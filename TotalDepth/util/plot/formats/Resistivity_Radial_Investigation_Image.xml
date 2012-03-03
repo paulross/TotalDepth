@@ -1,0 +1,277 @@
+<LgFormat UniqueId="Resistivity_Investigation_Image.xml" xmlns="x-schema:LgSchema2.xml">
+  <Description>AIT Radial Investigation Image</Description>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>FT</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgFont UniqueId="minorFont">
+    <Bold>0</Bold>
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Color>898989</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumberInDepthTrack">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Color>000000</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumberInDepthTrack">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <BackgroundColor>FFFFFF</BackgroundColor>
+    <Description>Track 1</Description>
+    <LeftPosition>0</LeftPosition>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR</ChannelName>
+      <Color>00C000</Color>
+      <LeftLimit>0</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>150</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HILTCaliper">
+      <ChannelName>HCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BitSize">
+      <ChannelName>BS</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SP">
+      <ChannelName>SP</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>-160</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>10</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="DepthTrack">
+    <BackgroundColor>fffff</BackgroundColor>
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+    <LgPip UniqueId="GR_IMPPip">
+      <Alignment>LG_ALIGN_LEFT</Alignment>
+      <ChannelName>GR_IMP</ChannelName>
+      <Color>008000</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Width>0.05</Width>
+    </LgPip>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <BackgroundColor>FFFFFF</BackgroundColor>
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>898989</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgLogarithmicGrid UniqueId="logGrid3">
+      <Color>898989</Color>
+      <Decade>3</Decade>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <LogScale>LG_LOG_2</LogScale>
+      <Visible>1</Visible>
+    </LgLogarithmicGrid>
+    <LgCurve UniqueId="AIT-H_10_InchInvestigation">
+      <ChannelName>AHT10</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>200</RightLimit>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Thickness>1.5</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="AIT-H_20_InchInvestigation">
+      <ChannelName>AHT20</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>200</RightLimit>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Thickness>2.0</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="AIT-H_30_InchInvestigation">
+      <ChannelName>AHT30</ChannelName>
+      <Color>800080</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>200</RightLimit>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Thickness>2.0</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="AIT-H_60_InchInvestigation">
+      <ChannelName>AHT60</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>200</RightLimit>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Thickness>2.0</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="AIT-H_90_InchInvestigation">
+      <ChannelName>AHT90</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>200</RightLimit>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Thickness>2.0</Thickness>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="Track3">
+    <BackgroundColor>ffffff</BackgroundColor>
+    <Description>Track 3</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid4">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid4">
+      <Color>898989</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <!-- Radial Investigation Image Channel has -->
+    <!-- 2 dimensions. 0 thru 179 are the array -->
+    <!-- channels, which are binned into the    -->
+    <!-- color table defined below ....         -->
+    <LgImage UniqueId="AHTRI">
+      <ChannelName>AHTRI</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>179</RightLimit>
+      <LgColorTable UniqueId="ColorTable">
+        <ColorEntry>
+          <Color>00ff00</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>Absent</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bfffff</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>0</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>80ffff</Color>
+          <GrayColor>efefef</GrayColor>
+          <Value>0.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>40ffff</Color>
+          <GrayColor>bfbfbf</GrayColor>
+          <Value>1</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>00ffff</Color>
+          <GrayColor>afafaf</GrayColor>
+          <Value>1.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>00bfff</Color>
+          <GrayColor>9f9f9f</GrayColor>
+          <Value>2</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>4000ff</Color>
+          <GrayColor>8f8f8f</GrayColor>
+          <Value>3</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>8000ff</Color>
+          <GrayColor>7f7f7f</GrayColor>
+          <Value>5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bf00ff</Color>
+          <GrayColor>6f6f6f</GrayColor>
+          <Value>8</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff00ff</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>12</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff00bf</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>17</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff0080</Color>
+          <GrayColor>4f4f4f</GrayColor>
+          <Value>25</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff0040</Color>
+          <GrayColor>3f3f3f</GrayColor>
+          <Value>50</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff0000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+</LgFormat>

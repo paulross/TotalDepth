@@ -1,0 +1,564 @@
+<LgFormat UniqueId="FMI_IMAGE_ALIGNED" xmlns="x-schema:LgSchema2.xml">
+  <Description>FMI Image Aligned</Description>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>FT</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgFont UniqueId="minorFont">
+    <Bold>0</Bold>
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Color>898989</Color>
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumberInDepthTrack">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Color>000000</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumberInDepthTrack">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <BackgroundColor>FFFFFF</BackgroundColor>
+    <Description>Track 1</Description>
+    <LeftPosition>0</LeftPosition>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR</ChannelName>
+      <Color>00C000</Color>
+      <LeftLimit>0</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SP">
+      <ChannelName>SP</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>-160</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_WRAPPED</WrapMode>
+      <WrapCount>10</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="C2Caliper">
+      <ChannelName>C2</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HoleAzimuth">
+      <ChannelName>HAZIM</ChannelName>
+      <Color>898989</Color>
+      <LeftLimit>-40</LeftLimit>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <RightLimit>360</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="C1Caliper">
+      <ChannelName>C1</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Pad1Azimuth">
+      <ChannelName>P1AZ</ChannelName>
+      <LeftLimit>-40</LeftLimit>
+      <Color>008000</Color>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>360</RightLimit>
+      <Thickness>1.75</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="DepthTrack">
+    <BackgroundColor>0FFFFF</BackgroundColor>
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+    <LgPip UniqueId="GR_IMPPip">
+      <Alignment>LG_ALIGN_LEFT</Alignment>
+      <ChannelName>GR_IMP</ChannelName>
+      <Color>008000</Color>
+      <Width>0.05</Width>
+    </LgPip>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC1">
+    <BackgroundColor>0FFFFF</BackgroundColor>
+    <Description>Track FC1</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>4.2</RightPosition>
+    <!-- Radial Investigation Image Channel has -->
+    <!-- 2 dimensions. 0 thru 49 are the array -->
+    <!-- channels, which are binned into the    -->
+    <!-- color table defined below ....         -->
+    <LgImage UniqueId="FBAA_A">
+      <ChannelName>FBAA_A</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>49</RightLimit>
+      <LgColorTable UniqueId="ColorTable1">
+        <ColorEntry>
+          <Color>ffffff</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffff7f</Color>
+          <GrayColor>efefef</GrayColor>
+          <Value>0</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffef5f</Color>
+          <GrayColor>bfbfbf</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffcf5f</Color>
+          <GrayColor>afafaf</GrayColor>
+          <Value>200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffbf00</Color>
+          <GrayColor>9f9f9f</GrayColor>
+          <Value>300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff9f00</Color>
+          <GrayColor>8f8f8f</GrayColor>
+          <Value>400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff6f00</Color>
+          <GrayColor>7f7f7f</GrayColor>
+          <Value>500</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff3f00</Color>
+          <GrayColor>6f6f6f</GrayColor>
+          <Value>600</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ef5f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>700</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>cf6f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>800</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bf7f00</Color>
+          <GrayColor>4f4f4f</GrayColor>
+          <Value>900</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>af5f00</Color>
+          <GrayColor>3f3f3f</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>9f2f00</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>7f0000</Color>
+          <GrayColor>1f1f1f</GrayColor>
+          <Value>1200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5f0000</Color>
+          <GrayColor>0f0f0f</GrayColor>
+          <Value>1300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>2f0000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1500</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC2">
+    <Description>Track FC2</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>4.4</LeftPosition>
+    <RightPosition>5.4</RightPosition>
+    <!-- Radial Investigation Image Channel has -->
+    <!-- 2 dimensions. 0 thru 49 are the array -->
+    <!-- channels, which are binned into the    -->
+    <!-- color table defined below ....         -->
+    <LgImage UniqueId="FBAB_A">
+      <ChannelName>FBAB_A</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>49</RightLimit>
+      <LgColorTable UniqueId="ColorTable2">
+        <ColorEntry>
+          <Color>ffffff</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffff7f</Color>
+          <GrayColor>efefef</GrayColor>
+          <Value>0</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffef5f</Color>
+          <GrayColor>bfbfbf</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffcf5f</Color>
+          <GrayColor>afafaf</GrayColor>
+          <Value>200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffbf00</Color>
+          <GrayColor>9f9f9f</GrayColor>
+          <Value>300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff9f00</Color>
+          <GrayColor>8f8f8f</GrayColor>
+          <Value>400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff6f00</Color>
+          <GrayColor>7f7f7f</GrayColor>
+          <Value>500</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff3f00</Color>
+          <GrayColor>6f6f6f</GrayColor>
+          <Value>600</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ef5f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>700</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>cf6f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>800</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bf7f00</Color>
+          <GrayColor>4f4f4f</GrayColor>
+          <Value>900</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>af5f00</Color>
+          <GrayColor>3f3f3f</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>9f2f00</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>7f0000</Color>
+          <GrayColor>1f1f1f</GrayColor>
+          <Value>1200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5f0000</Color>
+          <GrayColor>0f0f0f</GrayColor>
+          <Value>1300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>2f0000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1500</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC3">
+    <Description>Track FC3</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>6.6</RightPosition>
+    <!-- Radial Investigation Image Channel has -->
+    <!-- 2 dimensions. 0 thru 49 are the array -->
+    <!-- channels, which are binned into the    -->
+    <!-- color table defined below ....         -->
+    <LgImage UniqueId="FBAC_A">
+      <ChannelName>FBAC_A</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>49</RightLimit>
+      <LgColorTable UniqueId="ColorTable3">
+        <ColorEntry>
+          <Color>ffffff</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffff7f</Color>
+          <GrayColor>efefef</GrayColor>
+          <Value>0</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffef5f</Color>
+          <GrayColor>bfbfbf</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffcf5f</Color>
+          <GrayColor>afafaf</GrayColor>
+          <Value>200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffbf00</Color>
+          <GrayColor>9f9f9f</GrayColor>
+          <Value>300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff9f00</Color>
+          <GrayColor>8f8f8f</GrayColor>
+          <Value>400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff6f00</Color>
+          <GrayColor>7f7f7f</GrayColor>
+          <Value>500</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff3f00</Color>
+          <GrayColor>6f6f6f</GrayColor>
+          <Value>600</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ef5f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>700</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>cf6f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>800</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bf7f00</Color>
+          <GrayColor>4f4f4f</GrayColor>
+          <Value>900</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>af5f00</Color>
+          <GrayColor>3f3f3f</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>9f2f00</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>7f0000</Color>
+          <GrayColor>1f1f1f</GrayColor>
+          <Value>1200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5f0000</Color>
+          <GrayColor>0f0f0f</GrayColor>
+          <Value>1300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>2f0000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1500</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC4">
+    <Description>Track FC4</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>6.8</LeftPosition>
+    <RightPosition>7.8</RightPosition>
+    <!-- Radial Investigation Image Channel has -->
+    <!-- 2 dimensions. 0 thru 49 are the array -->
+    <!-- channels, which are binned into the    -->
+    <!-- color table defined below ....         -->
+    <LgImage UniqueId="FBAD_A">
+      <ChannelName>FBAD_A</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>49</RightLimit>
+      <LgColorTable UniqueId="ColorTable4">
+        <ColorEntry>
+          <Color>ffffff</Color>
+          <GrayColor>ffffff</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffff7f</Color>
+          <GrayColor>efefef</GrayColor>
+          <Value>0</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffef5f</Color>
+          <GrayColor>bfbfbf</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffcf5f</Color>
+          <GrayColor>afafaf</GrayColor>
+          <Value>200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffbf00</Color>
+          <GrayColor>9f9f9f</GrayColor>
+          <Value>300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff9f00</Color>
+          <GrayColor>8f8f8f</GrayColor>
+          <Value>400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff6f00</Color>
+          <GrayColor>7f7f7f</GrayColor>
+          <Value>500</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff3f00</Color>
+          <GrayColor>6f6f6f</GrayColor>
+          <Value>600</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ef5f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>700</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>cf6f00</Color>
+          <GrayColor>5f5f5f</GrayColor>
+          <Value>800</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bf7f00</Color>
+          <GrayColor>4f4f4f</GrayColor>
+          <Value>900</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>af5f00</Color>
+          <GrayColor>3f3f3f</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>9f2f00</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1100</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>7f0000</Color>
+          <GrayColor>1f1f1f</GrayColor>
+          <Value>1200</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5f0000</Color>
+          <GrayColor>0f0f0f</GrayColor>
+          <Value>1300</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>2f0000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1400</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>2f2f2f</GrayColor>
+          <Value>1500</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 2</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgCurve UniqueId="TENS_6">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

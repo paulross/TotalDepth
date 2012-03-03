@@ -1,0 +1,262 @@
+<LgFormat UniqueId="Sonic_SPR4_VDL" xmlns="x-schema:LgSchema2.xml">
+  <Description>SONIC Receiver Array P and S VDL</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>Ft</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumber">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumber">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR</ChannelName>
+      <Color>00C000</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HILTCaliper">
+      <ChannelName>HCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Caliper">
+      <ChannelName>CALI</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="TENSION">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="depthTrack">
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="minorGrid3">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgCurve UniqueId="Delta-T_Comp">
+      <ChannelName>DTCO</ChannelName>
+      <LeftLimit>240</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear1">
+      <ChannelName>DT1</ChannelName>
+      <LeftLimit>240</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_ShearMonoPole">
+      <ChannelName>DTSM</ChannelName>
+      <LeftLimit>240</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear2">
+      <ChannelName>DT2</ChannelName>
+      <LeftLimit>240</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Stonely">
+      <ChannelName>DTST</ChannelName>
+      <LeftLimit>240</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="Track3">
+    <BackgroundColor>ffffff</BackgroundColor>
+    <Description>Track 4</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8.0</RightPosition>
+    <LgImage UniqueId="SPR4_VDL">
+      <ChannelName>SPR4</ChannelName>
+      <LeftLimit>40</LeftLimit>
+      <RightLimit>240</RightLimit>
+      <LgColorTable UniqueId="ColorTable">
+        <ColorEntry>
+          <Color>0000ff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>20</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>003fff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>25</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>007fff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>30</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>00bfff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>35</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>00ffff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>40</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>3fffff</Color>
+          <GrayColor>0</GrayColor>
+          <Value>45</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>3fffbf</Color>
+          <GrayColor>0</GrayColor>
+          <Value>50</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>3fff7f</Color>
+          <GrayColor>0</GrayColor>
+          <Value>55</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>3fff00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>60</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>7fff00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>65</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>bfff00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>70</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffff00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>75</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ffbf00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>80</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff7f00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>85</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff3f00</Color>
+          <GrayColor>0</GrayColor>
+          <Value>90</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff0000</Color>
+          <GrayColor>0</GrayColor>
+          <Value>95</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>ff0000</Color>
+          <GrayColor>0</GrayColor>
+          <Value>100</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+    <!-- Must put curves after image, so will plot on top -->
+    <LgCurve UniqueId="Delta-T_PS_Comp">
+      <ChannelName>DTRP</ChannelName>
+      <LeftLimit>40</LeftLimit>
+      <RightLimit>240</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_PS_Shear">
+      <ChannelName>DTRS</ChannelName>
+      <LeftLimit>40</LeftLimit>
+      <RightLimit>240</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

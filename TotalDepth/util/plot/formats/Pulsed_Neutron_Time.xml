@@ -1,0 +1,194 @@
+<LgFormat UniqueId="Pulsed_Neutron_Time.xml" xmlns="x-schema:LgSchema2.xml">
+  <Description>Pulsed Neutron Time</Description>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>10</Size>
+  </LgFont>
+  <LgFont UniqueId="minorFont">
+    <Bold>0</Bold>
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="verticalScale">
+    <IndexScaler>10</IndexScaler>
+    <IndexUnit>seconds</IndexUnit>
+    <PaperScaler>1</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>1.5</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Color>000000</Color>
+      <Spacing>60</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgTimeIndexNumber UniqueId="timeIndexNumber">
+        <!--  Comment: Don't show DateFormat ddMMMyyyy -->
+        <DateFormat></DateFormat>
+        <Font>majorFont</Font>
+        <TimeFormat>HH:mm:ss</TimeFormat>
+      </LgTimeIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="FBAC_1">
+      <ChannelName>FBAC_SL</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.5</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="GR_2">
+      <ChannelName>GR_SL</ChannelName>
+      <Color>008080</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_RIGHT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="timeTrack">
+    <Description>Time Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>0</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+    <LgRemarks UniqueId="ETIM_Text">
+      <BackgroundColor>00ff00</BackgroundColor>
+      <ChannelName>ETIM_SL</ChannelName>
+      <Color>ff00000</Color>
+      <Font>majorFont</Font>
+      <OffsetFromLeft>0.1</OffsetFromLeft>
+    </LgRemarks>
+    <!--
+               <LgValueCurve UniqueId="ETIM_VALCURVE">
+                       <ChannelName>ETIM</ChannelName>
+                       <Color>000000</Color>
+                       <LineStyle>LG_SOLID_LINE</LineStyle>
+                       <Thickness>1</Thickness>
+                       <Font>majorFont</Font>
+                       <LeftLimit>0</LeftLimit>
+                       <RightLimit>100000</RightLimit>
+               </LgValueCurve>
+-->
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="minorGrid3">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgCurve UniqueId="TCAF_13">
+      <ChannelName>TCAF_SL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>-20000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>5000</RightLimit>
+      <Thickness>1.75</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="TPHI_15">
+      <ChannelName>TPHI_SL</ChannelName>
+      <Color>008080</Color>
+      <LeftLimit>0.6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid4">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid4">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="INFD_17">
+      <ChannelName>INFD_SL</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>1500</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TENS_16">
+      <ChannelName>TENS_SL</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TSCF_12">
+      <ChannelName>TSCF_SL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>12000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TSCN_13">
+      <ChannelName>TSCN_SL</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>30000</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track23">
+    <Description>Track 23</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgCurve UniqueId="SIGM_14">
+      <ChannelName>SIGM_SL</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>60</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TAU">
+      <ChannelName>TAU_SL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>80</LeftLimit>
+      <RightLimit>480</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

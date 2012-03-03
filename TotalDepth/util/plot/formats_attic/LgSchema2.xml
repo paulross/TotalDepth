@@ -1,0 +1,770 @@
+<?xml version="1.0"?>
+<Schema xmlns="urn:schemas-microsoft-com:xml-data"
+        xmlns:dt="urn:schemas-microsoft-com:datatypes">
+
+<!-- UniqueID is used for references betweeen elements -->
+<AttributeType name="UniqueId" dt:type="id" required="yes"/>
+<AttributeType name="Unit" dt:type="string" required="yes"/>
+<AttributeType name="UnitSystem" dt:type="string" required="yes"/>
+
+<!-- Curve Limit related element and attributes -->
+<ElementType name="Limit" content="eltOnly" model="closed" order="many">
+   <attribute type="UnitSystem"/>
+   <attribute type="Unit"/>
+   <element type="LeftLimit"/>
+   <element type="RightLimit"/>
+</ElementType>
+
+<!-- LgFormat is the root element -->
+<ElementType name="LgFormat" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="Description"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="LgFont" minOccurs="0" maxOccurs="*"/>
+   <element type="LgIndexGrid" minOccurs="0" maxOccurs="*"/>
+   <element type="LgLayer" minOccurs="0" maxOccurs="*"/>
+   <element type="LgTrack" minOccurs="0" maxOccurs="*"/>
+   <element type="LgVerticalScale" minOccurs="1" maxOccurs="*"/>
+   <element type="LgZoneSet" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgFont declaration -->
+<ElementType name="LgFont" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Bold" minOccurs="0"/>
+   <element type="Italic" minOccurs="0"/>
+   <element type="Name"/>
+   <element type="Size"/>
+   <element type="Strikethrough" minOccurs="0"/>
+   <element type="Underline" minOccurs="0"/>
+</ElementType>
+
+<!-- LgIndexGrid declaration begin -->
+<ElementType name="LgIndexGrid" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="FromVerticalScale" minOccurs="0"/>
+   <element type="UptoVerticalScale" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="LgIndexLine" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgIndexLine declaration begin -->
+<ElementType name="LgIndexLine" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Spacing"/>
+   <element type="SpacingUnit"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <group minOccurs="0" order="one">
+      <element type="LgIndexNumber"/>
+      <element type="LgTimeIndexNumber"/>
+   </group>
+</ElementType>
+
+<!-- LgIndexNumber declaration begin -->
+<ElementType name="LgIndexNumber" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Alignment" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="ShowTVDHint" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgTimeIndexNumber declaration begin -->
+<ElementType name="LgTimeIndexNumber" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Alignment" minOccurs="0"/>
+   <element type="DateFormat" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="TimeFormat" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgLayer declaration begin -->
+<ElementType name="LgLayer" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Description"/>
+<!--   <element type="Object" maxOccurs="*"/> -->
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgTrack declaration begin -->
+<ElementType name="LgTrack" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Description" minOccurs="0"/>
+   <element type="IndexLinesVisible" minOccurs="0"/>
+   <element type="IndexNumbersVisible" minOccurs="0"/>
+   <element type="LeftPosition" minOccurs="0"/>
+   <element type="RightPosition" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="LgAreaFill" minOccurs="0" maxOccurs="*"/>
+   <element type="LgBorehole" minOccurs="0" maxOccurs="*"/>
+   <element type="LgBoreholeDrift" minOccurs="0" maxOccurs="*"/>
+   <element type="LgCurve" minOccurs="0" maxOccurs="*"/>
+   <element type="LgDigitalText" minOccurs="0" maxOccurs="*"/>
+   <element type="LgDipChannel" minOccurs="0" maxOccurs="*"/>
+   <element type="LgDynamicLithology" minOccurs="0" maxOccurs="*"/>
+   <element type="LgExternal" minOccurs="0" maxOccurs="*"/>
+   <element type="LgImage" minOccurs="0" maxOccurs="*"/>
+   <element type="LgLinearGrid" minOccurs="0" maxOccurs="*"/>
+   <element type="LgLithology" minOccurs="0" maxOccurs="*"/>
+   <element type="LgLogarithmicGrid" minOccurs="0" maxOccurs="*"/>
+   <element type="LgMultiIndexBar" minOccurs="0" maxOccurs="*"/>
+   <element type="LgPatternTable" minOccurs="0"/>
+   <element type="LgPip" minOccurs="0" maxOccurs="*"/>
+   <element type="LgQualityCurve" minOccurs="0" maxOccurs="*"/>
+   <element type="LgRemarks" minOccurs="0" maxOccurs="*"/>
+   <element type="LgSymbolCurve" minOccurs="0" maxOccurs="*"/>
+   <element type="LgTangentialGrid" minOccurs="0" maxOccurs="*"/>
+   <element type="LgValueCurve" minOccurs="0" maxOccurs="*"/>
+   <element type="LgVolumeAnalysis" minOccurs="0"/>
+   <element type="LgWaveform" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgAreaFill declaration begin -->
+<ElementType name="LgAreaFill" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Description"/>
+   <element type="ForegroundColor" minOccurs="0"/>
+   <element type="FromCurve" minOccurs="0"/>
+   <element type="FromValue" minOccurs="0"/>
+   <element type="Mode" minOccurs="0"/>
+   <element type="PatternNumber"/>
+   <element type="ToCurve" minOccurs="0"/>
+   <element type="ToValue" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgBorehole declaration begin -->
+<ElementType name="LgBorehole" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <group order="one">
+      <element type="Limit" maxOccurs="*"/>
+      <group order="many">
+         <element type="LeftLimit" minOccurs="0"/>
+         <element type="RightLimit" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="Width" minOccurs="0"/>
+</ElementType>
+
+<!-- LgBoreholeDrift declaration begin -->
+<ElementType name="LgBoreholeDrift" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="LeftLimit" minOccurs="0"/>
+   <element type="RightLimit" minOccurs="0"/>
+   <element type="LgTadpole"/>
+</ElementType>
+
+<!-- LgTadpole declaration begin -->
+<ElementType name="LgTadpole" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BorderColor" minOccurs="0"/>
+   <element type="BorderThickness" minOccurs="0"/>
+   <element type="MajorTailLength" minOccurs="0"/>
+   <element type="MinorTailLength" minOccurs="0"/>
+   <element type="Radius" minOccurs="0"/>
+   <element type="Shape" minOccurs="0"/>
+</ElementType>
+
+<!-- LgCurve declaration begin -->
+<ElementType name="LgCurve" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <group order="one">
+      <element type="Limit" maxOccurs="*"/>
+      <group order="many">
+         <element type="LeftLimit" minOccurs="0"/>
+         <element type="RightLimit" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Transform" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="WrapCount" minOccurs="0"/>
+   <element type="WrapMode" minOccurs="0"/>
+   <element type="LgAutoLabel" minOccurs="0" maxOccurs="*"/>
+   <element type="LgAverageCurve" minOccurs="0" maxOccurs="*"/>
+   <group minOccurs="0" order="one">
+      <element type="Color"/>
+      <element type="LgColorTable"/>
+   </group>
+   <element type="LgSpliceAnnotation" minOccurs="0"/>
+</ElementType>
+
+<!-- LgAutoLabel declaration begin -->
+<ElementType name="LgAutoLabel" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Arrow" minOccurs="0"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BorderThickness" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="Interval"/>
+   <element type="IntervalUnit"/>
+   <element type="Label" minOccurs="0"/>
+   <element type="StartIndex" minOccurs="0"/>
+   <element type="StopIndex" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgAverageCurve declaration begin -->
+<ElementType name="LgAverageCurve" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="Width" minOccurs="0"/>
+   <element type="ZoneChannelName"/>
+</ElementType>
+
+<!-- LgColorTable declaration begin -->
+<ElementType name="LgColorTable" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="ColorEntry" maxOccurs="*"/>
+</ElementType> 
+<ElementType name="ColorEntry" content="eltOnly" model="closed" order="many">
+   <element type="Color"/>
+   <element type="GrayColor"/>
+   <element type="Value"/>
+</ElementType>
+
+<!-- LgSpliceAnnotation declaration begin -->
+<ElementType name="LgSpliceAnnotation" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Arrow" minOccurs="0"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BorderThickness" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="Label" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgDigitalText declaration begin -->
+<ElementType name="LgDigitalText" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <group order="many">
+      <group order="seq">
+         <element type="ChannelName" minOccurs="1"/>
+         <element type="Binding" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="Color" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="OffsetFromLeft" minOccurs="0"/>
+   <element type="PrimaryChannel" minOccurs="0"/>
+   <element type="TextFormat"/>
+   <element type="Width" minOccurs="0"/>
+</ElementType>
+
+<!-- LgDipChannel declaration begin -->
+<ElementType name="LgDipChannel" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="FanPlotInterval" minOccurs="0"/>
+   <element type="FanPlotPosition" minOccurs="0"/>
+   <element type="LeftLimit" minOccurs="0"/>
+   <element type="RightLimit" minOccurs="0"/>
+   <element type="LgColorTable" minOccurs="0"/>
+   <element type="LgFanPlot" minOccurs="0"/>
+   <element type="LgTadpole" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgDynamicLithology declaration begin -->
+<ElementType name="LgDynamicLithology" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="BkColorChannelName"/>
+   <element type="Description"/>
+   <element type="ForegroundColor" minOccurs="0"/>
+   <element type="FromCurve" minOccurs="0"/>
+   <element type="FromValue" minOccurs="0"/>
+   <element type="Mode" minOccurs="0"/>
+   <element type="PatternChannelName"/>
+   <element type="ToCurve" minOccurs="0"/>
+   <element type="ToValue" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgFanPlot declaration begin -->
+<ElementType name="LgFanPlot" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BorderColor" minOccurs="0"/>
+   <element type="BorderThickness" minOccurs="0"/>
+   <element type="Buckets" minOccurs="0"/>
+   <element type="Interval" minOccurs="0"/>
+   <element type="Length"/>
+   <element type="MaxAngle" minOccurs="0"/>
+   <element type="MinAngle" minOccurs="0"/>
+   <element type="Position"/>
+   <element type="PositionInInterval" minOccurs="0"/>
+   <element type="Scale" minOccurs="0"/>
+   <element type="Threshold" minOccurs="0"/>
+</ElementType>
+
+<!-- LgExternal declaration begin -->
+<ElementType name="LgExternal" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Height"/>
+   <element type="HeightUnit"/>
+   <element type="IndexPosition"/>
+   <element type="OffsetFromLeft" minOccurs="0"/>
+<!--   <element type="ProgID"/> -->
+<!--   <element type="PropertyBag" minOccurs="0"/> -->
+   <element type="Width"/>
+</ElementType>
+
+<!-- LgImage declaration begin -->
+<ElementType name="LgImage" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="LeftLimit"/>
+   <element type="RightLimit"/>
+   <element type="LgColorTable"/>
+</ElementType>
+
+<!-- LgLinearGrid declaration begin -->
+<ElementType name="LgLinearGrid" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="LineCount"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgLithology declaration begin -->
+<ElementType name="LgLithology" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Description"/>
+   <element type="ForegroundColor" minOccurs="0"/>
+   <element type="FromCurve" minOccurs="0"/>
+   <element type="FromValue" minOccurs="0"/>
+   <element type="Mode" minOccurs="0"/>
+   <element type="ToCurve" minOccurs="0"/>
+   <element type="ToValue" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgLogaritmicGrid declaration begin -->
+<ElementType name="LgLogarithmicGrid" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="Decade" minOccurs="0"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="LogScale" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgMultiIndexBar declaration begin -->
+<ElementType name="LgMultiIndexBar" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="OffsetFromLeft" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="Width" minOccurs="0"/>
+</ElementType>
+
+<!-- LgPatternTable declaration begin -->
+<ElementType name="LgPatternTable" content="eltOnly" model="closed">
+   <attribute type="UniqueId"/>
+   <group order="one" minOccurs="0">
+       <element type="Path"/>
+       <group order="seq">
+           <element type="Description" minOccurs="0"/>
+           <element type="LgFillPattern" minOccurs="0" maxOccurs="*"/>
+       </group>
+   </group>
+</ElementType>
+
+<!-- LgFillPattern declaration begin -->
+<ElementType name="LgFillPattern" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="Description"/>
+   <element type="ForegroundColor" minOccurs="0"/>
+   <element type="Number" minOccurs="1"/>
+   <element type="VisibleInInsert" minOccurs="0"/>
+   <element type="LgBitPattern"/>
+</ElementType>
+
+<!-- LgBitPattern declaration begin -->
+<ElementType name="LgBitPattern" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="PatternHeight"/>
+   <element type="PatternWidth"/>
+   <element type="Bits"/>
+</ElementType>
+
+<!-- LgPip declaration begin -->
+<ElementType name="LgPip" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Alignment" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="Width" minOccurs="0"/>
+</ElementType>
+
+<!-- LgQualityCurve declaration begin -->
+<ElementType name="LgQualityCurve" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <group order="one">
+      <element type="Limit" maxOccurs="*"/>
+      <group order="many">
+         <element type="LeftLimit" minOccurs="0"/>
+         <element type="RightLimit" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="QualityChannelName"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Transform" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="WrapCount" minOccurs="0"/>
+   <element type="WrapMode" minOccurs="0"/>
+   <element type="LgAutoLabel" minOccurs="0" maxOccurs="*"/>
+   <element type="LgAverageCurve" minOccurs="0" maxOccurs="*"/>
+   <group minOccurs="0" order="one">
+      <element type="Color"/>
+      <element type="LgColorTable"/>
+   </group>
+   <element type="LgSpliceAnnotation" minOccurs="0"/>
+   <element type="QualityProperties" minOccurs="0"/>
+</ElementType>
+
+<!-- LgRemarks declaration begin -->
+<ElementType name="LgRemarks" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="Font"/>
+   <element type="OffsetFromLeft" minOccurs="0"/>
+   <element type="Width" minOccurs="0"/>
+</ElementType>
+
+<!-- LgSymbolCurve declaration begin -->
+<ElementType name="LgSymbolCurve" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <group order="one">
+      <element type="Limit" maxOccurs="*"/>
+      <group order="many">
+         <element type="LeftLimit" minOccurs="0"/>
+         <element type="RightLimit" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Radius" minOccurs="0"/>
+   <element type="Shape" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Transform" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="WrapCount" minOccurs="0"/>
+   <element type="WrapMode" minOccurs="0"/>
+   <element type="LgAutoLabel" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgTangentialGrid declaration begin -->
+<ElementType name="LgTangentialGrid" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- LgValueCurve declaration begin -->
+<ElementType name="LgValueCurve" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="Font"/>
+   <group order="one">
+      <element type="Limit" maxOccurs="*"/>
+      <group order="many">
+         <element type="LeftLimit" minOccurs="0"/>
+         <element type="RightLimit" minOccurs="0"/>
+      </group>
+   </group>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Transform" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+   <element type="WrapCount" minOccurs="0"/>
+   <element type="WrapMode" minOccurs="0"/>
+   <element type="LgAutoLabel" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- LgVolumeAnalysis declaration begin -->
+<ElementType name="LgVolumeAnalysis" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="SeparatorLineColor" minOccurs="0"/>
+   <element type="SeparatorLineStyle" minOccurs="0"/>
+   <element type="SeparatorLineThickness" minOccurs="0"/>
+</ElementType>
+
+<!-- LgWaveform declaration begin -->
+<ElementType name="LgWaveform" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BottomLimit"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="ClipMode" minOccurs="0"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="FillMode" minOccurs="0"/>
+   <element type="IndexExtent"/>
+   <element type="LeftLimit"/>
+   <element type="RightLimit"/>
+   <element type="TopLimit"/>
+   <element type="Transform" minOccurs="0"/>
+</ElementType>
+
+<!-- LgVerticalScale declaration begin -->
+<ElementType name="LgVerticalScale" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="IndexScaler"/>
+   <element type="IndexUnit"/>
+   <element type="PaperScaler"/>
+   <element type="PaperUnit"/>
+</ElementType>
+
+<!-- LgZoneSet declaration begin -->
+<ElementType name="LgZoneSet" content="eltOnly" model="closed" order="many">
+   <attribute type="UniqueId"/>
+   <element type="BackgroundColor" minOccurs="0"/>
+   <element type="BackgroundMode" minOccurs="0"/>
+   <element type="BorderColor" minOccurs="0"/>
+   <element type="BorderLineStyle" minOccurs="0"/>
+   <element type="BorderThickness" minOccurs="0"/>
+   <element type="Binding" minOccurs="0"/>
+   <element type="ChannelName"/>
+   <element type="Description" minOccurs="0"/>
+   <element type="ForegroundColor" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+
+<!-- Enumerated Common ElementType declaration begin -->
+<ElementType name="Alignment" content="textOnly" dt:type="string"/>
+<ElementType name="BackgroundMode" content="textOnly" dt:type="string"/>
+<ElementType name="BorderLineStyle" content="textOnly" dt:type="string"/>
+<ElementType name="ClipMode" content="textOnly" dt:type="string"/>
+<ElementType name="FillMode" content="textOnly" dt:type="string"/>
+<ElementType name="FromValue" content="textOnly" dt:type="string"/>
+<ElementType name="HeightUnit" content="textOnly" dt:type="string"/>
+<ElementType name="LineStyle" content="textOnly" dt:type="string"/>
+<ElementType name="LogScale" content="textOnly" dt:type="string"/>
+<ElementType name="Mode" content="textOnly" dt:type="string"/>
+<ElementType name="PaperUnit" content="textOnly" dt:type="string"/>
+<ElementType name="PositionInInterval" content="textOnly" dt:type="string"/>
+<ElementType name="Scale" content="textOnly" dt:type="string"/>
+<ElementType name="SeparatorLineStyle" content="textOnly" dt:type="string"/>
+<ElementType name="Shape" content="textOnly" dt:type="string"/>
+<ElementType name="ToValue" content="textOnly" dt:type="string"/>
+<ElementType name="Transform" content="textOnly" dt:type="string"/>
+<ElementType name="WrapMode" content="textOnly" dt:type="string"/>
+
+<!-- Reference declaration begin -->
+<ElementType name="Font" content="textOnly" dt:type="string"/>
+<ElementType name="FromCurve" content="textOnly" dt:type="string"/>
+<ElementType name="Object" content="textOnly" dt:type="string"/>
+<ElementType name="ToCurve" content="textOnly" dt:type="string"/>
+
+<!-- Validated Common ElementType declaration begin -->
+<ElementType name="Bits" content="textOnly" dt:type="bin.base64"/>
+
+<ElementType name="BackgroundColor" content="textOnly" dt:type="bin.hex"/>
+<ElementType name="BorderColor" content="textOnly" dt:type="bin.hex"/>
+<ElementType name="Color" content="textOnly" dt:type="bin.hex"/>
+<ElementType name="ForegroundColor" content="textOnly" dt:type="bin.hex"/>
+<ElementType name="GrayColor" content="textOnly" dt:type="bin.hex"/>
+<ElementType name="SeparatorLineColor" content="textOnly" dt:type="bin.hex"/>
+
+<ElementType name="Arrow" content="textOnly" dt:type="boolean"/>
+<ElementType name="Bold" content="textOnly" dt:type="boolean"/>
+<ElementType name="IndexLinesVisible" content="textOnly" dt:type="boolean"/>
+<ElementType name="IndexNumbersVisible" content="textOnly" dt:type="boolean"/>
+<ElementType name="Italic" content="textOnly" dt:type="boolean"/>
+<ElementType name="ShowTVDHint" content="textOnly" dt:type="boolean"/>
+<ElementType name="Strikethrough" content="textOnly" dt:type="boolean"/>
+<ElementType name="Underline" content="textOnly" dt:type="boolean"/>
+<ElementType name="Visible" content="textOnly" dt:type="boolean"/>
+<ElementType name="VisibleInInsert" content="textOnly" dt:type="boolean"/>
+
+<ElementType name="Buckets" content="textOnly" dt:type="int"/>
+<ElementType name="Decade" content="textOnly" dt:type="int"/>
+<ElementType name="LineCount" content="textOnly" dt:type="int"/>
+<ElementType name="Number" content="textOnly" dt:type="int"/>
+<ElementType name="PatternHeight" content="textOnly" dt:type="int"/>
+<ElementType name="PatternNumber" content="textOnly" dt:type="int"/>
+<ElementType name="PatternWidth" content="textOnly" dt:type="int"/>
+<ElementType name="WrapCount" content="textOnly" dt:type="int"/>
+
+<ElementType name="BorderThickness" content="textOnly" dt:type="float"/>
+<ElementType name="BottomLimit" content="textOnly" dt:type="float"/>
+<ElementType name="FanPlotInterval" content="textOnly" dt:type="float"/>
+<ElementType name="FanPlotPosition" content="textOnly" dt:type="float"/>
+<ElementType name="FromVerticalScale" content="textOnly" dt:type="float"/>
+<ElementType name="Height" content="textOnly" dt:type="float"/>
+<ElementType name="IndexExtent" content="textOnly" dt:type="float"/>
+<ElementType name="IndexPosition" content="textOnly" dt:type="float"/>
+<ElementType name="IndexScaler" content="textOnly" dt:type="float"/>
+<ElementType name="Interval" content="textOnly" dt:type="float"/>
+<ElementType name="LeftLimit" content="textOnly" dt:type="float"/>
+<ElementType name="LeftOffset" content="textOnly" dt:type="float"/>
+<ElementType name="LeftPosition" content="textOnly" dt:type="float"/>
+<ElementType name="Length" content="textOnly" dt:type="float"/>
+<ElementType name="MajorTailLength" content="textOnly" dt:type="float"/>
+<ElementType name="MaxAngle" content="textOnly" dt:type="float"/>
+<ElementType name="MinAngle" content="textOnly" dt:type="float"/>
+<ElementType name="MinorTailLength" content="textOnly" dt:type="float"/>
+<ElementType name="OffsetFromLeft" content="textOnly" dt:type="float"/>
+<ElementType name="PaperScaler" content="textOnly" dt:type="float"/>
+<ElementType name="Position" content="textOnly" dt:type="float"/>
+<ElementType name="Radius" content="textOnly" dt:type="float"/>
+<ElementType name="RightLimit" content="textOnly" dt:type="float"/>
+<ElementType name="RightPosition" content="textOnly" dt:type="float"/>
+<ElementType name="SeparatorLineThickness" content="textOnly" dt:type="float"/>
+<ElementType name="Size" content="textOnly" dt:type="float"/>
+<ElementType name="Spacing" content="textOnly" dt:type="float"/>
+<ElementType name="StartIndex" content="textOnly" dt:type="float"/>
+<ElementType name="StopIndex" content="textOnly" dt:type="float"/>
+<ElementType name="Thickness" content="textOnly" dt:type="float"/>
+<ElementType name="Threshold" content="textOnly" dt:type="float"/>
+<ElementType name="TopLimit" content="textOnly" dt:type="float"/>
+<ElementType name="UptoVerticalScale" content="textOnly" dt:type="float"/>
+<ElementType name="Width" content="textOnly" dt:type="float"/>
+
+<ElementType name="BkColorChannelName" content="textOnly" dt:type="string"/>
+<ElementType name="ChannelName" content="textOnly" dt:type="string"/>
+<ElementType name="DateFormat" content="textOnly" dt:type="string"/>
+<ElementType name="Description" content="textOnly" dt:type="string"/>
+<ElementType name="IndexUnit" content="textOnly" dt:type="string"/>
+<ElementType name="IntervalUnit" content="textOnly" dt:type="string"/>
+<ElementType name="Label" content="textOnly" dt:type="string"/>
+<ElementType name="Name" content="textOnly" dt:type="string"/>
+<ElementType name="Path" content="textOnly" dt:type="string"/>
+<ElementType name="PatternChannelName" content="textOnly" dt:type="string"/>
+<ElementType name="PrimaryChannel" content="textOnly" dt:type="string"/>
+<ElementType name="QualityChannelName" content="textOnly" dt:type="string"/>
+<ElementType name="SpacingUnit" content="textOnly" dt:type="string"/>
+<ElementType name="TextFormat" content="textOnly" dt:type="string"/>
+<ElementType name="TimeFormat" content="textOnly" dt:type="string"/>
+<ElementType name="Value" content="textOnly" dt:type="string"/>
+<ElementType name="ZoneChannelName" content="textOnly" dt:type="string"/>
+
+<!-- Data Binding related property bag structure -->
+<AttributeType name="Value" dt:type="string" required="yes"/>
+<AttributeType name="Name" dt:type="string" required="yes"/>
+<AttributeType name="Type" dt:type="string" required="yes"/>
+<ElementType name="Property" content="empty" model="closed" order="many">
+   <attribute type="Name"/>
+   <attribute type="Value"/>
+</ElementType>
+<ElementType name="Binding" content="eltOnly" model="closed" order="many">
+   <attribute type="Type"/>
+   <element type="Property" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<!-- Quality Curve related elements-->
+<ElementType name="QualityProperty" content="eltOnly" model="closed" order="many">
+   <attribute type="Value"/>
+   <element type="Color" minOccurs="0"/>
+   <element type="Description" minOccurs="0"/>
+   <element type="LineStyle" minOccurs="0"/>
+   <element type="Thickness" minOccurs="0"/>
+   <element type="Visible" minOccurs="0"/>
+</ElementType>
+<ElementType name="QualityProperties" content="eltOnly" model="closed" order="many">
+   <element type="QualityProperty" minOccurs="0" maxOccurs='*'/>
+</ElementType>
+</Schema>
+<!--+- OmniWorks Replacement History - Horizon`Framework`Graphics`LogGraphics`XMLFiles`Version2.0:LgSchema2.xml;15 -->
+<!--      15*[358088] 10-JUL-2002 13:47:40 (GMT) kotapalle -->
+<!--         "Update Schema - Quality Curve" -->
+<!--      14*[347343] 09-MAY-2002 22:55:22 (GMT) kotapalle -->
+<!--         "Schema for Dynamic Lithology Object" -->
+<!--      13*[343898] 18-APR-2002 04:38:33 (GMT) kotapalle -->
+<!--         "Update Schema for LgAverageCurve Attributes" -->
+<!--      12*[333257] 26-FEB-2002 11:08:34 (GMT) Suwandi -->
+<!--         "Added LgSpliceAnnotation element type" -->
+<!--      11*[304440] 22-OCT-2001 13:15:12 (GMT) kotapalle -->
+<!--         "Digital Text Object" -->
+<!--      10*[300380] 17-SEP-2001 21:35:51 (GMT) Suwandi -->
+<!--         "Removed StartIndex and StopIndex properties from LgLinearGrid, LgLogarithmicGrid, LgTangentialGrid" -->
+<!--       9*[296916] 24-AUG-2001 22:46:58 (GMT) kotapalle -->
+<!--         "Move up the Limit declaration" -->
+<!--       8*[295388] 22-AUG-2001 13:44:20 (GMT) Suwandi -->
+<!--         "Added Limit element" -->
+<!--       7*[294595] 13-AUG-2001 16:14:26 (GMT) Suwandi -->
+<!--         "Added IntervalUnit element" -->
+<!--       6*[283691] 12-JUN-2001 21:33:28 (GMT) Manickam -->
+<!--         "Add VisibleInInsert property to LgFillPattern object" -->
+<!--       5*[280706] 07-JUN-2001 18:52:40 (GMT) kotapalle -->
+<!--         "XML Reader and Writer for LgPatternTable" -->
+<!--       4*[270842] 12-MAR-2001 22:40:29 (GMT) Manickam -->
+<!--         "Fix LgSchema2.xml file" -->
+<!--       3*[267948] 19-FEB-2001 15:26:18 (GMT) Suwandi -->
+<!--         "Added Visible property for LgIndexNumber and LgTimeIndexNumber elements" -->
+<!--       2*[254630] 02-NOV-2000 17:15:14 (GMT) Suwandi -->
+<!--         "Submitted the corrected version" -->
+<!--       1*[246236] 01-SEP-2000 17:54:17 (GMT) weeks -->
+<!--         "adding file" -->
+<!--+- OmniWorks Replacement History - Horizon`Framework`Graphics`LogGraphics`XMLFiles`Version2.0:LgSchema2.xml;15 -->
