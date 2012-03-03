@@ -1,0 +1,174 @@
+<LgFormat UniqueId="Pulsed_Neutron_3Track.xml" xmlns="x-schema:LgSchema2.xml">
+  <Description>Pulsed Neutron 3Track</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>Ft</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumber">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumber">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="FBAC_1">
+      <ChannelName>FBAC</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.5</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="GR_2">
+      <ChannelName>GR</ChannelName>
+      <Color>008080</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_RIGHT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="depthTrack">
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="minorGrid3">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgCurve UniqueId="TCAF_13">
+      <ChannelName>TCAF</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>-20000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>5000</RightLimit>
+      <Thickness>1.75</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="TPHI_15">
+      <ChannelName>TPHI</ChannelName>
+      <Color>008080</Color>
+      <LeftLimit>0.6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid4">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid4">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="INFD_17">
+      <ChannelName>INFD</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>1500</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TENS_16">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TSCF_12">
+      <ChannelName>TSCF</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>12000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TSCN_13">
+      <ChannelName>TSCN</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>30000</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track23">
+    <Description>Track 23</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgCurve UniqueId="SIGM_14">
+      <ChannelName>SIGM</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>60</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TAU">
+      <ChannelName>TAU</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>80</LeftLimit>
+      <RightLimit>480</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

@@ -1,0 +1,539 @@
+<LgFormat UniqueId="OBMI_IMAGE_EQUAL" xmlns="x-schema:LgSchema2.xml">
+  <Description>OBMI Image Equalized</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>FT</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Color>898989</Color>
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumberInDepthTrack">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumberInDepthTrack">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="DepthTrack">
+    <BackgroundColor>0FFFFF</BackgroundColor>
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <RightPosition>0.5</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <LeftPosition>0.5</LeftPosition>
+    <RightPosition>1.75</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR</ChannelName>
+      <Color>00C000</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="C2Caliper">
+      <ChannelName>C2</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HoleAzimuth">
+      <ChannelName>HAZIM</ChannelName>
+      <Color>898989</Color>
+      <LeftLimit>-40</LeftLimit>
+      <RightLimit>360</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="C1Caliper">
+      <ChannelName>C1</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Pad1Azimuth">
+      <ChannelName>P1AZ</ChannelName>
+      <Color>008000</Color>
+      <LeftLimit>-40</LeftLimit>
+      <RightLimit>360</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>0</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="C1_OBMT-11">
+      <ChannelName>C1_OBMT</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="C2_OBMT-12">
+      <ChannelName>C2_OBMT</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>2</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="P1NO_OBMT-13">
+      <ChannelName>P1NO_OBMT</ChannelName>
+      <LeftLimit>-40</LeftLimit>
+      <RightLimit>360</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC1">
+    <BackgroundColor>0FFFFF</BackgroundColor>
+    <Description>Track FC1</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>1.75</LeftPosition>
+    <RightPosition>2.25</RightPosition>
+    <LgImage UniqueId="OBREA">
+      <ChannelName>OBREA</ChannelName>
+      <RightLimit>4</RightLimit>
+      <LgColorTable UniqueId="ColorTable1">
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>000000</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5F2F00</Color>
+          <GrayColor>1F1F1F</GrayColor>
+          <Value>0.1</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>8F3F00</Color>
+          <GrayColor>2F2F2F</GrayColor>
+          <Value>0.231013</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>AF5F00</Color>
+          <GrayColor>3F3F3F</GrayColor>
+          <Value>0.53367</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>EF5F00</Color>
+          <GrayColor>5F5F5F</GrayColor>
+          <Value>1.23285</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF3F00</Color>
+          <GrayColor>6F6F6F</GrayColor>
+          <Value>2.84804</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF6F00</Color>
+          <GrayColor>7F7F7F</GrayColor>
+          <Value>6.57933</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFAF00</Color>
+          <GrayColor>9F9F9F</GrayColor>
+          <Value>15.1991</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFCF3F</Color>
+          <GrayColor>AFAFAF</GrayColor>
+          <Value>35.1119</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFDF6F</Color>
+          <GrayColor>BFBFBF</GrayColor>
+          <Value>81.1131</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEF7F</Color>
+          <GrayColor>DFDFDF</GrayColor>
+          <Value>187.382</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEFAF</Color>
+          <GrayColor>EFEFEF</GrayColor>
+          <Value>432.876</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFFFFF</Color>
+          <GrayColor>FFFFFF</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC2">
+    <Description>Track FC2</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>2.25</LeftPosition>
+    <RightPosition>2.75</RightPosition>
+    <LgImage UniqueId="OBREB">
+      <ChannelName>OBREB</ChannelName>
+      <RightLimit>4</RightLimit>
+      <LgColorTable UniqueId="ColorTable2">
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>000000</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5F2F00</Color>
+          <GrayColor>1F1F1F</GrayColor>
+          <Value>0.1</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>8F3F00</Color>
+          <GrayColor>2F2F2F</GrayColor>
+          <Value>0.231013</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>AF5F00</Color>
+          <GrayColor>3F3F3F</GrayColor>
+          <Value>0.53367</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>EF5F00</Color>
+          <GrayColor>5F5F5F</GrayColor>
+          <Value>1.23285</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF3F00</Color>
+          <GrayColor>6F6F6F</GrayColor>
+          <Value>2.84804</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF6F00</Color>
+          <GrayColor>7F7F7F</GrayColor>
+          <Value>6.57933</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFAF00</Color>
+          <GrayColor>9F9F9F</GrayColor>
+          <Value>15.1991</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFCF3F</Color>
+          <GrayColor>AFAFAF</GrayColor>
+          <Value>35.1119</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFDF6F</Color>
+          <GrayColor>BFBFBF</GrayColor>
+          <Value>81.1131</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEF7F</Color>
+          <GrayColor>DFDFDF</GrayColor>
+          <Value>187.382</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEFAF</Color>
+          <GrayColor>EFEFEF</GrayColor>
+          <Value>432.876</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFFFFF</Color>
+          <GrayColor>FFFFFF</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC3">
+    <Description>Track FC3</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>2.75</LeftPosition>
+    <RightPosition>3.25</RightPosition>
+    <LgImage UniqueId="OBREC">
+      <ChannelName>OBREC</ChannelName>
+      <RightLimit>4</RightLimit>
+      <LgColorTable UniqueId="ColorTable3">
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>000000</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5F2F00</Color>
+          <GrayColor>1F1F1F</GrayColor>
+          <Value>0.1</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>8F3F00</Color>
+          <GrayColor>2F2F2F</GrayColor>
+          <Value>0.231013</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>AF5F00</Color>
+          <GrayColor>3F3F3F</GrayColor>
+          <Value>0.53367</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>EF5F00</Color>
+          <GrayColor>5F5F5F</GrayColor>
+          <Value>1.23285</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF3F00</Color>
+          <GrayColor>6F6F6F</GrayColor>
+          <Value>2.84804</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF6F00</Color>
+          <GrayColor>7F7F7F</GrayColor>
+          <Value>6.57933</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFAF00</Color>
+          <GrayColor>9F9F9F</GrayColor>
+          <Value>15.1991</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFCF3F</Color>
+          <GrayColor>AFAFAF</GrayColor>
+          <Value>35.1119</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFDF6F</Color>
+          <GrayColor>BFBFBF</GrayColor>
+          <Value>81.1131</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEF7F</Color>
+          <GrayColor>DFDFDF</GrayColor>
+          <Value>187.382</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEFAF</Color>
+          <GrayColor>EFEFEF</GrayColor>
+          <Value>432.876</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFFFFF</Color>
+          <GrayColor>FFFFFF</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="TrackFC4">
+    <Description>Track FC4</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>3.25</LeftPosition>
+    <RightPosition>3.75</RightPosition>
+    <LgImage UniqueId="OBRED">
+      <ChannelName>OBRED</ChannelName>
+      <RightLimit>4</RightLimit>
+      <LgColorTable UniqueId="ColorTable4">
+        <ColorEntry>
+          <Color>000000</Color>
+          <GrayColor>000000</GrayColor>
+          <Value>-10000</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>5F2F00</Color>
+          <GrayColor>1F1F1F</GrayColor>
+          <Value>0.1</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>8F3F00</Color>
+          <GrayColor>2F2F2F</GrayColor>
+          <Value>0.231013</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>AF5F00</Color>
+          <GrayColor>3F3F3F</GrayColor>
+          <Value>0.53367</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>EF5F00</Color>
+          <GrayColor>5F5F5F</GrayColor>
+          <Value>1.23285</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF3F00</Color>
+          <GrayColor>6F6F6F</GrayColor>
+          <Value>2.84804</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF6F00</Color>
+          <GrayColor>7F7F7F</GrayColor>
+          <Value>6.57933</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFAF00</Color>
+          <GrayColor>9F9F9F</GrayColor>
+          <Value>15.1991</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFCF3F</Color>
+          <GrayColor>AFAFAF</GrayColor>
+          <Value>35.1119</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFDF6F</Color>
+          <GrayColor>BFBFBF</GrayColor>
+          <Value>81.1131</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEF7F</Color>
+          <GrayColor>DFDFDF</GrayColor>
+          <Value>187.382</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFEFAF</Color>
+          <GrayColor>EFEFEF</GrayColor>
+          <Value>432.876</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFFFFF</Color>
+          <GrayColor>FFFFFF</GrayColor>
+          <Value>1000</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>3.75</LeftPosition>
+    <RightPosition>4.75</RightPosition>
+    <LgImage UniqueId="LQC_IMG_OBMT">
+      <ChannelName>LQC_IMG_OBMT</ChannelName>
+      <RightLimit>22</RightLimit>
+      <LgColorTable UniqueId="ColorTable5">
+        <ColorEntry>
+          <Color>FFFFFF</Color>
+          <GrayColor>FFFFFF</GrayColor>
+          <Value>-2.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>00FF00</Color>
+          <GrayColor>9F9F9F</GrayColor>
+          <Value>-1.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FFFF00</Color>
+          <GrayColor>CFCFCF</GrayColor>
+          <Value>-0.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>0000FF</Color>
+          <GrayColor>000000</GrayColor>
+          <Value>0.5</Value>
+        </ColorEntry>
+        <ColorEntry>
+          <Color>FF0000</Color>
+          <GrayColor>6F6F6F</GrayColor>
+          <Value>1.5</Value>
+        </ColorEntry>
+      </LgColorTable>
+    </LgImage>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <LeftPosition>4.75</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgCurve UniqueId="TENS_6">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="OBRA3-14">
+      <ChannelName>OBRA3</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>0.1</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="OBRB3-15">
+      <ChannelName>OBRB3</ChannelName>
+      <Color>008000</Color>
+      <LeftLimit>0.1</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="OBRC3-16">
+      <ChannelName>OBRC3</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>0.1</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="OBRD3-17">
+      <ChannelName>OBRD3</ChannelName>
+      <Color>FFFF00</Color>
+      <LeftLimit>0.1</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgLogarithmicGrid UniqueId="LogGrid3">
+      <Color>818181</Color>
+      <Decade>5</Decade>
+      <Thickness>1</Thickness>
+    </LgLogarithmicGrid>
+    <LgLinearGrid UniqueId="MinorGrid3">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="MajorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+  </LgTrack>
+</LgFormat>

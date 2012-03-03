@@ -1,0 +1,774 @@
+<?xml version='1.0' encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="20.75in" version="1.1" viewBox="0 0 816.000 1992.000" width="8.5in" xmlns="http://www.w3.org/2000/svg"><!--
+=========== API Header START ===========
+-->
+  <g transform="translate(24,24)">
+    <g transform="translate(768,0) rotate(90)">
+      <rect fill="black" height="2in" width="6.25in" x="0in" y="0in"/>
+      <rect fill="none" height="0.3in" stroke="blue" stroke-width="2.0" width="2in" x="1.2in" y="2.05in"/>
+      <rect fill="blue" height="0.3in" stroke="blue" stroke-width="2.0" width="2in" x="1.2in" y="2.35in"/>
+      <text fill="white" font-family="Verdana" font-size="24" font-weight="bold" text-anchor="middle" x="2.2in" y="2.6in">TotalDepth</text>
+      <rect fill="none" height="8in" stroke="blue" stroke-width=".5" width="6.25in" x="0in" y="0in"/>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="0.35in">Company:</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="0.85in">Well:</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="1.35in">Field:</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="1.85in">Rig:</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="3.2in" y="1.85in">Country:</text>
+      <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="2.7in" x="1.3167in" y="2.7in"/>
+      <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="2.25in" x="4.0167in" y="2.7in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.0667in" y="2.825in">Elev:</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.5667in" y="2.825in">KB</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.5667in" y="2.975in">GL</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.5667in" y="3.125in">DF</text>
+      <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="4.9375in" x="1.3167in" y="3.2in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="3.325in">Permanent Datum:</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="3.475in">Log Measured From:</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="3.625in">Drilling Measured From:</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.0667in" y="3.325in">Elev:</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.8667in" y="3.475in">above permanent datum</text>
+      <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="2in" x="2in" y="3.7in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.55in" y="3.825in">Max. Well Deviation</text>
+      <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="1.125in" x="4in" y="3.7in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.3in" y="3.825in">Latitude</text>
+      <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="1.125in" x="5.125in" y="3.7in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="5.425in" y="3.825in">Longitude</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.05in" y="4.125in">Other Services:</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.125in">Logging Date</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.1667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.2917in">Run Number</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.1667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.3333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.4583in">Depth Driller</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.3333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.5in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.625in">Depth Logger</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.5in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.6667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.7917in">Bottom Log Interval</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.6667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.8333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="4.9583in">Top Log Interval</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.8333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.125in">Casing Driller Size @ Depth</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.1667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.2917in">Casing Logger</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.1667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.3333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.4583in">Bit Size</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.3333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.5in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.625in">Type of Fluid in the Hole</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.5in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.6667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.7917in">Mud: Density, Viscosity</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.6667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.8333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="5.9583in">Mud: Fluid Loss, Ph</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.8333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.125in">Mud: Source of Sample</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.1667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.2917in">Rm @ Measured Temperature</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.1667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.3333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.4583in">Rmf @ Measured Temperature</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.3333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.5in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.625in">Rmc @ Measured Temperature</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.5in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.6667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.7917in">Source: Rmf, Rmc</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.6667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.8333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="6.9583in">Rm @ MRT, Rmf @ MRT</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.8333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.125in">Max. Recorded Temperature</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.1667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.2917in">Time circulation stopped</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.1667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.3333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.4583in">Time logger at bottom</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.3333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.5in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.625in">Logging unit and location</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.5in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.6667in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.7917in">Recorded by</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.6667in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.8333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.05in" y="7.9583in">Witnessed by</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.8333in"/>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.925in" y="5.125in">@</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.925in" y="6.2917in">@</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.925in" y="6.4583in">@</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.925in" y="6.625in">@</text>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="2in" y="6.8333in"/>
+      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="3in" y="6.8333in"/>
+      <g transform="translate(0,384) rotate(-90)">
+        <rect fill="none" height="1.15in" stroke="black" stroke-width=".5" width="2in" x="0in" y="0in"/>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.15in" y="0.225in">Rig:</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.15in" y="0.425in">Field:</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.15in" y="0.625in">Location:</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.15in" y="0.825in">Well:</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.15in" y="1.025in">Company:</text>
+        <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="0.3in" y="1.15in"/>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.55in" y="1.275in">LOCATION</text>
+      </g>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="1.45in" y="0.35in">ANY OIL COMPANY INC.</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="1.45in" y="0.85in">ANY ET AL A9-16-49-20</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="1.45in" y="1.35in">EDAM</text>
+      <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="1.45in" y="1.85in">SEWARD</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="2.825in">A9-16-49-20W3M</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="2.975in">SASKATCHEWAN</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="1.3667in" y="3.125in">100091604920W300</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="4.175in" y="3.95in">38.53915</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="5.3in" y="3.95in">98.95341</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.05in" y="4.125in">13-DEC-86</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.05in" y="4.7917in">1000.0 (F)</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.05in" y="4.9583in">1100.0 (F)</text>
+      <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="2.05in" y="7.625in">ANY LOGGING COMPANY INC.</text>
+      <g transform="translate(0,384) rotate(-90)">
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.75in" y="0.225in">SEWARD</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.75in" y="0.425in">EDAM</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.75in" y="0.625in">A9-16-49-20W3M</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.75in" y="0.825in">ANY ET AL A9-16-49-20</text>
+        <text font-family="Verdana" font-size="9" font-weight="bold" text-anchor="start" x="0.75in" y="1.025in">ANY OIL COMPANY INC.</text>
+      </g>
+    </g>
+  </g><!--
+============ API Header END ============
+--><!--
+========== Plot Tracks START ===========
+--><!--
+............ Track 0 START .............
+-->
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="0.25in" x2="0.25in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.49in" x2="0.49in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.73in" x2="0.73in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.97in" x2="0.97in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.21in" x2="1.21in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="1.45in" x2="1.45in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.69in" x2="1.69in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.93in" x2="1.93in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.17in" x2="2.17in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.41in" x2="2.41in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.65in" x2="2.65in" y1="7.5in" y2="19.5in"/><!--
+............. Track 0 END ..............
+--><!--
+............ Track 1 START .............
+--><!--
+............. Track 1 END ..............
+--><!--
+............ Track 2 START .............
+-->
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.45in" x2="3.45in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.5909in" x2="3.5909in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.6908in" x2="3.6908in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.7684in" x2="3.7684in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.8317in" x2="3.8317in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.8853in" x2="3.8853in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.9316in" x2="3.9316in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.9726in" x2="3.9726in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.0092in" x2="4.0092in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.25in" x2="4.25in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.3909in" x2="4.3909in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.4908in" x2="4.4908in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.5684in" x2="4.5684in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.6317in" x2="4.6317in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.6853in" x2="4.6853in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.7316in" x2="4.7316in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.7726in" x2="4.7726in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.8092in" x2="4.8092in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.05in" x2="5.05in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.1909in" x2="5.1909in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.2908in" x2="5.2908in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.3684in" x2="5.3684in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.4317in" x2="5.4317in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.4853in" x2="5.4853in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.5316in" x2="5.5316in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.5726in" x2="5.5726in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.6092in" x2="5.6092in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="7.5in" y2="19.5in"/><!--
+............. Track 2 END ..............
+--><!--
+............ Track 3 START .............
+-->
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.09in" x2="6.09in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.33in" x2="6.33in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.57in" x2="6.57in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.81in" x2="6.81in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="7.05in" x2="7.05in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.29in" x2="7.29in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.53in" x2="7.53in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.77in" x2="7.77in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="8.01in" x2="8.01in" y1="7.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="8.25in" x2="8.25in" y1="7.5in" y2="19.5in"/><!--
+............. Track 3 END ..............
+--><!--
+=========== Plot Tracks END ============
+--><!--
+========== Plot X Grid START ===========
+-->
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="0.25in" x2="2.65in" y1="7.5in" y2="7.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="3.45in" x2="5.85in" y1="7.5in" y2="7.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="5.85in" x2="8.25in" y1="7.5in" y2="7.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="7.62in" y2="7.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="7.62in" y2="7.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="7.62in" y2="7.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="7.74in" y2="7.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="7.74in" y2="7.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="7.74in" y2="7.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="7.86in" y2="7.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="7.86in" y2="7.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="7.86in" y2="7.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="7.98in" y2="7.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="7.98in" y2="7.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="7.98in" y2="7.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="8.1in" y2="8.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="8.1in" y2="8.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="8.1in" y2="8.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.22in" y2="8.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.22in" y2="8.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.22in" y2="8.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.34in" y2="8.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.34in" y2="8.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.34in" y2="8.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.46in" y2="8.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.46in" y2="8.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.46in" y2="8.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.58in" y2="8.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.58in" y2="8.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.58in" y2="8.58in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="8.7in" y2="8.7in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="8.7in" y2="8.7in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="8.7in" y2="8.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.82in" y2="8.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.82in" y2="8.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.82in" y2="8.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="8.94in" y2="8.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="8.94in" y2="8.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="8.94in" y2="8.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.06in" y2="9.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.06in" y2="9.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.06in" y2="9.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.18in" y2="9.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.18in" y2="9.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.18in" y2="9.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="9.3in" y2="9.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="9.3in" y2="9.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="9.3in" y2="9.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.42in" y2="9.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.42in" y2="9.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.42in" y2="9.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.54in" y2="9.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.54in" y2="9.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.54in" y2="9.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.66in" y2="9.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.66in" y2="9.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.66in" y2="9.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="9.78in" y2="9.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="9.78in" y2="9.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="9.78in" y2="9.78in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="9.9in" y2="9.9in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="9.9in" y2="9.9in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="9.9in" y2="9.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.02in" y2="10.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.02in" y2="10.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.02in" y2="10.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.14in" y2="10.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.14in" y2="10.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.14in" y2="10.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.26in" y2="10.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.26in" y2="10.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.26in" y2="10.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.38in" y2="10.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.38in" y2="10.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.38in" y2="10.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="10.5in" y2="10.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="10.5in" y2="10.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="10.5in" y2="10.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.62in" y2="10.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.62in" y2="10.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.62in" y2="10.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.74in" y2="10.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.74in" y2="10.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.74in" y2="10.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.86in" y2="10.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.86in" y2="10.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.86in" y2="10.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="10.98in" y2="10.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="10.98in" y2="10.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="10.98in" y2="10.98in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="11.1in" y2="11.1in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="11.1in" y2="11.1in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="11.1in" y2="11.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.22in" y2="11.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.22in" y2="11.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.22in" y2="11.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.34in" y2="11.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.34in" y2="11.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.34in" y2="11.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.46in" y2="11.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.46in" y2="11.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.46in" y2="11.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.58in" y2="11.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.58in" y2="11.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.58in" y2="11.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="11.7in" y2="11.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="11.7in" y2="11.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="11.7in" y2="11.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.82in" y2="11.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.82in" y2="11.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.82in" y2="11.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="11.94in" y2="11.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="11.94in" y2="11.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="11.94in" y2="11.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.06in" y2="12.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.06in" y2="12.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.06in" y2="12.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.18in" y2="12.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.18in" y2="12.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.18in" y2="12.18in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="12.3in" y2="12.3in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="12.3in" y2="12.3in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="12.3in" y2="12.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.42in" y2="12.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.42in" y2="12.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.42in" y2="12.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.54in" y2="12.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.54in" y2="12.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.54in" y2="12.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.66in" y2="12.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.66in" y2="12.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.66in" y2="12.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="12.78in" y2="12.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="12.78in" y2="12.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="12.78in" y2="12.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="12.9in" y2="12.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="12.9in" y2="12.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="12.9in" y2="12.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.02in" y2="13.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.02in" y2="13.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.02in" y2="13.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.14in" y2="13.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.14in" y2="13.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.14in" y2="13.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.26in" y2="13.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.26in" y2="13.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.26in" y2="13.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.38in" y2="13.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.38in" y2="13.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.38in" y2="13.38in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="0.25in" x2="2.65in" y1="13.5in" y2="13.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.45in" x2="5.85in" y1="13.5in" y2="13.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="8.25in" y1="13.5in" y2="13.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.62in" y2="13.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.62in" y2="13.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.62in" y2="13.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.74in" y2="13.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.74in" y2="13.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.74in" y2="13.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.86in" y2="13.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.86in" y2="13.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.86in" y2="13.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="13.98in" y2="13.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="13.98in" y2="13.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="13.98in" y2="13.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="14.1in" y2="14.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="14.1in" y2="14.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="14.1in" y2="14.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.22in" y2="14.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.22in" y2="14.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.22in" y2="14.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.34in" y2="14.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.34in" y2="14.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.34in" y2="14.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.46in" y2="14.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.46in" y2="14.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.46in" y2="14.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.58in" y2="14.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.58in" y2="14.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.58in" y2="14.58in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="14.7in" y2="14.7in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="14.7in" y2="14.7in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="14.7in" y2="14.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.82in" y2="14.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.82in" y2="14.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.82in" y2="14.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="14.94in" y2="14.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="14.94in" y2="14.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="14.94in" y2="14.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.06in" y2="15.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.06in" y2="15.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.06in" y2="15.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.18in" y2="15.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.18in" y2="15.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.18in" y2="15.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="15.3in" y2="15.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="15.3in" y2="15.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="15.3in" y2="15.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.42in" y2="15.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.42in" y2="15.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.42in" y2="15.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.54in" y2="15.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.54in" y2="15.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.54in" y2="15.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.66in" y2="15.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.66in" y2="15.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.66in" y2="15.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="15.78in" y2="15.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="15.78in" y2="15.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="15.78in" y2="15.78in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="15.9in" y2="15.9in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="15.9in" y2="15.9in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="15.9in" y2="15.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.02in" y2="16.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.02in" y2="16.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.02in" y2="16.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.14in" y2="16.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.14in" y2="16.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.14in" y2="16.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.26in" y2="16.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.26in" y2="16.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.26in" y2="16.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.38in" y2="16.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.38in" y2="16.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.38in" y2="16.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="16.5in" y2="16.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="16.5in" y2="16.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="16.5in" y2="16.5in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.62in" y2="16.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.62in" y2="16.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.62in" y2="16.62in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.74in" y2="16.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.74in" y2="16.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.74in" y2="16.74in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.86in" y2="16.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.86in" y2="16.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.86in" y2="16.86in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="16.98in" y2="16.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="16.98in" y2="16.98in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="16.98in" y2="16.98in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="17.1in" y2="17.1in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="17.1in" y2="17.1in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="17.1in" y2="17.1in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.22in" y2="17.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.22in" y2="17.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.22in" y2="17.22in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.34in" y2="17.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.34in" y2="17.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.34in" y2="17.34in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.46in" y2="17.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.46in" y2="17.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.46in" y2="17.46in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.58in" y2="17.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.58in" y2="17.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.58in" y2="17.58in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="17.7in" y2="17.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="17.7in" y2="17.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="17.7in" y2="17.7in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.82in" y2="17.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.82in" y2="17.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.82in" y2="17.82in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="17.94in" y2="17.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="17.94in" y2="17.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="17.94in" y2="17.94in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.06in" y2="18.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.06in" y2="18.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.06in" y2="18.06in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.18in" y2="18.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.18in" y2="18.18in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.18in" y2="18.18in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="18.3in" y2="18.3in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="18.3in" y2="18.3in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="18.3in" y2="18.3in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.42in" y2="18.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.42in" y2="18.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.42in" y2="18.42in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.54in" y2="18.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.54in" y2="18.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.54in" y2="18.54in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.66in" y2="18.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.66in" y2="18.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.66in" y2="18.66in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="18.78in" y2="18.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="18.78in" y2="18.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="18.78in" y2="18.78in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="18.9in" y2="18.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="5.85in" y1="18.9in" y2="18.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.500" x1="5.85in" x2="8.25in" y1="18.9in" y2="18.9in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="19.02in" y2="19.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="19.02in" y2="19.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="19.02in" y2="19.02in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="19.14in" y2="19.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="19.14in" y2="19.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="19.14in" y2="19.14in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="19.26in" y2="19.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="19.26in" y2="19.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="19.26in" y2="19.26in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="0.25in" x2="2.65in" y1="19.38in" y2="19.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="3.45in" x2="5.85in" y1="19.38in" y2="19.38in"/>
+  <line stroke="grey" stroke-opacity="1.000" stroke-width="0.250" x1="5.85in" x2="8.25in" y1="19.38in" y2="19.38in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="0.25in" x2="2.65in" y1="19.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="3.45in" x2="5.85in" y1="19.5in" y2="19.5in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="1.000" x1="5.85in" x2="8.25in" y1="19.5in" y2="19.5in"/>
+  <text dominant-baseline="middle" font-family="Courier" font-size="12" text-anchor="end" x="3.4in" y="7.55in">1000</text>
+  <text dominant-baseline="middle" font-family="Courier" font-size="12" text-anchor="end" x="3.4in" y="13.55in">1050</text>
+  <text dominant-baseline="middle" font-family="Courier" font-size="12" text-anchor="end" x="3.4in" y="19.55in">1100</text><!--
+=========== Plot X Grid END ============
+--><!--
+========== Plot Legends START ==========
+-->
+  <rect fill="none" height="1in" stroke="blue" stroke-width=".25" width="8in" x="0.25in" y="19.5in"/>
+  <text font-family="Verdana" font-size="10" text-anchor="middle" x="4.25in" y="20.25in">LgFormat: &quot;Triple_Combo&quot; 100 feet of 5 gamma ray curves.</text>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="0.25in" y1="19.5in" y2="20in"/>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="2.65in" x2="2.65in" y1="19.5in" y2="20in"/>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="19.812in" y2="19.812in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.65in" x2="2.57in" y1="19.812in" y2="19.773in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.57in" x2="2.65in" y1="19.852in" y2="19.812in"/>
+  <text font-family="Courier" font-size="9" text-anchor="start" x="0.29in" y="19.75in">0</text>
+  <text font-family="Courier" font-size="9" text-anchor="end" x="2.61in" y="19.75in">150</text>
+  <text font-family="Courier" font-size="9" text-anchor="middle" x="1.45in" y="19.75in">GammaRay [b&apos;GAPI&apos;]</text>
+  <rect fill="none" height="1in" stroke="blue" stroke-width=".25" width="8in" x="0.25in" y="6.5in"/>
+  <text font-family="Verdana" font-size="10" text-anchor="middle" x="4.25in" y="6.75in">LgFormat: &quot;Triple_Combo&quot; 100 feet of 5 gamma ray curves.</text>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="0.25in" y1="7in" y2="7.5in"/>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="2.65in" x2="2.65in" y1="7in" y2="7.5in"/>
+  <line stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500" x1="0.25in" x2="2.65in" y1="7.3125in" y2="7.3125in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.65in" x2="2.57in" y1="7.3125in" y2="7.2725in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.57in" x2="2.65in" y1="7.3525in" y2="7.3125in"/>
+  <text font-family="Courier" font-size="9" text-anchor="start" x="0.29in" y="7.25in">0</text>
+  <text font-family="Courier" font-size="9" text-anchor="end" x="2.61in" y="7.25in">150</text>
+  <text font-family="Courier" font-size="9" text-anchor="middle" x="1.45in" y="7.25in">GammaRay [b&apos;GAPI&apos;]</text><!--
+=========== Plot Legends END ===========
+--><!--
+========== Plot Curves START ===========
+--><!--
+.......... Output PCAL START ...........
+--><!--
+........... Output PCAL END ............
+--><!--
+.......... Output ATR  START ...........
+--><!--
+........... Output ATR  END ............
+--><!--
+.......... Output TNPB START ...........
+--><!--
+........... Output TNPB END ............
+--><!--
+.......... Output MSFL START ...........
+--><!--
+........... Output MSFL END ............
+--><!--
+.......... Output RLA1 START ...........
+--><!--
+........... Output RLA1 END ............
+--><!--
+.......... Output DPHZ START ...........
+--><!--
+........... Output DPHZ END ............
+--><!--
+.......... Output SFL  START ...........
+--><!--
+........... Output SFL  END ............
+--><!--
+.......... Output AHT60 START ..........
+--><!--
+........... Output AHT60 END ...........
+--><!--
+.......... Output CMRP START ...........
+--><!--
+........... Output CMRP END ............
+--><!--
+.......... Output SPHI START ...........
+--><!--
+........... Output SPHI END ............
+--><!--
+.......... Output NPOR START ...........
+--><!--
+........... Output NPOR END ............
+--><!--
+.......... Output C2   START ...........
+--><!--
+........... Output C2   END ............
+--><!--
+.......... Output HMNO START ...........
+--><!--
+........... Output HMNO END ............
+--><!--
+.......... Output DPHI START ...........
+--><!--
+........... Output DPHI END ............
+--><!--
+.......... Output SNP  START ...........
+--><!--
+........... Output SNP  END ............
+--><!--
+.......... Output ILM  START ...........
+--><!--
+........... Output ILM  END ............
+--><!--
+.......... Output TNPH START ...........
+--><!--
+........... Output TNPH END ............
+--><!--
+.......... Output DSOZ START ...........
+--><!--
+........... Output DSOZ END ............
+--><!--
+.......... Output TPHI START ...........
+--><!--
+........... Output TPHI END ............
+--><!--
+.......... Output ILD  START ...........
+--><!--
+........... Output ILD  END ............
+--><!--
+.......... Output LLD  START ...........
+--><!--
+........... Output LLD  END ............
+--><!--
+.......... Output AHT30 START ..........
+--><!--
+........... Output AHT30 END ...........
+--><!--
+.......... Output SP   START ...........
+--><!--
+........... Output SP   END ............
+--><!--
+.......... Output HCAL START ...........
+--><!--
+........... Output HCAL END ............
+--><!--
+.......... Output RLA0 START ...........
+--><!--
+........... Output RLA0 END ............
+--><!--
+.......... Output RLA3 START ...........
+--><!--
+........... Output RLA3 END ............
+--><!--
+.......... Output RLA2 START ...........
+--><!--
+........... Output RLA2 END ............
+--><!--
+.......... Output RLA5 START ...........
+--><!--
+........... Output RLA5 END ............
+--><!--
+.......... Output RLA4 START ...........
+--><!--
+........... Output RLA4 END ............
+--><!--
+.......... Output AHT10 START ..........
+--><!--
+........... Output AHT10 END ...........
+--><!--
+.......... Output ROP5 START ...........
+--><!--
+........... Output ROP5 END ............
+--><!--
+.......... Output RXO  START ...........
+--><!--
+........... Output RXO  END ............
+--><!--
+.......... Output AHT90 START ..........
+--><!--
+........... Output AHT90 END ...........
+--><!--
+.......... Output RXOZ START ...........
+--><!--
+........... Output RXOZ END ............
+--><!--
+........ Output DPOR_CDN START .........
+--><!--
+......... Output DPOR_CDN END ..........
+--><!--
+.......... Output PEFZ START ...........
+--><!--
+........... Output PEFZ END ............
+--><!--
+.......... Output BS   START ...........
+--><!--
+........... Output BS   END ............
+--><!--
+.......... Output APLC START ...........
+--><!--
+........... Output APLC END ............
+--><!--
+.......... Output PSR  START ...........
+--><!--
+........... Output PSR  END ............
+--><!--
+.......... Output LLM  START ...........
+--><!--
+........... Output LLM  END ............
+--><!--
+.......... Output CMFF START ...........
+--><!--
+........... Output CMFF END ............
+--><!--
+........ Output TNPH_CDN START .........
+--><!--
+......... Output TNPH_CDN END ..........
+--><!--
+.......... Output HMIN START ...........
+--><!--
+........... Output HMIN END ............
+--><!--
+.......... Output DPHB START ...........
+--><!--
+........... Output DPHB END ............
+--><!--
+.......... Output APDC START ...........
+--><!--
+........... Output APDC END ............
+--><!--
+.......... Output CALI START ...........
+--><!--
+........... Output CALI END ............
+--><!--
+.......... Output AHT20 START ..........
+--><!--
+........... Output AHT20 END ...........
+--><!--
+.......... Output ENPH START ...........
+--><!--
+........... Output ENPH END ............
+--><!--
+.......... Output TENS START ...........
+--><!--
+........... Output TENS END ............
+--><!--
+.......... Output APSC START ...........
+--><!--
+........... Output APSC END ............
+--><!--
+.......... Output GR   START ...........
+-->
+  <polyline fill="none" points="39.36,720 42.432,725.76 45.504,731.52 48.576,737.28 51.648,743.04 54.72,748.8 57.792,754.56 60.864,760.32 63.936,766.08 67.008,771.84 70.08,777.6 73.152,783.36 76.224,789.12 79.296,794.88 82.368,800.64 85.44,806.4 88.512,812.16 91.584,817.92 94.656,823.68 97.728,829.44 100.8,835.2 103.87,840.96 106.94,846.72 110.02,852.48 113.09,858.24 116.16,864 119.23,869.76 122.3,875.52 125.38,881.28 128.45,887.04 131.52,892.8 134.59,898.56 137.66,904.32 140.74,910.08 143.81,915.84 146.88,921.6 149.95,927.36 153.02,933.12 156.1,938.88 159.17,944.64 162.24,950.4 39.36,956.16 42.432,961.92 45.504,967.68 48.576,973.44 51.648,979.2 54.72,984.96 57.792,990.72 60.864,996.48 63.936,1002.2 67.008,1008 70.08,1013.8 73.152,1019.5 76.224,1025.3 79.296,1031 82.368,1036.8 85.44,1042.6 88.512,1048.3 91.584,1054.1 94.656,1059.8 97.728,1065.6 100.8,1071.4 103.87,1077.1 106.94,1082.9 110.02,1088.6 113.09,1094.4 116.16,1100.2 119.23,1105.9 122.3,1111.7 125.38,1117.4 128.45,1123.2 131.52,1129 134.59,1134.7 137.66,1140.5 140.74,1146.2 143.81,1152 146.88,1157.8 149.95,1163.5 153.02,1169.3 156.1,1175 159.17,1180.8 162.24,1186.6 39.36,1192.3 42.432,1198.1 45.504,1203.8 48.576,1209.6 51.648,1215.4 54.72,1221.1 57.792,1226.9 60.864,1232.6 63.936,1238.4 67.008,1244.2 70.08,1249.9 73.152,1255.7 76.224,1261.4 79.296,1267.2 82.368,1273 85.44,1278.7 88.512,1284.5 91.584,1290.2 94.656,1296 97.728,1301.8 100.8,1307.5 103.87,1313.3 106.94,1319 110.02,1324.8 113.09,1330.6 116.16,1336.3 119.23,1342.1 122.3,1347.8 125.38,1353.6 128.45,1359.4 131.52,1365.1 134.59,1370.9 137.66,1376.6 140.74,1382.4 143.81,1388.2 146.88,1393.9 149.95,1399.7 153.02,1405.4 156.1,1411.2 159.17,1417 162.24,1422.7 39.36,1428.5 42.432,1434.2 45.504,1440 48.576,1445.8 51.648,1451.5 54.72,1457.3 57.792,1463 60.864,1468.8 63.936,1474.6 67.008,1480.3 70.08,1486.1 73.152,1491.8 76.224,1497.6 79.296,1503.4 82.368,1509.1 85.44,1514.9 88.512,1520.6 91.584,1526.4 94.656,1532.2 97.728,1537.9 100.8,1543.7 103.87,1549.4 106.94,1555.2 110.02,1561 113.09,1566.7 116.16,1572.5 119.23,1578.2 122.3,1584 125.38,1589.8 128.45,1595.5 131.52,1601.3 134.59,1607 137.66,1612.8 140.74,1618.6 143.81,1624.3 146.88,1630.1 149.95,1635.8 153.02,1641.6 156.1,1647.4 159.17,1653.1 162.24,1658.9 39.36,1664.6 42.432,1670.4 45.504,1676.2 48.576,1681.9 51.648,1687.7 54.72,1693.4 57.792,1699.2 60.864,1705 63.936,1710.7 67.008,1716.5 70.08,1722.2 73.152,1728 76.224,1733.8 79.296,1739.5 82.368,1745.3 85.44,1751 88.512,1756.8 91.584,1762.6 94.656,1768.3 97.728,1774.1 100.8,1779.8 103.87,1785.6 106.94,1791.4 110.02,1797.1 113.09,1802.9 116.16,1808.6 119.23,1814.4 122.3,1820.2 125.38,1825.9 128.45,1831.7 131.52,1837.4 134.59,1843.2 137.66,1849 140.74,1854.7 143.81,1860.5 146.88,1866.2 149.95,1872" stroke="rgb(0,192,0)" stroke-opacity="1.000" stroke-width="0.500"/><!--
+........... Output GR   END ............
+--><!--
+.......... Output C1   START ...........
+--><!--
+........... Output C1   END ............
+--><!--
+.......... Output RSOZ START ...........
+--><!--
+........... Output RSOZ END ............
+--><!--
+.......... Output NPHI START ...........
+--><!--
+........... Output NPHI END ............
+--><!--
+=========== Plot Curves END ============
+-->
+</svg>

@@ -1,0 +1,252 @@
+<LgFormat UniqueId="Formation_Test" xmlns="x-schema:LgSchema2.xml">
+  <Description>Formation Test Time</Description>
+  <LgVerticalScale UniqueId="verticalScale">
+    <IndexScaler>10</IndexScaler>
+    <IndexUnit>seconds</IndexUnit>
+    <PaperScaler>1</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>10</Size>
+  </LgFont>
+  <LgFont UniqueId="minorFont">
+    <Bold>0</Bold>
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>1.5</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Color>000000</Color>
+      <Spacing>60</Spacing>
+      <SpacingUnit>Sec</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgTimeIndexNumber UniqueId="timeIndexNumber">
+        <!--  Comment: Don't show DateFormat ddMMMyyyy -->
+        <DateFormat></DateFormat>
+        <Font>majorFont</Font>
+        <TimeFormat>HH:mm:ss</TimeFormat>
+      </LgTimeIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <BackgroundColor>FFFFFF</BackgroundColor>
+    <Description>Track 1</Description>
+    <RightPosition>1.2</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgRemarks UniqueId="POET_Text">
+      <BackgroundColor>00ff00</BackgroundColor>
+      <ChannelName>POET</ChannelName>
+      <Font>minorFont</Font>
+      <OffsetFromLeft>0.1</OffsetFromLeft>
+    </LgRemarks>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>1.2</LeftPosition>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid2">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid2">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgRemarks UniqueId="POPV_Text">
+      <BackgroundColor>00ff00</BackgroundColor>
+      <ChannelName>POPV</ChannelName>
+      <Font>minorFont</Font>
+      <OffsetFromLeft>0.1</OffsetFromLeft>
+    </LgRemarks>
+  </LgTrack>
+  <LgTrack UniqueId="track12">
+    <Description>Track 12</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid12">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid12">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="MRPS1_Resis">
+      <ChannelName>BFR1</ChannelName>
+      <LeftLimit>1</LeftLimit>
+      <Thickness>2</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="BSG1">
+      <ChannelName>BSG1</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Color>00ff00</Color>
+      <Thickness>2</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="BQP1">
+      <ChannelName>BQP1</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10000</RightLimit>
+      <Color>0000ff</Color>
+      <Thickness>2</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="MRPS1_Temp">
+      <ChannelName>B1TR</ChannelName>
+      <LeftLimit>100</LeftLimit>
+      <RightLimit>200</RightLimit>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <WrapCount>-1</WrapCount>
+      <Thickness>1.75</Thickness>
+    </LgCurve>
+    <LgCurve UniqueId="POHP">
+      <ChannelName>POHP</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>8000</RightLimit>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="timeTrack">
+    <Description>Time Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>0</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+    <LgRemarks UniqueId="ETIM_Text">
+      <BackgroundColor>00ff00</BackgroundColor>
+      <ChannelName>ETIM</ChannelName>
+      <Color>ff00000</Color>
+      <Font>majorFont</Font>
+      <OffsetFromLeft>0.1</OffsetFromLeft>
+    </LgRemarks>
+    <!--
+               <LgValueCurve UniqueId="ETIM_VALCURVE">
+                       <ChannelName>ETIM</ChannelName>
+                       <Color>000000</Color>
+                       <LineStyle>LG_SOLID_LINE</LineStyle>
+                       <Thickness>1</Thickness>
+                       <Font>majorFont</Font>
+                       <LeftLimit>0</LeftLimit>
+                       <RightLimit>100000</RightLimit>
+               </LgValueCurve>
+-->
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>4.4</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgValueCurve UniqueId="BQP1VALCURVE">
+      <ChannelName>BQP1</ChannelName>
+      <Color>0000FF</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Thickness>1</Thickness>
+      <Font>minorFont</Font>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10000</RightLimit>
+    </LgValueCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track4">
+    <Description>Track 4</Description>
+    <LeftPosition>4.4</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid4">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid4">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="BQP1_tens">
+      <ChannelName>BQP1</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10</RightLimit>
+      <Thickness>1</Thickness>
+      <Color>0000FF</Color>
+      <WrapCount>-1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track5">
+    <Description>Track 5</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>6.8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid5">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid5">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="BQP1_ones">
+      <ChannelName>BQP1</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>1</RightLimit>
+      <Thickness>1</Thickness>
+      <Color>0000FF</Color>
+      <WrapCount>-1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track6">
+    <Description>Track 6</Description>
+    <LeftPosition>6.8</LeftPosition>
+    <RightPosition>8.0</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid6">
+      <Color>818181</Color>
+      <LineCount>6</LineCount>
+      <Thickness>1</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid6">
+      <Color>818181</Color>
+      <LineCount>2</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="BQP1_tenths">
+      <ChannelName>BQP1</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>0.1</RightLimit>
+      <Thickness>1</Thickness>
+      <Color>0000FF</Color>
+      <WrapCount>-1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

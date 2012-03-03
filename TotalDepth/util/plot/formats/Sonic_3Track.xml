@@ -1,0 +1,336 @@
+<LgFormat UniqueId="Sonic_3Track.xml" xmlns="x-schema:LgSchema2.xml">
+  <Description>Sonic DT Porosity 3 Track</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>Ft</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumber">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumber">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="ROP5">
+      <ChannelName>ROP5</ChannelName>
+      <Color>0000FF</Color>
+      <RightLimit>0</RightLimit>
+      <LeftLimit>500</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="PCAL">
+      <ChannelName>PCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.6</Thickness>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR</ChannelName>
+      <Color>00C000</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HILTCaliper">
+      <ChannelName>HCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Caliper">
+      <ChannelName>CALI</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BitSize">
+      <ChannelName>BS</ChannelName>
+      <LeftLimit>6</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>16</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SP">
+      <ChannelName>SP</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>-160</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>10</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="depthTrack">
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="minorGrid3">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid4">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid4">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="SonicPorosity">
+      <ChannelName>SPHI</ChannelName>
+      <Color>008080</Color>
+      <LeftLimit>0.45</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>-0.15</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="TENSION">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <!-- Tracks with no grids must be last in   -->
+  <!-- the format, or the grids after will    -->
+  <!-- over-lay the curves.                   -->
+  <LgTrack UniqueId="track23">
+    <Description>Track 23</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgCurve UniqueId="DTCompressionalSDT">
+      <ChannelName>DTCO</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="DT">
+      <ChannelName>DT</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="DTL_DDBHC">
+      <ChannelName>DTL</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="DTLF_DDBHC">
+      <ChannelName>DTLF</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="DTLN_DDBHC">
+      <ChannelName>DTLN</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear">
+      <ChannelName>DTSM</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear2">
+      <ChannelName>DT0S</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear3">
+      <ChannelName>DTRS</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear4">
+      <ChannelName>DT1R</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear5">
+      <ChannelName>DT4S</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear6">
+      <ChannelName>DT2</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="Delta-T_Shear7">
+      <ChannelName>DTSH</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="MonopoleStoneley">
+      <ChannelName>DTST</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="MonopoleStoneley2">
+      <ChannelName>DT2R</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SlownessUpperDipoleMode">
+      <ChannelName>DTR2</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SlownessFirstMotionMode">
+      <ChannelName>DTR5</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="DTComputedUphole">
+      <ChannelName>DTCU</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Color>00CCFF</Color>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="DTReceiverArray">
+      <ChannelName>DTRA</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <Color>0000CC</Color>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="DTTransArray">
+      <ChannelName>DTTA</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Color>0000CC</Color>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="DTBoreholeComp">
+      <ChannelName>DTBC</ChannelName>
+      <LeftLimit>140</LeftLimit>
+      <Color>00CCFF</Color>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

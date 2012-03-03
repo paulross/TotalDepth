@@ -1,0 +1,259 @@
+<LgFormat UniqueId="RAB_Std_Format" xmlns="x-schema:LgSchema2.xml">
+  <Description>Resistivity At the Bit</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>Ft</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Color>898989</Color>
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumberInDepthTrack">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumberInDepthTrack">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="GammaRay">
+      <ChannelName>GR_RAB</ChannelName>
+      <Color>00C000</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>2</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="ROP5">
+      <ChannelName>ROP5</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>200</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BTAB">
+      <ChannelName>BTAB</ChannelName>
+      <Color>818181</Color>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="RTAB">
+      <ChannelName>RTAB</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>10</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="CALI">
+      <ChannelName>CALI</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HAZI">
+      <ChannelName>HAZI</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>-40</LeftLimit>
+      <RightLimit>360</RightLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="DEVI">
+      <ChannelName>DEVI</ChannelName>
+      <Color>FF00FF</Color>
+      <LeftLimit>-40</LeftLimit>
+      <RightLimit>360</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="DepthTrack">
+    <BackgroundColor>fffff</BackgroundColor>
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+    <LgCurve UniqueId="AAI">
+      <ChannelName>AAI</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>200</RightLimit>
+      <Color>FF0000</Color>
+      <Thickness>1.75</Thickness>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="RPM">
+      <ChannelName>RPM</ChannelName>
+      <LeftLimit>0</LeftLimit>
+      <RightLimit>400</RightLimit>
+      <Color>000000</Color>
+      <Thickness>1.75</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgPip UniqueId="GR_IMPPip">
+      <Alignment>LG_ALIGN_LEFT</Alignment>
+      <ChannelName>GR_IMP</ChannelName>
+      <Color>008000</Color>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Width>0.05</Width>
+    </LgPip>
+    <LgPip UniqueId="P10H_UNCPip">
+      <Alignment>LG_ALIGN_RIGHT</Alignment>
+      <ChannelName>P10H_UNC</ChannelName>
+      <LineStyle>LG_SOLID_LINE</LineStyle>
+      <Width>0.05</Width>
+    </LgPip>
+  </LgTrack>
+  <LgTrack UniqueId="track23">
+    <Description>Track 23</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLogarithmicGrid UniqueId="logGrid3">
+      <Color>818181</Color>
+      <Decade>4</Decade>
+      <LogScale>LG_LOG_2</LogScale>
+    </LgLogarithmicGrid>
+    <LgCurve UniqueId="RING">
+      <ChannelName>RING</ChannelName>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="RBIT">
+      <ChannelName>RBIT</ChannelName>
+      <Color>000000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>0</Visible>
+    </LgCurve>
+    <LgCurve UniqueId="BDAV">
+      <ChannelName>BDAV</ChannelName>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <Color>0000FF</Color>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>0</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BDM3">
+      <ChannelName>BDM3</ChannelName>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <Color>0000FF</Color>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BMAV">
+      <ChannelName>BMAV</ChannelName>
+      <Color>800040</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <Color>000088</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>0</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BMM2">
+      <ChannelName>BMM2</ChannelName>
+      <Color>00c0ff</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>1</Visible>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="BSAV">
+      <ChannelName>BSAV</ChannelName>
+      <Color>00C000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>2000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>0</Visible>
+    </LgCurve>
+    <LgCurve UniqueId="BSM1">
+      <ChannelName>BSM1</ChannelName>
+      <Color>00C000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <RightLimit>2000</RightLimit>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>1</Visible>
+    </LgCurve>
+    <LgCurve UniqueId="OBIT">
+      <ChannelName>OBIT</ChannelName>
+      <Color>00C000</Color>
+      <LeftLimit>0.2</LeftLimit>
+      <RightLimit>2000</RightLimit>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Transform>LG_LOGARITHMIC</Transform>
+      <Visible>0</Visible>
+    </LgCurve>
+  </LgTrack>
+</LgFormat>

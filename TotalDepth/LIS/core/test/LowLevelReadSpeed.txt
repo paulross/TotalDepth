@@ -1,0 +1,339 @@
+
+Summary of speed tests of low level read and conversion to integer.
+===================================================================
+Machine DELL laptop dual core with encrypted hard drive.
+
+TestStringIntConvert.py
+-----------------------
+Takes in-memory strings and converts them to BE/LE integers using three methods.
+1. - Python byte stuffing.
+2. - Cython byte stuffing.
+3. - The struct module.
+
+Cython vs Python
+----------------
+Cython code read rate is x1.7 for 1 byte words, x2.6 for 4 byte codes.
+struct is about xs as fast for 4 bytes as Cython.
+
+Typical figures for 4 byte words:
+Python:             2,000 kB/s
+Cython:             6,300 kb/s
+Struct:            13,800 kb/s 
+Struct (compiled): 17,200 kB/s
+
+Looks like struct has it.
+
+Big endian vs Little endian
+---------------------------
+With Python/Cython LE took 3% to 15% longer than BE.
+With the struct module LE is about 0% to 3% faster (not significantly in other words).
+
+Precompilation of struct using struct.Struct()
+----------------------------------------------
+Precompiling the struct format statement gives a 13-32% speed increase for small
+buffers, falls to zero for about 512 byte format string and is actually slower
+by about 5% fo a 8192 byte format string.
+
+
+TestReadSpeed.py
+================
+
+Reading binary files and reading and unpacking
+----------------------------------------------
+For single byte buffers read is arount 1500 kb/s and unpacking the same.
+At 32 bytes read is around 90,000 kB/s (!) and unpacking takes the same time
+again (i.e. half rate).
+Above that read rate continues to increase almost linearly (1GB/s @ 8192 buffer size!)
+with read+unpack flattening off at arund 100,000 kB/s
+
+In-memory rates may be around x2 to x3.
+
+TODO: Investigate mmap.
+TODO: c.f. reaad speed with Mac.
+
+
+Reading binary files and unpacking Python 26, 27, 31
+----------------------------------------------------
+
+Python 3.1.2
+------------
+C:\Python31>python W:\openLIS\src\OpenLIS\core\test\TestReadSpeed.py C:\Paul\BP_Macondo
+TestClass.py script version "0.8.0", dated 6 Dec 2010
+Author: Paul Ross
+Copyright (c) 2010 Paul Ross.
+
+testSetUpTearDown (__main__.TestReadClass)
+TestReadClass: Tests setUp() and tearDown(). ... ok
+test_0001 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     1. ... Read:   65.092 rate       1934.1 k/S ok
+test_0002 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     2. ... Read:   34.244 rate       3676.4 k/S ok
+test_0004 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     4. ... Read:   17.581 rate       7160.6 k/S ok
+test_0008 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     8. ... Read:    8.903 rate      14141.1 k/S ok
+test_0016 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    16. ... Read:    4.582 rate      27472.7 k/S ok
+test_0032 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    32. ... Read:    2.279 rate      55247.3 k/S ok
+test_0064 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    64. ... Read:    1.250 rate     100712.7 k/S ok
+test_0128 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   128. ... Read:    0.698 rate     180446.8 k/S ok
+test_0256 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   256. ... Read:    0.478 rate     263103.2 k/S ok
+test_0512 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   512. ... Read:    0.319 rate     394261.8 k/S ok
+test_1024 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  1024. ... Read:    0.243 rate     517267.3 k/S ok
+test_2048 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  2048. ... Read:    0.190 rate     661874.4 k/S ok
+test_4096 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  4096. ... Read:    0.180 rate     700957.6 k/S ok
+test_8192 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  8192. ... Read:    0.144 rate     871413.2 k/S ok
+testSetUpTearDown (__main__.TestReadStructClass)
+TestReadClass: Tests setUp() and tearDown(). ... ok
+test_0001 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     1. ... Read:   88.400 rate       1424.1 k/S ok
+test_0002 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     2. ... Read:   47.602 rate       2644.7 k/S ok
+test_0004 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     4. ... Read:   25.757 rate       4887.6 k/S ok
+test_0008 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     8. ... Read:   14.151 rate       8896.6 k/S ok
+test_0016 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    16. ... Read:    7.783 rate      16174.8 k/S ok
+test_0032 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    32. ... Read:    4.814 rate      26151.0 k/S ok
+test_0064 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    64. ... Read:    3.277 rate      38413.3 k/S ok
+test_0128 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   128. ... Read:    2.558 rate      49223.0 k/S ok
+test_0256 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   256. ... Read:    2.137 rate      58905.3 k/S ok
+test_0512 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   512. ... Read:    1.874 rate      67193.9 k/S ok
+test_1024 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  1024. ... Read:    1.745 rate      72125.2 k/S ok
+test_2048 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  2048. ... Read:    1.658 rate      75932.7 k/S ok
+test_4096 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  4096. ... Read:    1.715 rate      73413.7 k/S ok
+test_8192 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  8192. ... Read:    1.629 rate      77265.2 k/S ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 341.888s
+
+OK
+CPU time =  342.091 (S)
+Bye, bye!
+
+Python 2.7.1
+------------
+C:\Python27>python W:\openLIS\src\OpenLIS\core\test\TestReadSpeed.py C:\Paul\BP_Macondo
+TestClass.py script version "0.8.0", dated 6 Dec 2010
+Author: Paul Ross
+Copyright (c) 2010 Paul Ross.
+()
+testSetUpTearDown (__main__.TestReadClass)
+TestReadClass: Tests setUp() and tearDown(). ... ok
+test_0001 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     1. ... Read:   73.107 rate       1722.0 k/S ok
+test_0002 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     2. ... Read:   36.690 rate       3431.2 k/S ok
+test_0004 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     4. ... Read:   18.806 rate       6694.3 k/S ok
+test_0008 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len     8. ... Read:    9.288 rate      13553.7 k/S ok
+test_0016 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    16. ... Read:    4.611 rate      27300.7 k/S ok
+test_0032 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    32. ... Read:    2.578 rate      48827.8 k/S ok
+test_0064 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len    64. ... Read:    1.440 rate      87451.3 k/S ok
+test_0128 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   128. ... Read:    0.734 rate     171547.9 k/S ok
+test_0256 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   256. ... Read:    0.519 rate     242408.0 k/S ok
+test_0512 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len   512. ... Read:    0.339 rate     371169.5 k/S ok
+test_1024 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  1024. ... Read:    0.276 rate     455337.0 k/S ok
+test_2048 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  2048. ... Read:    0.228 rate     553214.0 k/S ok
+test_4096 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  4096. ... Read:    0.171 rate     734422.5 k/S ok
+test_8192 (__main__.TestReadClass)
+TestReadClass: Read binary; buffer len  8192. ... Read:    0.115 rate    1091981.0 k/S ok
+testSetUpTearDown (__main__.TestReadStructClass)
+TestReadClass: Tests setUp() and tearDown(). ... ok
+test_0001 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     1. ... Read:   95.201 rate       1322.4 k/S ok
+test_0002 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     2. ... Read:   48.484 rate       2596.6 k/S ok
+test_0004 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     4. ... Read:   24.355 rate       5169.0 k/S ok
+test_0008 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len     8. ... Read:   13.285 rate       9476.5 k/S ok
+test_0016 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    16. ... Read:    7.534 rate      16709.7 k/S ok
+test_0032 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    32. ... Read:    4.366 rate      28832.0 k/S ok
+test_0064 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len    64. ... Read:    2.898 rate      43444.4 k/S ok
+test_0128 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   128. ... Read:    2.099 rate      59981.6 k/S ok
+test_0256 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   256. ... Read:    1.911 rate      65869.3 k/S ok
+test_0512 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len   512. ... Read:    1.595 rate      78917.9 k/S ok
+test_1024 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  1024. ... Read:    1.535 rate      81988.2 k/S ok
+test_2048 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  2048. ... Read:    1.447 rate      87000.3 k/S ok
+test_4096 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  4096. ... Read:    1.472 rate      85511.0 k/S ok
+test_8192 (__main__.TestReadStructClass)
+TestReadClass: Read and unpack binary; buffer len  8192. ... Read:    1.295 rate      97244.3 k/S ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 356.366s
+
+OK
+CPU time =  356.399 (S)
+Bye, bye!
+
+Python 26
+---------
+W:\openLIS\src\OpenLIS\core>python --version
+Python 2.6.5
+
+W:\openLIS\src\OpenLIS\core>python test\TestReadSpeed.py C:\Paul\BP_Macondo
+TestClass.py script version "0.8.0", dated 6 Dec 2010
+Author: Paul Ross
+Copyright (c) 2010 Paul Ross.
+()
+TestReadClass: Tests setUp() and tearDown(). ... ok
+TestReadClass: Read binary; buffer len     1. ... Read:   75.283 rate       1672.3 k/S ok
+TestReadClass: Read binary; buffer len     2. ... Read:   38.320 rate       3285.3 k/S ok
+TestReadClass: Read binary; buffer len     4. ... Read:   19.346 rate       6507.4 k/S ok
+TestReadClass: Read binary; buffer len     8. ... Read:    9.574 rate      13149.8 k/S ok
+TestReadClass: Read binary; buffer len    16. ... Read:    4.897 rate      25710.3 k/S ok
+TestReadClass: Read binary; buffer len    32. ... Read:    2.652 rate      47479.1 k/S ok
+TestReadClass: Read binary; buffer len    64. ... Read:    1.356 rate      92837.9 k/S ok
+TestReadClass: Read binary; buffer len   128. ... Read:    0.761 rate     165322.1 k/S ok
+TestReadClass: Read binary; buffer len   256. ... Read:    0.515 rate     244471.2 k/S ok
+TestReadClass: Read binary; buffer len   512. ... Read:    0.343 rate     367304.3 k/S ok
+TestReadClass: Read binary; buffer len  1024. ... Read:    0.262 rate     480432.5 k/S ok
+TestReadClass: Read binary; buffer len  2048. ... Read:    0.214 rate     589557.5 k/S ok
+TestReadClass: Read binary; buffer len  4096. ... Read:    0.182 rate     692728.5 k/S ok
+TestReadClass: Read binary; buffer len  8192. ... Read:    0.121 rate    1036534.6 k/S ok
+TestReadClass: Tests setUp() and tearDown(). ... ok
+TestReadClass: Read and unpack binary; buffer len     1. ... Read:   97.554 rate       1290.5 k/S ok
+TestReadClass: Read and unpack binary; buffer len     2. ... Read:   47.129 rate       2671.2 k/S ok
+TestReadClass: Read and unpack binary; buffer len     4. ... Read:   25.434 rate       4949.8 k/S ok
+TestReadClass: Read and unpack binary; buffer len     8. ... Read:   13.758 rate       9150.8 k/S ok
+TestReadClass: Read and unpack binary; buffer len    16. ... Read:    7.803 rate      16134.6 k/S ok
+TestReadClass: Read and unpack binary; buffer len    32. ... Read:    4.929 rate      25540.4 k/S ok
+TestReadClass: Read and unpack binary; buffer len    64. ... Read:    3.072 rate      40986.5 k/S ok
+TestReadClass: Read and unpack binary; buffer len   128. ... Read:    2.375 rate      52997.1 k/S ok
+TestReadClass: Read and unpack binary; buffer len   256. ... Read:    1.830 rate      68808.1 k/S ok
+TestReadClass: Read and unpack binary; buffer len   512. ... Read:    1.667 rate      75516.7 k/S ok
+TestReadClass: Read and unpack binary; buffer len  1024. ... Read:    1.481 rate      84991.6 k/S ok
+TestReadClass: Read and unpack binary; buffer len  2048. ... Read:    1.464 rate      85967.3 k/S ok
+TestReadClass: Read and unpack binary; buffer len  4096. ... Read:    1.360 rate      92546.0 k/S ok
+TestReadClass: Read and unpack binary; buffer len  8192. ... Read:    1.308 rate      96268.4 k/S ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 364.978s
+
+OK
+CPU time =  365.017 (S)
+Bye, bye!
+
+
+Testing seek to EOF
+===================
+
+First pass is slowest, subsequent passes use VM at x100 speed.
+
+589 files 2-400 kB, total size 12.4 MB:
+Tests how long is takes to open a file and seek to EOF bytes ...
+Time:    9.592 Rate      1.3 MB/S,     61.4 file/S Cost:  790.083 (ms/MB) ok
+Time:    0.066 Rate    188.7 MB/S,   8939.1 file/S Cost:    5.427 (ms/MB) ok
+Time:    0.097 Rate    128.5 MB/S,   6090.1 file/S Cost:    7.966 (ms/MB) ok
+Time:    0.057 Rate    217.4 MB/S,  10299.7 file/S Cost:    4.710 (ms/MB) ok
+
+50 ZIP files 1kB to 320MB, total size 801 MB:
+Time:    1.986 Rate    403.5 MB/S,     25.2 file/S Cost:    2.538 (ms/MB) ok
+Time:    0.005 Rate 146318.5 MB/S,   9130.1 file/S Cost:    0.007 (ms/MB) ok
+Time:    0.005 Rate 147257.5 MB/S,   9188.7 file/S Cost:    0.007 (ms/MB) ok
+Time:    0.005 Rate 145723.8 MB/S,   9093.0 file/S Cost:    0.007 (ms/MB) ok
+
+115 ZIP files 1kB to 790MB, total size 2.28 GB:
+Time:    5.047 Rate    463.7 MB/S,     22.8 file/S Cost:    2.208 (ms/MB) ok
+Time:    0.018 Rate 131923.4 MB/S,   6481.3 file/S Cost:    0.008 (ms/MB) ok
+Time:    0.015 Rate 157880.0 MB/S,   7756.5 file/S Cost:    0.006 (ms/MB) ok
+Time:    0.015 Rate 151324.7 MB/S,   7434.5 file/S Cost:    0.007 (ms/MB) ok
+
+
+Testing cost of reading repcodes
+================================
+
+W:\openLIS\src\OpenLIS\core>python test\TestRepCode.py 2>&1 | grep Cost
+TestRepCodeFrom49.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.377 Rate  2650886 words/S  Cost: 202.525 (ms/MB)ok
+TestRepCodeFrom49.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 1.225 Rate   816640 words/S  Cost: 657.414 (ms/MB)ok
+TestRepCodeFrom49.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.312 Rate   320513 words/S  Cost: 1675.037 (ms/MB)ok
+TestRepCodeFrom49.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.404 Rate   247743 words/S  Cost: 2167.050 (ms/MB)ok
+TestRepCodeFrom50.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.715 Rate  1399321 words/S  Cost: 191.833 (ms/MB)ok
+TestRepCodeFrom50.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 1.842 Rate   543010 words/S  Cost: 494.347 (ms/MB)ok
+TestRepCodeFrom50.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.345 Rate   289648 words/S  Cost: 926.764 (ms/MB)ok
+TestRepCodeFrom56.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.239 Rate  4176389 words/S  Cost: 257.098 (ms/MB)ok
+TestRepCodeFrom56.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 0.465 Rate  2151773 words/S  Cost: 499.003 (ms/MB)ok
+TestRepCodeFrom56.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.250 Rate   399875 words/S  Cost: 2685.197 (ms/MB)ok
+TestRepCodeFrom56.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.286 Rate   349537 words/S  Cost: 3071.895 (ms/MB)ok
+TestRepCodeFrom66.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.243 Rate  4119747 words/S  Cost: 260.633 (ms/MB)ok
+TestRepCodeFrom66.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 0.415 Rate  2411343 words/S  Cost: 445.288 (ms/MB)ok
+TestRepCodeFrom66.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.248 Rate   402833 words/S  Cost: 2665.474 (ms/MB)ok
+TestRepCodeFrom66.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.271 Rate   368987 words/S  Cost: 2909.973 (ms/MB)ok
+TestRepCodeFrom68.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.591 Rate  1691124 words/S  Cost: 158.732 (ms/MB)ok
+TestRepCodeFrom68.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 2.212 Rate   452055 words/S  Cost: 593.812 (ms/MB)ok
+TestRepCodeFrom68.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.342 Rate   292048 words/S  Cost: 919.148 (ms/MB)ok
+TestRepCodeFrom68.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.508 Rate   197012 words/S  Cost: 1362.532 (ms/MB)ok
+TestRepCodeTo68Time.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.370 Rate  2701152 words/S  Cost: 99.378 (ms/MB)ok
+TestRepCodeTo68Time.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 2.199 Rate   454722 words/S  Cost: 590.329 (ms/MB)ok
+TestRepCodeTo68Time.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.062 Rate  1602913 words/S  Cost: 167.467 (ms/MB)ok
+TestRepCodeTo68Time.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.258 Rate   387924 words/S  Cost: 691.980 (ms/MB)ok
+TestRepCodeTo68.test_time_21(): write68() 1e5 words ... Time: 0.263 Rate   380489 words/S  Cost: 705.501 (ms/MB)ok
+TestRepCodeFrom70.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.378 Rate  2647675 words/S  Cost: 101.385 (ms/MB)ok
+TestRepCodeFrom70.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 1.593 Rate   627900 words/S  Cost: 427.513 (ms/MB)ok
+TestRepCodeFrom70.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.342 Rate   292528 words/S  Cost: 917.639 (ms/MB)ok
+TestRepCodeFrom70.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.413 Rate   241982 words/S  Cost: 1109.319 (ms/MB)ok
+TestRepCodeFrom73.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.243 Rate  4114500 words/S  Cost: 65.241 (ms/MB)ok
+TestRepCodeFrom73.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 0.315 Rate  3176834 words/S  Cost: 84.498 (ms/MB)ok
+TestRepCodeFrom73.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.294 Rate   340369 words/S  Cost: 788.660 (ms/MB)ok
+TestRepCodeFrom73.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.298 Rate   335713 words/S  Cost: 799.598 (ms/MB)ok
+TestRepCodeFrom77.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.247 Rate  4047963 words/S  Cost: 265.255 (ms/MB)ok
+TestRepCodeFrom77.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 0.401 Rate  2491999 words/S  Cost: 430.876 (ms/MB)ok
+TestRepCodeFrom77.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.256 Rate   390940 words/S  Cost: 2746.567 (ms/MB)ok
+TestRepCodeFrom77.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.281 Rate   355861 words/S  Cost: 3017.304 (ms/MB)ok
+TestRepCodeFrom79.test_time_00(): tests conversion of 1e6 of same word - Cython code. ... Time: 0.258 Rate  3868766 words/S  Cost: 138.771 (ms/MB)ok
+TestRepCodeFrom79.test_time_01(): tests conversion of 1e6 of same word - Python code. ... Time: 0.367 Rate  2728351 words/S  Cost: 196.775 (ms/MB)ok
+TestRepCodeFrom79.test_time_10(): tests conversion of 1e5 random words - Cython code. ... Time: 0.269 Rate   371785 words/S  Cost: 1444.035 (ms/MB)ok
+TestRepCodeFrom79.test_time_11(): tests conversion of 1e5 random words - Python code. ... Time: 0.290 Rate   344492 words/S  Cost: 1558.442 (ms/MB)ok
+
+Cython code
+-----------
+W:\openLIS\src\OpenLIS\core>python test\TestRepCode.py 2>&1 | grep Cost | grep "same word" | grep "Cython code"
+From49 Time: 0.358 Rate  2792041 words/S  Cost: 192.286 (ms/MB)ok
+From50 Time: 0.690 Rate  1449619 words/S  Cost: 185.177 (ms/MB)ok
+From56 Time: 0.237 Rate  4218704 words/S  Cost: 254.519 (ms/MB)ok
+From66 Time: 0.248 Rate  4034299 words/S  Cost: 266.153 (ms/MB)ok
+From68 Time: 0.592 Rate  1690403 words/S  Cost: 158.800 (ms/MB)ok
+To68   Time: 0.358 Rate  2791464 words/S  Cost: 96.163 (ms/MB)ok
+From70 Time: 0.395 Rate  2529344 words/S  Cost: 106.128 (ms/MB)ok
+From73 Time: 0.257 Rate  3888325 words/S  Cost: 69.036 (ms/MB)ok
+From77 Time: 0.247 Rate  4053106 words/S  Cost: 264.918 (ms/MB)ok
+From79 Time: 0.260 Rate  3850012 words/S  Cost: 139.447 (ms/MB)ok

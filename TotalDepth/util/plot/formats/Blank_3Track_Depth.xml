@@ -1,0 +1,95 @@
+<LgFormat UniqueId="Blank_3Track_Depth" xmlns="x-schema:LgSchema2.xml">
+   <Description>Blank 3Track</Description>
+	<LgFont UniqueId="minorFont">
+		<Name>Courier New</Name>
+		<Size>8</Size>
+	</LgFont>
+	<LgFont UniqueId="majorFont">
+		<Bold>1</Bold>
+		<Name>Courier New</Name>
+		<Size>11</Size>
+	</LgFont>
+	<LgVerticalScale UniqueId="VerticalScale">
+		<IndexScaler>100</IndexScaler>
+		<IndexUnit>Ft</IndexUnit>
+		<PaperScaler>5</PaperScaler>
+		<PaperUnit>LG_PAPER_INCH</PaperUnit>
+	</LgVerticalScale>
+	<LgIndexGrid UniqueId="indexGrid">
+		<LgIndexLine UniqueId="unitLine">
+			<Color>818181</Color>
+			<Spacing>2</Spacing>
+			<SpacingUnit>Ft</SpacingUnit>
+			<Thickness>1</Thickness>
+		</LgIndexLine>
+		<LgIndexLine UniqueId="minorLine">
+			<Spacing>10</Spacing>
+			<SpacingUnit>Ft</SpacingUnit>
+			<Thickness>1.5</Thickness>
+			<LgIndexNumber UniqueId="minorNumber">
+				<Font>minorFont</Font>	
+			</LgIndexNumber>
+		</LgIndexLine>
+		<LgIndexLine UniqueId="majorLine">
+			<Spacing>50</Spacing>
+			<SpacingUnit>Ft</SpacingUnit>
+			<Thickness>2</Thickness>
+			<LgIndexNumber UniqueId="majorNumber">
+				<Font>majorFont</Font>
+			</LgIndexNumber>
+		</LgIndexLine>
+	</LgIndexGrid>
+	<LgTrack UniqueId="track1">
+		<Description>Track 1</Description>
+		<RightPosition>2.4</RightPosition>
+		<LgLinearGrid UniqueId="minorGrid1">
+			<Color>818181</Color>
+			<LineCount>11</LineCount>
+		</LgLinearGrid>
+		<LgLinearGrid UniqueId="majorGrid1">
+			<Color>818181</Color>
+			<LineCount>3</LineCount>
+			<Thickness>2</Thickness>
+		</LgLinearGrid>
+	</LgTrack>
+	<LgTrack UniqueId="depthTrack">
+		<Description>Depth Track</Description>
+		<IndexLinesVisible>0</IndexLinesVisible>
+		<IndexNumbersVisible>1</IndexNumbersVisible>
+		<LeftPosition>2.4</LeftPosition>
+		<RightPosition>3.2</RightPosition>
+	</LgTrack>
+	<LgTrack UniqueId="track2">
+		<Description>Track 2</Description>
+		<LeftPosition>3.2</LeftPosition>
+		<RightPosition>5.6</RightPosition>
+		<LgLinearGrid UniqueId="majorGrid2">
+			<Color>818181</Color>
+			<LineCount>3</LineCount>
+			<Thickness>2</Thickness>
+		</LgLinearGrid>
+		<LgLinearGrid UniqueId="minorGrid2">
+			<Color>818181</Color>
+			<LineCount>11</LineCount>
+		</LgLinearGrid>
+	</LgTrack>
+   	<LgTrack UniqueId="Track3">
+      		<Description>Track 3</Description>
+      		<LeftPosition>5.6</LeftPosition>
+      		<RightPosition>8.0</RightPosition>
+		<LgLinearGrid UniqueId="majorGrid3">
+			<Color>818181</Color>
+			<LineCount>3</LineCount>
+			<Thickness>2</Thickness>
+		</LgLinearGrid>
+		<LgLinearGrid UniqueId="minorGrid3">
+			<Color>818181</Color>
+			<LineCount>11</LineCount>
+		</LgLinearGrid>      
+   	</LgTrack>
+	<LgTrack UniqueId="track23">
+		<Description>Track 23</Description>
+		<LeftPosition>3.2</LeftPosition>
+		<RightPosition>8</RightPosition>
+	</LgTrack>	   	
+</LgFormat>

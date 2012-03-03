@@ -1,0 +1,306 @@
+<LgFormat UniqueId="Resistivity_3Track_Correlation.xml" xmlns="x-schema:LgSchema2.xml">
+  <Description>Resistivity Linear Correlation Format</Description>
+  <LgFont UniqueId="minorFont">
+    <Name>Courier New</Name>
+    <Size>8</Size>
+  </LgFont>
+  <LgFont UniqueId="majorFont">
+    <Bold>1</Bold>
+    <Name>Courier New</Name>
+    <Size>11</Size>
+  </LgFont>
+  <LgVerticalScale UniqueId="VerticalScale">
+    <IndexScaler>100</IndexScaler>
+    <IndexUnit>Ft</IndexUnit>
+    <PaperScaler>5</PaperScaler>
+    <PaperUnit>LG_PAPER_INCH</PaperUnit>
+  </LgVerticalScale>
+  <LgIndexGrid UniqueId="indexGrid">
+    <LgIndexLine UniqueId="unitLine">
+      <Color>818181</Color>
+      <Spacing>2</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1</Thickness>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="minorLine">
+      <Spacing>10</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>1.5</Thickness>
+      <LgIndexNumber UniqueId="minorNumber">
+        <Font>minorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+    <LgIndexLine UniqueId="majorLine">
+      <Spacing>50</Spacing>
+      <SpacingUnit>Ft</SpacingUnit>
+      <Thickness>2</Thickness>
+      <LgIndexNumber UniqueId="majorNumber">
+        <Font>majorFont</Font>
+      </LgIndexNumber>
+    </LgIndexLine>
+  </LgIndexGrid>
+  <LgTrack UniqueId="track1">
+    <Description>Track 1</Description>
+    <RightPosition>2.4</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid1">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid11">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="ROP5">
+      <ChannelName>ROP5</ChannelName>
+      <Color>0000FF</Color>
+      <RightLimit>0</RightLimit>
+      <LeftLimit>500</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="BS_7">
+      <ChannelName>BS</ChannelName>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <LineStyle>LG_LONG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <WrapCount>0</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="CALI_8">
+      <ChannelName>CALI</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.6</Thickness>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="PCAL">
+      <ChannelName>PCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.6</Thickness>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="HiltCaliper">
+      <ChannelName>HCAL</ChannelName>
+      <Color>FF0000</Color>
+      <LeftLimit>6</LeftLimit>
+      <RightLimit>16</RightLimit>
+      <Thickness>1.6</Thickness>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <WrapCount>1</WrapCount>
+    </LgCurve>
+    <LgCurve UniqueId="SP_10">
+      <ChannelName>SP</ChannelName>
+      <Color>0000FF</Color>
+      <LeftLimit>-160</LeftLimit>
+      <RightLimit>40</RightLimit>
+      <Thickness>1.75</Thickness>
+      <Visible>1</Visible>
+    </LgCurve>
+    <LgCurve UniqueId="GR_9">
+      <ChannelName>GR</ChannelName>
+      <Color>008000</Color>
+      <RightLimit>150</RightLimit>
+      <Thickness>1.75</Thickness>
+      <Visible>1</Visible>
+      <WrapMode>LG_RIGHT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="depthTrack">
+    <Description>Depth Track</Description>
+    <IndexLinesVisible>0</IndexLinesVisible>
+    <IndexNumbersVisible>1</IndexNumbersVisible>
+    <LeftPosition>2.4</LeftPosition>
+    <RightPosition>3.2</RightPosition>
+  </LgTrack>
+  <LgTrack UniqueId="track2">
+    <Description>Track 2</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>5.6</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid2">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid2">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="ATR">
+      <ChannelName>ATR</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="PSR">
+      <ChannelName>PSR</ChannelName>
+      <Color>008000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="AHT90_7">
+      <ChannelName>AHT90</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="AHT60_6">
+      <ChannelName>AHT60</ChannelName>
+      <Color>0000FF</Color>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="AHT20_5">
+      <ChannelName>AHT20</ChannelName>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="RT">
+      <ChannelName>RT</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="RXO">
+      <ChannelName>RXO</ChannelName>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="LLD">
+      <ChannelName>LLD</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="LLS">
+      <ChannelName>LLS</ChannelName>
+      <Color>0000FF</Color>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="MSFL">
+      <ChannelName>MSFL</ChannelName>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="ILD">
+      <ChannelName>ILD</ChannelName>
+      <Color>FF0000</Color>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="ILM">
+      <ChannelName>ILM</ChannelName>
+      <Color>0000FF</Color>
+      <LineStyle>LG_DOT_LINE</LineStyle>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="SFL">
+      <ChannelName>SFL</ChannelName>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="RLA0">
+      <ChannelName>RLA0</ChannelName>
+      <Thickness>2</Thickness>
+      <Visible>1</Visible>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_X10</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <LgTrack UniqueId="track3">
+    <Description>Track 3</Description>
+    <LeftPosition>5.6</LeftPosition>
+    <RightPosition>8</RightPosition>
+    <LgLinearGrid UniqueId="minorGrid3">
+      <Color>818181</Color>
+      <LineCount>11</LineCount>
+    </LgLinearGrid>
+    <LgLinearGrid UniqueId="majorGrid3">
+      <Color>818181</Color>
+      <LineCount>3</LineCount>
+      <Thickness>2</Thickness>
+    </LgLinearGrid>
+    <LgCurve UniqueId="TENS_6">
+      <ChannelName>TENS</ChannelName>
+      <LeftLimit>10000</LeftLimit>
+      <LineStyle>LG_DASH_LINE</LineStyle>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.5</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="CILD">
+      <ChannelName>CILD</ChannelName>
+      <LeftLimit>500</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="CLLD">
+      <ChannelName>CLLD</ChannelName>
+      <LeftLimit>500</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+    <LgCurve UniqueId="CATR">
+      <ChannelName>CATR</ChannelName>
+      <LeftLimit>500</LeftLimit>
+      <RightLimit>0</RightLimit>
+      <Color>FF0000</Color>
+      <Thickness>1.75</Thickness>
+      <WrapCount>1</WrapCount>
+      <WrapMode>LG_LEFT_WRAPPED</WrapMode>
+    </LgCurve>
+  </LgTrack>
+  <!-- Tracks with no grids must be last in   -->
+  <!-- the format, or the grids after will    -->
+  <!-- over-lay the curves.                   -->
+  <LgTrack UniqueId="track23">
+    <Description>Track 23</Description>
+    <LeftPosition>3.2</LeftPosition>
+    <RightPosition>8</RightPosition>
+  </LgTrack>
+</LgFormat>
