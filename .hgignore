@@ -1,9 +1,0 @@
-# use glob syntax.
-syntax: glob
-*.pyc
-*.pyo
-.coverage
-*__pycache__
-*buid
-*.so
-HgIgnore*
