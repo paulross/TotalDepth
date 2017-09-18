@@ -24,8 +24,8 @@ Plotting from LIS
 
 Some examples of plots generated from LIS79 files:
 
-* A `collection <../copy_to_html/plots_LIS/index.html>`_ of 9 LIS files where TotalDepth used their internal plot specifications to generate 22 separate plots.
-* A `High Resolution Dipmeter <../copy_to_html/plots/HDT_Example.svg>`_ plot on a scale of 1:25 with an API header. Fast channel FC0 (red) overlaid on FC1.
+* A `collection <../_static/plots_LIS/index.html>`_ of 9 LIS files where TotalDepth used their internal plot specifications to generate 22 separate plots.
+* A `High Resolution Dipmeter <../_static/plots/HDT_Example.svg>`_ plot on a scale of 1:25 with an API header. Fast channel FC0 (red) overlaid on FC1.
 
 Plotting From LAS
 ===================
@@ -37,15 +37,15 @@ Single LAS Plot examples
 
 This shows plots of a single LAS file that has 200 feet of 15 curves. TotalDepth can plot this with, linear and log scales and with an API header:
 
-* Plotted with the `Resistivity 3Track Logrithmic <../copy_to_html/plots/Resistivity_3Track_Logrithmic.xml_47_LAS.svg>`_ format.
-* The same data plotted with the `Triple Combo <../copy_to_html/plots/Triple_Combo_46_LAS.svg>`_ format.
+* Plotted with the `Resistivity 3Track Logrithmic <../_static/plots/Resistivity_3Track_Logrithmic.xml_47_LAS.svg>`_ format.
+* The same data plotted with the `Triple Combo <../_static/plots/Triple_Combo_46_LAS.svg>`_ format.
 
-The original LAS file is `here <../copy_to_html/plots/1001178923.las.txt>`_.
+The original LAS file is `here <../_static/plots/1001178923.las.txt>`_.
 
 A Collection of LAS Plots
 ------------------------------
 
-Here is a `directory of six LAS files <../copy_to_html/plots_LAS/index.html>`_ that was used to make 31 individual plots complete with an index that summarises them. For each LAS file the plotting program automatically choose from 29 plot formats the formats that produce useful plots [#]_.
+Here is a `directory of six LAS files <../_static/plots_LAS/index.html>`_ that was used to make 31 individual plots complete with an index that summarises them. For each LAS file the plotting program automatically choose from 29 plot formats the formats that produce useful plots [#]_.
 
 Making LAS Plots
 ---------------------------------
@@ -69,7 +69,7 @@ This took around six seconds to compute. More detail on the ``PlotLogs.py`` is h
 LIS Log HTML Summaries
 **********************************
 
-The program ``LisToHtml.py`` takes LIS file(s) and generates an `HTML summary <../copy_to_html/LISExampleHTML/index.html>`_ for each one.
+The program ``LisToHtml.py`` takes LIS file(s) and generates an `HTML summary <../_static/LISExampleHTML/index.html>`_ for each one.
 
 How This HTML was Made
 ====================================
