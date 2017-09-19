@@ -44,7 +44,7 @@ from TotalDepth.LIS.core import Mnem
 ######################
 import unittest
 #import struct
-import TestBase
+from . import TestBase
 
 class TestLogPass_LowLevel(TestBase.TestBaseFile):
     """Tests LogPass"""

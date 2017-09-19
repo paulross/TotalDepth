@@ -36,14 +36,15 @@ import time
 import unittest
 import io
 
-from TotalDepth.LIS.core.test import TestBase
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LAS.core import LASRead
 from TotalDepth.util.plot import SVGWriter
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import LogHeader
-from TotalDepth.util.plot.test import TestPlotShared
+
+from . import TestPlotShared
+from . import TestBase
 
 def _hdrTrippleToLogicalRecord(theData):
     # Record header

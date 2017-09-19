@@ -32,7 +32,6 @@ import logging
 
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.LIS.core.test import TestBase
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import FILMCfg
 
@@ -40,6 +39,7 @@ from TotalDepth.util.plot import FILMCfg
 # Section: Unit tests.
 ######################
 import unittest
+from . import TestBase
 
 class TestFILMRead(TestBase.TestBaseFile):
     """Tests reading a FILM table."""

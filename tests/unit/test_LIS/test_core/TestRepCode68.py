@@ -47,7 +47,7 @@ from TotalDepth.LIS.core import PhysRec
 # Section: Unit tests.
 ######################
 import unittest
-import TestBase
+from . import TestBase
 
 #class TestRepCodeBase(TestBase.TestBase):
 #    def randBits(self, theBits):

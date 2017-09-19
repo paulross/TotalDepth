@@ -36,7 +36,8 @@ import unittest
 
 import TotalDepth.RP66.core.RepCode as RepCode
 import TotalDepth.RP66.core.AttrComp as AttrComp
-import TestBase
+
+from . import TestBase
 
 class TestAttrCompBasic(unittest.TestCase):
 

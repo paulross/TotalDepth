@@ -41,7 +41,7 @@ from TotalDepth.LIS.core import RepCode
 # Section: Unit tests.
 ######################
 import unittest
-import TestBase
+from . import TestBase
 
 class TestFrameSet_SuChArTe(TestBase.TestBaseFile):
     """Tests FrameSet SuChArTe class"""

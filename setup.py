@@ -3,12 +3,13 @@
 
 """The setup script."""
 
-from distutils.core import setup
+# from distutils.core import setup
 from distutils.extension import Extension
 
 from setuptools import setup, find_packages
 
 from Cython.Distutils import build_ext
+from Cython.Build import cythonize
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -39,6 +40,7 @@ setup(
     author_email='apaulross@gmail.com',
     url='https://github.com/paulross/totaldepth',
     packages=find_packages(include=['src']),
+    package_dir={'' : 'src'},
     entry_points={
         'console_scripts': [
             'totaldepth=totaldepth.cli:main'
@@ -63,9 +65,12 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     setup_requires=setup_requirements,
-	cmdclass = {'build_ext': build_ext},
-	ext_modules = [
-        Extension("TotalDepth.LIS.core.cRepCode", ["src/TotalDepth/LIS/core/cRepCode.pyx"]),
-        Extension("TotalDepth.LIS.core.cFrameSet", ["src/TotalDepth/LIS/core/cFrameSet.pyx"]),
-	]
+# 	cmdclass = {'build_ext': build_ext},
+# 	ext_modules = [
+#         Extension("TotalDepth.LIS.core.cRepCode",
+#                   ["src/TotalDepth/LIS/core/cRepCode.pyx"]),
+#         Extension("TotalDepth.LIS.core.cFrameSet",
+#                   ["src/TotalDepth/LIS/core/cFrameSet.pyx"]),
+# 	]
+    ext_modules = cythonize("src/TotalDepth/LIS/core/*.pyx"),
 )

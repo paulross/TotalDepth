@@ -46,7 +46,7 @@ from TotalDepth.LIS.core import Mnem
 ######################
 import unittest
 
-import TestBase
+from . import TestBase
 
 #class TestLrBase(unittest.TestCase):
 #    def _retFileSinglePr(self, theB):

@@ -50,3 +50,7 @@ tmp/
 # Dependency file
 .depend
 
+.eggs
+dist/
+totaldepth.egg-info/
+

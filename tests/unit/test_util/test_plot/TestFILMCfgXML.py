@@ -45,13 +45,8 @@ from TotalDepth.util.plot import FILMCfg
 from TotalDepth.util.plot import FILMCfgXML
 from TotalDepth.util.plot import Coord
 
-#print(dir(), __file__)
-#
-#l = os.listdir(os.path.join(os.path.dirname(__file__), os.pardir, 'formats'))
-##print(l)
-
 XML_CONTENT_MAP = {}
-__d = os.path.join(os.path.dirname(__file__), os.pardir, 'formats')
+__d = os.path.join(os.path.dirname(__file__), 'formats')
 for __fp in os.listdir(__d):
     with open(os.path.join(__d, __fp)) as f:
         XML_CONTENT_MAP[__fp] = f.read()

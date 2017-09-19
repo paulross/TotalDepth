@@ -35,7 +35,6 @@ import pprint
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.LIS.core.test import TestBase
 from TotalDepth.util.plot import Stroke
 from TotalDepth.util.plot import FILMCfg
 from TotalDepth.util.plot import PRESCfg
@@ -44,6 +43,8 @@ from TotalDepth.util.plot import PRESCfg
 # Section: Unit tests.
 ######################
 import unittest
+
+from . import TestBase
 
 class TestLineTrans(unittest.TestCase):
     """Tests line transformation."""

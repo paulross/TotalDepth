@@ -31,9 +31,9 @@ import time
 import logging
 import io
 
-import TestBase
-
 from TotalDepth.LIS.core import PhysRec
+
+from . import TestBase
 
 ######################
 # Section: Unit tests.

@@ -32,8 +32,9 @@ import logging
 
 from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.LIS.core import LogiRec
-import TestBase
 from TotalDepth.LIS.core import LisGen
+
+from . import TestBase
 ######################
 # Section: Unit tests.
 ######################

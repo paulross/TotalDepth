@@ -37,7 +37,8 @@ from TotalDepth.LIS.core import Type01Plan
 # Section: Unit tests.
 ######################
 import unittest
-import TestBase
+
+from . import TestBase
 
 # Mock classes
 class MockEntryBlockSet(object):

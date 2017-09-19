@@ -34,7 +34,7 @@ import io
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import RepCode
 
-import TestBase
+from . import TestBase
 
 ######################
 # Section: Unit tests.

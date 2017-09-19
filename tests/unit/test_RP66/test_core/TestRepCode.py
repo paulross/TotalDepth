@@ -36,7 +36,8 @@ import time
 import unittest
 
 import TotalDepth.RP66.core.RepCode as RepCode
-import TestBase
+
+from . import TestBase
 
 #class MockStreamRead(object):
 #    def __init__(self, b):

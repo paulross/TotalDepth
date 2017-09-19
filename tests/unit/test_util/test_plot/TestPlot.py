@@ -54,12 +54,6 @@ from TotalDepth.util.plot import Plot
 from TotalDepth.util.plot import PlotConstants
 from TotalDepth.util.plot import FILMCfgXML
 from TotalDepth.util.plot import PRESCfgXML
-from TotalDepth.util.plot.test import TestPlotShared
-from TotalDepth.util.plot.test import TestLogHeader
-from TotalDepth.util.plot.test import TestPlotLASData
-from TotalDepth.util.plot.test import TestLgFormatXMLData
-
-from TotalDepth.LIS.core.test import TestBase
 from TotalDepth.util import XmlWrite
 from TotalDepth.util import ExecTimer
 
@@ -67,6 +61,13 @@ from TotalDepth.util import ExecTimer
 # Section: Unit tests.
 ######################
 import unittest
+
+from . import TestPlotShared
+from . import TestLogHeader
+from . import TestPlotLASData
+from . import TestLgFormatXMLData
+
+from . import TestBase
 
 #=================================================
 # Section: Managing where our test SVG is written.

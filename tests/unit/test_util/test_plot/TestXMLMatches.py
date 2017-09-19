@@ -46,11 +46,12 @@ from TotalDepth.LAS.core import LASRead
 from TotalDepth.LIS.core import Mnem
 from TotalDepth.LIS.core import LogPass
 from TotalDepth.LIS.core import LogiRec
-from TotalDepth.LIS.core.test import TestBase
 from TotalDepth.util.plot import XMLMatches
 from TotalDepth.util.plot import FILMCfgXML
-from TotalDepth.util.plot.test import TestLgFormatXMLData
-from TotalDepth.util.plot.test import TestPlotLASData
+
+from . import TestBase
+from . import TestLgFormatXMLData
+from . import TestPlotLASData
 
 class TestXMLMatches(unittest.TestCase):
 
