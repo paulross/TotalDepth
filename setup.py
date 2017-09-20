@@ -42,18 +42,21 @@ setup(
     packages=find_packages('src'),
     package_dir={'' : 'src'},
     entry_points={
+        # All TotalDepth scripts have a 'td' prefix.
+        # Experimental scripts have a 'tdX' prefix.
         'console_scripts': [
             'tdplotlogs=TotalDepth.PlotLogs:main',
+            'tdlisdetif=TotalDepth.LIS.DeTif:main',
             'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
             'tdlisindex=TotalDepth.LIS.Index:main',
             'tdlistohtml=TotalDepth.LIS.LisToHtml:main',
             'tdlisplotlogpasses=TotalDepth.LIS.PlotLogPasses:main',
+            'tdXlisrandomframesetread=TotalDepth.LIS.RandomFrameSetRead:main',
             'tdlisscanlogidata=TotalDepth.LIS.ScanLogiData:main',
             'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRecord:main',
             'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
             'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
-            'tdlisdetif=TotalDepth.LIS.DeTif:main',
-            'tdreadlas=TotalDepth.LAS.ReadLASFIles:main',
+            'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFIles:main',
 #            'TotalDepth=TotalDepth.cli:main'
         ]
     },

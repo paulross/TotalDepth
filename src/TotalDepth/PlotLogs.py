@@ -732,7 +732,7 @@ def main():
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
         print(myFg.longStr(''.join(myOptNs.LgFormat).count('?')))
         return 1
-    if myOptNs.jobs ==  CmnCmdOpts.DEFAULT_OPT_MP_JOBS:
+    if myOptNs.jobs == CmnCmdOpts.DEFAULT_OPT_MP_JOBS:
         myPlp = PlotLogPasses(
             myOptNs.pathIn,
             myOptNs.pathOut,
