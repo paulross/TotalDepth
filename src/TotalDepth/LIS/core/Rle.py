@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
-# Paul Ross: cpipdev@googlemail.com
+# Paul Ross: apaulross@gmail.com
 """The RLE module provides Run Length Encoding suitable for recording the file
 positions of a set of LIS Logical Records that represent frame data.
 

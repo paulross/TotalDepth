@@ -356,4 +356,4 @@ TotalDepth is released under GPL 2.::
 Other Licences
 -----------------------
 
-For other licences contact: cpipdev@googlemail.com
+For other licences contact: apaulross@gmail.com

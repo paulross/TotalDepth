@@ -1,5 +1,5 @@
-.. moduleauthor:: Paul Ross <cpipdev@googlemail.com>
-.. sectionauthor:: Paul Ross <cpipdev@googlemail.com>
+.. moduleauthor:: Paul Ross <apaulross@gmail.com>
+.. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
 .. LIS Performance Improvement with a 'C' Extension for Physical Record Reading and Writing.
 

@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
-# Paul Ross: cpipdev@googlemail.com
+# Paul Ross: apaulross@gmail.com
 """Some common classes used in unit testing.
 
 Created on 10 Jan 2011

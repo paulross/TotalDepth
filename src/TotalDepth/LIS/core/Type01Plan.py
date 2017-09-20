@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
-# Paul Ross: cpipdev@googlemail.com
+# Paul Ross: apaulross@gmail.com
 """Given a DFSR the FrameSetPlan gives offsets to any part of the Logical Record
 for any frame and channel.
 """

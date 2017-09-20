@@ -1,5 +1,5 @@
-.. moduleauthor:: Paul Ross <cpipdev@googlemail.com>
-.. sectionauthor:: Paul Ross <cpipdev@googlemail.com>
+.. moduleauthor:: Paul Ross <apaulross@gmail.com>
+.. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
 .. TotalDepth documentation master file, created by
    sphinx-quickstart on Sun Feb  5 12:18:05 2012.
