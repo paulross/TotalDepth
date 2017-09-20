@@ -53,16 +53,34 @@ class ExceptionPresCfgXMLRead(ExceptionPRESCfgXML):
 #: If either value is None an SVG attribute is not needed i.e. default SVG behaviour
 XML_CODI_MAP = {
     # Default
-    None                        : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=None)),
-    'LG_SOLID_LINE'             : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=None)),
-    'LG_DOT_LINE'               : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(2,2))),
-    'LG_DASH_LINE'              : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(4,4))),
-    'LG_LONG_DASH_LINE'         : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(6,2))),
+    None                        : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=None)
+                                   ),
+    'LG_SOLID_LINE'             : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=None)
+                                   ),
+    'LG_DOT_LINE'               : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(2,2))
+                                   ),
+    'LG_DASH_LINE'              : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(4,4))
+                                   ),
+    'LG_LONG_DASH_LINE'         : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_LLINE_WIDTH_PX, coding=(6,2))
+                                   ),
     # These have not actually been seen in LgFormat files, they are invented but useful.
-    'LG_SOLID_HEAVY_LINE'       : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=None)),
-    'LG_SOLID_HEAVY_DOT'        : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(2,2))),
-    'LG_SOLID_HEAVY_DASH'       : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(4,4))),
-    'LG_SOLID_HEAVY_LONG_DASH'  : (Stroke.StrokeBlackSolid._replace(width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(6,2))),
+    'LG_SOLID_HEAVY_LINE'       : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=None)
+                                   ),
+    'LG_SOLID_HEAVY_DOT'        : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(2,2))
+                                   ),
+    'LG_SOLID_HEAVY_DASH'       : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(4,4))
+                                   ),
+    'LG_SOLID_HEAVY_LONG_DASH'  : (Stroke.StrokeBlackSolid._replace(
+                                        width=PRESCfg.DEFAULT_HLINE_WIDTH_PX, coding=(6,2))
+                                   ),
 }
 
 #: Maps LgFormat backup specifications to an internal representation
@@ -144,7 +162,9 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
         assert(e.tag == self.tagInNs('LgCurve')), 'Wrong element {:s}'.format(e.tag)
         assert(isinstance(theFILMCfg, FILMCfgXML.FilmCfgXMLRead))
         self.mnem = Mnem.Mnem(self.elemID(e), len_mnem=0)
-        logging.debug('CurveCfgXMLRead.__init__(): mnem="{:s}" trac="{:s}"'.format(self.mnem, theTrac))
+        logging.debug(
+            'CurveCfgXMLRead.__init__(): mnem="{!r:s}"'
+            ' trac="{!r:s}"'.format(self.mnem, theTrac))
         try:
             self.outp = self.chNameAsMnem(e)
         except XMLCfg.ExceptionXMLCfgNoContent as err:
@@ -176,16 +196,26 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
                 try:
                     myIntTrac = theFILMCfg.interpretTrac(aFilmID, self.dest, self.trac)
                 except ExceptionTotalDepthLIS as err:
-#                    logging.error('CurveCfgXMLRead.__init__(): can not get trac: {:s}'.format(str(err)))
+#                     logging.error(
+#                         'CurveCfgXMLRead.__init__(): can not get trac: {!r:s}'.format(str(err))
+#                     )
                     pass
                 else:
                     leftLimit = self.float(e, self.tagInNs('LeftLimit'))
                     rightLimit = self.float(e, self.tagInNs('RightLimit'))
                     # myIntTrac can be None if the destination is NEIT for example
                     if myIntTrac is None: 
-                        logging.warning('Got None from theFILMCfg.interpretTrac(FILM ID={:s}, PRES DEST={:s}, PRES TRAC={:s})'.format(aFilmID, self.dest, self.trac))
+                        logging.warning(
+                            'Got None from theFILMCfg.interpretTrac(FILM ID={!r:s},'
+                            ' PRES DEST={!r:s}, PRES TRAC={!r:s})'.format(aFilmID,
+                                                                          self.dest,
+                                                                          self.trac)
+                        )
                     elif leftLimit == rightLimit:
-                        logging.warning('"{:s}" Left/right track limits equal [{:g}] from theFILMCfg.interpretTrac(FILM ID={:s}, PRES DEST={:s}, PRES TRAC={:s})'.format(
+                        logging.warning(
+                            '"{!r:s}" Left/right track limits equal [{:g}]'
+                            ' from theFILMCfg.interpretTrac(FILM ID={!r:s},'
+                            ' PRES DEST={!r:s}, PRES TRAC={!r:s})'.format(
                             self.mnem, leftLimit, aFilmID, self.dest, self.trac)
                         )
                     else:
@@ -212,9 +242,7 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
         assert(len(self._filmTrackWidthMap) == len(self._filmTrackFnMap))
         if len(self._filmTrackWidthMap) == 0:
             raise ExceptionCurveCfgXMLRead(
-                'Can not map films to curve="{:s}"'.format(
-                    str(self.outp),
-                )
+                'Can not map films to curve="{!s:s}"'.format(self.outp)
             )
 
     def _retBackup(self, e):
@@ -224,8 +252,9 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
             try:
                 return BACKUP_FROM_MODE_MAP[myMode]
             except KeyError:
-                logging.warning('CurveCfgXMLRead._retBackup(): Unsupported WrapMode: {:s}.'.format(
-                    myMode)
+                logging.warning(
+                    'CurveCfgXMLRead._retBackup():'
+                    ' Unsupported WrapMode: {:s}.'.format(myMode)
                 )
         # Fallback on count if present
         myCount = self.str(e, self.tagInNs('WrapCount'), None)
@@ -233,8 +262,9 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
             try:
                 return BACKUP_FROM_COUNT_MAP[myCount]
             except KeyError:
-                logging.warning('CurveCfgXMLRead._retBackup(): Unsupported WrapCount: {:s}.'.format(
-                    myCount)
+                logging.warning(
+                    'CurveCfgXMLRead._retBackup():'
+                    ' Unsupported WrapCount: {:s}.'.format(myCount)
                 )
         # Final fallback on default
         assert(None in BACKUP_FROM_MODE_MAP)
@@ -247,8 +277,9 @@ class CurveCfgXMLRead(PRESCfg.CurveCfg, XMLCfg.LgXMLBase):
             r = XML_CODI_MAP[myTxt]
         except KeyError:
             assert(None in XML_CODI_MAP)
-            logging.warning('CurveCfgXMLRead.__init__(): Unsupported LineStyle: {:s}. Have substituted the default.'.format(
-                myTxt)
+            logging.warning(
+                'CurveCfgXMLRead.__init__(): Unsupported LineStyle:'
+                ' {:s}. Have substituted the default.'.format(myTxt)
             )
             r = XML_CODI_MAP[None]
         # Add in the Color element
@@ -275,17 +306,26 @@ class PresCfgXMLRead(PRESCfg.PresCfg, XMLCfg.LgXMLBase):
         try:
             root = theFILMCfg.rootNode(theUniqueId)
         except KeyError:
-            raise ExceptionPresCfgXMLRead('PresCfgXMLRead.__init__(): No root element for UniqueId="{:s}"'.format(theUniqueId))            
+            raise ExceptionPresCfgXMLRead(
+                'PresCfgXMLRead.__init__():'
+                ' No root element for UniqueId="{:s}"'.format(theUniqueId))            
         if root.tag != self.tagInNs('LgFormat'):
-            raise ExceptionPresCfgXMLRead('PresCfgXMLRead.__init__(): Wrong root element {:s}'.format(root.tag))
+            raise ExceptionPresCfgXMLRead(
+                'PresCfgXMLRead.__init__():'
+                ' Wrong root element {:s}'.format(root.tag))
         for aTrac in root.findall(self.tagInNs('LgTrack')):
             trackID = self.elemID(aTrac)
             for aCurv in aTrac.findall(self.tagInNs('LgCurve')):
                 try:
                     chMnem = self.chNameAsMnem(aCurv)
                 except XMLCfg.ExceptionXMLCfgNoContent as err:
-                    raise ExceptionPresCfgXMLRead('Can not read Mnemonic: {:s}'.format(str(err)))
-                logging.debug('PresCfgXMLRead.__init__(): XML ID="{:s}" trackID="{:s}" chName="{:s}"'.format(self.elemID(root), trackID, chMnem))
+                    raise ExceptionPresCfgXMLRead(
+                        'Can not read Mnemonic: {:s}'.format(str(err)))
+                logging.debug(
+                    'PresCfgXMLRead.__init__(): XML ID="{:s}"'
+                    ' trackID="{:s}" chName="{!r:s}"'.format(self.elemID(root),
+                                                             trackID,
+                                                             chMnem))
                 try:
                     self.add(
                         CurveCfgXMLRead(aCurv, trackID, theFILMCfg),

@@ -182,25 +182,25 @@ class TestBaseFile(TestBase):
         frLen = len(w) * numValues
         # Logical record length:
         # PRH + LRH + fr * frLen
-        lrLen = 4+2+fr*frLen
+        lrLen = 4 + 2 + fr * frLen
         #print('lrLen', lrLen)
-        for l in range(lr):
+        for _l in range(lr):
             # PR Header
             r.extend(self._twoBytes(lrLen))
             r.extend(b'\x00\x00')
             # LR header
             r.extend(bytes([0, 0]))
-            for f in range(fr):
+            for _f in range(fr):
                 r.extend(w * numValues)
         return bytes(r)
     
-    def randomBytes(self, len=None):
+    def randomBytes(self, length=None):
         """Returns a bytes() object of specified length that contains random data
         of length theLen. If theLen is absent a random length of 0<=len<=32kB is
         chosen."""
-        if len is None:
-            len = random.randint(0, 32*1024)
-        return bytes([random.choice(range(256)) for l in range(len)])
+        if length is None:
+            length = random.randint(0, 32*1024)
+        return bytes([random.choice(range(256)) for _l in range(length)])
     
 class TestBaseLogPass(TestBaseFile):
     """Can create DFSRs of arbitrary size and LR type 0 of arbitrary size."""
@@ -280,13 +280,13 @@ class TestBaseLogPass(TestBaseFile):
         # PRH + LRH + fr * frLen
         lrLen = 4 + 2 + len(indirectBytes) + fr*frLen
         #print('lrLen', lrLen)
-        for l in range(lr):
+        for _l in range(lr):
             # PR Header
             r.extend(self._twoBytes(lrLen))
             r.extend(b'\x00\x00')
             # LR header
             r.extend(bytes([0, 0]))
-            for f in range(fr):
+            for _f in range(fr):
                 # Value 153.0 in repcode 68 is b'\x44\x4c\x80\x00'
                 r.extend(b'\x44\x4c\x80\x00' * numValues)
         return bytes(r)

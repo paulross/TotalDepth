@@ -311,7 +311,12 @@ class TestLASReadLASSection(unittest.TestCase):
         myLs = LASRead.LASSection('P')
         self.assertEqual('P', myLs.type)
         self.assertEqual([], myLs._members)
-        self.assertRaises(LASRead.ExceptionLASReadSection, myLs.addMemberLine, 1, '  .       13/12/1986                       : LOG DATE  {DD/MM/YYYY}\n')
+        self.assertRaises(LASRead.ExceptionLASReadSection,
+                          # Function
+                          myLs.addMemberLine,
+                          # Arguments
+                          1,
+                          '  .       13/12/1986                       : LOG DATE  {DD/MM/YYYY}\n')
 
     def test_05(self):
         """TestLASReadLASSection.test_05(): Adding member lines to 'V' section in wrong order."""
@@ -445,8 +450,8 @@ class TestLASReadLASSectionArray(unittest.TestCase):
 #        print()
 #        print(list(myLsA.keys()))
         self.assertEqual(
-            [1700.5, 1701.0, 1702.5, 1703.0, 1703.5, 1702.0, 1700.0, 1701.5],
-            list(myLsA.keys()),
+            [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5],
+            sorted(list(myLsA.keys())),
         )
         
     def test_03(self):
@@ -490,8 +495,8 @@ class TestLASReadLASSectionArray(unittest.TestCase):
 #        print()
 #        print(list(myLsA.keys()))
         self.assertEqual(
-            [1700.5, 1701.0, 1702.5, 1703.0, 1703.5, 1702.0, 1700.0, 1701.5],
-            list(myLsA.keys()),
+            [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5],
+            sorted(list(myLsA.keys())),
         )
         
     def test_04(self):
@@ -543,8 +548,8 @@ class TestLASReadLASSectionArray(unittest.TestCase):
 #        print()
 #        print(list(myLsA.keys()))
         self.assertEqual(
-            [1700.5, 1701.0, 1702.5, 1703.0, 1703.5, 1702.0, 1700.0, 1701.5],
-            list(myLsA.keys()),
+            [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5],
+            sorted(list(myLsA.keys())),
         )
         
     def test_05(self):
@@ -580,8 +585,8 @@ class TestLASReadLASSectionArray(unittest.TestCase):
 #        print()
 #        print(list(myLsA.keys()))
         self.assertEqual(
-            [1700.5, 1701.0, 1702.5, 1703.0, 1703.5, 1702.0, 1700.0, 1701.5],
-            list(myLsA.keys()),
+            [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5],
+            sorted(list(myLsA.keys())),
         )
 
 ## Removed as we now support wrap when there is a single channel

@@ -164,7 +164,7 @@ class CurvePlotData(object):
         self.prevWrap = None
     
     def __str__(self):
-        return '{:s} id={:s} fn={:s}'.format(repr(self), self._id, self._fn)
+        return '{!r:s} id={:s} fn={:s}'.format(self, self._id, self._fn)
     
     @property
     def fn(self):
@@ -174,9 +174,10 @@ class CurvePlotData(object):
     def id(self):
         return self._id
     
-####################################################################################################
-# Section: Code that handles the curve scales (or legends) that appear at top and bottom of the log.
-####################################################################################################
+#############################################################################
+# Section: Code that handles the curve scales (or legends) that appear at top
+# and bottom of the log.
+#############################################################################
 class CurvePlotScale(collections.namedtuple('CurvePlotScale', 'name halfTrackStart halfTracks')):
     """Holds a minimal amount of curve plot scale and so on for the layout of
     the scale pane at each end of the log.
@@ -251,20 +252,26 @@ class CurvePlotScaleSlotMap(object):
             # Fit a curve in the slice
             i = 0
             # First curve in this slice should always fit
-            assert(self.canFit(myCpsS[0])), 'CurvePlotScaleSlotMap {:s} can not fit first curve remaining in list.'.format(self._htIdxMap)
+            assert(self.canFit(myCpsS[0])), \
+                'CurvePlotScaleSlotMap {!r:s} can not fit first curve' \
+                ' remaining in list.'.format(self._htIdxMap)
             while i < len(myCpsS):
                 if self.canFit(myCpsS[i]):
                     myCps = myCpsS.pop(i)
                     # Pack the slice with these curve slots
                     self.fit(myCps)
-                    yield ScaleSliceCurve(scaleSlice, myCps.name, myCps.halfTrackStart, myCps.halfTracks)
+                    yield ScaleSliceCurve(scaleSlice,
+                                          myCps.name,
+                                          myCps.halfTrackStart,
+                                          myCps.halfTracks)
                 else:
                     i += 1
             scaleSlice += 1
             
-####################################################################################################
-# End: Code that handles the curve scales (or legends) that appear at top and bottom of the log.
-####################################################################################################
+#############################################################################
+# End: Code that handles the curve scales (or legends) that appear at top and
+# bottom of the log.
+#############################################################################
 
 class PlotRoll(object):
     """Describes the plot canvas as if it were a roll of paper.
@@ -327,15 +334,26 @@ class PlotRoll(object):
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch):
         """Initialise with:
-        theXStart - The X start position as an EngVal.
-        theXStop - The X stop position as an EngVal.
-        theScale - The plot scale as a number.
-        theLegendDepth - A Coord.Dim() that is the depth of the scales used in the header and footer.
-        theHeadDepth - A Coord.Dim() that is the depth of any log header.
-        theTailDepth - A Coord.Dim() that is the depth of any log trailer.
-        plotUp - True if X start is at the bottom of the main pane.
-        theWidth - The absolute width of the plot as a Coord.Dim().
-        theMargin - A Coord.Margin() that describes the untouchable edges of the plot.
+        
+        *theXStart*
+            The X start position as an ``EngVal``.
+        *theXStop*
+            The X stop position as an ``EngVal``.
+        *theScale*
+            The plot scale as a number.
+        *theLegendDepth*
+            A ``Coord.Dim()`` that is the depth of the scales used in
+            the header and footer.
+        *theHeadDepth*
+            A ``Coord.Dim()`` that is the depth of any log header.
+        *theTailDepth*
+            A ``Coord.Dim()`` that is the depth of any log trailer.
+        *plotUp, bool*
+            True if X start is at the bottom of the main pane.
+        *theWidth*
+            The absolute width of the plot as a ``Coord.Dim()``.
+        *theMargin*
+            A ``Coord.Margin()`` that describes the untouchable edges of the plot.
         """
         self._xStart = theXStart
         self._xStop = theXStop
@@ -397,7 +415,8 @@ class PlotRoll(object):
     
     @property
     def trackTopLeft(self):
-        """"A Coord.Pt() that is the top left of the pane that tracks are plotted within."""
+        """"A Coord.Pt() that is the top left of the pane that tracks are
+        plotted within."""
         return Coord.Pt(
             self._rollMargin.left,
             self._rollMargin.top + self._legendDepth + self._headDepth,
@@ -466,19 +485,23 @@ class PlotRoll(object):
         a number or an EngVal. If this is a number it is expected to be in the
         units of the xStart/xStop in the constructor."""
         xProp = (theX - self._xStart) / self._xSpan
-#        print('theX', theX, 'self._xStart', self._xStart, 'self._xSpan', self._xSpan, 'xProp', xProp)
+#         print('theX', theX, 'self._xStart', self._xStart, 'self._xSpan',
+#               self._xSpan, 'xProp', xProp)
         # Note the contract we have with EngVal, the calculations might have
         # resulted in xProp being an EngVal.
         if self._isUpPlot:
-            return self._rollMargin.top + self._headDepth + self._legendDepth + self._plotDepth.scale(1.0 - xProp.value)
-        return self._rollMargin.top + self._headDepth + self._legendDepth + self._plotDepth.scale(xProp.value)
+            return self._rollMargin.top + self._headDepth \
+                + self._legendDepth + self._plotDepth.scale(1.0 - xProp.value)
+        return self._rollMargin.top + self._headDepth + self._legendDepth \
+            + self._plotDepth.scale(xProp.value)
         
     def polyLinePt(self, theX, theTracPos):
         """Returns a Coord.Pt from theX axis value (or EngVal) and theTracPos
         that is a value in DEFAULT_PLOT_UNITS, for example given by a
         tracValueFunction.
         The Coord.Pt() will be scaled by VIEW_BOX_UNITS_PER_PLOT_UNITS."""
-        tracDim = self._rollMargin.left + Coord.Dim(theTracPos, PlotConstants.DEFAULT_PLOT_UNITS)
+        tracDim = self._rollMargin.left
+        tracDim += Coord.Dim(theTracPos, PlotConstants.DEFAULT_PLOT_UNITS)
         return Coord.Pt(
             tracDim.scale(PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS),
             self.xDepth(theX).scale(PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS)
@@ -505,11 +528,14 @@ class Plot(object):
     #: Title font size
     TITLE_FONT_SIZE = 10
     # Constants to do with the legend (scales).
-    #: How much depth to give each legend (curve scale) at the top and bottom of the log
+    #: How much depth to give each legend (curve scale) at the top and
+    #: bottom of the log
     LEGEND_DEPTH_PER_CURVE = Coord.Dim(0.5, 'in')
-    #: How much spare depth to give over the legend (curve scale) sections at the top and bottom of the log
+    #: How much spare depth to give over the legend (curve scale) sections at
+    #: the top and bottom of the log
     LEGEND_DEPTH_SPARE = Coord.Dim(0.5, 'in')
-    #: Where the curve line in the legend section appears as a proportion of LEGEND_DEPTH_PER_CURVE
+    #: Where the curve line in the legend section appears as a proportion of
+    #: LEGEND_DEPTH_PER_CURVE
     LEGEND_HORIZONTAL_LINE_DEPTH_PROPORTION = 5/8
     #: Arrow heads on legend scales
     LEGEND_ARROW_DISPLAY = True
@@ -538,9 +564,12 @@ class Plot(object):
         # Scale override if non-zero
         self._scale = theScale
         if not isinstance(theScale, (int, float)):
-            raise ExceptionTotalDepthLISPlot('Plot.__init__(): Scale override of type {:s} is not a number.'.format(type(self._scale)))
+            raise ExceptionTotalDepthLISPlot(
+                'Plot.__init__(): Scale override of type {!r:s} is not'
+                ' a number.'.format(type(self._scale)))
         if self._scale < 0:
-            raise ExceptionTotalDepthLISPlot('Plot.__init__(): Scale override {:g} < 0'.format(type(self._scale)))
+            raise ExceptionTotalDepthLISPlot(
+                'Plot.__init__(): Scale override {:g} is < 0'.format(self._scale))
                 
     def xScale(self, theFilmID):
         """Returns the X axis scale as a number given the FILM ID."""
@@ -550,7 +579,8 @@ class Plot(object):
         return self._filmCfg[theFilmID].xScale
     
     def _openOutFile(self, theFp):
-        """Returns a writable file-like object. This creates the enclosing directory if necessary."""
+        """Returns a writable file-like object. This creates the enclosing
+        directory if necessary."""
         d = os.path.dirname(theFp)
         if not os.path.exists(d):
             os.makedirs(d, exist_ok=True)
@@ -563,7 +593,8 @@ class Plot(object):
     def _insertCommentInSVG(self, xS, cmt, level):
         assert(level in range(len(COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE)))
         if COMMENTS_IN_SVG_SECTION:
-            myCmt = '\n%s\n' % cmt.center(COMMENTS_IN_SVG_SECTION_WIDTH, COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE[level])
+            myCmt = '\n%s\n' % cmt.center(COMMENTS_IN_SVG_SECTION_WIDTH,
+                                          COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE[level])
             xS.comment(myCmt) 
     
     #=============================
@@ -578,18 +609,29 @@ class Plot(object):
             return False
         if not self._presCfg.hasCurvesForDest(theFilmId):
             # No curves for this ID
-            logging.info('Plot.hasDataToPlotLIS(): No curves for destination "{:s}"'.format(str(theFilmId)))
+            logging.info(
+                'Plot.hasDataToPlotLIS():'
+                ' No curves for destination "{:s}"'.format(str(theFilmId))
+            )
             return False
         # Now get the list of OUTP and check that at least one is in LogPass
         myOutS = self._retOutputChIDs(theFilmId)
-        logging.info('Plot.hasDataToPlotLIS():   Available outputs: {:s}'.format(str(myOutS)))
-        logging.info('Plot.hasDataToPlotLIS(): LogPass._chMap keys: {:s}'.format(str(theLogPass._chMap.keys())))
+        logging.info(
+            'Plot.hasDataToPlotLIS():'
+            '   Available outputs: {:s}'.format(str(myOutS))
+        )
+        logging.info(
+            'Plot.hasDataToPlotLIS():'
+            ' LogPass._chMap keys: {:s}'.format(str(theLogPass._chMap.keys()))
+        )
         for anO in myOutS:
 #            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
             # If an output is in the LogPass we are good to go
             if theLogPass.hasOutpMnem(anO):
                 return True
-        logging.info('Plot.hasDataToPlotLIS(): No outputs for destination "{:s}"'.format(str(theFilmId)))
+        logging.info(
+            'Plot.hasDataToPlotLIS():'
+            ' No outputs for destination "{:s}"'.format(str(theFilmId)))
         return False
         
     def plotLogPassLIS(self,
@@ -606,39 +648,61 @@ class Plot(object):
                 ):
         """Plot a part of a LogPass and returns a list of Channel IDs plotted.
                 
-        theLisFile - The LIS File object.
+        *theLisFile*
+            The LIS File object.
         
-        theLogPass - A LogPass object, the FrameSet will be populated here.
+        *theLogPass*
+            A ``LogPass`` object, the FrameSet will be populated here.
         
-        theXStart - The start X axis position as an EngVal.
+        *theXStart*
+            The start X axis position as an ``EngVal``.
         
-        theXStop - The stop X axis position as an EngVal.
+        *theXStop*
+            The stop X axis position as an ``EngVal``.
         
-        theFilmId - The ID of the output device from the film table
+        *theFilmId*
+            The ID of the output device from the film table
         
-        theFpOut - A file path for the output SVG.
+        *theFpOut*
+            A file path for the output SVG.
         
-        frameStep - Integer number of frame steps, 1 is all frames.
+        *frameStep*
+            Integer number of frame steps, 1 is all frames.
         
-        title - A string for the title that will appear in LEGEND_DEPTH_SPARE
+        *title*
+            A string for the title that will appear in ``LEGEND_DEPTH_SPARE``
         
-        lrCONS - A CONS Logical Record that will be used to plot an API header in SVG.
+        *lrCONS*
+            A ``CONS`` Logical Record that will be used to plot an API header in SVG.
         
-        timerS - Optional ExecTimer.ExecTimerList for performance measurement.
+        *timerS*
+            Optional ``ExecTimer.ExecTimerList`` for performance measurement.
         
-        TODO: If title is empty do not use the space self.LEGEND_DEPTH_SPARE
+        TODO: If title is empty do not use the space ``self.LEGEND_DEPTH_SPARE``
         """
         retVal = (None, None)
         if not self.hasDataToPlotLIS(theLogPass, theFilmId):
-            logging.info('Plot.plotLogPassLIS(): Has no data to plot for destination {:s}'.format(theFilmId))
+            logging.info(
+                'Plot.plotLogPassLIS():'
+                ' Has no data to plot for destination {:s}'.format(theFilmId)
+            )
             return retVal
         self._incTimers(timerS, None, 'Loading FrameSet')
         # Get the PhysFilmCfg that corresponds to theFilmId, do this first as
         # may raise KeyError.
         myPhsFiCf = self._filmCfg[theFilmId]
-        myLisSize = self._loadFrameSet(theLisFile, theLogPass, theXStart, theXStop, theFilmId, frameStep)
-        logging.info('Plot.plotLogPassLIS(): LogPass now:\n{:s}'.format(theLogPass.longStr()))
-        logging.info('Plot.plotLogPassLIS(): FrameSet now:\n{:s}'.format(theLogPass.frameSetLongStr()))
+        myLisSize = self._loadFrameSet(theLisFile, theLogPass, theXStart,
+                                       theXStop, theFilmId, frameStep)
+        logging.info(
+            'Plot.plotLogPassLIS(): LogPass now:\n{:s}'.format(
+                theLogPass.longStr()
+            )
+        )
+        logging.info(
+            'Plot.plotLogPassLIS(): FrameSet now:\n{:s}'.format(
+                theLogPass.frameSetLongStr()
+            )
+        )
         self._incTimers(timerS, myLisSize, 'Initialising LIS plot')
         # We need to assess the header depth which means sorting out scales
         # (legends) at each end of the plot. Get a list of ScaleSliceCurve() objects
@@ -664,7 +728,11 @@ class Plot(object):
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch,
         )
-        logging.info('Plot.plotLogPassLIS(): Plotting SVG width={:s} depth={:s} ...'.format(myPlRo.widthDim, myPlRo.depthDim))
+        logging.info(
+            'Plot.plotLogPassLIS():'
+            ' Plotting SVG width={:s} depth={:s} ...'.format(myPlRo.widthDim,
+                                                             myPlRo.depthDim)
+        )
         # Set up viewBox and viewPort
         myRootAttrs = {
             'viewBox'  : "0 0 {:.3f} {:.3f}".format(
@@ -729,7 +797,10 @@ class Plot(object):
             return False
         if not self._presCfg.hasCurvesForDest(theFilmId):
             # No curves for this ID
-            logging.info('Plot.hasDataToPlotLAS(): No curves for destination "{:s}"'.format(str(theFilmId)))
+            logging.info(
+                'Plot.hasDataToPlotLAS():'
+                ' No curves for destination "{:s}"'.format(str(theFilmId))
+            )
             return False
         # Now get the list of OUTP and check that at least one is in LogPass
         myOutS = self._retOutputChIDs(theFilmId)
@@ -740,11 +811,16 @@ class Plot(object):
             str(sorted(list(theLasFile.curveMnems())))
         ))
         for anO in myOutS:
-            logging.debug('Plot.hasDataToPlotLAS(): Testing output "{:s}"'.format(repr(anO)))
+            logging.debug(
+                'Plot.hasDataToPlotLAS(): Testing output "{:s}"'.format(repr(anO))
+            )
             # If an output is in the LogPass we are good to go
             if theLasFile.hasOutpMnem(anO):
                 return True
-        logging.info('Plot.hasDataToPlotLAS(): No outputs for destination "{:s}"'.format(str(theFilmId)))
+        logging.info(
+            'Plot.hasDataToPlotLAS():'
+            ' No outputs for destination "{:s}"'.format(str(theFilmId))
+        )
         return False
         
     def plotLogPassLAS(self,
@@ -1181,8 +1257,12 @@ class Plot(object):
                     for cur in self._presCfg.outpCurveIDs(theFilmID, anO):
                         curvIdSet.add(cur)
                 else:
-                    logging.debug('Plot._retCurvePlotScales() OUTP not available in LogPass: {:s}'.format(anO))
-        logging.info('Plot._retCurvePlotScales() OUTP\'s available in LogPass:'.format(str(curvIdSet)))
+                    logging.debug(
+                        'Plot._retCurvePlotScales() OUTP not available in'
+                        ' LogPass: {!r:s}'.format(anO))
+        logging.info(
+            'Plot._retCurvePlotScales() OUTP\'s available in'
+            ' LogPass: {!r:s}'.format(curvIdSet))
         # cpsSet is a set of curve IDs
         # Now create a list of CurvePlotScale objects and sort it
         cpsList = []        

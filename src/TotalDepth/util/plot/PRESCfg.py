@@ -697,10 +697,11 @@ class CurveCfgLISRead(CurveCfg):
             else:
                 # myIntTrac can be None if the destination is NEIT for example
                 if myIntTrac is None: 
-                    msg = 'Get None from theFILMCfg.interpretTrac(FILM ID={:s}, PRES DEST={:s}, PRES TRAC={:s})'.format(
-                        aFilmId, self.dest, self.trac
+                    logging.warning('Get None from theFILMCfg.interpretTrac(FILM ID={!r:s},'
+                        ' PRES DEST={!r:s}, PRES TRAC={!r:s})'.format(
+                            aFilmId, self.dest, self.trac
+                        )
                     )
-                    logging.warning(msg)
                 else:
                     # Make a new instance of TrackWidthData from the four part iterable
                     myTw = TrackWidthData._make(myIntTrac)
@@ -709,7 +710,12 @@ class CurveCfgLISRead(CurveCfg):
                     # Raise if the LEDG and the REDG make no sense
                     # Example: 200099.S06
                     if theRow[b'LEDG'].value == theRow[b'REDG'].value:
-                        raise ExceptionCurveCfgCtor('CurveCfgLISRead.__init__(): Curve {:s} has no logical span {:s}->{:s}'.format(self.mnem, str(theRow[b'LEDG'].value), str(theRow[b'REDG'].value)))
+                        raise ExceptionCurveCfgCtor(
+                            'CurveCfgLISRead.__init__(): Curve {:s} has no'
+                            ' logical span {:s}->{:s}'.format(self.mnem,
+                                                              str(theRow[b'LEDG'].value),
+                                                              str(theRow[b'REDG'].value))
+                        )
                     # Otherwise proceed...
                     if self.mode == b'GRAD':
                         self._filmTrackFnMap[aFilmId] = LineTransLog10(

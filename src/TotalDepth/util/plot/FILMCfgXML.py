@@ -28,17 +28,15 @@ __date__    = '2011-12-14'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2011 Paul Ross.'
 
-import os
-import logging
 import functools
-#import pprint
+import logging
+import os
 
 try:
     import xml.etree.cElementTree as etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
-from TotalDepth.LIS.core import Mnem
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import FILMCfg
 from TotalDepth.util.plot import XMLCfg
@@ -214,7 +212,7 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
 
 class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
     """Contains the configuration equivalent to a complete FILM table from a set of XML files."""
-    def __init__(self, dir=None):
+    def __init__(self, directory=None):
         """Constructor with a directory, all files in the directory (non-recursive)
         are read as LGFormat XML files. If dir is None then the "formats/" directory
         relative to this module is searched. If dir is an empty string then no search
@@ -226,7 +224,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
         # Map of curves to film ids i.e.:
         # {LgCurve/LgChannel>"ROP5" : [<LgFormat UniqueId="Porosity_GR_3Track", ...], ...}
         self._chOutpMnemFilmMap = {}
-        self.readDir(dir)
+        self.readDir(directory)
         
     def readDir(self, d=None):
         """Read a directory of XML files (not recursive)."""

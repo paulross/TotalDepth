@@ -928,7 +928,8 @@ class TableRow(object):
             self._cellMnemMap = {}
             for i, c in enumerate(self._blocks):
                 if c.mnem in self._cellMnemMap:
-                    logging.error('Ignoring duplicate mnemonic {:s} in row {:s}'.format(c.mnem, self._blocks[0].mnem))
+                    logging.error('Ignoring duplicate mnemonic {!s:s}'
+                                  ' in row {!s:s}'.format(c.mnem, self._blocks[0].mnem))
                 else:
                     self._cellMnemMap[c.mnem] = i
         # Could raise KeyError here
@@ -1522,7 +1523,7 @@ class DatumSpecBlock(object):
                     )
                 self._bursts = self.size // (myRepCodeSize * self._samples)
             else:
-                logging.warning('DatumSpecBlock MNEM={:s} has zero length.'.format(self.mnem))
+                logging.warning('DatumSpecBlock MNEM={!s:s} has zero length.'.format(self.mnem))
                 self.subChannels = 0
                 self._bursts = 0
 

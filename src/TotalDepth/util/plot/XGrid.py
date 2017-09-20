@@ -204,7 +204,7 @@ class XGrid(object):
             return self._intStroke[units][self._scale]
         except KeyError:
             pass
-        logging.warning('XGrid._getInterval() returning default for units={:s}.'.format(units))
+        logging.warning('XGrid._getInterval() returning default for units={!s:s}.'.format(units))
         return self.DEFAULT_INTERVAL_MAP
         
     def _setIntervalText(self, units, scale, interval):
@@ -221,7 +221,7 @@ class XGrid(object):
             return self._intText[units][self._scale]
         except KeyError:
             pass
-        logging.warning('XGrid.genIntervalText() returning default for units={:s}.'.format(units))
+        logging.warning('XGrid.genIntervalText() returning default for units={!s:s}.'.format(units))
         return self.DEFAULT_INTERVAL_TEXT
 
     def _firstVal(self, xVal, xInterval, xInc):
@@ -233,7 +233,7 @@ class XGrid(object):
     def genXAxisRange(self, evFrom, evTo):
         """Generates a bounded series of X axis line plot positions as
         (Dim(), Stroke()). evFrom and evTo and EngVal objects."""
-        logging.info('XGrid.genXAxisRange(): evFrom={:s}, evTo={:s}'.format(evFrom, evTo))
+        logging.info('XGrid.genXAxisRange(): evFrom={!s:s}, evTo={!s:s}'.format(evFrom, evTo))
         evFrom = self._makeEngValOptical(evFrom)
         evTo = self._makeEngValOptical(evTo)
         if evFrom.uom != evTo.uom:
@@ -322,7 +322,8 @@ class XGrid(object):
     def genXAxisTextRange(self, evFrom, evTo):
         """Generates a bounded series of X axis line plot positions as
         (Dim(), value). evFrom and evTo and EngVal objects."""
-        logging.info('XGrid.genXAxisTextRange(): evFrom={:s}, evTo={:s}'.format(evFrom, evTo))
+        logging.info('XGrid.genXAxisTextRange(): evFrom={!r:s},'
+                     ' evTo={!r:s}'.format(evFrom, evTo))
         if evFrom.uom != evTo.uom:
             evTo.convert(evFrom.uom)
         evFrom = self._makeEngValOptical(evFrom)

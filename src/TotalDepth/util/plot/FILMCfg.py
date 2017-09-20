@@ -279,7 +279,7 @@ class PhysFilmCfg(object):
         theTracks is a list of Track.Track objects.
         theX is an integer scale.
         """
-        logging.debug('PhysFilmCfg: name="{:s}" {:d} tracks dest={:s} scale={:d}'.format(
+        logging.debug('PhysFilmCfg: name="{!s:s}" {:d} tracks dest={!s:s} scale={:d}'.format(
                 theName, len(theTracks), theDest, theX,
         ))
         self._name = theName

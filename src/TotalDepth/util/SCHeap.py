@@ -130,7 +130,7 @@ class SCHeap(object):
         C. Append to an existing block
         D. Completely fill a gap (i.e. B+C)"""
         # Error check of input
-        logging.debug('SCHeap.add({:d}, {:d}): list was={:s}'.format(start, stop, self._l))
+        logging.debug('SCHeap.add({:d}, {:d}): list was={!s:s}'.format(start, stop, self._l))
         self._raiseOnError(start, stop)
         # Take an early bath if we can
         if len(self._l) == 0:
@@ -192,7 +192,7 @@ class SCHeap(object):
     def need(self, start, stop):
         """Returns a list of Blocks needed to complete the
         supplied start, stop."""
-        logging.debug('SCHeap.need({:d}, {:d}): list is={:s}'.format(start, stop, self._l)) 
+        logging.debug('SCHeap.need({:d}, {:d}): list is={!s:s}'.format(start, stop, self._l)) 
         self._raiseOnError(start, stop)
         retVal = []
         if len(self._l) > 0:

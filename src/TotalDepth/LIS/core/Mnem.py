@@ -93,7 +93,7 @@ class Mnem(object):
     
     def __repr__(self):
         """repr() representation."""
-        return 'Mnem({:s})'.format(self._m)
+        return 'Mnem({!s:s})'.format(self._m)
     
     def __hash__(self):
         """Hashing, this makes bytes() and Mnem() objects interchangeable."""

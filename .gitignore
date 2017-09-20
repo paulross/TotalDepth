@@ -30,7 +30,7 @@
 
 *.dSYM
 
-docs/build/*
+docs/_build/*
 build/*
 
 # Python

@@ -164,7 +164,8 @@ class LASSection():
         return theMnem in self._indexMap
     
     def addMemberLine(self, i, l):
-        """Given a line this decomposes it to its _members. i is the position of the line l in the file."""
+        """Given a line this decomposes it to its _members. i is the position
+        of the line l in the file."""
         if self.type in SECT_TYPES_WITH_DATA_LINES:
             # A hybrid approach where we split the line then apply individual regex's
             dIdx = l.find('.')
@@ -174,8 +175,10 @@ class LASSection():
                 m1 = RE_LINE_FIELD_1.match(l[dIdx + 1:cIdx])
                 m2 = RE_LINE_FIELD_2.match(l[cIdx + 1:])
                 if m0 is None or m1 is None or m2 is None:
+                    # Use !s prefix as any of m0, m1, m2 can be None.
                     raise ExceptionLASReadSection(
-                        'Can not decompose line [{:d}]: "{:s}" with results: {:s}, {:s}, {:s}'.format(
+                        'Can not decompose line [{:d}]: "{:s}" with results: '
+                        '{!s:s}, {!s:s}, {!s:s}'.format(
                             i, l.replace('\n', '\\n'), m0, m1, m2
                         )
                     )

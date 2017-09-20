@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
 # Paul Ross: cpipdev@googlemail.com
-"""Provides a fairly basictwo dimensional coordinate sytem.
+"""Provides a fairly basic two dimensional coordinate system.
 """
 
 

@@ -44,7 +44,7 @@ from TotalDepth.LIS.core import cRepCode
 ######################
 import unittest
 
-TEST_DIR = '.'
+TEST_DIR = os.path.dirname(__file__)
 
 class TestReadClass(unittest.TestCase):
     """Tests ..."""
@@ -67,12 +67,14 @@ class TestReadClass(unittest.TestCase):
         fileCount = 0
         for aFileName in os.listdir(TEST_DIR):
             fileCount += 1
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                while 1:
-                    b = f.read(bufLen)
-                    byteCount += len(b)
-                    if len(b) != bufLen:
-                        break
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(fpath), 'rb') as f:
+                    while 1:
+                        b = f.read(bufLen)
+                        byteCount += len(b)
+                        if len(b) != bufLen:
+                            break
         return fileCount, byteCount, (time.clock() - tS)
         
     def test_0001(self):
@@ -167,14 +169,16 @@ class TestReadStructClass(unittest.TestCase):
         byteCount = 0
         fileCount = 0
         for aFileName in os.listdir(TEST_DIR):
-            fileCount += 1
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                while 1:
-                    b = f.read(bufLen)
-                    byteCount += len(b)
-                    if len(b) != bufLen:
-                        break
-                    myStruct.unpack(b)
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(fpath), 'rb') as f:
+                    while 1:
+                        b = f.read(bufLen)
+                        byteCount += len(b)
+                        if len(b) != bufLen:
+                            break
+                        myStruct.unpack(b)
+                fileCount += 1
         return fileCount, byteCount, (time.clock() - tS)
         
     def _readStructCompiledNot(self, theFormat):
@@ -183,27 +187,21 @@ class TestReadStructClass(unittest.TestCase):
         byteCount = 0
         fileCount = 0
         for aFileName in os.listdir(TEST_DIR):
-            fileCount += 1
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                while 1:
-                    b = f.read(bufLen)
-                    byteCount += len(b)
-                    if len(b) != bufLen:
-                        break
-                    struct.unpack(theFormat, b)
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
+                    while 1:
+                        b = f.read(bufLen)
+                        byteCount += len(b)
+                        if len(b) != bufLen:
+                            break
+                        struct.unpack(theFormat, b)
+                fileCount += 1
         return fileCount, byteCount, (time.clock() - tS)
         
     def _readStruct(self, theFormat):
         raise NotImplementedError
         
-    def test_all(self):
-        """TestReadClass: Read and unpack binary; all buffer lengths."""
-        print()
-        for k in sorted(self.FORMAT_MAP.keys()):
-            assert(k == struct.calcsize(self.FORMAT_MAP[k])), 'k={:d} calcsize()={:d}'.format(k, struct.calcsize(self.FORMAT_MAP[k]))
-            f, b, t = self._readStruct(self.FORMAT_MAP[k])
-            print('Buffer len  {:d}. Read: {:8.3f} Rate {:12.1f} kB/S Cost: {:.3f} (ms/MB)'.format(k, t, b/(1024*t),(t*1024)/(b/(1024*1024))))
-
 class TestReadStructClassInteger(TestReadStructClass):
     """Base class for reading bytes as integers."""
     FORMAT_MAP = {
@@ -222,6 +220,16 @@ class TestReadStructClassInteger(TestReadStructClass):
         4096    : '>1024I',
         8192    : '>2048I',
     }
+
+    def test_all(self):
+        """TestReadStructClassInteger: Read and unpack binary; all buffer lengths."""
+        print()
+        for k in sorted(self.FORMAT_MAP.keys()):
+            assert(k == struct.calcsize(self.FORMAT_MAP[k])), \
+                'k={:d} calcsize()={:d}'.format(k, struct.calcsize(self.FORMAT_MAP[k]))
+            f, b, t = self._readStruct(self.FORMAT_MAP[k])
+            print('Buffer len  {:d}. Read: {:8.3f} Rate {:12.1f} kB/S'
+                  ' Cost: {:.3f} (ms/MB)'.format(k, t, b/(1024*t),(t*1024)/(b/(1024*1024))))
 
 class TestReadStructClassIntegerCompiledNot(TestReadStructClassInteger):
     """Tests ..."""
@@ -318,21 +326,23 @@ class TestSeek(unittest.TestCase):
             tE = 0.0
             fileCount = 0
             for aFileName in os.listdir(TEST_DIR):
-                try:
-                    with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                        fSize = f.seek(0, os.SEEK_END)
-                        f.seek(0, os.SEEK_SET)
-                        tS = time.clock()
-                        numSeeks = 1 + int(fSize / sLen)
-                        i = 0
-                        while i < numSeeks:
-                            f.seek(sLen, os.SEEK_CUR)
-                            i += 1
-                        tE += time.clock() - tS
-                        byteCount += fSize
-                    fileCount += 1
-                except IOError as err:
-                    print(err)
+                fpath = os.path.join(TEST_DIR, aFileName)
+                if os.path.isfile(fpath):
+                    try:
+                        with open(fpath, 'rb') as f:
+                            fSize = f.seek(0, os.SEEK_END)
+                            f.seek(0, os.SEEK_SET)
+                            tS = time.clock()
+                            numSeeks = 1 + int(fSize / sLen)
+                            i = 0
+                            while i < numSeeks:
+                                f.seek(sLen, os.SEEK_CUR)
+                                i += 1
+                            tE += time.clock() - tS
+                            byteCount += fSize
+                        fileCount += 1
+                    except IOError as err:
+                        print(err)
             print('Seek len {:d} Time: {:8.3f} Rate {:8.1f} MB/S, {:8.1f} file/S Cost: {:.3f} (ms/MB) '.format(
                     sLen, tE, byteCount/(1024*1024*tE), fileCount/tE,(tE*1024)/(byteCount/(1024*1024))))
         #sys.stderr.write('Time: {:.3f} Rate {:.1f} Files/S Cost: {:.3f} (uS) '.format(
@@ -358,12 +368,14 @@ class TestSeekEOF(unittest.TestCase):
         fileCount = 0
         byteCount = 0
         for aFileName in os.listdir(TEST_DIR):
-            fileCount += 1
-            try:
-                with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                    byteCount += f.seek(0, io.SEEK_END)
-            except IOError as err:
-                print(err)
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                try:
+                    with open(fpath, 'rb') as f:
+                        byteCount += f.seek(0, io.SEEK_END)
+                except IOError as err:
+                    print(err)
+                fileCount += 1
         tE = time.clock() - tS
         #sys.stderr.write('Time: {:.3f} Rate {:.1f} Files/S Cost: {:.3f} (uS) '.format(
         #        tE, fileCount/tE,(tE*1024*1024)/fileCount))
@@ -390,15 +402,17 @@ class TestSeekEOFSimulateIndexRead(unittest.TestCase):
         byteCount = 0
         tS = time.clock()
         for aFileName in os.listdir(TEST_DIR):
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                siz = f.seek(0, io.SEEK_END)
-                if siz > 2048+256:
-                    byteCount += siz
-                    f.seek(-256, io.SEEK_END)
-                    f.read(256)
-                    f.seek(-(256+2048), io.SEEK_END)
-                    f.read(2048)
-                    fileCount += 1
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(fpath), 'rb') as f:
+                    siz = f.seek(0, io.SEEK_END)
+                    if siz > 2048+256:
+                        byteCount += siz
+                        f.seek(-256, io.SEEK_END)
+                        f.read(256)
+                        f.seek(-(256+2048), io.SEEK_END)
+                        f.read(2048)
+                        fileCount += 1
         tE = time.clock() - tS
         #sys.stderr.write('Time: {:.3f} Rate {:.1f} Files/S Cost: {:.3f} (uS) '.format(
         #        tE, fileCount/tE,(tE*1024*1024)/fileCount))
@@ -437,16 +451,18 @@ class TestReadRepCode_p68(TestReadStructClass_RepCode68):
         byteCount = 0
         fileCount = 0
         for aFileName in os.listdir(TEST_DIR):
-            fileCount += 1
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                while 1:
-                    b = f.read(bufLen)
-                    byteCount += len(b)
-                    if len(b) != bufLen:
-                        break
-                    # Convert from RepCod 68
-                    for w in myStruct.unpack(b):
-                        pRepCode.from68(w)
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(fpath), 'rb') as f:
+                    while 1:
+                        b = f.read(bufLen)
+                        byteCount += len(b)
+                        if len(b) != bufLen:
+                            break
+                        # Convert from RepCod 68
+                        for w in myStruct.unpack(b):
+                            pRepCode.from68(w)
+                fileCount += 1
         return fileCount, byteCount, (time.clock() - tS)
 
     def _readStruct(self, theFormat):
@@ -467,16 +483,18 @@ class TestReadRepCode_c68(TestReadStructClass_RepCode68):
         byteCount = 0
         fileCount = 0
         for aFileName in os.listdir(TEST_DIR):
-            fileCount += 1
-            with open(os.path.join(TEST_DIR, aFileName), 'rb') as f:
-                while 1:
-                    b = f.read(bufLen)
-                    byteCount += len(b)
-                    if len(b) != bufLen:
-                        break
-                    # Convert from RepCod 68
-                    for w in myStruct.unpack(b):
-                        cRepCode.from68(w)
+            fpath = os.path.join(TEST_DIR, aFileName)
+            if os.path.isfile(fpath):
+                with open(os.path.join(fpath), 'rb') as f:
+                    while 1:
+                        b = f.read(bufLen)
+                        byteCount += len(b)
+                        if len(b) != bufLen:
+                            break
+                        # Convert from RepCod 68
+                        for w in myStruct.unpack(b):
+                            cRepCode.from68(w)
+                fileCount += 1
         return fileCount, byteCount, (time.clock() - tS)
 
     def _readStruct(self, theFormat):

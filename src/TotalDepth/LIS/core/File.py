@@ -164,7 +164,15 @@ class FileRead(FileBase):
             #    return None
             if myB  is None \
             or len(myB) != theStruct.size:
-                msg = 'FileRead.unpack(): Bytes: {:s} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
+                print('WTF')
+                print(type(myB), myB)
+                print(type(theStruct.size), theStruct.size)
+                # TODO: Why do the broken down lines work when the one liner does not?
+#                 msg = 'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
+                msg = 'FileRead.unpack(): Bytes: '
+                msg += '{}'.format(myB)
+                msg += ' not enough for struct that needs: '
+                msg += '{:d} bytes.'.format(theStruct.size)
                 #logging.warning(msg)
                 raise ExceptionFileRead(msg)
                 #return None

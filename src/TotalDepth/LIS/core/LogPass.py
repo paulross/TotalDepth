@@ -255,7 +255,7 @@ class LogPass(object):
 #                        self._rle.frameSpacing(),
 #                        self._rle.xAxisUnits,
 #                        ))
-            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} in optical units={:s} (actual units={:s})'.format(
+            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} in optical units={!s:s} (actual units={!s:s})'.format(
                         self.xAxisFirstValOptical,
                         self.xAxisLastValOptical,
                         self._rle.totalFrames(),
@@ -389,7 +389,10 @@ class LogPass(object):
         myEv = theEv.newEngValInUnits(self.xAxisUnits)
         retVal = int((myEv.value - self.xAxisFirstVal) // self.xAxisSpacing)
         if retVal < 0 or retVal >= self._rle.totalFrames():
-            raise ExceptionLogPass('FrameSet.frameFromX(): EngVal={:s} results in frame index {:d} out of range 0->{:d}'.format(theEv, retVal, self._rle.totalFrames()))
+            raise ExceptionLogPass(
+                'FrameSet.frameFromX():'
+                ' EngVal={!s:s} results in frame index {:d}'
+                ' out of range 0->{:d}'.format(theEv, retVal, self._rle.totalFrames()))
         return retVal
     #========================
     # End: X Axis values.
@@ -443,7 +446,7 @@ class LogPass(object):
                 for valIdx in range(myDsb.values()):
                     #print('valIdx', valIdx)
                     sc, sa, bu = RepCode.DIPMETER_VALUE_MAPPER[valIdx]
-                    yield '{:s} ({:d}, {:d})'.format(
+                    yield '{!s:s} ({:d}, {:d})'.format(
                             RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[sc][0],
                             sa,
                             bu), myDsb.units
@@ -456,7 +459,7 @@ class LogPass(object):
                     if sa * bu > 1:
                         for s in range(sa):
                             for b in range(bu):
-                                yield '{:s} ({:d}, {:d})'.format(mnem, s, b), units
+                                yield '{!s:s} ({:d}, {:d})'.format(mnem, s, b), units
                     else:
                         yield mnem, units
         

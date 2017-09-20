@@ -522,7 +522,7 @@ class FrameSet(object):
                 #'      _chOffset: {:s}'.format(str(self._chOffset)),
                 '>>>>>>>>>>>_catS: {:s}'.format('\n '+str('\n '.join([str(c) for c in self._catS]))),
                 '>_valuesPerFrame: {:s}'.format(str(self._valuesPerFrame)),
-                '>>>>>_frameSlice: {:s}'.format(self._frameSlice),
+                '>>>>>_frameSlice: {!s:s}'.format(self._frameSlice),
             ]
         )
         

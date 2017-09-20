@@ -32,10 +32,10 @@ __rights__  = 'Copyright (c) 2012 Paul Ross.'
 from TotalDepth.util.plot import FILMCfgXML
 from TotalDepth.util.plot import PRESCfgXML
 
-def fileCurveMap(theLpOrLasFile, dir=None):
+def fileCurveMap(theLpOrLasFile, directory=None):
     """Returns a map of ``{FilmID : [OUTP, ...], ...}`` which is a list of OUTP in theLpOrLasFile
     that could be plotted with that film ID."""
-    myFilmCfg = FILMCfgXML.FilmCfgXMLRead(dir)
+    myFilmCfg = FILMCfgXML.FilmCfgXMLRead(directory)
     return fileCurveMapFromFILM(theLpOrLasFile, myFilmCfg)
 
 def fileCurveMapFromFILM(theLpOrLasFile, theFilmCfg):
