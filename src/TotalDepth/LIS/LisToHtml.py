@@ -552,15 +552,19 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
             # From DFSR entry block set
             ('Up/Down',                 '{:g}'.format(myLp.dfsr.ebs.upDown)),
             ('Absent Value',            '{:g}'.format(myLp.dfsr.ebs.absentValue)),
-            ('Declared frame spacing',  '{:g} [{!r:s}]'.format(
-                    myLp.dfsr.ebs.frameSpacing,
-                    myLp.dfsr.ebs.frameSpacingUnits,
-                )
-            ),
-            ('Recording mode',           '{:g}'.format(myLp.dfsr.ebs.recordingMode)),
-            ('X axis units',             '{!r:s}'.format(myLp.dfsr.ebs.depthUnits)),
-            ('X axis Rep Code',          '{:g}'.format(myLp.dfsr.ebs.depthRepCode)),
         ]
+        if myLp.dfsr.ebs.frameSpacing is not None:
+            myFrInfo.append(('Declared frame spacing',  '{:g} [{!r:s}]'.format(myLp.dfsr.ebs.frameSpacing,
+                                                                               myLp.dfsr.ebs.frameSpacingUnits)))
+        else:
+            myFrInfo.append(('Declared frame spacing',  'None [{!r:s}]'.format(myLp.dfsr.ebs.frameSpacingUnits)))
+        myFrInfo.extend(
+            [
+                ('Recording mode',           '{:g}'.format(myLp.dfsr.ebs.recordingMode)),
+                ('X axis units',             '{!r:s}'.format(myLp.dfsr.ebs.depthUnits)),
+                ('X axis Rep Code',          '{:g}'.format(myLp.dfsr.ebs.depthRepCode)),
+            ]
+        )
         self._HTMLKeyValTable(theS, myFrInfo, fieldTitle='Measure')
         # Now the channels and their units as a string
         with XmlWrite.Element(theS, 'h5', {}):
@@ -755,6 +759,14 @@ def processFile(fpIn, fpOut, keepGoing):
     except ExceptionTotalDepthLIS as err:
         logging.error('LisToHtml.processFile({:s}): {:s}'.format(fpIn, str(err)))
         logging.error(traceback.format_exc())
+    except Exception as err:
+        if keepGoing:
+            # Log it, return None
+            logging.critical('LisToHtml.processFile({:s}): {:s}'.format(fpIn, str(err)))
+            logging.critical(traceback.format_exc())
+        else:
+            # Raise it
+            raise
     else:
         return myPlp._summary
 

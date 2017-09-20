@@ -323,7 +323,7 @@ class PresCfgXMLRead(PRESCfg.PresCfg, XMLCfg.LgXMLBase):
                         'Can not read Mnemonic: {:s}'.format(str(err)))
                 logging.debug(
                     'PresCfgXMLRead.__init__(): XML ID="{:s}"'
-                    ' trackID="{:s}" chName="{!r:s}"'.format(self.elemID(root),
+                    ' trackID="{!r:s}" chName="{!r:s}"'.format(self.elemID(root),
                                                              trackID,
                                                              chMnem))
                 try:
@@ -332,7 +332,7 @@ class PresCfgXMLRead(PRESCfg.PresCfg, XMLCfg.LgXMLBase):
                         theFILMCfg.retAllFILMDestS(chMnem),
                     )
                 except ExceptionCurveCfgXMLRead as err:
-                    logging.info('PresCfgXMLRead.__init__(): Can not add curve {:s}, error is: {:s}'.format(
+                    logging.info('PresCfgXMLRead.__init__(): Can not add curve {!r:s}, error is: {!r:s}'.format(
                             self.elemID(aCurv),
                             err,
                         )

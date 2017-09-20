@@ -648,7 +648,9 @@ class CurveCfgLISRead(CurveCfg):
         except KeyError:
             # Noticed missing OUTP in 11851.S7, fall back on curve name
             self.outp = self.mnem
-            logging.warning('CurveCfgLISRead.__init__(): No OUTP entry for {:s}, assuming same name as MNEM.'.format(str(self.mnem)))
+            logging.warning(
+                'CurveCfgLISRead.__init__(): No OUTP entry for {!r:s}, assuming same name as MNEM.'.format(self.mnem)
+            )
         self.stat = theRow[b'STAT'].status
         self.trac = theRow[b'TRAC'].value
         self.dest = Mnem.Mnem(theRow[b'DEST'].value)
@@ -657,7 +659,10 @@ class CurveCfgLISRead(CurveCfg):
         except KeyError:
             # Noted in 13408.S2
             self.filt = self.DEFAULT_FILT
-            logging.warning('CurveCfgLISRead.__init__(): No FILT entry for {:s}, assuming the default: {:f}.'.format(str(self.mnem), self.filt))
+            logging.warning(
+                'CurveCfgLISRead.__init__(): No FILT entry for {!r:s}, assuming the default: {:f}.'.format(self.mnem,
+                                                                                                           self.filt)
+            )
         # Interpret track, we need theFILMCfg to help us here
         #print(self.mnem, self.dest)
         # Set self.trac to an object derived from LineTransBase
@@ -666,18 +671,25 @@ class CurveCfgLISRead(CurveCfg):
         except KeyError:
             # Noted in 13408.S2
             self.mode = self.DEFAULT_MODE
-            logging.warning('CurveCfgLISRead.__init__(): No MODE entry for {:s}, assuming the default: {:s}.'.format(str(self.mnem), self.mode))
+            logging.warning(
+                'CurveCfgLISRead.__init__(): No MODE entry for {!r:s}, assuming the default: {!r:s}.'.format(self.mnem,
+                                                                                                             self.mode)
+            )
         try:
             myBackup = BACKUP_FROM_MODE_MAP[self.mode]
         except KeyError:
-            logging.warning('CurveCfgLISRead.__init__(): No BACKUP_FROM_MODE_MAP entry for {:s}, assuming the default.'.format(str(self.mode)))
+            logging.warning(
+                'CurveCfgLISRead.__init__(): No BACKUP_FROM_MODE_MAP entry for {!r:s}, assuming the default.'.format(self.mode)
+            )
             # Use default
             myBackup = BACKUP_FROM_MODE_MAP[None]
         myCodi = theRow[b'CODI'].value
         try:
             self.codiStroke = LIS_CODI_MAP[myCodi]
         except KeyError:
-            logging.warning('CurveCfgLISRead.__init__(): No LIS_CODI_MAP entry for {:s}, assuming the default.'.format(str(myCodi)))
+            logging.warning(
+                'CurveCfgLISRead.__init__(): No LIS_CODI_MAP entry for {!r:s}, assuming the default.'.format(str(myCodi))
+            )
             # Use default
             self.codiStroke = LIS_CODI_MAP[None]
         # Apply colour to stroke if COLO attribute is present
@@ -713,7 +725,7 @@ class CurveCfgLISRead(CurveCfg):
                     # Example: 200099.S06
                     if theRow[b'LEDG'].value == theRow[b'REDG'].value:
                         raise ExceptionCurveCfgCtor(
-                            'CurveCfgLISRead.__init__(): Curve {:s} has no'
+                            'CurveCfgLISRead.__init__(): Curve {!r:s} has no'
                             ' logical span {:s}->{:s}'.format(self.mnem,
                                                               str(theRow[b'LEDG'].value),
                                                               str(theRow[b'REDG'].value))

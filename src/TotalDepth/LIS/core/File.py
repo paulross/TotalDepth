@@ -159,23 +159,20 @@ class FileRead(FileBase):
         Returns a tuple of the number of objects specified by the format or None."""
         try:
             myB = self.readLrBytes(theStruct.size)
-            #print('myB [{:d}]'.format(len(myB)), myB)
-            #if myB is None:
-            #    return None
-            if myB  is None \
-            or len(myB) != theStruct.size:
-                print('WTF')
-                print(type(myB), myB)
-                print(type(theStruct.size), theStruct.size)
-                # TODO: Why do the broken down lines work when the one liner does not?
-#                 msg = 'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
-                msg = 'FileRead.unpack(): Bytes: '
-                msg += '{}'.format(myB)
-                msg += ' not enough for struct that needs: '
-                msg += '{:d} bytes.'.format(theStruct.size)
-                #logging.warning(msg)
-                raise ExceptionFileRead(msg)
-                #return None
+            if myB is None or len(myB) != theStruct.size:
+                # print('WTF')
+                # print(type(myB), myB)
+                # print(type(theStruct.size), theStruct.size)
+                # # TODO: Why do the broken down lines work when the one liner does not?
+                # msg = 'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
+                # msg = 'FileRead.unpack(): Bytes: '
+                # msg += '{}'.format(myB)
+                # msg += ' not enough for struct that needs: '
+                # msg += '{:d} bytes.'.format(theStruct.size)
+                # logging.error(msg)
+                raise ExceptionFileRead(
+                    'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
+                )
             return theStruct.unpack(myB)
         except struct.error as err:
             raise ExceptionFileRead('Bytes: {:s} error: {:s}'.format(myB, str(err)))

@@ -1373,7 +1373,8 @@ class Plot(object):
         for cuPlot in myCurvPlotS:
             self._flushPolyLineBuffer(cuPlot, xS)
         if numMathErrors > 0:
-            logging.warning('Plot._plotSingleOutput(): {:d} maths errors plotting output {:s}'.format(numMathErrors, theOutpID))
+            logging.warning('Plot._plotSingleOutput(): {:d} maths errors plotting output {!r:s}'.format(numMathErrors,
+                                                                                                        theOutpID))
         return myCurvIdS, numPoints
     
     def _flushPolyLineBuffer(self, theCurvPlotData, xS):

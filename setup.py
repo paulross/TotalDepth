@@ -31,6 +31,38 @@ test_requirements = [
     'pytest',
 ]
 
+XML_FORMAT_FILES = [
+    'src/TotalDepth/util/plot/formats/Azimuthal_Density_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Azimuthal_Density_Image.xml',
+    'src/TotalDepth/util/plot/formats/Azimuthal_Resistivity_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Blank_3Track_Depth.xml',
+    'src/TotalDepth/util/plot/formats/Blank_3Track_Time.xml',
+    'src/TotalDepth/util/plot/formats/Formation_Micro_Image_Aligned.xml',
+    'src/TotalDepth/util/plot/formats/Formation_Micro_Image_Processed.xml',
+    'src/TotalDepth/util/plot/formats/Formation_Test_Time.xml',
+    'src/TotalDepth/util/plot/formats/HDT.xml',
+    'src/TotalDepth/util/plot/formats/Micro_Resistivity_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Natural_GR_Spectrometry_3Track.xml',
+    'src/TotalDepth/util/plot/formats/OilBaseMicroImager_Equalized.xml',
+    'src/TotalDepth/util/plot/formats/Porosity_GR_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Pulsed_Neutron_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Pulsed_Neutron_Time.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_3Track_Correlation.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_3Track_Logrithmic.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_Porosity_GR_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_Radial_Investigation_Image.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_at_the_Bit.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_at_the_bit_deep_image.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_at_the_bit_medium_image.xml',
+    'src/TotalDepth/util/plot/formats/Resistivity_at_the_bit_shallow_image.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_3Track.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_LowerDipole_VDL.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_P_S_VDL.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_Stonely_VDL.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_UpperDipole_VDL.xml',
+    'src/TotalDepth/util/plot/formats/Sonic_Waveform4_Depth.xml',
+]
+
 setup(
     name='TotalDepth',
     version='0.1.0',
@@ -41,6 +73,10 @@ setup(
     url='https://github.com/paulross/TotalDepth',
     packages=find_packages('src'),
     package_dir={'' : 'src'},
+    # package_data={'' : ['TotalDepth/util/plot/formats/*.xml']},
+    data_files= [
+        ('TotalDepth/util/plot/formats/', XML_FORMAT_FILES),
+    ],
     entry_points={
         # All TotalDepth scripts have a 'td' prefix.
         # Experimental scripts have a 'tdX' prefix.
