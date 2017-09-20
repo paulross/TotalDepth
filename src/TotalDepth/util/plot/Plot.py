@@ -730,8 +730,8 @@ class Plot(object):
         )
         logging.info(
             'Plot.plotLogPassLIS():'
-            ' Plotting SVG width={:s} depth={:s} ...'.format(myPlRo.widthDim,
-                                                             myPlRo.depthDim)
+            ' Plotting SVG width={!r:s} depth={!r:s} ...'.format(myPlRo.widthDim,
+                                                                 myPlRo.depthDim)
         )
         # Set up viewBox and viewPort
         myRootAttrs = {
@@ -1293,7 +1293,7 @@ class Plot(object):
         curveS = []
         numPoints = 0
         for anO in self._retOutputChIDs(theFilmID):
-            logging.debug('Plot._plotCurves(): Plotting Output "{:s}"...'.format(anO))
+            logging.debug('Plot._plotCurves(): Plotting Output "{!r:s}"...'.format(anO))
             self._insertCommentInSVG(xS, ' Output {:s} START '.format(anO.pStr()), 1)
             if self._presCfg.usesOutpChannel(theFilmID, anO):
                 if theFrameHolder.hasOutpMnem(anO):
@@ -1301,9 +1301,9 @@ class Plot(object):
                     curveS += c
                     numPoints += n
                 else:
-                    logging.debug('Plot._plotCurves() omitting "{:s}" as not in LogPass'.format(anO))
+                    logging.debug('Plot._plotCurves() omitting "{!r:s}" as not in LogPass'.format(anO))
             else:
-                logging.warning('Plot._plotCurves() omitting OUTP "{:s}" as not used by PRES table.'.format(anO))
+                logging.warning('Plot._plotCurves() omitting OUTP "{!r:s}" as not used by PRES table.'.format(anO))
             self._insertCommentInSVG(xS, ' Output {:s} END '.format(anO.pStr()), 1)
         return curveS, numPoints
     
@@ -1315,7 +1315,7 @@ class Plot(object):
         thePlRo - The PlotRoll output configuration.
         xS - The SVG stream to write to. 
         """
-        logging.info('Plot._plotSingleOutput() plotting {:s}'.format(theOutpID))
+        logging.info('Plot._plotSingleOutput() plotting {!r:s}'.format(theOutpID))
 #        if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotSingleOutput() theOutpID={:s} '.format(theOutpID.pStr()))
         assert(self._presCfg.usesOutpChannel(theFilmID, theOutpID))
         assert(theFrameHolder.hasOutpMnem(theOutpID))

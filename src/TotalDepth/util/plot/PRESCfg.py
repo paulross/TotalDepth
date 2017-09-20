@@ -607,7 +607,9 @@ class CurveCfg(object):
     
     def tracWidthData(self, theFilmID):
         """Returns a TrackWidthData object for the film ID."""
-        logging.debug('CurveCfg.tracWidthData({:s}): keys: {:s}'.format(theFilmID, str(self._filmTrackWidthMap.keys())))
+        logging.debug(
+            'CurveCfg.tracWidthData({!r:s}): keys: {!r:s}'.format(theFilmID, str(self._filmTrackWidthMap.keys()))
+        )
         assert(theFilmID in self._filmTrackWidthMap), \
             'theFilmID "{:s}" not in self._filmTrackWidthMap: {:s}'.format(
                 str(theFilmID),

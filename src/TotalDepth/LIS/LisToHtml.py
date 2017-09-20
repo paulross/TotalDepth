@@ -552,13 +552,13 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
             # From DFSR entry block set
             ('Up/Down',                 '{:g}'.format(myLp.dfsr.ebs.upDown)),
             ('Absent Value',            '{:g}'.format(myLp.dfsr.ebs.absentValue)),
-            ('Declared frame spacing',  '{:g} [{:s}]'.format(
+            ('Declared frame spacing',  '{:g} [{!r:s}]'.format(
                     myLp.dfsr.ebs.frameSpacing,
                     myLp.dfsr.ebs.frameSpacingUnits,
                 )
             ),
             ('Recording mode',           '{:g}'.format(myLp.dfsr.ebs.recordingMode)),
-            ('X axis units',             '{:s}'.format(myLp.dfsr.ebs.depthUnits)),
+            ('X axis units',             '{!r:s}'.format(myLp.dfsr.ebs.depthUnits)),
             ('X axis Rep Code',          '{:g}'.format(myLp.dfsr.ebs.depthRepCode)),
         ]
         self._HTMLKeyValTable(theS, myFrInfo, fieldTitle='Measure')
@@ -628,7 +628,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 ('Interval',    '{:.3f} ({:s})'.format(myLp.xAxisLastValOptical-myLp.xAxisFirstValOptical, myOptUnitStr)),
                 ('Total number of frames',    '{:d}'.format(myLp.rle.totalFrames())),
                 ('Overall frame spacing',    '{:.3f} ({:s})'.format(myLp.xAxisSpacingOptical, myOptUnitStr)),
-                ('Original recording units',    '{:s}'.format(myLp.xAxisUnits)),
+                ('Original recording units',    '{!r:s}'.format(myLp.xAxisUnits)),
             ]
             self._HTMLKeyValTable(theS, myFrInfo, fieldTitle='')
         else:
@@ -697,7 +697,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         try:
             myFile, myIndex = self._retLisFileAndIndex(fpIn)
         except ExceptionTotalDepthLIS as err:
-            logging.error('Can not create file and index: {:s}'.format(err))
+            logging.error('Can not create file and index: {!r:s}'.format(err))
             return
         clkStart = time.clock()
         # Write the CSS is not already there

@@ -69,9 +69,9 @@ def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
                 theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
                 if myOffs not in dumpTellS \
                 and not isVerbose and len(myLdSigma) > LEN_TRUNCATE:
-                    theS.write('  {:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
+                    theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
                 else:
-                    theS.write('  {:s}\n'.format(myLdSigma))
+                    theS.write('  {!r:s}\n'.format(myLdSigma))
                 myLdSigma = bytes() 
                 myOffs = myPrh.tellLr()
         myLdSigma += myLd
@@ -79,7 +79,7 @@ def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
         theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
         if myOffs not in dumpTellS \
         and not isVerbose and len(myLdSigma) > LEN_TRUNCATE:
-            theS.write('  {:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
+            theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
         else:
             theS.write('  {:s}\n'.format(myLdSigma))
     theS.write('Histogram of Logical Data lengths:\n')

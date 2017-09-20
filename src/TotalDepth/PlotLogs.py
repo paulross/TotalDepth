@@ -376,7 +376,7 @@ class PlotLogPasses(object):
             myIdx = TotalDepth.LIS.core.FileIndexer.FileIndex(myFi)
         except ExceptionTotalDepthLIS as err:
             # Failed to read file of create index so not a LIS file
-            logging.debug('PlotLogPasses._processFileLIS(): Failed with error {:s}'.format(err))
+            logging.debug('PlotLogPasses._processFileLIS(): Failed with error {!r:s}'.format(err))
             return False
         try:
             self.plotLogInfo.logPassCntr += myIdx.numLogPasses()
@@ -391,11 +391,15 @@ class PlotLogPasses(object):
                     # Plot using external plot specification
                     self._plotLISUsingLgFormats(myFi, lpIdx, aPrs, fpOut)
         except ExceptionTotalDepthLIS as err:
-            logging.error('PlotLogPasses._processFileLIS(): Can not process as LIS: "{:s}", error: {:s}'.format(fpIn, err))
+            logging.error(
+                'PlotLogPasses._processFileLIS(): Can not process as LIS: "{!r:s}", error: {!r:s}'.format(fpIn, err)
+            )
             logging.error(traceback.format_exc())
             return False
         except Exception as err:
-            logging.critical('PlotLogPasses._processFileLIS(): In "{:s}", error: {:s}'.format(fpIn, err))
+            logging.critical(
+                'PlotLogPasses._processFileLIS(): In "{!r:s}", error type {!r:s}: {!r:s}'.format(fpIn, type(err), err)
+            )
             logging.critical(traceback.format_exc())
             return False
         self.plotLogInfo.lisFileCntr += 1
@@ -416,7 +420,9 @@ class PlotLogPasses(object):
             self._plotLASUsingLgFormats(myLasFile, fpOut)
             self.plotLogInfo.logPassCntr += 1 # Only one pass per file in LAS, well LAS 1.2 2.0 anyway
         except ExceptionTotalDepthLAS as err:
-            logging.error('PlotLogPasses._processFileLAS(): Can not process as LAS: "{:s}", error: {:s}'.format(fpIn, err))
+            logging.error(
+                'PlotLogPasses._processFileLAS(): Can not process as LAS: "{:s}", error: {:s}'.format(fpIn, err)
+            )
             return False
         except Exception as err:
             logging.critical('PlotLogPasses._processFileLAS(): In "{:s}", error: {:s}'.format(fpIn, err))
@@ -507,7 +513,9 @@ class PlotLogPasses(object):
                     theCurveS=myCurvIDs,
                     ptsPlotted=numPoints)
             else:
-                logging.info('PlotLogPasses._plotUsingLISLogicalRecords(): No data to plot for FILM ID {:s}'.format(aFilmId))
+                logging.info(
+                    'PlotLogPasses._plotUsingLISLogicalRecords(): No data to plot for FILM ID {!r:s}'.format(aFilmId)
+                )
     #=================================================================
     # End: Plotting LIS using LIS Logical Records to specify the plot.
     #=================================================================

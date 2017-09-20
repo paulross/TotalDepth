@@ -43,7 +43,18 @@ setup(
     package_dir={'' : 'src'},
     entry_points={
         'console_scripts': [
-            'TotalDepth=TotalDepth.cli:main'
+            'tdplotlogs=TotalDepth.PlotLogs:main',
+            'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
+            'tdlisindex=TotalDepth.LIS.Index:main',
+            'tdlistohtml=TotalDepth.LIS.LisToHtml:main',
+            'tdlisplotlogpasses=TotalDepth.LIS.PlotLogPasses:main',
+            'tdlisscanlogidata=TotalDepth.LIS.ScanLogiData:main',
+            'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRecord:main',
+            'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
+            'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
+            'tdlisdetif=TotalDepth.LIS.DeTif:main',
+            'tdreadlas=TotalDepth.LAS.ReadLASFIles:main',
+#            'TotalDepth=TotalDepth.cli:main'
         ]
     },
     include_package_data=True,

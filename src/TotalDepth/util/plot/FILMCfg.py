@@ -713,12 +713,17 @@ class PhysFilmCfgLISRead(PhysFilmCfg):
             return self.GCOD_GDEC_MAP[(theGCOD, theGDEC)]
         except KeyError:
             # Try the alternate map
-            logging.warning('PhysFilmCfgLISRead._retTracks(): No key for GCOD={:s} GDEC={:s}, falling back to alternate.'.format(theGCOD, theGDEC))
+            logging.warning(
+                'PhysFilmCfgLISRead._retTracks():'
+                ' No key for GCOD={!r:s} GDEC={!r:s}, falling back to alternate.'.format(theGCOD, theGDEC)
+            )
             try:
                 return self.GCOD_GDEC_ALT_MAP[(theGCOD, theGDEC)]
             except KeyError:
                 pass
-        raise ExceptionFILMCfg('PhysFilmCfgLISRead._retTracks(): No key for GCOD={:s} GDEC={:s}'.format(theGCOD, theGDEC))
+        raise ExceptionFILMCfg(
+            'PhysFilmCfgLISRead._retTracks(): No key for GCOD={!r:s} GDEC={!r:s}'.format(theGCOD, theGDEC)
+        )
 
     def supportedFilmTracks(self):
         """A list of supported film (name, decade) pairs."""
