@@ -52,7 +52,7 @@ tmp/
 
 .eggs
 dist/
-totaldepth.egg-info/
+TotalDepth.egg-info/
 
 .idea
 

@@ -32,25 +32,25 @@ test_requirements = [
 ]
 
 setup(
-    name='totaldepth',
+    name='TotalDepth',
     version='0.1.0',
     description="TotalDepth is a software collection that can process petrophysical data such as wireline logs and seismic data.",
     long_description=readme + '\n\n' + history,
     author="Paul Ross",
     author_email='apaulross@gmail.com',
-    url='https://github.com/paulross/totaldepth',
+    url='https://github.com/paulross/TotalDepth',
     packages=find_packages(include=['src']),
     package_dir={'' : 'src'},
     entry_points={
         'console_scripts': [
-            'totaldepth=totaldepth.cli:main'
+            'TotalDepth=TotalDepth.cli:main'
         ]
     },
     include_package_data=True,
     install_requires=requirements,
     license="GPLv2",
     zip_safe=False,
-    keywords='totaldepth',
+    keywords='TotalDepth',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

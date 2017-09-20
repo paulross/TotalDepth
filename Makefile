@@ -48,7 +48,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 totaldepth tests
+	flake8 TotalDepth tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -58,15 +58,15 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source totaldepth -m pytest
+	coverage run --source TotalDepth -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/totaldepth.rst
+	rm -f docs/TotalDepth.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ totaldepth
+	sphinx-apidoc -o docs/ TotalDepth
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html

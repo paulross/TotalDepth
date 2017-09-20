@@ -3,18 +3,18 @@ TotalDepth
 ==========
 
 
-.. image:: https://img.shields.io/pypi/v/totaldepth.svg
-        :target: https://pypi.python.org/pypi/totaldepth
+.. image:: https://img.shields.io/pypi/v/TotalDepth.svg
+        :target: https://pypi.python.org/pypi/TotalDepth
 
-.. image:: https://img.shields.io/travis/paulross/totaldepth.svg
-        :target: https://travis-ci.org/paulross/totaldepth
+.. image:: https://img.shields.io/travis/paulross/TotalDepth.svg
+        :target: https://travis-ci.org/paulross/TotalDepth
 
-.. image:: https://readthedocs.org/projects/totaldepth/badge/?version=latest
-        :target: https://totaldepth.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/TotalDepth/badge/?version=latest
+        :target: https://TotalDepth.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/paulross/totaldepth/shield.svg
-     :target: https://pyup.io/repos/github/paulross/totaldepth/
+.. image:: https://pyup.io/repos/github/paulross/TotalDepth/shield.svg
+     :target: https://pyup.io/repos/github/paulross/TotalDepth/
      :alt: Updates
 
 
@@ -22,7 +22,7 @@ Petrophysical software xxx.
 
 
 * Free software: BSD license
-* Documentation: https://totaldepth.readthedocs.io.
+* Documentation: https://TotalDepth.readthedocs.io.
 
 
 Features
