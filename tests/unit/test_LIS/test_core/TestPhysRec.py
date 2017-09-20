@@ -25,7 +25,7 @@ __date__    = '8 Nov 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -33,7 +33,8 @@ import io
 
 from TotalDepth.LIS.core import PhysRec
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 ######################
 # Section: Unit tests.
@@ -1070,7 +1071,7 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
 #            pass
         self.assertTrue(self._pr.isEOF)
 
-class TestPhysRecWriteRead_PerfBase(TestBase.TestBase):
+class TestPhysRecWriteRead_PerfBase(BaseTestClasses.TestBase):
     """Writes a PR then times how long it takes to read it."""
     def _writeToFile(self, prLen, lrLen, lrNum):
         myFi = io.BytesIO()

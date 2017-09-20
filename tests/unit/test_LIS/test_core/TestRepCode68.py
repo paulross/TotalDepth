@@ -25,7 +25,7 @@ __date__    = '2 Nov 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -47,9 +47,10 @@ from TotalDepth.LIS.core import PhysRec
 # Section: Unit tests.
 ######################
 import unittest
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
-#class TestRepCodeBase(TestBase.TestBase):
+#class TestRepCodeBase(BaseTestClasses.TestBase):
 #    def randBits(self, theBits):
 #        """Return a random integer of theBits number of bits."""
 #        return random.getrandbits(theBits)
@@ -88,7 +89,7 @@ from . import TestBase
 #        sys.stderr.write('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
 #        sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
 #    
-class TestRepCode68Base(TestBase.TestRepCodeBase):
+class TestRepCode68Base(BaseTestClasses.TestRepCodeBase):
     """Rep Code 68 specific stuff."""
     
     def splitBits68(self, i):

@@ -44,7 +44,8 @@ from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import LogHeader
 
 from . import TestPlotShared
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 def _hdrTrippleToLogicalRecord(theData):
     # Record header
@@ -94,7 +95,7 @@ def _hdrTrippleToLogicalRecord(theData):
             myB.append(u)
             myB.append(RepCode.writeBytes(v, CODE_FLOAT))
     # Use self._retFilePrS() as size could be large
-    myBaseFile = TestBase.TestBaseFile()
+    myBaseFile = BaseTestClasses.TestBaseFile()
     myF = myBaseFile._retFilePrS(b''.join(myB))
     return LogiRec.LrTableRead(myF)
 
@@ -207,7 +208,7 @@ TEST_SVG_FILE_MAP_HDR = {
         ),
 }
 
-class TestLogHeaderLIS(TestBase.TestBaseFile):
+class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
 
     def setUp(self):
         self._lrCONS = headerLogicalRecordLIS()
@@ -396,7 +397,7 @@ class TestLogHeaderLIS(TestBase.TestBaseFile):
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
         self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS,])
 
-class TestLogHeaderLAS(TestBase.TestBaseFile):
+class TestLogHeaderLAS(BaseTestClasses.TestBaseFile):
 
     def setUp(self):
         myFi = io.StringIO("""~VERSION INFORMATION

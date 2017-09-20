@@ -25,7 +25,7 @@ __date__    = '6 Jan 2011'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) 2011 Paul Ross. All rights reserved.'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -38,7 +38,8 @@ from TotalDepth.LIS.core import Type01Plan
 ######################
 import unittest
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 # Mock classes
 class MockEntryBlockSet(object):
@@ -761,7 +762,7 @@ class TestType01PlanGenEventsIndirect(unittest.TestCase):
         #pprint.pprint(actList)
         self.assertEqual(expList, actList)
 
-class TestType01Plan_PerfBase(TestBase.TestBase):
+class TestType01Plan_PerfBase(BaseTestClasses.TestBase):
     """Tests ..."""
     def _timeEvents(self, theFrameSlice, theChRange):
         """Time genEvents() from frame slice and channel range."""

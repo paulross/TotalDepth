@@ -29,6 +29,7 @@ __date__    = '2011-08-03'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2011 Paul Ross.'
 
+import os
 import sys
 import logging
 import datetime
@@ -37,7 +38,8 @@ import unittest
 
 import TotalDepth.RP66.core.RepCode as RepCode
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 #class MockStreamRead(object):
 #    def __init__(self, b):
@@ -82,13 +84,13 @@ class TestMockStream(unittest.TestCase):
         self.assertRaises(
             RepCode.ExceptionRepCodeEndOfStream,
             RepCode.read,
-            TestBase.MockStreamRead(b''),
+            BaseTestClasses.MockStreamRead(b''),
             RepCode.STRUCT_RC_SLONG,
         )
 
     def test_11(self):
         """TestMockStream.test_11(): Simulation of failing to write bytes to stream."""
-        class MockStreamWriteNothing(TestBase.MockStreamWrite):
+        class MockStreamWriteNothing(BaseTestClasses.MockStreamWrite):
             def write(self, b):
                 return 0
         self.assertRaises(
@@ -104,10 +106,10 @@ class TestRepCodeBase(unittest.TestCase):
     def _indirectTest(self):
         """Tests edge values write/read - indirect."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeIndirectRepCode(self.NUM, v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readIndirectRepCode(self.NUM, sIn)
             self.assertEqual(v, vR)
 
@@ -133,10 +135,10 @@ class TestFSINGL(TestRepCodeBase):
     def test_01(self):
         """Tests FSINGL values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFSINGL(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFSINGL(sIn)
             self.assertEqual(v, vR)
 
@@ -166,10 +168,10 @@ class TestFSING1(TestRepCodeBase):
     def test_01(self):
         """Tests FSING1 values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFSING1(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFSING1(sIn)
             self.assertEqual(v, vR)
 
@@ -200,10 +202,10 @@ class TestFSING2(TestRepCodeBase):
     def test_01(self):
         """Tests FSING2 values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFSING2(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFSING2(sIn)
             self.assertEqual(v, vR)
 
@@ -233,10 +235,10 @@ class TestFDOUBL(TestRepCodeBase):
     def test_01(self):
         """Tests FDOUBL values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFDOUBL(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFDOUBL(sIn)
             self.assertEqual(v, vR)
 
@@ -266,10 +268,10 @@ class TestFDOUB1(TestRepCodeBase):
     def test_01(self):
         """Tests FDOUB1 values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFDOUB1(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFDOUB1(sIn)
             self.assertEqual(v, vR)
 
@@ -300,10 +302,10 @@ class TestFDOUB2(TestRepCodeBase):
     def test_01(self):
         """Tests FDOUB2 values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeFDOUB2(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readFDOUB2(sIn)
             self.assertEqual(v, vR)
 
@@ -336,10 +338,10 @@ class TestSSHORT(TestRepCodeBase):
         """Tests SSHORT values write/read."""
         for v, b in self.CASES:
 #            print('TRACE: v, b:', v, b)
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeSSHORT(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readSSHORT(sIn)
             self.assertEqual(v, vR)
 
@@ -371,10 +373,10 @@ class TestSNORM(TestRepCodeBase):
     def test_01(self):
         """Tests SNORM values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeSNORM(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readSNORM(sIn)
             self.assertEqual(v, vR)
 
@@ -406,10 +408,10 @@ class TestSLONG(TestRepCodeBase):
     def test_01(self):
         """Tests SLONG values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeSLONG(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readSLONG(sIn)
             self.assertEqual(v, vR)
 
@@ -440,10 +442,10 @@ class TestUSHORT(TestRepCodeBase):
         """Tests USHORT values write/read."""
         for v, b in self.CASES:
 #            print('TRACE: v, b:', v, b)
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeUSHORT(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readUSHORT(sIn)
             self.assertEqual(v, vR)
 
@@ -474,10 +476,10 @@ class TestUNORM(TestRepCodeBase):
     def test_01(self):
         """Tests UNORM values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeUNORM(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readUNORM(sIn)
             self.assertEqual(v, vR)
 
@@ -510,10 +512,10 @@ class TestULONG(TestRepCodeBase):
     def test_01(self):
         """Tests ULONG values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeULONG(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readULONG(sIn)
             self.assertEqual(v, vR)
 
@@ -553,16 +555,16 @@ class TestUVARI(TestRepCodeBase):
         
 #    def test_05(self):
 #        """Tests UVARI read."""
-#        v = RepCode.readUVARI(TestBase.MockStreamRead(b'\x00\x00\x00\x00'))
+#        v = RepCode.readUVARI(BaseTestClasses.MockStreamRead(b'\x00\x00\x00\x00'))
 #        self.assertEquals(0, v)
     
     def test_01(self):
         """Tests UVARI edge values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeUVARI(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readUVARI(sIn)
             self.assertEqual(v, vR)
 
@@ -596,10 +598,10 @@ class TestIDENT(TestRepCodeBase):
     def test_01(self):
         """Tests IDENT edge values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeIDENT(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readIDENT(sIn)
             self.assertEqual(v, vR)
 
@@ -635,10 +637,10 @@ class TestASCII(TestRepCodeBase):
         for v, b in self.CASES:
             assert(0)
             print('TRACE: test_01', v, b)
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeASCII(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readASCII(sIn)
             self.assertEqual(v, vR)
 
@@ -678,7 +680,7 @@ class TestDTIME(TestRepCodeBase):
         # A saturday morning
         t = datetime.datetime(*(2011, 10, 8, 10, 31, 39, 719783))
         myRc = RepCode.DTIMEInternal(t)
-        sOut = TestBase.MockStreamWrite()
+        sOut = BaseTestClasses.MockStreamWrite()
         RepCode.writeDTIME(myRc, sOut)
 #        print('sOut.bytes', sOut.bytes)
 #        print(myRc.time())
@@ -687,11 +689,11 @@ class TestDTIME(TestRepCodeBase):
         """Tests DTIME edge values write/read."""
         for v, b in self.CASES:
             myRc = RepCode.DTIMEInternal(datetime.datetime(*v))
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeDTIME(myRc, sOut)
             self.assertEqual(b, sOut.bytes)
             # Read from bytes
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             myRc = RepCode.readDTIME(sIn)
             self.assertEqual(self._datetimeTupleToSeconds(v), myRc.mktime())
 
@@ -702,10 +704,10 @@ class TestDTIME(TestRepCodeBase):
             # Fix up the microseconds to truncate to milleseconds
             myV = v[:-1] + (1000*(v[-1] // 1000),)
             rc = RepCode.DTIMEInternal(datetime.datetime(*myV))
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeIndirectRepCode(self.NUM, rc, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readIndirectRepCode(self.NUM, sIn)
             self.assertEqual(rc._time, vR._time)
 
@@ -745,10 +747,10 @@ class TestSTATUS(TestRepCodeBase):
         """Tests STATUS values write/read."""
         for v, b in self.CASES:
 #            print('TRACE: v, b:', v, b)
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeSTATUS(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readSTATUS(sIn)
             self.assertEqual(v, vR)
 
@@ -780,10 +782,10 @@ class TestISNORM(TestRepCodeBase):
     def test_01(self):
         """Tests ISNORM values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeISNORM(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readISNORM(sIn)
             self.assertEqual(v, vR)
 
@@ -813,10 +815,10 @@ class TestISLONG(TestRepCodeBase):
     def test_01(self):
         """Tests ISLONG values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeISLONG(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readISLONG(sIn)
             self.assertEqual(v, vR)
 
@@ -847,10 +849,10 @@ class TestIUNORM(TestRepCodeBase):
     def test_01(self):
         """Tests IUNORM values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeIUNORM(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readIUNORM(sIn)
             self.assertEqual(v, vR)
 
@@ -883,10 +885,10 @@ class TestIULONG(TestRepCodeBase):
     def test_01(self):
         """Tests IULONG values write/read."""
         for v, b in self.CASES:
-            sOut = TestBase.MockStreamWrite()
+            sOut = BaseTestClasses.MockStreamWrite()
             RepCode.writeIULONG(v, sOut)
             self.assertEqual(sOut.bytes, b)
-            sIn = TestBase.MockStreamRead(sOut.bytes)
+            sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
             vR = RepCode.readIULONG(sIn)
             self.assertEqual(v, vR)
 

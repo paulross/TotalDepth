@@ -67,7 +67,8 @@ from . import TestLogHeader
 from . import TestPlotLASData
 from . import TestLgFormatXMLData
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 #=================================================
 # Section: Managing where our test SVG is written.
@@ -620,7 +621,7 @@ class TestPlotRoll(unittest.TestCase):
         except Plot.ExceptionTotalDepthPlotRoll:
             pass
 
-class TestPlotBase(TestBase.TestBaseFile):
+class TestPlotBase(BaseTestClasses.TestBaseFile):
     pass
 
 class TestPlotBase_00(TestPlotBase):

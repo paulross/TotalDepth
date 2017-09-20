@@ -25,7 +25,7 @@ __date__    = '2010-08-02'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -39,9 +39,10 @@ from TotalDepth.util.plot import FILMCfg
 # Section: Unit tests.
 ######################
 import unittest
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
-class TestFILMRead(TestBase.TestBaseFile):
+class TestFILMRead(BaseTestClasses.TestBaseFile):
     """Tests reading a FILM table."""
     def setUp(self):
         """Set up Typical FILM record
@@ -313,7 +314,7 @@ MNEM  GCOD  GDEC  DEST  DSCA
             self._fc[Mnem.Mnem(b'1')].supportedFilmTracks(),
         )
 
-class TestFILMReadFourTrack(TestBase.TestBaseFile):
+class TestFILMReadFourTrack(BaseTestClasses.TestBaseFile):
     """Tests reading a FILM table with four tracks."""
     def setUp(self):
         """Set up Typical FILM record
@@ -401,7 +402,7 @@ A     LLLL  1111  PFA   D200
 
 
 
-class TestFILMRead_Fail(TestBase.TestBaseFile):
+class TestFILMRead_Fail(BaseTestClasses.TestBaseFile):
     """Tests failing to read a FILM table."""
     def setUp(self):
         pass

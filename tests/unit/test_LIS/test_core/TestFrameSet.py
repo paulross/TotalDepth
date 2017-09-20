@@ -24,7 +24,7 @@ __date__    = '10 Jan 2011'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -41,9 +41,10 @@ from TotalDepth.LIS.core import RepCode
 # Section: Unit tests.
 ######################
 import unittest
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
-class TestFrameSet_SuChArTe(TestBase.TestBaseFile):
+class TestFrameSet_SuChArTe(BaseTestClasses.TestBaseFile):
     """Tests FrameSet SuChArTe class"""
     def setUp(self):
         """Set up."""
@@ -108,7 +109,7 @@ class TestFrameSet_SuChArTe(TestBase.TestBaseFile):
         self.assertRaises(IndexError, myScat.index, -3, 0)
         self.assertRaises(IndexError, myScat.index, 0, 4)
 
-class TestFrameSet_ChArTe(TestBase.TestBaseFile):
+class TestFrameSet_ChArTe(BaseTestClasses.TestBaseFile):
     """Tests FrameSet.ChArTe class"""
     def setUp(self):
         """Set up."""
@@ -189,7 +190,7 @@ class TestFrameSet_ChArTe(TestBase.TestBaseFile):
         # Offsets
         self.assertEqual(list(range(12)), list(myCat.subChOffsRange(0)))
 
-class TestFrameSet_ChArTe_Dipmeter(TestBase.TestBaseFile):
+class TestFrameSet_ChArTe_Dipmeter(BaseTestClasses.TestBaseFile):
     """Tests FrameSet.ChArTe class for Dipmeter data."""
     def setUp(self):
         """Set up."""
@@ -437,7 +438,7 @@ class TestFrameSet_ChArTe_Dipmeter(TestBase.TestBaseFile):
         for i in range(5,15,1):
             self.assertEqual(list(range(80+(i-5),80+(i-5)+1)), list(myCat.subChOffsRange(i)))
             
-class TestFrameSetStaticData(TestBase.TestBaseFile):
+class TestFrameSetStaticData(BaseTestClasses.TestBaseFile):
     """Tests FrameSet constructor with various DFSRs (no channels) and its
     static attributes."""
     def setUp(self):
@@ -559,7 +560,7 @@ class TestFrameSetStaticData(TestBase.TestBaseFile):
         myDfsr = LogiRec.LrDFSRRead(myF)
         self.assertRaises(FrameSet.ExceptionFrameSet, FrameSet.FrameSet, myDfsr, slice(0))
 
-class TestFrameSet(TestBase.TestBaseFile):
+class TestFrameSet(BaseTestClasses.TestBaseFile):
     """Tests FrameSet"""
     def setUp(self):
         """Set up."""
@@ -830,7 +831,7 @@ class TestFrameSet(TestBase.TestBaseFile):
         self.assertRaises(FrameSet.ExceptionFrameSet, FrameSet.FrameSet, self._dfsr, slice(1), xAxisIndex=5)
         self.assertRaises(FrameSet.ExceptionFrameSet, FrameSet.FrameSet, self._dfsr, slice(1), xAxisIndex=6)
 
-class TestFrameSet_offsetTree(TestBase.TestBaseFile):
+class TestFrameSet_offsetTree(BaseTestClasses.TestBaseFile):
     """Tests FrameSet"""
     def setUp(self):
         """Set up."""
@@ -1234,7 +1235,7 @@ class TestFrameSet_offsetTree(TestBase.TestBaseFile):
         )
 
     
-class TestFrameSet_setFrameBytes(TestBase.TestBaseFile):
+class TestFrameSet_setFrameBytes(BaseTestClasses.TestBaseFile):
     """Tests FrameSet"""
     def setUp(self):
         """Set up."""
@@ -1324,7 +1325,7 @@ class TestFrameSet_setFrameBytes(TestBase.TestBaseFile):
         myFs = FrameSet.FrameSet(self._dfsr, slice(1))
         self.assertRaises(FrameSet.ExceptionFrameSet, myFs.setFrameBytes, b'\x00\x00\x00\x00\x00', 0, 0, 0)
 
-class TestFrameSet_setFrameBytes_Indirect(TestBase.TestBaseFile):
+class TestFrameSet_setFrameBytes_Indirect(BaseTestClasses.TestBaseFile):
     """Tests FrameSet"""
     def setUp(self):
         """Set up."""
@@ -1430,7 +1431,7 @@ class TestFrameSet_setFrameBytes_Indirect(TestBase.TestBaseFile):
         by = b'\x00\x01\x00\x00\x00'
         self.assertRaises(FrameSet.ExceptionFrameSet, myFs.setFrameBytes, by, 0, None, None)
 
-class TestFrameSetAccumulate(TestBase.TestBaseLogPass):
+class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet accumulate()."""
     def setUp(self):
         """Set up."""
@@ -1954,7 +1955,7 @@ class TestFrameSetAccumulate(TestBase.TestBaseLogPass):
         self.assertEqual(expVal.shape, myArray.shape)
         self.assertTrue((expVal == myArray).all())
 
-class TestFrameSetgenChScValues(TestBase.TestBaseLogPass):
+class TestFrameSetgenChScValues(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet genChScValues()."""
     def setUp(self):
         """Set up."""
@@ -2228,7 +2229,7 @@ class TestFrameSetgenChScValues(TestBase.TestBaseLogPass):
         self.assertEqual([b+8 for b in baseSlowValS], [v for v in myFs.genChScValues(0, 13)])
         self.assertEqual([b+9 for b in baseSlowValS], [v for v in myFs.genChScValues(0, 14)])
 
-class TestFrameSetgenChScPoints_LowLevel(TestBase.TestBaseLogPass):
+class TestFrameSetgenChScPoints_LowLevel(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet genChScPoints() low level support."""
     def setUp(self):
         """Set up."""
@@ -2636,7 +2637,7 @@ class TestFrameSetgenChScPoints_LowLevel(TestBase.TestBaseLogPass):
         self.assertRaises(FrameSet.ExceptionFrameSetNULLSpacing, myFs._retFirstXaxisFrameSpacing, 2)
 
 
-class TestFrameSetgenChScPoints(TestBase.TestBaseLogPass):
+class TestFrameSetgenChScPoints(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet genChScPoints() low level support."""
     def setUp(self):
         """Set up."""
@@ -3478,7 +3479,7 @@ class TestFrameSetgenChScPoints(TestBase.TestBaseLogPass):
             [v for v in myFs.genChScPoints(0, 0)],
         )
 
-class TestFrameSetgenAll(TestBase.TestBaseLogPass):
+class TestFrameSetgenAll(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet genAll()."""
     def setUp(self):
         """Set up."""
@@ -3804,7 +3805,7 @@ class TestFrameSetgenAll(TestBase.TestBaseLogPass):
             myRes,
         )
 
-class TestFrameSet_Perf_Ctor(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet."""
     NUMBER_OF_CTOR = 1
     
@@ -3949,7 +3950,7 @@ class TestFrameSet_Perf_Ctor(TestBase.TestBaseLogPass):
             numBytes += myFs.nbytes
         self.writeCostToStderr(tS, lisLen*self.NUMBER_OF_CTOR, 'LIS MB', lisLen // (1024**2))
 
-class TestFrameSet_Perf_Load(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Load(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data."""
     def setUp(self):
         """Set up."""
@@ -3998,7 +3999,7 @@ class TestFrameSet_Perf_Load(TestBase.TestBaseLogPass):
         #print()
         #print('TestFrameSet_Perf_Load.test_01() array:\n', myFs._frames)
 
-class TestFrameSet_Perf_Read(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Read(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading."""
     def setUp(self):
         """Set up."""
@@ -4032,7 +4033,7 @@ class TestFrameSet_Perf_Read(TestBase.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
-class TestFrameSet_Perf_Read_Gen(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using generators."""
     def setUp(self):
         """Set up."""
@@ -4129,7 +4130,7 @@ class TestFrameSet_Perf_Read_Gen(TestBase.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', (lisLen + 512*1024) // (1024**2))
 
-class TestFrameSet_Perf_Read_GenAll(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Read_GenAll(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using generators."""
     def setUp(self):
         """Set up."""
@@ -4180,7 +4181,7 @@ class TestFrameSet_Perf_Read_GenAll(TestBase.TestBaseLogPass):
             lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
-class TestFrameSet_Perf_Read_GenPoints(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using genChScPoints.
     genChScPoints() is used for plotting"""
     def setUp(self):
@@ -4382,7 +4383,7 @@ class TestFrameSet_Perf_Read_GenPoints(TestBase.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', (lisLen + 512*1024) // (1024**2))
 
-class TestFrameSet_Perf_Accumulate(TestBase.TestBaseLogPass):
+class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then using accumulate()."""
     def setUp(self):
         """Set up."""
@@ -4688,7 +4689,7 @@ class TestFrameSet_Perf_Accumulate(TestBase.TestBaseLogPass):
 #        self.assertTrue((myArray == myArrayNp).all())
 
 
-class Special(TestBase.TestBaseFile):
+class Special(BaseTestClasses.TestBaseFile):
     """Special tests."""
     pass
 

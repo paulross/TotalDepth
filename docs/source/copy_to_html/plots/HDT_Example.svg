@@ -464,14 +464,14 @@
   <text font-family="Courier" font-size="9" text-anchor="start" x="0.29in" y="9.75in">6</text>
   <text font-family="Courier" font-size="9" text-anchor="end" x="2.61in" y="9.75in">16</text>
   <text font-family="Courier" font-size="9" text-anchor="middle" x="1.45in" y="9.75in">C1 Caliper [INCH]</text>
-  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="3.45in" y1="9.5in" y2="10in"/>
-  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="4.65in" x2="4.65in" y1="9.5in" y2="10in"/>
-  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="4.65in" y1="9.8125in" y2="9.8125in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.65in" x2="4.57in" y1="9.8125in" y2="9.7725in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.57in" x2="4.65in" y1="9.8525in" y2="9.8125in"/>
-  <text font-family="Courier" font-size="9" text-anchor="start" x="3.49in" y="9.75in">0</text>
-  <text font-family="Courier" font-size="9" text-anchor="end" x="4.61in" y="9.75in">256</text>
-  <text font-family="Courier" font-size="9" text-anchor="middle" x="4.05in" y="9.75in">FC0</text>
+  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="3.45in" y1="9.25in" y2="10in"/>
+  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="4.65in" x2="4.65in" y1="9.25in" y2="10in"/>
+  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="4.65in" y1="9.3125in" y2="9.3125in"/>
+  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.750" x1="4.65in" x2="4.57in" y1="9.3125in" y2="9.2725in"/>
+  <line stroke="rgb(255,0,0)" stroke-opacity="1.000" stroke-width="0.750" x1="4.57in" x2="4.65in" y1="9.3525in" y2="9.3125in"/>
+  <text font-family="Courier" font-size="9" text-anchor="start" x="3.49in" y="9.25in">0</text>
+  <text font-family="Courier" font-size="9" text-anchor="end" x="4.61in" y="9.25in">256</text>
+  <text font-family="Courier" font-size="9" text-anchor="middle" x="4.05in" y="9.25in">FC0</text>
   <line stroke="rgb(0,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="3.45in" y1="9.5in" y2="10in"/>
   <line stroke="rgb(0,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="4.65in" x2="4.65in" y1="9.5in" y2="10in"/>
   <line stroke="rgb(0,0,0)" stroke-opacity="1.000" stroke-width="0.500" x1="3.45in" x2="4.65in" y1="9.8125in" y2="9.8125in"/>

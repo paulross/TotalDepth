@@ -49,9 +49,11 @@ from TotalDepth.LIS.core import LogiRec
 from TotalDepth.util.plot import XMLMatches
 from TotalDepth.util.plot import FILMCfgXML
 
-from . import TestBase
 from . import TestLgFormatXMLData
 from . import TestPlotLASData
+
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 class TestXMLMatches(unittest.TestCase):
 
@@ -106,7 +108,7 @@ class TestXMLMatches(unittest.TestCase):
             sorted(filmMap['Triple_Combo']),
         )
 
-class TestXMLMatchesHDT(TestBase.TestBaseFile):
+class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
     """Tests whether XML matches can be made with RHDT channel and a LIS LogPass."""
     def setUp(self):
         pass

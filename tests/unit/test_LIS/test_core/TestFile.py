@@ -25,23 +25,24 @@ __date__    = '8 Nov 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
+import io
+import os
 import sys
 import time
 import logging
-import io
 
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import RepCode
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
-class TestFileLowLevel(TestBase.TestBaseFile):
+class TestFileLowLevel(BaseTestClasses.TestBaseFile):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -55,7 +56,7 @@ class TestFileLowLevel(TestBase.TestBaseFile):
         """TestFileLowLevel.test_00(): Tests setUp() and tearDown()."""
         pass
     
-class TestFileType0Base(TestBase.TestBaseFile):
+class TestFileType0Base(BaseTestClasses.TestBaseFile):
     """Tests ..."""
     def setUp(self):
         """Set up."""

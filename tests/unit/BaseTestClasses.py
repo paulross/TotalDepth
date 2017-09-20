@@ -17,7 +17,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
 # Paul Ross: cpipdev@googlemail.com
-"""
+"""Some common classes used in unit testing.
+
 Created on 10 Jan 2011
 
 @author: p2ross
@@ -302,3 +303,38 @@ class TestBaseLogPass(TestBaseFile):
         """Create an io.BytesIO complete with a DFSR."""
         myBd = self._retSinglePr(self._retDFSRBytes(numCh, numSa, numBu))
         return self._retFileFromBytes(myBd)
+
+
+class MockStreamRead(object):
+    def __init__(self, b):
+        self._b = b
+        self._p = 0
+        
+    def read(self, n=1):
+        """Get n bytes and increment the index, if n is negative then return all the remaining bytes."""
+        if n < 0:
+            myP = self._p
+            self._p = len(self._b)
+            return self._b[myP:]
+        self._p += n
+        return self._b[self._p-n:self._p]
+        
+class MockStreamWrite(object):
+    def __init__(self):
+        self._b = bytearray()
+        # This is not used
+        self._p = 0
+    
+    @property
+    def bytes(self):
+        return self._b
+        
+    def write(self, b):
+        """Write multiple bytes."""
+        self._b += b
+        self._p += len(b)
+        return len(b)
+    
+    def clear(self):
+        self._b = bytearray()
+        self._p = 0

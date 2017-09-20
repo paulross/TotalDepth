@@ -25,7 +25,7 @@ __date__    = '29 Dec 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -46,7 +46,8 @@ from TotalDepth.LIS.core import Mnem
 ######################
 import unittest
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 #class TestLrBase(unittest.TestCase):
 #    def _retFileSinglePr(self, theB):
@@ -59,7 +60,7 @@ from . import TestBase
 #        )
 #        return File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=True)
 
-class TestLrBase(TestBase.TestBaseFile):
+class TestLrBase(BaseTestClasses.TestBaseFile):
     pass
 
 class TestLrBaseClass(TestLrBase):

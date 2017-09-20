@@ -25,7 +25,7 @@ __date__    = '10 Feb 2011'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -34,7 +34,8 @@ from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import LisGen
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 ######################
 # Section: Unit tests.
 ######################
@@ -137,7 +138,7 @@ class TestPlotRecordSet(unittest.TestCase):
         self.assertFalse(myPrs.canPlotFromInternalRecords())
         self.assertFalse(myPrs.canPlotFromExternalRecords())
 
-class TestFileIndexerBase(TestBase.TestBaseLogPass):
+class TestFileIndexerBase(BaseTestClasses.TestBaseLogPass):
     """Base class to create LIS files to index."""
     def _retFileHead(self):
         """Returns a single Physical Record encapsulating as File Head."""

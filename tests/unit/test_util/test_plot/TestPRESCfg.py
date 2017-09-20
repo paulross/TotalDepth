@@ -25,6 +25,7 @@ __date__    = '2010-08-02'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
+import os
 import sys
 import time
 import logging
@@ -44,7 +45,8 @@ from TotalDepth.util.plot import PRESCfg
 ######################
 import unittest
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 class TestLineTrans(unittest.TestCase):
     """Tests line transformation."""
@@ -326,7 +328,7 @@ class TestLineTrans(unittest.TestCase):
         """TestLineTrans.test_40_03(): Linear identity transformation, wrapPos(), physical 8->0, logical scale 64->0 raises ExceptionLineTransBase."""
         self.assertRaises(PRESCfg.ExceptionLineTransBase, PRESCfg.LineTransLin, 8.0, 0.0, 64.0, 0.0, backup=PRESCfg.BACKUP_ONCE)
 
-class TestPRESRead(TestBase.TestBaseFile):
+class TestPRESRead(BaseTestClasses.TestBaseFile):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -667,7 +669,7 @@ class TestPRESRead(TestBase.TestBaseFile):
 #        print(myFunc(0.02))
 #        print(myFunc(20000.0))
 
-class TestPRESReadMultiFilm(TestBase.TestBaseFile):
+class TestPRESReadMultiFilm(BaseTestClasses.TestBaseFile):
     """Tests PRES tables where the curves have BOTH, NEIT, ALL etc."""
     def setUp(self):
         """Set up."""
@@ -1052,7 +1054,7 @@ class TestPRESReadMultiFilm(TestBase.TestBaseFile):
             myPclr._destOutpToCurveIdMap,
         )
         
-class TestPRESReadFail(TestBase.TestBaseFile):
+class TestPRESReadFail(BaseTestClasses.TestBaseFile):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1308,7 +1310,7 @@ class TestPRESReadFail(TestBase.TestBaseFile):
 #        self._pclr = PRESCfg.PresCfgLISRead(LogiRec.LrTableRead(myFi), myFc)
         self.assertRaises(PRESCfg.ExceptionPRESCfgLISRead, PRESCfg.PresCfgLISRead, LogiRec.LrTableRead(myFi), myFc)
 
-class TestPRESColour(TestBase.TestBaseFile):
+class TestPRESColour(BaseTestClasses.TestBaseFile):
     """Tests color from COLO attribute"""
     def setUp(self):
         """Set up."""

@@ -25,7 +25,7 @@ __date__    = '2 Nov 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -47,9 +47,10 @@ from TotalDepth.LIS.core import PhysRec
 # Section: Unit tests.
 ######################
 import unittest
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
-#class TestRepCodeBase(TestBase.TestBase):
+#class TestRepCodeBase(BaseTestClasses.TestBase):
 #    def randBits(self, theBits):
 #        """Return a random integer of theBits number of bits."""
 #        return random.getrandbits(theBits)
@@ -89,7 +90,7 @@ from . import TestBase
 #        sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
         
 
-#class TestRepCodeFrom49(TestBase.TestRepCodeBase):
+#class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
 #    """Tests ..."""
 #    def test_size(self):
 #        """TestRepCodeFrom49.test_size(): word length of 2."""
@@ -148,7 +149,7 @@ from . import TestBase
 #        print(('0x%x' % RepCode.to49(1/2048.0)))
 #        self.assertEqual(RepCode.to49(1/2048.0), 0x0010)
 
-class TestRepCodeFrom49(TestBase.TestRepCodeBase):
+class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -259,7 +260,7 @@ class TestRepCodeFrom49(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read49(myFile), -153.0)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom49Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -383,7 +384,7 @@ class TestRepCodeFrom49Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom50(TestBase.TestRepCodeBase):
+class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -490,7 +491,7 @@ class TestRepCodeFrom50(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read50(myFile), -153.0)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom50Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -604,7 +605,7 @@ class TestRepCodeFrom50Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom56(TestBase.TestRepCodeBase):
+class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 56"""
     def setUp(self):
         """Set up."""
@@ -700,7 +701,7 @@ class TestRepCodeFrom56(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read56(myFile), -89)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom56Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -837,7 +838,7 @@ class TestRepCodeFrom56Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom66(TestBase.TestRepCodeBase):
+class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 66"""
     def setUp(self):
         """Set up."""
@@ -901,7 +902,7 @@ class TestRepCodeFrom66(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read66(myFile), 153)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom66Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1044,7 +1045,7 @@ class TestRepCodeFrom66Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom70(TestBase.TestRepCodeBase):
+class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1151,7 +1152,7 @@ class TestRepCodeFrom70(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read70(myFile), -153.25)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom70Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1275,7 +1276,7 @@ class TestRepCodeFrom70Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom73(TestBase.TestRepCodeBase):
+class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 73"""
     def setUp(self):
         """Set up."""
@@ -1362,7 +1363,7 @@ class TestRepCodeFrom73(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read73(myFile), -153)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom73Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1488,7 +1489,7 @@ class TestRepCodeFrom73Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom77(TestBase.TestRepCodeBase):
+class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 77"""
     def setUp(self):
         """Set up."""
@@ -1552,7 +1553,7 @@ class TestRepCodeFrom77(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read77(myFile), 153)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom77Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1695,7 +1696,7 @@ class TestRepCodeFrom77Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeFrom79(TestBase.TestRepCodeBase):
+class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 79"""
     def setUp(self):
         """Set up."""
@@ -1791,7 +1792,7 @@ class TestRepCodeFrom79(TestBase.TestRepCodeBase):
         self.assertEqual(pRepCode.read79(myFile), -153)
         self.assertFalse(myFile.hasLd())
 
-class TestRepCodeFrom79Time(TestBase.TestRepCodeBase):
+class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
@@ -1934,7 +1935,7 @@ class TestRepCodeFrom79Time(TestBase.TestRepCodeBase):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
-class TestRepCodeIndirect(TestBase.TestRepCodeBase):
+class TestRepCodeIndirect(BaseTestClasses.TestRepCodeBase):
     """Tests indirect repcode functionality."""
     def setUp(self):
         """Set up."""

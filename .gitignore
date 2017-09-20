@@ -54,3 +54,5 @@ tmp/
 dist/
 totaldepth.egg-info/
 
+.idea
+

@@ -4,7 +4,7 @@
 """The setup script."""
 
 # from distutils.core import setup
-from distutils.extension import Extension
+#from distutils.extension import Extension
 
 from setuptools import setup, find_packages
 
@@ -20,7 +20,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'Cython',
     'numpy',
-    'Click>=6.0',
+#    'Click>=6.0',
 ]
 
 setup_requirements = [

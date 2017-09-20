@@ -25,7 +25,7 @@ __date__    = '10 Jan 2011'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-#import pprint
+import os
 import sys
 import time
 import logging
@@ -43,10 +43,10 @@ from TotalDepth.LIS.core import Mnem
 # Section: Unit tests.
 ######################
 import unittest
-#import struct
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
-class TestLogPass_LowLevel(TestBase.TestBaseFile):
+class TestLogPass_LowLevel(BaseTestClasses.TestBaseFile):
     """Tests LogPass"""
     def setUp(self):
         """Set up."""
@@ -100,7 +100,7 @@ class TestLogPass_LowLevel(TestBase.TestBaseFile):
         """TestLogPass_LowLevel.test_10(): nullValue()."""
         self.assertEqual(-153.0, self._lp.nullValue)
         
-class TestLogPassCtorRaises(TestBase.TestBaseFile):
+class TestLogPassCtorRaises(BaseTestClasses.TestBaseFile):
     """Tests LogPass"""
     def setUp(self):
         """Set up."""
@@ -152,7 +152,7 @@ class TestLogPassCtorRaises(TestBase.TestBaseFile):
         self.assertRaises(LogPass.ExceptionLogPassCtor, LogPass.LogPass, myDfsr, 'FileID', xAxisIndex=-1)
         self.assertRaises(LogPass.ExceptionLogPassCtor, LogPass.LogPass, myDfsr, 'FileID', xAxisIndex=1)
 
-class TestLogPassBadDFSR(TestBase.TestBaseFile):
+class TestLogPassBadDFSR(BaseTestClasses.TestBaseFile):
     """Tests LogPass"""
     def setUp(self):
         """Set up."""
@@ -244,7 +244,7 @@ class TestLogPassBadDFSR(TestBase.TestBaseFile):
         myDfsr = LogiRec.LrDFSRRead(myF)
         myLp = LogPass.LogPass(myDfsr, 'FileID')
 
-class TestLogPassFromTestBase(TestBase.TestBaseLogPass):
+class TestLogPassFromTestBase(BaseTestClasses.TestBaseLogPass):
     """Tests LogPass ctor and some internal functionality"""
     def setUp(self):
         """Set up."""
@@ -259,14 +259,14 @@ class TestLogPassFromTestBase(TestBase.TestBaseLogPass):
         pass
     
     def test_00(self):
-        """TestLogPassFromTestBase.test_00(): Nine channels."""
+        """TestLogPassFromBaseTestClasses.test_00(): Nine channels."""
         myF = self._retFileSinglePr(self._retDFSRBytes(9, 1, 1))
         myLp = LogPass.LogPass(LogiRec.LrDFSRRead(myF), 'FileID')
         self.assertEqual(len(myLp.dfsr.dsbBlocks), 9)
         self.assertEqual(myLp.dfsr.frameSize(), 4*9)
         str(myLp)
 
-class TestLogPassStatic(TestBase.TestBaseFile):
+class TestLogPassStatic(BaseTestClasses.TestBaseFile):
     """Tests LogPass ctor and some internal functionality"""
     def setUp(self):
         """Set up."""
@@ -454,7 +454,7 @@ class TestLogPassStatic(TestBase.TestBaseFile):
         except LogPass.ExceptionLogPassKeyError:
             pass
 
-class TestLogPassStaticUpDirect(TestBase.TestBaseFile):
+class TestLogPassStaticUpDirect(BaseTestClasses.TestBaseFile):
     """Tests LogPass static data functionality with a up log and direct X axis"""
     def setUp(self):
         """Set up."""
@@ -522,7 +522,7 @@ class TestLogPassStaticUpDirect(TestBase.TestBaseFile):
         except LogPass.ExceptionLogPassKeyError:
             pass
 
-class TestLogPassEventBase(TestBase.TestBaseFile):
+class TestLogPassEventBase(BaseTestClasses.TestBaseFile):
     """Base class for event testing."""
     def _genEvents(self, theTellLrS, theLrSize, theFrames, theChannels, theNumChannelsInFrame):
         myDict = collections.defaultdict(int)
@@ -1108,7 +1108,7 @@ class TestLogPass_Events_UpIndirect(TestLogPassEventBase):
         self.assertEqual(-0.5, self._lp.xAxisSpacingOptical)
         self.assertEqual(b'FEET', self._lp.xAxisUnitsOptical)
 
-class TestLogPass_UpDirect_Dipmeter(TestBase.TestBaseLogPass):
+class TestLogPass_UpDirect_Dipmeter(BaseTestClasses.TestBaseLogPass):
     """Tests LogPass"""
     def setUp(self):
         """Set up."""
@@ -1440,7 +1440,7 @@ class TestLogPass_UpDirect_Dipmeter(TestBase.TestBaseLogPass):
         self.assertEqual(numFrames, self._lp.frameSet.numFrames)
         self.assertEqual(91, self._lp.frameSet.valuesPerFrame)
 
-class TestLogPass_UpIndirect(TestBase.TestBaseLogPass):
+class TestLogPass_UpIndirect(BaseTestClasses.TestBaseLogPass):
     """Tests LogPass"""
     def setUp(self):
         """Set up. 3 LRs, 5 frames, 4 channels"""
@@ -1633,7 +1633,7 @@ class TestLogPass_UpIndirect(TestBase.TestBaseLogPass):
             list(self._logPass.genFrameSetHeadings())
         )
 
-class TestLogPass_PerfBase(TestBase.TestBaseFile):
+class TestLogPass_PerfBase(BaseTestClasses.TestBaseFile):
     """Tests LogPass performance."""
 
     def _loadLogPass(self, num):
@@ -1893,7 +1893,7 @@ class TestLogPass_Perf(TestLogPass_PerfBase):
         """TestLogPass_Perf.test_60(): channel step 1024, 8000 frames step 1024."""
         self._runIterTestSomeFrames(1000, slice(0, 8000, 1024), list(range(0, 1025, 1024)))
 
-class TestLogPass_Type0_Base(TestBase.TestBaseLogPass):
+class TestLogPass_Type0_Base(BaseTestClasses.TestBaseLogPass):
     """Reading binary data."""
     
     def _createLogPass(self, theF):
@@ -2203,7 +2203,7 @@ class TestLogPass_Type0_Profile(TestLogPass_Type0_Base):
         #self.assertEqual(1024*1024//4, valCount)
         sys.stderr.write(' setFrameSet() time: {:8.3f} '.format(time.clock()-tS))
 
-class Special(TestBase.TestBaseFile):
+class Special(BaseTestClasses.TestBaseFile):
     """Special tests."""
     pass
 

@@ -29,6 +29,7 @@ __date__    = '2011-08-03'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2011 Paul Ross.'
 
+import os
 import sys
 import logging
 import time
@@ -37,7 +38,8 @@ import unittest
 import TotalDepth.RP66.core.RepCode as RepCode
 import TotalDepth.RP66.core.AttrComp as AttrComp
 
-from . import TestBase
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+import BaseTestClasses
 
 class TestAttrCompBasic(unittest.TestCase):
 
@@ -52,12 +54,12 @@ class TestAttrCompBasic(unittest.TestCase):
 
     def test_01(self):
         """TestAttrCompBasic.test_01(): Simple creation of a single template object."""
-        sOut = TestBase.MockStreamWrite()
+        sOut = BaseTestClasses.MockStreamWrite()
         RepCode.writeIDENT(RepCode.IDENTString(b'WEIGHT'), sOut)
         # FSINGL is code 2
         RepCode.writeUSHORT(2, sOut)
         RepCode.writeUNITS(RepCode.UNITSString('KG'), sOut)
-        sIn = TestBase.MockStreamRead(sOut.bytes)
+        sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
         myTemplate = AttrComp.AttrCompStream(int('10110', 2), sIn)
 #        print(myTemplate)
         self.assertEqual(RepCode.IDENTString(b'WEIGHT'), myTemplate.lable)
@@ -68,21 +70,21 @@ class TestAttrCompBasic(unittest.TestCase):
 
     def test_02(self):
         """TestAttrCompBasic.test_02(): Creation of a template object and a partial object."""
-        sOut = TestBase.MockStreamWrite()
+        sOut = BaseTestClasses.MockStreamWrite()
         RepCode.writeIDENT(RepCode.IDENTString(b'WEIGHT'), sOut)
         # FSINGL is code 2
         RepCode.writeUSHORT(2, sOut)
         RepCode.writeUNITS(RepCode.UNITSString('KG'), sOut)
 #        print('TRACE: sOut.bytes', sOut.bytes)
-        sIn = TestBase.MockStreamRead(sOut.bytes)
+        sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
         myTemplate = AttrComp.AttrCompStream(int('10110', 2), sIn)
 #        print(myTemplate)
         self.assertEqual(RepCode.IDENTString(b'WEIGHT'), myTemplate.lable)
         self.assertEqual(b'WEIGHT', myTemplate.lable.payload)
         # Now create object
-        sOut = TestBase.MockStreamWrite()
+        sOut = BaseTestClasses.MockStreamWrite()
         RepCode.writeFSINGL(356.2, sOut)
-        sIn = TestBase.MockStreamRead(sOut.bytes)
+        sIn = BaseTestClasses.MockStreamRead(sOut.bytes)
         myObject = myTemplate.readAsTemplate(int('00001', 2), sIn)
 #        print(myObject)
         self.assertEqual(RepCode.IDENTString(b'WEIGHT'), myObject.lable)
@@ -101,7 +103,7 @@ class TestAttrV1Example(unittest.TestCase):
     def setUp(self):
         """This comes from the the example given in version 1 of the RP66
         specification, figure 3.8. See: http://w3.energistics.org/rp66/v1/rp66v1_sec3.html"""
-        self._data = TestBase.MockStreamRead(
+        self._data = BaseTestClasses.MockStreamRead(
             # Logical Records Segment (#1) Header
             # Length == 104 bytes
             b'\x00\x68'
