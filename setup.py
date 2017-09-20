@@ -39,7 +39,7 @@ setup(
     author="Paul Ross",
     author_email='apaulross@gmail.com',
     url='https://github.com/paulross/TotalDepth',
-    packages=find_packages(include=['src']),
+    packages=find_packages('src'),
     package_dir={'' : 'src'},
     entry_points={
         'console_scripts': [
