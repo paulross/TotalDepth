@@ -32,13 +32,7 @@ __rights__  = 'Copyright (c) 2012 Paul Ross.'
 import os
 import collections
 
-# OK this is pretty crude but I can't, off-hand, of a better way
-# One problematic feature is that it uses the invoking CWD
-TEST_SVG_DIR = 'test_svg'
-
 def outPath(f):
-    return os.path.join('test_svg', f)
+    return os.path.join(os.path.dirname(__file__), 'test_svg', f)
 
 SVGTestOutput = collections.namedtuple('SVGTestOutput', 'fileName description')
-
-

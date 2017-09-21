@@ -89,17 +89,21 @@ TEST_SVG_FILE_MAP_LIS = {
             'SP_square_highfreq.svg',
             "TestPlotReadLIS_SingleSquareCurveHighFreq.test_01(): Square wave with 0.5' spacing to check wrap interpolation."
         ),
+    3.1   : TestPlotShared.SVGTestOutput(
+            'SP_square_superhighfreq.svg',
+            "TestPlotReadLIS_SingleSquareCurveSuperHighFreq.test_01(): Square wave with 0.5' spacing to check super high wrap interpolation."
+        ),
     4   : TestPlotShared.SVGTestOutput(
             'HDT_00.svg',
-            "TestPlotReadLIS_HDT.test_01(): 200 feet of HDT on a 1:200 scale."
+            "TestPlotReadLIS_HDT.test_01(): 50 feet of HDT on a 1:200 scale."
         ),
     4.1   : TestPlotShared.SVGTestOutput(
             'HDT_01.svg',
-            "TestPlotReadLIS_HDT_25.test_01(): 200 feet of HDT on a 1:25 scale."
+            "TestPlotReadLIS_HDT_20.test_01(): 50 feet of HDT on a 1:20 scale."
         ),
     4.2   : TestPlotShared.SVGTestOutput(
             'HDT_02.svg',
-            "TestPlotReadLIS_HDT_40.test_01(): 200 feet of HDT on a 1:40 scale."
+            "TestPlotReadLIS_HDT_40.test_01(): 50 feet of HDT on a 1:40 scale."
         ),
     5   : TestPlotShared.SVGTestOutput(
             'SuperSampled.svg',
@@ -211,9 +215,9 @@ TEST_SVG_FILE_MAP_LAS = {
 
 def writeTestSVGIndex():
     """Write the TEST_SVG_FILE_MAP_LIS as an index.html."""
-    if not os.path.isdir(TestPlotShared.TEST_SVG_DIR):
-        os.makedirs(TestPlotShared.TEST_SVG_DIR)
-    with XmlWrite.XhtmlStream(open(os.path.join(TestPlotShared.TEST_SVG_DIR, 'index.html'), 'w')) as xS:
+    if not os.path.isdir(TestPlotShared.outPath('')):
+        os.makedirs(TestPlotShared.outPath(''))
+    with XmlWrite.XhtmlStream(open(TestPlotShared.outPath('index.html'), 'w')) as xS:
         with XmlWrite.Element(xS, 'h1', {}):
             xS.characters('API Headers')
         with XmlWrite.Element(xS, 'ol'):
@@ -1718,8 +1722,8 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     wrapPrev=0,
                     wrapNow=64,
                 )
-#        print()
-#        pprint.pprint(myPts)
+        print()
+        pprint.pprint(myPts)
         self.assertEqual(2*Plot.Plot.MAX_BACKUP_TRACK_CROSSING_LINES, len(myPts[1]))
         expResult = (
             (15.875, Coord.Dim(value=2.4, units='in')),
@@ -1893,7 +1897,7 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[1].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[1].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[1].description,
                 timerS=myTimerS)
@@ -2013,7 +2017,7 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -2133,7 +2137,142 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                frameStep=1,
+                title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
+                timerS=myTimerS)
+            myTimerS.writeToStderr()
+
+class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
+    """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
+    TEST_SVG_FILE_MAP_ENTRY = 3.1
+
+    def retFilmBytes(self):
+        return b'"\x00' \
+            + b'IA\x04\x00TYPE    FILM' \
+                + b'\x00A\x04\x00MNEM    1   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF1 ' \
+                    + b'EA\x04\x00DSCA    D20 ' \
+                + b'\x00A\x04\x00MNEM    2   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF2 ' \
+                    + b'EA\x04\x00DSCA    D20 '
+
+    def retPresBytes_TEST(self):
+        """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
+        return bytes(
+            b'"\x00'
+            + b'IA\x04\x00TYPE    PRES'
+            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+            + b'\x00A\x04\x00MNEM    40  '
+                + b'EA\x04\x00OUTP    TEST'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
+                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
+                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
+            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+            + b'\x00A\x04\x00MNEM    20  '
+                + b'EA\x04\x00OUTP    TEST'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T2  '
+                + b'EA\x04\x00CODI    HDAS'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
+                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
+                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
+            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+            + b'\x00A\x04\x00MNEM    8   '
+                + b'EA\x04\x00OUTP    TEST'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T3  '
+                + b'EA\x04\x00CODI    LGAP'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
+                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(8.0, 68)#\xbc0\x00\x00'
+                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(-8.0, 68)#B\xd0\x00\x00'
+            )
+
+    def retFileAndFileIndex(self):
+        """Returns a File and a FileIndexer.FileIndex of DEPT plus a single curve.
+        Log is 100 ft, .5 ft spacing. SP is a square wave -40 to 40 mV with a
+        wavelength of 16 frames feet. i.e. 40 feet."""
+        myEbs = LogiRec.EntryBlockSet()
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
+        #print('myEbs.lisByteList()')
+        #pprint.pprint(myEbs.lisByteList())
+        # Create a direct X axis log with b'DEPT' and b'SP  '
+        myLpGen = LisGen.LogPassGen(
+            myEbs,
+            # Output list
+            [
+                LisGen.Channel(
+                    LisGen.ChannelSpec(
+                        b'TEST', b'ServID', b'ServOrdN', b'MV  ',
+                        45310011, 256, 4, 1, 68
+                    ),
+                    LisGen.ChValsSquare(fOffs=0, waveLen=4*8.0, mid=0.0, amp=300.0, numSa=1, noise=None),
+                ),
+            ],
+            xStart=1000.0,
+            xRepCode=68,
+            xNoise=None,
+        )
+        # File Header
+        myData = LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileHead)
+        # Create a File with the DFSR plus some frames
+        myData.extend(self.retPrS(myLpGen.lrBytesDFSR()))
+        framesPerLr = 8
+        numFrames = 201
+        for fNum in range(0, numFrames, framesPerLr):
+            myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
+        myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
+        myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
+        # Create a file index
+        myFileIndex = FileIndexer.FileIndex(myFile)
+        return myFile, myFileIndex
+
+    def setUp(self):
+        """Set up."""
+        myByFilm = self.retFilmBytes()
+        myByPres = self.retPresBytes_TEST()
+        self._prl = Plot.PlotReadLIS(
+            LogiRec.LrTableRead(self._retFileSinglePr(myByFilm)),
+            LogiRec.LrTableRead(self._retFileSinglePr(myByPres)),
+        )
+        self._lisFile, self._lisFileIndex = self.retFileAndFileIndex()
+
+    def tearDown(self):
+        """Tear down."""
+        pass
+
+    def test_00(self):
+        """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
+        pass
+
+    def test_01(self):
+        """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
+        for anIlp in self._lisFileIndex.genLogPasses():
+            myXStart = EngVal.EngVal(1000.0, b'FEET')
+            myXStop = EngVal.EngVal(975.0, b'FEET')
+            myTimerS = ExecTimer.ExecTimerList()
+            self._prl.plotLogPassLIS(
+                self._lisFile,
+                anIlp.logPass,
+                myXStart,
+                myXStop,
+                Mnem.Mnem(b'2   '),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -2494,7 +2633,7 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
-            myXStop = EngVal.EngVal(4800.0, b'FEET')
+            myXStop = EngVal.EngVal(4950.0, b'FEET')
             myTimerS = ExecTimer.ExecTimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
@@ -2502,15 +2641,29 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'1   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
-class TestPlotReadLIS_HDT_25(TestPlotReadLIS_HDTBase):
-    """Tests plotting HDT data on a 1:25 scale."""
+class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
+    """Tests plotting HDT data on a 1:20 scale."""
     TEST_SVG_FILE_MAP_ENTRY = 4.1
+
+    def retFilmBytes(self):
+        return b'"\x00' \
+            + b'IA\x04\x00TYPE    FILM' \
+                + b'\x00A\x04\x00MNEM    1   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF1 ' \
+                    + b'EA\x04\x00DSCA    D20 ' \
+                + b'\x00A\x04\x00MNEM    2   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF2 ' \
+                    + b'EA\x04\x00DSCA    D20 '
 
     def setUp(self):
         """Set up."""
@@ -2519,7 +2672,7 @@ class TestPlotReadLIS_HDT_25(TestPlotReadLIS_HDTBase):
         self._prl = Plot.PlotReadLIS(
             LogiRec.LrTableRead(self._retFileSinglePr(myByFilm)),
             LogiRec.LrTableRead(self._retFileSinglePr(myByPres)),
-            theScale=25,
+            theScale=20,
         )
         self._lisFile, self._lisFileIndex = self.retFileAndFileIndex()
 
@@ -2535,7 +2688,7 @@ class TestPlotReadLIS_HDT_25(TestPlotReadLIS_HDTBase):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
-            myXStop = EngVal.EngVal(4800.0, b'FEET')
+            myXStop = EngVal.EngVal(4950.0, b'FEET')
             myTimerS = ExecTimer.ExecTimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
@@ -2543,7 +2696,7 @@ class TestPlotReadLIS_HDT_25(TestPlotReadLIS_HDTBase):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'1   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -2552,6 +2705,20 @@ class TestPlotReadLIS_HDT_25(TestPlotReadLIS_HDTBase):
 class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data on a 1:40 scale."""
     TEST_SVG_FILE_MAP_ENTRY = 4.2
+
+    def retFilmBytes(self):
+        return b'"\x00' \
+            + b'IA\x04\x00TYPE    FILM' \
+                + b'\x00A\x04\x00MNEM    1   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF1 ' \
+                    + b'EA\x04\x00DSCA    D40 ' \
+                + b'\x00A\x04\x00MNEM    2   ' \
+                    + b'EA\x04\x00GCOD    EEE ' \
+                    + b'EA\x04\x00GDEC    ----' \
+                    + b'EA\x04\x00DEST    PF2 ' \
+                    + b'EA\x04\x00DSCA    D40 '
 
     def setUp(self):
         """Set up."""
@@ -2576,7 +2743,7 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
-            myXStop = EngVal.EngVal(4800.0, b'FEET')
+            myXStop = EngVal.EngVal(4950.0, b'FEET')
             myTimerS = ExecTimer.ExecTimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
@@ -2584,7 +2751,7 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'1   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -2744,7 +2911,7 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'1   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -2895,7 +3062,7 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -3046,7 +3213,7 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -3197,7 +3364,7 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
@@ -3617,7 +3784,7 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'1   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].description,
                 timerS=myTimerS)
@@ -3635,7 +3802,7 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'2   ']].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'2   ']].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'2   ']].description,
                 timerS=myTimerS)
@@ -3782,10 +3949,7 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
             myXStop = EngVal.EngVal(self.PLOT_START_IN_FEET-self.PLOT_LENGTH_IN_FEET, b'FEET')
             myTimerS = ExecTimer.ExecTimerList()
             for lgFormat in self._prlMap:
-                fp = os.path.join(
-                    TestPlotShared.TEST_SVG_DIR,
-                    TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].fileName,
-                )
+                fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].fileName)
                 self._prlMap[lgFormat].plotLogPassLIS(
                     self._lisFile,
                     anIlp.logPass,
@@ -3910,10 +4074,7 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
         myFileIndex = FileIndexer.FileIndex(myFile)
         for anIlp in myFileIndex.genLogPasses():
             myTimerS = ExecTimer.ExecTimerList()
-            fp = os.path.join(
-                TestPlotShared.TEST_SVG_DIR,
-                TEST_SVG_FILE_MAP_LIS[22].fileName,
-            )
+            fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[22].fileName)
             myPlot = Plot.PlotReadXML('HDT', theScale=40)
             myPlot.plotLogPassLIS(
                 myFile,
@@ -3966,7 +4127,7 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
                 myXStart,
                 myXStop,
                 Mnem.Mnem(b'2   '),
-                os.path.join(TestPlotShared.TEST_SVG_DIR, TEST_SVG_FILE_MAP_LIS[30].fileName),
+                TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[30].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[1].description,
                 lrCONS=[TestLogHeader.headerLogicalRecordLIS(),],
@@ -3992,10 +4153,7 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         """TestPlotReadLAS_XML_LgFormat.test_00(): Plot from XML LgFormat files - down log, no header."""
         myTimerS = ExecTimer.ExecTimerList()
         for lgFormat in fIdxMap:
-            fp = os.path.join(
-                TestPlotShared.TEST_SVG_DIR,
-                TEST_SVG_FILE_MAP_LAS[fIdxMap[lgFormat]].fileName
-            )
+            fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LAS[fIdxMap[lgFormat]].fileName)
             myPlot = Plot.PlotReadXML(lgFormat)
             myPlot.plotLogPassLAS(
                 theLasFile,
@@ -4116,12 +4274,16 @@ class SpecialUnused(unittest.TestCase):
 #        pprint.pprint(myMnemUniqueIDMap)
         print(' OUTP : UniqueId(s) START '.center(75, '='))
         for k in sorted(myMnemUniqueIDMap.keys()):
-            print('{:12s} : {:s},'.format(
-                    '"{:s}"'.format(k.pStr(strip=True)),
-                    [v.pStr(strip=True) for v in myMnemUniqueIDMap[k]],
-                )
-            )
+            theID = '"{!r:s}"'.format(k.pStr(strip=True))
+            print('{:12s} : {!r:s},'.format(theID, [v.pStr(strip=True) for v in myMnemUniqueIDMap[k]]))
         print(' OUTP : UniqueId(s) END '.center(75, '='))
+
+
+
+class TestWriteTestSVGIndex(unittest.TestCase):
+
+    def test_00(self):
+        writeTestSVGIndex()
 
 class Special(unittest.TestCase):
     """Special tests."""

@@ -271,7 +271,6 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
     def test_05(self):
         """TestLogHeader.test_05(): Plot as not top of log."""
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
-#        fp = os.path.join('test_svg', 'APIHeader_05.svg')
         fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_HDR[40].fileName)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
         viewPort = myLh.viewPort(tl)
@@ -457,7 +456,6 @@ LON .                     98.95341: LONGITUDE WEST (KGS, LEO3.6)
     def test_05(self):
         """TestLogHeaderLAS.test_05(): Plot as not top of log."""
         myLh = LogHeader.APIHeaderLAS(isTopOfLog=False)
-#        fp = os.path.join('test_svg', 'APIHeader_05.svg')
         fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_HDR[50].fileName)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
         viewPort = myLh.viewPort(tl)

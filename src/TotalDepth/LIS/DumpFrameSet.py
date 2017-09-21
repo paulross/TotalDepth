@@ -39,7 +39,12 @@ from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.LIS.core import FrameSet
 
-def dumpFrameSets(fp, keepGoing, summaryOnly):
+def dumpFrameSets(fp, keepGoing, summaryOnly, channels):
+    """Dump the frame values to stdout.
+
+    keepGoing is a bool.
+    SummaryOnly is a bool to emit a summary only, if false all the data and the summary is written out.
+    Channels is a set of Mnems, if non-empty then only these channels, if present, are written out."""
     logging.info('Index.indexFile(): {:s}'.format(fp))
     assert(os.path.isfile(fp))
     myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
@@ -56,15 +61,30 @@ def dumpFrameSets(fp, keepGoing, summaryOnly):
                 # Print the channels and units
                 hdrS = []
                 if myFrSet.isIndirectX:
-                    hdrS.append('XAXIS [{:s}]'.format(myFrSet.xAxisDecl.depthUnits))
-                hdrS.extend(['{:s} [{:s}]'.format(m, u) for m,u in aLp.logPass.genFrameSetHeadings()])
+                    hdrS.append('XAXIS [{!r:s}]'.format(myFrSet.xAxisDecl.depthUnits))
+                indexes = []
+                if len(channels):
+                    for i, (m, u) in enumerate(aLp.logPass.genFrameSetHeadings()):
+                        if m in channels:
+                            hdrS.append('{!r:s} [{!r:s}]'.format(m, u))
+                            indexes.append(i)
+                else:
+                    hdrS.extend(['{!r:s} [{!r:s}]'.format(m, u) for m,u in aLp.logPass.genFrameSetHeadings()])
+                if len(indexes) == len(channels):
+                    logging.warning(
+                        'Some channels you specified can not be found: indexes={!r:s} channels={!r:s}'.format(indexes, channels)
+                    )
                 #print('TRACE: len(hdrS)', len(hdrS))
                 print('\t'.join(hdrS))
                 for frIdx in range(myFrSet.numFrames):
                     #print('TRACE: len(frame)', len(myFrSet.frame(frIdx)))
                     if myFrSet.isIndirectX:
                         print(myFrSet.xAxisValue(frIdx), '\t', end='')
-                    print('\t'.join(['%g' % v for v in myFrSet.frame(frIdx)]))
+                    if len(indexes):
+                        values = [myFrSet.frame(frIdx)[i] for i in indexes]
+                        print('\t'.join(['%g' % v for v in values]))
+                    else:
+                        print('\t'.join(['%g' % v for v in myFrSet.frame(frIdx)]))
             # Accumulate min/mean/max
             myAccClasses = [
                     FrameSet.AccCount,
@@ -109,6 +129,8 @@ Reads a LIS file and writes out tab separated values of each frame."""
         )      
     optParser.add_option("-s", "--summary", action="store_true", dest="summary", default=False, 
                       help="Display summary only. [default: %default]")
+    optParser.add_option("-c", "--channels", action="append", type="str",
+                         help="Only dump these named curves.", default=[])
     opts, args = optParser.parse_args()
     clkStart = time.clock()
     # Initialise logging etc.
@@ -121,7 +143,7 @@ Reads a LIS file and writes out tab separated values of each frame."""
         optParser.print_help()
         optParser.error("I can't do much without a path to the LIS file.")
         return 1
-    dumpFrameSets(args[0], opts.keepGoing, opts.summary)
+    dumpFrameSets(args[0], opts.keepGoing, opts.summary, set([v.encode('ascii') for v in opts.channels]))
     clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')

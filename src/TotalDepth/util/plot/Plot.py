@@ -164,7 +164,7 @@ class CurvePlotData(object):
         self.prevWrap = None
     
     def __str__(self):
-        return '{!r:s} id={:s} fn={:s}'.format(self, self._id, self._fn)
+        return '{!r:s} id={!r:s} fn={!r:s}'.format(self, self._id, self._fn)
     
     @property
     def fn(self):
@@ -891,7 +891,9 @@ class Plot(object):
             plotUp=not theLasFile.logDown(),
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch)
-        logging.info('Plot.plotLogPassLAS(): Plotting SVG width={:s} depth={:s} ...'.format(myPlRo.widthDim, myPlRo.depthDim))
+        logging.info(
+            'Plot.plotLogPassLAS(): Plotting SVG width={!r:s} depth={!r:s} ...'.format(myPlRo.widthDim, myPlRo.depthDim)
+        )
         # Set up viewBox and viewPort
         myRootAttrs = {
             'viewBox'  : "0 0 {:.3f} {:.3f}".format(
@@ -1181,11 +1183,11 @@ class Plot(object):
                 myTxt = '{:s}'.format(myCurvCfg.mnem.pStr(strip=True))
                 # Add units if present
                 myUnits = theLpData.curveUnitsAsStr(myCurvCfg.outp)
-                assert(myUnits is not None), 'None returned for curve: "{:s}"'.format(myCurvCfg.outp)
+                assert(myUnits is not None), 'None returned for curve: "{!r:s}"'.format(myCurvCfg.outp)
                 if len(myUnits.strip()) > 0:
-                    myTxt += ' [{:s}]'.format(myUnits)
+                    myTxt += ' [{!r:s}]'.format(myUnits)
                 xS.characters(myTxt)            
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotScale() curve={:s} {:s} END'.format(aSsc.curveName.pStr(), str(isTop)))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotScale() curve={!r:s} {!r:s} END'.format(aSsc.curveName.pStr(), isTop))
 
     def _retPlotScaleDepth(self, theSscS):
         """Returns a Coord.Dim() of the amount of space needed to plot the
@@ -1315,8 +1317,7 @@ class Plot(object):
         thePlRo - The PlotRoll output configuration.
         xS - The SVG stream to write to. 
         """
-        logging.info('Plot._plotSingleOutput() plotting {!r:s}'.format(theOutpID))
-#        if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotSingleOutput() theOutpID={:s} '.format(theOutpID.pStr()))
+        logging.info('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
         assert(self._presCfg.usesOutpChannel(theFilmID, theOutpID))
         assert(theFrameHolder.hasOutpMnem(theOutpID))
         # Given an output ID select all curve IDs and iterate through their
@@ -1326,11 +1327,12 @@ class Plot(object):
         #
         myCurvIdS = self._presCfg.outpCurveIDs(theFilmID, theOutpID)
         myCurvPlotS = [CurvePlotData(c, self._presCfg[c].tracValueFunction(theFilmID)) for c in myCurvIdS]
-#        print('myCurvPlotS:', [str(c) for c in myCurvPlotS])
+        logging.debug('Plot._plotSingleOutput: myCurvPlotS: {!r:s}'.format([str(c) for c in myCurvPlotS]))
         xPrev = None
         ptPrevS = [None] * len(myCurvIdS)
         numPoints = 0
         numMathErrors = 0
+        if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
         for x, v in theFrameHolder.genOutpPoints(theOutpID):
             # If v is a null or absent value then flush the buffer and start again
             if v == theFrameHolder.nullValue:
@@ -1347,7 +1349,7 @@ class Plot(object):
                 except PRESCfg.ExceptionLineTransBaseMath:
                     numMathErrors += 1
                 else:
-#                    print('Plot._plotSingleOutput(): x={:8.3f} v={:8.3f} wr={:4s} pt={:8.3f}'.format(x, v, str(wr), pt))
+                    # print('Plot._plotSingleOutput(): x={:8.3f} v={:8.3f} wr={:4s} pt={:8.3f}'.format(x, v, str(wr), pt))
                     if wr != myCuPlot.prevWrap and xPrev is not None and ptPrevS[cuIdx] is not None:
                         # Interpolate wrapping
                         self._interpolateBackup(
@@ -1370,6 +1372,8 @@ class Plot(object):
                     myCuPlot.prevWrap = wr
                     ptPrevS[cuIdx] = pt
             xPrev = x
+        logging.info('DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
+        if COMMENTS_IN_SVG_TRACE: xS.comment(' DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
         for cuPlot in myCurvPlotS:
             self._flushPolyLineBuffer(cuPlot, xS)
         if numMathErrors > 0:
@@ -1485,8 +1489,27 @@ class Plot(object):
         3, (1,0,2) - Add pair 0 to existing polyline and flush, start new polyline with 1,2.
         5, (1,2,2) - Add pair 0 to existing polyline and flush, crossing line with 1,2, start new polyline with 3,4.
         Then 7 (1,4,2), 9 (1,6,2) etc.
+
+        An egrecious case is 300025.S03 where TNPH [V/V ]has these values:
+        V: -0.078       1516301.25
+        X: 450060.0     450000.0
+        This is -2,527,168 wraps. NPOR is similar.
+        This has to be fixed here in _retInterpolateWrapPoints() as the idea building a list of 2m cLineS and
+        calling _filterCrossLineList() to filter them blows the memory.
+        Here are the actual values:
+        XAXIS [b'.1IN'] b'TNPH' [b'V/V ']   b'NPOR' [b'V/V ']
+        450120.0 	    -0.0782128	        0.84
+        450060.0 	    -0.0781904	        0.84
+        450000.0 	    1.5163e+06	        2.42385e+08
+        449940.0 	    0.608137	        230.553
+        449880.0 	    0.359284	        0.166243
+        449820.0 	    0.295198	        0.211552
+        449760.0 	    0.427305	        0.427305
         """
         assert(wrapPrev != wrapNow)
+        # print('TRACE:', '_retInterpolateWrapPoints(', theTwd, theLtb, xPrev, xNow, pNow, wrapPrev, wrapNow, ')')
+        # assert abs(wrapPrev) < 10, 'Far too many wrapPrev'
+        # assert abs(wrapNow) < 10, 'Far too many wrapNow'
         polyEnd = None
         crossLines = []
         polyNew = []
@@ -1509,17 +1532,24 @@ class Plot(object):
             else:
                 polyEnd = (x, theTwd.leftP)
         # Now compute C, the crossing lines
-        while abs(wrapDiff) > 1:
+        # Limit number of wraps
+        if abs(wrapDiff) > 2 * self.MAX_BACKUP_TRACK_CROSSING_LINES:
+            wrapIncrement = abs(wrapDiff) // 4 * self.MAX_BACKUP_TRACK_CROSSING_LINES
+            print('TRACE: Plot._retInterpolateWrapPoints(): increasing wrapIncrement=', wrapIncrement, wrapDiff)
+            logging.debug('Plot._retInterpolateWrapPoints(): increasing wrapIncrement=', wrapIncrement)
+        else:
+            wrapIncrement = 1
+        while abs(wrapDiff) > wrapIncrement:
             if wrapDiff > 0:
                 crossLines.append((x, theTwd.leftP))
                 x += 2 * xInc
                 crossLines.append((x, theTwd.rightP))
-                wrapDiff -= 1
+                wrapDiff -= wrapIncrement
             else:
                 crossLines.append((x, theTwd.rightP))
                 x += 2 * xInc
                 crossLines.append((x, theTwd.leftP))
-                wrapDiff += 1
+                wrapDiff += wrapIncrement
         # Finally S the 'incoming' line from the track edge to the new point
         if not theLtb.offScale(wrapNow):
             if wrapDiff > 0:

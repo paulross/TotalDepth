@@ -1,123 +1,123 @@
 <?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="8in" version="1.1" width="6.25in" xmlns="http://www.w3.org/2000/svg">
+<svg height="8.000in" version="1.1" width="6.250in" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(0,0)">
-    <rect fill="black" height="2in" width="6.25in" x="0in" y="0in"/>
-    <rect fill="none" height="0.3in" stroke="blue" stroke-width="2.0" width="2in" x="1.2in" y="2.05in"/>
-    <rect fill="blue" height="0.3in" stroke="blue" stroke-width="2.0" width="2in" x="1.2in" y="2.35in"/>
-    <text fill="white" font-family="Verdana" font-size="24" font-weight="bold" text-anchor="middle" x="2.2in" y="2.6in">TotalDepth</text>
-    <rect fill="none" height="8in" stroke="blue" stroke-width=".5" width="6.25in" x="0in" y="0in"/>
-    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="0.35in">Company:</text>
-    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="0.85in">Well:</text>
-    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="1.35in">Field:</text>
-    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.2in" y="1.85in">Rig:</text>
-    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="3.2in" y="1.85in">Country:</text>
-    <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="2.7in" x="1.3167in" y="2.7in"/>
-    <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="2.25in" x="4.0167in" y="2.7in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.0667in" y="2.825in">Elev:</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.5667in" y="2.825in">KB</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.5667in" y="2.975in">GL</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.5667in" y="3.125in">DF</text>
-    <rect fill="none" height="0.5in" stroke="black" stroke-width=".5" width="4.9375in" x="1.3167in" y="3.2in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.3667in" y="3.325in">Permanent Datum:</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.3667in" y="3.475in">Log Measured From:</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.3667in" y="3.625in">Drilling Measured From:</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.0667in" y="3.325in">Elev:</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.8667in" y="3.475in">above permanent datum</text>
-    <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="2in" x="2in" y="3.7in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.55in" y="3.825in">Max. Well Deviation</text>
-    <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="1.125in" x="4in" y="3.7in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.3in" y="3.825in">Latitude</text>
-    <rect fill="none" height="0.3in" stroke="black" stroke-width=".5" width="1.125in" x="5.125in" y="3.7in"/>
+    <rect fill="black" height="2.000in" width="6.250in" x="0.000in" y="0.000in"/>
+    <rect fill="none" height="0.300in" stroke="blue" stroke-width="2.0" width="2.000in" x="1.200in" y="2.050in"/>
+    <rect fill="blue" height="0.300in" stroke="blue" stroke-width="2.0" width="2.000in" x="1.200in" y="2.350in"/>
+    <text fill="white" font-family="Verdana" font-size="24" font-weight="bold" text-anchor="middle" x="2.200in" y="2.600in">TotalDepth</text>
+    <rect fill="none" height="8.000in" stroke="blue" stroke-width=".5" width="6.250in" x="0.000in" y="0.000in"/>
+    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.200in" y="0.350in">Company:</text>
+    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.200in" y="0.850in">Well:</text>
+    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.200in" y="1.350in">Field:</text>
+    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="0.200in" y="1.850in">Rig:</text>
+    <text fill="white" font-family="Verdana" font-size="18" font-weight="bold" text-anchor="start" x="3.200in" y="1.850in">Country:</text>
+    <rect fill="none" height="0.500in" stroke="black" stroke-width=".5" width="2.700in" x="1.317in" y="2.700in"/>
+    <rect fill="none" height="0.500in" stroke="black" stroke-width=".5" width="2.250in" x="4.017in" y="2.700in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.067in" y="2.825in">Elev:</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.567in" y="2.825in">KB</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.567in" y="2.975in">GL</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.567in" y="3.125in">DF</text>
+    <rect fill="none" height="0.500in" stroke="black" stroke-width=".5" width="4.938in" x="1.317in" y="3.200in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.367in" y="3.325in">Permanent Datum:</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.367in" y="3.475in">Log Measured From:</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="1.367in" y="3.625in">Drilling Measured From:</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.067in" y="3.325in">Elev:</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.867in" y="3.475in">above permanent datum</text>
+    <rect fill="none" height="0.300in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="3.700in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.550in" y="3.825in">Max. Well Deviation</text>
+    <rect fill="none" height="0.300in" stroke="black" stroke-width=".5" width="1.125in" x="4.000in" y="3.700in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.300in" y="3.825in">Latitude</text>
+    <rect fill="none" height="0.300in" stroke="black" stroke-width=".5" width="1.125in" x="5.125in" y="3.700in"/>
     <text font-family="Verdana" font-size="9" text-anchor="start" x="5.425in" y="3.825in">Longitude</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.05in" y="4.125in">Other Services:</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.125in">Logging Date</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.1667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.2917in">Run Number</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.1667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.3333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.4583in">Depth Driller</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.3333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.5in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.625in">Depth Logger</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.5in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.6667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.7917in">Bottom Log Interval</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.6667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="4.8333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="4.9583in">Top Log Interval</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="4.8333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.125in">Casing Driller Size @ Depth</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.1667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.2917in">Casing Logger</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.1667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.3333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.4583in">Bit Size</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.3333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.5in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.625in">Type of Fluid in the Hole</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.5in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.6667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.7917in">Mud: Density, Viscosity</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.6667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="5.8333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="5.9583in">Mud: Fluid Loss, Ph</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="5.8333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.125in">Mud: Source of Sample</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.1667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.2917in">Rm @ Measured Temperature</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.1667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.3333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.4583in">Rmf @ Measured Temperature</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.3333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.5in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.625in">Rmc @ Measured Temperature</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.5in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.6667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.7917in">Source: Rmf, Rmc</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.6667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="6.8333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="6.9583in">Rm @ MRT, Rmf @ MRT</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="6.8333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.125in">Max. Recorded Temperature</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.1667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.2917in">Time circulation stopped</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.1667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.3333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.4583in">Time logger at bottom</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.3333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.5in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.625in">Logging unit and location</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.5in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.6667in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.7917in">Recorded by</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.6667in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="0in" y="7.8333in"/>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.05in" y="7.9583in">Witnessed by</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="2in" x="2in" y="7.8333in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="4.050in" y="4.125in">Other Services:</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.000in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.125in">Logging Date</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.000in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.167in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.292in">Run Number</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.167in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.333in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.458in">Depth Driller</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.333in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.500in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.625in">Depth Logger</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.500in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.667in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.792in">Bottom Log Interval</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.667in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="4.833in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="4.958in">Top Log Interval</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="4.833in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.000in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.125in">Casing Driller Size @ Depth</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.000in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.167in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.292in">Casing Logger</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.167in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.333in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.458in">Bit Size</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.333in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.500in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.625in">Type of Fluid in the Hole</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.500in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.667in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.792in">Mud: Density, Viscosity</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.667in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="5.833in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="5.958in">Mud: Fluid Loss, Ph</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="5.833in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.000in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.125in">Mud: Source of Sample</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.000in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.167in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.292in">Rm @ Measured Temperature</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.167in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.333in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.458in">Rmf @ Measured Temperature</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.333in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.500in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.625in">Rmc @ Measured Temperature</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.500in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.667in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.792in">Source: Rmf, Rmc</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.667in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="6.833in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="6.958in">Rm @ MRT, Rmf @ MRT</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="6.833in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.000in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.125in">Max. Recorded Temperature</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.000in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.167in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.292in">Time circulation stopped</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.167in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.333in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.458in">Time logger at bottom</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.333in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.500in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.625in">Logging unit and location</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.500in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.667in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.792in">Recorded by</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.667in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="7.833in"/>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="0.050in" y="7.958in">Witnessed by</text>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="2.000in" x="2.000in" y="7.833in"/>
     <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="5.125in">@</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="6.2917in">@</text>
-    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="6.4583in">@</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="6.292in">@</text>
+    <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="6.458in">@</text>
     <text font-family="Verdana" font-size="9" text-anchor="start" x="2.925in" y="6.625in">@</text>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="2in" y="6.8333in"/>
-    <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="3in" y="6.8333in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="1.000in" x="2.000in" y="6.833in"/>
+    <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="1.000in" x="3.000in" y="6.833in"/>
     <g transform="translate(0,384) rotate(-90)">
-      <rect fill="none" height="1.15in" stroke="black" stroke-width=".5" width="2in" x="0in" y="0in"/>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.15in" y="0.225in">Rig:</text>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.15in" y="0.425in">Field:</text>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.15in" y="0.625in">Location:</text>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.15in" y="0.825in">Well:</text>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.15in" y="1.025in">Company:</text>
-      <rect fill="none" height="0.16667in" stroke="black" stroke-width=".5" width="1in" x="0.3in" y="1.15in"/>
-      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.55in" y="1.275in">LOCATION</text>
+      <rect fill="none" height="1.150in" stroke="black" stroke-width=".5" width="2.000in" x="0.000in" y="0.000in"/>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.150in" y="0.225in">Rig:</text>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.150in" y="0.425in">Field:</text>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.150in" y="0.625in">Location:</text>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.150in" y="0.825in">Well:</text>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.150in" y="1.025in">Company:</text>
+      <rect fill="none" height="0.167in" stroke="black" stroke-width=".5" width="1.000in" x="0.300in" y="1.150in"/>
+      <text font-family="Verdana" font-size="9" text-anchor="start" x="0.550in" y="1.275in">LOCATION</text>
     </g>
   </g>
 </svg>
