@@ -12,14 +12,15 @@
 Indexing LIS Files
 ###############################
 
-This describes how TotalDepth indexes LIS files to achieve high performance. It would be equally applicable to any other similar binary format such as RP66 (DLIS) or SEG-Y files.
+Most petrophysical files are recorded in real time and the recording format is sequential, thus everything depends on what has gone before. This is not very satisfactory for the user who might well wish to access the data in a arbitrary manner - "give me these curves over this interval". The solution is to create an index to the original file so that it can be accessed *as if* it is a random access file.
 
+Here we describe how that indexing works and the performance it achieves for the user.
 
 ***************************************************
 Introduction
 ***************************************************
 
-The LIS file format is a binary, self describing, sequential format with multiple layers of encoding and, in practice, no forward references. LIS files can be large and, generally speaking, the greater part of the file consists of frame data whose format is invariant within any particular Log Pass.
+The LIS file format is a binary, self describing, sequential format with multiple layers of encoding and, in practice, no forward references. LIS files can be large and, generally speaking, the greater part of the file consists of frame data whose format is invariant within any particular :term:`Log Pass`.
 
 In a dynamic situation, such as a user reading the file, the *instantaneous* amount of data needed from a LIS file is small compared with the file size. For example plotting 200 feet of a 50Mb file might need only 1/3000 of the data in the file. As the LIS file format is geared to sequential recording, not random access, accessing such a small amount efficiently needs additional software cunning.
 
@@ -28,7 +29,7 @@ TotalDepth's approach to this is to use *indexing*. The essential requirements f
 * Fast to create an index.
 * The index is small.
 * The index has sufficiently useful granularity.
-* The index can be serialised in a number of ways (as a minimum; binary, XML).
+* The index can be serialised in a number of ways (as a minimum; XML, binary (e.g. 'pickle'), JSON?).
 * The indexer design is flexible and extensible.
 
 Apart from the cost of design and coding a solution the cost/benefit of indexing can be measured thus:
@@ -53,7 +54,8 @@ TotalDepth's LIS indexer works on several levels:
 | Logical Records with frame data      | Runs of these can be efficiently indexed with Run Length Encoding               |
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Within a Logical Record              | Accessing a particular frame and channel can be by computation with the help    |
-| containing frame data                | of a frame index. In particular this can identify seek/read sequences.          |
+| containing frame data                | of a frame index. In particular this can identify seek/read sequences of any    |
+|                                      | value from any channel in O(1) time.                                            |
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Indexing a LIS File
