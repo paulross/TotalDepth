@@ -71,7 +71,7 @@ Index Completion
 -----------------------
 The bootstrap information passed to the server allows the server to construct a virtual, partial, logical image of the file. The server may request further information in the form of an ordered list of pairs ``[(file position, number of bytes), ...]``. The client does a series of seek/read operations and passes the data back to the server as a list of pairs ``[(file position, bytes), ...]``. This allows the server to complete the file index.
 
-The total size of the data transferred to the server at this stage is typically 0.6% of the file size. See :ref:`totaldepth-tech-indexing` for a description of how LIS files are indexed and :ref:`totaldepth-tech-indexing.IndexSize` for a study of index sizes.
+The total size of the data transferred to the server at this stage is typically 0.6% of the file size. See :ref:`TotalDepth-tech-indexing` for a description of how LIS files are indexed and :ref:`TotalDepth-tech-indexing.IndexSize` for a study of index sizes.
 
 Rest of Session
 =====================

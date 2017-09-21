@@ -10,7 +10,7 @@ Installing TotalDepth
 From PyPi
 ========================
 
-TODO
+TODO.
 
 From GitHub
 ===========================
@@ -37,17 +37,39 @@ Install the dependencies, ``numpy`` and ``Cython``::
     (TotalDepth) $ pip install numpy
     (TotalDepth) $ pip install Cython
     
-If you want to build the documentation you need to ``pip install Sphinx``.
-
 Install TotalDepth::
 
     (TotalDepth) $ python setup.py install
 
-Run TotalDepth's tests::
+Install the test dependencies and run TotalDepth's tests::
 
     (TotalDepth) $ pip install pytest
     (TotalDepth) $ pip install pytest-runner
     (TotalDepth) $ python setup.py test
+
+Developing with TotalDepth
+----------------------------
+
+If you are developing with TotalDepth you need test coverage and documentation tools.
+
+Test Coverage
+^^^^^^^^^^^^^^^^
+
+Install ``pytest-cov``::
+
+    $ pip install pytest-cov
+    $ pytest --cov=TotalDepth --report html tests/
+
+
+Documentation
+^^^^^^^^^^^^^^^^
+
+If you want to build the documentation you need to::
+
+    $ pip install Sphinx
+    $ cd docs
+    $ make html
+
 
 System Testing
 --------------------------
@@ -58,4 +80,3 @@ Unit Testing
 --------------------------
 
 See :doc:`testing/unit_tests` for more information about testing and unit tests.
-

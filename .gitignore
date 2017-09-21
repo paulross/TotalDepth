@@ -56,3 +56,6 @@ TotalDepth.egg-info/
 
 .idea
 
+# The contents is created when testing and have data that is randomly generated.
+tests/unit/test_util/test_plot/
+

@@ -376,7 +376,7 @@ Heading           Description
 ================  ============================================================================================================
 
 
-.. _totaldepth-LIScmdline-LisToHtml:
+.. _TotalDepth-LIScmdline-LisToHtml:
 
 LisToHtml.py
 ----------------------
@@ -642,7 +642,7 @@ DeTIF with write::
 Index.py
 ----------------------
 
-This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`totaldepth-tech-indexing` for more information about the design and performance of LIS indexing.
+This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`TotalDepth-tech-indexing` for more information about the design and performance of LIS indexing.
 
 Arguments
 ^^^^^^^^^

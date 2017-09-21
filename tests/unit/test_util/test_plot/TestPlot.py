@@ -62,11 +62,11 @@ from TotalDepth.util import ExecTimer
 ######################
 import unittest
 
-from . import TestPlotShared
-from . import TestLogHeader
-from . import TestPlotLASData
-from . import TestLgFormatXMLData
-
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+import TestPlotShared
+import TestLogHeader
+import TestPlotLASData
+import TestLgFormatXMLData
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
@@ -4308,7 +4308,7 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_SingleSquareCurveLowFreq))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_SingleSquareCurveHighFreq))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_HDT))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_HDT_25))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_HDT_20))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_HDT_40))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_SuperSampled))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLIS_COLO_Named))

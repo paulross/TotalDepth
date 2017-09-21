@@ -9,7 +9,7 @@ A Bag Full of TODO's
 
 This is just a gathering area for work items that should be done at some point.
 
-TotalDepth is currently at **Alpha**, release version 0.1.0.
+TotalDepth is currently at **Alpha**, release version |release|.
 
 **************************
 Current Release

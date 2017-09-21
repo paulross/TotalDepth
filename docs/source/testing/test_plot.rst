@@ -6,10 +6,9 @@ This is a comprehensive testing of your installation to see if LIS/LAS files can
 Running the test
 -----------------------
 
-TestPlot is a unit test and is invoked thus::
+TestPlot is a unit test which also has performance tests within it. It is invoked thus::
 
-	cd <TOTALDEPTH>/TotalDepth/util/plot
-	python3 test/TestPlot.py
+	$ python tests/unit/test_util/test_plot/TestPlot.py
 
 The response should be something like::
 
@@ -57,12 +56,12 @@ The important thing is that there should be no reported failures.
 Results
 -------------
 
-You should find in the directory :file:`{<TOTALDEPTH>}/TotalDepth/util/plot/test_svg` a set of test plots.
+You should find in the directory :file:`{<TOTALDEPTH>}/tests/unit/test_util/test_plot/test_svg` a set of test plots.
 
 Index
 ^^^^^^^^^^
 
-This directory has an :file:`{<TOTALDEPTH>}/TotalDepth/util/plot/test_svg/index.html` that looks like this:
+This directory has an :file:`{<TOTALDEPTH>}/tests/unit/test_util/test_plot/test_svg/index.html` that looks like this:
 
 .. image:: images/TestPlotIndex.png
 
