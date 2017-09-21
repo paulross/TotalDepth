@@ -3,7 +3,7 @@
 
 .. TotalDepth introduction
 
-.. _totaldepth-intro:
+.. _TotalDepth-intro:
 
 ###############################
 Introduction to TotalDepth
@@ -22,5 +22,3 @@ Software Technology
 For rapid development and performance TotalDepth is written in `Python <http://www.python.org>`_ with performance critical code written in C/C++ or `Cython <http://www.cython.org>`_.
 
 TotalDepth was developed using :abbr:`TDD (Test Driven Development)` in an agile fashion using *nano-iterations*.
-
-

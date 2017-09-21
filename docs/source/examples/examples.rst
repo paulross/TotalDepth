@@ -3,7 +3,7 @@
 
 .. Examples of TotalDepth output
 
-.. _totaldepth-examples:
+.. _TotalDepth-examples:
 
 ###############################
 TotalDepth Example Outputs
@@ -11,7 +11,7 @@ TotalDepth Example Outputs
 
 This shows some examples of the kind of thing that TotalDepth can do.
 
-.. _totaldepth-examples-plots:
+.. _TotalDepth-examples-plots:
 
 **********************************
 Wireline Plots
@@ -63,7 +63,7 @@ The following options have been set:
 * Recursive search of input directory: ``-r``
 * Uses any available plot specifications from LgFormat XML files which result in 4 curves or more being plotted: ``-X 4``
 
-This took around six seconds to compute. More detail on the ``PlotLogs.py`` is here: :ref:`totaldepth-cmdline-PlotLogs`
+This took around six seconds to compute. More detail on the ``PlotLogs.py`` is here: :ref:`TotalDepth-cmdline-PlotLogs`
 
 **********************************
 LIS Log HTML Summaries
@@ -86,13 +86,13 @@ The following options have been set:
 * Multiprocessing on with 4 simultaneous jobs: ``-j4``
 * Recursive search of input directory: ``-r``
 
-More detail on the ``LisToHtml.py`` is here: :ref:`totaldepth-LIScmdline-LisToHtml`
+More detail on the ``LisToHtml.py`` is here: :ref:`TotalDepth-LIScmdline-LisToHtml`
 
 .. rubric:: Footnotes
 
-.. [#] Probably the best SVG support among current browsers is `Opera <http://www.opera.com>`_ [opera.com].
+.. [#] There is good SVG support among current browsers such as `Opera <http://www.opera.com>`_,  `Chrome <https://www.google.com/chrome/>`_ and  `Safari <https://www.apple.com/safari/>`_. You can find a comparison of browser support for SVG at `Wikipedia <https://en.wikipedia.org/wiki/Comparison_of_layout_engines_%28Scalable_Vector_Graphics%29>`_.
 .. [#] Thanks to the `University of Kansas <http://www.kgs.ku.edu/Magellan/Logs/index.html>`_ [kgs.ku.edu] for the original data. For these examples that data has been edited or truncated or both.
-.. [#] A *useful* plot format is one that can handle at least *n* curves where *n* is a number that is specified by the user.
+.. [#] A *useful* plot format is one that can handle at least *n* curves where *n* is a number that is specified by the user. If the user specifies 4 then there will be at least 4 curves on each plot.
 
 
 

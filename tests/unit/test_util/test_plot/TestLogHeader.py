@@ -43,7 +43,8 @@ from TotalDepth.util.plot import SVGWriter
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import LogHeader
 
-from . import TestPlotShared
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+import TestPlotShared
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 

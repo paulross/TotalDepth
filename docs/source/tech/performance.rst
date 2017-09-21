@@ -6,7 +6,7 @@
 .. toctree::
     :maxdepth: 2
    
-.. _totaldepth-tech-LIS_read_perf:
+.. _TotalDepth-tech-LIS_read_perf:
 
 ####################################
 Performance of TotalDepth
@@ -232,7 +232,7 @@ For the sake of completeness, here are all the results:
 Summary
 ==========================
 
-The low level performance of TotalDepth is pretty good. FrameSet performance is satisfactory. Further improvement is likely if (as for the Indexing :ref:`totaldepth-tech-indexing-perf_improve`) that the RawStream, TifMarker and PhysRec were to be rewritten in Cython or, preferably C/C++.
+The low level performance of TotalDepth is pretty good. FrameSet performance is satisfactory. Further improvement is likely if (as for the Indexing :ref:`TotalDepth-tech-indexing-perf_improve`) that the RawStream, TifMarker and PhysRec were to be rewritten in Cython or, preferably C/C++.
 
 .. rubric:: Footnotes
 

@@ -6,7 +6,7 @@
 .. toctree::
     :maxdepth: 2
    
-.. _totaldepth-tech-indexing:
+.. _TotalDepth-tech-indexing:
 
 ###############################
 Indexing LIS Files
@@ -206,7 +206,7 @@ The rising costs for smaller files is no real cause for concern, this represents
 
 Again the advantage in having 8kb Physical Records is evident in the lower right hand corner. The cost would be further reduced to around 1 to 1.5 ms/Mb by having 64kb Physical Records.
 
-.. _totaldepth-tech-indexing.IndexSize:
+.. _TotalDepth-tech-indexing.IndexSize:
 
 Multi-Processing
 ==================================================
@@ -258,7 +258,7 @@ The pickled size shows a wide range that is representative of the wide range of 
 
 The relative size of the index shows a strong downward trend (blue line) for files below 4Mb, before levelling off at the 0.1 to 3% mark. This is quite satisfactory for the use cases described above including SaaS. This graph clearly demonstrates O(N), or better, behaviour.
 
-.. _totaldepth-tech-indexing-perf_improve:
+.. _TotalDepth-tech-indexing-perf_improve:
 
 Performance Improvements
 =================================
@@ -277,7 +277,7 @@ The performance improvements would not necessarily combine as they are mutually 
 LIS Read Performance via an Index
 =====================================
 
-This is described here :ref:`totaldepth-tech-LIS_read_perf`
+This is described here :ref:`TotalDepth-tech-LIS_read_perf`
 
 Summary
 ===================
