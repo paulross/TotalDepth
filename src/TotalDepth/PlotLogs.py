@@ -376,7 +376,11 @@ class PlotLogPasses(object):
             myIdx = TotalDepth.LIS.core.FileIndexer.FileIndex(myFi)
         except ExceptionTotalDepthLIS as err:
             # Failed to read file of create index so not a LIS file
-            logging.debug('PlotLogPasses._processFileLIS(): Failed with error {!r:s}'.format(err))
+            logging.error('PlotLogPasses._processFileLIS(): Failed with error {!r:s}'.format(err))
+            return False
+        except Exception as err:
+            # Failed to read file of create index so not a LIS file
+            logging.critical('PlotLogPasses._processFileLIS(): Failed with error {!r:s}'.format(err))
             return False
         try:
             self.plotLogInfo.logPassCntr += myIdx.numLogPasses()
