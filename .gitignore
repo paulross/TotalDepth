@@ -54,5 +54,13 @@ tmp/
 dist/
 TotalDepth.egg-info/
 
+# PyCharm
 .idea
+
+# Coverage artifacts
+.coverage
+htmlcov/
+
+# Test generated code
+tests/unit/test_util/test_plot/test_svg/
 
