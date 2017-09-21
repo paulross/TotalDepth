@@ -19,7 +19,7 @@ These command line tools plot wireline data.
 
 .. _TotalDepth-cmdline-PlotLogs:
 
-PlotLogs.py
+tdplotlogs
 ===================
 
 Produces SVG plots from LIS and LAS files.
@@ -29,7 +29,7 @@ Usage
 
 Usage::
 
-    usage: PlotLogs.py [-h] [--version] [-j JOBS] [-k] [-l LOGLEVEL] [-g] [-r]
+    usage: tdplotlogs [-h] [--version] [-j JOBS] [-k] [-l LOGLEVEL] [-g] [-r]
                        [-A] [-x LGFORMAT] [-X LGFORMAT_MIN] [-s SCALE]
                        in out
 
@@ -87,11 +87,11 @@ LgFormat XML
 
 Using ``-x?`` to see what formats are available::
 
-    $ python3 PlotLogs.py -x? spam eggs
+    $ python3 tdplotlogs -x? spam eggs
     
 The output is something like::
 
-    Cmd: PlotLogs.py -x? spam eggs
+    Cmd: tdplotlogs -x? spam eggs
     XML LgFormats available: [29]
     UniqueId                              Description
     -----------------------------------   --------------------------------
@@ -129,11 +129,11 @@ The first column is the UniqueID to be used in identifying plots for the ``-x`` 
 
 Using ``-x??`` to see what formats and what curves would be plotted by each plot specification::
 
-    $ python3 PlotLogs.py -x?? a b
+    $ python3 tdplotlogs -x?? a b
     
 The output is something like::
 
-    Cmd: PlotLogs.py -x?? a b    
+    Cmd: tdplotlogs -x?? a b    
     XML LgFormats available: [29]
     UniqueId                              Description
     -----------------------------------   --------------------------------
@@ -226,13 +226,13 @@ Here is an example of plotting LIS and LAS files in directory ``in/`` with the p
 
 The command line is::
 
-	$ python3 PlotLogs.py -A -j4 -r -X 4 in/ out/
+	$ python3 tdplotlogs -A -j4 -r -X 4 in/ out/
 
-First PlotLogs.py echos the command::
+First tdplotlogs echos the command::
 
-	Cmd: PlotLogs.py -A -j4 -r -X 4 in/ out/
+	Cmd: tdplotlogs -A -j4 -r -X 4 in/ out/
 
-When complete PlotLogs.py writes out a summary, first the number of files read (output is wrapped here with '\\' for clarity)::
+When complete tdplotlogs writes out a summary, first the number of files read (output is wrapped here with '\\' for clarity)::
 
 	plotLogInfo PlotLogInfo <__main__.PlotLogInfo object at 0x101e0da90> \
 		Files=23 \
@@ -306,7 +306,7 @@ Finally the total number of curve feet plotted and the time it took::
 	Exec. time =   25.119 (S)
 	Bye, bye!
 
-In this case (under Unix) the "CPU Time" is the cumulative amount of CPU time used. As we are using multiprocessing it is the CPU time of the parent process which is very small since it just invokes child processes. The Exec. time is the wall clock time between starting and finishing PlotLogs.py.
+In this case (under Unix) the "CPU Time" is the cumulative amount of CPU time used. As we are using multiprocessing it is the CPU time of the parent process which is very small since it just invokes child processes. The Exec. time is the wall clock time between starting and finishing tdplotlogs.
 
 In the output directory will be an index.html file that has a table with the fields that duplicate those on the command line output. It looks like this:
 

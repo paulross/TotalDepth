@@ -9,7 +9,21 @@ LIS Command Line Tools
 
 This describes the command line tools that are available for processing LIS files.
 
-The tools are located in ``TotalDepth/src/TotalDepth/LIS``
+=========================== ===========================================================================
+Tool Name                   Description
+=========================== ===========================================================================
+``tdlisdetif``              Removes TIF markers from a LIS file.
+``tdlisdumpframeset``       Writes out the frame values as a CSV file.
+``tdlisindex``              Indexes a LIS file.
+``tdlisplotlogpasses``      Plots the log data as SVG pages.
+``tdlisscanlogidata``       Scans the logical data.
+``tdlisscanlogirecord``     Scans all Logical records.
+``tdlisscanphysrec``        Scans all the Physical Records.
+``tdlistablehistogram``     Analyses the contents of table Logical Records.
+``tdlistohtml``             Generates a HTML page about the LIS file.
+``tdplotlogs``              Plots logs as SVG files.
+=========================== ===========================================================================
+
 
 ***************************************************
 Scanning LIS Files
@@ -17,7 +31,7 @@ Scanning LIS Files
 
 These command line tools scan LIS files without changing them.
 
-ScanPhysRec.py
+``tdlisscanphysrec``
 ----------------------
 
 Scans a LIS79 file and reports the Physical Record structure.
@@ -47,7 +61,7 @@ Examples
 
 Example of scanning a non-TIF encoded file::
 
-    $ python3 ScanPhysRec.py LIS.lis 
+    $ ``tdlisscanphysrec`` LIS.lis 
     Cmd: ScanPhysRec.py LIS.lis
     PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum   LR Attr [Total LD]
     -------------------------------------- start --------------------------------------
@@ -86,7 +100,7 @@ Example of scanning a non-TIF encoded file::
     CPU time =    0.001 (S)
     Bye, bye!
 
-First ScanPhysRec.py echo's the command line then it scans the Physical Records an writes out a table that has the following columns:
+First ``tdlisscanphysrec`` echo's the command line then it scans the Physical Records an writes out a table that has the following columns:
 
 ==============  ============================================================================================================
 Heading         Description 
@@ -135,8 +149,8 @@ Heading         Description
 ``Next``        The file position of the next TIF marker as a hex integer.
 ==============  ============================================================================================================
 
-ScanLogiRec.py
-----------------------
+``tdlisscanlogirecord``
+------------------------
 
 Scans a LIS79 file and reports the Logical Record structure.
 
@@ -168,7 +182,7 @@ Examples
 
 Example of scanning a LIS file::
 
-    $ python3 ScanLogiRec.py RW.lis 
+    $ tdlisscanlogirecord RW.lis 
     Cmd: ScanLogiRec.py RW.lis
     0x00000000 <TotalDepth.LIS.core.LogiRec.LrFileHeadRead object at 0x1007981d0>: "File header"
     2012-02-08 17:43:45,078 WARNING  LrTableRead(): Discarding duplicate row b'BS7 ' in table b'CONS'
@@ -190,7 +204,7 @@ Example of scanning a LIS file::
     CPU time =    0.064 (S)
     Bye, bye!
 
-ScanLogiData.py
+``tdlisscanlogidata``
 ----------------------
 
 Scans a LIS79 file and reports the Logical Record structure.
@@ -225,7 +239,7 @@ Examples
 
 Example of scanning a LIS file::
 
-    $ python3 ScanLogiData.py LIS.lis 
+    $ ``tdlisscanlogidata`` LIS.lis 
     Cmd: ScanLogiData.py LIS.lis
     Offset        Length  Type  Logical Data
     0x00000000        58   128  b'\x80\x00RUN1R .S01\x00\x00DAT2TF            '...
@@ -256,7 +270,7 @@ Example of scanning a LIS file::
     CPU time =    0.001 (S)
     Bye, bye!
 
-First ScanLogiData.py echo's the command line then it scans the file an writes out a table that has the following columns:
+First ``tdlisscanlogidata`` echo's the command line then it scans the file an writes out a table that has the following columns:
 
 ================  ============================================================================================================
 Heading           Description 
@@ -296,7 +310,7 @@ To this::
 Extracting Data from LIS
 ***************************************************
 
-DumpFrameSet.py
+``tdlisdumpframeset``
 ----------------------
 
 Reads a LIS file and writes out tab separated values of each frame.
@@ -328,7 +342,7 @@ Examples
 
 ::
 
-    $ python3 DumpFrameSet.py LIS.lis 
+    $ ``tdlisdumpframeset`` LIS.lis 
     Cmd: DumpFrameSet.py LIS.lis
     2012-02-09 08:41:38,372 INFO     Index.indexFile(): LIS.lis
     <TotalDepth.LIS.core.LogPass.LogPass object at 0x101a0c510>
@@ -378,7 +392,7 @@ Heading           Description
 
 .. _TotalDepth-LIScmdline-LisToHtml:
 
-LisToHtml.py
+``tdlistohtml``
 ----------------------
 
 Generates HTML from input LIS file or directory to an output destination.
@@ -418,11 +432,11 @@ Examples
 
 Command to process a directory of LIS::
 
-    $ python3 LisToHtml.py Simple LIS_plot/Simple_00
+    $ ``tdlistohtml`` Simple LIS_plot/Simple_00
 
 Output::
 
-    Cmd: LisToHtml.py Simple LIS_plot/Simple_00
+    Cmd: ``tdlistohtml`` Simple LIS_plot/Simple_00
     plotLogInfo:
     FileInfo: "Simple/LIS.lis" -> "LIS_plot/Simple_00/LIS.lis.html" 17 (kb) LR count=4 t=0.070
     FileInfo: "Simple/RW.lis" -> "LIS_plot/Simple_00/RW.lis.html" 843 (kb) LR count=12 t=3.206
@@ -461,8 +475,8 @@ Then there is a couple of tables, the first summarises the X axis and the second
 
 .. image:: images/LisToHtml_LogPass_01.png
 
-TableHistogram.py
---------------------
+``tdlistablehistogram``
+-------------------------
 
 Provides a count of elements in LIS tables.
 
@@ -503,7 +517,7 @@ Examples
 
 Count of all entries regardless of the table/row/column that they appear in::
 
-    $ python3 TableHistogram.py -l 40 Simple/
+    $ ``tdlistablehistogram`` -l 40 Simple/
     Cmd: TableHistogram.py -l 40 Simple/
     ======================== Count of all table entries =======================
     {"(34, b'    ')": 1414,
@@ -562,7 +576,7 @@ respectively and the value as a count of the number of occurrences.
 
 Filtering by Logical Record type, table name, row name and column name (note quoting of spaces)::
 
-    $ python3 TableHistogram.py -l 40 --type=34 --name=CONS --row="WN  " --col=VALU Simple/
+    $ ``tdlistablehistogram`` -l 40 --type=34 --name=CONS --row="WN  " --col=VALU Simple/
     Cmd: TableHistogram.py -l 40 --type=34 --name=CONS --row=WN   --col=VALU Simple/
     ======================== Count of all table entries =======================
     {"(34, b'CONS', b'WN  ', b'VALU', b'B897 - 14')": 1,
@@ -579,7 +593,7 @@ the value as a count of the number of occurrences.
 LIS Developer Tools
 ***************************************************
 
-DeTif.py
+``tdlisdetif``
 ----------------------
 
 Takes an input LIS79 file and writes out a new one without TIF markers.
@@ -611,7 +625,7 @@ Examples
 
 DeTIF with nervous mode just examines the file::
 
-    $ python3 DeTif.py -n RW.lis RW_No_TIF.lis 
+    $ ``tdlisdetif`` -n RW.lis RW_No_TIF.lis 
     Cmd: DeTif.py -n RW.lis RW_No_TIF.lis
     stripTif(): Tell: 0x00000000 Len: 0x00000000 TIF: TIF  True >:  0x       0  0x       0  0x       0
     stripTif(): Tell: 0x0000000c Len: 0x0000003e TIF: TIF  True >:  0x       0  0x       0  0x      4a
@@ -625,21 +639,19 @@ DeTIF with nervous mode just examines the file::
     ...
     stripTif(): Tell: 0x000d2b4e Len: 0x000000f6 TIF: TIF  True >:  0x       0  0x   d2748  0x   d2c44
     stripTif(): Tell: 0x000d2c50 Len: 0x0000003e TIF: TIF  True >:  0x       0  0x   d2b42  0x   d2c8e
-    2012-02-09 08:33:39,381 ERROR    Premature EOF of input so output terminated: RawStream.readAndUnpack(): EOF; read b'' but need 12 bytes
       CPU time =    0.022 (S)
     Exec. time =    0.022 (S)
     Bye, bye!
 
 DeTIF with write::
 
-    $ python3 DeTif.py RW.lis RW_No_TIF.lis 
+    $ ``tdlisdetif`` RW.lis RW_No_TIF.lis 
     Cmd: DeTif.py RW.lis RW_No_TIF.lis
-    2012-02-09 08:33:48,382 ERROR    Premature EOF of input so output terminated: RawStream.readAndUnpack(): EOF; read b'' but need 12 bytes
       CPU time =    0.019 (S)
     Exec. time =    0.019 (S)
     Bye, bye!
 
-Index.py
+``tdlisindex``
 ----------------------
 
 This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`TotalDepth-tech-indexing` for more information about the design and performance of LIS indexing.
@@ -681,7 +693,7 @@ Examples
 
 Simple scan of a single file::
 
-    $ python3 Index.py Simple/LIS.lis
+    $ ``tdlisindex`` Simple/LIS.lis
     Cmd: Index.py Simple/LIS.lis
     2012-02-09 09:36:28,039 INFO     Index.indexFile(): Simple/LIS.lis
     File size: 17708 (0.017 MB) Reference Time: 0.002459 (s) for Simple/LIS.lis pickleLen=4351 jsonLen=-1
@@ -694,7 +706,7 @@ Simple scan of a single file::
 
 Simple scan of a single file with verbose output::
 
-    $ python3 Index.py -v Simple/LIS.lis 
+    $ ``tdlisindex`` -v Simple/LIS.lis 
     Cmd: Index.py -v Simple/LIS.lis
     2012-02-09 09:39:29,493 INFO     Index.indexFile(): Simple/LIS.lis
     <TotalDepth.LIS.core.FileIndexer.FileIndex object at 0x10197fdd0> "Simple/LIS.lis" [4]:
@@ -733,7 +745,7 @@ Simple scan of a single file with verbose output::
 
 Scan of a directory (recursively) indexing each file 11 times and writing out statistics::
 
-    $ python3 Index.py -t11 -s -l 40 Simple/
+    $ ``tdlisindex`` -t11 -s -l 40 Simple/
     Cmd: Index.py -t11 -s -l 40 ../../../../TDTestData/LIS/Simple
     File size: 17708 (0.017 MB) Reference Time: 0.001670 (s) for Simple/LIS.lis pickleLen=4351 jsonLen=-1
     File size: 863374 (0.823 MB) Reference Time: 0.043411 (s) for Simple/RW.lis pickleLen=18231 jsonLen=-1
@@ -749,8 +761,8 @@ Scan of a directory (recursively) indexing each file 11 times and writing out st
     CPU time =    0.938 (S)
     Bye, bye!
 
-RandomFrameSetRead.py
-----------------------
+``tdXlisrandomframesetread``
+------------------------------
 
 For developers only. This is designed to measure the performance of loading and iterating across a frame-set.
 
