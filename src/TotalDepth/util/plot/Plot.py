@@ -1535,7 +1535,7 @@ class Plot(object):
         # Limit number of wraps
         if abs(wrapDiff) > 2 * self.MAX_BACKUP_TRACK_CROSSING_LINES:
             wrapIncrement = abs(wrapDiff) // 4 * self.MAX_BACKUP_TRACK_CROSSING_LINES
-            print('TRACE: Plot._retInterpolateWrapPoints(): increasing wrapIncrement=', wrapIncrement, wrapDiff)
+            # print('TRACE: Plot._retInterpolateWrapPoints(): increasing wrapIncrement=', wrapIncrement, wrapDiff)
             logging.debug('Plot._retInterpolateWrapPoints(): increasing wrapIncrement=', wrapIncrement)
         else:
             wrapIncrement = 1
