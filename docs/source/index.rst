@@ -25,7 +25,7 @@ Contents
 	
 	intro
 	examples/examples
-	install
+	installation
 	file_formats
 	cmd_line_tools/index_cmd_line_tools
 	tech/index_tech
@@ -40,7 +40,6 @@ Contents
 	history
 	readme
 	usage
-	installation
 
 For many year this project was hosted by `Sourceforge <https://sourceforge.net/projects/TotalDepth/>`_. Thank you Sourceforge!
 

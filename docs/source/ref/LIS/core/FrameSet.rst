@@ -12,7 +12,7 @@ The LIS Frame Set
 
 This describes the LIS FrameSet that contains the binary frame data. It is effectively a wrapper around a 2-D numpy array with specific APIs to interface that with a channel specific shape. Importantly FrameSets can be partial in that they need not hold all the data for every frame and every channel. Instead they can hold data for the frames and channels specified by the caller.
 
-The FrameSet module is located in ``TotalDepth/src/TotalDepth/LIS/core`` and can be imported thus::
+The FrameSet module is located in ``src/TotalDepth/LIS/core`` and can be imported thus::
 
 	from TotalDepth.LIS.core import FrameSet
 

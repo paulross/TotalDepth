@@ -20,10 +20,9 @@ Contents:
 	core/PhysRec
 	core/LogiRec
 	
+	core/FileIndexer
+	core/LogPass
+	core/FrameSet
+
 	core/Rle
 	core/Type01Plan
-	
-	core/FrameSet
-	core/LogPass
-	core/FileIndexer
-

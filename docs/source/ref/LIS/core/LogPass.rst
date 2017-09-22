@@ -7,9 +7,9 @@
 The LIS Log Pass
 ###############################
 
-This describes the LIS LogPass class that encapsulates a Log Pass.
+This describes the LIS LogPass class that encapsulates a Log Pass. A log pass is the binary log data plus the record (DFSR) that describes the format of the binary data. Internally the binary data is converted to a FrameSet that wraps a numpy array.
 
-The LogPass module is located in ``TotalDepth/src/TotalDepth/LIS/core`` and can be imported thus::
+The LogPass module is located in ``src/TotalDepth/LIS/core`` and can be imported thus::
 
 	from TotalDepth.LIS.core import LogPass
 
