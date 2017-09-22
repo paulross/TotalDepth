@@ -58,7 +58,7 @@ Test Coverage
 Install ``pytest-cov``::
 
     $ pip install pytest-cov
-    $ pytest --cov=TotalDepth --report html tests/
+    $ pytest --cov=TotalDepth --cov-report html tests/
 
 
 Documentation
