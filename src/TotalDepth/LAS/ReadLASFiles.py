@@ -91,10 +91,10 @@ class ReadLASFiles(object):
             self._cntrs['data'] += myLr.numDataPoints()
             self._procLAS(myLr)
         except LASRead.ExceptionLASRead as err:
-            logging.error('File: "{:s}", Error: {:s}'.format(fp, err))
+            logging.error('File: "{:s}", Error: {!r:s}'.format(fp, err))
             self._cntrs['erro'] += 1
         except Exception as err:
-            logging.critical('File: "{:s}", Error [{:s}]: {:s}'.format(fp, type(err), err))
+            logging.critical('File: "{:s}", Error [{!r:s}]: {!r:s}'.format(fp, type(err), err))
             logging.critical(traceback.format_exc())
             self._cntrs['crit'] += 1
         self._cntrs['file'] += 1
@@ -173,37 +173,48 @@ class ReadLASFiles(object):
         return str(l)
     
     def pprintMnemDesc(self, theS=sys.stdout):
-        theS.write('All mnemonics and their descriptions:\n')
+        theS.write(' All mnemonics and their descriptions '.center(75, '-'))
+        theS.write('\n')
         theS.write('{\n')
         for m in sorted(self._mnemDescMap.keys()):
             desc = self._retMostPopularDescription(self._mnemDescMap, m)
             theS.write('{:10s} : "{:s}",\n'.format('"{:s}"'.format(m), desc))
         theS.write('}\n')
-    
+        theS.write(' DONE: All mnemonics and their descriptions '.center(75, '-'))
+        theS.write('\n')
+
     def pprintCurveDesc(self, theS=sys.stdout):
-        theS.write('Curve mnemonics and their descriptions:\n')
-        theS.write('{\n')
+        theS.write(' Curve mnemonics and their descriptions '.center(75, '-'))
+        theS.write('\n')
         for m in sorted(self._curveDescMap.keys()):
             desc = self._retMostPopularDescription(self._curveDescMap, m)
             theS.write('{:10s} : "{:s}",\n'.format('"{:s}"'.format(m), desc))
         theS.write('}\n')
-    
+        theS.write(' DONE: Curve mnemonics and their descriptions '.center(75, '-'))
+        theS.write('\n')
+
     def pprintUnitDesc(self, theS=sys.stdout):
-        theS.write('Units and their mnemonic descriptions:\n')
-        theS.write('{\n')
+        theS.write(' Units and the channels that use them '.center(75, '-'))
+        theS.write('\n')
         for m in sorted(self._unitDescMap.keys()):
             desc = self._retMostPopularDescription(self._unitDescMap, m)
             theS.write('{:10s} : "{:s}",\n'.format('"{:s}"'.format(m), desc))
         theS.write('}\n')
-    
+        theS.write(' DONE: Units and the channels that use them '.center(75, '-'))
+        theS.write('\n')
+
     def pprintSizeTime(self, theS=sys.stdout):
-        theS.write('Size/Time (bytes/sec):\n')
+        theS.write(' Size/Time (bytes/sec) '.center(75, '-'))
+        theS.write('\n')
         for s in sorted(self._sizeTimeMap.keys()):
             for t in self._sizeTimeMap[s]:
                 theS.write('{:d}\t{:g}\n'.format(s, t))
+        theS.write(' DONE: Size/Time (bytes/sec) '.center(75, '-'))
+        theS.write('\n')
 
     def pprintWsd(self, theS=sys.stdout):
-        theS.write('self._wsdMnemCount:\n')
+        theS.write(' Count of well site mnemonics and the % of files that have them '.center(75, '-'))
+        theS.write('\n')
 #        theS.write(pprint.pformat(self._wsdMnemCount))
 #        theS.write('\n')
         theS.write('{\n')
@@ -220,6 +231,8 @@ class ReadLASFiles(object):
                 )
             )
         theS.write('}\n')
+        theS.write(' DONE: Count of well site mnemonics and the % of files that have them '.center(75, '-'))
+        theS.write('\n')
 
     def results(self):
         r = ['ReadLASFiles:']
@@ -235,7 +248,7 @@ class ReadLASFiles(object):
 
 def main():
     usage = """usage: %prog [options] dir
-Recursively reads LAS files in a directory reporting stuff about them."""
+Recursively reads LAS files in a directory reporting information about their contents."""
     print ('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
 #    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
@@ -272,12 +285,12 @@ Recursively reads LAS files in a directory reporting stuff about them."""
         optParser.error("I need a directory to read from!")
         return 1
     myReader = ReadLASFiles(args[0])
-#    myReader.pprintMnemDesc()
-#    myReader.pprintCurveDesc()
+    myReader.pprintMnemDesc()
+    myReader.pprintCurveDesc()
     myReader.pprintUnitDesc()
-#    pprint.pprint(myReader._mnemDescMap)
-#    myReader.pprintWsd()
-#    myReader.pprintSizeTime()
+    # pprint.pprint(myReader._mnemDescMap)
+    myReader.pprintWsd()
+    # myReader.pprintSizeTime()
     print(myReader.results())
     print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
