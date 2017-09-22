@@ -464,7 +464,8 @@ class FileIndex(object):
 
     def longDesc(self):
         """Returns a string that is the long description of this object."""
-        return '{:s} "{:s}" [{:d}]:\n  '.format(repr(self), self._fileId, len(self._idx)) \
+        return '{!r:s} "{!r:s}" [{:d}]:\n  '.format(
+            repr(self), self._fileId, len(self._idx)) \
         + '\n  '.join([str(i) for i in self._idx])
 
     def __len__(self):

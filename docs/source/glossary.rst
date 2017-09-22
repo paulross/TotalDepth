@@ -15,7 +15,7 @@ Glossary
 		*Enhanced* Log Information Standard. This adds somewhat to the [:term:`LIS-79`] standard.
 	
 	RP66
-		*Recomended Practice 66* is an API standard that describes a more advanced file format for, among other things, wireline logs. Comes in two flavours version 1 and version 2. Often (and incorrectly) referred to as :term:`DLIS`.
+		*Recommended Practice 66* is an API standard that describes a more advanced file format for, among other things, wireline logs. Comes in two flavours version 1 and version 2. Often (and incorrectly) referred to as :term:`DLIS`.
 		
 	DLIS
 		This adds schema specific semantics to :term:`RP66`.
@@ -67,11 +67,11 @@ Glossary
 		See :term:`Datum Specification Block`.
 		
 	Datum Specification Block
-		[:term:`LIS`] A fixed format data block that defines the characteristics of a single recorded channel in a DFSR.
+		[:term:`LIS`] A fixed format data block that defines the characteristics of a single, independent, data channel in a DFSR.
 		
 	Log Pass
-		A continuos run of data together with any formatting records required to interpret it. "Main Log", "Repeat Section" etc. are seperate examples of Log Pass(es).
-		In [:term:`LIS`] a Log Pass is defined by a :term:`DFSR` and zero or more type ``0| 1`` Logical Records.
+		A TotalDepth term that describes a continuos body of logging data such as "Repeat Section" or "Main Log".
+		In the :term:`LIS` format this is defined by a single Logical Record, the :term:`DFSR`, plus multiple type 0 or type 1 Logical Records that the DFSR describes.
 
 	Frame Set
 		A set of frames representing multi-channel data that is typically depth or time series based.
