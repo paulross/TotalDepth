@@ -222,17 +222,31 @@ Maximum     4003.3          13552.5         7.98
 
 There is a very slight (around 1-5%) additional cost over D but the huge benefit is being able to skip intermediate frames. This means that a low resolution plot (say 1:500) of a high resolution log (say sampling every 1.2 inches) could read every fifth frame (six inch sampling) and that would be plotted every 0.012" (say 1 pixel) as a speedup of almost 500%.
 
-All Measurments
+All Measurements
 --------------------------------------------------
 
 For the sake of completeness, here are all the results:
 
 .. image:: images/ReadCost.png
 
-Summary
-==========================
+.. _TotalDepth-tech-perf_improve:
 
-The low level performance of TotalDepth is pretty good. FrameSet performance is satisfactory. Further improvement is likely if (as for the Indexing :ref:`TotalDepth-tech-indexing-perf_improve`) that the RawStream, TifMarker and PhysRec were to be rewritten in Cython or, preferably C/C++.
+Performance Improvements
+=================================
+
+The low level performance of TotalDepth is pretty good. FrameSet performance is satisfactory. Further improvement is certain for :ref:`TotalDepth-tech-indexing-perf_improve` once the existing C code (in another project) is integrated into this one.
+
+Populating the frame is a costly exercise and the current solution takes this path::
+
+    File bytes -> Cython convert to C double -> convert to Python float -> insert into a numpy array.
+
+All this boxing and unboxing is expensive and a faster (but with more code complexity) is to populate the numpy array directly so this all happens in C code::
+
+    File bytes -> Convert to C double -> copy directly into numpy memory space
+
+This should provide a great speedup.
+
+The SVG creation is also worth looking at.
 
 .. rubric:: Footnotes
 

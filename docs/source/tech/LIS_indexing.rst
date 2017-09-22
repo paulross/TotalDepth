@@ -262,7 +262,7 @@ The relative size of the index shows a strong downward trend (blue line) for fil
 
 .. _TotalDepth-tech-indexing-perf_improve:
 
-Performance Improvements
+Indexing Performance Improvements
 =================================
 
 As noted above there is a substantial improvement in indexing when large Physical Record sizes are used.
@@ -272,9 +272,11 @@ It is also likely that significant improvement could be made if the RawStream, T
 So given an 'average' cost of indexing of 40 ms/Mb (i.e. a 'good' rating) the performance improvements could be:
 
 * Moving to larger Physical Record sizes: x8?
-* Pushing the Raw Stream/TIF/Physical Record handling code into Cython/C: x2-4?
+* Integrate the existing (in another project) code in C that handles Raw Stream/TIF/Physical Record handling into this project. This is known to be about x100 faster (and the index has a lower memory footprint).
 
 The performance improvements would not necessarily combine as they are mutually dependent but the combination might reduce the cost to around 2 to 8 ms/MB, an exceptionally good performance indeed.
+
+See :ref:`TotalDepth-tech-perf_improve` for other performance improvements
 
 LIS Read Performance via an Index
 =====================================
