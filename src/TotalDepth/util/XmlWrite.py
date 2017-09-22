@@ -278,8 +278,8 @@ class XmlStream(object):
                 #u = unichr(ord(c))
                 #retL.append(u.encode('ascii', 'xmlcharrefreplace'))
                 # Python 3.x code
-                retL.append(c)
-        return ''.join(retL)#.encode(self._enc, 'xmlcharrefreplace')
+                retL.append(c.encode('ascii', 'xmlcharrefreplace').decode(self._enc))
+        return ''.join(retL)
     
     def __enter__(self):
         """Context manager support."""

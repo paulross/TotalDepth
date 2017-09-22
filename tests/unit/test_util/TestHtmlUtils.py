@@ -68,7 +68,7 @@ class Test_retHtmlFileName(unittest.TestCase):
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)
         self.assertEqual(
-            'spam.lis_0a499c9c49dee920456848d72b8aabe2.html',
+            'spam.lis_87c42a1bc41f4b8579f088dce504d710.html',
             HtmlUtils.retHtmlFileName(myPath),
         )
 
@@ -80,7 +80,7 @@ class Test_retHtmlFileName(unittest.TestCase):
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)
         self.assertEqual(
-            'spam.lis_0a499c9c49dee920456848d72b8aabe2.html#4',
+            'spam.lis_87c42a1bc41f4b8579f088dce504d710.html#4',
             HtmlUtils.retHtmlFileLink(myPath, 4),
         )
 
@@ -108,7 +108,7 @@ class Test_XhtmlWrite(unittest.TestCase):
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
-  <a href="chips.lis_b19f66531f1ae9e3a9a56f5f309adbe9.html#47">Navigation text</a>
+  <a href="chips.lis_ca9b0f0a4f166e8fbd1ca3795e8adc76.html#47">Navigation text</a>
 </html>
 """,
             myF.getvalue(),
@@ -124,7 +124,7 @@ class Test_XhtmlWrite(unittest.TestCase):
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
-  <a href="chips.lis_b19f66531f1ae9e3a9a56f5f309adbe9.html#47">
+  <a href="chips.lis_ca9b0f0a4f166e8fbd1ca3795e8adc76.html#47">
     <span class="CSS_class">Navigation text</span>
   </a>
 </html>
@@ -208,25 +208,25 @@ class Test_writeFileListAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
       <td>
-        <a href="beans.lis_c80c1ea43cf3e65a59a2552cb3476ace.html">beans.lis</a>
+        <a href="beans.lis_71bb0c26c74b06cd02a4f56f3e17667f.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="chips.lis_e47053d61ff16de8204d458465683dba.html">chips.lis</a>
+        <a href="chips.lis_a11b6c9b0a5036efc32e9b30a09252fc.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="eggs.lis_6ea3da99bedf99f85e5ab62345077268.html">eggs.lis</a>
+        <a href="eggs.lis_97cf6bc2288e920398a47aee155da4a8.html">eggs.lis</a>
       </td>
     </tr>
   </table>
@@ -244,8 +244,8 @@ class Test_writeFileListAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -253,17 +253,17 @@ class Test_writeFileListAsTable(unittest.TestCase):
     <tr>
       <td rowspan="3">spam/</td>
       <td>
-        <a href="beans.lis_e6a41188a589cc6b52882b9cd7d22eb9.html">beans.lis</a>
+        <a href="beans.lis_bd0fa0db0dba3d5deae8b324f475096e.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="chips.lis_f429ae32a9c46981370bb498ad597041.html">chips.lis</a>
+        <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="eggs.lis_4bedd293e6272aaf67cd473127969aac.html">eggs.lis</a>
+        <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a>
       </td>
     </tr>
   </table>
@@ -282,8 +282,8 @@ class Test_writeFileListAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -291,23 +291,23 @@ class Test_writeFileListAsTable(unittest.TestCase):
     <tr>
       <td rowspan="4">spam/</td>
       <td colspan="2">
-        <a href="chips.lis_f429ae32a9c46981370bb498ad597041.html">chips.lis</a>
+        <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td colspan="2">
-        <a href="eggs.lis_4bedd293e6272aaf67cd473127969aac.html">eggs.lis</a>
+        <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a>
       </td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
       <td>
-        <a href="beans.lis_611b98b30977cffa010f98516f0f1d3f.html">beans.lis</a>
+        <a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="peas.lis_b33b7e7dc77fb7179df194fc00f6db0b.html">peas.lis</a>
+        <a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">peas.lis</a>
       </td>
     </tr>
   </table>
@@ -326,25 +326,25 @@ class Test_writeFileListAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListAsTable(myS, myFileLinkS, {}, True)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
       <td rowspan="4">spam/</td>
-      <td colspan="2">chips.lis:<a href="chips.lis_f429ae32a9c46981370bb498ad597041.html">chips.lis</a></td>
+      <td colspan="2">chips.lis:<a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a></td>
     </tr>
     <tr>
-      <td colspan="2">eggs.lis:<a href="eggs.lis_4bedd293e6272aaf67cd473127969aac.html">eggs.lis</a></td>
+      <td colspan="2">eggs.lis:<a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a></td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
-      <td>beans.lis:<a href="beans.lis_611b98b30977cffa010f98516f0f1d3f.html">beans.lis</a></td>
+      <td>beans.lis:<a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">beans.lis</a></td>
     </tr>
     <tr>
-      <td>peas.lis:<a href="peas.lis_b33b7e7dc77fb7179df194fc00f6db0b.html">peas.lis</a></td>
+      <td>peas.lis:<a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">peas.lis</a></td>
     </tr>
   </table>
 </html>
@@ -375,21 +375,21 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListTrippleAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myFileLinkS)
+        # print()
+        # print(myF.getvalue())
 #        print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
-      <td> <a href="0eggs.lis_d23a40cf926df40ac0a0567acdadd443.html">Link text 0</a></td>
+      <td> <a href="0eggs.lis_5fdd58d724c849dd9d217fbe6a35b3e6.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td> <a href="1chips.lis_10659a53a7e19d0a410fff859afda9bf.html">Link text 1</a></td>
+      <td> <a href="1chips.lis_3cdd79989f0c867f42464c2c02fa184f.html">Link text 1</a></td>
     </tr>
     <tr>
-      <td> <a href="2beans.lis_45bf4fdc3882cef7e749605e515b7624.html">Link text 2</a></td>
+      <td> <a href="2beans.lis_999dc8fa0c627e259d489d8694205092.html">Link text 2</a></td>
     </tr>
   </table>
 </html>
@@ -406,21 +406,21 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListTrippleAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
       <td rowspan="3">spam/</td>
-      <td> <a href="beans.lis_e6a41188a589cc6b52882b9cd7d22eb9.html">Link text 0</a></td>
+      <td> <a href="beans.lis_bd0fa0db0dba3d5deae8b324f475096e.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td> <a href="chips.lis_f429ae32a9c46981370bb498ad597041.html">Link text 1</a></td>
+      <td> <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">Link text 1</a></td>
     </tr>
     <tr>
-      <td> <a href="eggs.lis_4bedd293e6272aaf67cd473127969aac.html">Link text 2</a></td>
+      <td> <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">Link text 2</a></td>
     </tr>
   </table>
 </html>
@@ -438,25 +438,25 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeFileListTrippleAsTable(myS, myFileLinkS, {}, False)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
       <td rowspan="4">spam/</td>
-      <td colspan="2"> <a href="chips.lis_f429ae32a9c46981370bb498ad597041.html">Link text 0</a></td>
+      <td colspan="2"> <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td colspan="2"> <a href="eggs.lis_4bedd293e6272aaf67cd473127969aac.html">Link text 1</a></td>
+      <td colspan="2"> <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">Link text 1</a></td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
-      <td> <a href="beans.lis_611b98b30977cffa010f98516f0f1d3f.html">Link text 2</a></td>
+      <td> <a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">Link text 2</a></td>
     </tr>
     <tr>
-      <td> <a href="peas.lis_b33b7e7dc77fb7179df194fc00f6db0b.html">Link text 3</a></td>
+      <td> <a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">Link text 3</a></td>
     </tr>
   </table>
 </html>

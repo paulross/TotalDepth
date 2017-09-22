@@ -131,8 +131,8 @@ class TestXmlWrite(unittest.TestCase):
                     xS.characters(chr(65))
                 with XmlWrite.Element(xS, 'A'):
                     xS.characters(chr(128))
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
         self.assertEqual("""<?xml version='1.0' encoding="latin-1"?>
 <Root>
   <A>&lt;&amp;&gt;&quot;&apos;</A>

@@ -221,6 +221,9 @@ class TestReadStructClassInteger(TestReadStructClass):
         8192    : '>2048I',
     }
 
+    def _readStruct(self, theFormat):
+        return self._readStructCompiledNot(theFormat)
+
     def test_all(self):
         """TestReadStructClassInteger: Read and unpack binary; all buffer lengths."""
         print()

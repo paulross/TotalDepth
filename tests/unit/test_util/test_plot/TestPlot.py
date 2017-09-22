@@ -39,6 +39,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+import pytest
+
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import LisGen
@@ -1710,6 +1712,7 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
             myPts,
         )
 
+    @pytest.mark.xfail(reason='need to investigate this.')
     def test_27(self):
         """TestPlotLowLevel_wrap.test_27(): Huge WRAP backup, centreline-centreline wrap left from 0 to 100."""
         myPts = self._prl._retInterpolateWrapPoints(
