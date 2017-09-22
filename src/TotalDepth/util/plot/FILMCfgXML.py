@@ -190,7 +190,7 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
         try:
             myTrackIdx = self._trackNameOrdinalMap[theTracStr]
         except KeyError:
-            raise ExceptionFILMCfgXMLReadLookUp('PhysFilmCfgXMLRead.interpretTrac(): "{:s}" not in {:s}'.format(
+            raise ExceptionFILMCfgXMLReadLookUp('PhysFilmCfgXMLRead.interpretTrac(): "{!r:s}" not in {:s}'.format(
                     theTracStr,
                     str(self._trackNameOrdinalMap.keys())
                 )

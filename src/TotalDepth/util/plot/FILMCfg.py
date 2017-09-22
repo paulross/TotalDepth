@@ -809,7 +809,7 @@ class FilmCfgLISRead(FilmCfg):
         if theLr.type != LogiRec.LR_TYPE_WELL_DATA:
             raise ExceptionFilmCfgLISRead('FilmCfgLISRead.__init__(): LR type={:d}, expected {:d}'.format(theLr.type, LogiRec.LR_TYPE_WELL_DATA))
         if theLr.value != b'FILM':
-            raise ExceptionFilmCfgLISRead('FilmCfgLISRead.__init__(): LR Table not a CONS table type "FILM" but a {:s}.'.format(theLr.value))
+            raise ExceptionFilmCfgLISRead('FilmCfgLISRead.__init__(): LR Table not a CONS table type "FILM" but a {!r:s}.'.format(theLr.value))
         for aRow in theLr.genRows():
             self.add(Mnem.Mnem(aRow.value), PhysFilmCfgLISRead(aRow))
         

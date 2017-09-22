@@ -60,8 +60,10 @@ class Test_retHtmlFileName(unittest.TestCase):
 
     def test_01(self):
         """Test_retHtmlFileName.test_01(): retHtmlFileName() - basic functionality."""
-        self.assertEqual('_734d45cfc660ec2a4a5ad236ee323599.html', HtmlUtils.retHtmlFileName(''))
-        self.assertEqual('foo.lis_35496a3f79fc3f1bc5dd166e7411c841.html', HtmlUtils.retHtmlFileName('foo.lis'))
+        # _5458a57e4dc446c657ecb558416c36b5
+        self.assertEqual('_5458a57e4dc446c657ecb558416c36b5.html', HtmlUtils.retHtmlFileName(''))
+        # 987d43c274104ccae9d86bd5aa7d80e0
+        self.assertEqual('foo.lis_987d43c274104ccae9d86bd5aa7d80e0.html', HtmlUtils.retHtmlFileName('foo.lis'))
         myPathStr = 'a very long path that goes on and on and on and you think that it will never ever stop spam.lis'
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)
@@ -72,8 +74,8 @@ class Test_retHtmlFileName(unittest.TestCase):
 
     def test_02(self):
         """Test_retHtmlFileName.test_02(): retHtmlFileLink() - basic functionality."""
-        self.assertEqual('_734d45cfc660ec2a4a5ad236ee323599.html#4', HtmlUtils.retHtmlFileLink('', 4))
-        self.assertEqual('foo.lis_35496a3f79fc3f1bc5dd166e7411c841.html#4', HtmlUtils.retHtmlFileLink('foo.lis', 4))
+        self.assertEqual('_5458a57e4dc446c657ecb558416c36b5.html#4', HtmlUtils.retHtmlFileLink('', 4))
+        self.assertEqual('foo.lis_987d43c274104ccae9d86bd5aa7d80e0.html#4', HtmlUtils.retHtmlFileLink('foo.lis', 4))
         myPathStr = 'a very long path that goes on and on and on and you think that it will never ever stop spam.lis'
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)

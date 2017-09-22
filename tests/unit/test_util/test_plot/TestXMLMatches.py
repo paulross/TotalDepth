@@ -98,8 +98,8 @@ class TestXMLMatches(unittest.TestCase):
         #
         # Result, note SFL is achieved by substitution of an alternate:
         # ['CALI', 'DPHI', 'GR  ', 'ILD ', 'ILM ', 'NPHI', 'SFL ', 'SP  ', 'TNPH']
-#        print()
-#        pprint.pprint(filmMap)
+        print()
+        pprint.pprint(filmMap)
         self.assertEqual(1, len(filmMap))
         self.assertTrue('Triple_Combo' in filmMap)
 #        pprint.pprint(sorted([m.pStr() for m in filmMap['Triple_Combo']]))

@@ -606,7 +606,7 @@ class TestPRESRead(BaseTestClasses.TestBaseFile):
         #print()
         #print('list(self._pclr.keys())', list(self._pclr.keys()))
         self.assertEqual(
-            [
+            sorted([
                 b'LLS\x00',
                 b'MSFL',
                 b'LLSB',
@@ -618,8 +618,8 @@ class TestPRESRead(BaseTestClasses.TestBaseFile):
                 b'LLG\x00',
                 b'LLGB',
                 b'MINV',
-            ],
-            list(self._pclr.keys())
+            ]),
+            sorted(list(self._pclr.keys()))
         )
         self.assertEqual(11, len(self._pclr))
 #        print()
@@ -627,16 +627,16 @@ class TestPRESRead(BaseTestClasses.TestBaseFile):
         self.assertEqual(b'MSFL', self._pclr[b'MSFL'].mnem)
         self.assertTrue(b'MSFL' in self._pclr)
         self.assertEqual(
-            [
+            sorted([
                 b'LLS ', b'MSFL', b'MNOR', b'LLD ', b'CALI', b'SP  ', b'LLG ', b'MINV',
-            ],
-            list(self._pclr.outpChIDs(Mnem.Mnem(b'1   ')))
+            ]),
+            sorted(list(self._pclr.outpChIDs(Mnem.Mnem(b'1   '))))
         )
         self.assertEqual(
-            [
+            sorted([
                 b'LLS\x00', b'LLSB'
-            ],
-            list(self._pclr.outpCurveIDs(Mnem.Mnem(b'1   '), Mnem.Mnem(b'LLS ')))
+            ]),
+            sorted(list(self._pclr.outpCurveIDs(Mnem.Mnem(b'1   '), Mnem.Mnem(b'LLS '))))
         )
         self.assertTrue(self._pclr.usesOutpChannel(Mnem.Mnem(b'1   '), Mnem.Mnem(b'LLS ')))
         self.assertFalse(self._pclr.usesOutpChannel(Mnem.Mnem(b'1   '), Mnem.Mnem(b'UNKN')))
@@ -693,9 +693,9 @@ class TestPRESReadMultiFilm(BaseTestClasses.TestBaseFile):
         self.assertEqual(200, self._filmCfg[Mnem.Mnem(b'1   ')].xScale)
         self.assertEqual(4, len(self._filmCfg[Mnem.Mnem(b'1   ')]))
         # Check we can get the film destinations
-        self.assertEqual([Mnem.Mnem(b'2'), Mnem.Mnem(b'1')], self._filmCfg.retAllFILMDestS(b'BOTH'))
-        self.assertEqual([Mnem.Mnem(b'2'), Mnem.Mnem(b'1')], self._filmCfg.retAllFILMDestS(b'ALL'))
-        self.assertEqual([Mnem.Mnem(b'1'), Mnem.Mnem(b'2')], self._filmCfg.retAllFILMDestS(b'12'))
+        self.assertEqual(sorted([Mnem.Mnem(b'2'), Mnem.Mnem(b'1')]), sorted(self._filmCfg.retAllFILMDestS(b'BOTH')))
+        self.assertEqual(sorted([Mnem.Mnem(b'2'), Mnem.Mnem(b'1')]), sorted(self._filmCfg.retAllFILMDestS(b'ALL')))
+        self.assertEqual(sorted([Mnem.Mnem(b'1'), Mnem.Mnem(b'2')]), sorted(self._filmCfg.retAllFILMDestS(b'12')))
         self.assertEqual([], self._filmCfg.retAllFILMDestS(b'NEIT'))
         # Create a FILM table with alphanumeric labels
         myByFilm = b'"\x00' \
@@ -719,10 +719,10 @@ class TestPRESReadMultiFilm(BaseTestClasses.TestBaseFile):
         self.assertEqual(500, self._filmCfgAlpha[Mnem.Mnem(b'B   ')].xScale)
         self.assertEqual(4, len(self._filmCfgAlpha[Mnem.Mnem(b'A   ')]))
         # Check we can get the film destinations
-        self.assertEqual([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')], self._filmCfgAlpha.retAllFILMDestS(b'BOTH'))
-        self.assertEqual([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')], self._filmCfgAlpha.retAllFILMDestS(b'ALL'))
-        self.assertEqual([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')], self._filmCfgAlpha.retAllFILMDestS(b'BA'))
-        self.assertEqual([Mnem.Mnem(b'A'), Mnem.Mnem(b'B')], self._filmCfgAlpha.retAllFILMDestS(b'AB'))
+        self.assertEqual(sorted([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')]), sorted(self._filmCfgAlpha.retAllFILMDestS(b'BOTH')))
+        self.assertEqual(sorted([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')]), sorted(self._filmCfgAlpha.retAllFILMDestS(b'ALL')))
+        self.assertEqual(sorted([Mnem.Mnem(b'B'), Mnem.Mnem(b'A')]), sorted(self._filmCfgAlpha.retAllFILMDestS(b'BA')))
+        self.assertEqual(sorted([Mnem.Mnem(b'A'), Mnem.Mnem(b'B')]), sorted(self._filmCfgAlpha.retAllFILMDestS(b'AB')))
         self.assertEqual([], self._filmCfgAlpha.retAllFILMDestS(b'NEIT'))
 
     def tearDown(self):

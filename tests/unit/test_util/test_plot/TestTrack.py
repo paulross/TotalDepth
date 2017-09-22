@@ -584,23 +584,23 @@ class TestPlotTrack(unittest.TestCase):
         myF = io.StringIO()
         with SVGWriter.SVGWriter(myF, myViewPort) as xS:
             myT.plotSVG(myTl, Coord.Dim(7.5, 'in'), xS)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="8in" version="1.1" width="6in" xmlns="http://www.w3.org/2000/svg">
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.45in" x2="3.45in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.69in" x2="3.69in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.93in" x2="3.93in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.17in" x2="4.17in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.41in" x2="4.41in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="4.65in" x2="4.65in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.89in" x2="4.89in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.13in" x2="5.13in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.37in" x2="5.37in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.61in" x2="5.61in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="0.25in" y2="7.75in"/>
+<svg height="8.000in" version="1.1" width="6.000in" xmlns="http://www.w3.org/2000/svg">
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.450in" x2="3.450in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.690in" x2="3.690in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.930in" x2="3.930in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.170in" x2="4.170in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.410in" x2="4.410in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="4.650in" x2="4.650in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.890in" x2="4.890in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.130in" x2="5.130in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.370in" x2="5.370in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.610in" x2="5.610in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.850in" x2="5.850in" y1="0.250in" y2="7.750in"/>
 </svg>
 """,
             myF.getvalue()
@@ -626,31 +626,31 @@ class TestPlotTrack(unittest.TestCase):
         myF = io.StringIO()
         with SVGWriter.SVGWriter(myF, myViewPort) as xS:
             myT.plotSVG(myTl, Coord.Dim(7.5, 'in'), xS)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="8in" version="1.1" width="6in" xmlns="http://www.w3.org/2000/svg">
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.45in" x2="3.45in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.8112in" x2="3.8112in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.0225in" x2="4.0225in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.1725in" x2="4.1725in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.2888in" x2="4.2888in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.3838in" x2="4.3838in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.4641in" x2="4.4641in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.5337in" x2="4.5337in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.5951in" x2="4.5951in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.65in" x2="4.65in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.0112in" x2="5.0112in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.2225in" x2="5.2225in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.3725in" x2="5.3725in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.4888in" x2="5.4888in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.5838in" x2="5.5838in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.6641in" x2="5.6641in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.7337in" x2="5.7337in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.7951in" x2="5.7951in" y1="0.25in" y2="7.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="0.25in" y2="7.75in"/>
+<svg height="8.000in" version="1.1" width="6.000in" xmlns="http://www.w3.org/2000/svg">
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.450in" x2="3.450in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.811in" x2="3.811in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.023in" x2="4.023in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.172in" x2="4.172in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.289in" x2="4.289in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.384in" x2="4.384in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.464in" x2="4.464in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.534in" x2="4.534in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.595in" x2="4.595in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.650in" x2="4.650in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.011in" x2="5.011in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.223in" x2="5.223in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.372in" x2="5.372in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.489in" x2="5.489in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.584in" x2="5.584in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.664in" x2="5.664in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.734in" x2="5.734in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.795in" x2="5.795in" y1="0.250in" y2="7.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.850in" x2="5.850in" y1="0.250in" y2="7.750in"/>
 </svg>
 """,
             myF.getvalue()
@@ -690,61 +690,61 @@ class TestPlotTrack(unittest.TestCase):
             for t in myTracks:
                 #xS.comment(str(t))
                 t.plotSVG(myTl, Coord.Dim(5.5, 'in'), xS)
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="8in" version="1.1" width="6in" xmlns="http://www.w3.org/2000/svg">
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="0.25in" x2="0.25in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.49in" x2="0.49in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.73in" x2="0.73in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.97in" x2="0.97in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.21in" x2="1.21in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="1.45in" x2="1.45in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.69in" x2="1.69in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.93in" x2="1.93in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.17in" x2="2.17in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.41in" x2="2.41in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.65in" x2="2.65in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.45in" x2="3.45in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.6613in" x2="3.6613in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.8112in" x2="3.8112in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.9275in" x2="3.9275in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.0225in" x2="4.0225in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.1029in" x2="4.1029in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.1725in" x2="4.1725in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.2339in" x2="4.2339in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.2888in" x2="4.2888in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.65in" x2="4.65in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.8613in" x2="4.8613in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.0112in" x2="5.0112in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.1275in" x2="5.1275in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.2225in" x2="5.2225in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.3029in" x2="5.3029in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.3725in" x2="5.3725in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.4339in" x2="5.4339in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.4888in" x2="5.4888in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.85in" x2="5.85in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.0613in" x2="6.0613in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.2112in" x2="6.2112in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.3275in" x2="6.3275in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.4225in" x2="6.4225in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.5029in" x2="6.5029in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.5725in" x2="6.5725in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.6339in" x2="6.6339in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="6.6888in" x2="6.6888in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.05in" x2="7.05in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.2613in" x2="7.2613in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.4112in" x2="7.4112in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.5275in" x2="7.5275in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.6225in" x2="7.6225in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.7029in" x2="7.7029in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.7725in" x2="7.7725in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.8339in" x2="7.8339in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="7.8888in" x2="7.8888in" y1="0.25in" y2="5.75in"/>
-  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="8.25in" x2="8.25in" y1="0.25in" y2="5.75in"/>
+<svg height="8.000in" version="1.1" width="6.000in" xmlns="http://www.w3.org/2000/svg">
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="0.250in" x2="0.250in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.490in" x2="0.490in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.730in" x2="0.730in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="0.970in" x2="0.970in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.210in" x2="1.210in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.500" x1="1.450in" x2="1.450in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.690in" x2="1.690in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="1.930in" x2="1.930in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.170in" x2="2.170in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="2.410in" x2="2.410in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="2.650in" x2="2.650in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="3.450in" x2="3.450in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.661in" x2="3.661in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.811in" x2="3.811in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="3.928in" x2="3.928in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.023in" x2="4.023in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.103in" x2="4.103in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.172in" x2="4.172in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.234in" x2="4.234in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="4.289in" x2="4.289in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.650in" x2="4.650in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="4.861in" x2="4.861in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.011in" x2="5.011in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.128in" x2="5.128in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.223in" x2="5.223in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.303in" x2="5.303in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.372in" x2="5.372in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="5.434in" x2="5.434in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.489in" x2="5.489in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.850in" x2="5.850in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="5.850in" x2="5.850in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.061in" x2="6.061in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.211in" x2="6.211in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.328in" x2="6.328in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.423in" x2="6.423in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.503in" x2="6.503in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.572in" x2="6.572in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="6.634in" x2="6.634in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="6.689in" x2="6.689in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.050in" x2="7.050in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.261in" x2="7.261in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.411in" x2="7.411in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.528in" x2="7.528in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.623in" x2="7.623in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.703in" x2="7.703in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.772in" x2="7.772in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.250" x1="7.834in" x2="7.834in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="7.889in" x2="7.889in" y1="0.250in" y2="5.750in"/>
+  <line stroke="black" stroke-opacity="1.000" stroke-width="0.750" x1="8.250in" x2="8.250in" y1="0.250in" y2="5.750in"/>
 </svg>
 """, myF.getvalue())
 

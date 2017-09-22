@@ -336,29 +336,6 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertTrue(myFcxr[0].hasGrid)
         self.assertFalse(myFcxr[0].plotXLines)
         self.assertFalse(myFcxr[0].plotXAlpha)
-        
-class TestPhysFilmCfgXMLRead_XML_CONTENT_MAP(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_00(self):
-        """TestPhysFilmCfgXMLRead_XML_CONTENT_MAP.test_00(): Test setUp() and tearDown()"""
-        pass
-    
-    def test_01(self):
-        """TestPhysFilmCfgXMLRead_XML_CONTENT_MAP.test_01(): Test have 'Micro_Resistivity_3Track.xml'."""
-#        print(XML_CONTENT_MAP.keys())
-        etree.fromstring(XML_CONTENT_MAP['Micro_Resistivity_3Track.xml'])
-
-    def test_02(self):
-        """TestPhysFilmCfgXMLRead_XML_CONTENT_MAP.test_02(): Test read 'Micro_Resistivity_3Track.xml, four tracks'."""
-        r = etree.fromstring(XML_CONTENT_MAP['Micro_Resistivity_3Track.xml'])
-        myFcxr = FILMCfgXML.PhysFilmCfgXMLRead(r)
-        self.assertEqual(4, len(myFcxr))
 
 class TestFILMCfgXML(unittest.TestCase):
 
@@ -433,7 +410,7 @@ class TestFILMCfgXML(unittest.TestCase):
                 'A22H', 'A34H', 'P16H_RT', 'P28H_RT', 'P34H_RT', 'TENS',
                 )
             ):
-            self.assertTrue(myFcxr.chOutpMnemInFilmId(aCuOutp, myFilmID), 'aCuOutp="{:s}"'.format(aCuOutp))
+            self.assertTrue(myFcxr.chOutpMnemInFilmId(aCuOutp, myFilmID), 'aCuOutp="{!r:s}"'.format(aCuOutp))
             
     def test_11(self):
         """TestFILMCfgXML.test_12(): "Resistivity_3Track_Logrithmic.xml" tracks chOutpMnemInFilmId() returns False."""
@@ -516,7 +493,6 @@ class Special(unittest.TestCase):
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysFilmCfgXMLRead))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysFilmCfgXMLRead_XML_CONTENT_MAP))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFILMCfgXML))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))

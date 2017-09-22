@@ -135,7 +135,7 @@ class SCHeap(object):
         # Take an early bath if we can
         if len(self._l) == 0:
             self._l = [Block(start, stop)]
-            logging.debug('SCHeap.add({:d}, {:d}): first entry, list now={:s}'.format(start, stop, self._l)) 
+            logging.debug('SCHeap.add({:d}, {:d}): first entry, list now={!r:s}'.format(start, stop, self._l))
             return
         # Now down to work...
         # Find the block after start
@@ -187,7 +187,7 @@ class SCHeap(object):
             # Case A (new block)
             logging.debug('SCHeap.add(): Case A a={:d}'.format(a)) 
             self._l.insert(a, Block(start, stop))
-        logging.debug('SCHeap.add({:d}, {:d}): list now={:s}'.format(start, stop, self._l)) 
+        logging.debug('SCHeap.add({:d}, {:d}): list now={!r:s}'.format(start, stop, self._l))
     
     def need(self, start, stop):
         """Returns a list of Blocks needed to complete the
@@ -200,7 +200,7 @@ class SCHeap(object):
             if a > 0 and a < len(self._l):
                 start = self._l[a-1].stop
             while a < len(self._l):
-                logging.debug('SCHeap.need(): loop a={:d} Block={:s} start={:d}'.format(a, self._l[a], start))
+                logging.debug('SCHeap.need(): loop a={:d} Block={!r:s} start={:d}'.format(a, self._l[a], start))
                 if self._l[a].start > stop:
                     break
                 # Add gap
@@ -209,14 +209,14 @@ class SCHeap(object):
                 # Move start point up to end of current block
                 start = self._l[a].stop
                 a += 1
-            logging.debug('SCHeap.need(): Done a={:d} retVal={:s}'.format(a, retVal))
+            logging.debug('SCHeap.need(): Done a={:d} retVal={!r:s}'.format(a, retVal))
             # Add trailing block if necessary
             if len(self._l) > 0 and self._l[a-1].stop < stop:
                 retVal.append(Block(self._l[a-1].stop, stop))
         else:
             # Empty list case
             retVal.append(Block(start, stop))
-        logging.debug('SCHeap.need(): returning retVal={:s}'.format(retVal)) 
+        logging.debug('SCHeap.need(): returning retVal={!r:s}'.format(retVal))
         return retVal
 
 #    def need(self, start, stop):

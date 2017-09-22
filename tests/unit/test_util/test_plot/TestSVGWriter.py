@@ -54,7 +54,7 @@ class TestSVGWriter(unittest.TestCase):
         #print myF.getvalue()
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="20mm" version="1.1" width="100mm" xmlns="http://www.w3.org/2000/svg"/>\n""")
+<svg height="20.000mm" version="1.1" width="100.000mm" xmlns="http://www.w3.org/2000/svg"/>\n""")
         
     def test_01(self):
         """TestSVGlWriter.test_01(): <desc> and four rectangles.
@@ -96,17 +96,17 @@ class TestSVGWriter(unittest.TestCase):
                         }
                 ):
                 pass
-        #print
-        #print myF.getvalue()
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" width="5cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" width="5.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Four separate rectangles</desc>
-  <rect height="1cm" width="2cm" x="0.5cm" y="0.5cm"/>
-  <rect height="1.5cm" width="1cm" x="0.5cm" y="2cm"/>
-  <rect height="2cm" width="1.5cm" x="3cm" y="0.5cm"/>
-  <rect height="0.5cm" width="1cm" x="3.5cm" y="3cm"/>
-  <rect fill="none" height="3.98cm" stroke="blue" stroke-width=".02cm" width="4.98cm" x="0.01cm" y="0.01cm"/>
+  <rect height="1.000cm" width="2.000cm" x="0.500cm" y="0.500cm"/>
+  <rect height="1.500cm" width="1.000cm" x="0.500cm" y="2.000cm"/>
+  <rect height="2.000cm" width="1.500cm" x="3.000cm" y="0.500cm"/>
+  <rect height="0.500cm" width="1.000cm" x="3.500cm" y="3.000cm"/>
+  <rect fill="none" height="3.980cm" stroke="blue" stroke-width=".02cm" width="4.980cm" x="0.010cm" y="0.010cm"/>
 </svg>
 """)
        
@@ -130,15 +130,15 @@ class TestSVGWriter(unittest.TestCase):
             myRad = Coord.baseUnitsDim(100)
             with SVGWriter.SVGCircle(xS, myPt, myRad, {'fill':"red", 'stroke':"blue",'stroke-width':"10"}):
                 pass
-        #print
-        #print myF.getvalue()
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example circle01 - circle filled with red and stroked with blue</desc>
-  <rect fill="none" height="398px" stroke="blue" stroke-width="2" width="1198px" x="1px" y="1px"/>
-  <circle cx="600px" cy="200px" fill="red" r="100px" stroke="blue" stroke-width="10"/>
+  <rect fill="none" height="398.000px" stroke="blue" stroke-width="2" width="1198.000px" x="1.000px" y="1.000px"/>
+  <circle cx="600.000px" cy="200.000px" fill="red" r="100.000px" stroke="blue" stroke-width="10"/>
 </svg>
 """)
 
@@ -163,15 +163,15 @@ class TestSVGWriter(unittest.TestCase):
             myRadY = Coord.baseUnitsDim(100)
             with SVGWriter.SVGElipse(xS, myPt, myRadX, myRadY, {'fill':"red", 'stroke':"blue",'stroke-width':"10"}):
                 pass
-        #print
-        #print myF.getvalue()
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example ellipse01 - examples of ellipses</desc>
-  <rect fill="none" height="398px" stroke="blue" stroke-width="2" width="1198px" x="1px" y="1px"/>
-  <elipse cx="600px" cy="200px" fill="red" rx="250px" ry="100px" stroke="blue" stroke-width="10"/>
+  <rect fill="none" height="398.000px" stroke="blue" stroke-width="2" width="1198.000px" x="1.000px" y="1.000px"/>
+  <elipse cx="600.000px" cy="200.000px" fill="red" rx="250.000px" ry="100.000px" stroke="blue" stroke-width="10"/>
 </svg>
 """)
 
@@ -228,20 +228,20 @@ class TestSVGWriter(unittest.TestCase):
                         {'stroke-width' : "25"}
                     ):
                     pass
-        #print
-        #print myF.getvalue()
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example line01 - lines expressed in user coordinates</desc>
-  <rect fill="none" height="398px" stroke="blue" stroke-width="2" width="1198px" x="1px" y="1px"/>
+  <rect fill="none" height="398.000px" stroke="blue" stroke-width="2" width="1198.000px" x="1.000px" y="1.000px"/>
   <g stroke="green">
-    <line stroke-width="5" x1="100px" x2="300px" y1="300px" y2="100px"/>
-    <line stroke-width="10" x1="300px" x2="500px" y1="300px" y2="100px"/>
-    <line stroke-width="15" x1="500px" x2="700px" y1="300px" y2="100px"/>
-    <line stroke-width="20" x1="700px" x2="900px" y1="300px" y2="100px"/>
-    <line stroke-width="25" x1="900px" x2="1100px" y1="300px" y2="100px"/>
+    <line stroke-width="5" x1="100.000px" x2="300.000px" y1="300.000px" y2="100.000px"/>
+    <line stroke-width="10" x1="300.000px" x2="500.000px" y1="300.000px" y2="100.000px"/>
+    <line stroke-width="15" x1="500.000px" x2="700.000px" y1="300.000px" y2="100.000px"/>
+    <line stroke-width="20" x1="700.000px" x2="900.000px" y1="300.000px" y2="100.000px"/>
+    <line stroke-width="25" x1="900.000px" x2="1100.000px" y1="300.000px" y2="100.000px"/>
   </g>
 </svg>
 """,
@@ -293,15 +293,15 @@ class TestSVGWriter(unittest.TestCase):
                     {'fill' : 'none', 'stroke' : 'blue', 'stroke-width' : "5"}
                 ):
                 pass
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" viewBox="0 0 1200 400" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" viewBox="0 0 1200 400" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example line01 - lines expressed in user coordinates</desc>
-  <rect fill="none" height="398px" stroke="blue" stroke-width="2" width="1198px" x="1px" y="1px"/>
-  <polyline fill="none" points="50,375 150,375 150,325 250,325 250,375 350,375 350,250 450,250 450,375 550,375 550,175 650,175 650,375 750,375 750,100 850,100 850,375 950,375 950,25 1050,25 1050,375 1150,375" stroke="blue" stroke-width="5"/>
+  <rect fill="none" height="398.000px" stroke="blue" stroke-width="2" width="1198.000px" x="1.000px" y="1.000px"/>
+  <polyline fill="none" points="50.0,375.0 150.0,375.0 150.0,325.0 250.0,325.0 250.0,375.0 350.0,375.0 350.0,250.0 450.0,250.0 450.0,375.0 550.0,375.0 550.0,175.0 650.0,175.0 650.0,375.0 750.0,375.0 750.0,100.0 850.0,100.0 850.0,375.0 950.0,375.0 950.0,25.0 1050.0,25.0 1050.0,375.0 1150.0,375.0" stroke="blue" stroke-width="5"/>
 </svg>
 """)
         
@@ -339,15 +339,15 @@ class TestSVGWriter(unittest.TestCase):
                     {'fill' : 'red', 'stroke' : 'blue', 'stroke-width' : "10"}
                 ):
                 pass
-#        print()
-#        print(myF.getvalue())
+        # print()
+        # print(myF.getvalue())
 #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" viewBox="0 0 1200 400" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" viewBox="0 0 1200 400" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example line01 - lines expressed in user coordinates</desc>
-  <rect fill="none" height="398px" stroke="blue" stroke-width="2" width="1198px" x="1px" y="1px"/>
-  <polygon fill="red" points="350,75 379,161 469,161 397,215 423,301 350,250 277,301 303,215 231,161 321,161" stroke="blue" stroke-width="10"/>
+  <rect fill="none" height="398.000px" stroke="blue" stroke-width="2" width="1198.000px" x="1.000px" y="1.000px"/>
+  <polygon fill="red" points="350.0,75.0 379.0,161.0 469.0,161.0 397.0,215.0 423.0,301.0 350.0,250.0 277.0,301.0 303.0,215.0 231.0,161.0 321.0,161.0" stroke="blue" stroke-width="10"/>
 </svg>
 """,
         myF.getvalue())
@@ -371,14 +371,14 @@ class TestSVGWriter(unittest.TestCase):
             myBx = Coord.Box(Coord.baseUnitsDim(998), Coord.baseUnitsDim(298))
             with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
                 pass
-        #print
-        #print myF.getvalue()
+        # print()
+        # print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="4cm" version="1.1" viewBox="0 0 1000 300" width="12cm" xmlns="http://www.w3.org/2000/svg">
+<svg height="4.000cm" version="1.1" viewBox="0 0 1000 300" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
   <desc>Example text01 - &apos;Hello, out there&apos; in blue</desc>
-  <text fill="blue" font-family="Verdans" font-size="55" x="250px" y="150px">Hello, out there</text>
-  <rect fill="none" height="298px" stroke="blue" stroke-width="2" width="998px" x="1px" y="1px"/>
+  <text fill="blue" font-family="Verdans" font-size="55" x="250.000px" y="150.000px">Hello, out there</text>
+  <rect fill="none" height="298.000px" stroke="blue" stroke-width="2" width="998.000px" x="1.000px" y="1.000px"/>
 </svg>
 """)
 

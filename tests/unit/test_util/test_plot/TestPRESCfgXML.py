@@ -49,7 +49,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
 
     def setUp(self):
         self._fcxr = FILMCfgXML.FilmCfgXMLRead()
-        self.assertEqual(28, len(self._fcxr))
+        self.assertEqual(29, len(self._fcxr))
 
     def tearDown(self):
         pass
@@ -367,7 +367,7 @@ class TestPresCfgXMLRead(unittest.TestCase):
 
     def setUp(self):
         self._fcxr = FILMCfgXML.FilmCfgXMLRead()
-        self.assertEqual(28, len(self._fcxr))
+        self.assertEqual(29, len(self._fcxr))
         self.assertTrue(self.TEST_FILM_ID in self._fcxr)
 
     def tearDown(self):
