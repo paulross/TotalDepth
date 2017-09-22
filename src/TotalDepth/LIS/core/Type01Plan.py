@@ -110,6 +110,10 @@ class FrameSetPlan(object):
         """Number of channels."""
         return len(self._channelSizes)
 
+    def channelSize(self, i):
+        """The size of the given channel."""
+        return self._channelSizes[i]
+
     def numFrames(self, recLen):
         """Returns the number of frames that will fit into the record length.
         May raise a ExceptionFrameSetPlan. May raise ExceptionFrameSetPlanNegLen

@@ -107,6 +107,14 @@ class IndexObjBase(object):
         """Sets theFile to the start of the Logical Record object."""
         theFile.seekLr(self.tell)
 
+    def jsonObject(self):
+        """Return an Python object that can be JSON encoded."""
+        return {
+            'tell' : self._tell,
+            'lrtype' : self._typ,
+            # 'fileID' : self._fileId,
+        }
+
 class IndexNone(IndexObjBase):
     """NULL class just takes the LR information and skips to next LR."""
     def __init__(self, tell, lrType, theF):
@@ -239,7 +247,13 @@ class IndexTable(IndexObjBase):
             self._lr = LogiRec.LrTableRead(theFile)
             theFile.skipToNextLr()
     
-class IndexLogPass(IndexObjBase):    
+    def jsonObject(self):
+        """Return an Python object that can be JSON encoded."""
+        d = super().jsonObject()
+        d['tablename'] = repr(self.name)
+        return d
+
+class IndexLogPass(IndexObjBase):
     """The index of a Log Pass. This contains a LogPass object.
     
     xAxisIndex is the channel index that is regarded as the X axis.
@@ -311,6 +325,12 @@ class IndexLogPass(IndexObjBase):
         skip += theF.skipToNextLr()
         self._logPass.addType01Data(tell, lrType, skip, myXval)
         
+    def jsonObject(self):
+        """Return an Python object that can be JSON encoded."""
+        d = super().jsonObject()
+        d['LogPass'] = self._logPass.jsonObject()
+        return d
+
 class PlotRecordSet(object):
     """A POD class that can contain a set of references to the essential (plus
     optional) logical records for plotting."""
@@ -524,4 +544,10 @@ class FileIndex(object):
         """Generates each index object (child class of IndexObjBase)."""
         for anObj in self._idx:
             yield anObj
-        
+
+    def jsonObject(self):
+        """Return an Python object that can be JSON encoded."""
+        return {
+            'FileID' : self._fileId,
+            'LogicalRecords' : [obj.jsonObject() for obj in self._idx],
+        }

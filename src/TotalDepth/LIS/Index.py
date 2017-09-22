@@ -97,6 +97,7 @@ import multiprocessing
 # Serialisation
 import pickle
 import json
+import pprint
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
@@ -121,8 +122,8 @@ class IndexTimer(object):
         return len(self._sizeTime)
         
     def __str__(self):
-        l = ['Size (kb)\tTime (s)']
-        l += ['{:.3f}\t{:.6f}'.format(s/1024,t) for s,t in self._sizeTime]
+        l = ['Size(kb)\tTime(s)\tRate(ms/MB)']
+        l += ['{:.3f}\t{:.6f}\t{:.3f}'.format(s/1024, t, t * 1000 / (s / 1024**2)) for s, t in self._sizeTime]
         l.append('\nFiles: {:d}\nErrors: {:d}'.format(self._errCount+len(self._sizeTime), self._errCount))
         return '\n'.join(l)
         
@@ -132,8 +133,7 @@ class IndexTimer(object):
     def addSizeTime(self, s, t):
         self._sizeTime.append((s,t))
 
-def indexFile(fp, numTimes, verbose, keepGoing):
-    #print('indexFile()', fp, numTimes, verbose, keepGoing)
+def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
     logging.info('Index.indexFile(): {:s}'.format(fp))
     assert(os.path.isfile(fp))
     retIt = IndexTimer()
@@ -177,8 +177,15 @@ def indexFile(fp, numTimes, verbose, keepGoing):
                 #)
                 myLenPickle = len(pikBy)
                 #print('{:d}\t{:d}\t{:.3f} #Pickled'.format(os.path.getsize(fp), len(pikBy), len(pikBy)*100/os.path.getsize(fp)))
-                #jsonBy = json.dumps(myIdx)
-                #myLenJson = len(jsonBy)
+                if convertJson:
+                    jsonObj = myIdx.jsonObject()
+                    # pprint.pprint(jsonObj)
+                    jsonBytes = json.dumps(jsonObj, sort_keys=True, indent=4)
+                    myLenJson = len(jsonBytes)
+                    if verbose:
+                        print(' JSON [{:d}] '.format(myLenJson).center(75, '='))
+                        print(jsonBytes)
+                        print(' JSON DONE '.center(75, '='))
         if len(timeS) > 0:
             refTime = sum(timeS)/len(timeS)
             if verbose:
@@ -193,10 +200,13 @@ def indexFile(fp, numTimes, verbose, keepGoing):
                     print('Median: {:.3f} (s)'.format(refTime))
             #print(os.path.getsize(fp), refTime)
             mySiz = os.path.getsize(fp)
-            print('File size: {:d} ({:.3f} MB) Reference Time: {:.6f} (s) for {:s} pickleLen={:d} jsonLen={:d}'.format(
+            sizemb = mySiz / 2**20
+            rate = refTime * 1000 / sizemb
+            print('File size: {:d} ({:.3f} MB) Reference Time: {:.6f} (s), rate {:.3f} ms/MB file: {:s} pickleLen={:d} jsonLen={:d}'.format(
                     mySiz,
-                    mySiz/2**20,
+                    sizemb,
                     refTime,
+                    rate,
                     fp,
                     myLenPickle,
                     myLenJson,
@@ -208,16 +218,16 @@ def indexFile(fp, numTimes, verbose, keepGoing):
         traceback.print_exc()
     return retIt
 
-def indexDirSingleProcess(d, r, t, v, k):
-    #print('indexDirSingleProcess()', d, r, t, v, k)
+def indexDirSingleProcess(d, r, t, v, k, j):
+    """Recursively process a directory using a single process."""
     assert(os.path.isdir(d))
     retIt = IndexTimer()
     for n in os.listdir(d):
         fp = os.path.join(d, n)
         if os.path.isfile(fp):
-            retIt += indexFile(fp, t, v, k)
+            retIt += indexFile(fp, t, v, k, j)
         elif os.path.isdir(fp) and r:
-            retIt += indexDirSingleProcess(fp, r, t, v, k)
+            retIt += indexDirSingleProcess(fp, r, t, v, k, j)
     return retIt
 
 ################################
@@ -234,12 +244,12 @@ def genFp(d, r):
             for aFp in genFp(fp, r):
                 yield aFp
 
-def indexDirMultiProcess(dir, recursive, numT, verbose, keepGoing, jobs):
+def indexDirMultiProcess(dir, recursive, numT, verbose, keepGoing, convertJson, jobs):
     if jobs < 1:
         jobs = multiprocessing.cpu_count()
     logging.info('indexDirMultiProcess(): Setting MP jobs to %d' % jobs)
     myPool = multiprocessing.Pool(processes=jobs)
-    myTaskS = [(fp, numT, verbose, keepGoing) for fp in genFp(dir, recursive)]
+    myTaskS = [(fp, numT, verbose, keepGoing, convertJson) for fp in genFp(dir, recursive)]
     retResult = IndexTimer()
     #print('myTaskS', myTaskS)
     myResults = [
@@ -286,6 +296,8 @@ Indexes LIS files recursively."""
                       help="Verbose Output. [default: %default]")
     optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
                       help="Process input recursively. [default: %default]")
+    optParser.add_option("-J", "--JSON", action="store_true", dest="json", default=False,
+                      help="Convert index to JSON, if verbose then dump it out as well. [default: %default]")
     opts, args = optParser.parse_args()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -305,14 +317,14 @@ Indexes LIS files recursively."""
         return 1
     if os.path.isfile(args[0]):
         # Single file so always single process code
-        myIt += indexFile(args[0], opts.times, opts.verbose, opts.keepGoing)
+        myIt += indexFile(args[0], opts.times, opts.verbose, opts.keepGoing, opts.json)
     elif os.path.isdir(args[0]):
         if opts.jobs == -1:
             # Single process code
-            myIt += indexDirSingleProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing)
+            myIt += indexDirSingleProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.json)
         else:
             # Multiprocess code 
-            myIt += indexDirMultiProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.jobs)
+            myIt += indexDirMultiProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.json, opts.jobs)
     print('Summary:')
     if opts.statistics:
         print(myIt)

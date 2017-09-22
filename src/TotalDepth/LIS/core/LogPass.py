@@ -654,7 +654,35 @@ class LogPass(object):
         """Wrapper around the frameset generator, in fact this returns exactly that generator."""
         fsCh, fsSc = self._mnemToChSc(theMnem)
         return self._frameSet.genChScPoints(fsCh, fsSc, chIsExt=True)
-            
+
+    def jsonObject(self):
+        """Return an Python object that can be JSON encoded."""
+        d = {
+            # TODO: Expand the DFSR.
+            'DFSR' : str(self._dfsr),
+            'Plan' : {
+                'IndirectSize' : self._plan.indirectSize,
+                'FrameSize' : self._plan.frameSize,
+                'NumChannels' : self._plan.numChannels,
+                'ChannelSizes' : [self._plan.channelSize(i) for i in range(self._plan.numChannels)]
+            },
+            'Channels' : [str(b.mnem) for b in self._dfsr.dsbBlocks],
+            # TODO: add datum, stride, repeat
+            'RLE' : repr(self._rle),
+        }
+        if self._rle.hasXaxisData:
+            d['Xaxis'] = {
+                'FirstValOptical' : self.xAxisFirstValOptical,
+                'LastValOptical' : self.xAxisLastValOptical,
+                'TotalFrames' : self._rle.totalFrames(),
+                'SpacingOptical' : self.xAxisSpacingOptical,
+                'UnitsOptical' : repr(self.xAxisUnitsOptical),
+                'Units' : repr(self._rle.xAxisUnits),
+            }
+        else:
+            d['Xaxis'] = None
+        return d
+
 ##############
 # End: LogPass
 ##############
