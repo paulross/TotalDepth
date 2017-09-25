@@ -24,14 +24,14 @@ Petrophysical software capable of processing wireline logs.
 Features
 --------
 
-* Reads LIS, LAS (1.2, 2.0) file formats.
+* Reads LIS, LAS (1.2, 2.0) file formats for analysis or conversion to other formats.
 * Plots log data as SVG viewable in any modern browser.
 * Plots can be made with a wide variety of plot formats.
 * TotalDepth can generate HTML summaries of log data.
 * TotalDepth is written in Python so it is fast to develop with.
 * Special indexing techniques are used to be able to randomly access sequential files.
 
-An example of a LAS file plotted with the Tripple Combo plot format:
+An example of a LAS file plotted with the Tripple Combo plot format as seen in a browser, this inclueds the API header:
 
 .. image:: images/TrippleCombo.png
         :alt: Tripple Combo
