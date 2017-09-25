@@ -170,7 +170,7 @@ class TestSCHeapFind(unittest.TestCase):
         self.assertEqual(1, self._sch.retIdx(500))
         self.assertEqual(2, self._sch.retIdx(501))
 
-    def test_03(self):
+    def test_04(self):
         """TestSCHeapFind.test_03(): Binary search add(123, 470), add(500, 970) - reversed."""
         self._sch.add(500, 970)
         self._sch.add(123, 470)
@@ -423,7 +423,7 @@ class TestSCHeapNeed(unittest.TestCase):
             self._sch.need(50, 450)
         )
 
-    def test_17(self):
+    def test_18(self):
         """SCHeap.test_17(): __str__() need() leading + trailing block when overlapping first of two blocks in list."""
         #print()
         self._sch.add(100, 200)

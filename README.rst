@@ -2,7 +2,6 @@
 TotalDepth
 ==========
 
-
 .. image:: https://img.shields.io/pypi/v/TotalDepth.svg
         :target: https://pypi.python.org/pypi/TotalDepth
 
@@ -17,18 +16,30 @@ TotalDepth
      :target: https://pyup.io/repos/github/paulross/TotalDepth/
      :alt: Updates
 
+Petrophysical software capable of processing wireline logs.
 
-Petrophysical software xxx.
-
-
-* Free software: BSD license
-* Documentation: https://TotalDepth.readthedocs.io.
-
+* Free software: GPL 2.0
+* Documentation: https://TotalDepth.readthedocs.io
 
 Features
 --------
 
-* TODO
+* Reads LIS, LAS (1.2, 2.0) file formats.
+* Plots log data as SVG viewable in any modern browser.
+* Plots can be made with a wide variety of plot formats.
+* TotalDepth can generate HTML summaries of log data.
+* TotalDepth is written in Python so it is fast to develop with.
+* Special indexing techniques are used to be able to randomly access sequential files.
+
+An example of a LAS file plotted with the Tripple Combo plot format:
+
+.. image:: images/TrippleCombo.png
+        :alt: Tripple Combo
+
+An example of a High Resolution Dipmeter plotted at 1:25 scale:
+
+.. image:: images/HDT_25_no_hdr.png
+        :alt: High Resolution Dipmeter
 
 Credits
 ---------

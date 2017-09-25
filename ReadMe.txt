@@ -19,59 +19,55 @@ Paul Ross: apaulross@gmail.com
 
 TotalDepth: Petrophysical data processing and presentation
 
-Alpha Release 2012-03-03
+Alpha Release 2017-09-25
 ========================
 
-This is a pre-release of TotalDepth. It is tested on Mac Os X 10.6 ('Snow Leopard').
+This is a pre-release of TotalDepth.
 
 Requirements
 ------------
 Python 3, Cython, and numpy.
 
-Tested with:
-Python 3.2
-Cython 0.14.1
-numpy 1.6.0.b2
-
 Installation
 ------------
-Unzip/chekout TotalDepth to any directory referred to here as <TOTALDEPTH>.
 
-Put <TOTALDEPTH>/src on your PYTHONPATH
+$ pip install TotalDepth
 
-Some parts need to be built with Cython by hand:
+This is the preferred method to install TotalDepth, as it will always install the most recent stable release. 
 
-cd <TOTALDEPTH>/src/TotalDepth/LIS/core
-python3 setup.py build_ext --inplace
+From sources
+------------
 
-Testing the Installation
-------------------------
-cd <TOTALDEPTH>/src/TotalDepth/LIS/core
-python3 test/UnitTests.py
+First make a virtual environment in your <PYTHONVENVS, say ~/pyvenvs:
 
-Running Unit Tests
-------------------
-Navigate a command line to: TBD
+$ python3 -m venv <PYTHONVENVS>/TotalDepth
+$ . <PYTHONVENVS>/TotalDepth/bin/activate
+(TotalDepth) $
 
-Execute: python3 test/UnitTests.py
+Install the dependencies, numpy and Cython:
 
-In this release
-===============
-TBD.
+(TotalDepth) $ pip install numpy
+(TotalDepth) $ pip install Cython
+    
+The sources for TotalDepth can be downloaded from the Github repo.
 
-doc/
-----
-Some documentation and tutorials, fairly limited at the moment.
+You can either clone the public repository:
 
-src/
-----
-Source code of TotalDepth.
+(TotalDepth) $ git clone git://github.com/paulross/TotalDepth.git
 
-DeTif.py - Reads a TIF delimited file and writes a version without TIF markers. 
-DumpFrameSet.py - Reads a LIS file and writes out tab separated values of each frame.
-Index.py - Reads LIS file or directory and indexes the LIS files. This can be used for pre-indexing or performance measurement.
-LisToHtml.py - Generate HTML summary of each LIS file. Takes input/output directories/files.
-PlotLogPasses.py - Generate SVG plots of each pass in as LIS file. Takes input/output directories/files.
-ProcLisPath.py - Provides multiprocessing support for file and directory processing.
-RandomFrameSetRead.py - Performance measurement of accessing LIS frame data.
+Or download the tarball:
 
+(TotalDepth) $ curl  -OL https://github.com/paulross/TotalDepth/tarball/master
+
+Once you have a copy of the source, you can install it with:
+
+(TotalDepth) $ cd TotalDepth
+(TotalDepth) $ python setup.py install
+
+Install the test dependencies and run TotalDepth's tests:
+
+(TotalDepth) $ pip install pytest
+(TotalDepth) $ pip install pytest-runner
+(TotalDepth) $ python setup.py test
+
+See https://TotalDepth.readthedocs.io for the documentation.
