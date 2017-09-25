@@ -31,7 +31,7 @@ Features
 * TotalDepth is written in Python so it is fast to develop with.
 * Special indexing techniques are used to be able to randomly access sequential files.
 
-An example of a LAS file plotted with the Tripple Combo plot format as seen in a browser, this inclueds the API header:
+Here is an example of a LAS file plotted with the Tripple Combo plot format as seen in a browser, this includes the API header:
 
 .. image:: images/TrippleCombo.png
         :alt: Tripple Combo
