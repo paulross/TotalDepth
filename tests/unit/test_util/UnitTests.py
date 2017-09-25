@@ -51,7 +51,6 @@ def unitTest(theVerbosity=0):
             'TestFileBuffer',
             'TestHistogram',
             'TestHtmlUtils',
-            'TestSCHeap',
             'TestXmlWrite',
         )
     #myModules = retPyModuleList()
