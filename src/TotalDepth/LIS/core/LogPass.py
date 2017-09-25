@@ -222,7 +222,6 @@ class LogPass(object):
         """The NULL or absent value as specified in the DFSR."""
         return self.dfsr.ebs.absentValue
 
-#    def __str__(self):
     def longStr(self):
         """Returns a long (multiline) descriptive string."""
         strS = ['{:s}: '.format(repr(self)),]
@@ -267,6 +266,8 @@ class LogPass(object):
             strS.append('     X axis: No data.')
         strS.append('  Frame set: {:s}'.format(str(self._frameSet)))
         return '\n'.join(strS)
+    
+    __str__ = longStr
     
     def frameSetLongStr(self):
         """Returns a long (multiline) descriptive string of the Frame Set or N/A if not initialised."""

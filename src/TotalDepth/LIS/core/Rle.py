@@ -239,7 +239,7 @@ class RLEItemType01(RLEItem):
         """String representation."""
         return 'RLEItemType01: ' \
             + self._propStr() \
-            + ' frames={:s}'.format(str(self._numFrames))
+            + ' frames={:d}'.format(self._numFrames)
         
     @property
     def numFrames(self):
@@ -309,7 +309,7 @@ class RLEType01(RLE):
         """String representation."""
         #return 'RLEType01: func={:s}\n  '.format(str(self._func)) \
         #    + '\n  '.join([str(r) for r in self._rleS])
-        return '{:s}: func={:s}: '.format(repr(self), str(self._func)) \
+        return '{:s}: func={:s}: '.format(self.__class__.__name__, str(self._func)) \
             + '[' + ', '.join([str(r) for r in self._rleS]) + ']'
     
     @property

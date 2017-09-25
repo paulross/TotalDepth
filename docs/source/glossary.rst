@@ -93,4 +93,6 @@ Glossary
 	Backup Mode
 		A means of specifying what happens to plotted lines when they go off scale. Typical examples are None (all intermediate data is lost) and 'wrap' (all data is plotted with lines at modulo scale).
 		
+	Frame
+		An array of values for each channel at a particular depth (or time).
 	

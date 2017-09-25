@@ -28,6 +28,7 @@ Contents
 	installation
 	file_formats
 	cmd_line_tools/index_cmd_line_tools
+	usage
 	tech/index_tech
 	testing/index_test
 	ref/index_ref
@@ -39,7 +40,6 @@ Contents
 	contributing
 	history
 	readme
-	usage
 
 For many year this project was hosted by `Sourceforge <https://sourceforge.net/projects/TotalDepth/>`_. Thank you Sourceforge!
 
