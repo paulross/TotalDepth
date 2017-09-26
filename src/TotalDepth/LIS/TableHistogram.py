@@ -114,7 +114,7 @@ def _processFile(fp, keepGoing, tabMtch, theCntr):
         myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
         myIdx = FileIndexer.FileIndex(myFi)
     except ExceptionTotalDepthLIS as err:
-        logging.error('Can not read LIS file {:s} with error: {:s}'.format(fp, err))
+        logging.error('Can not read LIS file {:s} with error: {!r:s}'.format(fp, err))
     else:
 #        print(' Index longDesc() '.center(75, '='))
 #        print(myIdx.longDesc())
