@@ -89,7 +89,7 @@ setup(
             'tdlisplotlogpasses=TotalDepth.LIS.PlotLogPasses:main',
             'tdXlisrandomframesetread=TotalDepth.LIS.RandomFrameSetRead:main',
             'tdlisscanlogidata=TotalDepth.LIS.ScanLogiData:main',
-            'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRecord:main',
+            'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRec:main',
             'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
             'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
             'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
