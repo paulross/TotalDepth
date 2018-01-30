@@ -35,7 +35,7 @@ import time
 import multiprocessing
 import collections
 import argparse
-from TotalDepth.util import CmdCommonOpts
+from TotalDepth.util import CmnCmdOpts
 from TotalDepth.util import FileBuffer
 
 
@@ -224,7 +224,7 @@ class ScanV1EFLR(object):
                                     attr,
                                     attr,
                                     typeCode,
-                                    name,
+                                    name.decode("UTF8"),
                                 )
                             )
                             tellPrev = self._fb.tell()
@@ -237,7 +237,7 @@ class ScanV1EFLR(object):
 
 def main():
     print ('Cmd: %s' % ' '.join(sys.argv))
-    op = CmdCommonOpts.retOptParser(
+    op = CmnCmdOpts.argParserIn(
         desc='Searches for structures that look like RP66v1 EFLRs',
         prog='%(prog) ',
         version=__version__,
@@ -252,10 +252,10 @@ def main():
     clkStart = time.clock()
     timStart = time.time()
     # Initialise logging etc.
-    logging.basicConfig(level=args.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
+    #logging.basicConfig(level=args.loglevel,
+    #                format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+    #                stream=sys.stdout)
     # Your code here
     myObj = ScanV1EFLR(args.infile)
     
