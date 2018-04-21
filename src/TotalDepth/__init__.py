@@ -21,9 +21,9 @@
 
 __all__ = ['LAS', 'LIS', 'RP66', 'util',]
 
-__version__ = '0.2.1'
+__version__ = '0.2.2rc0'
 
-VERSION = (0, 2, 1)
+VERSION = (0, 2, 2, 'rc0')
 
 RELEASE_NOTES = [
     """
