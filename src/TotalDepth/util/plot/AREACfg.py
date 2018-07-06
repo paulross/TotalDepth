@@ -25,6 +25,8 @@ Provides access to patterns either using the Data URI Scheme (https://en.wikiped
 as PNG files. Both can be in monochrome or RGB
 
 """
+from TotalDepth.util import XmlWrite
+
 __author__  = 'Paul Ross'
 __date__    = '2011-04-01'
 __version__ = '0.1.0'
@@ -258,3 +260,131 @@ AREA_DATA_URI_SCHEME_RGB: typing.Dict[str, str] = {
     'Volcanic Rock'                              : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAMCAIAAAAyIHCzAAAAXUlEQVR4nH1QwQ0AMQjCTsbojnYPL4YorZ9KCoJGZgIgCaD6gt1rRT37b+h/9sDbRGFoEmuiGp/E5iY5k7wF5+Hb8TybpI7cgrD3vkU6jcfVutTBb3mzmls2z275AT0VUFEc1K2XAAAAAElFTkSuQmCC',
     'Wackstone'                                  : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAMCAIAAAAyIHCzAAAAQ0lEQVR4nGNk+P+fgSBgZIQoYyKsFAlQqJqRETubDLNRAcTHmCTcMvQwgdj+/z+CQcAl2EzFYTZegGo2RiDgVU1dAABPyBgGdo0uhQAAAABJRU5ErkJggg==',
 }
+
+PATTERN_IDS: typing.Dict[str, str] = {
+    'Anhydrite'                                  : 'FillPattern95',
+    'Anhydritic Clay-Shale'                      : 'FillPattern53',
+    'Anhydritic Limestone'                       : 'FillPattern19',
+    'Anhydritic Sandstone'                       : 'FillPattern81',
+    'Anhydritic Siltsone'                        : 'FillPattern82',
+    'Argillaceous Dolomite'                      : 'FillPattern29',
+    'Argillaceous Limestone'                     : 'FillPattern5',
+    'Argillaceous Sandstone'                     : 'FillPattern68',
+    'Argillaceous Siltstone'                     : 'FillPattern67',
+    'Argillaceous and Sandy Dolomite'            : 'FillPattern33',
+    'Argillaceous and calcareous Dolomite'       : 'FillPattern31',
+    'Argillaceous and calcareous Sandstone'      : 'FillPattern72',
+    'Argillaceous and dolomitic Limestone'       : 'FillPattern7',
+    'Argillaceous and dolomitic Sandstone'       : 'FillPattern73',
+    'Argillaceous and sandy Limestone'           : 'FillPattern8',
+    'Arkosic Sandstone'                          : 'FillPattern74',
+    'Basalt'                                     : 'FillPattern99',
+    'Bedded Chert'                               : 'FillPattern80',
+    'Bioclastic Limestone'                       : 'FillPattern16',
+    'Bituminous Clay-Shale'                      : 'FillPattern56',
+    'Bituminous Limestone'                       : 'FillPattern21',
+    'Bituminous Sandstone'                       : 'FillPattern84',
+    'Bundstone'                                  : 'FillPattern26',
+    'Calacareous Dolomite'                       : 'FillPattern28',
+    'Calcareous Clay-Shale'                      : 'FillPattern38',
+    'Calcareous Sandstone'                       : 'FillPattern69',
+    'Calcareous and dolomitic Clay-Shale'        : 'FillPattern42',
+    'Calcareous and dolomitic Sandstone'         : 'FillPattern71',
+    'Cargneule'                                  : 'FillPattern34',
+    'Chalk'                                      : 'FillPattern10',
+    'Chert'                                      : 'FillPattern79',
+    'Cherty Limestone'                           : 'FillPattern18',
+    'Clay-Shale'                                 : 'FillPattern35',
+    'Coal-LigNite'                               : 'FillPattern2',
+    'Coarse Sand'                                : 'FillPattern61',
+    'Coarse Sandstone'                           : 'FillPattern65',
+    'Diatomite'                                  : 'FillPattern77',
+    'Dolomite'                                   : 'FillPattern27',
+    'Dolomitic Caly-Shale'                       : 'FillPattern39',
+    'Dolomitic LimeStone'                        : 'FillPattern4',
+    'Dolomitic Marl'                             : 'FillPattern49',
+    'Dolomitic Sandstone'                        : 'FillPattern70',
+    'Evaporite'                                  : 'FillPattern93',
+    'Ferruginous Sandstone'                      : 'FillPattern86',
+    'Fine Sand'                                  : 'FillPattern59',
+    'Fine Sandstone'                             : 'FillPattern63',
+    'Glauconitic Sandstone'                      : 'FillPattern85',
+    'Grainstone'                                 : 'FillPattern25',
+    'Granit'                                     : 'FillPattern100',
+    'Gypsiferous Clay-Shale'                     : 'FillPattern55',
+    'Gypsum'                                     : 'FillPattern96',
+    'Halite'                                     : 'FillPattern94',
+    'LimeStone'                                  : 'FillPattern3',
+    'Marl'                                       : 'FillPattern48',
+    'Medium Sand'                                : 'FillPattern60',
+    'Medium Sandstone'                           : 'FillPattern64',
+    'Metamorphic Rocks'                          : 'FillPattern101',
+    'Monogenic Breccia'                          : 'FillPattern91',
+    'Monom Conglomerate 2-4 mm'                  : 'FillPattern89',
+    'Monom Conglomerate 4-64 mm'                 : 'FillPattern87',
+    'Mudstone'                                   : 'FillPattern22',
+    'Nodular Limestone'                          : 'FillPattern13',
+    'Oolitic Limestone'                          : 'FillPattern11',
+    'Organic Shale'                              : 'FillPattern57',
+    'Packstone'                                  : 'FillPattern24',
+    'Pelletic Limestone'                         : 'FillPattern12',
+    'Phosphatic Limestone'                       : 'FillPattern20',
+    'Plastic Clay-Shale'                         : 'FillPattern37',
+    'Polym Conglomerate 2-4 mm'                  : 'FillPattern90',
+    'Polym Conglomerate 4-64 mm'                 : 'FillPattern88',
+    'Polymictic Breccia'                         : 'FillPattern92',
+    'Quartzite'                                  : 'FillPattern66',
+    'Radiolarite'                                : 'FillPattern78',
+    'Reefal Limestone'                           : 'FillPattern15',
+    'Saliferous Clay-Shale'                      : 'FillPattern54',
+    'Saliferous Sandstone'                       : 'FillPattern83',
+    'Sandy Clay-Shale'                           : 'FillPattern40',
+    'Sandy Dolomite'                             : 'FillPattern30',
+    'Sandy Limestone'                            : 'FillPattern6',
+    'Sandy and calcareous Clay-Shale'            : 'FillPattern43',
+    'Sandy and calcareous Dolomite'              : 'FillPattern32',
+    'Sandy and dolomitic Clay-Shale'             : 'FillPattern44',
+    'Sandy and dolomitic Limestone'              : 'FillPattern9',
+    'Sandy, calcareous and dolomitic Clay-Shale' : 'FillPattern46',
+    'Shelly Limestone'                           : 'FillPattern14',
+    'Shelly Sandstone'                           : 'FillPattern75',
+    'Shelly Siltstone'                           : 'FillPattern76',
+    'Silicified Claystone'                       : 'FillPattern52',
+    'Silicified Limestone'                       : 'FillPattern17',
+    'Silt'                                       : 'FillPattern58',
+    'Siltstone'                                  : 'FillPattern62',
+    'Silty Clay-Shale'                           : 'FillPattern41',
+    'Silty Marl'                                 : 'FillPattern50',
+    'Silty dolomitic Marl'                       : 'FillPattern51',
+    'Silty, calcareous and dolomitic Clay-Shale' : 'FillPattern47',
+    'Slaty Shale'                                : 'FillPattern36',
+    'Sylvite'                                    : 'FillPattern97',
+    'Void'                                       : 'FillPattern1',
+    'Volcanic Rock'                              : 'FillPattern98',
+    'Wackstone'                                  : 'FillPattern23',
+}
+
+assert AREA_DATA_URI_SCHEME_MONO.keys() == AREA_DATA_URI_SCHEME_RGB.keys() == PATTERN_IDS.keys()
+
+AREA_KEYS = AREA_DATA_URI_SCHEME_MONO.keys()
+
+
+def write_svg_defs(xS, area_map, keys=None):
+    if keys is None:
+        keys = AREA_KEYS
+    with XmlWrite.Element(xS, 'defs'):
+        for pattern in keys:
+            attrs_pattern = {
+                'id': PATTERN_IDS[pattern],
+                'width': '15',
+                'height': '12',
+                'viewBox' : "0 0 15 12",
+                'patternUnits' : 'userSpaceOnUse',
+                'alt': pattern,
+            }
+            with XmlWrite.Element(xS, 'pattern', attrs_pattern):
+                attrs_image = {
+                    'xlink:href': area_map[pattern],
+                }
+                with XmlWrite.Element(xS, 'image', attrs_image):
+                    pass

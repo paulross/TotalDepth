@@ -156,6 +156,7 @@ def parse_iwwpatterns_xml():
 
 def read_iwwpatterns():
     result = {}
+    ids = set()
     root = parse_iwwpatterns_xml()
     for pattern in root.findall(_text('LgFillPattern')):
         # Typical. Note BackgroundColor is optional
@@ -179,12 +180,16 @@ def read_iwwpatterns():
         description = desc_node.text
         # Ignore duplicates such as "Calcareous and dolomitic Clay-Shale"
         if description not in result:
+            unique_id = pattern.get('UniqueId')
+            if unique_id in ids:
+                raise IOError('Duplicate unique ID: "{}"'.format(unique_id))
+            ids.add(unique_id)
             bit_pattern = pattern.find(_text('LgBitPattern'))
             encoded_bits = bit_pattern.find(_text('Bits')).text
             height = int(bit_pattern.find(_text('PatternHeight')).text)
             width = int(bit_pattern.find(_text('PatternWidth')).text)
             array = pattern_to_array(width, encoded_bits)
-            result[description] = (width, height), bc, array
+            result[description] = unique_id, (width, height), bc, array
     return result
 
 
@@ -216,9 +221,9 @@ def main():
         os.makedirs(directory, exist_ok=True)
         for name in patterns:
             if sub_dir == 'mono':
-                png = create_png_image('FFFFFF', patterns[name][2])
+                png = create_png_image('FFFFFF', patterns[name][3])
             else:
-                png = create_png_image(patterns[name][1], patterns[name][2])
+                png = create_png_image(patterns[name][2], patterns[name][3])
             with open(os.path.join(directory, name + '.png'), 'wb') as f:
                 f.write(png)
             b64 = base64.b64encode(png)
@@ -233,6 +238,14 @@ def main():
         for k in sorted(data_uri_schemes.keys()):
             print('    {!r:{width}s} : {!r:s},'.format(k, data_uri_schemes[k], width=key_width))
         print('}')
+    # Unique ID
+    unique_ids = {k : v[0] for k, v in patterns.items()}
+    key_width = max([len(repr(k)) for k in unique_ids.keys()])
+    print('# IDs')
+    print('{}: typing.Dict[str, str] = {}'.format('PATTERN_IDS', '{'))
+    for k in sorted(data_uri_schemes.keys()):
+        print('    {!r:{width}s} : {!r:s},'.format(k, unique_ids[k], width=key_width))
+    print('}')
 
     print('Bye, bye!')
     return 0
