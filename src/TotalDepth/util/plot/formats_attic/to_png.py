@@ -110,7 +110,7 @@ Examples:
 DataURIScheme: https://en.wikipedia.org/wiki/Data_URI_scheme
 
 """
-
+import collections
 import base64
 import io
 import os
@@ -127,17 +127,13 @@ EXPECTED_PATTERN_HEIGHT = 12
 EXPECTED_PATTERN_WIDTH = 15
 
 
-def pattern_to_text(width: int, pattern: bytes) -> typing.List[str]:
+def pattern_to_array(width: int, pattern: bytes) -> typing.List[typing.List[int]]:
     b = base64.b64decode(pattern)
     st = ''.join(['{:08b}'.format(v) for v in b])
-    result  = [st[i:i+width] for i in range(0, len(st), width+1)]
-    # TODO: Check bit 16 is always 0 in each row
-    return result
-
-
-def pattern_to_array(width: int, pattern: bytes) -> typing.List[typing.List[int]]:
-    result = [[int(v) for v in row] for row in pattern_to_text(width, pattern)]
-    return result
+    # TODO: Check bit 16 is always '0' in each row
+    text_table  = [st[i:i+width] for i in range(0, len(st), width+1)]
+    int_table = [[int(v) for v in row] for row in text_table]
+    return int_table
 
 
 def _text(val):
@@ -153,6 +149,8 @@ def parse_iwwpatterns_xml():
         raise IOError('Pattern XML file root element "{}" is unknown.'.format(root.tag))
     return root
 
+
+Pattern = collections.namedtuple('Pattern', 'unique_id, width, height, background, array')
 
 def read_iwwpatterns():
     result = {}
@@ -189,7 +187,7 @@ def read_iwwpatterns():
             height = int(bit_pattern.find(_text('PatternHeight')).text)
             width = int(bit_pattern.find(_text('PatternWidth')).text)
             array = pattern_to_array(width, encoded_bits)
-            result[description] = unique_id, (width, height), bc, array
+            result[description] = Pattern(unique_id, width, height, bc, array)
     return result
 
 
@@ -211,9 +209,16 @@ def create_png_image(background: str, array: typing.List[typing.List[int]]):
     return fp.getvalue()
 
 
+def png_to_data_uri(png: bytes) -> str:
+    """Encodes a PNG binary image as a Data URI string.
+    https://en.wikipedia.org/wiki/Data_URI_scheme.
+    """
+    b64 = base64.b64encode(png)
+    return '{}{}'.format('data:image/png;base64,', b64.decode())
+
+
 def main():
     patterns = read_iwwpatterns()
-    # pprint.pprint(patterns, width=120)
     print('PNG file data')
     data_uri_schemes = {}
     for sub_dir in ('mono', 'rgb'):
@@ -221,18 +226,14 @@ def main():
         os.makedirs(directory, exist_ok=True)
         for name in patterns:
             if sub_dir == 'mono':
-                png = create_png_image('FFFFFF', patterns[name][3])
+                png = create_png_image('FFFFFF', patterns[name].array)
             else:
-                png = create_png_image(patterns[name][2], patterns[name][3])
+                png = create_png_image(patterns[name].background, patterns[name].array)
             with open(os.path.join(directory, name + '.png'), 'wb') as f:
                 f.write(png)
-            b64 = base64.b64encode(png)
-            # print(name, b64)
-            # Data URI Scheme
-            # https://en.wikipedia.org/wiki/Data_URI_scheme
-            data_uri_schemes[name] = '{}{}'.format('data:image/png;base64,', b64.decode())
-        # pprint.pprint(data_uri_schemes)
+            data_uri_schemes[name] = png_to_data_uri(png)
         key_width = max([len(repr(k)) for k in data_uri_schemes.keys()])
+        # Dump to stdout to paste into Python code
         print(directory)
         print('{}: typing.Dict[str, str] = {}'. format('AREA_DATA_URI_SCHEME_' + sub_dir.upper(), '{'))
         for k in sorted(data_uri_schemes.keys()):
@@ -241,12 +242,12 @@ def main():
     # Unique ID
     unique_ids = {k : v[0] for k, v in patterns.items()}
     key_width = max([len(repr(k)) for k in unique_ids.keys()])
+    # Dump to stdout to paste into Python code
     print('# IDs')
     print('{}: typing.Dict[str, str] = {}'.format('PATTERN_IDS', '{'))
     for k in sorted(data_uri_schemes.keys()):
         print('    {!r:{width}s} : {!r:s},'.format(k, unique_ids[k], width=key_width))
     print('}')
-
     print('Bye, bye!')
     return 0
 
