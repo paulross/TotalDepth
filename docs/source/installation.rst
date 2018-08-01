@@ -26,7 +26,7 @@ you through the process.
 From sources
 ------------
 
-First make a virtual environment in your :file:`{<PYTHONVENVS>}`, say :file:`{~/pyvenvs}`:
+If you are using a virtual environment in your :file:`{<PYTHONVENVS>}`, say :file:`{~/pyvenvs}`:
 
 .. code-block:: console
 
@@ -34,13 +34,29 @@ First make a virtual environment in your :file:`{<PYTHONVENVS>}`, say :file:`{~/
     $ . <PYTHONVENVS>/TotalDepth/bin/activate
     (TotalDepth) $
 
+Or if you have a Conda environment:
+
+.. code-block:: console
+
+    $ conda create --name TotalDepth python=3.6 pip
+    $ source activate TotalDepth
+
 Install the dependencies, ``numpy`` and ``Cython``:
+
+If you are using a virtual environment:
 
 .. code-block:: console
 
     (TotalDepth) $ pip install numpy
     (TotalDepth) $ pip install Cython
-    
+
+Or if you have a Conda environment:
+
+.. code-block:: console
+
+    (TotalDepth) $ conda install numpy
+    (TotalDepth) $ conda install Cython
+
 The sources for TotalDepth can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
@@ -59,7 +75,7 @@ Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-	(TotalDepth) $ cd TotalDepth
+    (TotalDepth) $ cd TotalDepth
     (TotalDepth) $ python setup.py install
 
 Install the test dependencies and run TotalDepth's tests:
