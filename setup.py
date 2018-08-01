@@ -5,6 +5,7 @@
 
 # from distutils.core import setup
 #from distutils.extension import Extension
+import os
 
 from setuptools import setup, find_packages
 
@@ -63,6 +64,8 @@ XML_FORMAT_FILES = [
     'src/TotalDepth/util/plot/formats/Sonic_Waveform4_Depth.xml',
 ]
 
+XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
+
 setup(
     name='TotalDepth',
     version='0.2.2rc0',
@@ -75,7 +78,7 @@ setup(
     package_dir={'' : 'src'},
     # package_data={'' : ['TotalDepth/util/plot/formats/*.xml']},
     data_files= [
-        ('TotalDepth/util/plot/formats/', XML_FORMAT_FILES),
+        (os.path.join('TotalDepth','util','plot', 'formats'), XML_FORMAT_FILES),
     ],
     entry_points={
         # All TotalDepth scripts have a 'td' prefix.
