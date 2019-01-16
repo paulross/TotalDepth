@@ -13,6 +13,9 @@
 #include <cstdint>
 
 /* Allow access from C/C++ code. */
+double _from49(int16_t word);
+int16_t _to49(double value);
+
 double _from68(int32_t word);
 int32_t _to68(double value);
 

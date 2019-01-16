@@ -67,4 +67,6 @@ tests/unit/test_util/test_plot/test_svg/*
 # General stuff to ignore
 gitignore/
 
+# Airspeed velocity benchmarks
+.asv
 

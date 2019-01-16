@@ -7,7 +7,7 @@ import os
 
 from setuptools import Extension, setup, find_packages
 
-from Cython.Build import cythonize
+# from Cython.Build import cythonize
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -15,18 +15,21 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
+install_requirements = [
     'Cython',
     'numpy',
 #    'Click>=6.0',
 ]
 
 setup_requirements = [
+    'setuptools>=18.0',
+    'Cython',
     'pytest-runner',
 ]
 
 test_requirements = [
     'pytest',
+    'asv',
 ]
 
 XML_FORMAT_FILES = [
@@ -63,18 +66,35 @@ XML_FORMAT_FILES = [
 
 XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 
-ext_modules = cythonize(
-    module_list="src/TotalDepth/LIS/core/*.pyx",
-)
+# ext_modules = cythonize(
+#     module_list="src/TotalDepth/LIS/core/*.pyx",
+# )
 
-ext_modules.append(
+ext_modules = [
     Extension(
-        "TotalDepth.LIS.core.cpRepCode",
+        "TotalDepth.LIS.core.cRepCode",
         sources=[
-            "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
-            "src/TotalDepth/LIS/core/LISRepCode.cpp",
-        ],
-    )
+            "src/TotalDepth/LIS/core/cRepCode.pyx",
+        ]
+    ),
+    Extension(
+        "TotalDepth.LIS.core.cFrameSet",
+        sources=[
+            "src/TotalDepth/LIS/core/cFrameSet.pyx",
+        ]
+    ),
+]
+
+ext_modules.extend(
+    [
+        Extension(
+            "TotalDepth.LIS.core.cpRepCode",
+            sources=[
+                "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
+                "src/TotalDepth/LIS/core/LISRepCode.cpp",
+            ],
+        ),
+    ]
 )
 
 print('TRACE:', ext_modules)
@@ -113,7 +133,6 @@ setup(
         ]
     },
     include_package_data=True,
-    install_requires=requirements,
     license="GPLv2",
     zip_safe=False,
     keywords='TotalDepth',
@@ -127,8 +146,9 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    tests_require=test_requirements,
     setup_requires=setup_requirements,
+    install_requires=install_requirements,
+    tests_require=test_requirements,
     # cmdclass = {'build_ext': build_ext},
     ext_modules=ext_modules
 )
