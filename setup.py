@@ -24,6 +24,7 @@ install_requirements = [
 setup_requirements = [
     'setuptools>=18.0',
     'Cython',
+    'wheel',
     'pytest-runner',
 ]
 
