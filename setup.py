@@ -3,13 +3,10 @@
 
 """The setup script."""
 
-# from distutils.core import setup
-#from distutils.extension import Extension
 import os
 
-from setuptools import setup, find_packages
+from setuptools import Extension, setup, find_packages
 
-from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
 with open('README.rst') as readme_file:
@@ -66,6 +63,22 @@ XML_FORMAT_FILES = [
 
 XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 
+ext_modules = cythonize(
+    module_list="src/TotalDepth/LIS/core/*.pyx",
+)
+
+ext_modules.append(
+    Extension(
+        "TotalDepth.LIS.core.cpRepCode",
+        sources=[
+            "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
+            "src/TotalDepth/LIS/core/LISRepCode.cpp",
+        ],
+    )
+)
+
+print('TRACE:', ext_modules)
+
 setup(
     name='TotalDepth',
     version='0.2.2rc0',
@@ -78,7 +91,7 @@ setup(
     package_dir={'' : 'src'},
     # package_data={'' : ['TotalDepth/util/plot/formats/*.xml']},
     data_files= [
-        (os.path.join('TotalDepth','util','plot', 'formats'), XML_FORMAT_FILES),
+        (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
     ],
     entry_points={
         # All TotalDepth scripts have a 'td' prefix.
@@ -110,20 +123,12 @@ setup(
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
     tests_require=test_requirements,
     setup_requires=setup_requirements,
-# 	cmdclass = {'build_ext': build_ext},
-# 	ext_modules = [
-#         Extension("TotalDepth.LIS.core.cRepCode",
-#                   ["src/TotalDepth/LIS/core/cRepCode.pyx"]),
-#         Extension("TotalDepth.LIS.core.cFrameSet",
-#                   ["src/TotalDepth/LIS/core/cFrameSet.pyx"]),
-# 	]
-    ext_modules = cythonize("src/TotalDepth/LIS/core/*.pyx"),
+    # cmdclass = {'build_ext': build_ext},
+    ext_modules=ext_modules
 )

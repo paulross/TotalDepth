@@ -840,6 +840,31 @@ def read79(theFile):
 # End: Representation Code 79, 0x4F, 16bit signed integer
 #============================================================
 
+
+def bytes_to_doubles(byte_arr, rep_code, pos_start, num_adj, pos_stride):
+    """
+    Give an array of bytes this returns a numpy array of float64.
+    Number of frames is::
+
+        (len(byte_arr) - pos_start - (num_adj * rc_size)) / pos_stride
+
+    Number of values is: number of frames * num_adj
+
+    :param byte_arr: Array of bytes
+    :param rep_code: Integer representation code.
+    :param pos_start: Integer start of bytes in the array
+    :param num_adj: Number of adjacent values that makes a single frame entry.
+    :param pos_stride: Bytes to stride to next frame.
+    :return: ndarray of doubles
+    """
+    assert pos_start >= 0
+    assert num_adj >= 1
+    rc_size = RC_SIZE_MAP[rep_code]
+    assert pos_stride >= rc_size * num_adj
+    frames = (len(byte_arr) - pos_start - (num_adj * rc_size)) / pos_stride
+    num_values = frames * num_adj
+
+
 #############################
 # End: Python reference code.
 #############################

@@ -45,7 +45,7 @@ from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import PhysRec
 from TotalDepth.LIS.core import RepCode
 
-RE_SIZE_COST = re.compile('^.+Size:\s*([0-9.]+).+Cost:\s*([0-9.]+).+$')
+RE_SIZE_COST = re.compile(r'^.+Size:\s*([0-9.]+).+Cost:\s*([0-9.]+).+$')
 
 #>>> R = re.compile('^.+Size:\s*([0-9.]+).+Cost:\s*([0-9.]+).+$')
 #>>> t = """TestPhysRecWriteRead_Perf.test_03_03():  128 LRs that are 64kB, 512B PRs. ...  Size: 8.000 (MB) LRs: 128 Time: 0.519 (s) Cost: 66.416 (ms/MB) ok

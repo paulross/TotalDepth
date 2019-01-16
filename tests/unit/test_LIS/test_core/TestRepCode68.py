@@ -39,6 +39,8 @@ from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import pRepCode
 ## Cython methods
 from TotalDepth.LIS.core import cRepCode
+## CPython methods
+from TotalDepth.LIS.core import cpRepCode
 # For testing read operations
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import PhysRec
@@ -270,6 +272,67 @@ class TestRepCodeFrom68Cython(TestRepCode68Base):
         except AttributeError:
             pass
         self.assertFalse(myFile.hasLd())
+
+class TestRepCodeToFrom68CPython(TestRepCode68Base):
+    """Tests representation code 68 converted by a CPython extension."""
+    def setUp(self):
+        """Set up."""
+        pass
+
+    def tearDown(self):
+        """Tear down."""
+        pass
+
+    def test_00(self):
+        """TestRepCodeToFrom68CPython.test_00(): tests setUp() and tearDown()."""
+        pass
+
+    # Equivalent to 0xFFC00000
+    # RC_68_MIN = math.ldexp(-1.0, 127)
+    # Equivalent to 0x7FFFFFFF
+    # RC_68_MAX = math.ldexp(1 - 1.0 / (1 << 23), 127)
+
+    def test_from_min(self):
+        self.assertEqual(cpRepCode.from68(0x80700000), math.ldexp(-2.0, 123))
+
+    def test_from_max(self):
+        self.assertEqual(cpRepCode.from68(0x7FFFFFFF), math.ldexp(1 - 1.0 / (1 << 23), 127))
+
+    def test_from_153(self):
+        """TestRepCodeToFrom68CPython.test_01_c(): from68(0x444C8000) -> 153.0 CPython."""
+        self.assertEqual(cpRepCode.from68(0x444C8000), 153.0)
+
+    def test_from_minus_153(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): from68(0xBBB38000) -> -153.0 CPython."""
+        self.assertEqual(cpRepCode.from68(0xBBB38000), -153.0)
+
+    def test_from_zero(self):
+        """TestRepCodeToFrom68CPython.test_04_c(): from68(0x40000000) -> 0.0 CPython."""
+        self.assertEqual(cpRepCode.from68(0x40000000), 0.0)
+
+    def test_to_153(self):
+        """TestRepCodeToFrom68CPython.test_01_c(): to68(0x444C8000) -> 153.0 CPython."""
+        self.assertEqual(cpRepCode.to68(153.0), 0x444C8000)
+
+    def test_to_minus_153(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
+        self.assertEqual(cpRepCode.to68(-153.0), 0xBBB38000 - (1 << 32))
+
+    def test_to_zero(self):
+        """TestRepCodeToFrom68CPython.test_04_c(): to68(0x40000000) -> 0.0 CPython."""
+        self.assertEqual(cpRepCode.to68(0.0), 0x40000000)
+
+    def test_to_153_int(self):
+        """TestRepCodeToFrom68CPython.test_01_c(): to68(0x444C8000) -> 153.0 CPython."""
+        self.assertEqual(cpRepCode.to68(153), 0x444C8000)
+
+    def test_to_minus_153_int(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
+        self.assertEqual(cpRepCode.to68(-153), 0xBBB38000 - (1 << 32))
+
+    def test_to_zero_int(self):
+        """TestRepCodeToFrom68CPython.test_04_c(): to68(0x40000000) -> 0.0 CPython."""
+        self.assertEqual(cpRepCode.to68(0), 0x40000000)
 
 class TestRepCodeFrom68(TestRepCode68Base):
     """Tests ..."""
@@ -922,6 +985,7 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68Basic))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68Python))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68Cython))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeToFrom68CPython))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68PyCy))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68LowExponent))
