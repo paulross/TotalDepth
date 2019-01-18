@@ -86,6 +86,36 @@ finally:
     return ret;
 }
 
+/* Given a bytes object this returns a numpy array. */
+static PyObject *
+from68_bytes_to_array(PyObject *module, PyObject *arg, size_t pos, size_t words_per_frame, size_t stride) {
+    PyObject *ret = NULL;
+    assert(arg);
+    assert(! PyErr_Occurred());
+    /* Treat arg as a borrowed reference. */
+    Py_INCREF(arg);
+    if (! PyBytes_Check(arg)) {
+        PyErr_Format(PyExc_ValueError,
+                     "%s() in %s#%d takes a bytes object not a \"%s\"",
+                     __FUNCTION__, __FILE__, __LINE__,
+                     Py_TYPE(arg)->tp_name);
+        goto except;
+    }
+    assert(! PyErr_Occurred());
+    assert(ret);
+    goto finally;
+except:
+    assert(PyErr_Occurred());
+    Py_XDECREF(ret);
+    ret = NULL;
+finally:
+    /* Treat arg as a borrowed reference. */
+    Py_DECREF(arg);
+    return ret;
+}
+
+
+
 static PyMethodDef cpRepCode_methods[] = {
     {"from68", (PyCFunction)from68, METH_O,
         "Converts a 32bit integer word with representation code 68 to a float."

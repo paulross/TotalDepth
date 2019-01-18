@@ -15,8 +15,8 @@ class TimeRepCode68:
         (0xBBB38000, -153.0),
         (0x40000000, 0.0),
     )
-    BYTES_153 = b'\x44\x4C\x80\x00''
-    BYTES_0 = b'\x40\x00\x00\x00''
+    BYTES_153 = b'\x44\x4C\x80\x00'
+    BYTES_0 = b'\x40\x00\x00\x00'
 
     def time_pRepCode_to(self):
         pRepCode.to68(153.0)

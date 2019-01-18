@@ -76,7 +76,7 @@ class TestFileType0Base(BaseTestClasses.TestBaseFile):
 
     def _ReadFileWithBufferSizeRepCode(self, bufSiz):
         """Reads a file with a particular buffer size."""
-        tS = time.clock()
+        tS = time.perf_counter()
         # Iterate through file
         wordCntr = 0
         while not self._file.isEOF:
@@ -90,7 +90,7 @@ class TestFileType0Base(BaseTestClasses.TestBaseFile):
     
     def _ReadFileWithBufferSize(self, bufSiz):
         """Reads a file with a particular buffer size."""
-        tS = time.clock()
+        tS = time.perf_counter()
         # Iterate through file
         byteCntr = 0
         while not self._file.isEOF:
@@ -109,7 +109,7 @@ class TestFileType0(TestFileType0Base):
     
     def _ReadFileWithBufferSizeRepCode(self, bufSiz):
         """Reads a file with a particular buffer size."""
-        tS = time.clock()
+        tS = time.perf_counter()
         # Iterate through file
         wordCntr = 0
         while not self._file.isEOF:
@@ -123,7 +123,7 @@ class TestFileType0(TestFileType0Base):
     
     def _ReadFileWithBufferSize(self, bufSiz):
         """Reads a file with a particular buffer size."""
-        tS = time.clock()
+        tS = time.perf_counter()
         # Iterate through file
         byteCntr = 0
         while not self._file.isEOF:
@@ -135,7 +135,7 @@ class TestFileType0(TestFileType0Base):
     
     def test_01(self):
         """TestFileType0.test_01(): 8MB Type 0 data Repcode 68,    4 byte reads."""
-        tS = time.clock()
+        tS = time.perf_counter()
         # Iterate through file
         wordCntr = 0
         while not self._file.isEOF:
@@ -307,9 +307,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

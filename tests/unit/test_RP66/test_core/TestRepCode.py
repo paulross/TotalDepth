@@ -126,12 +126,12 @@ class TestFSINGL(TestRepCodeBase):
     def test_00(self):
         """Tests FSINGL properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FSINGL', rte.SymbolicName)
-        self.assertEquals('IEEE single precision floating point', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(4, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FSINGL', rte.SymbolicName)
+        self.assertEqual('IEEE single precision floating point', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(4, rte.Size)
         
     def test_01(self):
         """Tests FSINGL values write/read."""
@@ -159,12 +159,12 @@ class TestFSING1(TestRepCodeBase):
     def test_00(self):
         """Tests FSING1 properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FSING1', rte.SymbolicName)
-        self.assertEquals('Validated single precision floating point', rte.Description)
-        self.assertEquals('BALANCED-INTERVAL', rte.Class)
-        self.assertEquals('C', rte.Type)
-        self.assertEquals(8, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FSING1', rte.SymbolicName)
+        self.assertEqual('Validated single precision floating point', rte.Description)
+        self.assertEqual('BALANCED-INTERVAL', rte.Class)
+        self.assertEqual('C', rte.Type)
+        self.assertEqual(8, rte.Size)
         
     def test_01(self):
         """Tests FSING1 values write/read."""
@@ -193,12 +193,12 @@ class TestFSING2(TestRepCodeBase):
     def test_00(self):
         """Tests FSING2 properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FSING2', rte.SymbolicName)
-        self.assertEquals('Two-way validated single precision floating point', rte.Description)
-        self.assertEquals('UNBALANCED-INTERVAL', rte.Class)
-        self.assertEquals('C', rte.Type)
-        self.assertEquals(12, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FSING2', rte.SymbolicName)
+        self.assertEqual('Two-way validated single precision floating point', rte.Description)
+        self.assertEqual('UNBALANCED-INTERVAL', rte.Class)
+        self.assertEqual('C', rte.Type)
+        self.assertEqual(12, rte.Size)
         
     def test_01(self):
         """Tests FSING2 values write/read."""
@@ -226,12 +226,12 @@ class TestFDOUBL(TestRepCodeBase):
     def test_00(self):
         """Tests FDOUBL properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FDOUBL', rte.SymbolicName)
-        self.assertEquals('IEEE double precision floating point', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(8, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FDOUBL', rte.SymbolicName)
+        self.assertEqual('IEEE double precision floating point', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(8, rte.Size)
         
     def test_01(self):
         """Tests FDOUBL values write/read."""
@@ -259,12 +259,12 @@ class TestFDOUB1(TestRepCodeBase):
     def test_00(self):
         """Tests FDOUB1 properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FDOUB1', rte.SymbolicName)
-        self.assertEquals('Validated double precision floating point', rte.Description)
-        self.assertEquals('BALANCED-INTERVAL', rte.Class)
-        self.assertEquals('C', rte.Type)
-        self.assertEquals(16, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FDOUB1', rte.SymbolicName)
+        self.assertEqual('Validated double precision floating point', rte.Description)
+        self.assertEqual('BALANCED-INTERVAL', rte.Class)
+        self.assertEqual('C', rte.Type)
+        self.assertEqual(16, rte.Size)
         
     def test_01(self):
         """Tests FDOUB1 values write/read."""
@@ -293,12 +293,12 @@ class TestFDOUB2(TestRepCodeBase):
     def test_00(self):
         """Tests FDOUB2 properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('FDOUB2', rte.SymbolicName)
-        self.assertEquals('Two-way validated double precision floating point', rte.Description)
-        self.assertEquals('UNBALANCED-INTERVAL', rte.Class)
-        self.assertEquals('C', rte.Type)
-        self.assertEquals(24, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('FDOUB2', rte.SymbolicName)
+        self.assertEqual('Two-way validated double precision floating point', rte.Description)
+        self.assertEqual('UNBALANCED-INTERVAL', rte.Class)
+        self.assertEqual('C', rte.Type)
+        self.assertEqual(24, rte.Size)
         
     def test_01(self):
         """Tests FDOUB2 values write/read."""
@@ -328,12 +328,12 @@ class TestSSHORT(TestRepCodeBase):
     def test_00(self):
         """Tests SSHORT properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('SSHORT', rte.SymbolicName)
-        self.assertEquals('Short signed integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('SSHORT', rte.SymbolicName)
+        self.assertEqual('Short signed integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(1, rte.Size)
         
     def test_01(self):
         """Tests SSHORT values write/read."""
@@ -364,12 +364,12 @@ class TestSNORM(TestRepCodeBase):
     def test_00(self):
         """Tests SNORM properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('SNORM', rte.SymbolicName)
-        self.assertEquals('Normal signed integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(2, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('SNORM', rte.SymbolicName)
+        self.assertEqual('Normal signed integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(2, rte.Size)
         
     def test_01(self):
         """Tests SNORM values write/read."""
@@ -399,12 +399,12 @@ class TestSLONG(TestRepCodeBase):
     def test_00(self):
         """Tests SLONG properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('SLONG', rte.SymbolicName)
-        self.assertEquals('Long signed integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(4, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('SLONG', rte.SymbolicName)
+        self.assertEqual('Long signed integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(4, rte.Size)
         
     def test_01(self):
         """Tests SLONG values write/read."""
@@ -432,12 +432,12 @@ class TestUSHORT(TestRepCodeBase):
     def test_00(self):
         """Tests USHORT properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('USHORT', rte.SymbolicName)
-        self.assertEquals('Short unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('USHORT', rte.SymbolicName)
+        self.assertEqual('Short unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(1, rte.Size)
         
     def test_01(self):
         """Tests USHORT values write/read."""
@@ -467,12 +467,12 @@ class TestUNORM(TestRepCodeBase):
     def test_00(self):
         """Tests UNORM properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('UNORM', rte.SymbolicName)
-        self.assertEquals('Normal unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(2, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('UNORM', rte.SymbolicName)
+        self.assertEqual('Normal unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(2, rte.Size)
         
     def test_01(self):
         """Tests UNORM values write/read."""
@@ -503,12 +503,12 @@ class TestULONG(TestRepCodeBase):
     def test_00(self):
         """Tests ULONG properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('ULONG', rte.SymbolicName)
-        self.assertEquals('Long unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(4, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('ULONG', rte.SymbolicName)
+        self.assertEqual('Long unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(4, rte.Size)
         
     def test_01(self):
         """Tests ULONG values write/read."""
@@ -547,17 +547,17 @@ class TestUVARI(TestRepCodeBase):
     def test_00(self):
         """Tests UVARI properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('UVARI', rte.SymbolicName)
-        self.assertEquals('Variable-length unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals((1,2,4), rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('UVARI', rte.SymbolicName)
+        self.assertEqual('Variable-length unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual((1,2,4), rte.Size)
         
 #    def test_05(self):
 #        """Tests UVARI read."""
 #        v = RepCode.readUVARI(BaseTestClasses.MockStreamRead(b'\x00\x00\x00\x00'))
-#        self.assertEquals(0, v)
+#        self.assertEqual(0, v)
     
     def test_01(self):
         """Tests UVARI edge values write/read."""
@@ -589,12 +589,12 @@ class TestIDENT(TestRepCodeBase):
     def test_00(self):
         """Tests IDENT properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('IDENT', rte.SymbolicName)
-        self.assertEquals('Variable-length identifier', rte.Description)
-        self.assertEquals('STRING', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(-1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('IDENT', rte.SymbolicName)
+        self.assertEqual('Variable-length identifier', rte.Description)
+        self.assertEqual('STRING', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(-1, rte.Size)
         
     def test_01(self):
         """Tests IDENT edge values write/read."""
@@ -626,12 +626,12 @@ class TestASCII(TestRepCodeBase):
     def test_00(self):
         """Tests ASCII properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('ASCII', rte.SymbolicName)
-        self.assertEquals('Variable-length ASCII character string', rte.Description)
-        self.assertEquals('STRING', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(-1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('ASCII', rte.SymbolicName)
+        self.assertEqual('Variable-length ASCII character string', rte.Description)
+        self.assertEqual('STRING', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(-1, rte.Size)
 
     @pytest.mark.xfail(reason="RP66 is not fully supported.")
     def test_01(self):
@@ -673,12 +673,12 @@ class TestDTIME(TestRepCodeBase):
     def test_00(self):
         """Tests DTIME properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('DTIME', rte.SymbolicName)
-        self.assertEquals('Date and time', rte.Description)
-        self.assertEquals('TIME', rte.Class)
-        self.assertEquals('C', rte.Type)
-        self.assertEquals(8, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('DTIME', rte.SymbolicName)
+        self.assertEqual('Date and time', rte.Description)
+        self.assertEqual('TIME', rte.Class)
+        self.assertEqual('C', rte.Type)
+        self.assertEqual(8, rte.Size)
         
     def test_01(self):
         """A saturday morning."""
@@ -723,12 +723,12 @@ class TestORIGIN(TestUVARI):
     def test_00(self):
         """Tests UVARI properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('ORIGIN', rte.SymbolicName)
-        self.assertEquals('Origin reference', rte.Description)
-        self.assertEquals('ORIGIN', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(-1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('ORIGIN', rte.SymbolicName)
+        self.assertEqual('Origin reference', rte.Description)
+        self.assertEqual('ORIGIN', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(-1, rte.Size)
 
 class TestSTATUS(TestRepCodeBase):
     """Tests the STATUS Representation Code number 26."""
@@ -741,12 +741,12 @@ class TestSTATUS(TestRepCodeBase):
     def test_00(self):
         """Tests STATUS properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('STATUS', rte.SymbolicName)
-        self.assertEquals('Boolean status', rte.Description)
-        self.assertEquals('STATUS', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(1, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('STATUS', rte.SymbolicName)
+        self.assertEqual('Boolean status', rte.Description)
+        self.assertEqual('STATUS', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(1, rte.Size)
         
     def test_01(self):
         """Tests STATUS values write/read."""
@@ -777,12 +777,12 @@ class TestISNORM(TestRepCodeBase):
     def test_00(self):
         """Tests ISNORM properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('ISNORM', rte.SymbolicName)
-        self.assertEquals('Inverted order normal signed integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(2, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('ISNORM', rte.SymbolicName)
+        self.assertEqual('Inverted order normal signed integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(2, rte.Size)
         
     def test_01(self):
         """Tests ISNORM values write/read."""
@@ -810,12 +810,12 @@ class TestISLONG(TestRepCodeBase):
     def test_00(self):
         """Tests SLONG properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('ISLONG', rte.SymbolicName)
-        self.assertEquals('Inverted order long signed integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(4, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('ISLONG', rte.SymbolicName)
+        self.assertEqual('Inverted order long signed integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(4, rte.Size)
         
     def test_01(self):
         """Tests ISLONG values write/read."""
@@ -844,12 +844,12 @@ class TestIUNORM(TestRepCodeBase):
     def test_00(self):
         """Tests IUNORM properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('IUNORM', rte.SymbolicName)
-        self.assertEquals('Inverted order normal unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(2, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('IUNORM', rte.SymbolicName)
+        self.assertEqual('Inverted order normal unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(2, rte.Size)
         
     def test_01(self):
         """Tests IUNORM values write/read."""
@@ -880,12 +880,12 @@ class TestIULONG(TestRepCodeBase):
     def test_00(self):
         """Tests IULONG properties in RC_TABLE."""
         rte = RepCode.RC_TABLE[self.NUM]
-        self.assertEquals(self.NUM, rte.Code)
-        self.assertEquals('IULONG', rte.SymbolicName)
-        self.assertEquals('Inverted order long unsigned integer', rte.Description)
-        self.assertEquals('NUMBER', rte.Class)
-        self.assertEquals('S', rte.Type)
-        self.assertEquals(4, rte.Size)
+        self.assertEqual(self.NUM, rte.Code)
+        self.assertEqual('IULONG', rte.SymbolicName)
+        self.assertEqual('Inverted order long unsigned integer', rte.Description)
+        self.assertEqual('NUMBER', rte.Class)
+        self.assertEqual('S', rte.Type)
+        self.assertEqual(4, rte.Size)
         
     def test_01(self):
         """Tests IULONG values write/read."""
@@ -986,9 +986,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

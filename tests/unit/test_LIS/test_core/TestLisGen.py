@@ -848,8 +848,8 @@ class TestChannelDipmeter(TestLisGenBase):
                     self._assertInRange(v, 0, 255)
             self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
         #print('Min/Max', min, max)
-        self.assertEquals(0, min)
-        self.assertEquals(255, max)
+        self.assertEqual(0, min)
+        self.assertEqual(255, max)
 #        print(myB)
 #        self.assertEqual(
 #            [127, 9, 37, 176, 255]
@@ -897,8 +897,8 @@ class TestChannelDipmeter(TestLisGenBase):
                     self._assertInRange(v, 0, 255)
             self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
         #print('Min/Max', min, max)
-        #self.assertEquals(0, min)
-        #self.assertEquals(255, max)
+        #self.assertEqual(0, min)
+        #self.assertEqual(255, max)
         #print(myB)
         self.assertEqual(
             [0, 50, 100, 150, 200]
@@ -1445,9 +1445,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

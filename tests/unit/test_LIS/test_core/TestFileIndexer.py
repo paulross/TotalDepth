@@ -315,7 +315,7 @@ class TestIndex_genPlotRecords(TestFileIndexerBase):
         """TestIndex_genPlotRecords.test_00(): Test genPlotRecords()."""
         # TODO: Should add testing of Index.FileIndex generators
 #        assert(0), 'Should add testing of Index.FileIndex generators'
-        sys.stderr.write('Should add testing of Index.FileIndex generators\n')
+        print('Should add testing of Index.FileIndex generators\n')
         myBa = bytearray(self._retFileHead())
         # Add a log pass
         myLp = self._retLogPassGen()
@@ -420,9 +420,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

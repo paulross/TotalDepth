@@ -774,7 +774,7 @@ class TestType01Plan_PerfBase(BaseTestClasses.TestBase):
         self.assertEqual(myTp.frameSize, 4*8192)
         myReadSize = 0
         numEvents = 0
-        start = time.clock()
+        start = time.perf_counter()
         for e in myTp.genEvents(theFrameSlice, theChRange):
             if e[0] == Type01Plan.EVENT_READ:
                 myReadSize += e[1]
@@ -801,9 +801,9 @@ class TestType01Plan_Perf(TestType01Plan_PerfBase):
             MockEntryBlockSet(0, 73),
             [MockDsb(4) for i in range(8192)],
         )
-        start = time.clock()
+        start = time.perf_counter()
         myTp = Type01Plan.FrameSetPlan(myDfsr)
-        execTime = time.clock() - start
+        execTime = time.perf_counter() - start
         self.assertEqual(myTp.frameSize, 4*8192)
         sys.stderr.write(' Time: {:.3f} (s)'.format(execTime))
         #sys.stderr.write(' Rate: {:.3f} (MB/s)'.format(myReadSize /(1024*1024*execTime)))
@@ -1023,9 +1023,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

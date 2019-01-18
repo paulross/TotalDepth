@@ -39,14 +39,14 @@ class ExceptionExecTimer(ExceptionTotalDepthLIS):
 class ExecEvent(object):
     """Records the timing of a single event."""
     def __init__(self, desc):
-        self._tStart = time.clock()
+        self._tStart = time.perf_counter()
         self._desc = desc
         self._bytes = 0
         self._tStop = None
         
     def stop(self, bytes=0):
         """Stop the timer."""
-        self._tStop = time.clock()
+        self._tStop = time.perf_counter()
         self._bytes = bytes
     
     @property
@@ -132,5 +132,6 @@ class ExecTimerList(object):
         descWidth = max([t.lenDesc() for t in self._timerS])
         for i, e in enumerate(self._timerS):
             e.writeToStream(theS, descWidth=descWidth)
-            if i != len(self._timerS)-1:
-                theS.write('\n')
+            theS.write('\n')
+            # if i != len(self._timerS)-1:
+            #     theS.write('\n')

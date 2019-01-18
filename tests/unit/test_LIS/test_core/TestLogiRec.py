@@ -1123,8 +1123,8 @@ class TestLrTableSimple(TestLrBase):
         self.assertEqual(len(self._lrTable), 2)
         self.assertFalse(self._lrTable.isSingleParam)
         l = [b'1   ', b'2   ']
-        self.assertEquals(l, sorted(self._lrTable.rowLabels()))
-        self.assertEquals([Mnem.Mnem(v) for v in l], sorted(self._lrTable.rowMnems()))
+        self.assertEqual(l, sorted(self._lrTable.rowLabels()))
+        self.assertEqual([Mnem.Mnem(v) for v in l], sorted(self._lrTable.rowMnems()))
 
     def test_10(self):
         """TestLrTableSimple.test_00(): Two row table - access failure."""
@@ -2843,9 +2843,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

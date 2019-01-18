@@ -447,7 +447,7 @@ class TestFILMCfgXML(unittest.TestCase):
         self.assertEqual(29, len(myFcxr))
 #        print('')
 #        pprint.pprint(myFcxr._chOutpMnemFilmMap)
-        self.assertEquals(
+        self.assertEqual(
             [
                  'Azimuthal_Density_3Track.xml',
                  'Azimuthal_Resistivity_3Track.xml',
@@ -549,9 +549,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

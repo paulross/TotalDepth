@@ -259,12 +259,12 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
     def test_04(self):
         """TestLogHeader.test_04(): APIHeaderLIS.viewPort()."""
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
-        self.assertEquals(
+        self.assertEqual(
             Coord.Box(width=Coord.Dim(value=6.25, units='in'), depth=Coord.Dim(value=8.0, units='in')),
             myLh.size(),
         )
         tl = Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(0.5, 'in'))
-        self.assertEquals(
+        self.assertEqual(
             Coord.Box(width=Coord.Dim(value=6.5, units='in'), depth=Coord.Dim(value=8.5, units='in')),
             myLh.viewPort(tl),
         )
@@ -557,9 +557,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

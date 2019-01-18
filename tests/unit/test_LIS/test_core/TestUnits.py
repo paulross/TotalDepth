@@ -139,7 +139,7 @@ class TestUnitsMultiple(unittest.TestCase):
         myCats = Units.unitCategories()
         cCount = 0
         random.seed()
-        tS = time.clock()
+        tS = time.perf_counter()
         while cCount < 1e2:
             # Choose a category at random
             iC = random.randint(0, len(myCats)-1)
@@ -159,7 +159,7 @@ class TestUnitsMultiple(unittest.TestCase):
                 #self.assertAlmostEqual(oldVal, val)
                 uCount +=1
             cCount +=1
-        tE = time.clock() - tS
+        tE = time.perf_counter() - tS
         sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
 
     def test_03(self):
@@ -167,7 +167,7 @@ class TestUnitsMultiple(unittest.TestCase):
         myCats = Units.unitCategories()
         cCount = 0
         random.seed()
-        tS = time.clock()
+        tS = time.perf_counter()
         while cCount < 1e2:
             # Choose a category at random
             iC = random.randint(0, len(myCats)-1)
@@ -185,7 +185,7 @@ class TestUnitsMultiple(unittest.TestCase):
                 )
                 uCount +=1
             cCount +=1
-        tE = time.clock() - tS
+        tE = time.perf_counter() - tS
         sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
 
     def test_04(self):
@@ -193,7 +193,7 @@ class TestUnitsMultiple(unittest.TestCase):
         myCats = Units.unitCategories()
         cCount = 0
         random.seed()
-        tS = time.clock()
+        tS = time.perf_counter()
         while cCount < 1e1:
             # Choose a category at random
             iC = random.randint(0, len(myCats)-1)
@@ -206,7 +206,7 @@ class TestUnitsMultiple(unittest.TestCase):
                 newVal = Units.convert(val, myUnits[iU_1], myUnits[iU_2])
                 uCount +=1
             cCount +=1
-        tE = time.clock() - tS
+        tE = time.perf_counter() - tS
         sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
 
 class Special(unittest.TestCase):
@@ -273,9 +273,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

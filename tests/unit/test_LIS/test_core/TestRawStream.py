@@ -131,15 +131,15 @@ class TestRawStream(unittest.TestCase):
         myBytes = ''
         myStruct = struct.Struct('>L')
         # Take tSr: time start read
-        tSr = time.clock()
+        tSr = time.perf_counter()
         with RawStream.RawStream(myIo, mode='wb', fileId='MyFile') as myRs:
             for anI in myInts:
                 myRs.packAndWrite(myStruct, anI)
             myBytes = myIo.getvalue()
-        tE = time.clock() - tSr
+        tE = time.perf_counter() - tSr
         sys.stderr.write('Write rate %8.1f kB/s ' \
                          % (myStruct.size * myNum/(1024*tE)))
-        tSw = time.clock()
+        tSw = time.perf_counter()
         self.assertEqual(len(myBytes), 4*len(myInts))
         myIo = io.BytesIO()
         myIo.write(myBytes)
@@ -148,10 +148,10 @@ class TestRawStream(unittest.TestCase):
             for anI in myInts:
                 myT = myRs.readAndUnpack(myStruct)
                 #self.assertEqual(myT, (anI,))
-        tE = time.clock() - tSw
+        tE = time.perf_counter() - tSw
         sys.stderr.write('Read rate %8.1f kB/s ' \
                          % (myStruct.size * myNum/(1024*tE)))
-        #sys.stderr.write('Overall %10.3f kB/s ' % (myNum/(1024*(time.clock()-tSr))))
+        #sys.stderr.write('Overall %10.3f kB/s ' % (myNum/(1024*(time.perf_counter()-tSr))))
         
     def test_12_01(self):
         """TestRawStream: packAndWrite()/readAndUnpack() random 32bit integer big-endian words and test."""
@@ -163,7 +163,7 @@ class TestRawStream(unittest.TestCase):
         LEN = 4
         self.assertEqual(myStruct.size, LEN)
         # Take time
-        tS = time.clock()
+        tS = time.perf_counter()
         with RawStream.RawStream(myIo, mode='wb', fileId='MyFile') as myRs:
             for anI in myInts:
                 myRs.packAndWrite(myStruct, anI)
@@ -171,9 +171,9 @@ class TestRawStream(unittest.TestCase):
         #print
         #print '0x%X' % myInts[0]
         #print [hex(ord(b)) for b in myBytes]
-        tE = time.clock() - tS
+        tE = time.perf_counter() - tS
         sys.stderr.write('Write rate %10.3f kB/s ' % (myStruct.size * myNum/(1024*tE)))
-        tS = time.clock()
+        tS = time.perf_counter()
         self.assertEqual(len(myBytes), LEN*len(myInts))
         myIo = io.BytesIO()
         myIo.write(myBytes)
@@ -188,7 +188,7 @@ class TestRawStream(unittest.TestCase):
                     print(('Got: 0X%8x  Exp: 0X%8x Index: %d' % (myI, anI, myIndex)))
                 self.assertEqual(myI, anI)
                 myIndex += 1
-        tE = time.clock() - tS
+        tE = time.perf_counter() - tS
         sys.stderr.write('Read rate %10.3f kB/s ' % (myStruct.size * myNum/(1024*tE)))
 
 class Special(unittest.TestCase):
@@ -253,9 +253,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

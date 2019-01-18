@@ -42,6 +42,8 @@ Bit       Description
 ======    ====================================================
 
 """
+import io
+
 __author__ = 'Paul Ross'
 __date__ = '2010-11-05'
 __version__ = '0.1.2'
@@ -801,12 +803,11 @@ class PhysRecWrite(PhysRecBase):
             # Add Physical record trailer (this increments PR record etc.)
             myB.extend(self._prt.prtRecNum())
             myB.extend(self._prt.prtFileNum())
-            self._prt.computeCheckSum(myB)
             # Finally the checksum
+            self._prt.computeCheckSum(myB)
             myB.extend(self._prt.prtCheckSum())
             if self.tif is not None:
                 self.tif.write(self.stream, len(myB))
             self.stream.write(myB)
             ofs += len(myPayLoad)
         return myTell
-

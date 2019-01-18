@@ -62,7 +62,7 @@ RE_SIZE_COST = re.compile(r'^.+Size:\s*([0-9.]+).+Cost:\s*([0-9.]+).+$')
 
 class TestBase(unittest.TestCase):
     def writeCostToStderr(self, tStart, siz, workName, workCount):
-        execTime = time.clock() - tStart
+        execTime = time.perf_counter() - tStart
         sys.stderr.write(' Size: {:.3f} (MB)'.format(siz/(1024*1024)))
         sys.stderr.write(' {:s}: {:d}'.format(workName, workCount))
         sys.stderr.write(' Time: {:.3f} (s)'.format(execTime))
@@ -109,7 +109,7 @@ class TestRepCodeBase(TestBase):
         return r
 
     def writeTimeToStdErr(self, start, rc, numWords):
-        tE = time.clock() - start
+        tE = time.perf_counter() - start
         siz = numWords * RepCode.lisSize(rc)
         sys.stderr.write('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
         sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))

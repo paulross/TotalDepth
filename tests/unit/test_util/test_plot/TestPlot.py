@@ -3963,8 +3963,10 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
                     frameStep=1,
                     title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].description,
                     timerS=myTimerS)
-            myTimerS.writeToStderr()
-            sys.stderr.flush()
+            # myTimerS.writeToStderr()
+            # sys.stderr.flush()
+            myTimerS.writeToStream(sys.stdout)
+            sys.stdout.flush()
 
 class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
     """Example of a plot of HDT data extracted from real LIS file."""
@@ -4380,9 +4382,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

@@ -558,8 +558,8 @@ class TestPlotTrack(unittest.TestCase):
             rightPos=Coord.Dim(5.6, 'in'),
             gridGn=Track.genLinear10
         )
-        self.assertEquals(Coord.Dim(3.2, 'in'), myT.left)
-        self.assertEquals(Coord.Dim(5.6, 'in'), myT.right)
+        self.assertEqual(Coord.Dim(3.2, 'in'), myT.left)
+        self.assertEqual(Coord.Dim(5.6, 'in'), myT.right)
         self.assertTrue(myT.hasGrid)
         self.assertTrue(myT.plotXLines)
         self.assertFalse(myT.plotXAlpha)
@@ -755,8 +755,8 @@ class TestPlotTrack(unittest.TestCase):
             rightPos=Coord.Dim(5.6, 'in'),
             gridGn=None
         )
-        self.assertEquals(Coord.Dim(3.2, 'in'), myT.left)
-        self.assertEquals(Coord.Dim(5.6, 'in'), myT.right)
+        self.assertEqual(Coord.Dim(3.2, 'in'), myT.left)
+        self.assertEqual(Coord.Dim(5.6, 'in'), myT.right)
         self.assertFalse(myT.hasGrid)
         
     def test_10(self):
@@ -849,9 +849,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

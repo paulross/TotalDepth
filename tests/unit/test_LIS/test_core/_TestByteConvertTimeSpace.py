@@ -45,7 +45,7 @@ class Event(object):
         """Constructor with size of operation in bytes."""
         self._siz = siz
         self._hStart = self.getHeap()
-        self._tStart = time.clock()
+        self._tStart = time.perf_counter()
         self._tEnd = None
         self._hEnd = None
     
@@ -54,7 +54,7 @@ class Event(object):
     
     def stop(self):
         """Record stop operation."""
-        self._tEnd = time.clock()
+        self._tEnd = time.perf_counter()
         self._hEnd = self.getHeap()
 
     def getHeap(self):
@@ -283,9 +283,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
 

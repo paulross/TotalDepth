@@ -70,3 +70,8 @@ gitignore/
 # Airspeed velocity benchmarks
 .asv
 
+# Generated binary files
+tests/integration/test_LIS/test_core/binary_files
+benchmarks/TotalDepth/LIS/core/binary_files/
+
+

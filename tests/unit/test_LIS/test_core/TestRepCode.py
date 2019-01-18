@@ -84,10 +84,10 @@ import BaseTestClasses
 #        return r
 #
 #    def writeTimeToStdErr(self, start, rc, numWords):
-#        tE = time.clock() - start
+#        tE = time.perf_counter() - start
 #        siz = numWords * RepCode.lisSize(rc)
-#        sys.stderr.write('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
-#        sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
+#        print('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
+#        print(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
         
 
 #class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
@@ -100,8 +100,8 @@ import BaseTestClasses
 #        """TestRepCodeFrom49.test_minmax(): min/max."""
 #        #print
 #        #print RepCode.minMaxValue(49)
-#        sys.stderr.write(str(RepCode.minMaxValue(49)))
-#        sys.stderr.write(' ')
+#        print(str(RepCode.minMaxValue(49)))
+#        print(' ')
 #        self.assertEqual(RepCode.minMaxValue(49), (-32768.0, 32752.0))
 #
 #    def test_01(self):
@@ -171,8 +171,8 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom49.test_minmax(): min/max."""
         #print
         #print RepCode.minMaxValue(49)
-        sys.stderr.write(str(RepCode.minMaxValue(49)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(49)))
+        print(' ')
         self.assertEqual(RepCode.minMaxValue(49), (-32768.0, 32752.0))
 
     def test_min(self):
@@ -278,7 +278,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom49.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from49(0x4C88)
             i += 1
@@ -288,7 +288,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom49.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from49(0x4C88)
             i += 1
@@ -298,28 +298,28 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom49.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from49(0x4C88)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from49(0x4C88)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom49.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from49(self.randWord(1, 7, 8))
             i += 1
@@ -329,7 +329,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom49.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
         num = 1e5
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from49(self.randWord(1, 7, 8))
             i += 1
@@ -364,25 +364,25 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read49(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read49(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
@@ -406,8 +406,8 @@ class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom50.test_minmax(): min/max."""
         #print
         #print RepCode.minMaxValue(50)
-        sys.stderr.write(str(RepCode.minMaxValue(50)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(50)))
+        print(' ')
         self.assertEqual(
             RepCode.minMaxValue(50),
             (-8.98846567431158e+307, 8.98819136810814e+307)
@@ -509,7 +509,7 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom50.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from50(0xBBB38000)
             i += 1
@@ -519,7 +519,7 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom50.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from50(0xBBB38000)
             i += 1
@@ -529,28 +529,28 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom50.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from50(0xBBB38000)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from50(0xBBB38000)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom50.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from50(self.randWord(1, 8, 23))
             i += 1
@@ -585,25 +585,25 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read50(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read50(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 56"""
@@ -625,8 +625,8 @@ class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom56.test_minmax(): min/max."""
-        sys.stderr.write(str(RepCode.minMaxValue(56)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(56)))
+        print(' ')
         self.assertEqual(RepCode.minMaxValue(56), (-128, 127))
 
     def test_min(self):
@@ -719,7 +719,7 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom56.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from56(89)#0x99)
             i += 1
@@ -729,7 +729,7 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom56.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from56(89)#0x99)
             i += 1
@@ -739,29 +739,29 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom56.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from56(89)#0x99)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from56(0x0099)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom56.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(56)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from56(self.randInt(myMin, myMax))
             i += 1
@@ -772,7 +772,7 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(56)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from56(self.randInt(myMin, myMax))
             i += 1
@@ -818,25 +818,25 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read56(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read56(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 66"""
@@ -858,8 +858,8 @@ class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom66.test_minmax(): min/max."""
-        sys.stderr.write(str(RepCode.minMaxValue(66)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(66)))
+        print(' ')
         self.assertEqual(RepCode.minMaxValue(66), (0, 255))
 
     def test_min(self):
@@ -920,7 +920,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom66.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from66(0x99)
             i += 1
@@ -930,7 +930,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom66.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from66(0x99)
             i += 1
@@ -940,29 +940,29 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom66.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from66(0x99)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from66(0x99)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom66.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(66)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from66(self.randInt(myMin, myMax))
             i += 1
@@ -973,7 +973,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(66)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from66(self.randInt(myMin, myMax))
             i += 1
@@ -1019,11 +1019,11 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read66(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
 #        print('\ni =', i)
 #        i = 0
 #        while myFile.hasLd():
@@ -1031,19 +1031,19 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
 #            i += 1
 #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read66(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
@@ -1067,8 +1067,8 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_minmax(): min/max."""
         #print
         #print RepCode.minMaxValue(70)
-        sys.stderr.write(str(RepCode.minMaxValue(70)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(70)))
+        print(' ')
         self.assertEqual(
             RepCode.minMaxValue(70),
             (-32768.0, 32767.99998474121)
@@ -1170,7 +1170,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from70(0xBBB38000)
             i += 1
@@ -1180,7 +1180,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from70(0xBBB38000)
             i += 1
@@ -1190,28 +1190,28 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from70(0xBBB38000)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from70(0xBBB38000)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom70.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from70(self.randWord(1, 8, 23))
             i += 1
@@ -1221,7 +1221,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
         num = 1e5
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from70(self.randWord(1, 8, 23))
             i += 1
@@ -1256,25 +1256,25 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read70(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read70(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 73"""
@@ -1296,8 +1296,8 @@ class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom73.test_minmax(): min/max."""
-        sys.stderr.write(str(RepCode.minMaxValue(73)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(73)))
+        print(' ')
         self.assertEqual(
             RepCode.minMaxValue(73),
             (-2147483648, 2147483647)
@@ -1381,7 +1381,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom73.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from73(0x00000099)
             i += 1
@@ -1391,7 +1391,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom73.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from73(0x00000099)
             i += 1
@@ -1401,29 +1401,29 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom73.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from73(0x00000099)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from73(0x00000099)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom73.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(73)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from73(self.randInt(myMin, myMax))
             i += 1
@@ -1434,7 +1434,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(73)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from73(self.randInt(myMin, myMax))
             i += 1
@@ -1469,25 +1469,25 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read73(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read73(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 77"""
@@ -1509,8 +1509,8 @@ class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom77.test_minmax(): min/max."""
-        sys.stderr.write(str(RepCode.minMaxValue(77)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(77)))
+        print(' ')
         self.assertEqual(RepCode.minMaxValue(77), (0, 255))
 
     def test_min(self):
@@ -1571,7 +1571,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom77.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from77(0x99)
             i += 1
@@ -1581,7 +1581,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom77.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from77(0x99)
             i += 1
@@ -1591,29 +1591,29 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom77.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from77(0x99)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from77(0x99)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom77.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(77)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from77(self.randInt(myMin, myMax))
             i += 1
@@ -1624,7 +1624,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(77)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from77(self.randInt(myMin, myMax))
             i += 1
@@ -1670,11 +1670,11 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read77(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
 #        print('\ni =', i)
 #        i = 0
 #        while myFile.hasLd():
@@ -1682,19 +1682,19 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
 #            i += 1
 #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read77(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 79"""
@@ -1716,8 +1716,8 @@ class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom79.test_minmax(): min/max."""
-        sys.stderr.write(str(RepCode.minMaxValue(79)))
-        sys.stderr.write(' ')
+        print(str(RepCode.minMaxValue(79)))
+        print(' ')
         self.assertEqual(RepCode.minMaxValue(79), (-32768, 32767))
 
     def test_min(self):
@@ -1810,7 +1810,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom79.test_time_00(): tests conversion of 1e6 of same word - Cython code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from79(0x0099)
             i += 1
@@ -1820,7 +1820,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom79.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from79(0x0099)
             i += 1
@@ -1830,29 +1830,29 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom79.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from79(0x0099)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from79(0x0099)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
         #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        #print('Cython: %.3f% ' % tE_C)
+        #print('Python: %.3f% ' % tE_P)
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
         
     def test_time_10(self):
         """TestRepCodeFrom79.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(79)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             cRepCode.from79(self.randInt(myMin, myMax))
             i += 1
@@ -1863,7 +1863,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         num = 1e5
         myMin, myMax = RepCode.minMaxValue(79)
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < num:
             pRepCode.from79(self.randInt(myMin, myMax))
             i += 1
@@ -1909,11 +1909,11 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             pRepCode.read79(myFile)
             i += 1
-        tE_P = time.clock() - tS
+        tE_P = time.perf_counter() - tS
 #        print('\ni =', i)
 #        i = 0
 #        while myFile.hasLd():
@@ -1921,19 +1921,19 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
 #            i += 1
 #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
         i = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         while i < wordsInPr * numPr:
             RepCode.read79(myFile)
             i += 1
-        tE_C = time.clock() - tS
+        tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
-        sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 class TestRepCodeIndirect(BaseTestClasses.TestRepCodeBase):
     """Tests indirect repcode functionality."""
@@ -2076,9 +2076,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

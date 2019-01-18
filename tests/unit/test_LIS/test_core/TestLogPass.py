@@ -1655,7 +1655,7 @@ class TestLogPass_PerfBase(BaseTestClasses.TestBaseFile):
         mySize, myNumFrames = self._loadLogPass(num)
         myReadSize = 0
         numEvents = 0
-        start = time.clock()
+        start = time.perf_counter()
         for evt in self._lp._genFrameSetEvents(slice(myNumFrames), theChannels):
             numEvents += 1
             if evt[0] == 'read':
@@ -1667,7 +1667,7 @@ class TestLogPass_PerfBase(BaseTestClasses.TestBaseFile):
         mySize, myNumFrames = self._loadLogPass(num)
         myReadSize = 0
         numEvents = 0
-        start = time.clock()
+        start = time.perf_counter()
         for evt in self._lp._genFrameSetEvents(theFrSl, theChannels):
             numEvents += 1
             if evt[0] == 'read':
@@ -1753,7 +1753,7 @@ class TestLogPass_Perf(TestLogPass_PerfBase):
     def test_01(self):
         """TestLogPass_Perf.test_01(): Load LogPass."""
         num = 100000
-        start = time.clock()
+        start = time.perf_counter()
         mySize, myFrames = self._loadLogPass(num)
         self.writeCostToStderr(start, mySize, 'Frames', myFrames)
         
@@ -2042,20 +2042,20 @@ class TestLogPass_Type0(TestLogPass_Type0_Base):
         # 256 LR * 8 frames = 2048 frames
         # 128 ch * 4 bytes = 512 byte frame length
         # Total: 2048 * 512 = 1MB
-        tS = time.clock()
+        tS = time.perf_counter()
         numLr, frPerLr, numCh, numSa, numBu = (256, 8, 128, 1, 1)
         self._createFile(numLr, frPerLr, numCh, numSa, numBu)
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
     
     def test_03_01(self):
         """TestLogPass_Type0.test_03_01(): lr,fr,ch,sa,bu=(256,8,128,1,1)=1MB, populate LogPass."""
         numLr, frPerLr, numCh, numSa, numBu = (256, 8, 128, 1, 1)
         lisLen = 4 * numLr * frPerLr * numCh * numSa * numBu
         myF = self._createFile(numLr, frPerLr, numCh, numSa, numBu)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp = self._createLogPass(myF)
         #print(myF, myLp)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
     def test_03_02(self):
@@ -2063,9 +2063,9 @@ class TestLogPass_Type0(TestLogPass_Type0_Base):
         numLr, frPerLr, numCh, numSa, numBu = (256, 8, 128, 1, 1)
         lisLen = 4 * numLr * frPerLr * numCh * numSa * numBu
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp.setFrameSet(myF)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
     def test_03_03(self):
@@ -2075,11 +2075,11 @@ class TestLogPass_Type0(TestLogPass_Type0_Base):
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
         myLp.setFrameSet(myF)
         #print('test_03_03(): LogPass', myLp)
-        tS = time.clock()
+        tS = time.perf_counter()
         valCount = self._iterateUsingValue(myLp.frameSet)
         #print('valCount', valCount)
         self.assertEqual(1024*1024//4, valCount)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
     def test_03_04(self):
@@ -2089,11 +2089,11 @@ class TestLogPass_Type0(TestLogPass_Type0_Base):
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
         myLp.setFrameSet(myF)
         #print('test_03_03(): LogPass', myLp)
-        tS = time.clock()
+        tS = time.perf_counter()
         valCount = self._iterateUsingGen(myLp.frameSet)
         #print('valCount', valCount)
         self.assertEqual(1024*1024//4, valCount)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
 
@@ -2105,21 +2105,21 @@ class TestLogPass_Type0_8MB(TestLogPass_Type0_Base):
         # 256 ch * 1 * 4 bytes = 1024 byte frame length
         # Total: 8192 * 1024 = 8MB
         # Values: 2*1024*1024 = 2097152
-        tS = time.clock()
+        tS = time.perf_counter()
         numLr, frPerLr, numCh, numSa, numBu = (1024, 8, 256, 1, 1)
         myF = self._createFile(numLr, frPerLr, numCh, numSa, numBu)
         #print('test_04_00', myF, dir(myF))
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
     
     def test_04_01(self):
         """TestLogPass_Type0.test_04_01(): lr,fr,ch,sa,bu=(1024,8,256,1,1)=8MB, create LogPass."""
         numLr, frPerLr, numCh, numSa, numBu = (1024, 8, 256, 1, 1)
         lisLen = 4 * numLr * frPerLr * numCh * numSa * numBu
         myF = self._createFile(numLr, frPerLr, numCh, numSa, numBu)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp = self._createLogPass(myF)
         #print(myF, myLp)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
     def test_04_02(self):
@@ -2127,9 +2127,9 @@ class TestLogPass_Type0_8MB(TestLogPass_Type0_Base):
         numLr, frPerLr, numCh, numSa, numBu = (1024, 8, 256, 1, 1)
         lisLen = 4 * numLr * frPerLr * numCh * numSa * numBu
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp.setFrameSet(myF)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
     def test_04_03(self):
@@ -2139,11 +2139,11 @@ class TestLogPass_Type0_8MB(TestLogPass_Type0_Base):
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
         myLp.setFrameSet(myF)
         #print('test_04_03(): LogPass', myLp)
-        tS = time.clock()
+        tS = time.perf_counter()
         valCount = self._iterateUsingValue(myLp.frameSet)
         #print('valCount', valCount)
         self.assertEqual(1024*1024*2, valCount)
-        #sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
 class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
@@ -2153,29 +2153,29 @@ class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
         # 2 ch: 0ch * 4 bytes + 1 ch * 2 sa * 1024 bu * 4 bytes = 8196 byte frame length
         # Total: 1024 * 8196 = 8.004MB
         # Values: 2049 per frame * 1024 frames
-        tS = time.clock()
+        tS = time.perf_counter()
         numLr, frPerLr, numCh, numSa, numBu = (512, 2, 2, 2, 1024)
         myF = self._createFile(numLr, frPerLr, numCh, numSa, numBu)
         #print('test_04_00', myF, dir(myF))
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
     
     def test_05_01(self):
         """TestLogPass_Type0_LargeBurst.test_05_01(): lr,fr,ch,sa,bu=(512,2,2,2,1024)=8MB, populate LogPass."""
         numLr, frPerLr, numCh, numSa, numBu = (512, 2, 2, 2, 1024)
         myF = self._createFile(numLr, frPerLr, numCh, numSa, numBu)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp = self._createLogPass(myF)
         #print('test_05_01()', myF, myLp)
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
 
     def test_05_02(self):
         """TestLogPass_Type0_LargeBurst.test_05_02(): lr,fr,ch,sa,bu=(512,2,2,2,1024)=8MB, setFrameSet() all frames."""
         numLr, frPerLr, numCh, numSa, numBu = (512, 2, 2, 2, 1024)
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
         #print('test_05_02()', myLp)
-        tS = time.clock()
+        tS = time.perf_counter()
         myLp.setFrameSet(myF)
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
 
     def test_05_03(self):
         """TestLogPass_Type0_LargeBurst.test_05_03(): lr,fr,ch,sa,bu=(512,2,2,2,1024)=8MB, all value()."""
@@ -2183,25 +2183,25 @@ class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
         myLp.setFrameSet(myF)
         #print('test_04_03(): LogPass', myLp)
-        tS = time.clock()
+        tS = time.perf_counter()
         valCount = self._iterateUsingValue(myLp.frameSet)
         #print('valCount', valCount)
         self.assertEqual(2049*1024, valCount)
-        sys.stderr.write(' Time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
 class TestLogPass_Type0_Profile(TestLogPass_Type0_Base):
     """Profile preocessing of Type 0 Logical Records."""
     def test_04_03(self):
         """TestLogPass_Type0.test_04_03(): lr,fr,ch,sa,bu=(256,8,128,1,1)=1MB, all values iteration 1."""
         numLr, frPerLr, numCh, numSa, numBu = (256, 8, 128, 1, 1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myF, myLp = self._createFileLogPass(numLr, frPerLr, numCh, numSa, numBu)
-        sys.stderr.write(' _createFileLogPass() time: {:8.3f} '.format(time.clock()-tS))
-        tS = time.clock()
+        sys.stderr.write(' _createFileLogPass() time: {:8.3f} '.format(time.perf_counter()-tS))
+        tS = time.perf_counter()
         myLp.setFrameSet(myF)
-        #tS = time.clock()
+        #tS = time.perf_counter()
         #valCount = self._iterateUsingValue(myLp.frameSet)
         #self.assertEqual(1024*1024//4, valCount)
-        sys.stderr.write(' setFrameSet() time: {:8.3f} '.format(time.clock()-tS))
+        sys.stderr.write(' setFrameSet() time: {:8.3f} '.format(time.perf_counter()-tS))
 
 class Special(BaseTestClasses.TestBaseFile):
     """Special tests."""
@@ -2280,9 +2280,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

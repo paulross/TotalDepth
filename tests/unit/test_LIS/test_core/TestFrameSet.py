@@ -3827,7 +3827,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(128))
             if i == 0:
@@ -3841,7 +3841,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(1*1024))
             if i == 0:
@@ -3857,7 +3857,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         #print()
         #print('lisLen', lisLen)
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(8*1024))
             if i == 0:
@@ -3872,7 +3872,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(128))
             if i == 0:
@@ -3886,7 +3886,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(1024))
             if i == 0:
@@ -3900,7 +3900,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(64*1024))
             if i == 0:
@@ -3914,7 +3914,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(128))
             if i == 0:
@@ -3928,7 +3928,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(1024))
             if i == 0:
@@ -3942,7 +3942,7 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
         myDfsr =  LogiRec.LrDFSRRead(myFile)
         lisLen = myDfsr.frameSize()
         numBytes = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(self.NUMBER_OF_CTOR):
             myFs = FrameSet.FrameSet(myDfsr, slice(8*1024))
             if i == 0:
@@ -3972,7 +3972,7 @@ class TestFrameSet_Perf_Load(BaseTestClasses.TestBaseLogPass):
         myFs = FrameSet.FrameSet(myDfsr, slice(1024))
         by = b'\x44\x4C\x80\x00' * (numCh)
         lisLen = 0
-        tS = time.clock()
+        tS = time.perf_counter()
         for i in range(1024):
             myFs.setFrameBytes(by, i, 0, numCh-1)
             lisLen += len(by)
@@ -3986,7 +3986,7 @@ class TestFrameSet_Perf_Load(BaseTestClasses.TestBaseLogPass):
         myDfsr = LogiRec.LrDFSRRead(myFile)
         myFs = FrameSet.FrameSet(myDfsr, slice(numFr))
         val = 1.0
-        tS = time.clock()
+        tS = time.perf_counter()
         lisLen = 0
         for fr in range(numFr):
             by = bytearray()
@@ -4026,7 +4026,7 @@ class TestFrameSet_Perf_Read(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for fr in range(numFr):
             for ch in range(numCh):
                 myFs.value(fr, ch, 0, 0, 0)
@@ -4060,7 +4060,7 @@ class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScValues(ch, 0):
                 lisLen += 4
@@ -4082,7 +4082,7 @@ class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScValues(ch, 0):
                 lisLen += 4
@@ -4104,7 +4104,7 @@ class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScValues(ch, 0):
                 lisLen += 4
@@ -4124,7 +4124,7 @@ class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScValues(ch, 0):
                 lisLen += 4
@@ -4157,7 +4157,7 @@ class TestFrameSet_Perf_Read_GenAll(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for t in myFs.genAll():
             lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
@@ -4175,7 +4175,7 @@ class TestFrameSet_Perf_Read_GenAll(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for t in myFs.genAll():
             #print(t)
             lisLen += 4
@@ -4209,7 +4209,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4231,7 +4231,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4253,7 +4253,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4273,7 +4273,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4313,7 +4313,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
             myFs.setFrameBytes(by=fBy, fr=f, chFrom=0, chTo=1)
             dep -= depInterval
         lisLen = 0
-        tS = time.clock()
+        tS = time.perf_counter()
 #        # Ch/Sc 0/0 - depth
 #        for v in myFs.genChScPoints(0, 0):
 #            lisLen += 4
@@ -4337,7 +4337,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4357,7 +4357,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4377,7 +4377,7 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
         lisLen = 0
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         for ch in range(numCh):
             for v in myFs.genChScPoints(ch, 0):
                 lisLen += 4
@@ -4410,7 +4410,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArray = myFs.accumulate([FrameSet.AccMean])
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
         #print()
@@ -4429,7 +4429,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArray = myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean])
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
         #print()
@@ -4471,7 +4471,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
             lisLen += 4+90
             myFs.setFrameBytes(by=fBy, fr=f, chFrom=0, chTo=1)
             dep -= 0.5
-        tS = time.clock()
+        tS = time.perf_counter()
         myArray = myFs.accumulate([FrameSet.AccMin, FrameSet.AccMean, FrameSet.AccMax])
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
         #print()
@@ -4490,7 +4490,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(numCh):
             myArrayNp.append(
@@ -4518,7 +4518,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(numCh):
             myArrayNp.append(
@@ -4548,7 +4548,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(numCh):
             myArrayNp.append(
@@ -4583,7 +4583,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(numCh):
             npView = myFs.frameView(ch, 0)
@@ -4642,7 +4642,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
             lisLen += 4+90
             myFs.setFrameBytes(by=fBy, fr=f, chFrom=0, chTo=1)
             dep -= 0.5
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(myFs.numChannels):
             myScArray = []
@@ -4674,7 +4674,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
         lisLen = 1024**2
         for i in range(numFr):
             myFs.setFrameBytes(by, i, 0, numCh-1)
-        tS = time.clock()
+        tS = time.perf_counter()
         myArrayNp = []
         for ch in range(numCh):
             npView = myFs.frameView(ch, 0)
@@ -4770,9 +4770,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

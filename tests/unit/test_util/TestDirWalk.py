@@ -59,9 +59,10 @@ class TestGenBigFirst(unittest.TestCase):
 
     def test_01(self):
         """TestGenBigFirst.test_01(): Input only, defaults."""
-        print()
+        # print()
         for v in DirWalk.genBigFirst('.'):
-            print('{:8d}: {:s}'.format(os.path.getsize(v), v))
+            pass
+            # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 
 class TestDirWalk(unittest.TestCase):
     """Tests ..."""
@@ -85,39 +86,44 @@ class TestDirWalk(unittest.TestCase):
 
     def test_02(self):
         """TestDirWalk.test_02(): Input and output, no globbing or recursion."""
-        print()
+        # print()
         for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch=None, recursive=False):
-            print(v)
+            pass
+            # print(v)
 
     def test_03(self):
         """TestDirWalk.test_03(): Input only, *.py and recursion."""
-        print()
+        # print()
         for v in DirWalk.dirWalk('.', theFnMatch='*.py', recursive=True):
-            print(v)
+            pass
+            # print(v)
 
     def test_04(self):
         """TestDirWalk.test_04(): Input and output, *.py and recursion."""
-        print()
+        # print()
         for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch='*.py', recursive=True):
-            print(v)
+            pass
+            # print(v)
 
     def test_05(self):
         """TestDirWalk.test_05(): Input and output, *.py, recursion and biggest first."""
-        print()
+        # print()
         for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch='*.py', recursive=True, bigFirst=True):
-            print('{:8d}: {!r:s}'.format(os.path.getsize(v.filePathIn), v))
+            pass
+            # print('{:8d}: {!r:s}'.format(os.path.getsize(v.filePathIn), v))
 
     def test_06(self):
         """TestDirWalk.test_06(): Input only, *.py, recursion and biggest first."""
-        print()
+        # print()
         for v in DirWalk.dirWalk('.', theOut=None, theFnMatch='*.py', recursive=True, bigFirst=True):
-            print('{:8d}: {:s}'.format(os.path.getsize(v), v))
+            pass
+            # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 
     def test_10(self):
         """TestDirWalk.test_10(): Fails if input does not exist."""
         try:
             for v in DirWalk.dirWalk('no_existent'):
-                print(v)
+                pass
             self.fail('DirWalk.ExceptionDirWalk not raised.')
         except DirWalk.ExceptionDirWalk:
             pass
@@ -185,9 +191,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

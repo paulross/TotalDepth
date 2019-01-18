@@ -91,34 +91,34 @@ class TestLgXMLBase(unittest.TestCase):
     def test_06(self):
         """TestLgXMLBase.test_06(): Test int()."""
         root = etree.fromstring('<root UniqueId="1"><elem>1</elem></root>')
-        self.assertEquals(1, self._lxb.int(root, 'elem'))
+        self.assertEqual(1, self._lxb.int(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>  1  </elem></root>')
-        self.assertEquals(1, self._lxb.int(root, 'elem'))
+        self.assertEqual(1, self._lxb.int(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>0</elem></root>')
-        self.assertEquals(0, self._lxb.int(root, 'elem'))
+        self.assertEqual(0, self._lxb.int(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>  0  </elem></root>')
-        self.assertEquals(0, self._lxb.int(root, 'elem'))
+        self.assertEqual(0, self._lxb.int(root, 'elem'))
         # Using default
         root = etree.fromstring('<root UniqueId="1"><elem>12</elem><elem>45</elem></root>')
-        self.assertEquals(42, self._lxb.int(root, 'elem', 42))
+        self.assertEqual(42, self._lxb.int(root, 'elem', 42))
 
     def test_07(self):
         """TestLgXMLBase.test_07(): Test float()."""
         root = etree.fromstring('<root UniqueId="1"><elem>1.0</elem></root>')
-        self.assertEquals(1., self._lxb.float(root, 'elem'))
+        self.assertEqual(1., self._lxb.float(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>  1.  </elem></root>')
-        self.assertEquals(1., self._lxb.float(root, 'elem'))
+        self.assertEqual(1., self._lxb.float(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>0</elem></root>')
-        self.assertEquals(0., self._lxb.float(root, 'elem'))
+        self.assertEqual(0., self._lxb.float(root, 'elem'))
         root = etree.fromstring('<root UniqueId="1"><elem>  0  </elem></root>')
-        self.assertEquals(0., self._lxb.float(root, 'elem'))
+        self.assertEqual(0., self._lxb.float(root, 'elem'))
         # Using default
         root = etree.fromstring('<root UniqueId="1"><elem>12.0</elem><elem>45.0</elem></root>')
-        self.assertEquals(42.0, self._lxb.float(root, 'elem', 42.0))
+        self.assertEqual(42.0, self._lxb.float(root, 'elem', 42.0))
 
     def test_10(self):
         """TestLgXMLBase.test_07(): Test tagsInNs()."""
-        self.assertEquals(
+        self.assertEqual(
             '{x-schema:LgSchema2.xml}LgFormat/{x-schema:LgSchema2.xml}LgTrack',
             self._lxb.tagsInNs('LgFormat', 'LgTrack'),
         )
@@ -185,9 +185,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 

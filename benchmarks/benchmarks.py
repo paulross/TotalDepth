@@ -27,7 +27,7 @@ class TimeSuite:
 
     def time_xrange(self):
         d = self.d
-        for key in xrange(500):
+        for key in range(500):
             x = d[key]
 
 

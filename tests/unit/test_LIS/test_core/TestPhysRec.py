@@ -1129,7 +1129,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrNum = 1024
         lrSize = 1024
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1140,7 +1140,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrNum = 1024
         lrSize = 8 * 1024
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1151,7 +1151,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1162,7 +1162,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1173,7 +1173,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1184,7 +1184,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1195,7 +1195,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1206,7 +1206,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1217,7 +1217,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1228,7 +1228,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1239,7 +1239,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1251,7 +1251,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1262,7 +1262,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 8 * 1024
         lrNum = 8 * 1024
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1289,7 +1289,7 @@ class Special_Perf(TestPhysRecWriteRead_PerfBase):
 #        lrSize = 64 * 1024
 #        lrNum = 128
 #        myFi = self._writeToFile(prLen, lrSize, lrNum)
-#        tS = time.clock()
+#        tS = time.perf_counter()
 #        lrCount = self._readFile(myFi)
 #        self.assertEqual(lrNum, lrCount)
 #        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1301,7 +1301,7 @@ class Special_Perf(TestPhysRecWriteRead_PerfBase):
         lrSize = 64 * 1024
         lrNum = 128
         myFi = self._writeToFile(prLen, lrSize, lrNum)
-        tS = time.clock()
+        tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
@@ -1411,9 +1411,9 @@ def main():
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     unitTest()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
 
