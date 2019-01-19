@@ -25,6 +25,8 @@ Created on May 26, 2011
 import string
 
 #: A tuple of the ordinal values of whitespace characters
+import sys
+
 ORDS_WS = tuple([ord(c) for c in string.whitespace])
 #: A tuple of the ordinal values of characters that can be replaced with PAD_CHAR
 ORDS_REPLACE = tuple((0,)) + ORDS_WS
@@ -52,7 +54,7 @@ class Mnem(object):
     """
     def __init__(self, m, len_mnem=LEN_MNEM):
         """Constructor that prunes trailing nulls and spaces."""
-        if isinstance(m, str):
+        if sys.version_info[0] > 2 and isinstance(m, str):
             m = bytes(m, 'ascii')
         # Figure out behaviour depending on len_mnem
         if len_mnem == 0:

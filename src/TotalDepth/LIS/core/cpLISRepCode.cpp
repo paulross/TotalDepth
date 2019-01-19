@@ -10,6 +10,23 @@
 #include "cpLISRepCode.h"
 #include "LISRepCode.h"
 
+// Python 2/3 module initialisationfrom http://python3porting.com/cextensions.html
+#if PY_MAJOR_VERSION >= 3
+    #define MOD_ERROR_VAL NULL
+    #define MOD_SUCCESS_VAL(val) val
+    #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+    #define MOD_DEF(ob, name, doc, methods) \
+    static struct PyModuleDef moduledef = { \
+        PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+        ob = PyModule_Create(&moduledef);
+#else
+    #define MOD_ERROR_VAL
+    #define MOD_SUCCESS_VAL(val)
+    #define MOD_INIT(name) void init##name(void)
+    #define MOD_DEF(ob, name, doc, methods) \
+        ob = Py_InitModule3(name, methods, doc);
+#endif
+
 static PyObject *from68(PyObject *module, PyObject *arg) {
     PyObject *ret = NULL;
     long word;
@@ -86,36 +103,6 @@ finally:
     return ret;
 }
 
-/* Given a bytes object this returns a numpy array. */
-static PyObject *
-from68_bytes_to_array(PyObject *module, PyObject *arg, size_t pos, size_t words_per_frame, size_t stride) {
-    PyObject *ret = NULL;
-    assert(arg);
-    assert(! PyErr_Occurred());
-    /* Treat arg as a borrowed reference. */
-    Py_INCREF(arg);
-    if (! PyBytes_Check(arg)) {
-        PyErr_Format(PyExc_ValueError,
-                     "%s() in %s#%d takes a bytes object not a \"%s\"",
-                     __FUNCTION__, __FILE__, __LINE__,
-                     Py_TYPE(arg)->tp_name);
-        goto except;
-    }
-    assert(! PyErr_Occurred());
-    assert(ret);
-    goto finally;
-except:
-    assert(PyErr_Occurred());
-    Py_XDECREF(ret);
-    ret = NULL;
-finally:
-    /* Treat arg as a borrowed reference. */
-    Py_DECREF(arg);
-    return ret;
-}
-
-
-
 static PyMethodDef cpRepCode_methods[] = {
     {"from68", (PyCFunction)from68, METH_O,
         "Converts a 32bit integer word with representation code 68 to a float."
@@ -127,26 +114,31 @@ static PyMethodDef cpRepCode_methods[] = {
     {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
-/* Module specification. */
-static PyModuleDef cpRepCodemodule = {
-    PyModuleDef_HEAD_INIT,
-    "cpRepCode",
-    "CPython extension to convert representation codes.",
-    -1,     /* m_size - support for sub-interpreters. */
-    cpRepCode_methods,
-    NULL, /* m_slots - An array of slot definitions for multi-phase initialization. */
-    NULL, /* m_traverse - A traversal function to call during GC traversal of the module object. */
-    NULL, /* m_clear - A clear function to call during GC clearing of the module object. */
-    NULL  /* m_free - A function to call during deallocation of the module object. */
-};
+///* Module specification. */
+//static PyModuleDef cpRepCodemodule = {
+//    PyModuleDef_HEAD_INIT,
+//    "cpRepCode",
+//    "CPython extension to convert representation codes.",
+//    -1,     /* m_size - support for sub-interpreters. */
+//    cpRepCode_methods,
+//    NULL, /* m_slots - An array of slot definitions for multi-phase initialization. */
+//    NULL, /* m_traverse - A traversal function to call during GC traversal of the module object. */
+//    NULL, /* m_clear - A clear function to call during GC clearing of the module object. */
+//    NULL  /* m_free - A function to call during deallocation of the module object. */
+//};
 
-PyMODINIT_FUNC
-PyInit_cpRepCode(void)
+MOD_INIT(cpRepCode)
 {
-    PyObject *m= PyModule_Create(&cpRepCodemodule);
-    if (m == NULL) {
-        return NULL;
-    }
+    PyObject *m;
+    MOD_DEF(
+            m,
+            "cpRepCode",
+            "CPython extension to convert representation codes.",
+            cpRepCode_methods
+            )
+    if (m == NULL)
+        return MOD_ERROR_VAL;
     /* Possible other initialisations of globals or exceptions. */
-    return m;
+    
+    return MOD_SUCCESS_VAL(m);
 }
