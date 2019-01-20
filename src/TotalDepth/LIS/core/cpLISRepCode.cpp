@@ -10,23 +10,6 @@
 #include "cpLISRepCode.h"
 #include "LISRepCode.h"
 
-// Python 2/3 module initialisationfrom http://python3porting.com/cextensions.html
-#if PY_MAJOR_VERSION >= 3
-    #define MOD_ERROR_VAL NULL
-    #define MOD_SUCCESS_VAL(val) val
-    #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
-    #define MOD_DEF(ob, name, doc, methods) \
-    static struct PyModuleDef moduledef = { \
-        PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
-        ob = PyModule_Create(&moduledef);
-#else
-    #define MOD_ERROR_VAL
-    #define MOD_SUCCESS_VAL(val)
-    #define MOD_INIT(name) void init##name(void)
-    #define MOD_DEF(ob, name, doc, methods) \
-        ob = Py_InitModule3(name, methods, doc);
-#endif
-
 static PyObject *from68(PyObject *module, PyObject *arg) {
     PyObject *ret = NULL;
     long word;
@@ -114,31 +97,26 @@ static PyMethodDef cpRepCode_methods[] = {
     {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
-///* Module specification. */
-//static PyModuleDef cpRepCodemodule = {
-//    PyModuleDef_HEAD_INIT,
-//    "cpRepCode",
-//    "CPython extension to convert representation codes.",
-//    -1,     /* m_size - support for sub-interpreters. */
-//    cpRepCode_methods,
-//    NULL, /* m_slots - An array of slot definitions for multi-phase initialization. */
-//    NULL, /* m_traverse - A traversal function to call during GC traversal of the module object. */
-//    NULL, /* m_clear - A clear function to call during GC clearing of the module object. */
-//    NULL  /* m_free - A function to call during deallocation of the module object. */
-//};
+/* Module specification. */
+static PyModuleDef cpRepCodemodule = {
+    PyModuleDef_HEAD_INIT,
+    "cpRepCode",
+    "CPython extension to convert representation codes.",
+    -1,     /* m_size - support for sub-interpreters. */
+    cpRepCode_methods,
+    NULL, /* m_slots - An array of slot definitions for multi-phase initialization. */
+    NULL, /* m_traverse - A traversal function to call during GC traversal of the module object. */
+    NULL, /* m_clear - A clear function to call during GC clearing of the module object. */
+    NULL  /* m_free - A function to call during deallocation of the module object. */
+};
 
-MOD_INIT(cpRepCode)
+PyMODINIT_FUNC
+PyInit_cpRepCode(void)
 {
-    PyObject *m;
-    MOD_DEF(
-            m,
-            "cpRepCode",
-            "CPython extension to convert representation codes.",
-            cpRepCode_methods
-            )
-    if (m == NULL)
-        return MOD_ERROR_VAL;
+    PyObject *m= PyModule_Create(&cpRepCodemodule);
+    if (m == NULL) {
+        return NULL;
+    }
     /* Possible other initialisations of globals or exceptions. */
-    
-    return MOD_SUCCESS_VAL(m);
+    return m;
 }
