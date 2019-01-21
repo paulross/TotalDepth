@@ -125,16 +125,16 @@ class BenchmarkStructRepCode68:
         del self.struct_formats
         del self.struct_compiled
 
-    def time_struct_python_not_compiled(self, arg):
-        # buf_len = struct.calcsize(arg)
-        fmt = self.struct_formats[arg]
-        with open(binary_path(20), 'rb') as f:
-            while 1:
-                b = f.read(arg)
-                if len(b) != arg:
-                    break
-                for word in struct.unpack(fmt, b):
-                    pRepCode.from68(word)
+    # def time_struct_python_not_compiled(self, arg):
+    #     # buf_len = struct.calcsize(arg)
+    #     fmt = self.struct_formats[arg]
+    #     with open(binary_path(20), 'rb') as f:
+    #         while 1:
+    #             b = f.read(arg)
+    #             if len(b) != arg:
+    #                 break
+    #             for word in struct.unpack(fmt, b):
+    #                 pRepCode.from68(word)
 
     def time_struct_python_compiled(self, arg):
         my_struct = self.struct_compiled[arg]
@@ -147,16 +147,16 @@ class BenchmarkStructRepCode68:
                 for word in my_struct.unpack(b):
                     pRepCode.from68(word)
 
-    def time_struct_cython_not_compiled(self, arg):
-        # buf_len = struct.calcsize(arg)
-        fmt = self.struct_formats[arg]
-        with open(binary_path(20), 'rb') as f:
-            while 1:
-                b = f.read(arg)
-                if len(b) != arg:
-                    break
-                for word in struct.unpack(fmt, b):
-                    cRepCode.from68(word)
+    # def time_struct_cython_not_compiled(self, arg):
+    #     # buf_len = struct.calcsize(arg)
+    #     fmt = self.struct_formats[arg]
+    #     with open(binary_path(20), 'rb') as f:
+    #         while 1:
+    #             b = f.read(arg)
+    #             if len(b) != arg:
+    #                 break
+    #             for word in struct.unpack(fmt, b):
+    #                 cRepCode.from68(word)
 
     def time_struct_cython_compiled(self, arg):
         my_struct = self.struct_compiled[arg]
@@ -169,16 +169,16 @@ class BenchmarkStructRepCode68:
                 for word in my_struct.unpack(b):
                     cRepCode.from68(word)
 
-    def time_struct_cpython_not_compiled(self, arg):
-        # buf_len = struct.calcsize(arg)
-        fmt = self.struct_formats[arg]
-        with open(binary_path(20), 'rb') as f:
-            while 1:
-                b = f.read(arg)
-                if len(b) != arg:
-                    break
-                for word in struct.unpack(fmt, b):
-                    cpRepCode.from68(word)
+    # def time_struct_cpython_not_compiled(self, arg):
+    #     # buf_len = struct.calcsize(arg)
+    #     fmt = self.struct_formats[arg]
+    #     with open(binary_path(20), 'rb') as f:
+    #         while 1:
+    #             b = f.read(arg)
+    #             if len(b) != arg:
+    #                 break
+    #             for word in struct.unpack(fmt, b):
+    #                 cpRepCode.from68(word)
 
     def time_struct_cpython_compiled(self, arg):
         my_struct = self.struct_compiled[arg]

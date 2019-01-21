@@ -2188,6 +2188,7 @@ class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
         #print('valCount', valCount)
         self.assertEqual(2049*1024, valCount)
         sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
+
 class TestLogPass_Type0_Profile(TestLogPass_Type0_Base):
     """Profile preocessing of Type 0 Logical Records."""
     def test_04_03(self):

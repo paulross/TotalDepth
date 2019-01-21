@@ -42,15 +42,20 @@ def check_binary_files() -> None:
 
 
 def write_logical_data_to_physical_records(logical_data: bytes,
+                                           has_tif: bool=False,
                                            pr_len: int=PhysRec.PR_MAX_LENGTH,
                                            pr_tail: PhysRec.PhysRecTail=PhysRec.PhysRecTail()
                                            ) -> bytes:
     """
     Takes logical data and writes it into a contiguous set of physical records returning the raw bytes.
     This is quite useful for testing.
+
+    pr_tail has the following arguments: hasRecNum=False, fileNum=None, hasCheckSum=False
     """
     file_obj = io.BytesIO()
-    prh = PhysRec.PhysRecWrite(file_obj, thePrLen=pr_len, thePrt=pr_tail)
+    prh = PhysRec.PhysRecWrite(
+        file_obj, theFileId=None, keepGoing=False, hasTif=has_tif, thePrLen=pr_len, thePrt=pr_tail
+    )
     prh.writeLr(logical_data)
     return file_obj.getvalue()
 
