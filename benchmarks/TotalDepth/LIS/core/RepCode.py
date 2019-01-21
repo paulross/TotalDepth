@@ -10,6 +10,7 @@ from TotalDepth.LIS.core import cpRepCode
 ## Universal methods
 from TotalDepth.LIS.core import RepCode
 
+
 class TimeRepCode68:
 
     BINARY_VALUE_PAIRS_68 = (

@@ -4,7 +4,7 @@ from TotalDepth.LIS.core import LogiRec
 from benchmarks.TotalDepth.LIS.core import write_logical_data_to_physical_records
 
 
-class BenchmarkMarkerRecords:
+class MarkerRecords:
     params = [0x89, 0x8A, 0x8B, 0x8D]
     class_map = {
         0x89 : LogiRec.LrEOFRead,
@@ -30,7 +30,7 @@ class BenchmarkMarkerRecords:
         self.read_class(self.file_read)
 
 
-class BenchmarkFileHead:
+class FileHead:
 
     def setup(self):
         logical_bytes = (
@@ -70,7 +70,7 @@ class BenchmarkFileHead:
         LogiRec.LrFileHeadRead(self.file_read)
 
 
-class BenchmarkFileTail:
+class FileTail:
 
     def setup(self):
         logical_bytes = (
@@ -110,7 +110,7 @@ class BenchmarkFileTail:
         LogiRec.LrFileTailRead(self.file_read)
 
 
-class BenchmarkTapeHead:
+class TapeHead:
 
     def setup(self):
         logical_bytes = (
@@ -154,7 +154,7 @@ class BenchmarkTapeHead:
         LogiRec.LrTapeHeadRead(self.file_read)
 
 
-class BenchmarkTapeTail:
+class TapeTail:
 
     def setup(self):
         logical_bytes = (
@@ -198,7 +198,7 @@ class BenchmarkTapeTail:
         LogiRec.LrTapeTailRead(self.file_read)
 
 
-class BenchmarkReelHead:
+class ReelHead:
 
     def setup(self):
         logical_bytes = (
@@ -242,7 +242,7 @@ class BenchmarkReelHead:
         LogiRec.LrReelHeadRead(self.file_read)
 
 
-class BenchmarkReelTail:
+class ReelTail:
 
     def setup(self):
         logical_bytes = (
@@ -286,7 +286,7 @@ class BenchmarkReelTail:
         LogiRec.LrReelTailRead(self.file_read)
 
 
-class BenchmarkLrMiscRead:
+class LrMiscRead:
     # Different sizes of binary data
     params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
@@ -303,7 +303,7 @@ class BenchmarkLrMiscRead:
         LogiRec.LrMiscRead(self.file_read)
 
 
-class BenchmarkTableRead:
+class TableRead:
 
     def setup(self):
         myT = LogiRec.LrTableWrite(
@@ -332,7 +332,7 @@ class BenchmarkTableRead:
         LogiRec.LrTableRead(self.file_read)
 
 
-class BenchmarkDFSR_02_channel:
+class DFSR_02_channel:
 
     def setup(self):
         b = (
@@ -405,7 +405,7 @@ class BenchmarkDFSR_02_channel:
         LogiRec.LrDFSRRead(self.file_read)
 
 
-class BenchmarkDFSR_08_channel:
+class DFSR_08_channel:
 
     def setup(self):
         b = (
@@ -440,7 +440,7 @@ class BenchmarkDFSR_08_channel:
         LogiRec.LrDFSRRead(self.file_read)
 
 
-class BenchmarkDFSR_64_channel:
+class DFSR_64_channel:
 
     def setup(self):
         channels = []
@@ -476,7 +476,7 @@ class BenchmarkDFSR_64_channel:
         # print(dfsr)
 
 
-class BenchmarkDFSRMultichannel:
+class DFSRMultichannel:
     params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
 

@@ -5,7 +5,7 @@ from TotalDepth.LIS.core import cRepCode, pRepCode, cpRepCode
 from benchmarks.TotalDepth.LIS.core import check_binary_files, binary_path
 
 
-class BenchmarkStructInt:
+class StructInt:
     # Struct format sizes
     params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
@@ -54,7 +54,7 @@ class BenchmarkStructInt:
                 my_struct.unpack(b)
 
 
-class BenchmarkStructFloat:
+class StructFloat:
     # Struct format sizes
     params = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
@@ -99,7 +99,7 @@ class BenchmarkStructFloat:
                 my_struct.unpack(b)
 
 
-class BenchmarkStructRepCode68:
+class StructRepCode68:
     """Checks the time that it takes to unpack integer structs and convert them to Representation Code 68 values."""
     # Struct format sizes
     params = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]

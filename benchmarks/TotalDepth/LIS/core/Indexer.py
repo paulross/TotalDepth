@@ -2,7 +2,7 @@ from TotalDepth.LIS.core import LogiRec, LisGen, File, FileIndexer
 from benchmarks.TotalDepth.LIS.core import write_logical_data_to_physical_records
 
 
-class BenchmarkIndexerSimple:
+class IndexerSimple:
 
     def setup(self):
         # Create a Log Pass generator
@@ -48,7 +48,7 @@ class BenchmarkIndexerSimple:
         print(index)
 
 
-class BenchmarkIndexerLarge:
+class IndexerLarge:
     """
     print('BenchmarkIndexerLarge LIS file size', len(file_obj.getvalue())) gives the value 10,342,804
     """

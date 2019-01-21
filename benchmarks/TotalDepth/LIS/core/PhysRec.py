@@ -30,7 +30,7 @@ PHYSICAL_RECORD_BENCHMARK_PARAMETERS = [
 ]
 
 
-class BenchmarkPhysicalRecordWriteTIFTailChecksum:
+class PhysicalRecordWriteTIFTailChecksum:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):
@@ -60,7 +60,7 @@ class BenchmarkPhysicalRecordWriteTIFTailChecksum:
             self.pr_writer.writeLr(self.logical_data)
 
 
-class BenchmarkPhysicalRecordWriteTIFTailNoChecksum:
+class PhysicalRecordWriteTIFTailNoChecksum:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):
@@ -90,7 +90,7 @@ class BenchmarkPhysicalRecordWriteTIFTailNoChecksum:
             self.pr_writer.writeLr(self.logical_data)
 
 
-class BenchmarkPhysicalRecordWriteNoTIFTailNoChecksum:
+class PhysicalRecordWriteNoTIFTailNoChecksum:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):
@@ -120,7 +120,7 @@ class BenchmarkPhysicalRecordWriteNoTIFTailNoChecksum:
             self.pr_writer.writeLr(self.logical_data)
 
 
-class BenchmarkPhysicalRecordRead:
+class PhysicalRecordRead:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):
