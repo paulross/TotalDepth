@@ -2633,7 +2633,7 @@ class TestDFSR(TestLrBase):
             + b'\x02\xb3\x60\x3b'
             # File number: 256
             + bytes([1, 0])
-            # LIS size in bytes: 4 samples * 6 burst smples * 4 bytes = 96 bytes
+            # LIS size in bytes: 4 samples * 6 burst samples * 4 bytes = 96 bytes
             + bytes([0, 96])
             # Padding '0'
             + b'000'

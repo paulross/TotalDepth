@@ -304,8 +304,6 @@ class BenchmarkLrMiscRead:
 
 
 class BenchmarkTableRead:
-    # Different sizes of binary data
-    # params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
     def setup(self):
         myT = LogiRec.LrTableWrite(
@@ -332,6 +330,114 @@ class BenchmarkTableRead:
     def time_read(self):
         self.file_read.rewind()
         LogiRec.LrTableRead(self.file_read)
+
+
+class BenchmarkDFSR_2_channel:
+
+    def setup(self):
+        b = (
+            # Logical record header for DFSR
+            bytes([64, 0])
+            # Entry block 4, value 0
+            + bytes([4, 1, 66, 0])
+            # Entry block 12, value -153.0
+            + bytes([12, 4, 68])
+            + b'\xbb\xb3\x80\x00'
+            # Entry block 0, value None terminates read
+            + bytes([0, 1, 66, 0])
+            # Sensor 0
+            # Mnemonic
+            + b'DEPT'
+            # Service ID
+            + b'ServID'
+            # Service order number
+            + b'ServOrdN'
+            # Units
+            + b'FEET'
+            # API codes 45, 310, 01, 1
+            # Decimal 45310011 is 0x02b3603b
+            + b'\x02\xb3\x60\x3b'
+            # File number: 256
+            + bytes([1, 0])
+            # LIS size in bytes: 4 bytes
+            + bytes([0, 4])
+            # Padding '0'
+            + b'000'
+            # Samples: 1 super samples
+            + b'\x01'
+            # Representation code
+            + bytes([68,])
+            # Process indicators
+            + bytes([0, 1, 2, 3, 4])
+            # Sensor 1
+            # Mnemonic
+            + b'GR  '
+            # Service ID
+            + b'ServID'
+            # Service order number
+            + b'ServOrdN'
+            # Units
+            + b'GAPI'
+            # API codes 45, 310, 01, 1
+            # Decimal 45310011 is 0x02b3603b
+            + b'\x02\xb3\x60\x3b'
+            # File number: 256
+            + bytes([1, 0])
+            # LIS size in bytes: 4 samples * 6 burst samples * 4 bytes = 96 bytes
+            + bytes([0, 96])
+            # Padding '0'
+            + b'000'
+            # Samples: 4 super samples
+            + bytes([4,])
+            # Representation code
+            + bytes([68,])
+            # Process indicators
+            + bytes([0, 1, 2, 3, 4])
+        )
+        file_obj = write_logical_data_to_physical_records([b])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self):
+        del self.file_read
+
+    def time_read(self):
+        self.file_read.rewind()
+        LogiRec.LrDFSRRead(self.file_read)
+
+
+class BenchmarkDFSR_8_channel:
+
+    def setup(self):
+        b = (
+            # Logical record header for DFSR
+            bytes([64, 0])
+            # Entry block 4, value 0
+            + bytes([4, 1, 66, 0])
+            # Entry block 12, value -153.0
+            + bytes([12, 4, 68])
+            + b'\xbb\xb3\x80\x00'
+            # Entry block 0, value None terminates read
+            + bytes([0, 1, 66, 0])
+            # Sensor 0
+            # Mnemonic
+            + b'DEPTServIDServOrdNFEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH01ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH02ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH03ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH04ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH05ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH06ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b'CH07ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+        )
+        file_obj = write_logical_data_to_physical_records([b])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self):
+        del self.file_read
+
+    def time_read(self):
+        self.file_read.rewind()
+        LogiRec.LrDFSRRead(self.file_read)
 
 
 # Debugging...
