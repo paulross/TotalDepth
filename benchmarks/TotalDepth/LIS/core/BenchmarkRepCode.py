@@ -7,6 +7,8 @@ from TotalDepth.LIS.core import pRepCode
 from TotalDepth.LIS.core import cRepCode
 ## CPython methods
 from TotalDepth.LIS.core import cpRepCode
+## Universal methods
+from TotalDepth.LIS.core import RepCode
 
 class TimeRepCode68:
 
@@ -35,6 +37,12 @@ class TimeRepCode68:
 
     def time_cpRepCode_from(self):
         cpRepCode.from68(0x444C8000)
+
+    def time_RepCode_to(self):
+        RepCode.to68(153.0)
+
+    def time_RepCode_from(self):
+        RepCode.from68(0x444C8000)
 
 
 # class MemSuite:
