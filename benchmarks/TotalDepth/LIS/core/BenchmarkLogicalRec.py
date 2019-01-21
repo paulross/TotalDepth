@@ -1,4 +1,3 @@
-
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import LogiRec
 
@@ -285,6 +284,23 @@ class BenchmarkReelTail:
     def time_read(self):
         self.file_read.rewind()
         LogiRec.LrReelTailRead(self.file_read)
+
+
+class BenchmarkLrMiscRead:
+    # Different sizes of binary data
+    params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+
+    def setup(self, arg):
+        b = bytes([LogiRec.LR_TYPE_BLANK_RECORD, 0]) + b' ' * arg
+        file_obj = write_logical_data_to_physical_records([b])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self, arg):
+        del self.file_read
+
+    def time_read(self, arg):
+        self.file_read.rewind()
+        LogiRec.LrMiscRead(self.file_read)
 
 
 # Debugging...
