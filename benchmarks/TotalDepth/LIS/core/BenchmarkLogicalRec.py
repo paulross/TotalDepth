@@ -26,7 +26,8 @@ class BenchmarkMarkerRecords:
         del self.file_read
         del self.read_class
 
-    def time_file_head_read(self, arg):
+    def time_marker_read(self, arg):
+        self.file_read.rewind()
         self.read_class(self.file_read)
 
 
@@ -66,4 +67,17 @@ class BenchmarkFileHead:
         del self.file_read
 
     def time_file_head_read(self):
+        self.file_read.rewind()
         LogiRec.LrFileHeadRead(self.file_read)
+
+
+if __name__ == '__main__':
+    b = BenchmarkMarkerRecords()
+    b.setup(0x89)
+    b.time_marker_read(0x89)
+    b.teardown(0x89)
+
+    b = BenchmarkFileHead()
+    b.setup()
+    b.time_file_head_read()
+    b.teardown()
