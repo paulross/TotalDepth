@@ -1,5 +1,6 @@
 import io
 import os
+import typing
 
 from TotalDepth.LIS.core import PhysRec
 
@@ -41,13 +42,13 @@ def check_binary_files() -> None:
         create_binary_files()
 
 
-def write_logical_data_to_physical_records(logical_data: bytes,
+def write_logical_data_to_physical_records(logical_data_records: typing.List[bytes],
                                            has_tif: bool=False,
                                            pr_len: int=PhysRec.PR_MAX_LENGTH,
                                            pr_tail: PhysRec.PhysRecTail=PhysRec.PhysRecTail()
-                                           ) -> bytes:
+                                           ) -> io.BytesIO:
     """
-    Takes logical data and writes it into a contiguous set of physical records returning the raw bytes.
+    Takes logical data and writes it into a contiguous set of physical records returning a binary file.
     This is quite useful for testing.
 
     pr_tail has the following arguments: hasRecNum=False, fileNum=None, hasCheckSum=False
@@ -56,6 +57,7 @@ def write_logical_data_to_physical_records(logical_data: bytes,
     prh = PhysRec.PhysRecWrite(
         file_obj, theFileId=None, keepGoing=False, hasTif=has_tif, thePrLen=pr_len, thePrt=pr_tail
     )
-    prh.writeLr(logical_data)
-    return file_obj.getvalue()
+    for ld in logical_data_records:
+        prh.writeLr(ld)
+    return file_obj
 

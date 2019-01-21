@@ -18,7 +18,7 @@ class BenchmarkMarkerRecords:
         b = bytearray()
         b.append(arg)
         b.append(0)
-        file_bytes = write_logical_data_to_physical_records(bytes(b))
+        file_bytes = write_logical_data_to_physical_records([bytes(b)])
         self.file_read = File.FileRead(theFile=file_bytes, theFileId='MyFile', keepGoing=True)
         self.read_class = self.class_map[arg]
 
@@ -31,7 +31,6 @@ class BenchmarkMarkerRecords:
 
 
 class BenchmarkFileHead:
-    # params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
     def setup(self):
         logical_bytes = (
@@ -60,11 +59,11 @@ class BenchmarkFileHead:
             # Previous file name
             + b'Prev name.'
         )
-        file_bytes = write_logical_data_to_physical_records(logical_bytes)
+        file_bytes = write_logical_data_to_physical_records([logical_bytes,])
         self.file_read = File.FileRead(theFile=file_bytes, theFileId='MyFile', keepGoing=True)
 
     def teardown(self):
-        del self.file_bytes
+        del self.file_read
 
     def time_file_head_read(self):
-        myLr = LogiRec.LrFileHeadRead(self.file_read)
+        LogiRec.LrFileHeadRead(self.file_read)
