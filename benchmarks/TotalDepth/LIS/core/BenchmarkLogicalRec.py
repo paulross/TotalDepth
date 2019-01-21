@@ -326,10 +326,10 @@ class BenchmarkTableRead:
         file_obj = write_logical_data_to_physical_records([bytes(ba)])
         self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
 
-    def teardown(self, arg):
+    def teardown(self):
         del self.file_read
 
-    def time_read(self, arg):
+    def time_read(self):
         self.file_read.rewind()
         LogiRec.LrTableRead(self.file_read)
 
