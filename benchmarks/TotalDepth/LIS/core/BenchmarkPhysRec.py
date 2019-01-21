@@ -60,7 +60,7 @@ class BenchmarkPhysicalRecordWriteTIFTailChecksum:
             self.pr_writer.writeLr(self.logical_data)
 
 
-class BenchmarkPhysicalRecordWriteTIFTailNOChecksum:
+class BenchmarkPhysicalRecordWriteTIFTailNoChecksum:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):
@@ -90,7 +90,7 @@ class BenchmarkPhysicalRecordWriteTIFTailNOChecksum:
             self.pr_writer.writeLr(self.logical_data)
 
 
-class BenchmarkPhysicalRecordWriteNOTIFTailNOChecksum:
+class BenchmarkPhysicalRecordWriteNoTIFTailNoChecksum:
     params = PHYSICAL_RECORD_BENCHMARK_PARAMETERS
 
     def setup(self, arg):

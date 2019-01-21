@@ -18,8 +18,8 @@ class BenchmarkMarkerRecords:
         b = bytearray()
         b.append(arg)
         b.append(0)
-        file_bytes = write_logical_data_to_physical_records([bytes(b)])
-        self.file_read = File.FileRead(theFile=file_bytes, theFileId='MyFile', keepGoing=True)
+        file_obj = write_logical_data_to_physical_records([bytes(b)])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
         self.read_class = self.class_map[arg]
 
     def teardown(self, arg):
