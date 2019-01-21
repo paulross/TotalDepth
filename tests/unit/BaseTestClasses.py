@@ -74,6 +74,8 @@ class TestBase(unittest.TestCase):
             myCost = 'N/A'
             sys.stderr.write(' Cost: {:s} (ms/MB)'.format(myCost))
         sys.stderr.write(' ')
+        sys.stderr.flush()
+        # sys.stderr.write('\n')
 
 class TestRepCodeBase(TestBase):
     def randBits(self, theBits):
@@ -111,8 +113,13 @@ class TestRepCodeBase(TestBase):
     def writeTimeToStdErr(self, start, rc, numWords):
         tE = time.perf_counter() - start
         siz = numWords * RepCode.lisSize(rc)
-        sys.stderr.write('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
-        sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
+        # sys.stderr.write('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
+        # sys.stderr.write(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
+        print(
+            'Time: {:.3f} Rate {:8.0f} words/S Cost: {:.3f} (ms/MB)'.format(
+                tE, numWords/tE, (tE*1024)/(siz/(1024*1024))
+            )
+        )
 
 
 class TestBaseFile(TestBase):
