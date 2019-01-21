@@ -49,6 +49,9 @@ class BenchmarkIndexerSimple:
 
 
 class BenchmarkIndexerLarge:
+    """
+    print('BenchmarkIndexerLarge LIS file size', len(file_obj.getvalue())) gives the value 10,342,804
+    """
 
     def setup(self):
         # Create a Log Pass generator
@@ -85,6 +88,7 @@ class BenchmarkIndexerLarge:
             logical_data.append(log_pass_gen.lrBytes(i, 1))
         logical_data.append(LisGen.FileHeadTailDefault.lrBytesFileTail)
         file_obj = write_logical_data_to_physical_records(logical_data)
+        # print('BenchmarkIndexerLarge LIS file size', len(file_obj.getvalue()))
         self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
 
     def teardown(self):

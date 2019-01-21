@@ -36,6 +36,8 @@ __rights__  = 'Copyright (c) Paul Ross'
 from TotalDepth.LIS.core.pRepCode import *
 # Now overlay with any implemented in Cython
 from TotalDepth.LIS.core.cRepCode import *
+# Now overlay with any implemented in CPython
+from TotalDepth.LIS.core.cpRepCode import *
 
 class ExceptionRepCodeRead(ExceptionRepCode):
     """Exception for unknown Representation codes in look up tables."""
