@@ -303,6 +303,37 @@ class BenchmarkLrMiscRead:
         LogiRec.LrMiscRead(self.file_read)
 
 
+class BenchmarkTableRead:
+    # Different sizes of binary data
+    # params = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+
+    def setup(self):
+        myT = LogiRec.LrTableWrite(
+            34,
+            b'PRES',
+            (b'MNEM', b'OUTP', b'STAT', b'TRAC', b'CODI', b'DEST', b'MODE', b'FILT', b'LEDG', b'REDG',),
+            (
+                (b'40  ', b'TEST', b'ALLO', b'T1  ', b'LLIN', b'2   ', b'SHIF', 0.5, (-40.0, b'MV  '), (40.0, b'MV  ')),
+                (b'20  ', b'TEST', b'ALLO', b'T2  ', b'HDAS', b'2   ', b'SHIF', 0.5, (-20.0, b'MV  '), (20.0, b'MV  ')),
+                (b'10  ', b'TEST', b'ALLO', b'T3  ', b'LGAP', b'2   ', b'WRAP', 0.5, (-10.0, b'MV  '), (10.0, b'MV  ')),
+                (b'5   ', b'TEST', b'ALLO', b'T2  ', b'HSPO', b'2   ', b'WRAP', 0.5, (-5.0, b'MV  '), (5.0, b'MV  ')),
+                (b'2.5 ', b'TEST', b'ALLO', b'T3  ', b'LSPO', b'2   ', b'WRAP', 0.5, (-2.5, b'MV  '), (2.5, b'MV  ')),
+            ),
+        )
+        ba = bytearray([34, 0])
+        for b in myT.genLisBytes():
+            ba += b
+        file_obj = write_logical_data_to_physical_records([bytes(ba)])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self, arg):
+        del self.file_read
+
+    def time_read(self, arg):
+        self.file_read.rewind()
+        LogiRec.LrTableRead(self.file_read)
+
+
 # Debugging...
 if __name__ == '__main__':
     b = BenchmarkMarkerRecords()
