@@ -59,7 +59,5 @@ def write_logical_data_to_physical_records(logical_data_records: typing.List[byt
     )
     for ld in logical_data_records:
         prh.writeLr(ld)
-    # file_obj.seek(0)
-    print('TRACE: file_obj.getvalue():', file_obj.getvalue(), ' tell:', file_obj.tell())
     return file_obj
 
