@@ -82,7 +82,7 @@ class IndexerLarge:
             LisGen.FileHeadTailDefault.lrBytesFileHead,
             log_pass_gen.lrBytesDFSR()
         ]
-        # Add 4 Logical Records consisting of 1 frames starting at an offset of 100*i
+        # Add 10000 Logical Records consisting of 1 frames starting at an offset of i
         # In this case xStart has been set in the generator as 10,000 feet with a sample size of 0.1 inch
         for i in range(10000):
             logical_data.append(log_pass_gen.lrBytes(i, 1))
