@@ -332,7 +332,7 @@ class BenchmarkTableRead:
         LogiRec.LrTableRead(self.file_read)
 
 
-class BenchmarkDFSR_2_channel:
+class BenchmarkDFSR_02_channel:
 
     def setup(self):
         b = (
@@ -405,7 +405,7 @@ class BenchmarkDFSR_2_channel:
         LogiRec.LrDFSRRead(self.file_read)
 
 
-class BenchmarkDFSR_8_channel:
+class BenchmarkDFSR_08_channel:
 
     def setup(self):
         b = (
@@ -440,13 +440,112 @@ class BenchmarkDFSR_8_channel:
         LogiRec.LrDFSRRead(self.file_read)
 
 
+class BenchmarkDFSR_64_channel:
+
+    def setup(self):
+        channels = []
+        for i in range(63):
+            ch_name = '{:02d}'.format(i).encode('ascii')
+            channels.append(
+                b'CH' + ch_name + b'ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            )
+        b = (
+            # Logical record header for DFSR
+            bytes([64, 0])
+            # Entry block 4, value 0
+            + bytes([4, 1, 66, 0])
+            # Entry block 12, value -153.0
+            + bytes([12, 4, 68])
+            + b'\xbb\xb3\x80\x00'
+            # Entry block 0, value None terminates read
+            + bytes([0, 1, 66, 0])
+            # Sensor 0
+            # Mnemonic
+            + b'DEPTServIDServOrdNFEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            + b''.join(channels)
+            # + b'CH01ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH02ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH03ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH04ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH05ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH06ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH07ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH08ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH09ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH10ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH11ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH12ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH13ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH14ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH15ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH16ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH17ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH18ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH19ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH20ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH21ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH22ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH23ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH24ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH25ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH26ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH27ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH28ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH29ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH30ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH31ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH32ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH33ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH34ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH35ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH36ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH37ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH38ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH39ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH40ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH41ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH42ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH43ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH44ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH45ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH46ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH47ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH48ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH49ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH50ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH51ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH52ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH53ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH54ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH55ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH56ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH57ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH58ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH59ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH60ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH61ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH62ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+            # + b'CH63ServIDServOrdNNDIM' + b'\x02\xb3\x60\x3b' + bytes([1, 0, 0, 4, 0, 0, 0, 1, 68, 0, 1, 2, 3, 4])
+        )
+        file_obj = write_logical_data_to_physical_records([b])
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self):
+        del self.file_read
+
+    def time_read(self):
+        self.file_read.rewind()
+        dfsr = LogiRec.LrDFSRRead(self.file_read)
+        print(dfsr)
+
+
 # Debugging...
 if __name__ == '__main__':
-    b = BenchmarkMarkerRecords()
-    b.setup(0x89)
-    b.time_marker_read(0x89)
-    b.teardown(0x89)
-    b = BenchmarkFileHead()
+    # b = BenchmarkMarkerRecords()
+    # b.setup(0x89)
+    # b.time_marker_read(0x89)
+    # b.teardown(0x89)
+    b = BenchmarkDFSR_64_channel()
     b.setup()
-    b.time_file_head_read()
+    b.time_read()
     b.teardown()
