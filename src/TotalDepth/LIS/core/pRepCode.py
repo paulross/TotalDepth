@@ -159,96 +159,13 @@ DIPMETER_SUB_CHANNEL_SLICES = DIPMETER_FAST_SUB_CHANNEL_SLICES + DIPMETER_SLOW_S
 #print('DIPMETER_SUB_CHANNEL_RANGES', DIPMETER_SUB_CHANNEL_RANGES)
 
 # This maps each ordinal value to the (suCh, sa, bu)
-#((0, 0, 0),
-# (1, 0, 0),
-# (2, 0, 0),
-# (3, 0, 0),
-# (4, 0, 0),
-# (0, 1, 0),
-# (1, 1, 0),
-# (2, 1, 0),
-# (3, 1, 0),
-# (4, 1, 0),
-# (0, 2, 0),
-# (1, 2, 0),
-# (2, 2, 0),
-# (3, 2, 0),
-# (4, 2, 0),
-# (0, 3, 0),
-# (1, 3, 0),
-# (2, 3, 0),
-# (3, 3, 0),
-# (4, 3, 0),
-# (0, 4, 0),
-# (1, 4, 0),
-# (2, 4, 0),
-# (3, 4, 0),
-# (4, 4, 0),
-# (0, 5, 0),
-# (1, 5, 0),
-# (2, 5, 0),
-# (3, 5, 0),
-# (4, 5, 0),
-# (0, 6, 0),
-# (1, 6, 0),
-# (2, 6, 0),
-# (3, 6, 0),
-# (4, 6, 0),
-# (0, 7, 0),
-# (1, 7, 0),
-# (2, 7, 0),
-# (3, 7, 0),
-# (4, 7, 0),
-# (0, 8, 0),
-# (1, 8, 0),
-# (2, 8, 0),
-# (3, 8, 0),
-# (4, 8, 0),
-# (0, 9, 0),
-# (1, 9, 0),
-# (2, 9, 0),
-# (3, 9, 0),
-# (4, 9, 0),
-# (0, 10, 0),
-# (1, 10, 0),
-# (2, 10, 0),
-# (3, 10, 0),
-# (4, 10, 0),
-# (0, 11, 0),
-# (1, 11, 0),
-# (2, 11, 0),
-# (3, 11, 0),
-# (4, 11, 0),
-# (0, 12, 0),
-# (1, 12, 0),
-# (2, 12, 0),
-# (3, 12, 0),
-# (4, 12, 0),
-# (0, 13, 0),
-# (1, 13, 0),
-# (2, 13, 0),
-# (3, 13, 0),
-# (4, 13, 0),
-# (0, 14, 0),
-# (1, 14, 0),
-# (2, 14, 0),
-# (3, 14, 0),
-# (4, 14, 0),
-# (0, 15, 0),
-# (1, 15, 0),
-# (2, 15, 0),
-# (3, 15, 0),
-# (4, 15, 0),
-# (5, 0, 0),
-# (6, 0, 0),
-# (7, 0, 0),
-# (8, 0, 0),
-# (9, 0, 0),
-# (10, 0, 0),
-# (11, 0, 0),
-# (12, 0, 0),
-# (13, 0, 0),
-# (14, 0, 0))
+# (
+#     (0, 0, 0), (1, 0, 0), (2, 0, 0), (3, 0, 0), (4, 0, 0),
+#     (0, 1, 0), (1, 1, 0), (2, 1, 0), (3, 1, 0), (4, 1, 0),
+#     ...
+#     (0, 15, 0), (1, 15, 0), (2, 15, 0), (3, 15, 0), (4, 15, 0),
+#     (5, 0, 0), (6, 0, 0), (7, 0, 0), (8, 0, 0), (9, 0, 0), (10, 0, 0), (11, 0, 0), (12, 0, 0), (13, 0, 0), (14, 0, 0)
+# )
 DIPMETER_VALUE_MAPPER = tuple(
     [(sc, sa, 0) for sa in range(DIPMETER_FAST_CHANNEL_SUPER_SAMPLES) for sc in range(DIPMETER_NUM_FAST_CHANNELS)]
     + [(sc, 0, 0) for sc in range(DIPMETER_NUM_FAST_CHANNELS, DIPMETER_NUM_FAST_CHANNELS+DIPMETER_NUM_SLOW_CHANNELS)]
@@ -839,31 +756,6 @@ def read79(theFile):
 #============================================================
 # End: Representation Code 79, 0x4F, 16bit signed integer
 #============================================================
-
-
-def bytes_to_doubles(byte_arr, rep_code, pos_start, num_adj, pos_stride):
-    """
-    Give an array of bytes this returns a numpy array of float64.
-    Number of frames is::
-
-        (len(byte_arr) - pos_start - (num_adj * rc_size)) / pos_stride
-
-    Number of values is: number of frames * num_adj
-
-    :param byte_arr: Array of bytes
-    :param rep_code: Integer representation code.
-    :param pos_start: Integer start of bytes in the array
-    :param num_adj: Number of adjacent values that makes a single frame entry.
-    :param pos_stride: Bytes to stride to next frame.
-    :return: ndarray of doubles
-    """
-    assert pos_start >= 0
-    assert num_adj >= 1
-    rc_size = RC_SIZE_MAP[rep_code]
-    assert pos_stride >= rc_size * num_adj
-    frames = (len(byte_arr) - pos_start - (num_adj * rc_size)) / pos_stride
-    num_values = frames * num_adj
-
 
 #############################
 # End: Python reference code.

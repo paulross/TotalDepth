@@ -9,8 +9,9 @@
 #include "LISRepCode.h"
 
 #include <math.h>
+const size_t RC_49_SIZE = 2;
 
-double _from49(int16_t word) {
+double _from49(uint16_t word) {
     /* Returns a double from Rep code 49 0x31, 16bit floating point representation.
      * Value +153 is 0100 1100 1000 1000 or 0x4C88.
      * Value -153 is 1011 0011 1000 1000 or 0xB388.
@@ -26,12 +27,12 @@ double _from49(int16_t word) {
     return ldexp(mantissa, exponent);
 }
 
-int16_t _to49(double value) {
+uint16_t _to49(double value) {
     /* Converts a double to Rep code 49 0x31, 16bit floating point representation.
      * Value +153 is 0100 1100 1000 1000 or 0x4C88.
      * Value -153 is 1011 0011 1000 1000 or 0xB388.
      */
-    int16_t word = 0;
+    uint16_t word = 0;
     int exponent = 0;
     double mantissa = frexp(value, &exponent);
     /* TODO: Overflow, underflow */
@@ -69,7 +70,9 @@ int16_t _to49(double value) {
 }
 
 /* C/C++ function that returns a double from a Rep code 68 word (a 32 bit integer). */
-double _from68(int32_t word) {
+const size_t RC_68_SIZE = 4;
+
+double _from68(uint32_t word) {
     signed int mantissa;
     if (word & 0x80000000) {
         // This is: -0x800000 or -2147483648 >> 8 or (-1 << 31) >> 8 or  -1 << (31-8)

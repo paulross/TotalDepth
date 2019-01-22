@@ -113,6 +113,12 @@ static PyModuleDef cpRepCodemodule = {
     NULL  /* m_free - A function to call during deallocation of the module object. */
 };
 
+#define MODULE_ADD_INT_CONSTANT(m, name) do {\
+    if (PyModule_AddIntConstant(m, #name, name)) { \
+        return NULL; \
+    } \
+} while(0)
+
 PyMODINIT_FUNC
 PyInit_cpRepCode(void)
 {
@@ -120,6 +126,14 @@ PyInit_cpRepCode(void)
     if (m == NULL) {
         return NULL;
     }
+//    if (PyModule_AddIntConstant(m, "RC_49_SIZE", RC_49_SIZE)) {
+//        return NULL;
+//    }
+//    if (PyModule_AddIntConstant(m, "RC_68_SIZE", RC_68_SIZE)) {
+//        return NULL;
+//    }
+    MODULE_ADD_INT_CONSTANT(m, RC_49_SIZE);
+    MODULE_ADD_INT_CONSTANT(m, RC_68_SIZE);
     /* Possible other initialisations of globals or exceptions. */
     return m;
 }
