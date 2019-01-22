@@ -316,7 +316,8 @@ class TestRepCodeToFrom68CPython(TestRepCode68Base):
 
     def test_to_minus_153(self):
         """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
-        self.assertEqual(cpRepCode.to68(-153.0), 0xBBB38000 - (1 << 32))
+        result = cpRepCode.to68(-153.0)
+        self.assertEqual(result, 0xBBB38000)
 
     def test_to_zero(self):
         """TestRepCodeToFrom68CPython.test_04_c(): to68(0x40000000) -> 0.0 CPython."""
@@ -328,7 +329,8 @@ class TestRepCodeToFrom68CPython(TestRepCode68Base):
 
     def test_to_minus_153_int(self):
         """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
-        self.assertEqual(cpRepCode.to68(-153), 0xBBB38000 - (1 << 32))
+        result = cpRepCode.to68(-153)
+        self.assertEqual(result, 0xBBB38000)
 
     def test_to_zero_int(self):
         """TestRepCodeToFrom68CPython.test_04_c(): to68(0x40000000) -> 0.0 CPython."""
@@ -974,6 +976,23 @@ class TestRepCodeTo68Time(TestRepCode68Base):
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
+    def test_to_minus_153_p(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
+        result = pRepCode.to68(-153.0)
+        self.assertEqual(result, 0xBBB38000)
+
+    def test_to_minus_153_c(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
+        result = cRepCode.to68(-153.0)
+        self.assertEqual(result, 0xBBB38000)
+
+    def test_to_minus_153_cp(self):
+        """TestRepCodeToFrom68CPython.test_02_c(): to68(0xBBB38000) -> -153.0 CPython."""
+        result = cpRepCode.to68(-153.0)
+        print(result, hex(result))
+        self.assertEqual(result, 0xBBB38000)
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)

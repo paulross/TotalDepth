@@ -58,5 +58,11 @@ int main(int argc, char **argv) {
     value = _from68(word);
     std::cout << "Word: 0x" << std::hex << word << " Value: " << std::dec << value << std::endl;
 //    test_repcode_68();
+    value = -40.0;
+    value = -153.0;
+    word = _to68(value);
+    std::cout << "Word: 0x" << std::hex << word << " Value: " << std::dec << value << std::endl;
+    long word_l = static_cast<long>(word);
+    std::cout << "word_l: " << word_l << " 0x" << std::hex << word_l << std::endl;
     return 0;
 }

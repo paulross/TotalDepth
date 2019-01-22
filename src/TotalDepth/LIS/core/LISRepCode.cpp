@@ -96,8 +96,8 @@ double _from68(int32_t word) {
 }
 
 /* C/C++ function that returns a 32 bit representation code word from a double. */
-int32_t _to68(double value) {
-    int32_t word = 0;
+uint32_t _to68(double value) {
+    uint32_t word = 0;
     int exponent = 0;
     double mantissa = frexp(value, &exponent);
     // Overflow and underflow control
@@ -132,6 +132,6 @@ int32_t _to68(double value) {
     word |= exponent & 0xFF;
     // Shift for mantissa
     word <<= 23;
-    word |= static_cast<int32_t>(mantissa * (1 << 23)) & 0x007FFFFF;
+    word |= static_cast<uint32_t>(mantissa * (1 << 23)) & 0x007FFFFF;
     return word;
 }

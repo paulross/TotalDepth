@@ -48,7 +48,7 @@ finally:
 static PyObject *to68(PyObject *module, PyObject *arg) {
     PyObject *ret = NULL;
     double value;
-    int32_t as_68;
+    uint32_t as_68;
 //    long as_68_l;
     assert(arg);
     assert(! PyErr_Occurred());
@@ -66,13 +66,16 @@ static PyObject *to68(PyObject *module, PyObject *arg) {
         goto except;
     }
     as_68 = _to68(value);
-    ret = PyLong_FromLong(as_68);
+    ret = PyLong_FromLong(static_cast<unsigned long>(as_68));
     if (! ret) {
         PyErr_Format(PyExc_RuntimeError,
                      "%s() in %s#%d: Can not create a long.",
                      __FUNCTION__, __FILE__, __LINE__);
         goto except;
     }
+//    fprintf(stdout, "to68(%f): becomes ", value);
+//    PyObject_Print(ret, stdout, 0);
+//    fprintf(stdout, "\n");
     assert(! PyErr_Occurred());
     assert(ret);
     goto finally;
