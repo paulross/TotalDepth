@@ -11,8 +11,9 @@ class IndexerSimple:
 
     def setup(self):
         # Create a Log Pass generator
+        NUM_EXTRA_CHANNELS = 1
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, (NUM_EXTRA_CHANNELS + 1) * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
         log_pass_gen = LisGen.LogPassGen(
@@ -62,11 +63,12 @@ class Indexer1M:
 
     def setup(self):
         # Create a Log Pass generator
+        NUM_EXTRA_CHANNELS = 64
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, (NUM_EXTRA_CHANNELS + 1) * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        channel_names = ['{:04d}'.format(i).encode('ascii') for i in range(64)]
+        channel_names = ['{:04d}'.format(i).encode('ascii') for i in range(NUM_EXTRA_CHANNELS)]
         log_pass_gen = LisGen.LogPassGen(
             myEbs,
             # Channel list
