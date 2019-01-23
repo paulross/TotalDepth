@@ -3,6 +3,11 @@ from benchmarks.TotalDepth.LIS.core import write_logical_data_to_physical_record
 
 
 class IndexerSimple:
+    """
+    Simple index on a small file.
+    print('LIS file size', len(b.file_read.file.getvalue())) gives 8308 bytes
+    This is 2 channels of 4 data frames of rep code 68 data.
+    """
 
     def setup(self):
         # Create a Log Pass generator
@@ -45,12 +50,14 @@ class IndexerSimple:
     def time_read(self):
         self.file_read.rewind()
         index = FileIndexer.FileIndex(self.file_read)
-        print(index)
+        print(index.longDesc())
 
 
-class IndexerLarge:
+class Indexer1M:
     """
-    print('BenchmarkIndexerLarge LIS file size', len(file_obj.getvalue())) gives the value 10,342,804
+    Roughly a 1Mb file file.
+    print('LIS file size', len(b.file_read.file.getvalue())) gives 10,342,804 bytes
+    This is 65 channels of 10,000 data frames of rep code 68 data.
     """
 
     def setup(self):
@@ -97,16 +104,14 @@ class IndexerLarge:
     def time_read(self):
         self.file_read.rewind()
         index = FileIndexer.FileIndex(self.file_read)
-        print(index)
+        print(index.longDesc())
 
 
 # Debugging...
 if __name__ == '__main__':
-    # b = BenchmarkMarkerRecords()
-    # b.setup(0x89)
-    # b.time_marker_read(0x89)
-    # b.teardown(0x89)
-    b = BenchmarkIndexerLarge()
-    b.setup()
-    b.time_read()
-    b.teardown()
+    for cls in (IndexerSimple, Indexer1M):
+        b = cls()
+        b.setup()
+        print('LIS file size', len(b.file_read.file.getvalue()))
+        b.time_read()
+        b.teardown()
