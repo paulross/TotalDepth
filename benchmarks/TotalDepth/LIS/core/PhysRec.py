@@ -9,22 +9,20 @@ PHYSICAL_RECORD_BENCHMARK_PARAMETERS = [
     #       Logical Record length,
     #       number of Logical Records
     #   )
+    #
+    # The 'file size' is the product of the last two values.
     # We expect that the performance should be linear with the last two fields.
     #
-    # Some basic dimensions.
-    '1024-1024-1',  # 1kB
-    # '1024-1024-1024',  # 1MB
-    # '1024-1024-8192',  # 8MB
-    # LR length of 64 * 1024 = 65536 with 16 of them (2**20 logical bytes, 1MB)  at different
+    # LR length of 65536 * 16 of them (2**20 logical bytes, 1MB)  at different
     # PR sizes from 128 bytes up to the maximum 65535
-    # '128-65536-16',
+    '128-65536-16',
     '256-65536-16',
-    # '512-65536-16',
+    '512-65536-16',
     '1024-65536-16',
     '2048-65536-16',
-    # '4096-65536-16',
+    '4096-65536-16',
     '8192-65536-16',
-    # '16383-65536-16',
+    '16383-65536-16',
     '32768-65536-16',
     '{}-65536-16'.format(PhysRec.PR_MAX_LENGTH),
 ]

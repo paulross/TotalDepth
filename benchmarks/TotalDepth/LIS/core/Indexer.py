@@ -5,7 +5,7 @@ from benchmarks.TotalDepth.LIS.core import write_logical_data_to_physical_record
 class IndexerSimple:
     """
     Simple index on a small file.
-    print('LIS file size', len(b.file_read.file.getvalue())) gives 8308 bytes
+    print('LIS file size', len(b.file_read.file.getvalue())) gives 3508 bytes
     This is 2 channels of 4 data frames of rep code 68 data.
     """
 
@@ -23,7 +23,7 @@ class IndexerSimple:
                 LisGen.Channel(
                     LisGen.ChannelSpec(
                         b'TEST', b'ServID', b'ServOrdN', b'FEET',
-                        45310011, 256, 16, 4, 68
+                        45310011, 256, 4, 1, 68
                     ),
                     LisGen.ChValsConst(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=1, noise=None),
                 ),
@@ -54,18 +54,19 @@ class IndexerSimple:
         print(index.longDesc())
 
 
-class Indexer1M:
+class Indexer10M:
     """
     Roughly a 1Mb file file.
     print('LIS file size', len(b.file_read.file.getvalue())) gives 10,342,804 bytes
-    This is 65 channels of 10,000 data frames of rep code 68 data.
+    This is 65 channels of 10,000 data frames with 4 samples of rep code 68 data per frame.
+    Stride is 1034 bytes.
     """
 
     def setup(self):
         # Create a Log Pass generator
         NUM_EXTRA_CHANNELS = 64
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, (NUM_EXTRA_CHANNELS + 1) * 4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 73, (NUM_EXTRA_CHANNELS + 1) * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
         channel_names = ['{:04d}'.format(i).encode('ascii') for i in range(NUM_EXTRA_CHANNELS)]
@@ -109,9 +110,131 @@ class Indexer1M:
         print(index.longDesc())
 
 
+class Indexer100M:
+    """
+    Roughly a 100Mb file file.
+    print('LIS file size', len(b.file_read.file.getvalue())) gives 102,645,911 bytes
+    This is 65 channels of 10,000 data frames of rep code 68 data.
+    """
+
+    def setup(self):
+        # Create a Log Pass generator
+        NUM_EXTRA_CHANNELS = 64
+        SAMPLES_PER_EXTRA_CHANNEL = 40
+        myEbs = LogiRec.EntryBlockSet()
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 73, NUM_EXTRA_CHANNELS * SAMPLES_PER_EXTRA_CHANNEL + 4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
+        channel_names = ['{:04d}'.format(i).encode('ascii') for i in range(NUM_EXTRA_CHANNELS)]
+        log_pass_gen = LisGen.LogPassGen(
+            myEbs,
+            # Channel list
+            [
+                LisGen.Channel(
+                    LisGen.ChannelSpec(
+                        channel_name, b'ServID', b'ServOrdN', b'FEET',
+                        45310011, 256, SAMPLES_PER_EXTRA_CHANNEL*4, SAMPLES_PER_EXTRA_CHANNEL, 68
+                    ),
+                    LisGen.ChValsConst(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=1, noise=None),
+                )
+                for channel_name in channel_names
+            ],
+            xStart=10000.0 * 120,
+            xRepCode=68,
+            xNoise=None,
+        )
+        # dfsr = log_pass_gen.lrBytesDFSR()
+        # Create a more complex LIS file
+        logical_data = [
+            LisGen.TapeReelHeadTailDefault.lrBytesReelHead,
+            LisGen.TapeReelHeadTailDefault.lrBytesTapeHead,
+            LisGen.FileHeadTailDefault.lrBytesFileHead,
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandomCONS(100).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            LisGen.TableGenRandom(
+                theLrType=34,
+                theName=b'TOOL',
+                theColTitles=[b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
+                numRows=100
+            ).lrBytes(),
+            log_pass_gen.lrBytesDFSR(),
+        ]
+        # Add 10000 Logical Records consisting of 1 frames starting at an offset of i
+        # In this case xStart has been set in the generator as 10,000 feet with a sample size of 0.1 inch
+        for i in range(10000):
+            logical_data.append(log_pass_gen.lrBytes(i, 1))
+        logical_data.extend(
+            [
+                LisGen.FileHeadTailDefault.lrBytesFileTail,
+                LisGen.TapeReelHeadTailDefault.lrBytesTapeTail,
+                LisGen.TapeReelHeadTailDefault.lrBytesReelTail,
+            ]
+        )
+        file_obj = write_logical_data_to_physical_records(logical_data)
+        # print('BenchmarkIndexerLarge LIS file size', len(file_obj.getvalue()))
+        self.file_read = File.FileRead(theFile=file_obj, theFileId='MyFile', keepGoing=True)
+
+    def teardown(self):
+        del self.file_read
+
+    def time_read(self):
+        self.file_read.rewind()
+        index = FileIndexer.FileIndex(self.file_read)
+        print(index.longDesc())
+
+
 # Debugging...
 if __name__ == '__main__':
-    for cls in (IndexerSimple, Indexer1M):
+    # for cls in (IndexerSimple, Indexer10M, Indexer100M):
+    for cls in (Indexer100M,):
         b = cls()
         b.setup()
         print('LIS file size', len(b.file_read.file.getvalue()))
