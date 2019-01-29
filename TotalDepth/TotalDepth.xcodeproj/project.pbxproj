@@ -11,6 +11,8 @@
 		67C455CF21EBA6AA00D1788E /* Python in Frameworks */ = {isa = PBXBuildFile; fileRef = 67C455CE21EBA6AA00D1788E /* Python */; };
 		67C455D321ECCA5100D1788E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C455D221ECCA5100D1788E /* main.cpp */; };
 		67C455D621ED0B3100D1788E /* LISRepCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C455D421ED0B3100D1788E /* LISRepCode.cpp */; };
+		67C455DB21FB541000D1788E /* Tif.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C455D921FB541000D1788E /* Tif.cpp */; };
+		67C455DE21FB8DE400D1788E /* PhysicalRecord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C455DC21FB8DE400D1788E /* PhysicalRecord.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +35,11 @@
 		67C455D221ECCA5100D1788E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		67C455D421ED0B3100D1788E /* LISRepCode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LISRepCode.cpp; path = ../../src/TotalDepth/LIS/core/LISRepCode.cpp; sourceTree = "<group>"; };
 		67C455D521ED0B3100D1788E /* LISRepCode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LISRepCode.h; path = ../../src/TotalDepth/LIS/core/LISRepCode.h; sourceTree = "<group>"; };
+		67C455D921FB541000D1788E /* Tif.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Tif.cpp; path = ../../src/TotalDepth/LIS/core/src/Tif.cpp; sourceTree = "<group>"; };
+		67C455DA21FB541000D1788E /* Tif.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Tif.hpp; path = ../../src/TotalDepth/LIS/core/src/Tif.hpp; sourceTree = "<group>"; };
+		67C455DC21FB8DE400D1788E /* PhysicalRecord.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PhysicalRecord.cpp; path = ../../src/TotalDepth/LIS/core/src/PhysicalRecord.cpp; sourceTree = "<group>"; };
+		67C455DD21FB8DE400D1788E /* PhysicalRecord.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = PhysicalRecord.hpp; path = ../../src/TotalDepth/LIS/core/src/PhysicalRecord.hpp; sourceTree = "<group>"; };
+		67C455E021FF33F800D1788E /* Endian.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Endian.hpp; path = ../../src/TotalDepth/LIS/core/src/Endian.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +79,11 @@
 				67C455D221ECCA5100D1788E /* main.cpp */,
 				67C455D421ED0B3100D1788E /* LISRepCode.cpp */,
 				67C455D521ED0B3100D1788E /* LISRepCode.h */,
+				67C455D921FB541000D1788E /* Tif.cpp */,
+				67C455DA21FB541000D1788E /* Tif.hpp */,
+				67C455DC21FB8DE400D1788E /* PhysicalRecord.cpp */,
+				67C455DD21FB8DE400D1788E /* PhysicalRecord.hpp */,
+				67C455E021FF33F800D1788E /* Endian.hpp */,
 			);
 			path = TotalDepth;
 			sourceTree = "<group>";
@@ -133,8 +145,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				67C455D621ED0B3100D1788E /* LISRepCode.cpp in Sources */,
+				67C455DE21FB8DE400D1788E /* PhysicalRecord.cpp in Sources */,
 				67C455D321ECCA5100D1788E /* main.cpp in Sources */,
 				67C455CD21EBA52C00D1788E /* cpLISRepCode.cpp in Sources */,
+				67C455DB21FB541000D1788E /* Tif.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +270,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.cpp;
 				HEADER_SEARCH_PATHS = /Library/Frameworks/Python.framework/Versions/3.7/include/python3.7m;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -269,6 +284,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.cpp;
 				HEADER_SEARCH_PATHS = /Library/Frameworks/Python.framework/Versions/3.7/include/python3.7m;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

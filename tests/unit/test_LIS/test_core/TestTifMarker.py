@@ -110,26 +110,32 @@ class TestTifMarker(unittest.TestCase):
         """TestTifMarker: Initialise, write two Physical Records and write EOF."""
         myIo = io.BytesIO()
         myTh = TifMarker.TifMarkerWrite()
-        myPr = b'\x40' * 19
+        myPr = b'\xFF' * 12
         with RawStream.RawStream(myIo, mode='wb', fileId='MyFile') as myRs:
+            myTh.write(myRs, len(myPr))
+            myRs.stream.write(myPr)
             myTh.write(myRs, len(myPr))
             myRs.stream.write(myPr)
             myTh.close(myRs)
             myBytes = myIo.getvalue()
-        self.assertEqual(len(myBytes), len(myPr)+12*3)
-        self.assertEqual('TIF  True >:  0x       1  0x      2b  0x      37', str(myTh))
-        #print
-        #print myBytes.encode('unicode-escape')
-        #print ''.join(['\\x%02x' % ord(c) for c in myBytes])
+        self.assertEqual(len(myBytes), len(myPr) * 2 + 12 * 4)
+        self.assertEqual('TIF  True >:  0x       1  0x      3c  0x      48', str(myTh))
+        # print()
+        # for i in range(0, len(myBytes), 12):
+        #     print(myBytes[i:i+12])
         self.assertEqual(
             myBytes,
             # Opening 
-            b'\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00'\
-            # PR
-            +b'\x40'*19\
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00'
+            # PR 1
+            + myPr
+            # TIF for PR 2
+            + b'\x00\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00'
+            # PR 2
+            + myPr
             # EOF
-            +b'\x01\x00\x00\x00\x00\x00\x00\x00\x2b\x00\x00\x00'\
-            +b'\x01\x00\x00\x00\x1f\x00\x00\x00\x37\x00\x00\x00'
+            + b'\x01\x00\x00\x00\x18\x00\x00\x00<\x00\x00\x00'
+            + b'\x01\x00\x00\x000\x00\x00\x00H\x00\x00\x00'
         )
         
     def test_04(self):

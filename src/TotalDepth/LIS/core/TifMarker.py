@@ -102,6 +102,8 @@ TIF_WORD_FORMAT                 = struct.Struct('<L')
 #: struct.Struct() format for a TIF word written wrongly as little-endian
 TIF_WORD_FORMAT_WRONG_SEX       = struct.Struct('>L')
 #: struct.Struct() format for a TIF marker
+# FIXME: This is writing in little endian but should be big endian. Glad we are ignoring TIF markers.
+# FIXME: Should be > not <
 TIF_WORD_ALL_FORMAT             = struct.Struct('<%dL' % TIF_NUM_WORDS)
 #: struct.Struct() format for a TIF marker written wrongly as little-endian
 TIF_WORD_ALL_FORMAT_WRONG_SEX   = struct.Struct('>%dL' % TIF_NUM_WORDS)
