@@ -130,6 +130,7 @@ setup(
             'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
             'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
             'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
+            'tdarchive=TotalDepth.util.archive:main',
 #            'TotalDepth=TotalDepth.cli:main'
         ]
     },
