@@ -85,6 +85,190 @@ def test__lis_tif_r(by: bytes, expected: int):
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        # Success
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~Version Information',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~Version Information Section',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~V',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        # Comment line
+        (
+            b'\n'.join(
+                [
+                    b'# Some comment or other',
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        # Blank lines
+        (
+            b'\n'.join(
+                [
+                    b'   ',
+                    b'~VERSION INFORMATION',
+                    b'',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+        # Failure
+        (
+            b'\n'.join(
+                [
+                    b'~NOT VERSION INFORMATION',
+                ]
+            ),
+            1
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                ]
+            ),
+            2
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~V',
+                    b' NOTVERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            3
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~V',
+                    b' VERS.',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            4
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~V',
+                    b' VERS.                 1.9:   CWLS LOG ASCII STANDARD -VERSION 1.9',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            5
+        ),
+    )
+)
+def test__las(by: bytes, expected: int):
+    result = archive._las(by, (b'1.2:', b'1.2'))
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        # Success
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+    )
+)
+def test__las12(by: bytes, expected: int):
+    result = archive._lasv12(by)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        # Success
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+    )
+)
+def test__las20(by: bytes, expected: int):
+    result = archive._lasv20(by)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        # Success
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            0
+        ),
+    )
+)
+def test__las30(by: bytes, expected: int):
+    result = archive._lasv30(by)
+    assert result == expected
 
 
 # Typical RP66v1
@@ -351,6 +535,36 @@ def test__pdf(by: bytes, expected: int):
         (b'\x00\x80\x85\x9c\x80\x00' + b'\x00' * 12, 'LIS'),
         (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES, 'LISt'),
         (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES, 'LIStr'),
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            'LAS1.2',
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            'LAS2.0',
+        ),
+        (
+            b'\n'.join(
+                [
+                    b'~VERSION INFORMATION',
+                    b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            ),
+            'LAS3.0',
+        ),
         (
             b''.join(
                 [

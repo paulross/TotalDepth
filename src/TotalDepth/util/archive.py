@@ -50,24 +50,24 @@ VISUAL_ASCII_BYTES = set(
 
 
 def _las(by: bytes, versions: typing.Tuple[bytes, ...]) -> int:
-    lines = by.split(b'\n')
-    # TODO: Remove comment lines first, this has been seen in the wild.
-    # TODO: Remove zero length lines.
-    # TODO: Remove blank lines (spaces only).
-    # lines = []
-    # for line in by.split(b'\n'):
-    #     comment_idx = line.find(b'#')
-    #     if comment_idx != -1:
-    #         line = line[:comment_idx]
-    #     line = line.strip()
-    #     if len(line) > 0:
-    #         lines.append(line)
+    """Returns zero if this is a LAS file of specified version(s), non-zero otherwise."""
+    lines = []
+    for line in by.split(b'\n'):
+        comment_idx = line.find(b'#')
+        if comment_idx != -1:
+            line = line[:comment_idx]
+        line = line.strip()
+        if len(line) > 0:
+            lines.append(line)
     # ~Version Information
     if lines[0].strip() not in (
             b'~V',
             b'~Version',
             b'~Version Information',
             b'~Version Information Section',
+            B'~VERSION',
+            B'~VERSION INFORMATION',
+            B'~VERSION INFORMATION SECTION',
     ):
         return 1
     # VERS.                     2.0: CWLS log ASCII Standard Version 2.00
