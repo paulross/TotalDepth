@@ -402,15 +402,30 @@ def xxd_size(len_bytes: int) -> int:
 
 class FileBase:
     """Base class to represent a file, either on-disc or a ZIP file."""
+    # Number of bytes to take a file fragment of. 18 is useful for LIS+TIF as it gives
+    # all the TIF markers [12], the PRH [4] and the LRH [2].
+    XXD_NUM_BYTES = 18
+    
     def __init__(self, path: str):
         self.path = path
         self.ext = os.path.splitext(path)[1].upper()
         self.size = 0
         self.bin_type = ''
         self.mod_date = datetime.datetime.min
+        self.bytes = b''
 
     def __str__(self):
-        return f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
+        return ' '.join(
+            [
+                f'{self.size:12,d}'
+                f'{self.ext:4s}',
+                f'{self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s}',
+                f'{self.mod_date}',
+                f'{xxd(self.bytes):{xxd_size(self.XXD_NUM_BYTES)}s}',
+                f'{self.path}',
+            ]
+        )
+        # return f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
 
 
 class FileOnDisc(FileBase):
@@ -422,16 +437,19 @@ class FileOnDisc(FileBase):
         self.mod_date = datetime.datetime(*(time.localtime(os_stat.st_mtime)[:6]))
         with open(self.path, 'rb') as f:
             self.bin_type = binary_file_type(f)
+            f.seek(0)
+            self.bytes = f.read(self.XXD_NUM_BYTES)
 
 
 class FileInMemory(FileBase):
     """Represents an in-memory file, for example contained in a ZIP.
     We need to be given the file data as we can't read it from disc."""
-    def __init__(self, path: str, size: int, binary_type: str, mod_date: datetime.datetime):
+    def __init__(self, path: str, size: int, binary_type: str, mod_date: datetime.datetime, by: bytes):
         super().__init__(path)
         self.size = size
         self.bin_type = binary_type
         self.mod_date = mod_date
+        self.bytes = by
 
 
 class FileMembers:
@@ -464,7 +482,7 @@ class FileZip(FileArchive):
                 if z_info.is_dir():
                     # print(f'{str():{xxd_size(XXD_NUM_BYTES)}s} {0:12,d} {"DIR":8s} {z_info.filename}')
                     self.members.members.append(
-                        FileInMemory(z_info.filename, 0, 'DIR', datetime.datetime(*z_info.date_time))
+                        FileInMemory(z_info.filename, 0, 'DIR', datetime.datetime(*z_info.date_time), b'')
                     )
                 else:
                     with z_archive.open(z_info) as z_member_file:
@@ -474,34 +492,15 @@ class FileZip(FileArchive):
                         #     f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d}'
                         #     f' {bin_file_type:8s} {z_info.filename}'
                         # )
+                        z_member_file.seek(0)
+                        by = z_member_file.read(self.XXD_NUM_BYTES)
                         self.members.members.append(
-                            FileInMemory(z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time))
+                            FileInMemory(z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time), by)
                         )
 
     def __str__(self):
         str_self = f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
         return '{}\n{}'.format(str_self, str(self.members))
-
-
-# def process_zip_path(path: str) -> typing.List[FileBase]:
-#     XXD_NUM_BYTES = 18
-#     result = []
-#     assert zipfile.is_zipfile(path)
-#     # archive_directory: str = os.path.dirname(path)
-#     with zipfile.ZipFile(path) as z_archive:
-#         # print()
-#         print(f'TRACE: process_zip_path(): Processing ZIP {path}')# {z_archive.filename}')
-#         # print(z_archive.namelist())
-#         # pprint.pprint(z_archive.infolist())
-#         for z_info in z_archive.infolist():
-#             if z_info.is_dir():
-#                     print(f'{str():{xxd_size(XXD_NUM_BYTES)}s} {0:12,d} {"DIR":8s} {z_info.filename}')
-#             else:
-#                 with z_archive.open(z_info) as z_member_file:
-#                     by: bytes = z_member_file.read(XXD_NUM_BYTES)
-#                     bin_file_type = binary_file_type(z_member_file)
-#                     print(f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d} {bin_file_type:8s} {z_info.filename}')
-#     return result
 
 
 EXCLUDE_FILENAMES = ('.DS_Store',)
