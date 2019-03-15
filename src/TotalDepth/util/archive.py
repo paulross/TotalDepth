@@ -60,7 +60,7 @@ def _las(by: bytes, versions: typing.Tuple[bytes, ...]) -> int:
         if len(line) > 0:
             lines.append(line)
     # ~Version Information
-    if lines[0].strip() not in (
+    if lines[0] not in (
             b'~V',
             b'~Version',
             b'~Version Information',
@@ -173,7 +173,9 @@ def _lis(by: bytes) -> int:
 
 
 def _lis_tif_initial(by: bytes) -> int:
-    """Basic LIS with TIF markers correctly written."""
+    """Basic LIS with TIF markers correctly written.
+    Checks 8 bytes exactly so 2^64.
+    """
     assert len(by) >= 8, f'_lis_tif_initial(): needs at least 8 bytes not {len(by):d}'
     if by[:4] != b'\x00\x00\x00\x00':
         return 1
@@ -184,8 +186,9 @@ def _lis_tif_initial(by: bytes) -> int:
 
 
 def _lis_tif_general(by: bytes, tif_next: int) -> int:
-    """Basic LIS with TIF markers correctly written (little endian)."""
-    r = _lis_tif_initial(by)
+    """Basic LIS with TIF markers correctly written (little endian).
+    2^64 for first 8 bytes. 2^32 for tif_next. 2^11 for LIS."""
+    r = _lis_tif_initial(by) # 2^64
     assert len(by) >= 12 + 4, f'_lis_tif_general(): needs at least 16 bytes not {len(by):d}'
     if r:
         return r
@@ -300,22 +303,29 @@ def _rp66v2(by: bytes) -> int:
 
 
 def _ascii(by: bytes) -> int:
-    """Returns 0 if all the bytes are ASCII printable, nonm-zero otherwise."""
+    """Returns 0 if all the bytes are ASCII printable, non-zero otherwise."""
     if set(by).issubset(PRINTABLE_ASCII_BYTES):
         return 0
     return 1
 
 
 def _zip(by: bytes) -> int:
-    # https://en.wikipedia.org/wiki/Zip_(file_format)#Structure
-    # 504b 0304 or b'PK\x03\x04'
+    """Returns 0 if the magic number is a ZIP file, non-zero otherwise.
+    See: https://en.wikipedia.org/wiki/Zip_(file_format)#Structure
+    504b 0304 or b'PK\x03\x04'
+    Four bytes have to be right so 2^32.
+    Do not support empty (b'\x50\x4b\x05\x06') or spanned (b'\x50\x4b\x07\x08') files.
+    """
     if by[:4] == b'\x50\x4b\x03\x04':
         return 0
     return 1
 
 
 def _pdf(by: bytes) -> int:
-    # https://en.wikipedia.org/wiki/PDF#File_structure
+    """Returns 0 if the magic number is a PDF file, non-zero otherwise.
+    https://en.wikipedia.org/wiki/PDF#File_structure
+    Five bytes have to be right so 2^40
+    """
     if by[:5] == b'%PDF-':
         return 0
     return 1
@@ -324,8 +334,8 @@ def _pdf(by: bytes) -> int:
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP = (
-    (_zip, 'ZIP'),
-    (_pdf, 'PDF'),
+    (_pdf, 'PDF'), # 2^40
+    (_zip, 'ZIP'), # 2^32
     (_lis_tif, 'LISt'), # Tests with TIF markers are much more strict.
     (_lis_tif_r, 'LIStr'),
     (_lasv12, 'LAS1.2'),
@@ -335,8 +345,8 @@ FUNCTION_ID_MAP = (
     (_rp66v1_tif, 'RP66V1t'),
     (_rp66v1_tif_r, 'RP66V1tr'),
     (_rp66v2, 'RP66v2'),
-    (_lis,  'LIS'), # LIS without TIF is potentially the weakest test.
     (_ascii, 'ASCII'),
+    (_lis,  'LIS'), # LIS without TIF is potentially the weakest test, around 2^11
 )
 
 BINARY_FILE_TYPE_CODE_WIDTH = max(len(v[1]) for v in FUNCTION_ID_MAP)
@@ -365,70 +375,6 @@ def binary_file_type(fobj: typing.IO) -> str:
     return result
 
 
-class FileBase:
-    def __init__(self, path: str):
-        self.path = path
-        self.ext = os.path.splitext(path)[1].upper()
-        self.size = 0
-        self.bin_type = ''
-        self.mod_date = datetime.datetime.min
-
-    def __str__(self):
-        return f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
-
-
-class File(FileBase):
-    def __init__(self, path: str):
-        super().__init__(path)
-        os_stat = os.stat(self.path)
-        self.size = os_stat.st_size
-        self.mod_date = datetime.datetime(*(time.localtime(os_stat.st_mtime)[:6]))
-        with open(self.path, 'rb') as f:
-            self.bin_type = binary_file_type(f)
-
-
-class FileZip(FileBase):
-    def __init__(self, archive_path: str, zip_info: zipfile.ZipInfo, binary_type: str):
-        super().__init__(os.path.join(archive_path, zip_info.filename))
-        self.size = zip_info.file_size
-        self.mod_date = datetime.datetime(*zip_info.date_time)
-        self.bin_type = binary_type
-
-
-# def _process_zinfo(archive_directory: str, z_archive: zipfile.ZipFile, z_info: zipfile.ZipInfo) -> typing.List[FileBase]:
-#     result = []
-#     this_archive_directory = os.path.join(archive_directory, z_info.filename)
-#     # this_archive_directory = z_archive.filename
-#     print(f'TRACE: _process_zinfo(): A: {archive_directory}')
-#     print(f'TRACE: _process_zinfo(): B: {this_archive_directory}')
-#     if not z_info.is_dir():
-#         # print(f'   Using {z_info}')
-#         with z_archive.open(z_info.filename, "r") as f_file:
-#             if zipfile.is_zipfile(f_file):
-#                 # Recursive call
-#                 result.extend(process_zip_archive(this_archive_directory, f_file))
-#             else:
-#                 binary_file = binary_file_type(f_file)
-#                 # archive_path = os.path.join(os.path.dirname(path), z_info.filename)
-#                 file_path = os.path.join(this_archive_directory, z_info.filename)
-#                 result.append(FileZip(file_path, z_info, binary_file))
-#     # else:
-#     #     print(f'Ignoring {z_info}')
-#     return result
-#
-#
-# def process_zip_archive(archive_directory: str, zip_file_obj: typing.IO) -> typing.List[FileBase]:
-#     print(f'TRACE: process_zip_archive(): {archive_directory}')
-#     result = []
-#     # print('TRACE:', zip_file_obj)
-#     z_archive = zipfile.ZipFile(zip_file_obj)
-#     this_archive_directory = os.path.dirname(os.path.join(archive_directory, z_archive.filename))
-#     for z_info in z_archive.infolist():
-#         # print(z_info)
-#         result.extend(_process_zinfo(this_archive_directory, z_archive, z_info))
-#     return result
-
-
 def xxd(by: bytes) -> str:
     """Returns an xxd style string of the bytes. For example:
     0084 8000 8400 2647 3546 3239 2020 2020 2020 ......&G5F29     """
@@ -454,28 +400,123 @@ def xxd_size(len_bytes: int) -> int:
     return ret
 
 
-def process_zip_path(path: str) -> typing.List[FileBase]:
-    XXD_NUM_BYTES = 18
-    result = []
-    assert zipfile.is_zipfile(path)
-    archive_directory: str = os.path.dirname(path)
-    with zipfile.ZipFile(path) as z_archive:
-        # print()
-        print(f'TRACE: process_zip_path(): Processing ZIP {path}')# {z_archive.filename}')
-        # print(z_archive.namelist())
-        # pprint.pprint(z_archive.infolist())
-        for z_info in z_archive.infolist():
-            if z_info.is_dir():
-                    print(f'{str():{xxd_size(XXD_NUM_BYTES)}s} {0:12,d} {"DIR":8s} {z_info.filename}')
-            else:
-                with z_archive.open(z_info) as z_member_file:
-                    by: bytes = z_member_file.read(XXD_NUM_BYTES)
-                    bin_file_type = binary_file_type(z_member_file)
-                    print(f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d} {bin_file_type:8s} {z_info.filename}')
-    return result
+class FileBase:
+    """Base class to represent a file, either on-disc or a ZIP file."""
+    def __init__(self, path: str):
+        self.path = path
+        self.ext = os.path.splitext(path)[1].upper()
+        self.size = 0
+        self.bin_type = ''
+        self.mod_date = datetime.datetime.min
+
+    def __str__(self):
+        return f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
+
+
+class FileOnDisc(FileBase):
+    """Represents an on-disc file."""
+    def __init__(self, path: str):
+        super().__init__(path)
+        os_stat = os.stat(self.path)
+        self.size = os_stat.st_size
+        self.mod_date = datetime.datetime(*(time.localtime(os_stat.st_mtime)[:6]))
+        with open(self.path, 'rb') as f:
+            self.bin_type = binary_file_type(f)
+
+
+class FileInMemory(FileBase):
+    """Represents an in-memory file, for example contained in a ZIP.
+    We need to be given the file data as we can't read it from disc."""
+    def __init__(self, path: str, size: int, binary_type: str, mod_date: datetime.datetime):
+        super().__init__(path)
+        self.size = size
+        self.bin_type = binary_type
+        self.mod_date = mod_date
+
+
+class FileMembers:
+    """Represents a tree of files for example a ZIP might contain a ZIP."""
+    def __init__(self):
+        self.members: typing.List[typing.Union[FileBase, FileMembers]] = []
+
+    def __str__(self):
+        return '\n'.join(str(v) for v in self.members)
+
+
+class FileArchive(FileOnDisc):
+    """Represents an on-disc file that is an archive of other files."""
+    def __init__(self, archive_path: str):
+        super().__init__(archive_path)
+        self.members: FileMembers = FileMembers()
+
+
+class FileZip(FileArchive):
+    """Represents an on-disc file that is a ZIP file."""
+    def __init__(self, archive_path: str):
+        assert zipfile.is_zipfile(archive_path)
+        super().__init__(archive_path)
+        assert self.bin_type == 'ZIP'
+        # XXD_NUM_BYTES = 18
+        with zipfile.ZipFile(archive_path) as z_archive:
+            # print()
+            # print(f'TRACE: process_zip_path(): Processing ZIP {archive_path}')  # {z_archive.filename}')
+            for z_info in z_archive.infolist():
+                if z_info.is_dir():
+                    # print(f'{str():{xxd_size(XXD_NUM_BYTES)}s} {0:12,d} {"DIR":8s} {z_info.filename}')
+                    self.members.members.append(
+                        FileInMemory(z_info.filename, 0, 'DIR', datetime.datetime(*z_info.date_time))
+                    )
+                else:
+                    with z_archive.open(z_info) as z_member_file:
+                        bin_file_type = binary_file_type(z_member_file)
+                        # by: bytes = z_member_file.read(XXD_NUM_BYTES)
+                        # print(
+                        #     f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d}'
+                        #     f' {bin_file_type:8s} {z_info.filename}'
+                        # )
+                        self.members.members.append(
+                            FileInMemory(z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time))
+                        )
+
+    def __str__(self):
+        str_self = f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
+        return '{}\n{}'.format(str_self, str(self.members))
+
+
+# def process_zip_path(path: str) -> typing.List[FileBase]:
+#     XXD_NUM_BYTES = 18
+#     result = []
+#     assert zipfile.is_zipfile(path)
+#     # archive_directory: str = os.path.dirname(path)
+#     with zipfile.ZipFile(path) as z_archive:
+#         # print()
+#         print(f'TRACE: process_zip_path(): Processing ZIP {path}')# {z_archive.filename}')
+#         # print(z_archive.namelist())
+#         # pprint.pprint(z_archive.infolist())
+#         for z_info in z_archive.infolist():
+#             if z_info.is_dir():
+#                     print(f'{str():{xxd_size(XXD_NUM_BYTES)}s} {0:12,d} {"DIR":8s} {z_info.filename}')
+#             else:
+#                 with z_archive.open(z_info) as z_member_file:
+#                     by: bytes = z_member_file.read(XXD_NUM_BYTES)
+#                     bin_file_type = binary_file_type(z_member_file)
+#                     print(f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d} {bin_file_type:8s} {z_info.filename}')
+#     return result
 
 
 EXCLUDE_FILENAMES = ('.DS_Store',)
+
+
+def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) -> None:
+    if file_name not in EXCLUDE_FILENAMES:
+        path = os.path.join(dir_name, file_name)
+        if os.path.isfile(path):
+            # If this is a ZIP archive then open it a process the contents.
+            if zipfile.is_zipfile(path):
+                # result.extend(process_zip_path(path))
+                result.append(FileZip(path))
+            else:
+                result.append(FileOnDisc(path))
 
 
 def main() -> int:
@@ -486,29 +527,18 @@ def main() -> int:
     print(args)
 
     result: typing.List[FileBase] = []
+    assert os.path.isdir(args.path)
     if args.recurse:
         for root, dirs, files in os.walk(args.path):
             for file in files:
-                if file not in EXCLUDE_FILENAMES:
-                    path = os.path.join(root, file)
-                    # If this is a ZIP archive then open it a process the contents.
-                    if zipfile.is_zipfile(path):
-                        result.extend(process_zip_path(path))
-                    else:
-                        result.append(File(path))
+                _process_file(root, file, result)
     else:
         for file_name in sorted(os.listdir(args.path)):
-            path = os.path.join(args.path, file_name)
-            if file_name not in EXCLUDE_FILENAMES:
-                if os.path.isfile(path):
-                    if zipfile.is_zipfile(path):
-                        # If this is a ZIP archive then open it a process the contents.
-                        result.extend(process_zip_path(path))
-                    else:
-                        result.append(File(path))
+            _process_file(args.path, file_name, result)
     # pprint.pprint([str(v) for v in result])
     # pprint.pprint(result)
     for r in result:
+        # print(type(r), r)
         print(r)
     # Output summary
 
