@@ -417,7 +417,7 @@ class FileBase:
     def __str__(self):
         return ' '.join(
             [
-                f'{self.size:12,d}'
+                f'{self.size:12,d}',
                 f'{self.ext:4s}',
                 f'{self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s}',
                 f'{self.mod_date}',
@@ -425,7 +425,6 @@ class FileBase:
                 f'{self.path}',
             ]
         )
-        # return f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
 
 
 class FileOnDisc(FileBase):
@@ -499,7 +498,16 @@ class FileZip(FileArchive):
                         )
 
     def __str__(self):
-        str_self = f'{self.size:12,d} {self.ext:4s} {self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s} {self.mod_date} {self.path}'
+        str_self = ' '.join(
+            [
+                f'{self.size:12,d}',
+                f'{self.ext:4s}',
+                f'{self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s}',
+                f'{self.mod_date}',
+                f'{xxd(self.bytes):{xxd_size(self.XXD_NUM_BYTES)}s}',
+                f'{self.path}',
+            ]
+        )
         return '{}\n{}'.format(str_self, str(self.members))
 
 
