@@ -1,4 +1,5 @@
-
+import io
+import typing
 
 from TotalDepth.util import archive
 
@@ -6,144 +7,226 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'version_line, groups',
     (
-        # Physical record type 1
-        (b'\x00\xFF\x40\x00\x80\x00', 10),
-        # First PR has predecessor
-        (b'\x00\xFF\x00\x02\x80\x00', 20),
-        # Checksum flags are 10
-        (b'\x00\xFF\x20\x00\x80\x00', 30),
-        # Checksum flags are both set
-        (b'\x00\xFF\x30\x00\x80\x00', 40),
-        # Length check with no PRT
-        (b'\x00\x04\x00\x00\x80\x00', 50),
-        # Length check with checksum
-        (b'\x00\x06\x10\x00\x80\x00', 50),
-        # Length check with record number
-        (b'\x00\x06\x04\x00\x80\x00', 50),
-        # Length check with file number
-        (b'\x00\x06\x02\x00\x80\x00', 50),
-        # Length check with checksum, record and file number
-        (b'\x00\x0A\x16\x00\x80\x00', 50),
-        # Length check passes with checksum, record and file number
-        (b'\x00\x0B\x16\x00\x80\x00', 0),
-        # Logical record type is 0
-        (b'\x00\xFF\x00\x00\x00\x00', 60),
-        # Logical record attributes are non-zero
-        (b'\x00\xFF\x00\x00\x80\x01', 70),
-        # Test reserved/unused bits set and return code is 0
-        (b'\x00\x80\x85\x9c\x80\x00', 0),
+        (
+            b' VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
+            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+        ),
+        (
+            b'VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
+            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+        ),
+        (
+            b'VERS. 2.0 : CWLS Log ASCII Standard - VERSION 2.0',
+            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+        ),
+        (
+            b'     VERS.    2.0    :    CWLS Log ASCII Standard - VERSION 2.0   ',
+            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+        ),
+        (
+            b' VERS.                 2.0: ',
+            (b'2.0', None),
+        ),
+        (
+            b' VERS.                 2.0:',
+            (b'2.0', None),
+        ),
+        # b' VERS. 2.0 : CWLS Log ASCII Standard - VERSION 2.0',
+        # b' VERS. 2.0 :CWLS Log ASCII Standard - VERSION 2.0',
+        # b'VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+        # b'VERS.          2.0                                     : CWLS LOG ASCII Standard',
     )
 )
-def test__lis(by: bytes, expected: int):
-    result = archive._lis(by)
+def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
+    result = archive.RE_LAS_VERSION_LINE.match(version_line)
+    assert result is not None
+    assert result.groups() == groups
+
+
+@pytest.mark.parametrize(
+    'fobj, expected',
+    (
+        # Physical record type 1
+        (io.BytesIO(b'\x00\xFF\x40\x00\x80\x00'), 10),
+        # First PR has predecessor
+        (io.BytesIO(b'\x00\xFF\x00\x02\x80\x00'), 20),
+        # Checksum flags are 10
+        (io.BytesIO(b'\x00\xFF\x20\x00\x80\x00'), 30),
+        # Checksum flags are both set
+        (io.BytesIO(b'\x00\xFF\x30\x00\x80\x00'), 40),
+        # Length check with no PRT
+        (io.BytesIO(b'\x00\x04\x00\x00\x80\x00'), 50),
+        # Length check with checksum
+        (io.BytesIO(b'\x00\x06\x10\x00\x80\x00'), 50),
+        # Length check with record number
+        (io.BytesIO(b'\x00\x06\x04\x00\x80\x00'), 50),
+        # Length check with file number
+        (io.BytesIO(b'\x00\x06\x02\x00\x80\x00'), 50),
+        # Length check with checksum, record and file number
+        (io.BytesIO(b'\x00\x0A\x16\x00\x80\x00'), 50),
+        # Length check passes with checksum, record and file number
+        (io.BytesIO(b'\x00\x0B\x16\x00\x80\x00'), 0),
+        # Logical record type is 0
+        (io.BytesIO(b'\x00\xFF\x00\x00\x00\x00'), 60),
+        # Logical record attributes are non-zero
+        (io.BytesIO(b'\x00\xFF\x00\x00\x80\x01'), 70),
+        # Test reserved/unused bits set and return code is 0
+        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00'), 0),
+    )
+)
+def test__lis(fobj: io.BytesIO, expected: int):
+    result = archive._lis(fobj)
     assert result == expected
 
 
 # Example of a correct initial Phyisical Record and Logical Record Header
-LIS_PR_GOOD_BYTES  =b'\x00\x3e\x00\x00\x80\x00'
+LIS_PR_GOOD_BYTES = b'\x00\x3e\x00\x00\x80\x00'
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Typical TIF OK
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES, 0),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 0),
         # TIF word[0] bad
-        (b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES, 1),
+        (io.BytesIO(b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 1),
         # TIF word[1] bad
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES, 2),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 2),
         # TIF word[2] Too large
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\xff\xff\x0d\x00' + LIS_PR_GOOD_BYTES, 3),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\xff\xff\x0d\x00' + LIS_PR_GOOD_BYTES), 3),
         # TIF word[2] mismatch with PRL, TIF can be greater because of padding but not smaller.
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x49\x00\x00\x00' + LIS_PR_GOOD_BYTES, 4),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x49\x00\x00\x00' + LIS_PR_GOOD_BYTES), 4),
     )
 )
-def test__lis_tif(by: bytes, expected: int):
-    result = archive._lis_tif(by)
+def test__lis_tif(fobj: io.BytesIO, expected: int):
+    result = archive._lis_tif(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Typical TIF reversed OK
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES, 0),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 0),
         # TIF word[0] bad
-        (b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES, 1),
+        (io.BytesIO(b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 1),
         # TIF word[1] bad
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES, 2),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 2),
         # TIF word[2] too big
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x0D\xFF\xFF' + LIS_PR_GOOD_BYTES, 3),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x0D\xFF\xFF' + LIS_PR_GOOD_BYTES), 3),
         # TIF word[2] mismatch with PRL
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x49' + LIS_PR_GOOD_BYTES, 4),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x49' + LIS_PR_GOOD_BYTES), 4),
     )
 )
-def test__lis_tif_r(by: bytes, expected: int):
-    result = archive._lis_tif_r(by)
+def test__lis_tif_r(fobj: io.BytesIO, expected: int):
+    result = archive._lis_tif_r(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Success
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~Version Information',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~Version Information Section',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~V',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
-        # Comment line
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
+                [
+                    b'~Version Information Block',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            )),
+            0
+        ),
+        # No space prefix and '1.2:CWLS' rather than '1.2: CWLS'
+        (
+            io.BytesIO(b'\n'.join(
+                [
+                    b'~V',
+                    b'VERS. 1.2:CWLS Log ASCII Standard - VERSION 1.2',
+                    b'WRAP. NO:One line per depth step',
+                ]
+            )),
+            0
+        ),
+        # Comment line(s)
+        (
+            io.BytesIO(b'\n'.join(
                 [
                     b'# Some comment or other',
                     b'~VERSION INFORMATION',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
+            0
+        ),
+        # Comment line(s)
+        (
+            io.BytesIO(b'\n'.join(
+                [
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'~VERSION INFORMATION',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b'# Some comment or other',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                ]
+            )),
             0
         ),
         # Blank lines
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'   ',
                     b'~VERSION INFORMATION',
@@ -151,123 +234,118 @@ def test__lis_tif_r(by: bytes, expected: int):
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
         # Failure
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~NOT VERSION INFORMATION',
+                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             1
         ),
         (
-            b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                ]
-            ),
-            2
-        ),
-        (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~V',
                     b' NOTVERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             3
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~V',
                     b' VERS.',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
-            4
+            )),
+            3
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~V',
                     b' VERS.                 1.9:   CWLS LOG ASCII STANDARD -VERSION 1.9',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             5
         ),
+        (io.BytesIO(b'\n'), 6),
     )
 )
-def test__las(by: bytes, expected: int):
-    result = archive._las(by, (b'1.2:', b'1.2'))
+def test__las(fobj: io.BytesIO, expected: int):
+    result = archive._las(fobj, (b'1.2:', b'1.2'))
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Success
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
     )
 )
-def test__las12(by: bytes, expected: int):
-    result = archive._lasv12(by)
+def test__las12(fobj: io.BytesIO, expected: int):
+    result = archive._lasv12(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Success
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
     )
 )
-def test__las20(by: bytes, expected: int):
-    result = archive._lasv20(by)
+def test__las20(fobj: io.BytesIO, expected: int):
+    result = archive._lasv20(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Success
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             0
         ),
     )
 )
-def test__las30(by: bytes, expected: int):
-    result = archive._lasv30(by)
+def test__las30(fobj: io.BytesIO, expected: int):
+    result = archive._lasv30(fobj)
     assert result == expected
 
 
@@ -281,11 +359,11 @@ def test__las30(by: bytes, expected: int):
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         (
             # Good example
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31', # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
@@ -297,12 +375,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             0,
         ),
         (
             # Missing sequence number, byte[3]
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x20', # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
@@ -314,12 +392,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             1,
         ),
         (
             # Bad version, initial bytes are not 'V1.'
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'X\x31\x2e\x31\x31',  # DLIS version, 5 bytes
@@ -331,12 +409,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             2,
         ),
         (
             # Bad version, minor number is spaces
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x20\x20',  # DLIS version, 5 bytes
@@ -348,12 +426,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             2,
         ),
         (
             # Storage unit structure is not b'RECORD'
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
@@ -365,12 +443,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             3,
         ),
         (
             # Maximum Record Length is not a number, (last byte is a space)
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
@@ -382,12 +460,12 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             4,
         ),
         (
             # Storage Set Identifier - too short (last field)
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
@@ -397,14 +475,14 @@ def test__las30(by: bytes, expected: int):
                     b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
                     b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
                     b'\x20' * 16,
-                    b'\x20' * 15,
+                    (b'\x20' * 15),
                 ]
-            ),
-            5,
+            )),
+            -1,
         ),
         (
             # Storage Set Identifier - non-printable bytes (last field)
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
@@ -416,22 +494,22 @@ def test__las30(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x00' * 16,
                 ]
-            ),
+            )),
             6,
         ),
     )
 )
-def test__rp66v1(by: bytes, expected: int):
-    result = archive._rp66v1(by)
+def test__rp66v1(fobj: io.BytesIO, expected: int):
+    result = archive._rp66v1(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         (
             # Good example
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     # TIF
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
@@ -446,22 +524,22 @@ def test__rp66v1(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             0,
         ),
     )
 )
-def test__rp66v1_tif(by: bytes, expected: int):
-    result = archive._rp66v1_tif(by)
+def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
+    result = archive._rp66v1_tif(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         (
             # Good example
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     # TIF
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
@@ -476,97 +554,97 @@ def test__rp66v1_tif(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             0,
         ),
     )
 )
-def test__rp66v1_tif_r(by: bytes, expected: int):
-    result = archive._rp66v1_tif_r(by)
+def test__rp66v1_tif_r(fobj: io.BytesIO, expected: int):
+    result = archive._rp66v1_tif_r(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
-        (b'', 0),
-        (b'PK', 0),
+        (io.BytesIO(b''), 0),
+        (io.BytesIO(b'PK'), 0),
     )
 )
-def test__ascii(by: bytes, expected: int):
-    result = archive._ascii(by)
+def test__ascii(fobj: io.BytesIO, expected: int):
+    result = archive._ascii(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Typical ZIP OK
-        (b'PK\x03\x04', 0),
+        (io.BytesIO(b'PK\x03\x04'), 0),
         # ZIP bad
-        (b'PK\x03\x05', 1),
+        (io.BytesIO(b'PK\x03\x05'), 1),
     )
 )
-def test__zip(by: bytes, expected: int):
-    result = archive._zip(by)
+def test__zip(fobj: io.BytesIO, expected: int):
+    result = archive._zip(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
         # Typical PDF OK
-        (b'%PDF-', 0),
+        (io.BytesIO(b'%PDF-'), 0),
         # PDF bad
-        (b'%PDFX', 1),
+        (io.BytesIO(b'%PDFX'), 1),
     )
 )
-def test__pdf(by: bytes, expected: int):
-    result = archive._pdf(by)
+def test__pdf(fobj: io.BytesIO, expected: int):
+    result = archive._pdf(fobj)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    'by, expected',
+    'fobj, expected',
     (
-        (b'PK\x03\x04', 'ZIP'),
-        (b'%PDF-', 'PDF'),
+        (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
+        (io.BytesIO(b'%PDF-'), 'PDF'),
         # Need extra bytes so that TIF can be tested as well.
-        (b'\x00\x80\x85\x9c\x80\x00' + b'\x00' * 12, 'LIS'),
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES, 'LISt'),
-        (b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES, 'LIStr'),
+        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00' + b'\x00' * 12), 'LIS'),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 'LISt'),
+        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 'LIStr'),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             'LAS1.2',
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             'LAS2.0',
         ),
         (
-            b'\n'.join(
+            io.BytesIO(b'\n'.join(
                 [
                     b'~VERSION INFORMATION',
                     b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
-            ),
+            )),
             'LAS3.0',
         ),
         (
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
                     b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
@@ -578,12 +656,12 @@ def test__pdf(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ],
-            ),
+            )),
             'RP66V1',
         ),
         (
             # RP66V1 with a TIF marker.
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     # TIF
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
@@ -598,12 +676,12 @@ def test__pdf(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             'RP66V1t',
         ),
         (
             # RP66V1 with a reversed TIF marker.
-            b''.join(
+            io.BytesIO(b''.join(
                 [
                     # TIF
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
@@ -618,13 +696,13 @@ def test__pdf(by: bytes, expected: int):
                     b'\x20' * 16,
                     b'\x20' * 16,
                 ]
-            ),
+            )),
             'RP66V1tr',
         ),
     )
 )
-def test_binary_file_type_from_bytes(by: bytes, expected: str):
-    result = archive.binary_file_type_from_bytes(by)
+def test_binary_file_type_from_bytes(fobj: io.BytesIO, expected: str):
+    result = archive.binary_file_type(fobj)
     assert result == expected
 
 
