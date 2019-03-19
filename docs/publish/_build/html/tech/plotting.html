@@ -1,0 +1,409 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Plotting Wireline Data &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TotalDepth and SaaS" href="saas.html" />
+    <link rel="prev" title="Performance of TotalDepth" href="performance.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="saas.html" title="TotalDepth and SaaS"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="performance.html" title="Performance of TotalDepth"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" accesskey="U">TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="toctree-wrapper compound" id="totaldepth-tech-plotting">
+</div>
+<div class="section" id="plotting-wireline-data">
+<h1>Plotting Wireline Data<a class="headerlink" href="#plotting-wireline-data" title="Permalink to this headline">¶</a></h1>
+<p>Aside from the LogPass (the data structure that holds the frame data) the plot layout needs to be specified. There are two ways that TotalDepth does this:</p>
+<ul class="simple">
+<li>A plot specification that is <em>integral</em> to the file. For example; LIS files may well have FILM and PRES tables within them that configure the plot as the recording engineer (or software) intended. In this case TotalDepth can make those plots directly.</li>
+<li>A plot specification that is specified <em>externally</em> to the file. TotalDepth supports one such way; using LgFormat XML files and these are described below.</li>
+</ul>
+<div class="section" id="wireline-files-with-integral-plot-data">
+<h2>Wireline Files With Integral Plot Data<a class="headerlink" href="#wireline-files-with-integral-plot-data" title="Permalink to this headline">¶</a></h2>
+<p>This applies to LIS (and possibly RP66 files). The LAS file specification does not describe any plot specification at all.</p>
+<div class="section" id="lis-plot-specification">
+<h3>LIS Plot Specification<a class="headerlink" href="#lis-plot-specification" title="Permalink to this headline">¶</a></h3>
+<p>There are a number of table-like Logical Records (type 34) within a Log Pass that can specify the plot layout. As a minimum TotalDepth.LIS needs a <code class="docutils literal notranslate"><span class="pre">FILM</span></code> and a <code class="docutils literal notranslate"><span class="pre">PRES</span></code> record.</p>
+<div class="section" id="film-record">
+<h4>FILM Record<a class="headerlink" href="#film-record" title="Permalink to this headline">¶</a></h4>
+<p>A dump of a <code class="docutils literal notranslate"><span class="pre">FILM</span></code> Logical Record might look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Table</span> <span class="n">record</span> <span class="p">(</span><span class="nb">type</span> <span class="mi">34</span><span class="p">)</span> <span class="nb">type</span><span class="p">:</span> <span class="n">FILM</span>
+
+<span class="n">MNEM</span>  <span class="n">GCOD</span>  <span class="n">GDEC</span>  <span class="n">DEST</span>  <span class="n">DSCA</span>
+<span class="o">-----------------------------</span>
+
+<span class="mi">1</span>     <span class="n">EEE</span>   <span class="o">----</span>  <span class="n">PF2</span>   <span class="n">D200</span>
+<span class="mi">2</span>     <span class="n">E4E</span>   <span class="o">-</span><span class="mi">4</span><span class="o">--</span>  <span class="n">PF1</span>   <span class="n">DM</span>
+</pre></div>
+</div>
+<p>The columns are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="93%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Column</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MNEM</span></code></td>
+<td>The (logical) name of the output, TotalDepth uses this as part of the plot file name.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">GCOD</span></code></td>
+<td>The coding of the tracks. <code class="docutils literal notranslate"><span class="pre">E4E</span></code> means three tracks which have linear, log (4 decades), linear.
+With three tracks the X axis track (depth for example) appears between the first and second tracks.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">GDEC</span></code></td>
+<td>The number of logarithmic decades for each track, <code class="docutils literal notranslate"><span class="pre">-</span></code> for linear.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">DEST</span></code></td>
+<td>The physical destination (in the logging unit) of the plot. Ignored.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">DSCA</span></code></td>
+<td>The depth scale, encoded. For example <code class="docutils literal notranslate"><span class="pre">D200</span></code> means 1:200.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pres-record">
+<h4>PRES Record<a class="headerlink" href="#pres-record" title="Permalink to this headline">¶</a></h4>
+<p>A dump of a <code class="docutils literal notranslate"><span class="pre">PRES</span></code> Logical Record might look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">Table</span> <span class="n">record</span> <span class="p">(</span><span class="nb">type</span> <span class="mi">34</span><span class="p">)</span> <span class="nb">type</span><span class="p">:</span> <span class="n">PRES</span>
+
+<span class="n">MNEM</span>  <span class="n">OUTP</span>  <span class="n">STAT</span>  <span class="n">TRAC</span>  <span class="n">CODI</span>  <span class="n">DEST</span>  <span class="n">MODE</span>      <span class="n">FILT</span>          <span class="n">LEDG</span>          <span class="n">REDG</span>
+<span class="o">-----------------------------------------------------------------------------------</span>
+
+<span class="n">SP</span>    <span class="n">SP</span>    <span class="n">ALLO</span>  <span class="n">T1</span>    <span class="n">LLIN</span>  <span class="mi">1</span>     <span class="n">SHIF</span>      <span class="mf">0.500000</span>      <span class="o">-</span><span class="mf">80.0000</span>       <span class="mf">20.0000</span>
+<span class="n">CALI</span>  <span class="n">CALI</span>  <span class="n">ALLO</span>  <span class="n">T1</span>    <span class="n">LDAS</span>  <span class="mi">1</span>     <span class="n">SHIF</span>      <span class="mf">0.500000</span>       <span class="mf">5.00000</span>       <span class="mf">15.0000</span>
+<span class="n">MINV</span>  <span class="n">MINV</span>  <span class="n">DISA</span>  <span class="n">T1</span>    <span class="n">LLIN</span>  <span class="mi">1</span>     <span class="n">SHIF</span>      <span class="mf">0.500000</span>       <span class="mf">30.0000</span>       <span class="mf">0.00000</span>
+<span class="n">MNOR</span>  <span class="n">MNOR</span>  <span class="n">DISA</span>  <span class="n">T1</span>    <span class="n">LDAS</span>  <span class="mi">1</span>     <span class="n">SHIF</span>      <span class="mf">0.500000</span>       <span class="mf">30.0000</span>       <span class="mf">0.00000</span>
+<span class="n">LLD</span>   <span class="n">LLD</span>   <span class="n">ALLO</span>  <span class="n">T23</span>   <span class="n">LDAS</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>      <span class="mf">0.200000</span>       <span class="mf">2000.00</span>
+<span class="n">LLDB</span>  <span class="n">LLD</span>   <span class="n">ALLO</span>  <span class="n">T2</span>    <span class="n">HDAS</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>       <span class="mf">2000.00</span>       <span class="mf">200000.</span>
+<span class="n">LLG</span>   <span class="n">LLG</span>   <span class="n">DISA</span>  <span class="n">T23</span>   <span class="n">LDAS</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>      <span class="mf">0.200000</span>       <span class="mf">2000.00</span>
+<span class="n">LLGB</span>  <span class="n">LLG</span>   <span class="n">DISA</span>  <span class="n">T2</span>    <span class="n">HDAS</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>       <span class="mf">2000.00</span>       <span class="mf">200000.</span>
+<span class="n">LLS</span>   <span class="n">LLS</span>   <span class="n">ALLO</span>  <span class="n">T23</span>   <span class="n">LSPO</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>      <span class="mf">0.200000</span>       <span class="mf">2000.00</span>
+<span class="n">LLSB</span>  <span class="n">LLS</span>   <span class="n">ALLO</span>  <span class="n">T2</span>    <span class="n">HSPO</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>       <span class="mf">2000.00</span>       <span class="mf">200000.</span>
+<span class="n">MSFL</span>  <span class="n">MSFL</span>  <span class="n">ALLO</span>  <span class="n">T23</span>   <span class="n">LLIN</span>  <span class="mi">1</span>     <span class="n">GRAD</span>      <span class="mf">0.500000</span>      <span class="mf">0.200000</span>       <span class="mf">2000.00</span>
+<span class="mi">11</span>    <span class="n">DUMM</span>  <span class="n">DISA</span>  <span class="n">T1</span>    <span class="n">LLIN</span>  <span class="n">NEIT</span>  <span class="n">NB</span>        <span class="mf">0.500000</span>       <span class="mf">0.00000</span>       <span class="mf">1.00000</span>
+<span class="mi">12</span>    <span class="n">DUMM</span>  <span class="n">DISA</span>  <span class="n">T1</span>    <span class="n">LLIN</span>  <span class="n">NEIT</span>  <span class="n">NB</span>        <span class="mf">0.500000</span>       <span class="mf">0.00000</span>       <span class="mf">1.00000</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="8%" />
+<col width="92%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Column</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MNEM</span></code></td>
+<td>The (logical) name of the output curve. Note multiple curves might come from one <code class="docutils literal notranslate"><span class="pre">OUTP</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">OUTP</span></code></td>
+<td>The source of the curve.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">STAT</span></code></td>
+<td>Status, is this curve to be plotted.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">TRAC</span></code></td>
+<td>Which track the curve should be plotted on.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CODE</span></code></td>
+<td>The line coding, dot, dash etc.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">DEST</span></code></td>
+<td>The logical film that this curve is sent to. Can be <code class="docutils literal notranslate"><span class="pre">BOTH</span></code> and so on.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MODE</span></code></td>
+<td>What to do when the curve goes off scale (wrap round the track for example).</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FILT</span></code></td>
+<td>Filtering. Unused.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">LEDG</span></code></td>
+<td>Value of the left edge of the plot.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">REDG</span></code></td>
+<td>Value of the right edge of the plot.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="records-needed-for-a-lis-plot">
+<h4>Records Needed for a LIS Plot<a class="headerlink" href="#records-needed-for-a-lis-plot" title="Permalink to this headline">¶</a></h4>
+<p>As a minimum TotalDepth needs a <code class="docutils literal notranslate"><span class="pre">FILM</span></code> and <code class="docutils literal notranslate"><span class="pre">PRES</span></code> plot, using these TotalDepth can produce a plot identical to that when the data was recorded.</p>
+<p>In future releases TotalDepth might also support these Logical Records for plotting:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">AREA</span></code>: Describes shading between curves on a plot.</li>
+<li><code class="docutils literal notranslate"><span class="pre">PIP</span></code>: Describes integration marks on the plot such as integrated transit time, integrated hole volume etc.</li>
+<li><code class="docutils literal notranslate"><span class="pre">VDL</span></code>: Describes presentation of waveform amplitude data.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="wireline-files-with-external-plot-data">
+<h2>Wireline Files With External Plot Data<a class="headerlink" href="#wireline-files-with-external-plot-data" title="Permalink to this headline">¶</a></h2>
+<p>This can apply to any wireline file and it means using an external configuration file to decide the plot layout. For example; LAS files do not have any plot specification (the LAS standard precludes this). The presentation of the plot is made with an external plot specification.</p>
+<p>These external plot specifications are numerous and varied. TotalDepth currently supports one such specification: the XML <cite>LgFormat</cite> or <cite>LgSchema</cite> files.</p>
+<div class="section" id="lgformat-xml-files">
+<h3>LgFormat XML Files<a class="headerlink" href="#lgformat-xml-files" title="Permalink to this headline">¶</a></h3>
+<p>These appear to originate from some of Schlumberger’s “free” software.</p>
+<p>Here is an example LgFormat XML file for plotting <a class="reference external" href="../copy_to_html/plots/HDT.xml">HDT logs</a> .TotalDepth supplies an number of examples of these.</p>
+<p>There are a number of problems <a class="footnote-reference" href="#id2" id="id1">[1]</a> with the LgFormat which is why TotalDepth only supports a subset of it while we look for something better.</p>
+</div>
+</div>
+<div class="section" id="internal-plot-algorithms">
+<h2>Internal Plot Algorithms<a class="headerlink" href="#internal-plot-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>This describes some algorithms used by the <code class="docutils literal notranslate"><span class="pre">Plot</span></code> module. This is for information only as these algorithms are internal and the user has little or no control over them.</p>
+<div class="section" id="plotting-the-legends-scales">
+<span id="tech-plotting-legends"></span><h3>Plotting the Legends (Scales)<a class="headerlink" href="#plotting-the-legends-scales" title="Permalink to this headline">¶</a></h3>
+<p>These at each end of the plot per curve and may span a number of tracks or be limited to half a track. Here is an example which has seven curves:</p>
+<p>TODO: Finish this</p>
+<img alt="../_images/LegendStacking.png" src="../_images/LegendStacking.png" />
+<p>There are two important methods that implement this algorithm: <code class="docutils literal notranslate"><span class="pre">Plot.Plot._retCurvePlotScaleOrder()</span></code> and <code class="docutils literal notranslate"><span class="pre">Plot.Plot._plotScale()</span></code></p>
+</div>
+<div class="section" id="interpolating-backups">
+<h3>Interpolating Backups<a class="headerlink" href="#interpolating-backups" title="Permalink to this headline">¶</a></h3>
+<p>Industry standard wireline plots have the notion of curve backups where if the the trace for a particular curve goes off scale on one side of the track it might well reappear from the alternate side.</p>
+<p>Here is a simulated example generated by <code class="docutils literal notranslate"><span class="pre">TestPlot.py</span></code> where a single curve (a sin curve with an amplitude of +/- 40) is plotted in full on track one. The same curve is plotted fully backed up:</p>
+<ul class="simple">
+<li>In green on track two with a scale of +/- 5</li>
+<li>In blue on track two with a scale of +/- 20</li>
+<li>In red on track three with a scale of +/- 2.5</li>
+<li>In aqua on track three with a scale of +/- 10</li>
+</ul>
+<img alt="../_images/SinWrap.png" src="../_images/SinWrap.png" />
+<p>The algorithm that does this is probably best illustrated by example. The diagram below shows a curve (in the white track on the left) that goes from from point A goes off-scale to the right to point B in ‘real’ space. The line A-B is subdivided by track widths and these <em>crossing</em> lines are plotted by interpolation in the track space making the line space A-B’ (so-called ‘FlyBack’ lines are omitted in the diagram). If the <a class="reference internal" href="../glossary.html#term-backup-mode"><span class="xref std std-term">Backup Mode</span></a> is <em>wrap</em> then both red and green lines in the track are plotted. In this case if the <a class="reference internal" href="../glossary.html#term-backup-mode"><span class="xref std std-term">Backup Mode</span></a> is <em>1</em> then only the red lines are plotted in the track i.e. only one backup allowed.</p>
+<img alt="../_images/BackupAlgo.png" src="../_images/BackupAlgo.png" />
+<p>On the return B-C a similar process happens in reverse.</p>
+<div class="section" id="backup-specification">
+<h4>Backup Specification<a class="headerlink" href="#backup-specification" title="Permalink to this headline">¶</a></h4>
+<p>A backup specification is expected for any plot <em>per-curve</em>. Internally a backup specification is a pair of integers. If the virtual track position is less than the value (if left) or greater than the value (if right) then it is off scale. Zero is a special case in that all virtual track positions are on scale.</p>
+<p>Various values have been predefined and there are existing mappings from LIS data and LgFormat XML files. The following table describes all of this.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="8%" />
+<col width="14%" />
+<col width="43%" />
+<col width="15%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Spec.</th>
+<th class="head">Symbol</th>
+<th class="head">Description</th>
+<th class="head">LIS Mapping</th>
+<th class="head">LgFormat Mapping</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>(1, -1)</td>
+<td>BACKUP_NONE</td>
+<td>No backup</td>
+<td>‘NB  ‘, ‘GRAD’</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>(0,  0)</td>
+<td>BACKUP_ALL</td>
+<td>Every backup i.e. ‘wrap’ Note: Plot.py has a
+way of limiting ludicrous backup lines to a
+sensible number; say 4</td>
+<td>‘WRAP’</td>
+<td>‘LG_WRAPPED’
+‘LG_X10’</td>
+</tr>
+<tr class="row-even"><td>(-1, 1)</td>
+<td>BACKUP_ONCE</td>
+<td>Single backup to left or right</td>
+<td>‘SHIF’</td>
+<td>‘1’</td>
+</tr>
+<tr class="row-odd"><td>(-2, 2)</td>
+<td>BACKUP_TWICE</td>
+<td>Two backups to left or right</td>
+<td>&#160;</td>
+<td>‘2’</td>
+</tr>
+<tr class="row-even"><td>(-1, 1)</td>
+<td>BACKUP_LEFT</td>
+<td>Single backup to left only</td>
+<td>&#160;</td>
+<td>‘LG_LEFT_WRAPPED’</td>
+</tr>
+<tr class="row-odd"><td>(1, 1)</td>
+<td>BACKUP_RIGHT</td>
+<td>Single backup to right only</td>
+<td>&#160;</td>
+<td>‘LG_RIGHT_WRAPPED’</td>
+</tr>
+</tbody>
+</table>
+<p>Note that it is also common to have one curve with no backup and a second curve driven from the same output with a different scale acting as a backup. This has the advantage that a different coding and colour can be assigned to it. See <a class="reference internal" href="#tech-plotting-legends"><span class="std std-ref">Plotting the Legends (Scales)</span></a> above for an example with a Laterlog plot.</p>
+</div>
+<div class="section" id="algorithm">
+<h4>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h4>
+<p>The backup algorithm works as follows:</p>
+<ul class="simple">
+<li>For every point plotted an integer wrap value is calculated.</li>
+<li>If the wrap value is different from the previous wrap value then some interpolation is required and the <code class="docutils literal notranslate"><span class="pre">Plot._interpolateBackup()</span></code> method is called (below).</li>
+<li>Otherwise the point is plotted.</li>
+</ul>
+</div>
+<div class="section" id="interpolatebackup">
+<h4>_interpolateBackup<a class="headerlink" href="#interpolatebackup" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">Plot._interpolateBackup()</span></code> method manages all the different cases where a backup is needed given the backup configuration. It relies on <code class="docutils literal notranslate"><span class="pre">Plot._retInterpolateWrapPoints()</span></code> to generate a list of interpolated lines, including <em>crossing lines</em>,  between one point and another.</p>
+</div>
+<div class="section" id="filtercrosslinelist">
+<h4>_filterCrossLineList<a class="headerlink" href="#filtercrosslinelist" title="Permalink to this headline">¶</a></h4>
+<p>A further refinement to the algorithm is limiting the number of <em>crossing lines</em>. Consider the SP curve represented by this data taken from a real example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Depth</span> <span class="p">(</span><span class="n">ft</span><span class="p">)</span> <span class="n">SP</span> <span class="p">(</span><span class="n">mV</span><span class="p">)</span>
+<span class="mf">10245.0</span>    <span class="mf">332.724</span>
+<span class="mf">10245.5</span>    <span class="mf">13716948.000</span>
+<span class="mf">10246.0</span>    <span class="mf">41150204.000</span>
+<span class="mf">10246.5</span>    <span class="mf">68583456.000</span>
+<span class="mf">10247.0</span>    <span class="mf">96016712.000</span>
+<span class="mf">10247.5</span>    <span class="mf">334.176</span>
+</pre></div>
+</div>
+<p>Clearly some episode happened between 10245.0 and 10245.5 feet that caused a jump of 13716615.276 mV. This could have been an recording disturbance (unlikely as where would you find 96kV at 10247 feet?) or an editing error. In any case on a scale of -20 to 80 mV means 137,166 (mostly spurious) wrap lines crossing the track. This can turn a 1.6Mb file into a 91Mb file! To stop this a arbitrary limit is made to the number of <em>crossing lines</em> (e.g. 4) between each Xaxis interval. This limit filters the <em>crossing line</em> list to an evenly distributed list of 4 (or thereabouts).</p>
+<p>The method that does this is The <code class="docutils literal notranslate"><span class="pre">Plot._filterCrossLineList()</span></code> method</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>For example the <code class="docutils literal notranslate"><span class="pre">LgCurve</span></code> element content of <code class="docutils literal notranslate"><span class="pre">&lt;LeftLimit&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;RightLimit&gt;</span></code> is numeric, without units. This robs a compliant implementation of the opportunity of converting frame data, say in <code class="docutils literal notranslate"><span class="pre">&quot;V/V</span> <span class="pre">&quot;</span></code> to plot data say <code class="docutils literal notranslate"><span class="pre">&quot;PU</span>&#160; <span class="pre">&quot;</span></code> which might be far more appropriate. Truth in advertising prompts me to say that LIS <code class="docutils literal notranslate"><span class="pre">PRES</span></code> tables have the same flaw but they have a reasonable excuse that they are <em>per file</em> specification rather than a global specification.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plotting Wireline Data</a><ul>
+<li><a class="reference internal" href="#wireline-files-with-integral-plot-data">Wireline Files With Integral Plot Data</a><ul>
+<li><a class="reference internal" href="#lis-plot-specification">LIS Plot Specification</a><ul>
+<li><a class="reference internal" href="#film-record">FILM Record</a></li>
+<li><a class="reference internal" href="#pres-record">PRES Record</a></li>
+<li><a class="reference internal" href="#records-needed-for-a-lis-plot">Records Needed for a LIS Plot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wireline-files-with-external-plot-data">Wireline Files With External Plot Data</a><ul>
+<li><a class="reference internal" href="#lgformat-xml-files">LgFormat XML Files</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#internal-plot-algorithms">Internal Plot Algorithms</a><ul>
+<li><a class="reference internal" href="#plotting-the-legends-scales">Plotting the Legends (Scales)</a></li>
+<li><a class="reference internal" href="#interpolating-backups">Interpolating Backups</a><ul>
+<li><a class="reference internal" href="#backup-specification">Backup Specification</a></li>
+<li><a class="reference internal" href="#algorithm">Algorithm</a></li>
+<li><a class="reference internal" href="#interpolatebackup">_interpolateBackup</a></li>
+<li><a class="reference internal" href="#filtercrosslinelist">_filterCrossLineList</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="performance.html"
+                        title="previous chapter">Performance of TotalDepth</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="saas.html"
+                        title="next chapter">TotalDepth and SaaS</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tech/plotting.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="saas.html" title="TotalDepth and SaaS"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="performance.html" title="Performance of TotalDepth"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" >TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,322 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Contents}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}Introduction to TotalDepth}{3}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Software Technology}{3}{subsection.1.1.1}
+\contentsline {section}{\numberline {1.2}TotalDepth Example Outputs}{3}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Wireline Plots}{3}{subsection.1.2.1}
+\contentsline {subsubsection}{Plotting from LIS}{3}{subsubsection*.3}
+\contentsline {subsubsection}{Plotting From LAS}{4}{subsubsection*.4}
+\contentsline {paragraph}{Single LAS Plot examples}{4}{paragraph*.5}
+\contentsline {paragraph}{A Collection of LAS Plots}{4}{paragraph*.6}
+\contentsline {paragraph}{Making LAS Plots}{4}{paragraph*.7}
+\contentsline {subsection}{\numberline {1.2.2}LIS Log HTML Summaries}{4}{subsection.1.2.2}
+\contentsline {subsubsection}{How This HTML was Made}{4}{subsubsection*.8}
+\contentsline {section}{\numberline {1.3}Installation}{5}{section.1.3}
+\contentsline {subsection}{\numberline {1.3.1}Stable release}{5}{subsection.1.3.1}
+\contentsline {subsection}{\numberline {1.3.2}From sources}{5}{subsection.1.3.2}
+\contentsline {subsection}{\numberline {1.3.3}Developing with TotalDepth}{6}{subsection.1.3.3}
+\contentsline {subsubsection}{Test Coverage}{6}{subsubsection*.9}
+\contentsline {subsubsection}{Documentation}{6}{subsubsection*.10}
+\contentsline {subsection}{\numberline {1.3.4}System Testing}{6}{subsection.1.3.4}
+\contentsline {subsection}{\numberline {1.3.5}Unit Testing}{6}{subsection.1.3.5}
+\contentsline {section}{\numberline {1.4}Petrophysical File Formats that TotalDepth can Process}{6}{section.1.4}
+\contentsline {section}{\numberline {1.5}Command Line Tools}{7}{section.1.5}
+\contentsline {subsection}{\numberline {1.5.1}TotalDepth Command Line Tools}{7}{subsection.1.5.1}
+\contentsline {subsubsection}{Plotting Well Logs}{7}{subsubsection*.11}
+\contentsline {paragraph}{tdplotlogs}{7}{paragraph*.12}
+\contentsline {subparagraph}{Usage}{7}{subparagraph*.13}
+\contentsline {subparagraph}{Arguments}{8}{subparagraph*.14}
+\contentsline {subparagraph}{Options}{8}{subparagraph*.15}
+\contentsline {subparagraph}{Examples}{8}{subparagraph*.16}
+\contentsline {subparagraph}{LgFormat XML}{8}{subparagraph*.17}
+\contentsline {subparagraph}{Plotting Logs}{11}{subparagraph*.18}
+\contentsline {subparagraph}{Sample Plots}{14}{subparagraph*.19}
+\contentsline {subsection}{\numberline {1.5.2}LIS Command Line Tools}{14}{subsection.1.5.2}
+\contentsline {subsubsection}{Scanning LIS Files}{15}{subsubsection*.20}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisscanphysrec}}{15}{paragraph*.21}
+\contentsline {subparagraph}{Arguments}{15}{subparagraph*.22}
+\contentsline {subparagraph}{Options}{15}{subparagraph*.23}
+\contentsline {subparagraph}{Examples}{15}{subparagraph*.24}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisscanlogirecord}}{17}{paragraph*.25}
+\contentsline {subparagraph}{Arguments}{17}{subparagraph*.26}
+\contentsline {subparagraph}{Options}{17}{subparagraph*.27}
+\contentsline {subparagraph}{Examples}{18}{subparagraph*.28}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisscanlogidata}}{18}{paragraph*.29}
+\contentsline {subparagraph}{Arguments}{18}{subparagraph*.30}
+\contentsline {subparagraph}{Options}{19}{subparagraph*.31}
+\contentsline {subparagraph}{Examples}{19}{subparagraph*.32}
+\contentsline {subsubsection}{Extracting Data from LIS}{20}{subsubsection*.33}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisdumpframeset}}{20}{paragraph*.34}
+\contentsline {subparagraph}{Arguments}{21}{subparagraph*.35}
+\contentsline {subparagraph}{Options}{21}{subparagraph*.36}
+\contentsline {subparagraph}{Examples}{21}{subparagraph*.37}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlistohtml}}{22}{paragraph*.38}
+\contentsline {subparagraph}{Arguments}{22}{subparagraph*.39}
+\contentsline {subparagraph}{Options}{22}{subparagraph*.40}
+\contentsline {subparagraph}{Examples}{22}{subparagraph*.41}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlistablehistogram}}{26}{paragraph*.42}
+\contentsline {subparagraph}{Arguments}{26}{subparagraph*.43}
+\contentsline {subparagraph}{Options}{27}{subparagraph*.44}
+\contentsline {subparagraph}{Examples}{27}{subparagraph*.45}
+\contentsline {subsubsection}{LIS Developer Tools}{28}{subsubsection*.46}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisdetif}}{28}{paragraph*.47}
+\contentsline {subparagraph}{Arguments}{28}{subparagraph*.48}
+\contentsline {subparagraph}{Options}{29}{subparagraph*.49}
+\contentsline {subparagraph}{Examples}{29}{subparagraph*.50}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdlisindex}}{30}{paragraph*.51}
+\contentsline {subparagraph}{Arguments}{30}{subparagraph*.52}
+\contentsline {subparagraph}{Options}{30}{subparagraph*.53}
+\contentsline {subparagraph}{Examples}{30}{subparagraph*.54}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {tdXlisrandomframesetread}}{32}{paragraph*.55}
+\contentsline {section}{\numberline {1.6}Usage In a Python Project}{32}{section.1.6}
+\contentsline {subsection}{\numberline {1.6.1}Important Concepts}{32}{subsection.1.6.1}
+\contentsline {subsubsection}{Log Pass}{32}{subsubsection*.56}
+\contentsline {subsubsection}{Frame Set}{32}{subsubsection*.57}
+\contentsline {section}{\numberline {1.7}Processing LIS Files}{32}{section.1.7}
+\contentsline {subsection}{\numberline {1.7.1}Important LIS Concepts}{32}{subsection.1.7.1}
+\contentsline {subsubsection}{LIS File}{32}{subsubsection*.58}
+\contentsline {subsubsection}{LIS Index}{33}{subsubsection*.59}
+\contentsline {subsection}{\numberline {1.7.2}Reading a LIS File Table Data}{33}{subsection.1.7.2}
+\contentsline {subsection}{\numberline {1.7.3}Reading a LIS File Log Data}{34}{subsection.1.7.3}
+\contentsline {section}{\numberline {1.8}Processing LAS Files}{36}{section.1.8}
+\contentsline {section}{\numberline {1.9}TotalDepth Technical Notes}{36}{section.1.9}
+\contentsline {subsection}{\numberline {1.9.1}Indexing LIS Files}{36}{subsection.1.9.1}
+\contentsline {subsubsection}{Introduction}{36}{subsubsection*.60}
+\contentsline {subsubsection}{Indexing Design}{37}{subsubsection*.61}
+\contentsline {paragraph}{Indexing a LIS File}{37}{paragraph*.62}
+\contentsline {subparagraph}{Module}{37}{subparagraph*.63}
+\contentsline {subparagraph}{Example}{38}{subparagraph*.64}
+\contentsline {paragraph}{Indexing a Log Pass}{38}{paragraph*.65}
+\contentsline {subparagraph}{Run Length Encoding of Logical Records}{38}{subparagraph*.66}
+\contentsline {subparagraph}{Module}{39}{subparagraph*.67}
+\contentsline {subparagraph}{Indexing Frame Data}{39}{subparagraph*.68}
+\contentsline {subparagraph}{Module}{39}{subparagraph*.69}
+\contentsline {subsubsection}{Indexing Performance}{39}{subsubsection*.70}
+\contentsline {paragraph}{Index Time}{40}{paragraph*.71}
+\contentsline {paragraph}{Multi-Processing}{41}{paragraph*.72}
+\contentsline {paragraph}{Index Size}{42}{paragraph*.73}
+\contentsline {subparagraph}{TotalDepth and SaaS}{43}{subparagraph*.74}
+\contentsline {paragraph}{Indexing Performance Improvements}{44}{paragraph*.75}
+\contentsline {paragraph}{LIS Read Performance via an Index}{44}{paragraph*.76}
+\contentsline {paragraph}{Summary}{44}{paragraph*.77}
+\contentsline {subsection}{\numberline {1.9.2}Performance of TotalDepth}{44}{subsection.1.9.2}
+\contentsline {subsubsection}{Measuring Performance}{44}{subsubsection*.78}
+\contentsline {paragraph}{User\IeC {\textquoteright }s Perception of Performance}{44}{paragraph*.79}
+\contentsline {subparagraph}{Example of LIS cost}{45}{subparagraph*.80}
+\contentsline {subsubsection}{Actual LIS Performance}{45}{subsubsection*.81}
+\contentsline {paragraph}{File Read Cost}{45}{paragraph*.82}
+\contentsline {subparagraph}{Raw File Read}{46}{subparagraph*.83}
+\contentsline {subparagraph}{Raw File seek()}{46}{subparagraph*.84}
+\contentsline {subparagraph}{Using the \sphinxstyleliteralintitle {struct} module}{46}{subparagraph*.85}
+\contentsline {subparagraph}{Reading Rep Code 68}{47}{subparagraph*.86}
+\contentsline {subparagraph}{Python}{47}{subparagraph*.87}
+\contentsline {subparagraph}{Cython}{47}{subparagraph*.88}
+\contentsline {subparagraph}{Cython vs Python}{47}{subparagraph*.89}
+\contentsline {paragraph}{Frame Read Cost}{47}{paragraph*.90}
+\contentsline {subparagraph}{A: All Frames, all Channels}{48}{subparagraph*.91}
+\contentsline {subparagraph}{C: Adjacent Frames and Channels}{48}{subparagraph*.92}
+\contentsline {subparagraph}{D: Adjacent Frames, any Channels}{49}{subparagraph*.93}
+\contentsline {subparagraph}{E: Any Frames, any Channels}{50}{subparagraph*.94}
+\contentsline {subparagraph}{All Measurements}{51}{subparagraph*.95}
+\contentsline {paragraph}{Performance Improvements}{52}{paragraph*.96}
+\contentsline {subsection}{\numberline {1.9.3}Plotting Wireline Data}{52}{subsection.1.9.3}
+\contentsline {subsubsection}{Wireline Files With Integral Plot Data}{53}{subsubsection*.98}
+\contentsline {paragraph}{LIS Plot Specification}{53}{paragraph*.99}
+\contentsline {subparagraph}{FILM Record}{53}{subparagraph*.100}
+\contentsline {subparagraph}{PRES Record}{53}{subparagraph*.101}
+\contentsline {subparagraph}{Records Needed for a LIS Plot}{54}{subparagraph*.102}
+\contentsline {subsubsection}{Wireline Files With External Plot Data}{54}{subsubsection*.103}
+\contentsline {paragraph}{LgFormat XML Files}{54}{paragraph*.104}
+\contentsline {subsubsection}{Internal Plot Algorithms}{55}{subsubsection*.105}
+\contentsline {paragraph}{Plotting the Legends (Scales)}{55}{paragraph*.106}
+\contentsline {paragraph}{Interpolating Backups}{55}{paragraph*.107}
+\contentsline {subparagraph}{Backup Specification}{57}{subparagraph*.108}
+\contentsline {subparagraph}{Algorithm}{57}{subparagraph*.109}
+\contentsline {subparagraph}{\_interpolateBackup}{58}{subparagraph*.110}
+\contentsline {subparagraph}{\_filterCrossLineList}{58}{subparagraph*.111}
+\contentsline {subsection}{\numberline {1.9.4}TotalDepth and SaaS}{58}{subsection.1.9.4}
+\contentsline {subsubsection}{Processing Server Side Files}{59}{subsubsection*.112}
+\contentsline {subsubsection}{Processing Files that Remain on the Client\IeC {\textquoteright }s Device}{59}{subsubsection*.113}
+\contentsline {paragraph}{Starting the session}{59}{paragraph*.114}
+\contentsline {subparagraph}{The Session ID}{60}{subparagraph*.115}
+\contentsline {subparagraph}{Session Bootstrapping}{60}{subparagraph*.116}
+\contentsline {subparagraph}{LIS}{60}{subparagraph*.117}
+\contentsline {subparagraph}{LAS}{60}{subparagraph*.118}
+\contentsline {subparagraph}{RP66}{60}{subparagraph*.119}
+\contentsline {subparagraph}{Index Completion}{60}{subparagraph*.120}
+\contentsline {paragraph}{Rest of Session}{60}{paragraph*.121}
+\contentsline {paragraph}{Data Persistence}{61}{paragraph*.122}
+\contentsline {subsubsection}{SaaS Pros and Cons}{61}{subsubsection*.123}
+\contentsline {paragraph}{Advantages}{61}{paragraph*.124}
+\contentsline {paragraph}{Disadvantages}{61}{paragraph*.125}
+\contentsline {section}{\numberline {1.10}TotalDepth and Software Test}{61}{section.1.10}
+\contentsline {subsection}{\numberline {1.10.1}Unit Tests}{61}{subsection.1.10.1}
+\contentsline {subsubsection}{Module Unit Testing}{62}{subsubsection*.126}
+\contentsline {paragraph}{Example}{62}{paragraph*.127}
+\contentsline {subsubsection}{Package Unit Testing}{62}{subsubsection*.128}
+\contentsline {paragraph}{Example}{62}{paragraph*.129}
+\contentsline {subsubsection}{Unit Testing and \sphinxstyleliteralintitle {coverage}}{63}{subsubsection*.130}
+\contentsline {subsection}{\numberline {1.10.2}Testing the Plot Package}{64}{subsection.1.10.2}
+\contentsline {subsubsection}{Running the test}{64}{subsubsection*.131}
+\contentsline {subsubsection}{Results}{65}{subsubsection*.132}
+\contentsline {paragraph}{Index}{65}{paragraph*.133}
+\contentsline {paragraph}{Example Plot}{66}{paragraph*.134}
+\contentsline {section}{\numberline {1.11}API Reference}{68}{section.1.11}
+\contentsline {subsection}{\numberline {1.11.1}TotalDepth.LIS API Reference}{68}{subsection.1.11.1}
+\contentsline {subsubsection}{LIS Handling of Representation Codes}{68}{subsubsection*.135}
+\contentsline {paragraph}{Design}{68}{paragraph*.136}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {RepCode} Module}{68}{paragraph*.137}
+\contentsline {subparagraph}{Description}{68}{subparagraph*.138}
+\contentsline {subparagraph}{Usage}{68}{subparagraph*.139}
+\contentsline {subparagraph}{Reference}{68}{subparagraph*.140}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {pRepCode} Module}{70}{paragraph*.170}
+\contentsline {subparagraph}{Usage}{70}{subparagraph*.171}
+\contentsline {subparagraph}{Reference}{70}{subparagraph*.172}
+\contentsline {paragraph}{\sphinxstyleliteralintitle {cRepCode} Module}{72}{paragraph*.209}
+\contentsline {subparagraph}{Usage}{72}{subparagraph*.210}
+\contentsline {subparagraph}{Reference}{72}{subparagraph*.211}
+\contentsline {paragraph}{Testing}{72}{paragraph*.213}
+\contentsline {subsubsection}{Units}{73}{subsubsection*.214}
+\contentsline {paragraph}{Examples}{75}{paragraph*.239}
+\contentsline {paragraph}{Testing}{75}{paragraph*.240}
+\contentsline {subsubsection}{EngVal}{75}{subsubsection*.241}
+\contentsline {paragraph}{Operator Overloading}{75}{paragraph*.242}
+\contentsline {subparagraph}{Addition and subtraction}{75}{subparagraph*.243}
+\contentsline {subparagraph}{Division}{75}{subparagraph*.244}
+\contentsline {subparagraph}{Multiplication}{75}{subparagraph*.245}
+\contentsline {paragraph}{Notes}{76}{paragraph*.246}
+\contentsline {paragraph}{EngVal Reference}{76}{paragraph*.247}
+\contentsline {subsubsection}{Mnem}{77}{subsubsection*.279}
+\contentsline {subsubsection}{Raw Stream Handler}{78}{subsubsection*.295}
+\contentsline {subsubsection}{LIS File}{80}{subsubsection*.312}
+\contentsline {subsubsection}{TIF Marker Handling}{81}{subsubsection*.334}
+\contentsline {paragraph}{TIF Markers}{81}{paragraph*.336}
+\contentsline {subparagraph}{Word{[}0{]}}{81}{subparagraph*.337}
+\contentsline {subparagraph}{Word{[}1{]}}{81}{subparagraph*.338}
+\contentsline {subparagraph}{Word{[}2{]}}{81}{subparagraph*.339}
+\contentsline {subsubsection}{Physical Record Handler}{84}{subsubsection*.362}
+\contentsline {paragraph}{Physical Record Attributes}{84}{paragraph*.364}
+\contentsline {subsubsection}{Logical Record Handler}{87}{subsubsection*.419}
+\contentsline {subsubsection}{FileIndexer}{96}{subsubsection*.602}
+\contentsline {paragraph}{Usage}{99}{paragraph*.655}
+\contentsline {paragraph}{Examples}{99}{paragraph*.656}
+\contentsline {subparagraph}{Using a LIS Indexer}{99}{subparagraph*.657}
+\contentsline {paragraph}{Testing}{99}{paragraph*.658}
+\contentsline {subsubsection}{The LIS Log Pass}{100}{subsubsection*.659}
+\contentsline {paragraph}{LogPass API Reference}{100}{paragraph*.660}
+\contentsline {paragraph}{LogPass Usage}{103}{paragraph*.706}
+\contentsline {subparagraph}{Direct usage}{103}{subparagraph*.707}
+\contentsline {subparagraph}{Construction with a DFSR}{103}{subparagraph*.708}
+\contentsline {subparagraph}{Resources}{103}{subparagraph*.709}
+\contentsline {subparagraph}{Add Binary Data Records}{103}{subparagraph*.710}
+\contentsline {subparagraph}{Resources}{103}{subparagraph*.711}
+\contentsline {subparagraph}{Populating the FrameSet}{104}{subparagraph*.712}
+\contentsline {subparagraph}{Examples}{104}{subparagraph*.713}
+\contentsline {subparagraph}{Resources}{104}{subparagraph*.714}
+\contentsline {subparagraph}{Using a LIS Indexer}{104}{subparagraph*.715}
+\contentsline {paragraph}{Testing}{105}{paragraph*.716}
+\contentsline {subsubsection}{The LIS Frame Set}{106}{subsubsection*.717}
+\contentsline {paragraph}{FrameSet Internals}{106}{paragraph*.718}
+\contentsline {subparagraph}{LIS Dependancies}{106}{subparagraph*.719}
+\contentsline {paragraph}{FrameSet API Reference}{106}{paragraph*.720}
+\contentsline {paragraph}{FrameSet Usage}{111}{paragraph*.805}
+\contentsline {subsubsection}{Run Length Encoding Module}{111}{subsubsection*.806}
+\contentsline {paragraph}{class RLEItem()}{111}{paragraph*.808}
+\contentsline {paragraph}{class RLE()}{111}{paragraph*.809}
+\contentsline {paragraph}{class RLEItemType01()}{111}{paragraph*.810}
+\contentsline {paragraph}{class RLEType01()}{112}{paragraph*.811}
+\contentsline {paragraph}{API Reference}{112}{paragraph*.812}
+\contentsline {subsubsection}{Type01Plan}{114}{subsubsection*.860}
+\contentsline {subsection}{\numberline {1.11.2}TotalDepth.LAS API Reference}{116}{subsection.1.11.2}
+\contentsline {subsubsection}{LAS Read}{116}{subsubsection*.879}
+\contentsline {subsection}{\numberline {1.11.3}Utility Package Reference}{119}{subsection.1.11.3}
+\contentsline {subsubsection}{Common Command Line Options}{119}{subsubsection*.946}
+\contentsline {subsubsection}{DictTree}{120}{subsubsection*.950}
+\contentsline {subsubsection}{Directory Walking}{122}{subsubsection*.964}
+\contentsline {subsubsection}{Timing Code Execution}{122}{subsubsection*.974}
+\contentsline {subsubsection}{Look-ahead File Buffer}{123}{subsubsection*.994}
+\contentsline {subsubsection}{Histogram}{124}{subsubsection*.1003}
+\contentsline {paragraph}{Testing}{124}{paragraph*.1009}
+\contentsline {subparagraph}{Running Tests}{124}{subparagraph*.1010}
+\contentsline {subparagraph}{Test Coverage}{125}{subparagraph*.1011}
+\contentsline {paragraph}{Examples}{125}{paragraph*.1012}
+\contentsline {subsubsection}{HTML Utilities}{125}{subsubsection*.1013}
+\contentsline {subsubsection}{XML Writer Module}{126}{subsubsection*.1023}
+\contentsline {paragraph}{Introduction}{126}{paragraph*.1024}
+\contentsline {paragraph}{Reference}{126}{paragraph*.1025}
+\contentsline {paragraph}{Examples}{128}{paragraph*.1048}
+\contentsline {subparagraph}{Creating an XML Stream}{128}{subparagraph*.1049}
+\contentsline {subparagraph}{Simple Elements}{129}{subparagraph*.1050}
+\contentsline {subparagraph}{Mixed Content}{129}{subparagraph*.1051}
+\contentsline {paragraph}{Testing}{129}{paragraph*.1052}
+\contentsline {subsubsection}{Plot Package Reference}{129}{subsubsection*.1053}
+\contentsline {paragraph}{Plot Coordinates}{129}{paragraph*.1054}
+\contentsline {subparagraph}{Main Classes}{129}{subparagraph*.1055}
+\contentsline {subparagraph}{Reference}{130}{subparagraph*.1056}
+\contentsline {subparagraph}{Examples}{132}{subparagraph*.1096}
+\contentsline {subparagraph}{\sphinxstyleliteralintitle {Coord.Dim()}}{132}{subparagraph*.1097}
+\contentsline {subparagraph}{\sphinxstyleliteralintitle {Coord.Pt()}}{132}{subparagraph*.1098}
+\contentsline {subparagraph}{Testing}{132}{subparagraph*.1099}
+\contentsline {paragraph}{Plot Pen Stroke}{133}{paragraph*.1100}
+\contentsline {paragraph}{SVG Writer Module}{133}{paragraph*.1108}
+\contentsline {subparagraph}{Examples}{135}{subparagraph*.1131}
+\contentsline {subparagraph}{Construction}{135}{subparagraph*.1132}
+\contentsline {subparagraph}{Writing Objects to SVG}{136}{subparagraph*.1133}
+\contentsline {paragraph}{Plot Constants for Wireline Logs}{136}{paragraph*.1134}
+\contentsline {paragraph}{Track Module}{137}{paragraph*.1142}
+\contentsline {subparagraph}{Lacunae}{137}{subparagraph*.1143}
+\contentsline {subparagraph}{PlotConfig}{137}{subparagraph*.1144}
+\contentsline {subparagraph}{PlotTracks}{137}{subparagraph*.1145}
+\contentsline {paragraph}{X Axis Gird Line Module}{140}{paragraph*.1161}
+\contentsline {paragraph}{XML Plot Description Low-level support}{141}{paragraph*.1173}
+\contentsline {paragraph}{XML Plot Description Discovery}{142}{paragraph*.1183}
+\contentsline {paragraph}{AREA Plotting Configuration}{142}{paragraph*.1186}
+\contentsline {paragraph}{FILM Plotting Configuration}{146}{paragraph*.1190}
+\contentsline {paragraph}{FILM Plotting Configuration from XML files}{152}{paragraph*.1221}
+\contentsline {paragraph}{PRES Plotting Configuration}{153}{paragraph*.1241}
+\contentsline {paragraph}{PRES Plotting Configuration from XML files}{161}{paragraph*.1308}
+\contentsline {paragraph}{Plotting Well Log API headers}{162}{paragraph*.1320}
+\contentsline {paragraph}{Plotting Well Logs}{164}{paragraph*.1353}
+\contentsline {subparagraph}{Lacunae}{164}{subparagraph*.1354}
+\contentsline {subparagraph}{PlotConfig}{164}{subparagraph*.1355}
+\contentsline {subparagraph}{PlotTracks}{164}{subparagraph*.1356}
+\contentsline {section}{\numberline {1.12}A Bag Full of TODO\IeC {\textquoteright }s}{171}{section.1.12}
+\contentsline {subsection}{\numberline {1.12.1}Current Release}{171}{subsection.1.12.1}
+\contentsline {subsubsection}{LIS Format Support}{171}{subsubsection*.1421}
+\contentsline {paragraph}{General}{171}{paragraph*.1422}
+\contentsline {paragraph}{LIS Index}{171}{paragraph*.1423}
+\contentsline {paragraph}{LIS FrameSet/LogPass}{171}{paragraph*.1424}
+\contentsline {paragraph}{Representation Codes}{171}{paragraph*.1425}
+\contentsline {subsubsection}{LAS Format Support}{172}{subsubsection*.1426}
+\contentsline {subsubsection}{Plotting}{172}{subsubsection*.1427}
+\contentsline {subsection}{\numberline {1.12.2}Future Releases}{172}{subsection.1.12.2}
+\contentsline {subsubsection}{Format Support}{172}{subsubsection*.1428}
+\contentsline {paragraph}{Wireline Formats}{172}{paragraph*.1429}
+\contentsline {paragraph}{Seismic Formats}{172}{paragraph*.1430}
+\contentsline {paragraph}{Miscellaneous Formats}{172}{paragraph*.1431}
+\contentsline {section}{\numberline {1.13}Glossary}{172}{section.1.13}
+\contentsline {section}{\numberline {1.14}TotalDepth Licence}{174}{section.1.14}
+\contentsline {subsection}{\numberline {1.14.1}OpenSource Licence}{174}{subsection.1.14.1}
+\contentsline {subsection}{\numberline {1.14.2}Other Licences}{180}{subsection.1.14.2}
+\contentsline {section}{\numberline {1.15}Credits}{180}{section.1.15}
+\contentsline {subsection}{\numberline {1.15.1}Development Lead}{180}{subsection.1.15.1}
+\contentsline {subsection}{\numberline {1.15.2}Contributors}{180}{subsection.1.15.2}
+\contentsline {section}{\numberline {1.16}Contributing}{180}{section.1.16}
+\contentsline {subsection}{\numberline {1.16.1}Types of Contributions}{180}{subsection.1.16.1}
+\contentsline {subsubsection}{Report Bugs}{180}{subsubsection*.1462}
+\contentsline {subsubsection}{Fix Bugs}{181}{subsubsection*.1463}
+\contentsline {subsubsection}{Implement Features}{181}{subsubsection*.1464}
+\contentsline {subsubsection}{Write Documentation}{181}{subsubsection*.1465}
+\contentsline {subsubsection}{Submit Feedback}{181}{subsubsection*.1466}
+\contentsline {subsection}{\numberline {1.16.2}Get Started!}{181}{subsection.1.16.2}
+\contentsline {subsection}{\numberline {1.16.3}Pull Request Guidelines}{182}{subsection.1.16.3}
+\contentsline {subsection}{\numberline {1.16.4}Tips}{182}{subsection.1.16.4}
+\contentsline {section}{\numberline {1.17}History}{182}{section.1.17}
+\contentsline {subsection}{\numberline {1.17.1}0.2.0 (2017-09-25)}{182}{subsection.1.17.1}
+\contentsline {subsection}{\numberline {1.17.2}0.1.0 (2012-03-03)}{182}{subsection.1.17.2}
+\contentsline {section}{\numberline {1.18}TotalDepth}{182}{section.1.18}
+\contentsline {subsection}{\numberline {1.18.1}Features}{183}{subsection.1.18.1}
+\contentsline {subsection}{\numberline {1.18.2}Credits}{183}{subsection.1.18.2}
+\contentsline {chapter}{\numberline {2}Indices and tables}{185}{chapter.2}
+\contentsline {chapter}{Python Module Index}{187}{section*.1467}
+\contentsline {chapter}{Index}{189}{section*.1468}

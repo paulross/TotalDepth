@@ -1,0 +1,463 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Performance of TotalDepth &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plotting Wireline Data" href="plotting.html" />
+    <link rel="prev" title="Indexing LIS Files" href="LIS_indexing.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting Wireline Data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="LIS_indexing.html" title="Indexing LIS Files"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" accesskey="U">TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="performance-of-totaldepth">
+<span id="totaldepth-tech-lis-read-perf"></span><h1>Performance of TotalDepth<a class="headerlink" href="#performance-of-totaldepth" title="Permalink to this headline">¶</a></h1>
+<p>This technical note presents the results of some actual performance tests on TotalDepth.</p>
+<div class="section" id="measuring-performance">
+<h2>Measuring Performance<a class="headerlink" href="#measuring-performance" title="Permalink to this headline">¶</a></h2>
+<p>This describes some principles used in establishing TotalDepth’s performance and setting performance targets.</p>
+<div class="section" id="user-s-perception-of-performance">
+<h3>User’s Perception of Performance<a class="headerlink" href="#user-s-perception-of-performance" title="Permalink to this headline">¶</a></h3>
+<p>Users only want to pay for what they get and experienced users have a rough idea of the cost of what they ask the software to do. For example most users would regard these a cheap operations, and would not expect them to take much time. If they did the user is likely to regard the application as ‘slow’:</p>
+<ul class="simple">
+<li>Load file</li>
+<li>Show log header</li>
+<li>Plot small section</li>
+</ul>
+<p>Most users would regard these more expensive operations and is more likely to accept that they would take more time.:</p>
+<ul class="simple">
+<li>Cross correlate multiple curves</li>
+<li>Dipmeter processing</li>
+<li>Deconvolution</li>
+</ul>
+<p>Most users are aware of the size of the data set with which the are operating and appreciate that operations on larger data sets take longer time. Users do not appreciate O(N <sup>2</sup>) or worse behaviour. We don’t like it either <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
+<p>TotalDepth measures the cost of operations, in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Execution</span> <span class="n">time</span> <span class="p">(</span><span class="n">ms</span><span class="p">)</span>
+<span class="o">-------------------</span>
+<span class="n">Size</span> <span class="n">of</span> <span class="nb">input</span> <span class="p">(</span><span class="n">Mb</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="example-of-lis-cost">
+<h4>Example of LIS cost<a class="headerlink" href="#example-of-lis-cost" title="Permalink to this headline">¶</a></h4>
+<p>Our measure is ms/Mb of input. 1Mb of LIS data is typically 250,000 values, or, to put this in context 200 feet of 10 curves (6” sampling) is 0.015 Mb. So, just as an example, the cost of plotting such data from a 20Mb file <em>might</em> work out as:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="14%" />
+<col width="16%" />
+<col width="18%" />
+<col width="21%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Operation</th>
+<th class="head">Cost (ms/Mb)</th>
+<th class="head">Data Size (Mb)</th>
+<th class="head">User’s Time (ms)</th>
+<th class="head">Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Index a 20Mb file</td>
+<td>12</td>
+<td>20</td>
+<td>240</td>
+<td>One-off exercise</td>
+</tr>
+<tr class="row-odd"><td>Reading 200 feet, 10 curves</td>
+<td>1500</td>
+<td>0.015</td>
+<td>22</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>Plotting what has been read</td>
+<td>4000</td>
+<td>0.015</td>
+<td>60</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td><strong>Total</strong></td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><strong>322</strong></td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<p>The rest of this tech note describes the performance of reading LIS files in these ms/Mb terms.</p>
+</div>
+</div>
+</div>
+<div class="section" id="actual-lis-performance">
+<h2>Actual LIS Performance<a class="headerlink" href="#actual-lis-performance" title="Permalink to this headline">¶</a></h2>
+<p>Actual performance results of some LIS file operations.</p>
+<div class="section" id="file-read-cost">
+<h3>File Read Cost<a class="headerlink" href="#file-read-cost" title="Permalink to this headline">¶</a></h3>
+<p>The measure here is low level reading and conversion from binary words to internal number formats. Three operations are being measured:</p>
+<ul class="simple">
+<li>Raw read speed of bytes.</li>
+<li>Above, and converting to internal integers and floats.</li>
+<li>Above and converting from Rep Code 68 to an internal float.</li>
+</ul>
+<p>The input data was about 100 binary files with random data of around 100 Mb in total.</p>
+<p>The x-axis of the graph below is the buffer length, in other words how much data is swallowed in a single atomic read.</p>
+<img alt="../_images/ReadUnpackRc68.png" src="../_images/ReadUnpackRc68.png" />
+<div class="section" id="raw-file-read">
+<h4>Raw File Read<a class="headerlink" href="#raw-file-read" title="Permalink to this headline">¶</a></h4>
+<p>The ‘Read all’ graph shows the cost of reading bytes at different buffer sizes from a file and discarding it. This is the baseline and represents the crude storage access time. Large buffer sizes achieve &lt;1 ms/Mb (1 Gb/s).</p>
+</div>
+<div class="section" id="raw-file-seek">
+<h4>Raw File seek()<a class="headerlink" href="#raw-file-seek" title="Permalink to this headline">¶</a></h4>
+<p>The ‘Seek all’ graph shows the cost of traversing a file using seek() at different seek lengths. No data is read. Combined with the read information this can be used to estimate the minimum time to make a series of read/seek operations.</p>
+</div>
+<div class="section" id="using-the-struct-module">
+<h4>Using the <code class="docutils literal notranslate"><span class="pre">struct</span></code> module<a class="headerlink" href="#using-the-struct-module" title="Permalink to this headline">¶</a></h4>
+<p>The “Read int (compiled)” and “Read float (compiled)” data shows the cost of reading bytes into a buffer and then converting them to a list of integers and floats using the <code class="docutils literal notranslate"><span class="pre">struct</span></code> module (the type declaration is compiled). They show an asymptotic cost, in addition to the read cost, of 8 and 3 ms/Mb respectively. This shows very good performance for reading builtin types with the struct module. As most RP66 types are builtins (or types supported by the struct module) then the struct module should be used for RP66.</p>
+<p>It is slightly surprising that reading an integer is slower than reading a floating point number.</p>
+</div>
+<div class="section" id="reading-rep-code-68">
+<h4>Reading Rep Code 68<a class="headerlink" href="#reading-rep-code-68" title="Permalink to this headline">¶</a></h4>
+<p>This establishes the cost of converting a bytes object in Representation Code 68 to a internal floating point value.</p>
+<p>The cost of using Python code and Cython code is examined and in each case the the total cost or read+convert is presented and then the integer <code class="docutils literal notranslate"><span class="pre">struct</span></code> read cost (above) is subtracted to get the conversion cost.</p>
+<div class="section" id="python">
+<h5>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h5>
+<p>The data sets “Read Rep Code 68 (Python)” and “Convert to Rep Code 68 (Python)” plots to the cost of reading bytes and converting them to Representation code 68, the latter curve has the read cost subtracted (from above) so it represents merely the conversion cost of in-memory from bytes to Rep Code 68. This is asymptotic to around 270 ms/Mb.</p>
+</div>
+<div class="section" id="cython">
+<h5>Cython<a class="headerlink" href="#cython" title="Permalink to this headline">¶</a></h5>
+<p>The data sets “Read Rep Code 68 (Cython)” and “Convert to Rep Code 68 (Cython)” is as immediately above but using Cython code rather than Python code. This is asymptotic to around 72 ms/Mb. This is significantly longer than using the struct module to interpret a IEEE float so it could be that some improvement could be made with a pure C implementation.</p>
+</div>
+</div>
+<div class="section" id="cython-vs-python">
+<h4>Cython vs Python<a class="headerlink" href="#cython-vs-python" title="Permalink to this headline">¶</a></h4>
+<p>The “Cython/Python cost (right axis)” plots the ratio of converting Rep Code 68 with Python and Cython. The Cython code takes 0.27 of the cost of the Python code. Well worth it.</p>
+</div>
+</div>
+<div class="section" id="frame-read-cost">
+<h3>Frame Read Cost<a class="headerlink" href="#frame-read-cost" title="Permalink to this headline">¶</a></h3>
+<p>The operation being timed here is, given a LIS file index, read a certain set of frame data then convert each value to an internal floating point number and then populate the internal FrameSet object. This is a basic operation before doing any plotting, channel editing, recalibration etc. The amount of data read is the cumulative size in LIS bytes of all the values read from the file. 250,000 values would constitute typically 1Mb of LIS data.</p>
+<p>A number of different methods were use to read the LIS data:</p>
+<ul class="simple">
+<li>Method A: All frames all channels. Here indexing provides no optimisation as it is a simple sequential read operation of everything.</li>
+<li>Method C: A sequential subset of the frames and a sequential subset of the channels. This requires a logical seek operation to the start of the frames then, within each frame a seek then read then seek operation.</li>
+<li>Method D: A sequential subset of the frames and a non-sequential subset of the channels. This requires a logical seek operation to the start of the frames then, within each frame multiple seek/read operations.</li>
+<li>Method E: A non-sequential subset of the frames and a non-sequential subset of the channels. This requires a set of logical seek/read operations to each frame then, within each frame multiple seek/read operations.</li>
+</ul>
+<p>Indexing can provide an optimisation for methods C-E as it hugely reduces the amount of read operations to that just sufficient for the required frames and channels. The important measure is that the cost of indexing, computing and executing seek/read operations does not outweigh the reduction in data read.</p>
+<p>For example if a frame has 40 channels and only 5 are required then, if the cost per byte stays the same then the user sees a 8 fold speed improvement. If the cost per byte doubles then the user still sees a 4 fold speed improvement. If the cost per byte rises 8 fold there is no advantage over doing a sequential read of all channels. Beyond an eight fold rise in indexing cost the user sees a performance <em>reduction</em>.</p>
+<div class="section" id="a-all-frames-all-channels">
+<h4>A: All Frames, all Channels<a class="headerlink" href="#a-all-frames-all-channels" title="Permalink to this headline">¶</a></h4>
+<p>This is the baseline, indexing plays no part as this is a straightforward sequential read operation of every channel in every frame.</p>
+<img alt="../_images/ReadCost_A.png" src="../_images/ReadCost_A.png" />
+<p>Although there is quite a spread there is, gratifyingly, no obvious trend for the cost to increase as the file size does which would indicate worse than O(N) behaviour. The behaviour is clearly O(N). The cost in ms/Mb is:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">A:</th>
+<th class="head">Cost ms/Mb</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Minimum</td>
+<td>541.8</td>
+</tr>
+<tr class="row-odd"><td>Mean</td>
+<td>1446.9</td>
+</tr>
+<tr class="row-even"><td>Maximum</td>
+<td>4003.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="c-adjacent-frames-and-channels">
+<h4>C: Adjacent Frames and Channels<a class="headerlink" href="#c-adjacent-frames-and-channels" title="Permalink to this headline">¶</a></h4>
+<p>This is taking a random, but sequential, subset of the frames and a random, but sequential, subset of the channels. This requires the indexer to do a logical seek operation to the start of the frames then, within each frame a seek then read then seek operation.</p>
+<p>The results are plotted compared to the baseline and the ratio of the cost of C relative to the cost of A for each file is plotted on the right hand axis.</p>
+<img alt="../_images/ReadCost_A-C.png" src="../_images/ReadCost_A-C.png" />
+<p>The cost in ms/Mb is:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="31%" />
+<col width="29%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Value</th>
+<th class="head">A: Cost ms/Mb</th>
+<th class="head">C: Cost ms/Mb</th>
+<th class="head">Ratio C/A</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Minimum</td>
+<td>541.8</td>
+<td>545.7</td>
+<td>0.57</td>
+</tr>
+<tr class="row-odd"><td><strong>Mean</strong></td>
+<td><strong>1446.9</strong></td>
+<td><strong>1561.3</strong></td>
+<td><strong>1.13</strong></td>
+</tr>
+<tr class="row-even"><td>Maximum</td>
+<td>4003.3</td>
+<td>4485.8</td>
+<td>4.25</td>
+</tr>
+</tbody>
+</table>
+<p>This means that a small increase in cost (13%) is the price of a hugely reduced data set.</p>
+</div>
+<div class="section" id="d-adjacent-frames-any-channels">
+<h4>D: Adjacent Frames, any Channels<a class="headerlink" href="#d-adjacent-frames-any-channels" title="Permalink to this headline">¶</a></h4>
+<p>This is taking a random, but sequential, subset of the frames and a random, but non-sequential, subset of the channels. This requires the indexer to do a logical seek operation to the start of the frames then, within each frame multiple seek/read operations.</p>
+<p>This is highly representative of the indexing operation performed when plotting, say, any 200 foot section of a number of selected channels.</p>
+<p>The results are plotted compared to the baseline and the ratio of the cost of D relative to the cost of A for each file is plotted on the right hand axis.</p>
+<img alt="../_images/ReadCost_A-D.png" src="../_images/ReadCost_A-D.png" />
+<p>The cost in ms/Mb is:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="31%" />
+<col width="29%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Value</th>
+<th class="head">A: Cost ms/Mb</th>
+<th class="head">D: Cost ms/Mb</th>
+<th class="head">Ratio D/A</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Minimum</td>
+<td>541.8</td>
+<td>581.8</td>
+<td>0.98</td>
+</tr>
+<tr class="row-odd"><td><strong>Mean</strong></td>
+<td><strong>1446.9</strong></td>
+<td><strong>3410.5</strong></td>
+<td><strong>2.55</strong></td>
+</tr>
+<tr class="row-even"><td>Maximum</td>
+<td>4003.3</td>
+<td>11928.6</td>
+<td>7.44</td>
+</tr>
+</tbody>
+</table>
+<p>It should be noted that this test is deliberately harsh in that non-sequential channels are always chosen. If some of the channels are adjacent then the cost reduces, for those channels, more towards C (typically half the cost of D).</p>
+<p>Evens so provided the number of channels of interest is less than 40% of the total indexing this way provides a real speed improvement. The important point being this may not produce an improvement (and may actually be slower) for small frame sizes; they are not the problem precisely because they are small. For the seriously problematic large frame sizes then indexing will always be faster, often dramatically so.</p>
+</div>
+<div class="section" id="e-any-frames-any-channels">
+<h4>E: Any Frames, any Channels<a class="headerlink" href="#e-any-frames-any-channels" title="Permalink to this headline">¶</a></h4>
+<p>This is taking a random, non-sequential, subset of the frames and a random, but non-sequential, subset of the channels. This requires the indexer to perform a set of logical seek/read operations to each frame then, within each frame multiple seek/read operations.</p>
+<p>Essentially this is the same as test D but skipping intermediate frames.</p>
+<p>The results are plotted compared to the baseline and the ratio of the cost of E relative to the cost of A for each file is plotted on the right hand axis.</p>
+<img alt="../_images/ReadCost_A-E.png" src="../_images/ReadCost_A-E.png" />
+<p>The cost in ms/Mb is:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="31%" />
+<col width="29%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Value</th>
+<th class="head">A: Cost ms/Mb</th>
+<th class="head">E: Cost ms/Mb</th>
+<th class="head">Ratio E/A</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Minimum</td>
+<td>541.8</td>
+<td>619.9</td>
+<td>1.03</td>
+</tr>
+<tr class="row-odd"><td><strong>Mean</strong></td>
+<td><strong>1446.9</strong></td>
+<td><strong>3491.7</strong></td>
+<td><strong>2.57</strong></td>
+</tr>
+<tr class="row-even"><td>Maximum</td>
+<td>4003.3</td>
+<td>13552.5</td>
+<td>7.98</td>
+</tr>
+</tbody>
+</table>
+<p>There is a very slight (around 1-5%) additional cost over D but the huge benefit is being able to skip intermediate frames. This means that a low resolution plot (say 1:500) of a high resolution log (say sampling every 1.2 inches) could read every fifth frame (six inch sampling) and that would be plotted every 0.012” (say 1 pixel) as a speedup of almost 500%.</p>
+</div>
+<div class="section" id="all-measurements">
+<h4>All Measurements<a class="headerlink" href="#all-measurements" title="Permalink to this headline">¶</a></h4>
+<p>For the sake of completeness, here are all the results:</p>
+<img alt="../_images/ReadCost.png" src="../_images/ReadCost.png" />
+</div>
+</div>
+<div class="section" id="performance-improvements">
+<span id="totaldepth-tech-perf-improve"></span><h3>Performance Improvements<a class="headerlink" href="#performance-improvements" title="Permalink to this headline">¶</a></h3>
+<p>The low level performance of TotalDepth is pretty good. FrameSet performance is satisfactory. Further improvement is certain for <a class="reference internal" href="LIS_indexing.html#totaldepth-tech-indexing-perf-improve"><span class="std std-ref">Indexing Performance Improvements</span></a> once the existing C code (in another project) is integrated into this one.</p>
+<p>Populating the frame is a costly exercise and the current solution takes this path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">File</span> <span class="nb">bytes</span> <span class="o">-&gt;</span> <span class="n">Cython</span> <span class="n">convert</span> <span class="n">to</span> <span class="n">C</span> <span class="n">double</span> <span class="o">-&gt;</span> <span class="n">convert</span> <span class="n">to</span> <span class="n">Python</span> <span class="nb">float</span> <span class="o">-&gt;</span> <span class="n">insert</span> <span class="n">into</span> <span class="n">a</span> <span class="n">numpy</span> <span class="n">array</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>All this boxing and unboxing is expensive and a faster (but with more code complexity) is to populate the numpy array directly so this all happens in C code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">File</span> <span class="nb">bytes</span> <span class="o">-&gt;</span> <span class="n">Convert</span> <span class="n">to</span> <span class="n">C</span> <span class="n">double</span> <span class="o">-&gt;</span> <span class="n">copy</span> <span class="n">directly</span> <span class="n">into</span> <span class="n">numpy</span> <span class="n">memory</span> <span class="n">space</span>
+</pre></div>
+</div>
+<p>This should provide a great speedup.</p>
+<p>The SVG creation is also worth looking at.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>It is very easy for software developers to fail to see this kind of behaviour. For example if the time for an operation is: a + b * N + c * N <sup>2</sup> and c &lt;&lt; b. If the software test suit tests an insufficiently small size of N then it appears that the operation is O(N). Along comes a user with a large data set and they see O(N <sup>2</sup>) behaviour. This (or worse) is quite commonly observed in many software products.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Performance of TotalDepth</a><ul>
+<li><a class="reference internal" href="#measuring-performance">Measuring Performance</a><ul>
+<li><a class="reference internal" href="#user-s-perception-of-performance">User’s Perception of Performance</a><ul>
+<li><a class="reference internal" href="#example-of-lis-cost">Example of LIS cost</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#actual-lis-performance">Actual LIS Performance</a><ul>
+<li><a class="reference internal" href="#file-read-cost">File Read Cost</a><ul>
+<li><a class="reference internal" href="#raw-file-read">Raw File Read</a></li>
+<li><a class="reference internal" href="#raw-file-seek">Raw File seek()</a></li>
+<li><a class="reference internal" href="#using-the-struct-module">Using the <code class="docutils literal notranslate"><span class="pre">struct</span></code> module</a></li>
+<li><a class="reference internal" href="#reading-rep-code-68">Reading Rep Code 68</a><ul>
+<li><a class="reference internal" href="#python">Python</a></li>
+<li><a class="reference internal" href="#cython">Cython</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cython-vs-python">Cython vs Python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#frame-read-cost">Frame Read Cost</a><ul>
+<li><a class="reference internal" href="#a-all-frames-all-channels">A: All Frames, all Channels</a></li>
+<li><a class="reference internal" href="#c-adjacent-frames-and-channels">C: Adjacent Frames and Channels</a></li>
+<li><a class="reference internal" href="#d-adjacent-frames-any-channels">D: Adjacent Frames, any Channels</a></li>
+<li><a class="reference internal" href="#e-any-frames-any-channels">E: Any Frames, any Channels</a></li>
+<li><a class="reference internal" href="#all-measurements">All Measurements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performance-improvements">Performance Improvements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="LIS_indexing.html"
+                        title="previous chapter">Indexing LIS Files</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plotting.html"
+                        title="next chapter">Plotting Wireline Data</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tech/performance.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting Wireline Data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="LIS_indexing.html" title="Indexing LIS Files"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" >TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

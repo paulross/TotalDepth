@@ -1,0 +1,166 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Glossary &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TotalDepth Licence" href="licence.html" />
+    <link rel="prev" title="A Bag Full of TODO’s" href="TODO.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="licence.html" title="TotalDepth Licence"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="TODO.html" title="A Bag Full of TODO’s"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="glossary">
+<h1>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h1>
+<dl class="glossary docutils">
+<dt id="term-backup-mode">Backup Mode</dt>
+<dd>A means of specifying what happens to plotted lines when they go off scale. Typical examples are None (all intermediate data is lost) and ‘wrap’ (all data is plotted with lines at modulo scale).</dd>
+<dt id="term-data-format-specification-record">Data Format Specification Record</dt>
+<dd><p class="first">[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] An EFLR that describes type 0 or type 1 binary IFLRs containing log data. A DFSR consists of a set of Entry Blocks followed by a list of Datum Specification Blocks.</p>
+<p class="last">NOTE: The LIS specification associates a particular DFSR type <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">|</span> <span class="pre">1</span></code> with binary IFLRs of type <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">|</span> <span class="pre">1</span></code>. These collections will be independent of each other and thus permits the simultaneous recording of entirely different data sets. In practice however this rarely happens and it is debatable whether any or all LIS processing implementations support this.</p>
+</dd>
+<dt id="term-datum-specification-block">Datum Specification Block</dt>
+<dd>[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] A fixed format data block that defines the characteristics of a single, independent, data channel in a DFSR.</dd>
+<dt id="term-dfsr">DFSR</dt>
+<dd>See <a class="reference internal" href="#term-data-format-specification-record"><span class="xref std std-term">Data Format Specification Record</span></a></dd>
+<dt id="term-dlis">DLIS</dt>
+<dd>This adds schema specific semantics to <a class="reference internal" href="#term-rp66"><span class="xref std std-term">RP66</span></a>.</dd>
+<dt id="term-dsb">DSB</dt>
+<dd>See <a class="reference internal" href="#term-datum-specification-block"><span class="xref std std-term">Datum Specification Block</span></a>.</dd>
+<dt id="term-eflr">EFLR</dt>
+<dd>See <a class="reference internal" href="#term-explicitly-formatted-logical-record"><span class="xref std std-term">Explicitly Formatted Logical Record</span></a>.</dd>
+<dt id="term-engineering-value">Engineering Value</dt>
+<dd>A numeric value together with its units of measure.</dd>
+<dt id="term-entry-block">Entry Block</dt>
+<dd>[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] A variable length block of data that describes a static value in DFSR. This value is local to a Log Pass. For example and Entry Block might describe the NULL or absent value for any channel in a Log Pass.</dd>
+<dt id="term-explicitly-formatted-logical-record">Explicitly Formatted Logical Record</dt>
+<dd>This is an internally complete, self-describing record.</dd>
+<dt id="term-frame">Frame</dt>
+<dd>An array of values for each channel at a particular depth (or time).</dd>
+<dt id="term-frame-set">Frame Set</dt>
+<dd>A set of frames representing multi-channel data that is typically depth or time series based.</dd>
+<dt id="term-iflr">IFLR</dt>
+<dd>See <a class="reference internal" href="#term-indirectly-formatted-logical-record"><span class="xref std std-term">Indirectly Formatted Logical Record</span></a>.</dd>
+<dt id="term-indirectly-formatted-logical-record">Indirectly Formatted Logical Record</dt>
+<dd>This is a Logical Record whose format is only completely described by another EFLR. The EFLR that describes an IFLR might be identified formally; for example by a specific reference to an EFLR (as in RP66) or informally; by some heuristic (as in LIS) such as “the immediately prior Logical Record that is type 64”.</dd>
+<dt id="term-lis">LIS<dt id="term-lis-79">LIS-79</dt>
+<dd>Log Information Standard. The original file format used by Schlumberger from 1979 onwards.
+It is a <em>proprietary</em>, <em>de-facto</em> standard.</dd>
+<dt id="term-lis-a">LIS-A</dt>
+<dd><em>Enhanced</em> Log Information Standard. This adds somewhat to the [<a class="reference internal" href="#term-lis-79"><span class="xref std std-term">LIS-79</span></a>] standard.</dd>
+<dt id="term-log-pass">Log Pass</dt>
+<dd>A TotalDepth term that describes a continuos body of logging data such as “Repeat Section” or “Main Log”.
+In the <a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a> format this is defined by a single Logical Record, the <a class="reference internal" href="#term-dfsr"><span class="xref std std-term">DFSR</span></a>, plus multiple type 0 or type 1 Logical Records that the DFSR describes.</dd>
+<dt id="term-logical-record">Logical Record</dt>
+<dd>[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] A formal record from a LIS file. Logical Records consist of a header and optional payload. The Logical Records <em>type</em> is identified in the header. The interpretation of the payload of (some) Logical Records types is defined in the LIS standard. Logical Records consist of the payloads of one or more Physical Records. Logical Records are either EFLR or IFLR records.</dd>
+<dt id="term-lrh">LRH<dt id="term-logical-record-header">Logical Record header</dt>
+<dd>The bytes that describe the type and attributes of a Logical Record.</dd>
+<dt id="term-mnem">Mnem</dt>
+<dd>See <a class="reference internal" href="#term-mnemonic"><span class="xref std std-term">Mnemonic</span></a>.</dd>
+<dt id="term-mnemonic">Mnemonic</dt>
+<dd>[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] A four byte identifier that is human readable e.g. <code class="docutils literal notranslate"><span class="pre">RHOB</span></code> for Bulk Density.</dd>
+<dt id="term-physical-record">Physical Record</dt>
+<dd>[<a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a>] A formal record in a LIS file. Physical Records consist of a header, optional payload and optional trailer. Logical Records consist of the payloads of one or more Physical Records.</dd>
+<dt id="term-repcode">RepCode</dt>
+<dd>See <a class="reference internal" href="#term-representation-code"><span class="xref std std-term">Representation Code</span></a>.</dd>
+<dt id="term-representation-code">Representation Code</dt>
+<dd>A code, usually an integer, that describes how a particular run of bytes should be interpreted as a
+value (number, string etc.). For example in the LIS standard representation code 68 describes a 32 bit
+floating point format.</dd>
+<dt id="term-rp66">RP66</dt>
+<dd><em>Recommended Practice 66</em> is an API standard that describes a more advanced file format for, among other things, wireline logs. Comes in two flavours version 1 and version 2. Often (and incorrectly) referred to as <a class="reference internal" href="#term-dlis"><span class="xref std std-term">DLIS</span></a>.</dd>
+<dt id="term-uom">UOM</dt>
+<dd><em>Unit of Measure</em> for engineering values. In <a class="reference internal" href="#term-lis"><span class="xref std std-term">LIS</span></a> these are a set of fixed terms organised into several categories, such as <em>Linear Length</em>. Values can only be converted between units of in the same category. In <a class="reference internal" href="#term-rp66"><span class="xref std std-term">RP66</span></a> these are composed by a BNF parseable string.</dd>
+<dt id="term-xaxis">Xaxis<dt id="term-x-axis">X Axis</dt>
+<dd>The index channel in an array, for example an array of frames. Typically depth or time.</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="TODO.html"
+                        title="previous chapter">A Bag Full of TODO’s</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="licence.html"
+                        title="next chapter">TotalDepth Licence</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/glossary.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="licence.html" title="TotalDepth Licence"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="TODO.html" title="A Bag Full of TODO’s"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

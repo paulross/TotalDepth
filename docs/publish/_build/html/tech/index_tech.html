@@ -1,0 +1,172 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>TotalDepth Technical Notes &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Indexing LIS Files" href="LIS_indexing.html" />
+    <link rel="prev" title="Usage In a Python Project" href="../usage.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="LIS_indexing.html" title="Indexing LIS Files"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../usage.html" title="Usage In a Python Project"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="totaldepth-technical-notes">
+<h1>TotalDepth Technical Notes<a class="headerlink" href="#totaldepth-technical-notes" title="Permalink to this headline">¶</a></h1>
+<p>This collect together various technical descriptions of how TotalDepth solves certain problems.</p>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="LIS_indexing.html">Indexing LIS Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="LIS_indexing.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LIS_indexing.html#indexing-design">Indexing Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#indexing-a-lis-file">Indexing a LIS File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#indexing-a-log-pass">Indexing a Log Pass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="LIS_indexing.html#indexing-performance">Indexing Performance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#index-time">Index Time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#multi-processing">Multi-Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#index-size">Index Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#indexing-performance-improvements">Indexing Performance Improvements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#lis-read-performance-via-an-index">LIS Read Performance via an Index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LIS_indexing.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of TotalDepth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#measuring-performance">Measuring Performance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="performance.html#user-s-perception-of-performance">User’s Perception of Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#actual-lis-performance">Actual LIS Performance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="performance.html#file-read-cost">File Read Cost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html#frame-read-cost">Frame Read Cost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html#performance-improvements">Performance Improvements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting Wireline Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#wireline-files-with-integral-plot-data">Wireline Files With Integral Plot Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plotting.html#lis-plot-specification">LIS Plot Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#wireline-files-with-external-plot-data">Wireline Files With External Plot Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plotting.html#lgformat-xml-files">LgFormat XML Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#internal-plot-algorithms">Internal Plot Algorithms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plotting.html#plotting-the-legends-scales">Plotting the Legends (Scales)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting.html#interpolating-backups">Interpolating Backups</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="saas.html">TotalDepth and SaaS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="saas.html#processing-server-side-files">Processing Server Side Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="saas.html#processing-files-that-remain-on-the-client-s-device">Processing Files that Remain on the Client’s Device</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="saas.html#starting-the-session">Starting the session</a></li>
+<li class="toctree-l3"><a class="reference internal" href="saas.html#rest-of-session">Rest of Session</a></li>
+<li class="toctree-l3"><a class="reference internal" href="saas.html#data-persistence">Data Persistence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="saas.html#saas-pros-and-cons">SaaS Pros and Cons</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="saas.html#advantages">Advantages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="saas.html#disadvantages">Disadvantages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../usage.html"
+                        title="previous chapter">Usage In a Python Project</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="LIS_indexing.html"
+                        title="next chapter">Indexing LIS Files</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tech/index_tech.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="LIS_indexing.html" title="Indexing LIS Files"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../usage.html" title="Usage In a Python Project"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

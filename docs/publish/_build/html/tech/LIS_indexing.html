@@ -1,0 +1,494 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Indexing LIS Files &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Performance of TotalDepth" href="performance.html" />
+    <link rel="prev" title="TotalDepth Technical Notes" href="index_tech.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="performance.html" title="Performance of TotalDepth"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index_tech.html" title="TotalDepth Technical Notes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" accesskey="U">TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="indexing-lis-files">
+<span id="totaldepth-tech-indexing"></span><h1>Indexing LIS Files<a class="headerlink" href="#indexing-lis-files" title="Permalink to this headline">¶</a></h1>
+<p>Most petrophysical files are recorded in real time and the recording format is sequential, thus everything depends on what has gone before. This is not very satisfactory for the user who might well wish to access the data in a arbitrary manner - “give me these curves over this interval”. The solution is to create an index to the original file so that it can be accessed <em>as if</em> it is a random access file.</p>
+<p>Here we describe how that indexing works and the performance it achieves for the user.</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The LIS file format is a binary, self describing, sequential format with multiple layers of encoding and, in practice, no forward references. LIS files can be large and, generally speaking, the greater part of the file consists of frame data whose format is invariant within any particular <a class="reference internal" href="../glossary.html#term-log-pass"><span class="xref std std-term">Log Pass</span></a>.</p>
+<p>In a dynamic situation, such as a user reading the file, the <em>instantaneous</em> amount of data needed from a LIS file is small compared with the file size. For example plotting 200 feet of a 50Mb file might need only 1/3000 of the data in the file. As the LIS file format is geared to sequential recording, not random access, accessing such a small amount efficiently needs additional software cunning.</p>
+<p>TotalDepth’s approach to this is to use <em>indexing</em>. The essential requirements for an indexer are:</p>
+<ul class="simple">
+<li>Fast to create an index.</li>
+<li>The index is small.</li>
+<li>The index has sufficiently useful granularity.</li>
+<li>The index can be serialised in a number of ways (as a minimum; XML, binary (e.g. ‘pickle’), JSON?).</li>
+<li>The indexer design is flexible and extensible.</li>
+</ul>
+<p>Apart from the cost of design and coding a solution the cost/benefit of indexing can be measured thus:</p>
+<ul class="simple">
+<li>The time to creating an index.</li>
+<li>The space required by the index, in-memory or serialised in some form.</li>
+<li>The time, in O(N), terms of accessing N bytes of data.</li>
+</ul>
+<p>A design that has low time/space requirements is regarded as a ‘good’ design.</p>
+</div>
+<div class="section" id="indexing-design">
+<h2>Indexing Design<a class="headerlink" href="#indexing-design" title="Permalink to this headline">¶</a></h2>
+<p>TotalDepth’s LIS indexer works on several levels:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Level</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>File Level</td>
+<td>Indexing of the postion of all Logical Records</td>
+</tr>
+<tr class="row-odd"><td>Logical Records with frame data</td>
+<td>Runs of these can be efficiently indexed with Run Length Encoding</td>
+</tr>
+<tr class="row-even"><td>Within a Logical Record
+containing frame data</td>
+<td>Accessing a particular frame and channel can be by computation with the help
+of a frame index. In particular this can identify seek/read sequences of any
+value from any channel in O(1) time.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="indexing-a-lis-file">
+<h3>Indexing a LIS File<a class="headerlink" href="#indexing-a-lis-file" title="Permalink to this headline">¶</a></h3>
+<p>The intentions is to find the start position of each Logical Record and a minimal amount of information of that Logical Record. The start position is the <code class="docutils literal notranslate"><span class="pre">size_t</span></code> value of the file index of, either, the start of the TIF marker for the first Physical Record in the Logical Record (if TIF encoded), or, the start of the first Physical Record in the Logical Record (if <em>not</em> TIF encoded).</p>
+<p>As well as recording the file position of the Logical Record the indexer retrieves part or all of the Logical Record contents. This is specialised by Logical Record type thus:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Logical Record</th>
+<th class="head">Index Contents</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Reel/Tape/File Header/Trailer</td>
+<td>The complete contents of the Logical Record.
+These are small (58 or 128 bytes) but possibly important.</td>
+</tr>
+<tr class="row-odd"><td>Table records</td>
+<td>The Logical Record header and the first Component Block.
+These are variable, large, but possibly important.</td>
+</tr>
+<tr class="row-even"><td>DFSR</td>
+<td>The complete contents of the Logical Record.
+These are variable size, not particularly large and very important.</td>
+</tr>
+<tr class="row-odd"><td>Logical Records with frame data</td>
+<td>Indexed as part of a Log Pass with a RLE object. This records the Logical
+Record header and the first data word.</td>
+</tr>
+<tr class="row-even"><td>All other Logical Records</td>
+<td>The Logical Record header only.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="module">
+<h4>Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h4>
+<p>The Python module that performs file indexing is <code class="docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.FileIndexer</span></code></p>
+<p>For reference documentation see: <a class="reference internal" href="../ref/LIS/core/FileIndexer.html#totaldepth-lis-core-fileindexer"><span class="std std-ref">FileIndexer</span></a>.</p>
+</div>
+<div class="section" id="example">
+<h4>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h4>
+<p>The LIS package has an Index.py module that will index any LIS file. Here is some (selected) output of a single file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===============================</span> <span class="n">All</span> <span class="n">records</span> <span class="o">===============================</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x00000000</span> <span class="nb">type</span><span class="o">=</span><span class="mi">128</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileHead</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b09050</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x0000004a</span> <span class="nb">type</span><span class="o">=</span> <span class="mi">34</span> <span class="n">name</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;CONS&#39;</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexTable</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b090d0</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">LogPass</span><span class="o">.</span><span class="n">LogPass</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b09450</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x0006141c</span> <span class="nb">type</span><span class="o">=</span><span class="mi">129</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileTail</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0c110</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x00061466</span> <span class="nb">type</span><span class="o">=</span><span class="mi">128</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileHead</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0c190</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x000614b0</span> <span class="nb">type</span><span class="o">=</span> <span class="mi">34</span> <span class="n">name</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;CONS&#39;</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexTable</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0c210</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">LogPass</span><span class="o">.</span><span class="n">LogPass</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0c510</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x00065a44</span> <span class="nb">type</span><span class="o">=</span><span class="mi">129</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileTail</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0cad0</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x00065a8e</span> <span class="nb">type</span><span class="o">=</span><span class="mi">128</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileHead</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0cb50</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x00065ad8</span> <span class="nb">type</span><span class="o">=</span> <span class="mi">34</span> <span class="n">name</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;CONS&#39;</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexTable</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0cbd0</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">LogPass</span><span class="o">.</span><span class="n">LogPass</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b0cfd0</span><span class="o">&gt;</span>
+<span class="n">tell</span><span class="p">:</span> <span class="mh">0x000d2c44</span> <span class="nb">type</span><span class="o">=</span><span class="mi">129</span> <span class="o">&lt;</span><span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">IndexFileTail</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x101b10450</span><span class="o">&gt;</span>
+<span class="o">=============================</span> <span class="n">All</span> <span class="n">records</span> <span class="n">DONE</span> <span class="o">============================</span>
+</pre></div>
+</div>
+<p>Note that the indexing of a Log Pass is separate since it covers an EFLR and zero or more IFLRs. This is the subject of the next section.</p>
+</div>
+</div>
+<div class="section" id="indexing-a-log-pass">
+<h3>Indexing a Log Pass<a class="headerlink" href="#indexing-a-log-pass" title="Permalink to this headline">¶</a></h3>
+<p>A Log Pass is described by an EFLR and zero or more IFLRs. In LIS terms this means a DFSR and the associated binary IFLRs. This is a candidate for fairly agressive optimisation since:</p>
+<ul class="simple">
+<li>In practice the Logical Records containing the IFLRs are normally adjacent and regular (same size).</li>
+<li>The frame structure is invariant.</li>
+</ul>
+<p>Supposing a Log Pass has 18 data channels using representation code 68 (frame length 72 bytes) and each IFLR record contains 24 frames (24*72=1728 bytes). If there are 72 Logical Records then it is fairly easy to to calculate where, in logical space, logical record x is in the file; start + x * 1728 <a class="footnote-reference" href="#id6" id="id1">[1]</a>.</p>
+<p>NOTE: The following describes some of the internals of Log Pass indexing, it is for information only as the LogPass and IndexLogPass objects do this automatically.</p>
+<div class="section" id="run-length-encoding-of-logical-records">
+<h4>Run Length Encoding of Logical Records<a class="headerlink" href="#run-length-encoding-of-logical-records" title="Permalink to this headline">¶</a></h4>
+<p>Run Length Encoding (RLE) is an encoding system that is highly efficient at describing regularly spaced intervals. Since LIS is primarily a recording format the recording software will create and suitably sized buffer for an integer number of frames and other environmental parameters. During recording the buffer will be filled frame by frame. When the buffer is full the buffer will be flushed to file. So a continuos series of IFLRs tends to consist of a series of adjacent Logical Records of the same size followed, possibly, by a single terminating Logical Record that is shorter (by an integer number of frames) than the others.</p>
+<div class="section" id="id2">
+<h5>Module<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
+<p>The Python module that performs RLE of Logical Records is <code class="docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.Rle</span></code></p>
+<p>For reference documentation see: <a class="reference internal" href="../ref/LIS/core/Rle.html#totaldepth-lis-core-rle"><span class="std std-ref">Run Length Encoding Module</span></a>.</p>
+</div>
+</div>
+<div class="section" id="indexing-frame-data">
+<h4>Indexing Frame Data<a class="headerlink" href="#indexing-frame-data" title="Permalink to this headline">¶</a></h4>
+<p>This describes how an index is created to find arbitrary values in a Logical Record containing Frame Data.</p>
+<p>Supposing a Log Pass has 18 data channels using representation code 68 (frame length 72 bytes) and each IFLR record contains 24 frames. If there are 72 Logical Records then it is a simple <a class="footnote-reference" href="#id7" id="id3">[2]</a> task to calculate where, in logical space, the bytes for channel x and frame y are.</p>
+<div class="section" id="id4">
+<h5>Module<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h5>
+<p>The Python module that performs indexing within a Logical Record containing frame data is <code class="docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.Type01Plan</span></code>.</p>
+<p>For reference documentation see: <a class="reference internal" href="../ref/LIS/core/Type01Plan.html#totaldepth-lis-core-type01plan"><span class="std std-ref">Type01Plan</span></a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="indexing-performance">
+<h2>Indexing Performance<a class="headerlink" href="#indexing-performance" title="Permalink to this headline">¶</a></h2>
+<p>As mentioned above the cost of indexing can be measured with these independent measures:</p>
+<ul class="simple">
+<li>The time to creating an index.</li>
+<li>The space required by the index, in-memory or serialised in some form.</li>
+<li>The time per byte to access N bytes of data.</li>
+<li>Any deviation from O(N) performance, N being total file size or size of data read.</li>
+</ul>
+<p>The following data was measured using 300+ LIS files totalling of around 300+Mb, the largest being around 50Mb. The LIS module <code class="docutils literal notranslate"><span class="pre">TotalDepth.LIS.RandomFrameSetRead.py</span></code> was used to conduct the tests.</p>
+<p>The original targets for the cost of TotalDepth LIS indexing were:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Cost ms/Mb</th>
+<th class="head">Result</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&lt;15</td>
+<td>Excellent</td>
+</tr>
+<tr class="row-odd"><td>15-50</td>
+<td>Good</td>
+</tr>
+<tr class="row-even"><td>50-100</td>
+<td>Satisfactory</td>
+</tr>
+<tr class="row-odd"><td>&gt;100</td>
+<td>Unsatisfactory</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="index-time">
+<h3>Index Time<a class="headerlink" href="#index-time" title="Permalink to this headline">¶</a></h3>
+<p>This is simply the actual time taken to create a file level index:</p>
+<img alt="../_images/IndexTime.png" src="../_images/IndexTime.png" />
+<p>The best fit of all points is the cyan line (index(x) on the plot legend). The best fit for the lines is:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="34%" />
+<col width="10%" />
+<col width="13%" />
+<col width="14%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Line</th>
+<th class="head">Description</th>
+<th class="head">Colour</th>
+<th class="head">Latency (ms)</th>
+<th class="head">Cost (ms/Mb)</th>
+<th class="head">Result</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>PR_1kB(x)</td>
+<td>Physical Record length = 1kb</td>
+<td>Green</td>
+<td>1.3</td>
+<td>80</td>
+<td>Satisfactory</td>
+</tr>
+<tr class="row-odd"><td>PR_8kB(x)</td>
+<td>Physical Record length = 8kb</td>
+<td>Blue</td>
+<td>1.2</td>
+<td>12</td>
+<td>Excellent</td>
+</tr>
+<tr class="row-even"><td>PR_DontKnow</td>
+<td>Upper bound, worst case</td>
+<td>Magenta</td>
+<td>3.0</td>
+<td>90</td>
+<td>Satisfactory</td>
+</tr>
+<tr class="row-odd"><td>index(x)</td>
+<td>Regression fit on all points</td>
+<td>Cyan</td>
+<td>1.2</td>
+<td>39.9</td>
+<td>Good</td>
+</tr>
+</tbody>
+</table>
+<p>However there are some other trends that can be teased out when separating files that have Physical Records of 1kb and those in the data set that have 8kb Physical Records (there were no larger Physical Record sizes in the data set). The green fit (PR_1kb(x) on the plot legend) is the best fit for those files that have Physical Records of 1kb. The blue line (PR_8kb(x) on the plot legend) is the best fit for files that have Physical Records of 8kb, it is almost exactly 8 times faster.</p>
+<p>In fact in other tests, not presented here, it was shown that there was a linear speedup with Physical Record size up to their maximum size of 64kb. In fact the dominant factor in indexing time was the <em>number of physical records</em>. This suggests a couple of things:</p>
+<ul class="simple">
+<li>Before archiving or processing LIS files rewrite them to their maximum Physical Record size (64kb). This will pay off later when indexing prior to any read operation.</li>
+<li>Rewrite the Physical Record handler (and below) in C or Cython as it seems to be the bottleneck for indexing.</li>
+</ul>
+<p>This is actual time taken to create a file level index divided by the file size. This gives some measure of ‘cost’ which is defined here as ms per Mb of data processed, here the size in Mb is the total file size:</p>
+<img alt="../_images/IndexCost.png" src="../_images/IndexCost.png" />
+<p>The rising costs for smaller files is no real cause for concern, this represents the startup cost of indexing and reading of around 1 to 2 ms. This graph clearly demonstrates O(N), or better, behaviour.</p>
+<p>Again the advantage in having 8kb Physical Records is evident in the lower right hand corner. The cost would be further reduced to around 1 to 1.5 ms/Mb by having 64kb Physical Records.</p>
+</div>
+<div class="section" id="multi-processing">
+<span id="totaldepth-tech-indexing-indexsize"></span><h3>Multi-Processing<a class="headerlink" href="#multi-processing" title="Permalink to this headline">¶</a></h3>
+<p>Most of TotalDepth software supports parallel processing. The LIS command line tool Index.py can create indexes in parallel. The following graph shows the file size plotted against total time to index when indexing around 300 LIS files with different numbers of simultaneous processes. The red line is the best fit for single process indexing that costs about 40 ms/Mb:</p>
+<img alt="../_images/IndexMultiProcessing.png" src="../_images/IndexMultiProcessing.png" />
+<p>The index time rises slightly with increasing number of processes and the scatter rises dramatically with 8 processes presumably because of I/O contention.</p>
+<p>Actual wall clock times for indexing all those LIS files for different numbers of simultaneous processes on a four core machine with hyper-threading are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="30%" />
+<col width="45%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Processes</th>
+<th class="head">Total time to index (s)</th>
+<th class="head">Improvement over No multiprocessing</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>No multiprocessing</td>
+<td>18.4</td>
+<td>Datum</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>18.3</td>
+<td>0.995</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>9.9</td>
+<td>0.538</td>
+</tr>
+<tr class="row-odd"><td>4</td>
+<td>8.9</td>
+<td>0.484</td>
+</tr>
+<tr class="row-even"><td>8</td>
+<td>7.6</td>
+<td>0.413</td>
+</tr>
+</tbody>
+</table>
+<p>Moving to two processes gives an almost linear speedup, moving from two to four or eight processes gives only slight improvement presumably because the execution time becomes I/O bound.</p>
+</div>
+<div class="section" id="index-size">
+<h3>Index Size<a class="headerlink" href="#index-size" title="Permalink to this headline">¶</a></h3>
+<p>It is envisaged that the index will be persisted in some form. Once persisted then the LIS file would only be accessed via the index, any file write operation requires a suitable adjustment to the index.</p>
+<p>Persistence techniques could be, for example:</p>
+<ul class="simple">
+<li>Stored in a database.</li>
+<li>Serialised in binary form onto the file system.</li>
+<li>Serialised in human readable form, such as XML, onto the file system or database <a class="footnote-reference" href="#id8" id="id5">[3]</a>.</li>
+<li>Serialised in binary form and attached as a Logical Record to the LIS file it refers to.</li>
+</ul>
+<div class="section" id="totaldepth-and-saas">
+<h4>TotalDepth and SaaS<a class="headerlink" href="#totaldepth-and-saas" title="Permalink to this headline">¶</a></h4>
+<p>There is a further imperative to understanding index size; if TotalDepth were to be used, as it was always intended, as Software as a Service (SaaS) where the bulk of the processing is with the data file on the client machine and the processing done on the server then part of the bootstrap process of any transaction is for the client to index the file and send the index to the server. In that case it is important to keep the index size small.</p>
+<p>Thus the size of the index content is a significant consideration.</p>
+<p>The following graph measures the size of the index when serialised with Python’s <code class="docutils literal notranslate"><span class="pre">cPickle</span></code> module, Pickled size is in kb (red markers, left scale) and compared as a percentage of the original file size (green markers, right scale):</p>
+<img alt="../_images/PickleSize.png" src="../_images/PickleSize.png" />
+<p>The pickled size shows a wide range that is representative of the wide range of LIS inputs. The best fit for size (albeit with a large scatter) is 5kb + 0.6% of the file size which is entirely satisfactory [the upper bound being 42kb + 2.3% and the lower bound being just 1.2kb + 0.08% with larger files tending towards the lower bound].</p>
+<p>The relative size of the index shows a strong downward trend (blue line) for files below 4Mb, before levelling off at the 0.1 to 3% mark. This is quite satisfactory for the use cases described above including SaaS. This graph clearly demonstrates O(N), or better, behaviour.</p>
+</div>
+</div>
+<div class="section" id="indexing-performance-improvements">
+<span id="totaldepth-tech-indexing-perf-improve"></span><h3>Indexing Performance Improvements<a class="headerlink" href="#indexing-performance-improvements" title="Permalink to this headline">¶</a></h3>
+<p>As noted above there is a substantial improvement in indexing when large Physical Record sizes are used.</p>
+<p>It is also likely that significant improvement could be made if the RawStream, TifMarker and PhysRec were to be rewritten in C/C++ or Cython. The PhysRec module has a dependency on the RepCode module (easily removed). All three modules have a dependency on the struct module so the limited functionality that they use from there would have to be reproduced, thats pretty easy since it only involves integer manipulation.</p>
+<p>So given an ‘average’ cost of indexing of 40 ms/Mb (i.e. a ‘good’ rating) the performance improvements could be:</p>
+<ul class="simple">
+<li>Moving to larger Physical Record sizes: x8?</li>
+<li>Integrate the existing (in another project) code in C that handles Raw Stream/TIF/Physical Record handling into this project. This is known to be about x100 faster (and the index has a lower memory footprint).</li>
+</ul>
+<p>The performance improvements would not necessarily combine as they are mutually dependent but the combination might reduce the cost to around 2 to 8 ms/MB, an exceptionally good performance indeed.</p>
+<p>See <a class="reference internal" href="performance.html#totaldepth-tech-perf-improve"><span class="std std-ref">Performance Improvements</span></a> for other performance improvements</p>
+</div>
+<div class="section" id="lis-read-performance-via-an-index">
+<h3>LIS Read Performance via an Index<a class="headerlink" href="#lis-read-performance-via-an-index" title="Permalink to this headline">¶</a></h3>
+<p>This is described here <a class="reference internal" href="performance.html#totaldepth-tech-lis-read-perf"><span class="std std-ref">Performance of TotalDepth</span></a></p>
+</div>
+<div class="section" id="summary">
+<h3>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h3>
+<p>Indexing is not free, it incurs an overhead, but this overhead is acceptable. The overhead is worst for small data sizes where the performance is high in any case. The overhead is low, and the benefit is very great for large or complex data sizes where the performance, without indexing, could be very poor indeed.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Illustrative only, it is slightly more complicated than this.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Well not that simple, there is indirect X-axis to take into account and several other things.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[3]</a></td><td>JSON can not handle the index in its current form.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Indexing LIS Files</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#indexing-design">Indexing Design</a><ul>
+<li><a class="reference internal" href="#indexing-a-lis-file">Indexing a LIS File</a><ul>
+<li><a class="reference internal" href="#module">Module</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indexing-a-log-pass">Indexing a Log Pass</a><ul>
+<li><a class="reference internal" href="#run-length-encoding-of-logical-records">Run Length Encoding of Logical Records</a><ul>
+<li><a class="reference internal" href="#id2">Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indexing-frame-data">Indexing Frame Data</a><ul>
+<li><a class="reference internal" href="#id4">Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indexing-performance">Indexing Performance</a><ul>
+<li><a class="reference internal" href="#index-time">Index Time</a></li>
+<li><a class="reference internal" href="#multi-processing">Multi-Processing</a></li>
+<li><a class="reference internal" href="#index-size">Index Size</a><ul>
+<li><a class="reference internal" href="#totaldepth-and-saas">TotalDepth and SaaS</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indexing-performance-improvements">Indexing Performance Improvements</a></li>
+<li><a class="reference internal" href="#lis-read-performance-via-an-index">LIS Read Performance via an Index</a></li>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index_tech.html"
+                        title="previous chapter">TotalDepth Technical Notes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="performance.html"
+                        title="next chapter">Performance of TotalDepth</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tech/LIS_indexing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="performance.html" title="Performance of TotalDepth"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index_tech.html" title="TotalDepth Technical Notes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index_tech.html" >TotalDepth Technical Notes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

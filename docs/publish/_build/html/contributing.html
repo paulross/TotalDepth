@@ -1,0 +1,208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Release Checklist &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="history.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="authors.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="history.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="authors.html" title="&lt;no title&gt;"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="release-checklist">
+<h1>Release Checklist<a class="headerlink" href="#release-checklist" title="Permalink to this headline">¶</a></h1>
+<p>In the following example the version we are moving to, in  <code class="docutils literal notranslate"><span class="pre">Major.Minor.Patch</span></code> format, is <code class="docutils literal notranslate"><span class="pre">0.2.1</span></code>.</p>
+<p>Current version should be something like <code class="docutils literal notranslate"><span class="pre">M.m.(p)rcX</span></code>, for example <code class="docutils literal notranslate"><span class="pre">0.2.1rc0</span></code>.</p>
+<div class="section" id="increment-version">
+<h2>Increment version<a class="headerlink" href="#increment-version" title="Permalink to this headline">¶</a></h2>
+<p>Change the version to <code class="docutils literal notranslate"><span class="pre">M.m.p</span></code> in these places:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>setup.cfg</em></li>
+<li><em>setup.py</em></li>
+<li><em>src/TotalDepth/__init__.py</em></li>
+<li>/docs/source/conf.py (two places).</li>
+</ul>
+</div></blockquote>
+<p>In <em>src/TotalDepth/__init__.py</em> change <code class="docutils literal notranslate"><span class="pre">VERSION</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">2,</span> <span class="pre">1)</span></code></p>
+<p>Update the history:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>HISTORY.rst</em></li>
+<li><em>src/TotalDepth/__init__.py</em></li>
+</ul>
+</div></blockquote>
+<p>Update any Trove classifiers in <em>setup.py</em>, <a class="reference external" href="https://pypi.python.org/pypi?%3Aaction=list_classifiers">https://pypi.python.org/pypi?%3Aaction=list_classifiers</a></p>
+</div>
+<div class="section" id="build-and-test">
+<h2>Build and Test<a class="headerlink" href="#build-and-test" title="Permalink to this headline">¶</a></h2>
+<p>Build and test for Python 3.6:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> . ~/venvs/TotalDepth_00/bin/activate
+<span class="gp">(TotalDepth_00) $</span> python setup.py install
+<span class="gp">(TotalDepth_00) $</span> python setup.py <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Build the docs HTML to test them, from an environment that has Sphinx:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">(Sphinx) $</span> <span class="nb">cd</span> docs
+<span class="gp">(Sphinx) $</span> make clean
+<span class="gp">(Sphinx) $</span> make html
+</pre></div>
+</div>
+</div>
+<div class="section" id="commit-and-tag">
+<h2>Commit and Tag<a class="headerlink" href="#commit-and-tag" title="Permalink to this headline">¶</a></h2>
+<p>Commit, tag and push:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git add .
+<span class="gp">$</span> git commit -m <span class="s1">&#39;Release version 0.2.1&#39;</span>
+<span class="gp">$</span> git tag -a v0.2.1 -m <span class="s1">&#39;Version 0.2.1&#39;</span>
+<span class="gp">$</span> git push
+<span class="gp">$</span> git push origin v0.2.1
+</pre></div>
+</div>
+</div>
+<div class="section" id="pypi">
+<h2>PyPi<a class="headerlink" href="#pypi" title="Permalink to this headline">¶</a></h2>
+<p>Prepare release to PyPi for Python 3.6:</p>
+<p>Build the egg and the source distribution:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">(TotalDepth_00) $</span> python setup.py install sdist
+</pre></div>
+</div>
+<p>Check the contents of <code class="docutils literal notranslate"><span class="pre">dist/*</span></code>, unpack into <code class="docutils literal notranslate"><span class="pre">tmp/</span></code> if you want:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> cp dist/* tmp/
+<span class="gp">$</span> <span class="nb">cd</span> tmp/
+<span class="gp">$</span> unzip TotalDepth-0.2.1-py3.6-macosx-10.6-intel.egg -d py27egg
+<span class="gp">$</span> tar -xzf TotalDepth-0.2.1.tar.gz
+</pre></div>
+</div>
+<p>Release to PyPi, <a class="reference external" href="https://pypi.python.org/pypi/TotalDepth">https://pypi.python.org/pypi/TotalDepth</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">(TotalDepth_00) $</span> twine upload dist/*
+</pre></div>
+</div>
+</div>
+<div class="section" id="readthedocs">
+<h2>ReadTheDocs<a class="headerlink" href="#readthedocs" title="Permalink to this headline">¶</a></h2>
+<p>Build the documentation: <a class="reference external" href="https://readthedocs.org/projects/TotalDepth/builds/">https://readthedocs.org/projects/TotalDepth/builds/</a></p>
+</div>
+<div class="section" id="prepare-next-release-candidate">
+<h2>Prepare Next Release Candidate<a class="headerlink" href="#prepare-next-release-candidate" title="Permalink to this headline">¶</a></h2>
+<p>Finally change the version to <code class="docutils literal notranslate"><span class="pre">M.m.(p+1)rc0</span></code>, in this example <code class="docutils literal notranslate"><span class="pre">0.2.2rc0</span></code> in these places:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>setup.cfg</em></li>
+<li><em>setup.py</em></li>
+<li><em>src/TotalDepth/__init__.py</em></li>
+<li>/docs/source/conf.py (two places).</li>
+</ul>
+</div></blockquote>
+<p>In <em>src/TotalDepth/__init__.py</em> change <code class="docutils literal notranslate"><span class="pre">VERSION</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">'rc0')</span></code></p>
+<p>Commit and push:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git add .
+<span class="gp">$</span> git commit -m <span class="s1">&#39;Release candidate v0.2.2rc0&#39;</span>
+<span class="gp">$</span> git push
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Release Checklist</a><ul>
+<li><a class="reference internal" href="#increment-version">Increment version</a></li>
+<li><a class="reference internal" href="#build-and-test">Build and Test</a></li>
+<li><a class="reference internal" href="#commit-and-tag">Commit and Tag</a></li>
+<li><a class="reference internal" href="#pypi">PyPi</a></li>
+<li><a class="reference internal" href="#readthedocs">ReadTheDocs</a></li>
+<li><a class="reference internal" href="#prepare-next-release-candidate">Prepare Next Release Candidate</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="authors.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="history.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/contributing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="history.html" title="&lt;no title&gt;"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="authors.html" title="&lt;no title&gt;"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

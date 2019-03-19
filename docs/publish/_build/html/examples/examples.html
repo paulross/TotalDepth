@@ -1,0 +1,209 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>TotalDepth Example Outputs &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation" href="../installation.html" />
+    <link rel="prev" title="Introduction to TotalDepth" href="../intro.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../intro.html" title="Introduction to TotalDepth"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="totaldepth-example-outputs">
+<span id="totaldepth-examples"></span><h1>TotalDepth Example Outputs<a class="headerlink" href="#totaldepth-example-outputs" title="Permalink to this headline">¶</a></h1>
+<p>This shows some examples of the kind of thing that TotalDepth can do.</p>
+<div class="section" id="wireline-plots">
+<span id="totaldepth-examples-plots"></span><h2>Wireline Plots<a class="headerlink" href="#wireline-plots" title="Permalink to this headline">¶</a></h2>
+<p>TotalDepth produced these time honoured plots from LIS and LAS wireline logs in SVG format that can be viewed in most browsers <a class="footnote-reference" href="#id4" id="id1">[1]</a>.</p>
+<div class="section" id="plotting-from-lis">
+<h3>Plotting from LIS<a class="headerlink" href="#plotting-from-lis" title="Permalink to this headline">¶</a></h3>
+<p>Some examples of plots generated from LIS79 files:</p>
+<ul class="simple">
+<li>A <a class="reference external" href="../_static/plots_LIS/index.html">collection</a> of 9 LIS files where TotalDepth used their internal plot specifications to generate 22 separate plots.</li>
+<li>A <a class="reference external" href="../_static/plots/HDT_Example.svg">High Resolution Dipmeter</a> plot on a scale of 1:25 with an API header. Fast channel FC0 (red) overlaid on FC1.</li>
+</ul>
+</div>
+<div class="section" id="plotting-from-las">
+<h3>Plotting From LAS<a class="headerlink" href="#plotting-from-las" title="Permalink to this headline">¶</a></h3>
+<p>This shows off some examples of plots generated from the Canadian Well Logging Society’s LAS formated files <a class="footnote-reference" href="#id5" id="id2">[2]</a>.</p>
+<div class="section" id="single-las-plot-examples">
+<h4>Single LAS Plot examples<a class="headerlink" href="#single-las-plot-examples" title="Permalink to this headline">¶</a></h4>
+<p>This shows plots of a single LAS file that has 200 feet of 15 curves. TotalDepth can plot this with, linear and log scales and with an API header:</p>
+<ul class="simple">
+<li>Plotted with the <a class="reference external" href="../_static/plots/Resistivity_3Track_Logrithmic.xml_47_LAS.svg">Resistivity 3Track Logrithmic</a> format.</li>
+<li>The same data plotted with the <a class="reference external" href="../_static/plots/Triple_Combo_46_LAS.svg">Triple Combo</a> format.</li>
+</ul>
+<p>The original LAS file is <a class="reference external" href="../_static/plots/1001178923.las.txt">here</a>.</p>
+</div>
+<div class="section" id="a-collection-of-las-plots">
+<h4>A Collection of LAS Plots<a class="headerlink" href="#a-collection-of-las-plots" title="Permalink to this headline">¶</a></h4>
+<p>Here is a <a class="reference external" href="../_static/plots_LAS/index.html">directory of six LAS files</a> that was used to make 31 individual plots complete with an index that summarises them. For each LAS file the plotting program automatically choose from 29 plot formats the formats that produce useful plots <a class="footnote-reference" href="#id6" id="id3">[3]</a>.</p>
+</div>
+<div class="section" id="making-las-plots">
+<h4>Making LAS Plots<a class="headerlink" href="#making-las-plots" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">PlotLogs.py</span></code> command line tool was used with the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 PlotLogs.py -A -j4 -r -X 4 Data/ Plot/
+</pre></div>
+</div>
+<p>This searched for LAS files in directory <code class="docutils literal notranslate"><span class="pre">Data/</span></code> with the plots being written in directory <code class="docutils literal notranslate"><span class="pre">Plot/</span></code>.</p>
+<p>The following options have been set:</p>
+<ul class="simple">
+<li>API headers on the top of each plot: <code class="docutils literal notranslate"><span class="pre">-A</span></code></li>
+<li>Multiprocessing on with 4 simultaneous jobs: <code class="docutils literal notranslate"><span class="pre">-j4</span></code></li>
+<li>Recursive search of input directory: <code class="docutils literal notranslate"><span class="pre">-r</span></code></li>
+<li>Uses any available plot specifications from LgFormat XML files which result in 4 curves or more being plotted: <code class="docutils literal notranslate"><span class="pre">-X</span> <span class="pre">4</span></code></li>
+</ul>
+<p>This took around six seconds to compute. More detail on the <code class="docutils literal notranslate"><span class="pre">PlotLogs.py</span></code> is here: <a class="reference internal" href="../cmd_line_tools/TD_cmd_line_tools.html#totaldepth-cmdline-plotlogs"><span class="std std-ref">tdplotlogs</span></a></p>
+</div>
+</div>
+</div>
+<div class="section" id="lis-log-html-summaries">
+<h2>LIS Log HTML Summaries<a class="headerlink" href="#lis-log-html-summaries" title="Permalink to this headline">¶</a></h2>
+<p>The program <code class="docutils literal notranslate"><span class="pre">LisToHtml.py</span></code> takes LIS file(s) and generates an <a class="reference external" href="../_static/LISExampleHTML/index.html">HTML summary</a> for each one.</p>
+<div class="section" id="how-this-html-was-made">
+<h3>How This HTML was Made<a class="headerlink" href="#how-this-html-was-made" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">LisToHtml.py</span></code> command line tool was used with the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 LisToHtml.py -k -j4 -r Data/ HTML/
+</pre></div>
+</div>
+<p>This searched for LAS files in directory <code class="docutils literal notranslate"><span class="pre">Data/</span></code> with the files being written to directory <code class="docutils literal notranslate"><span class="pre">HTML/</span></code>.</p>
+<p>The following options have been set:</p>
+<ul class="simple">
+<li>Keep going as far as possible: <code class="docutils literal notranslate"><span class="pre">-k</span></code></li>
+<li>Multiprocessing on with 4 simultaneous jobs: <code class="docutils literal notranslate"><span class="pre">-j4</span></code></li>
+<li>Recursive search of input directory: <code class="docutils literal notranslate"><span class="pre">-r</span></code></li>
+</ul>
+<p>More detail on the <code class="docutils literal notranslate"><span class="pre">LisToHtml.py</span></code> is here: <a class="reference internal" href="../cmd_line_tools/LIS_cmd_line_tools.html#totaldepth-liscmdline-listohtml"><span class="std std-ref">tdlistohtml</span></a></p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>There is good SVG support among current browsers such as <a class="reference external" href="http://www.opera.com">Opera</a>,  <a class="reference external" href="https://www.google.com/chrome/">Chrome</a> and  <a class="reference external" href="https://www.apple.com/safari/">Safari</a>. You can find a comparison of browser support for SVG at <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_layout_engines_%28Scalable_Vector_Graphics%29">Wikipedia</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Thanks to the <a class="reference external" href="http://www.kgs.ku.edu/Magellan/Logs/index.html">University of Kansas</a> [kgs.ku.edu] for the original data. For these examples that data has been edited or truncated or both.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>A <em>useful</em> plot format is one that can handle at least <em>n</em> curves where <em>n</em> is a number that is specified by the user. If the user specifies 4 then there will be at least 4 curves on each plot.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">TotalDepth Example Outputs</a><ul>
+<li><a class="reference internal" href="#wireline-plots">Wireline Plots</a><ul>
+<li><a class="reference internal" href="#plotting-from-lis">Plotting from LIS</a></li>
+<li><a class="reference internal" href="#plotting-from-las">Plotting From LAS</a><ul>
+<li><a class="reference internal" href="#single-las-plot-examples">Single LAS Plot examples</a></li>
+<li><a class="reference internal" href="#a-collection-of-las-plots">A Collection of LAS Plots</a></li>
+<li><a class="reference internal" href="#making-las-plots">Making LAS Plots</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#lis-log-html-summaries">LIS Log HTML Summaries</a><ul>
+<li><a class="reference internal" href="#how-this-html-was-made">How This HTML was Made</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../intro.html"
+                        title="previous chapter">Introduction to TotalDepth</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../installation.html"
+                        title="next chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/examples.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../intro.html" title="Introduction to TotalDepth"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

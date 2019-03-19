@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SVG Writer Module &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Plot Constants for Wireline Logs" href="PlotConstants.html" />
+    <link rel="prev" title="Plot Pen Stroke" href="Stroke.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="PlotConstants.html" title="Plot Constants for Wireline Logs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Stroke.html" title="Plot Pen Stroke"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index_ref.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_util.html" >Utility Package Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index_plot.html" accesskey="U">Plot Package Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="svg-writer-module">
+<h1>SVG Writer Module<a class="headerlink" href="#svg-writer-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>All these examples assume these imports:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">TotalDepth.util</span> <span class="k">import</span> <span class="n">XmlWrite</span>
+<span class="kn">from</span> <span class="nn">TotalDepth.util.plot</span> <span class="k">import</span> <span class="n">SVGWriter</span>
+<span class="kn">from</span> <span class="nn">TotalDepth.util.plot</span> <span class="k">import</span> <span class="n">Coord</span>
+</pre></div>
+</div>
+<div class="section" id="construction">
+<h3>Construction<a class="headerlink" href="#construction" title="Permalink to this headline">¶</a></h3>
+<p>Writing to an in-memory file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>f = io.StringIO()
+vp = Coord.Box(
+    Coord.Dim(100, &#39;mm&#39;),
+    Coord.Dim(20, &#39;mm&#39;),
+)
+with SVGWriter.SVGWriter(myF, myViewPort):
+    pass
+print(myF.getvalue())
+# Prints:
+&lt;?xml version=&#39;1.0&#39; encoding=&quot;utf-8&quot;?&gt;
+&lt;!DOCTYPE svg PUBLIC &quot;-//W3C//DTD SVG 1.1//EN&quot; &quot;http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd&quot;&gt;
+&lt;svg height=&quot;20.000mm&quot; version=&quot;1.1&quot; width=&quot;100.000mm&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;/&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="writing-objects-to-svg">
+<h3>Writing Objects to SVG<a class="headerlink" href="#writing-objects-to-svg" title="Permalink to this headline">¶</a></h3>
+<p>Writing a rectangles to a stream:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myF = io.StringIO()
+vp = Coord.Box(Coord.Dim(5, &#39;cm&#39;), Coord.Dim(4, &#39;cm&#39;))
+with SVGWriter.SVGWriter(myF, vp) as xS:
+    with XmlWrite.Element(xS, &#39;desc&#39;):
+        xS.characters(&#39;A couple of rectangles&#39;)
+    myPt = Coord.Pt(Coord.Dim(0.5, &#39;cm&#39;), Coord.Dim(0.5, &#39;cm&#39;))
+    myBx = Coord.Box(Coord.Dim(2.0, &#39;cm&#39;), Coord.Dim(1.0, &#39;cm&#39;))
+    with SVGWriter.SVGRect(xS, myPt, myBx):
+        pass
+    myPt = Coord.Pt(Coord.Dim(0.01, &#39;cm&#39;), Coord.Dim(0.01, &#39;cm&#39;))
+    myBx = Coord.Box(Coord.Dim(4.98, &#39;cm&#39;), Coord.Dim(3.98, &#39;cm&#39;))
+    with SVGWriter.SVGRect(xS, myPt, myBx, attrs= {&#39;fill&#39; : &quot;none&quot;, &#39;stroke&#39; : &quot;blue&quot;, &#39;stroke-width&#39; : &quot;.02cm&quot;}):
+        pass
+print(myF.getvalue())
+# Prints:
+&lt;?xml version=&#39;1.0&#39; encoding=&quot;utf-8&quot;?&gt;
+&lt;!DOCTYPE svg PUBLIC &quot;-//W3C//DTD SVG 1.1//EN&quot; &quot;http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd&quot;&gt;
+&lt;svg height=&quot;4.000cm&quot; version=&quot;1.1&quot; width=&quot;5.000cm&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
+    &lt;desc&gt;A couple of rectangles&lt;/desc&gt;
+    &lt;rect height=&quot;1.000cm&quot; width=&quot;2.000cm&quot; x=&quot;0.500cm&quot; y=&quot;0.500cm&quot;/&gt;
+    &lt;rect fill=&quot;none&quot; height=&quot;3.980cm&quot; stroke=&quot;blue&quot; stroke-width=&quot;.02cm&quot; width=&quot;4.980cm&quot; x=&quot;0.010cm&quot; y=&quot;0.010cm&quot;/&gt;
+&lt;/svg&gt;
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SVG Writer Module</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#construction">Construction</a></li>
+<li><a class="reference internal" href="#writing-objects-to-svg">Writing Objects to SVG</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Stroke.html"
+                        title="previous chapter">Plot Pen Stroke</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PlotConstants.html"
+                        title="next chapter">Plot Constants for Wireline Logs</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/util/plot/SVGWriter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="PlotConstants.html" title="Plot Constants for Wireline Logs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Stroke.html" title="Plot Pen Stroke"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index_ref.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_util.html" >Utility Package Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index_plot.html" >Plot Package Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

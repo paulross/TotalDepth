@@ -1,0 +1,194 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>XML Writer Module &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Plot Package Reference" href="plot/index_plot.html" />
+    <link rel="prev" title="HTML Utilities" href="HtmlUtils.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="plot/index_plot.html" title="Plot Package Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="HtmlUtils.html" title="HTML Utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index_ref.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="index_util.html" accesskey="U">Utility Package Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="xml-writer-module">
+<h1>XML Writer Module<a class="headerlink" href="#xml-writer-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The important classes here are:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">XmlWrite.XMLStream</span></code> (and derived classes): these manage the low level stream output.</li>
+<li><code class="docutils literal notranslate"><span class="pre">XmlWrite.XMLElement</span></code>: these handles opening and closing elements via the Context Manager. They require an initialised XMLStream in their constructor.</li>
+</ul>
+<p>Together, if used correctly, these make writing output to a stream fluent in the code. They also make strong guarantees about the encoding and well-formedness of the result.</p>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>All these examples assume these imports:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">TotalDepth.util</span> <span class="k">import</span> <span class="n">XmlWrite</span>
+</pre></div>
+</div>
+<div class="section" id="creating-an-xml-stream">
+<h3>Creating an XML Stream<a class="headerlink" href="#creating-an-xml-stream" title="Permalink to this headline">¶</a></h3>
+<p>Create a file-like object and write to it using an <code class="docutils literal notranslate"><span class="pre">XmlWrite.XmlStream</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myF = io.StringIO()
+with XmlWrite.XmlStream(myF):
+    pass
+print(myF.getvalue())
+# Results in:
+&lt;?xml version=&#39;1.0&#39; encoding=&quot;utf-8&quot;?&gt;\n
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-elements">
+<h3>Simple Elements<a class="headerlink" href="#simple-elements" title="Permalink to this headline">¶</a></h3>
+<p>Create a file-like object and write elements to it using an <code class="docutils literal notranslate"><span class="pre">XmlWrite.XmlElement</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myF = io.StringIO()
+with XmlWrite.XmlStream(myF) as xS:
+    with XmlWrite.Element(xS, &#39;Root&#39;, {&#39;version&#39; : &#39;12.0&#39;}):
+        with XmlWrite.Element(xS, &#39;A&#39;, {&#39;attr_1&#39; : &#39;1&#39;}):
+            pass
+print(myF.getvalue())
+# Results in:
+&lt;?xml version=&#39;1.0&#39; encoding=&quot;utf-8&quot;?&gt;
+&lt;Root version=&quot;12.0&quot;&gt;
+    &lt;A attr_1=&quot;1&quot;/&gt;
+&lt;/Root&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="mixed-content">
+<h3>Mixed Content<a class="headerlink" href="#mixed-content" title="Permalink to this headline">¶</a></h3>
+<p>As above but writing text as well:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myF = io.StringIO()
+with XmlWrite.XmlStream(myF) as xS:
+    with XmlWrite.Element(xS, &#39;Root&#39;, {&#39;version&#39; : &#39;12.0&#39;}):
+        with XmlWrite.Element(xS, &#39;A&#39;, {&#39;attr_1&#39; : &#39;1&#39;}):
+            xS.characters(&#39;&lt;&amp;&gt;&#39;)
+print(myF.getvalue())
+# Results in:
+&lt;?xml version=&#39;1.0&#39; encoding=&quot;utf-8&quot;?&gt;
+&lt;Root version=&quot;12.0&quot;&gt;
+    &lt;A attr_1=&quot;1&quot;&gt;&amp;lt;&amp;amp;&amp;gt;&lt;/A&gt;
+&lt;/Root&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>The unit tests are in <code class="file docutils literal notranslate"><span class="pre">test/TestWMLWrite.py</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">XML Writer Module</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#reference">Reference</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#creating-an-xml-stream">Creating an XML Stream</a></li>
+<li><a class="reference internal" href="#simple-elements">Simple Elements</a></li>
+<li><a class="reference internal" href="#mixed-content">Mixed Content</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="HtmlUtils.html"
+                        title="previous chapter">HTML Utilities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot/index_plot.html"
+                        title="next chapter">Plot Package Reference</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/util/XmlWrite.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="plot/index_plot.html" title="Plot Package Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="HtmlUtils.html" title="HTML Utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TotalDepth</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index_ref.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="index_util.html" >Utility Package Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,324 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Usage In a Python Project &#8212; TotalDepth 0.2.2rc0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TotalDepth Technical Notes" href="tech/index_tech.html" />
+    <link rel="prev" title="LIS Command Line Tools" href="cmd_line_tools/LIS_cmd_line_tools.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tech/index_tech.html" title="TotalDepth Technical Notes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cmd_line_tools/LIS_cmd_line_tools.html" title="LIS Command Line Tools"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="usage-in-a-python-project">
+<h1>Usage In a Python Project<a class="headerlink" href="#usage-in-a-python-project" title="Permalink to this headline">¶</a></h1>
+<p>To use TotalDepth:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">TotalDepth</span>
+</pre></div>
+</div>
+<div class="section" id="important-concepts">
+<h2>Important Concepts<a class="headerlink" href="#important-concepts" title="Permalink to this headline">¶</a></h2>
+<p>Due to the size of data TotalDepth makes extensive use of lazy evaluation and generators, this means that compute power is only used where necesary.</p>
+<div class="section" id="log-pass">
+<h3>Log Pass<a class="headerlink" href="#log-pass" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="glossary.html#term-log-pass"><span class="xref std std-term">Log Pass</span></a> represents a typical, independent, logging recording consisting of a format specification plus binary data. The format specification defines how to interpret the binary data (number of channels, name and units for each channel). In the LIS format the formatting record is known as the <a class="reference internal" href="glossary.html#term-data-format-specification-record"><span class="xref std std-term">Data Format Specification Record</span></a> (<a class="reference internal" href="glossary.html#term-dfsr"><span class="xref std std-term">DFSR</span></a>). A “Repeat Section” plus a “Main Log” are two, distinct, independent Log Passes.</p>
+</div>
+<div class="section" id="frame-set">
+<h3>Frame Set<a class="headerlink" href="#frame-set" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="glossary.html#term-frame-set"><span class="xref std std-term">Frame Set</span></a> is the logging data converted to the platforms internal types (usually C doubles) and stored in memory as a table where each row represents a particular depth (or time) and each column is the outptu of a specific channel. Each row is often referred to as a <a class="reference internal" href="glossary.html#term-frame"><span class="xref std std-term">Frame</span></a></p>
+</div>
+</div>
+</div>
+<div class="section" id="processing-lis-files">
+<h1>Processing LIS Files<a class="headerlink" href="#processing-lis-files" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="important-lis-concepts">
+<h2>Important LIS Concepts<a class="headerlink" href="#important-lis-concepts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lis-file">
+<h3>LIS File<a class="headerlink" href="#lis-file" title="Permalink to this headline">¶</a></h3>
+<p>A LIS file is a wrapper round the platforms native I/O system.</p>
+<p>Reference: <code class="xref py py-class docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.File.FileRead</span></code></p>
+</div>
+<div class="section" id="lis-index">
+<h3>LIS Index<a class="headerlink" href="#lis-index" title="Permalink to this headline">¶</a></h3>
+<p>The LIS file format is designed for recording rather than processing. As such it is a sequential self anouncing format where to understand any part of it you have to have processed all of the preceeding data. This becomes very expensive with large files.</p>
+<p>To avoid this an index is first created for the file that then allows random access to any part of that file including an individual frame. All access to the file is using this index. This index is very fast to create and its size is typically 1% of the original file size.</p>
+<p>Reference: <code class="xref py py-class docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.FileIndexer.FileIndex</span></code></p>
+</div>
+</div>
+<div class="section" id="reading-a-lis-file-table-data">
+<h2>Reading a LIS File Table Data<a class="headerlink" href="#reading-a-lis-file-table-data" title="Permalink to this headline">¶</a></h2>
+<p>Suppose that we have a file in <code class="docutils literal notranslate"><span class="pre">~/tmp/LIS.lis</span></code> and you want to read the well site data. First import what we need:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">TotalDepth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">TotalDepth.LIS.core</span> <span class="k">import</span> <span class="n">File</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">TotalDepth.LIS.core</span> <span class="k">import</span> <span class="n">FileIndexer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+</pre></div>
+</div>
+<p>Then open the LIS file and create an index from it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~/tmp/LIS.lis&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lis_file</span> <span class="o">=</span> <span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">FileRead</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lis_index</span> <span class="o">=</span> <span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">FileIndex</span><span class="p">(</span><span class="n">lis_file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There is a method on the index <code class="docutils literal notranslate"><span class="pre">genAll()</span></code> that iterates through all the records, filter this for only table data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">TotalDepth.LIS.core</span> <span class="k">import</span> <span class="n">LogiRec</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cons_records</span> <span class="o">=</span> <span class="p">[</span><span class="n">lr</span> <span class="k">for</span> <span class="n">lr</span> <span class="ow">in</span> <span class="n">lis_index</span><span class="o">.</span><span class="n">genAll</span><span class="p">()</span> <span class="k">if</span> <span class="n">lr</span><span class="o">.</span><span class="n">lrType</span> <span class="ow">in</span> <span class="n">LogiRec</span><span class="o">.</span><span class="n">LR_TYPE_TABLE_DATA</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cons_records</span>
+<span class="go">[&lt;TotalDepth.LIS.core.FileIndexer.IndexTable object at 0x103ac3dd8&gt;]</span>
+</pre></div>
+</div>
+<p>In this file there is only one table record. Now read it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lis_file</span><span class="o">.</span><span class="n">seekLr</span><span class="p">(</span><span class="n">cons_records</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tell</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">LogiRec</span><span class="o">.</span><span class="n">LrTableRead</span><span class="p">(</span><span class="n">lis_file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can explore the table:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">desc</span>
+<span class="go">&#39;Well site data&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">value</span>
+<span class="go">b&#39;CONS&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">colLabels</span><span class="p">()</span>
+<span class="go">odict_keys([b&#39;MNEM&#39;, b&#39;ALLO&#39;, b&#39;PUNI&#39;, b&#39;TUNI&#39;, b&#39;VALU&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">rowLabels</span><span class="p">()</span>
+<span class="go">dict_keys([b&#39;HIDE&#39;, b&#39;HID1&#39;, b&#39;HID2&#39;, b&#39;CN  &#39;, b&#39;WN  &#39;, ..., b&#39;C30 &#39;])</span>
+</pre></div>
+</div>
+<p>Notice all the entries are represented as Python bytes objects (<code class="docutils literal notranslate"><span class="pre">b'...'</span></code>), this is because LIS does not support Unicode. LIS is also a bit shouty.</p>
+<p>To get a specific value, say the well name:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;WN  &#39;</span><span class="p">][</span><span class="sa">b</span><span class="s1">&#39;VALU&#39;</span><span class="p">])</span>
+<span class="go">CB: type=69 rc=65 size=16 mnem=b&#39;VALU&#39; EngValRc: b&#39;GUSHER&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;WN  &#39;</span><span class="p">][</span><span class="sa">b</span><span class="s1">&#39;VALU&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+<span class="go">b&#39;GUSHER&#39;</span>
+</pre></div>
+</div>
+<p>You can index by integer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+<span class="go">b&#39;WN  &#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+<span class="go">b&#39;GUSHER&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">table</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+<span class="go">[b&#39;WN  &#39;, b&#39;ALLO&#39;, b&#39;    &#39;, b&#39;    &#39;, b&#39;GROSSENKNETEN Z2&#39;]</span>
+</pre></div>
+</div>
+<p>You can index by slice:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">table</span><span class="p">[</span><span class="mi">4</span><span class="p">][:</span><span class="mi">2</span><span class="p">]]</span>
+<span class="go">[b&#39;WN  &#39;, b&#39;ALLO&#39;]</span>
+</pre></div>
+</div>
+<p>To print the whole table there are some generators for this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">genRows</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">genCells</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="go">b&#39;HIDE&#39;  b&#39;ALLO&#39;  b&#39;    &#39;  b&#39;    &#39;  b&#39;MAIN LOG&#39;</span>
+<span class="go">b&#39;HID1&#39;  b&#39;ALLO&#39;  b&#39;    &#39;  b&#39;    &#39;  b&#39;RAW DATA&#39;</span>
+<span class="go">b&#39;HID2&#39;  b&#39;ALLO&#39;  b&#39;    &#39;  b&#39;    &#39;  b&#39;&#39;</span>
+<span class="go">b&#39;CN  &#39;  b&#39;ALLO&#39;  b&#39;    &#39;  b&#39;    &#39;  b&#39;BIG COMPANY&#39;</span>
+<span class="go">b&#39;WN  &#39;  b&#39;ALLO&#39;  b&#39;    &#39;  b&#39;    &#39;  b&#39;GUSHER&#39;</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>Reference: <code class="xref py py-class docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.LogiRec.LrTable</span></code></p>
+</div>
+<div class="section" id="reading-a-lis-file-log-data">
+<h2>Reading a LIS File Log Data<a class="headerlink" href="#reading-a-lis-file-log-data" title="Permalink to this headline">¶</a></h2>
+<p>Suppose that we have a file in <code class="docutils literal notranslate"><span class="pre">~/tmp/LIS.lis</span></code> and you want to read the frame data from a particular log pass, first import what we need:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">TotalDepth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">TotalDepth.LIS.core</span> <span class="k">import</span> <span class="n">File</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">TotalDepth.LIS.core</span> <span class="k">import</span> <span class="n">FileIndexer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+</pre></div>
+</div>
+<p>Then open the LIS file and create an index from it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~/tmp/LIS.lis&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lis_file</span> <span class="o">=</span> <span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">FileRead</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lis_index</span> <span class="o">=</span> <span class="n">TotalDepth</span><span class="o">.</span><span class="n">LIS</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">FileIndexer</span><span class="o">.</span><span class="n">FileIndex</span><span class="p">(</span><span class="n">lis_file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There is a method on the index <code class="docutils literal notranslate"><span class="pre">genLogPasses()</span></code> that iterates through the log passes, lets get them all:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">log_passes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lis_index</span><span class="o">.</span><span class="n">genLogPasses</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">log_passes</span><span class="p">)</span>
+<span class="go">[&lt;TotalDepth.LIS.core.FileIndexer.IndexLogPass object at 0x103ac3e80&gt;]</span>
+</pre></div>
+</div>
+<p>In this file there is only one log pass, we can get the description of it using <code class="docutils literal notranslate"><span class="pre">longstr()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">log_passes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logPass</span><span class="o">.</span><span class="n">longStr</span><span class="p">())</span>
+<span class="go">&lt;TotalDepth.LIS.core.LogPass.LogPass object at 0x103ae10b8&gt;:</span>
+<span class="go">       DFSR: &lt;TotalDepth.LIS.core.LogiRec.LrDFSRRead object at 0x103ac3eb8&gt;: &quot;Data format specification record&quot;</span>
+<span class="go"> Frame plan: &lt;TotalDepth.LIS.core.Type01Plan.FrameSetPlan object at 0x103ae10f0&gt;: indr=0 frame length=24 channels=6</span>
+<span class="go">   Channels: [b&#39;DEPT&#39;, b&#39;SP  &#39;, b&#39;SN  &#39;, b&#39;ILD &#39;, b&#39;CILD&#39;, b&#39;DT  &#39;]</span>
+<span class="go">        RLE: &lt;TotalDepth.LIS.core.Rle.RLEType01 object at 0x103ae1128&gt;: func=None: [RLEItemType01: datum=8592 stride=1014 repeat=7 frames=42, RLEItemType01: datum=16704 stride=None repeat=0 frames=39]</span>
+<span class="go">     X axis: first=2052.983 last=1995.986 frames=375 overall spacing=-0.1524 in optical units=b&#39;M   &#39; (actual units=b&#39;M   &#39;)</span>
+<span class="go">  Frame set: None</span>
+</pre></div>
+</div>
+<p>Note the last line <code class="docutils literal notranslate"><span class="pre">Frame</span> <span class="pre">set:</span> <span class="pre">None</span></code>, this is because the log pass is a lightweight object which does not (yet) contain all the frame data. To read all the frame data from the file we call <code class="docutils literal notranslate"><span class="pre">setFrameData(LisFile)</span></code> on the log pass:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">log_passes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logPass</span><span class="o">.</span><span class="n">setFrameSet</span><span class="p">(</span><span class="n">lis_file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now the frame set is fully populated:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">log_passes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logPass</span><span class="o">.</span><span class="n">genFrameSetScNameUnit</span><span class="p">()))</span>
+<span class="go">[(&#39;DEPT&#39;, &#39;M   &#39;), (&#39;SP  &#39;, &#39;MV  &#39;), (&#39;SN  &#39;, &#39;OHMM&#39;), (&#39;ILD &#39;, &#39;OHMM&#39;), (&#39;CILD&#39;, &#39;MMHO&#39;), (&#39;DT  &#39;, &#39;US/M&#39;)]</span>
+</pre></div>
+</div>
+<p>To get the actual vales in the frame we can access the numpy array directly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">log_passes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logPass</span><span class="o">.</span><span class="n">frameSet</span><span class="o">.</span><span class="n">frames</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span>
+<span class="go">array([[  2.05298340e+03,  -4.54907703e+00,   1.34538269e+00,</span>
+<span class="go">          1.26347518e+00,   3.86598633e+02,  -9.99250000e+02],</span>
+<span class="go">       [  2.05283105e+03,  -5.13720322e+00,   1.36061692e+00,</span>
+<span class="go">          1.29521227e+00,   5.00510803e+02,  -9.99250000e+02],</span>
+<span class="go">       [  2.05267871e+03,  -6.66747475e+00,   1.38543439e+00,</span>
+<span class="go">          1.45785594e+00,   5.95623291e+02,  -9.99250000e+02],</span>
+<span class="go">       ...,</span>
+<span class="go">       [  1.99629077e+03,  -9.99250000e+02,  -9.99250000e+02,</span>
+<span class="go">         -9.99250000e+02,  -9.99250000e+02,  -9.99250000e+02],</span>
+<span class="go">       [  1.99613843e+03,  -9.99250000e+02,  -9.99250000e+02,</span>
+<span class="go">         -9.99250000e+02,  -9.99250000e+02,  -9.99250000e+02],</span>
+<span class="go">       [  1.99598608e+03,  -9.99250000e+02,  -9.99250000e+02,</span>
+<span class="go">         -9.99250000e+02,  -9.99250000e+02,  -9.99250000e+02]])</span>
+</pre></div>
+</div>
+<p>Now, if you are familiar with numpy then all normal operations are possible, for example get the X axis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">array([ 2052.98339844,  2052.83105469,  2052.67871094,  2052.52636719,</span>
+<span class="go">        2052.37402344,  2052.22167969,  2052.06933594,  2051.91650391,</span>
+<span class="go">        2051.76416016,  2051.61181641,  2051.45947266,  2051.30712891,</span>
+<span class="go">        ...</span>
+<span class="go">        1996.29077148,  1996.13842773,  1995.98608398])</span>
+</pre></div>
+</div>
+<p>Find the min, mean, max:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([ 1995.98608398,  -999.25      ,  -999.25      ,  -999.25      ,</span>
+<span class="go">        -999.25      ,  -999.25      ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([ 2024.48480339,  -305.07223682,  -326.84234802,  -324.20620109,</span>
+<span class="go">         206.05499658,    28.2555695 ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([  2.05298340e+03,  -7.69491196e-01,   1.98412299e+00,</span>
+<span class="go">         2.34852839e+00,   1.75242944e+03,   4.59522583e+02])</span>
+</pre></div>
+</div>
+<p>References:</p>
+<p>LogPass: <code class="xref py py-class docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.LogPass.LogPass</span></code></p>
+<p>FrameSet: <code class="xref py py-class docutils literal notranslate"><span class="pre">TotalDepth.LIS.core.FrameSet.FrameSet</span></code></p>
+</div>
+</div>
+<div class="section" id="processing-las-files">
+<h1>Processing LAS Files<a class="headerlink" href="#processing-las-files" title="Permalink to this headline">¶</a></h1>
+<p>TODO:</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Usage In a Python Project</a><ul>
+<li><a class="reference internal" href="#important-concepts">Important Concepts</a><ul>
+<li><a class="reference internal" href="#log-pass">Log Pass</a></li>
+<li><a class="reference internal" href="#frame-set">Frame Set</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#processing-lis-files">Processing LIS Files</a><ul>
+<li><a class="reference internal" href="#important-lis-concepts">Important LIS Concepts</a><ul>
+<li><a class="reference internal" href="#lis-file">LIS File</a></li>
+<li><a class="reference internal" href="#lis-index">LIS Index</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reading-a-lis-file-table-data">Reading a LIS File Table Data</a></li>
+<li><a class="reference internal" href="#reading-a-lis-file-log-data">Reading a LIS File Log Data</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#processing-las-files">Processing LAS Files</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cmd_line_tools/LIS_cmd_line_tools.html"
+                        title="previous chapter">LIS Command Line Tools</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tech/index_tech.html"
+                        title="next chapter">TotalDepth Technical Notes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/usage.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tech/index_tech.html" title="TotalDepth Technical Notes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cmd_line_tools/LIS_cmd_line_tools.html" title="LIS Command Line Tools"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TotalDepth</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2010-2017, Paul Ross.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>
