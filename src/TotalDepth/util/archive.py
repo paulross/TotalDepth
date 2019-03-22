@@ -492,6 +492,7 @@ class FileBase:
     # Number of bytes to take a file fragment of. 18 is useful for LIS+TIF as it gives
     # all the TIF markers [12], the PRH [4] and the LRH [2].
     XXD_NUM_BYTES = 18
+    # XXD_NUM_BYTES = 8
 
     def __init__(self, path: str):
         self.path = path
@@ -504,10 +505,10 @@ class FileBase:
     def __str__(self):
         return ' '.join(
             [
-                f'{self.size:12,d}',
+                f'{self.size:14,d}',
                 f'{self.ext:4s}',
                 f'{self.bin_type:{BINARY_FILE_TYPE_CODE_WIDTH}s}',
-                f'{self.mod_date}',
+                # f'{self.mod_date}',
                 f'{xxd(self.bytes):{xxd_size(self.XXD_NUM_BYTES)}s}',
                 f'{self.path}',
             ]
@@ -628,12 +629,21 @@ class ArchiveCount:
         self._date_hist: typing.Dict[typing.Tuple[int, int], int] = collections.defaultdict(int)
         self.extensions: typing.Set[str] = set()
 
-    def add(self, size: int, mod_timestamp: datetime.datetime, ext: str) -> None:
+    def _reduce_size(self, size: int) -> int:
+        """Takes a file size in bytes and returns an integer measure of the size.
+        NOTE: argument can be zero.
+        Strategies could be:
+
+            - Power, either int(math.log2(size)), int(math.log10(size)), round up if desired.
+            - In kb, return size // 1024
+        """
         if size > 0:
-            size_base2 = int(math.log2(size))
-        else:
-            size_base2 = 0
-        self._size_hist[size_base2] += 1
+            return int(math.log2(size))
+            # return int(math.log10(size))
+        return 0
+
+    def add(self, size: int, mod_timestamp: datetime.datetime, ext: str) -> None:
+        self._size_hist[self._reduce_size(size)] += 1
         self.size_min = min(size, self.size_min)
         self.size_max = max(size, self.size_max)
         self._date_hist[(mod_timestamp.year, mod_timestamp.month)] += 1
@@ -698,12 +708,19 @@ def analyse_archive(files: typing.List[FileBase]) -> None:
             f'      Bytes: {archive_count.total_size:,d} [{archive_count.total_size / summary.total_size:.3%}]'
             f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
         # print(archive_count.size_hist)
-        for k in sorted(archive_count.size_hist.keys()):
-            print(f'{k:4d} : {archive_count.size_hist[k]}')
-        # print(archive_count.date_hist.keys())
-        # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
-        # print(archive_count.date_hist)
-        print()
+
+        # max_count = max(archive_count.size_hist.values())
+        # for k in sorted(archive_count.size_hist.keys()):
+        #     prop = archive_count.size_hist[k] / max_count
+        #     bar_len = int(0.5 + 40 * prop)
+        #     bar = '+' * bar_len
+        #     x_value = f'>2**{k}'
+        #     # print(f'{x_value:10} : {archive_count.size_hist[k]:6d} | {bar}')
+        #     print(f'{x_value:6} | {bar}')
+        # # print(archive_count.date_hist.keys())
+        # # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
+        # # print(archive_count.date_hist)
+        # print()
 
 
 EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
@@ -721,7 +738,7 @@ def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) 
                 result.append(FileOnDisc(path))
 
 
-def explore_tree(path: str, recurse: bool) -> None:
+def explore_tree(path: str, recurse: bool, file_types: typing.List[str]) -> None:
     result: typing.List[FileBase] = []
     assert os.path.isdir(path)
     if recurse:
@@ -735,7 +752,7 @@ def explore_tree(path: str, recurse: bool) -> None:
     # pprint.pprint(result)
     for r in result:
         # print(type(r), r)
-        if r.bin_type in (''): #, 'ASCII'):
+        if len(file_types) == 0 or r.bin_type in file_types: #, 'ASCII'):
             # print(type(r))
             print(r)
     # Output summary
@@ -835,17 +852,19 @@ def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
     parser.add_argument('path_from', help='Path to the archive.')
-    parser.add_argument('path_to', help='Path to the archive.', default='')
+    parser.add_argument('--file-types', default=[], action='append', help='Binary type(s) of file to list, additive.')
+    # parser.add_argument('path_to', help='Path to the archive.', default='')
     parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
-    parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
+    # parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
     args = parser.parse_args()
     print(args)
+    # return 0
 
     if os.path.isdir(args.path_from):
-        if args.path_to == '':
-            explore_tree(args.path_from, args.recurse)
-        else:
-            expand_archive(args.path_from, args.path_to, args.nervous)
+        explore_tree(args.path_from, args.recurse, args.file_types)
+        # if args.path_to == '':
+        # else:
+        #     expand_archive(args.path_from, args.path_to, args.nervous)
 
     return 0
 

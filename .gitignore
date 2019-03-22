@@ -77,4 +77,5 @@ benchmarks/TotalDepth/LIS/core/binary_files/
 # Binary test data
 data/
 
+private/
 

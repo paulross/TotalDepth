@@ -131,6 +131,7 @@ setup(
             'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
             'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
             'tdarchive=TotalDepth.util.archive:main',
+            'tdrp66v1scanfiles=TotalDepth.RP66V1.ScanFile:main',
 #            'TotalDepth=TotalDepth.cli:main'
         ]
     },

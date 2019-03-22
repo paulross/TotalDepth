@@ -22,18 +22,21 @@ interface consistency among command line applications.
 
 Copyright (c) 2010-2011 Paul Ross. All rights reserved.
 """
+import logging
+import multiprocessing
+import argparse
+
 __author__  = 'Paul Ross'
 __date__    = '2011-05-23'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2010-2012 Paul Ross. All rights reserved.'
 
-import multiprocessing
-import argparse
 
 DEFAULT_OPT_MP_JOBS = -1
 DEFAULT_OPT_LOG_LEVEL = 40
 
-def argParser(desc, prog=None, version=None):
+
+def argParser(desc, prog=None, version=None, allow_multiprocessing=True):
     """Return an command line parser with the standard pre-set options.
     
     Standard options are ``-h, --version`` and:
@@ -48,17 +51,19 @@ def argParser(desc, prog=None, version=None):
     if version is not None:
         parser.add_argument('--version', action='version', version='%(prog)s '+version)
     # Adding arguments in, well sort of, alphabetical order (not really)
-    parser.add_argument(
+    if allow_multiprocessing:
+        parser.add_argument(
             "-j", "--jobs",
             type=int,
             dest="jobs",
             default=DEFAULT_OPT_MP_JOBS,
-            help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
-                    % multiprocessing.cpu_count() \
-                    + " Default: %(default)s." 
-        )      
+            help="Max processes when multiprocessing."
+                 f"Zero uses number of native CPUs [{multiprocessing.cpu_count()}]."
+                 " -1 disables multiprocessing. Default: %(default)s."
+        )
     parser.add_argument("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. Default: %(default)s.")
+                        help="Keep going as far as sensible. Default: %(default)s.")
+    # logging._levelToName[level]
     parser.add_argument(
             "-l", "--loglevel",
             type=int,
@@ -68,8 +73,11 @@ def argParser(desc, prog=None, version=None):
         )
     return parser
 
+
 def argParserIn(*args, **kwargs):
-    """Return an command line parser with the standard pre-set options plus an input path as an argument."""
+    """
+    Return an command line parser with the standard pre-set options plus an input path as an argument.
+    """
     myP = argParser(*args, **kwargs)
     # Input specific arguments
     myP.add_argument("-g", "--glob", action="store_true", dest="glob", default=None, 
@@ -79,8 +87,11 @@ def argParserIn(*args, **kwargs):
     myP.add_argument('pathIn', metavar='in', type=str, help='Input path.')
     return myP
 
+
 def argParserInOut(*args, **kwargs):
-    """Return an command line parser with the standard pre-set options plus an input and output paths as an arguments."""
+    """
+    Return an command line parser with the standard pre-set options plus an input and output paths as an arguments.
+    """
     myP = argParserIn(*args, **kwargs)
     myP.add_argument('pathOut', metavar='out', type=str, help='Output path.')
     return myP
