@@ -61,26 +61,26 @@ class Test_retHtmlFileName(unittest.TestCase):
     def test_01(self):
         """Test_retHtmlFileName.test_01(): retHtmlFileName() - basic functionality."""
         # _5458a57e4dc446c657ecb558416c36b5
-        self.assertEqual('_5458a57e4dc446c657ecb558416c36b5.html', HtmlUtils.retHtmlFileName(''))
+        self.assertEqual('_4e1fa911190ecb7368be44999021508c.html', HtmlUtils.retHtmlFileName(''))
         # 987d43c274104ccae9d86bd5aa7d80e0
-        self.assertEqual('foo.lis_987d43c274104ccae9d86bd5aa7d80e0.html', HtmlUtils.retHtmlFileName('foo.lis'))
+        self.assertEqual('foo.lis_e7814c743fa417e7072464a6370586be.html', HtmlUtils.retHtmlFileName('foo.lis'))
         myPathStr = 'a very long path that goes on and on and on and you think that it will never ever stop spam.lis'
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)
         self.assertEqual(
-            'spam.lis_87c42a1bc41f4b8579f088dce504d710.html',
+            'spam.lis_ff17c1de6e309fb16c702faa7e2bd293.html',
             HtmlUtils.retHtmlFileName(myPath),
         )
 
     def test_02(self):
         """Test_retHtmlFileName.test_02(): retHtmlFileLink() - basic functionality."""
-        self.assertEqual('_5458a57e4dc446c657ecb558416c36b5.html#4', HtmlUtils.retHtmlFileLink('', 4))
-        self.assertEqual('foo.lis_987d43c274104ccae9d86bd5aa7d80e0.html#4', HtmlUtils.retHtmlFileLink('foo.lis', 4))
+        self.assertEqual('_4e1fa911190ecb7368be44999021508c.html#4', HtmlUtils.retHtmlFileLink('', 4))
+        self.assertEqual('foo.lis_e7814c743fa417e7072464a6370586be.html#4', HtmlUtils.retHtmlFileLink('foo.lis', 4))
         myPathStr = 'a very long path that goes on and on and on and you think that it will never ever stop spam.lis'
         myPath = os.path.join(*myPathStr.split())
         self.assertEqual('a/very/long/path/that/goes/on/and/on/and/on/and/you/think/that/it/will/never/ever/stop/spam.lis', myPath)
         self.assertEqual(
-            'spam.lis_87c42a1bc41f4b8579f088dce504d710.html#4',
+            'spam.lis_ff17c1de6e309fb16c702faa7e2bd293.html#4',
             HtmlUtils.retHtmlFileLink(myPath, 4),
         )
 
@@ -108,7 +108,7 @@ class Test_XhtmlWrite(unittest.TestCase):
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
-  <a href="chips.lis_ca9b0f0a4f166e8fbd1ca3795e8adc76.html#47">Navigation text</a>
+  <a href="chips.lis_de0b5666bb2303d292de593c61f4e8c8.html#47">Navigation text</a>
 </html>
 """,
             myF.getvalue(),
@@ -124,7 +124,7 @@ class Test_XhtmlWrite(unittest.TestCase):
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
-  <a href="chips.lis_ca9b0f0a4f166e8fbd1ca3795e8adc76.html#47">
+  <a href="chips.lis_de0b5666bb2303d292de593c61f4e8c8.html#47">
     <span class="CSS_class">Navigation text</span>
   </a>
 </html>
@@ -216,17 +216,17 @@ class Test_writeFileListAsTable(unittest.TestCase):
   <table>
     <tr>
       <td>
-        <a href="beans.lis_71bb0c26c74b06cd02a4f56f3e17667f.html">beans.lis</a>
+        <a href="beans.lis_506d7b33f7f4f5e91a27014670a2afe0.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="chips.lis_a11b6c9b0a5036efc32e9b30a09252fc.html">chips.lis</a>
+        <a href="chips.lis_3a5c2c41629c341d4a67dcd26f0876c9.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="eggs.lis_97cf6bc2288e920398a47aee155da4a8.html">eggs.lis</a>
+        <a href="eggs.lis_3e73430bc9a88a153b4239114e1e0149.html">eggs.lis</a>
       </td>
     </tr>
   </table>
@@ -253,17 +253,17 @@ class Test_writeFileListAsTable(unittest.TestCase):
     <tr>
       <td rowspan="3">spam/</td>
       <td>
-        <a href="beans.lis_bd0fa0db0dba3d5deae8b324f475096e.html">beans.lis</a>
+        <a href="beans.lis_ef9772ccc720deea37e190898b7167de.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a>
+        <a href="chips.lis_4beafb06c2c4383049c520ec80713ad4.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a>
+        <a href="eggs.lis_68357c85d8f3631e6db02fe6a036040e.html">eggs.lis</a>
       </td>
     </tr>
   </table>
@@ -291,23 +291,23 @@ class Test_writeFileListAsTable(unittest.TestCase):
     <tr>
       <td rowspan="4">spam/</td>
       <td colspan="2">
-        <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a>
+        <a href="chips.lis_4beafb06c2c4383049c520ec80713ad4.html">chips.lis</a>
       </td>
     </tr>
     <tr>
       <td colspan="2">
-        <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a>
+        <a href="eggs.lis_68357c85d8f3631e6db02fe6a036040e.html">eggs.lis</a>
       </td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
       <td>
-        <a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">beans.lis</a>
+        <a href="beans.lis_07cdde39a527d704f75cb8af7f700d0c.html">beans.lis</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">peas.lis</a>
+        <a href="peas.lis_1fe674e8faaa8dfc406af9f6b7b62f4e.html">peas.lis</a>
       </td>
     </tr>
   </table>
@@ -334,17 +334,17 @@ class Test_writeFileListAsTable(unittest.TestCase):
   <table>
     <tr>
       <td rowspan="4">spam/</td>
-      <td colspan="2">chips.lis:<a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">chips.lis</a></td>
+      <td colspan="2">chips.lis:<a href="chips.lis_4beafb06c2c4383049c520ec80713ad4.html">chips.lis</a></td>
     </tr>
     <tr>
-      <td colspan="2">eggs.lis:<a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">eggs.lis</a></td>
+      <td colspan="2">eggs.lis:<a href="eggs.lis_68357c85d8f3631e6db02fe6a036040e.html">eggs.lis</a></td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
-      <td>beans.lis:<a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">beans.lis</a></td>
+      <td>beans.lis:<a href="beans.lis_07cdde39a527d704f75cb8af7f700d0c.html">beans.lis</a></td>
     </tr>
     <tr>
-      <td>peas.lis:<a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">peas.lis</a></td>
+      <td>peas.lis:<a href="peas.lis_1fe674e8faaa8dfc406af9f6b7b62f4e.html">peas.lis</a></td>
     </tr>
   </table>
 </html>
@@ -377,19 +377,18 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
             HtmlUtils.writeFileListTrippleAsTable(myS, myFileLinkS, {}, False)
         # print()
         # print(myF.getvalue())
-#        print(myF.getvalue())
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <table>
     <tr>
-      <td> <a href="0eggs.lis_5fdd58d724c849dd9d217fbe6a35b3e6.html">Link text 0</a></td>
+      <td> <a href="0eggs.lis_794a10f9fa60f4b19f27a7e42e209f01.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td> <a href="1chips.lis_3cdd79989f0c867f42464c2c02fa184f.html">Link text 1</a></td>
+      <td> <a href="1chips.lis_48b0b051146cd7a23f5aa347318124b7.html">Link text 1</a></td>
     </tr>
     <tr>
-      <td> <a href="2beans.lis_999dc8fa0c627e259d489d8694205092.html">Link text 2</a></td>
+      <td> <a href="2beans.lis_302d2e55820514cd6d7f0636303ea6a1.html">Link text 2</a></td>
     </tr>
   </table>
 </html>
@@ -414,13 +413,13 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
   <table>
     <tr>
       <td rowspan="3">spam/</td>
-      <td> <a href="beans.lis_bd0fa0db0dba3d5deae8b324f475096e.html">Link text 0</a></td>
+      <td> <a href="beans.lis_ef9772ccc720deea37e190898b7167de.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td> <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">Link text 1</a></td>
+      <td> <a href="chips.lis_4beafb06c2c4383049c520ec80713ad4.html">Link text 1</a></td>
     </tr>
     <tr>
-      <td> <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">Link text 2</a></td>
+      <td> <a href="eggs.lis_68357c85d8f3631e6db02fe6a036040e.html">Link text 2</a></td>
     </tr>
   </table>
 </html>
@@ -446,17 +445,17 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
   <table>
     <tr>
       <td rowspan="4">spam/</td>
-      <td colspan="2"> <a href="chips.lis_8b5af66b7399116b669c1b12a95d7d33.html">Link text 0</a></td>
+      <td colspan="2"> <a href="chips.lis_4beafb06c2c4383049c520ec80713ad4.html">Link text 0</a></td>
     </tr>
     <tr>
-      <td colspan="2"> <a href="eggs.lis_b6b735a7daac22b82ecd20fae6189ea5.html">Link text 1</a></td>
+      <td colspan="2"> <a href="eggs.lis_68357c85d8f3631e6db02fe6a036040e.html">Link text 1</a></td>
     </tr>
     <tr>
       <td rowspan="2">fishfingers/</td>
-      <td> <a href="beans.lis_cc44d87fd7fc57302bb8f53e90981986.html">Link text 2</a></td>
+      <td> <a href="beans.lis_07cdde39a527d704f75cb8af7f700d0c.html">Link text 2</a></td>
     </tr>
     <tr>
-      <td> <a href="peas.lis_2cff29fa003c0ea829c7a7d877cae67c.html">Link text 3</a></td>
+      <td> <a href="peas.lis_1fe674e8faaa8dfc406af9f6b7b62f4e.html">Link text 3</a></td>
     </tr>
   </table>
 </html>

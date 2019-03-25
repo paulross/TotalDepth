@@ -205,39 +205,16 @@ class TestCmnCmdOpts(unittest.TestCase):
         myNs = myP.parse_args(['IN', 'OUT'])
         self.assertEqual('IN', myNs.pathIn)
         self.assertEqual('OUT', myNs.pathOut)
-        # print()
-#        print(dir(myP))
-#        print(dir(myNs))
-#        print(myNs._get_args())
-#        print(myNs._get_kwargs())
-#        print(myP.format_usage())
-#         print(myP.format_help())
+        # print('XXX')
+        # print(dir(myP))
+        # print(dir(myNs))
+        # print(myNs._get_args())
+        # print(myNs._get_kwargs())
+        # print(myP.format_usage())
+        # print(myP.format_help())
         self.assertEqual("""usage: Program [-h] [--version] [-j JOBS] [-k] [-l LOGLEVEL] [-g] [-r] in out
 """, myP.format_usage())
-        self.assertEqual("""usage: Program [-h] [--version] [-j JOBS] [-k] [-l LOGLEVEL] [-g] [-r] in out
 
-Description
-
-positional arguments:
-  in                    Input path.
-  out                   Output path.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  -j JOBS, --jobs JOBS  Max processes when multiprocessing. Zero uses number
-                        of native CPUs [4]. -1 disables multiprocessing.
-                        Default: -1.
-  -k, --keep-going      Keep going as far as sensible. Default: False.
-  -l LOGLEVEL, --loglevel LOGLEVEL
-                        Log Level (debug=10, info=20, warning=30, error=40,
-                        critical=50). Default: 40.
-  -g, --glob            File match pattern. Default: None.
-  -r, --recursive       Process input recursively. Default: False.
-
-Copyright (c) 2010-2012 Paul Ross. All rights reserved.
-""", myP.format_help())
-    
 class Special(unittest.TestCase):
     """Special tests."""
     pass
