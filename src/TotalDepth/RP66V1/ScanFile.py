@@ -32,11 +32,17 @@ def scan_file(path: str, verbose: int, keep_going: bool) -> None:
         rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
         print(rp66_file)
         _write_storage_unit_label(rp66_file.sul)
+
+        for l, lrsh in enumerate(rp66_file.iter_logical_record_segments()):
+            print('  [{:2d}] {} {}'.format(l, lrsh, lrsh.attribute_str()))
+        print()
         for v, vr in enumerate(rp66_file.iter_visible_records()):
             print('[{:8,d}] {}'.format(v, vr))
-            for l, lrsh in enumerate(rp66_file.iter_logical_record_segments(vr)):
+            for l, lrsh in enumerate(rp66_file.iter_visible_record_logical_record_segments(vr)):
                 print('  [{:2d}] {} {}'.format(l, lrsh, lrsh.attribute_str()))
-
+        print('Logical Records:')
+        for l, (lrsh, bya) in enumerate(rp66_file.iter_logical_records()):
+            print('[{:2d}] {} {}'.format(l, lrsh, len(bya)))
 
 # parser.add_argument(
 #         "-d", "--dump",

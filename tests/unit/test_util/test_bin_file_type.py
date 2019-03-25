@@ -1,7 +1,8 @@
 import io
 import typing
 
-from TotalDepth.util import archive
+import TotalDepth.util.bin_file_type
+# from TotalDepth.util import archive
 
 import pytest
 
@@ -40,7 +41,7 @@ import pytest
     )
 )
 def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
-    result = archive.RE_LAS_VERSION_LINE.match(version_line)
+    result = TotalDepth.util.bin_file_type.RE_LAS_VERSION_LINE.match(version_line)
     assert result is not None
     assert result.groups() == groups
 
@@ -77,7 +78,7 @@ def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
     )
 )
 def test__lis(fobj: io.BytesIO, expected: int):
-    result = archive._lis(fobj)
+    result = TotalDepth.util.bin_file_type._lis(fobj)
     assert result == expected
 
 
@@ -101,7 +102,7 @@ LIS_PR_GOOD_BYTES = b'\x00\x3e\x00\x00\x80\x00'
     )
 )
 def test__lis_tif(fobj: io.BytesIO, expected: int):
-    result = archive._lis_tif(fobj)
+    result = TotalDepth.util.bin_file_type._lis_tif(fobj)
     assert result == expected
 
 
@@ -121,7 +122,7 @@ def test__lis_tif(fobj: io.BytesIO, expected: int):
     )
 )
 def test__lis_tif_r(fobj: io.BytesIO, expected: int):
-    result = archive._lis_tif_r(fobj)
+    result = TotalDepth.util.bin_file_type._lis_tif_r(fobj)
     assert result == expected
 
 
@@ -282,7 +283,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
     )
 )
 def test__las(fobj: io.BytesIO, expected: int):
-    result = archive._las(fobj, (b'1.2:', b'1.2'))
+    result = TotalDepth.util.bin_file_type._las(fobj, (b'1.2:', b'1.2'))
     assert result == expected
 
 
@@ -303,7 +304,7 @@ def test__las(fobj: io.BytesIO, expected: int):
     )
 )
 def test__las12(fobj: io.BytesIO, expected: int):
-    result = archive._lasv12(fobj)
+    result = TotalDepth.util.bin_file_type._lasv12(fobj)
     assert result == expected
 
 
@@ -324,7 +325,7 @@ def test__las12(fobj: io.BytesIO, expected: int):
     )
 )
 def test__las20(fobj: io.BytesIO, expected: int):
-    result = archive._lasv20(fobj)
+    result = TotalDepth.util.bin_file_type._lasv20(fobj)
     assert result == expected
 
 
@@ -345,7 +346,7 @@ def test__las20(fobj: io.BytesIO, expected: int):
     )
 )
 def test__las30(fobj: io.BytesIO, expected: int):
-    result = archive._lasv30(fobj)
+    result = TotalDepth.util.bin_file_type._lasv30(fobj)
     assert result == expected
 
 
@@ -500,7 +501,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
     )
 )
 def test__rp66v1(fobj: io.BytesIO, expected: int):
-    result = archive._rp66v1(fobj)
+    result = TotalDepth.util.bin_file_type._rp66v1(fobj)
     assert result == expected
 
 
@@ -530,7 +531,7 @@ def test__rp66v1(fobj: io.BytesIO, expected: int):
     )
 )
 def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
-    result = archive._rp66v1_tif(fobj)
+    result = TotalDepth.util.bin_file_type._rp66v1_tif(fobj)
     assert result == expected
 
 
@@ -560,7 +561,7 @@ def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
     )
 )
 def test__rp66v1_tif_r(fobj: io.BytesIO, expected: int):
-    result = archive._rp66v1_tif_r(fobj)
+    result = TotalDepth.util.bin_file_type._rp66v1_tif_r(fobj)
     assert result == expected
 
 
@@ -572,7 +573,7 @@ def test__rp66v1_tif_r(fobj: io.BytesIO, expected: int):
     )
 )
 def test__ascii(fobj: io.BytesIO, expected: int):
-    result = archive._ascii(fobj)
+    result = TotalDepth.util.bin_file_type._ascii(fobj)
     assert result == expected
 
 
@@ -586,7 +587,7 @@ def test__ascii(fobj: io.BytesIO, expected: int):
     )
 )
 def test__zip(fobj: io.BytesIO, expected: int):
-    result = archive._zip(fobj)
+    result = TotalDepth.util.bin_file_type._zip(fobj)
     assert result == expected
 
 
@@ -600,7 +601,7 @@ def test__zip(fobj: io.BytesIO, expected: int):
     )
 )
 def test__pdf(fobj: io.BytesIO, expected: int):
-    result = archive._pdf(fobj)
+    result = TotalDepth.util.bin_file_type._pdf(fobj)
     assert result == expected
 
 
@@ -702,7 +703,7 @@ def test__pdf(fobj: io.BytesIO, expected: int):
     )
 )
 def test_binary_file_type_from_bytes(fobj: io.BytesIO, expected: str):
-    result = archive.binary_file_type(fobj)
+    result = TotalDepth.util.bin_file_type.binary_file_type(fobj)
     assert result == expected
 
 
