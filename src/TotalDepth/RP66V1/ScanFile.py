@@ -8,6 +8,7 @@ import time
 import typing
 
 import TotalDepth.RP66V1.core.File
+from TotalDepth.util.bin_file_type import format_bytes
 
 __author__  = 'Paul Ross'
 __date__    = '2019-03-21'
@@ -35,14 +36,25 @@ def scan_file(path: str, verbose: int, keep_going: bool) -> None:
 
         for l, lrsh in enumerate(rp66_file.iter_logical_record_segments()):
             print('  [{:2d}] {} {}'.format(l, lrsh, lrsh.attribute_str()))
+            if l > 48:
+                break
         print()
         for v, vr in enumerate(rp66_file.iter_visible_records()):
             print('[{:8,d}] {}'.format(v, vr))
             for l, lrsh in enumerate(rp66_file.iter_visible_record_logical_record_segments(vr)):
                 print('  [{:2d}] {} {}'.format(l, lrsh, lrsh.attribute_str()))
+            if v > 10:
+                break
         print('Logical Records:')
-        for l, (lrsh, bya) in enumerate(rp66_file.iter_logical_records()):
-            print('[{:2d}] {} {}'.format(l, lrsh, len(bya)))
+        for l, (vr_position, lrsh_position, lr_type, by) in enumerate(rp66_file.iter_logical_records()):
+            pass
+            print(
+                '[{:2d}] 0x{:08x} 0x{:08x} {:3d} 0x{:04x}    {}'.format(
+                    l, vr_position, lrsh_position, lr_type, len(by), format_bytes(by[:16])
+                )
+            )
+            # if l > 48:
+            #     break
 
 # parser.add_argument(
 #         "-d", "--dump",

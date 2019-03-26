@@ -186,7 +186,7 @@ class VisibleRecord:
 
 class LogicalRecordSegmentHeader:
     """RP66V1 Logical Record Segment Header. See See [RP66V1] 2.2.2.1"""
-    # NUMBER_OF_BYTES = 4
+    HEAD_LENGTH = 4
     # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
 
     def __init__(self, fobj: typing.BinaryIO):
@@ -201,6 +201,9 @@ class LogicalRecordSegmentHeader:
             length = read_two_bytes_big_endian(fobj)
             # TODO: Raise on minimum length. Maybe make this a read/write property or descriptor
             attributes = read_one_byte(fobj)
+            # TODO: Raise on attribute conflicts, for example:
+            # If encryption packet then encryption must be set
+            # Compare successors with previous - trailing length must be all or nothing, encryption all or nothing.
             record_type = read_one_byte(fobj)
         except ExceptionEOF:
             raise ExceptionLogicalRecordSegmentHeaderEOF(f'LogicalRecordSegmentHeader EOF at 0x{position:x}')
@@ -280,10 +283,10 @@ class LogicalRecordSegmentHeader:
     @property
     def logical_data_length(self):
         """Returns the length of the logical data, including padding but excluding the tail."""
-        ret = self.length
-        if self.has_trailing_length:
-            ret -= 2
+        ret = self.length - self.HEAD_LENGTH
         if self.has_checksum:
+            ret -= 2
+        if self.has_trailing_length:
             ret -= 2
         return ret
 
@@ -306,6 +309,8 @@ class FileRead:
     def _set_file_and_read_first_logical_record(self) -> None:
         self._set_file_and_read_first_visible_record()
         self.logical_record_segment_header.read(self.file)
+        if not self.logical_record_segment_header.is_first:
+            raise ExceptionFileRead('TODO: Error message')
 
     def _move_to_next_visible_and_logical_record_segment(self, vr_position: int, lrsh_position: int) -> None:
         """Sets the file up to read a LRSH within a Visible Record. It is up to the caller to make sure that
@@ -372,16 +377,34 @@ class FileRead:
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
-    def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, bytes]]:
+    def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, int, bytes]]:
         self._set_file_and_read_first_logical_record()
         try:
             while True:
                 # Loop for each yield
-                by_array: bytearray = bytearray()
-                position = self.logical_record_segment_header.position
+                vr_position = self.visible_record.position
+                lrsh_position = self.logical_record_segment_header.position
                 lr_type = self.logical_record_segment_header.record_type
-                while True:
-                    # Loop for each segment
+                by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
+                if len(by) != self.logical_record_segment_header.logical_data_length:
+                    # TODO: Write HEX values
+                    raise ExceptionFileReadEOF(
+                        f'Premature EOF reading {self.logical_record_segment_header.length} bytes from LRSH at'
+                        f' {self.logical_record_segment_header.position}'
+                    )
+                if self.logical_record_segment_header.must_strip_padding:
+                    pad_len = by[-1]
+                    assert 0 < pad_len < 4
+                    # print('TRACE: would strip: {}'.format(self.logical_record_segment_header), pad_len, len(by))#, by)
+                    assert len(by) >= 1
+                    assert len(by) >= pad_len
+                    # Maximum padding is 3 by observation
+                    by = by[:-pad_len]
+                by_array: bytearray = bytearray()
+                by_array.extend(by)
+                while not self.logical_record_segment_header.is_last:
+                    # Loop for each subsequent segment
+                    self._seek_and_read_next_logical_record_segment()
                     by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
                     if len(by) != self.logical_record_segment_header.logical_data_length:
                         raise ExceptionFileReadEOF(
@@ -392,14 +415,8 @@ class FileRead:
                     if self.logical_record_segment_header.must_strip_padding:
                         by = by[:-by[-1]]
                     by_array.extend(by)
-                    if self.logical_record_segment_header.is_last:
-                        yield position, lr_type, by_array
-                        break
-                    # FIXME:
-                    next_position = self.logical_record_segment_header.next_position
-                    self.file.seek(next_position)
-                    if next_position == self.visible_record.next_position:
-                        self.visible_record.read_next(self.file)
-                    self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
+                yield vr_position, lrsh_position, lr_type, bytes(by_array)
+                self._seek_and_read_next_logical_record_segment()
+                assert self.logical_record_segment_header.is_first
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
