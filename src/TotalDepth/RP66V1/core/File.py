@@ -291,6 +291,77 @@ class LogicalRecordSegmentHeader:
         return ret
 
 
+class LogicalRecordPosition:
+    def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
+        # Check VisibleRecord
+        if vr.position < StorageUnitLabel.SIZE:
+            raise ValueError(f'VisibleRecord position 0x{vr.position:x} must be >= 0x{StorageUnitLabel.SIZE:x}')
+        if vr.length < LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
+            raise ValueError(
+                f'VisibleRecord length 0x{vr.length:x} must be >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
+            )
+        if vr.length > VisibleRecord.MAX_LENGTH:
+            raise ValueError(f'VisibleRecord length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}')
+        # Check LogicalRecordSegmentHeader
+        if lrsh.position < StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:
+            raise ValueError(
+                f'LogicalRecordSegmentHeader position 0x{lrsh.position:x} must be'
+                f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:x}'
+            )
+        if lrsh.position > vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
+            raise ValueError(
+                f'LogicalRecordSegmentHeader position 0x{lrsh.position:x} must be'
+                f' <= 0x{vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
+            )
+        if lrsh.length < LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
+            raise ValueError(
+                f'LogicalRecordSegmentHeader length 0x{lrsh.length:x} must be'
+                f' >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
+            )
+        if lrsh.length > vr.length - VisibleRecord.NUMBER_OF_BYTES:
+            raise ValueError(
+                f'LogicalRecordSegmentHeader length 0x{lrsh.length:x} must be'
+                f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
+            )
+        if not lrsh.is_first:
+            raise ValueError(f'LogicalRecordSegmentHeader must be the first in the sequence of segments.')
+        self.vr_position = vr.position
+        self.lrsh_position = lrsh.position
+
+
+class LogicalData:
+    """Class that holds data bytes and can successively read them."""
+    def __init__(self, by: bytes):
+        self.bytes = by
+        self.index = 0
+
+    def peek(self) -> int:
+        """Return the next bytes without incrementing the index."""
+        return self.bytes[self.index]
+
+    def read(self) -> int:
+        """Return the next bytes and increment the index."""
+        ret = self.bytes[self.index]
+        self.index += 1
+        return ret
+
+    def chunk(self, length: int) -> bytes:
+        """Return the next length bytes and increment the index."""
+        ret = self.bytes[self.index:self.index + length]
+        self.index += length
+        return ret
+
+    @property
+    def remain(self) -> int:
+        return len(self.bytes) - self.index
+
+    def reset(self) -> None:
+        self.index = 0
+
+    def __bool__(self):
+        return self.remain > 0
+
+
 class FileRead:
     def __init__(self, file: typing.BinaryIO):
         self.file = file
@@ -377,7 +448,7 @@ class FileRead:
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
-    def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, int, bytes]]:
+    def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, int, LogicalData]]:
         self._set_file_and_read_first_logical_record()
         try:
             while True:
@@ -415,7 +486,7 @@ class FileRead:
                     if self.logical_record_segment_header.must_strip_padding:
                         by = by[:-by[-1]]
                     by_array.extend(by)
-                yield vr_position, lrsh_position, lr_type, bytes(by_array)
+                yield vr_position, lrsh_position, lr_type, LogicalData(bytes(by_array))
                 self._seek_and_read_next_logical_record_segment()
                 assert self.logical_record_segment_header.is_first
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
