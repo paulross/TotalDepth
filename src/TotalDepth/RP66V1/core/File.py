@@ -355,7 +355,7 @@ class LogicalData:
     def remain(self) -> int:
         return len(self.bytes) - self.index
 
-    def reset(self) -> None:
+    def rewind(self) -> None:
         self.index = 0
 
     def __bool__(self):

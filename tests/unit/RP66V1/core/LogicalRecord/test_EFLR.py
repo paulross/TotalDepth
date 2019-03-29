@@ -303,7 +303,7 @@ LOGICAL_DATA_FROM_STANDARD = LogicalData(
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
-    ld.reset()
+    ld.rewind()
     EFLR.ExplicitlyFormattedLogicalRecord(ld)
 
 
@@ -314,7 +314,7 @@ def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_set(ld):
-    ld.reset()
+    ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
     assert eflr.set.type == b'CHANNEL'
     assert eflr.set.name == b'0'
@@ -327,7 +327,7 @@ def test_ExplicitlyFormattedLogicalRecord_set(ld):
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_template(ld):
-    ld.reset()
+    ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
     assert len(eflr.template) == 5
     # ATTRIB[0]: LR
@@ -347,3 +347,5 @@ def test_ExplicitlyFormattedLogicalRecord_template(ld):
     assert eflr.template.attrs[4].label == b'DIMENSION'
     assert eflr.template.attrs[4].rep_code == 0x12
     assert eflr.template.attrs[4].value[0] == 0x01
+
+# TODO: Test list of objects.
