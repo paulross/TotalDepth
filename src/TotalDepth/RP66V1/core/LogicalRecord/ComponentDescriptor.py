@@ -74,7 +74,7 @@ class ComponentDescriptor:
     CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_MAP = {
         'L': CharacteristicRepCodeGlobalDefault('Label', 'IDENT', b''),
         'C': CharacteristicRepCodeGlobalDefault('Count', 'UVARI', 1),
-        'R': CharacteristicRepCodeGlobalDefault('Representation Code', 'USHORT', 19), # IDENT
+        'R': CharacteristicRepCodeGlobalDefault('Representation Code', 'USHORT', 19),  # IDENT
         'U': CharacteristicRepCodeGlobalDefault('Units', 'UNITS', b''),
         'V': CharacteristicRepCodeGlobalDefault('Value', None, None),
     }

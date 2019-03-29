@@ -5,6 +5,7 @@ import pytest
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
+from TotalDepth.RP66V1.core import RepCode
 
 
 @pytest.mark.parametrize(
@@ -288,6 +289,12 @@ LOGICAL_DATA_FROM_STANDARD = LogicalData(
     # Attribute: CV
     b'\x29\x02\x08\x14'
     # Attribute: V
+    # NOTE: [RP66V1 Error]
+    # There is an error in the standard. In [RP66V1 Section 3.2.3.2 Figure 3-8] the third attribute in the third object
+    # is specified as b'\x21\x0d' but described as "ATTRIB: V UNORM"
+    # In actuality b'\x21\x0d' is "ATTRIB: V SNORM"
+    # Correction: "ATTRIB: V UNORM" would be b'\x21\x10'
+    # In our case we take the binary not the explanation.
     b'\x21\x0d'
     # Absent Attribute
     b'\x00'
@@ -348,4 +355,133 @@ def test_ExplicitlyFormattedLogicalRecord_template(ld):
     assert eflr.template.attrs[4].rep_code == 0x12
     assert eflr.template.attrs[4].value[0] == 0x01
 
-# TODO: Test list of objects.
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_FROM_STANDARD,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_objects(ld):
+    ld.rewind()
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    assert len(eflr.template) == 5
+    assert len(eflr.objects) == 3
+    ## Object #1
+    obj_index: int = 0
+    assert eflr.objects[0].name == RepCode.ObjectName(0, 0, b'TIME')
+    assert len(eflr.objects[0].attrs) == len(eflr.template)
+    # Attribute 0
+    attr_index = 0
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'LONG-NAME'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['OBNAME']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.ObjectName(0, 0, b'1')]
+    # Attribute 1
+    attr_index = 1
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'ELEMENT-LIMIT'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [1]
+    # Attribute 2
+    attr_index = 2
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'REPRESENTATION-CODE'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['USHORT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.REP_CODE_STR_TO_INT['FSINGL']]
+    # Attribute 3
+    attr_index = 3
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'UNITS'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['IDENT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [b'S']
+    # Attribute 4
+    attr_index = 4
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'DIMENSION'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [1]
+    ## Object #2
+    obj_index: int = 1
+    assert eflr.objects[0].name == RepCode.ObjectName(0, 0, b'TIME')
+    assert len(eflr.objects[0].attrs) == len(eflr.template)
+    # Attribute 0
+    attr_index = 0
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'LONG-NAME'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['OBNAME']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.ObjectName(0, 0, b'2')]
+    # Attribute 1
+    attr_index = 1
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'ELEMENT-LIMIT'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [1]
+    # Attribute 2
+    attr_index = 2
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'REPRESENTATION-CODE'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['USHORT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.REP_CODE_STR_TO_INT['FDOUBL']]
+    # Attribute 3
+    attr_index = 3
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'UNITS'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['IDENT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [b'PSI']
+    # Attribute 4
+    attr_index = 4
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'DIMENSION'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [1]
+    ## Object #3
+    obj_index: int = 2
+    assert eflr.objects[0].name == RepCode.ObjectName(0, 0, b'TIME')
+    assert len(eflr.objects[0].attrs) == len(eflr.template)
+    # Attribute 0
+    attr_index = 0
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'LONG-NAME'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['OBNAME']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.ObjectName(0, 0, b'3')]
+    # Attribute 1
+    attr_index = 1
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'ELEMENT-LIMIT'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 2
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [8, 20]
+    # Attribute 2
+    attr_index = 2
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'REPRESENTATION-CODE'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['USHORT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    # TODO: Check this, UNORM surely?
+    assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.REP_CODE_STR_TO_INT['SNORM']]
+    # Attribute 3
+    attr_index = 3
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'UNITS'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 1
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['IDENT']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == None
+    # Attribute 4
+    attr_index = 4
+    assert eflr.objects[obj_index].attrs[attr_index].label == b'DIMENSION'
+    assert eflr.objects[obj_index].attrs[attr_index].count == 2
+    assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
+    assert eflr.objects[obj_index].attrs[attr_index].units == b''
+    assert eflr.objects[obj_index].attrs[attr_index].value == [8, 10]

@@ -26,6 +26,14 @@ class ExceptionEFLRAttribute(ExceptionEFLR):
     pass
 
 
+class ExceptionEFLRTemplate(ExceptionEFLR):
+    pass
+
+
+class ExceptionEFLRObject(ExceptionEFLR):
+    pass
+
+
 class Set:
     def __init__(self, ld: LogicalData):
         component_descriptor = ComponentDescriptor(ld.read())
@@ -54,6 +62,10 @@ class AttributeBase:
         if isinstance(other, AttributeBase):
             return self.__dict__ == other.__dict__
         return NotImplemented
+
+    def __str__(self) -> str:
+        return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
+            f' R: {self.rep_code} U: {self.units} V: {self.value}'
 
 
 class TemplateAttribute(AttributeBase):
@@ -106,7 +118,7 @@ class Template:
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
-                raise ExceptionEFLRSet(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
+                raise ExceptionEFLRTemplate(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
             self.attrs.append(TemplateAttribute(component_descriptor, ld))
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
@@ -128,7 +140,7 @@ class Object:
     def __init__(self, ld: LogicalData, template: Template):
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_object:
-            raise ExceptionEFLRSet(
+            raise ExceptionEFLRObject(
                 f'Component Descriptor does not represent a object but a {component_descriptor.type}.')
         self.name: ObjectName = OBNAME(ld)
         self.attrs: typing.List[typing.Union[AttributeBase, None]] = []
@@ -136,7 +148,7 @@ class Object:
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
-                raise ExceptionEFLRSet(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
+                raise ExceptionEFLRObject(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
             if template[index].component_descriptor.is_invariant_attribute:
                 self.attrs.append(template[index])
             elif template[index].component_descriptor.is_absent_attribute:
@@ -149,6 +161,12 @@ class Object:
                 # if next_component_descriptor.is_object:
                 #     break
             index += 1
+        while len(self.attrs) < len(template):
+            self.attrs.append(template[len(self.attrs)])
+        if len(template) != len(self.attrs):
+            raise ExceptionEFLRObject(
+                f'Template specifies {len(template)} attributes but Logical Data has {len(self.attrs)}'
+            )
 
     def __len__(self) -> int:
         return len(self.attrs)

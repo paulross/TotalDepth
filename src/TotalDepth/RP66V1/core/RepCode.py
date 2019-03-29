@@ -46,6 +46,38 @@ class ExceptionRepCode(ExceptionTotalDepthRP66V1):
     pass
 
 
+REP_CODE_INT_TO_STR = {
+    1: 'FSHORT',
+    2: 'FSINGL',
+    3: 'FSING1',
+    4: 'FSING2',
+    5: 'ISINGL',
+    6: 'VSINGL',
+    7: 'FDOUBL',
+    8: 'FDOUB1',
+    9: 'FDOUB2',
+    10: 'CSINGL',
+    11: 'CDOUBL',
+    12: 'SSHORT',
+    13: 'SNORM',
+    14: 'SLONG',
+    15: 'USHORT',
+    16: 'UNORM',
+    17: 'ULONG',
+    18: 'UVARI',
+    19: 'IDENT',
+    20: 'ASCII',
+    21: 'DTIME',
+    22: 'ORIGIN',
+    23: 'OBNAME',
+    24: 'OBJREF',
+    25: 'ATTREF',
+    26: 'STATUS',
+    27: 'UNITS',
+}
+REP_CODE_STR_TO_INT = {v: k for k, v in REP_CODE_INT_TO_STR.items()}
+
+
 def FSINGL(ld: LogicalData) -> float:
     """Representation code 2, IEEE single precision floating point"""
     by = ld.chunk(4)
@@ -98,6 +130,10 @@ def ORIGIN(ld: LogicalData) -> int:
     return UVARI(ld)
 
 
+# This has three fields:
+# O - Origin Reference as a ORIGIN type (UVARI).
+# C - Copy number as a USHORT type.
+# I - Identifier as an IDENT type.
 ObjectName = collections.namedtuple('ObjectName', 'O, C, I')
 
 
