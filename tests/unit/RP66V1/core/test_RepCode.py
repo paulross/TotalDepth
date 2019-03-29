@@ -16,6 +16,37 @@ from TotalDepth.RP66V1.core.File import LogicalData
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        # Examples from [RP66V1 Appendix B Section B.2]
+        (LogicalData(b'\x43\x19\x00\x00'), 153.0),
+        (LogicalData(b'\xc3\x19\x00\x00'), -153.0),
+        # Example from RP66V2
+        (LogicalData(b'\x00\x00\x00\x00'), 0.0),
+    )
+)
+def test_FSINGL(ld, expected):
+    result = RepCode.FSINGL(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        # Examples from [RP66V1 Appendix B Section B.7 NOTE: These are only 4 byte examples, RP66V2 has better examples]
+        (LogicalData(b'\x40\x63\x20\x00\x00\x00\x00\x00'), 153.0),
+        (LogicalData(b'\xc0\x63\x20\x00\x00\x00\x00\x00'), -153.0),
+        (LogicalData(b'\x00\x00\x00\x00\x00\x00\x00\x00'), 0.0),
+    )
+)
+def test_FDOUBL(ld, expected):
+    result = RepCode.FDOUBL(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         (LogicalData(b'\x00'), 0),
         (LogicalData(b'\xd9'), 217),  # RP66V2 example.
         (LogicalData(b'\xff'), 255),

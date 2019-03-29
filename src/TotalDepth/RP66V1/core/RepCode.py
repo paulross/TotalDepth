@@ -36,6 +36,7 @@ Code	Name	Size in Bytes	Descirption (sic)
 27	    UNITS	V	            Units expression
 """
 import collections
+import struct
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
@@ -43,6 +44,20 @@ from TotalDepth.RP66V1.core.File import LogicalData
 
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
     pass
+
+
+def FSINGL(ld: LogicalData) -> float:
+    """Representation code 2, IEEE single precision floating point"""
+    by = ld.chunk(4)
+    value = struct.unpack('>f', by)
+    return value[0]
+
+
+def FDOUBL(ld: LogicalData) -> float:
+    """Representation code 7, IEEE double precision floating point"""
+    by = ld.chunk(8)
+    value = struct.unpack('>d', by)
+    return value[0]
 
 
 def _pascal_string(ld: LogicalData) -> bytes:
@@ -100,6 +115,8 @@ def UNITS(ld: LogicalData) -> bytes:
 
 # Map of Representation code name to functions that take a LogicalData object.
 REP_CODE_MAP = {
+    2: FSINGL,
+    7: FDOUBL,
     15: USHORT,
     18: UVARI,
     19: IDENT,
