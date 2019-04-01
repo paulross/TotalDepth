@@ -101,6 +101,10 @@ class ComponentDescriptor:
             return self._desc == other._desc
         return NotImplemented
 
+    def __str__(self):
+        # return f'{self._desc:08b}'
+        return f'{self._bits_1_3 >> 5:03b} {self._bits_4_8:05b}'
+
     @property
     def _bits_1_3(self) -> int:
         """Returns the bits 1-3 as the upper three bits in the range 0x00 to 0xe0 in steps of 0x20.

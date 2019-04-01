@@ -97,11 +97,40 @@ def _pascal_string(ld: LogicalData) -> bytes:
     return ld.chunk(siz)
 
 
+def SLONG(ld: LogicalData) -> int:
+    """
+    Representation code 14, Signed 4-byte integer.
+    [RP66V1 Appendix B Section B.14]
+    """
+    by = ld.chunk(4)
+    value = struct.unpack('>i', by)
+    return value[0]
+
+
 def USHORT(ld: LogicalData) -> int:
+    """
+    USHORT Representation code 15, Unsigned 1-byte integer.
+    [RP66V1 Appendix B Section B.15]
+    """
     return ld.read()
 
 
+def UNORM(ld: LogicalData) -> int:
+    """
+    Representation code 16, Unsigned 2-byte integer.
+    [RP66V1 Appendix B Section B.16]
+    """
+    ret = ld.read()
+    ret <<= 8
+    ret |= ld.read()
+    return ret
+
+
 def UVARI(ld: LogicalData) -> int:
+    """
+    Representation code 18, Variable-length unsigned integer.
+    [RP66V1 Appendix B Section B.18]
+    """
     value: int = ld.read()
     if value & 0xc0 == 0x80:
         # Two bytes
@@ -123,7 +152,49 @@ def UVARI(ld: LogicalData) -> int:
 
 
 def IDENT(ld: LogicalData) -> bytes:
+    """
+    Representation code 19, Variable length identifier. Length up to 256 bytes.
+    [RP66V1 Appendix B Section B.19]
+    """
     return _pascal_string(ld)
+
+
+def ASCII(ld: LogicalData) -> bytes:
+    """
+    Representation code 20, Variable length identifier. Length up to 2**30-1 bytes.
+    [RP66V1 Appendix B Section B.20]
+    """
+    size: int = UVARI(ld)
+    return ld.chunk(size)
+
+
+class DateTime:
+    def __init__(self, ld: LogicalData):
+        # TODO: Check ranges
+        self.year: int = USHORT(ld) + 1900
+        v: int = ld.read()
+        self.tz = (v >> 4) & 0xf
+        self.month: int = v & 0xf
+        self.day: int = USHORT(ld)
+        self.hour: int = USHORT(ld)
+        self.minute: int = USHORT(ld)
+        self.second: int = USHORT(ld)
+        self.millisecond: int = UNORM(ld)
+
+    def __str__(self):
+        # TODO: Timezone
+        return f'{self.year}-{self.month:02d}-{self.day:02d}' \
+            f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d}'
+
+    __repr__ = __str__
+
+
+def DTIME(ld: LogicalData) -> DateTime:
+    """
+    Representation code 21, Date/time.
+    [RP66V1 Appendix B Section B.21]
+    """
+    return DateTime(ld)
 
 
 def ORIGIN(ld: LogicalData) -> int:
@@ -134,30 +205,71 @@ def ORIGIN(ld: LogicalData) -> int:
 # O - Origin Reference as a ORIGIN type (UVARI).
 # C - Copy number as a USHORT type.
 # I - Identifier as an IDENT type.
-ObjectName = collections.namedtuple('ObjectName', 'O, C, I')
+class ObjectName(collections.namedtuple('ObjectName', 'O, C, I')):
+
+    def __str__(self):
+        return f'OBNAME: O: {self.O} C: {self.C} I: {self.I}'
 
 
 def OBNAME(ld: LogicalData) -> ObjectName:
+    """
+    Representation code 23, Boolean status value.
+    [RP66V1 Appendix B Section B.23]
+    """
     o = ORIGIN(ld)
     c = USHORT(ld)
     i = IDENT(ld)
     return ObjectName(o, c, i)
 
 
+# This has three fields:
+# T - Object Type as a IDENT.
+# N - Object Name as a OBNAME.
+class ObjectReference(collections.namedtuple('ObjectReference', 'T, N')):
+
+    def __str__(self):
+        return f'OBREF: O: {self.T} C: {self.N}'
+
+
+def OBJREF(ld: LogicalData) -> ObjectReference:
+    """
+    Representation code 24, Boolean status value.
+    [RP66V1 Appendix B Section B.24]
+    """
+    t = IDENT(ld)
+    n = OBNAME(ld)
+    return ObjectReference(t, n)
+
+
+def STATUS(ld: LogicalData) -> int:
+    """
+    Representation code 26, Boolean status value.
+    [RP66V1 Appendix B Section B.26]
+    """
+    return USHORT(ld)
+
+
 def UNITS(ld: LogicalData) -> bytes:
+    ret = _pascal_string(ld)
     # TODO: Validate according to the specification
-    return _pascal_string(ld)
+    return ret
 
 
 # Map of Representation code name to functions that take a LogicalData object.
 REP_CODE_MAP = {
     2: FSINGL,
     7: FDOUBL,
+    14: SLONG,
     15: USHORT,
+    16: UNORM,
     18: UVARI,
     19: IDENT,
+    20: ASCII,
+    21: DTIME,
     22: ORIGIN,
     23: OBNAME,
+    24: OBJREF,
+    26: STATUS,
     27: UNITS,
 }
 

@@ -11,7 +11,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
-from TotalDepth.RP66V1.core.RepCode import IDENT, UVARI, USHORT, UNITS, code_read, OBNAME, ObjectName
+from TotalDepth.RP66V1.core.RepCode import IDENT, UVARI, USHORT, UNITS, code_read, OBNAME, ObjectName, REP_CODE_INT_TO_STR
 
 
 class ExceptionEFLR(ExceptionTotalDepthRP66V1):
@@ -44,6 +44,9 @@ class Set:
         if component_descriptor.has_set_N:
             self.name = IDENT(ld)
 
+    def __str__(self) -> str:
+        return f'EFLR Set type: {self.type} name: {self.name}'
+
 
 class AttributeBase:
     def __init__(self, component_descriptor: ComponentDescriptor):
@@ -63,9 +66,13 @@ class AttributeBase:
             return self.__dict__ == other.__dict__
         return NotImplemented
 
+    # def __str__(self) -> str:
+    #     return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
+    #         f' R: {self.rep_code} U: {self.units} V: {self.value}'
+    #
     def __str__(self) -> str:
         return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
-            f' R: {self.rep_code} U: {self.units} V: {self.value}'
+            f' R: {REP_CODE_INT_TO_STR[self.rep_code]} U: {self.units} V: {self.value}'
 
 
 class TemplateAttribute(AttributeBase):
@@ -135,6 +142,9 @@ class Template:
             return self.attrs == other.attrs
         return NotImplemented
 
+    def __str__(self) -> str:
+        return '\n'.join(str(a) for a in self.attrs)
+
 
 class Object:
     def __init__(self, ld: LogicalData, template: Template):
@@ -179,6 +189,15 @@ class Object:
             return self.name == other.name and self.attrs == other.attrs
         return NotImplemented
 
+    def __str__(self) -> str:
+        strs = [
+            str(self.name)
+        ]
+        strs.extend(
+            ['  {}'.format(a) for a in self.attrs]
+        )
+        return '\n'.join(strs)
+
 
 class ExplicitlyFormattedLogicalRecord:
     def __init__(self, ld: LogicalData):
@@ -194,10 +213,13 @@ class ExplicitlyFormattedLogicalRecord:
     def __getitem__(self, item) -> Object:
         return self.objects[item]
 
-
-class IndirectlyFormattedLogicalRecord:
-    def __init__(self, eflr: ExplicitlyFormattedLogicalRecord, ld: LogicalData):
-        self.data_descriptor_reference = OBNAME(ld)
-        # TODO: Indirectly Formatted Data
-
-
+    def __str__(self) -> str:
+        ret = [
+            str(self.set),
+            f'  Template [{len(self.template)}]:',
+        ]
+        ret.extend('    {}'.format(line) for line in str(self.template).split('\n'))
+        ret.append(f'  Objects [{len(self.objects)}]:')
+        for obj in self.objects:
+            ret.extend('    {}'.format(line) for line in str(obj).split('\n'))
+        return '\n'.join(ret)

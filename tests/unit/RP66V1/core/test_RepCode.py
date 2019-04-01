@@ -47,6 +47,20 @@ def test_FDOUBL(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        (LogicalData(b'\x00\x00\x00\x00'), 0),
+        (LogicalData(b'\x00\x00\x00\x99'), 153),
+        (LogicalData(b'\xff\xff\xff\x67'), -153),
+    )
+)
+def test_SLONG(ld, expected):
+    result = RepCode.SLONG(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         (LogicalData(b'\x00'), 0),
         (LogicalData(b'\xd9'), 217),  # RP66V2 example.
         (LogicalData(b'\xff'), 255),
@@ -54,6 +68,20 @@ def test_FDOUBL(ld, expected):
 )
 def test_USHORT(ld, expected):
     result = RepCode.USHORT(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (LogicalData(b'\x00\x00'), 0),
+        (LogicalData(b'\x80\x99'), 32921),
+        (LogicalData(b'\x00\x99'), 153),  # RP66V2 example.
+    )
+)
+def test_UNORM(ld, expected):
+    result = RepCode.UNORM(ld)
     assert result == expected
     assert ld.remain == 0
 
@@ -101,6 +129,36 @@ def test_IDENT(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        (LogicalData(b'\x00'), b''),
+        (LogicalData(b'\x03A\x0ab'), b'A\x0ab'),
+        (LogicalData(b'\x05\x24 / \xa3'), b'\x24 / \xa3'),  # RP66V2 example.
+    )
+)
+def test_ASCII(ld, expected):
+    result = RepCode.ASCII(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+# TODO: Test DTIME out of range.
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (LogicalData(b'\x57\x14\x13\x15\x14\x0f\x02\x6c'), '1987-04-19 21:20:15.620'),
+        # RP66V2 example from the printed standard. The website is in error as it uses all nulls.
+        # http://w3.energistics.org/rp66/v2/rp66v2_sec2.html#11_4_2
+        (LogicalData(b'\x00\x01\x01\x00\x00\x00\x00\x00'), '1900-01-01 00:00:00.000'),
+    )
+)
+def test_DTIME(ld, expected):
+    result = RepCode.DTIME(ld)
+    assert str(result) == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         # One byte examples
         (LogicalData(b'\x00'), 0),
         (LogicalData(b'\x01'), 1),
@@ -127,21 +185,7 @@ def test_ORIGIN(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
-        # One byte examples
         (LogicalData(b'\x00' + b'\x01' + b'\x03ABC'), RepCode.ObjectName(0, 1, b'ABC')),
-        # (LogicalData(b'\x01'), 1),
-        # (LogicalData(b'\x7e'), 2**7 - 2),
-        # (LogicalData(b'\x7F'), 2**7 - 1),
-        # # Two byte examples
-        # (LogicalData(b'\x80\x80'), 2**7),
-        # (LogicalData(b'\x80\x81'), 2**7 + 1),
-        # (LogicalData(b'\xbf\xfe'), 2**14 - 2),
-        # (LogicalData(b'\xbf\xff'), 2**14 - 1),
-        # # Four byte examples
-        # (LogicalData(b'\xc0\x00\x40\x00'), 2**14),
-        # (LogicalData(b'\xc0\x00\x40\x01'), 2**14 + 1),
-        # (LogicalData(b'\xff\xff\xff\xfe'), 2**30 - 2),
-        # (LogicalData(b'\xff\xff\xff\xff'), 2**30 - 1),
     )
 )
 def test_OBNAME(ld, expected):
@@ -149,4 +193,40 @@ def test_OBNAME(ld, expected):
     assert result == expected
     assert ld.remain == 0
 
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (
+            LogicalData(
+                b'\x0512345' + b'\x00' + b'\x01' + b'\x03ABC'
+            ),
+            RepCode.ObjectReference(
+                RepCode.IDENT(LogicalData(b'\x0512345')),
+                RepCode.ObjectName(0, 1, b'ABC'),
+            ),
+        ),
+    )
+)
+def test_OBJREF(ld, expected):
+    result = RepCode.OBJREF(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (LogicalData(b'\x00'), 0),
+        (LogicalData(b'\x01'), 1),
+    )
+)
+def test_STATUS(ld, expected):
+    result = RepCode.STATUS(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+# TODO: Test: UNITS
+# TODO: Test code_read()
 

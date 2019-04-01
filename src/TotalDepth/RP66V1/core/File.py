@@ -3,6 +3,7 @@ import re
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
+from TotalDepth.util.bin_file_type import format_bytes
 
 
 class ExceptionFile(ExceptionTotalDepthRP66V1):
@@ -185,7 +186,7 @@ class VisibleRecord:
 
 
 class LogicalRecordSegmentHeader:
-    """RP66V1 Logical Record Segment Header. See See [RP66V1] 2.2.2.1"""
+    """RP66V1 Logical Record Segment Header. See See [RP66V1 2.2.2.1]"""
     HEAD_LENGTH = 4
     # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
 
@@ -295,38 +296,46 @@ class LogicalRecordPosition:
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         # Check VisibleRecord
         if vr.position < StorageUnitLabel.SIZE:
-            raise ValueError(f'VisibleRecord position 0x{vr.position:x} must be >= 0x{StorageUnitLabel.SIZE:x}')
+            raise ValueError(f'VisibleRecord at 0x{lrsh.position:x} must be >= 0x{StorageUnitLabel.SIZE:x}')
         if vr.length < LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
             raise ValueError(
-                f'VisibleRecord length 0x{vr.length:x} must be >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
+                f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x}'
+                f' must be >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
             )
         if vr.length > VisibleRecord.MAX_LENGTH:
-            raise ValueError(f'VisibleRecord length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}')
+            raise ValueError(
+                f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
+            )
         # Check LogicalRecordSegmentHeader
         if lrsh.position < StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:
             raise ValueError(
-                f'LogicalRecordSegmentHeader position 0x{lrsh.position:x} must be'
+                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
                 f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:x}'
             )
         if lrsh.position > vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
             raise ValueError(
-                f'LogicalRecordSegmentHeader position 0x{lrsh.position:x} must be'
+                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
                 f' <= 0x{vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
             )
         if lrsh.length < LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
             raise ValueError(
-                f'LogicalRecordSegmentHeader length 0x{lrsh.length:x} must be'
+                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
             )
         if lrsh.length > vr.length - VisibleRecord.NUMBER_OF_BYTES:
             raise ValueError(
-                f'LogicalRecordSegmentHeader length 0x{lrsh.length:x} must be'
+                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
             )
         if not lrsh.is_first:
-            raise ValueError(f'LogicalRecordSegmentHeader must be the first in the sequence of segments.')
+            raise ValueError(
+                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
+            )
         self.vr_position = vr.position
         self.lrsh_position = lrsh.position
+
+    def __str__(self):
+        return f'VR: 0x{self.vr_position:08x} LRSH 0x{self.lrsh_position:08x}'
 
 
 class LogicalData:
@@ -360,6 +369,44 @@ class LogicalData:
 
     def __bool__(self):
         return self.remain > 0
+
+    def __len__(self):
+        return len(self.bytes)
+
+    def __getitem__(self, item):
+        return self.bytes[item]
+
+
+class FileLogicalData:
+    def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
+        self.position = LogicalRecordPosition(vr, lrsh)
+        self.lr_type: int = lrsh.record_type
+        self.lr_is_eflr: bool = lrsh.is_eflr
+        self.lr_is_encrypted: bool = lrsh.is_encrypted
+        self._bytes: typing.Union[None, bytearray] = bytearray()
+        self.logical_data: typing.Union[None, LogicalData] = None
+
+    def add_bytes(self, by: bytes) -> None:
+        self._bytes.extend(by)
+
+    def seal(self):
+        self.logical_data = LogicalData(bytes(self._bytes))
+        self._bytes = None
+
+    def __str__(self) -> str:
+        assert self.logical_data is not None
+        # if self.logical_data is None:
+        #     return '0x{:08x} LR type {:3d} {!s:5} {!s:5} UNKNOWN'.format(
+        #         self.position, self.lr_type, self.lr_is_eflr, self.lr_is_encrypted,
+        #
+        #     )
+        lr_is_eflr = 'E' if self.lr_is_eflr else 'I'
+        lr_is_encrypted = 'y' if self.lr_is_encrypted else 'n'
+        # return f'0x{self.position:08x} LR type {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted}' \
+        #     f' len 0x{len(self.logical_data):04x}    {format_bytes(self.logical_data.bytes[:16])}'
+        position = str(self.position)
+        return f'{position} LR type {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted}' \
+            f' len 0x{len(self.logical_data):04x}    {format_bytes(self.logical_data.bytes[:16])}'
 
 
 class FileRead:
@@ -448,14 +495,18 @@ class FileRead:
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
-    def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, int, LogicalData]]:
+    # def iter_logical_records(self) -> typing.Sequence[typing.Tuple[int, int, int, LogicalData]]:
+    def iter_logical_records(self) -> typing.Sequence[FileLogicalData]:
         self._set_file_and_read_first_logical_record()
         try:
             while True:
                 # Loop for each yield
-                vr_position = self.visible_record.position
-                lrsh_position = self.logical_record_segment_header.position
-                lr_type = self.logical_record_segment_header.record_type
+                # vr_position = self.visible_record.position
+                # lrsh_position = self.logical_record_segment_header.position
+                # position = LogicalRecordPosition(self.visible_record, self.logical_record_segment_header)
+                file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
+                # lr_type = self.logical_record_segment_header.record_type
+                # lr_is_eflr = self.logical_record_segment_header.is_eflr
                 by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
                 if len(by) != self.logical_record_segment_header.logical_data_length:
                     # TODO: Write HEX values
@@ -465,14 +516,15 @@ class FileRead:
                     )
                 if self.logical_record_segment_header.must_strip_padding:
                     pad_len = by[-1]
-                    assert 0 < pad_len < 4
+                    # assert 0 < pad_len < 4, f'Pad length is {pad_len}'
                     # print('TRACE: would strip: {}'.format(self.logical_record_segment_header), pad_len, len(by))#, by)
                     assert len(by) >= 1
                     assert len(by) >= pad_len
                     # Maximum padding is 3 by observation
                     by = by[:-pad_len]
-                by_array: bytearray = bytearray()
-                by_array.extend(by)
+                # by_array: bytearray = bytearray()
+                # by_array.extend(by)
+                file_logical_data.add_bytes(by)
                 while not self.logical_record_segment_header.is_last:
                     # Loop for each subsequent segment
                     self._seek_and_read_next_logical_record_segment()
@@ -485,8 +537,13 @@ class FileRead:
                     # print(f'TRACE read {len(by)} bytes')
                     if self.logical_record_segment_header.must_strip_padding:
                         by = by[:-by[-1]]
-                    by_array.extend(by)
-                yield vr_position, lrsh_position, lr_type, LogicalData(bytes(by_array))
+                    # by_array.extend(by)
+                    file_logical_data.add_bytes(by)
+                # yield vr_position, lrsh_position, lr_type, LogicalData(bytes(by_array))
+                # position = LogicalRecordPosition(self.visible_record, self.logical_record_segment_header)
+                # yield position, lr_type, lr_is_eflr, LogicalData(bytes(by_array))
+                file_logical_data.seal()
+                yield file_logical_data
                 self._seek_and_read_next_logical_record_segment()
                 assert self.logical_record_segment_header.is_first
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):

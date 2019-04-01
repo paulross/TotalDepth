@@ -469,7 +469,7 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
     assert eflr.objects[obj_index].attrs[attr_index].count == 1
     assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['USHORT']
     assert eflr.objects[obj_index].attrs[attr_index].units == b''
-    # TODO: Check this, UNORM surely?
+    # See above for: NOTE: [RP66V1 Error]
     assert eflr.objects[obj_index].attrs[attr_index].value == [RepCode.REP_CODE_STR_TO_INT['SNORM']]
     # Attribute 3
     attr_index = 3
@@ -477,7 +477,7 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
     assert eflr.objects[obj_index].attrs[attr_index].count == 1
     assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['IDENT']
     assert eflr.objects[obj_index].attrs[attr_index].units == b''
-    assert eflr.objects[obj_index].attrs[attr_index].value == None
+    assert eflr.objects[obj_index].attrs[attr_index].value is None
     # Attribute 4
     attr_index = 4
     assert eflr.objects[obj_index].attrs[attr_index].label == b'DIMENSION'
@@ -485,3 +485,46 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
     assert eflr.objects[obj_index].attrs[attr_index].rep_code == RepCode.REP_CODE_STR_TO_INT['UVARI']
     assert eflr.objects[obj_index].attrs[attr_index].units == b''
     assert eflr.objects[obj_index].attrs[attr_index].value == [8, 10]
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_FROM_STANDARD,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_str(ld):
+    ld.rewind()
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    # print(eflr)
+    assert str(eflr) == """EFLR Set type: b'CHANNEL' name: b'0'
+Template:
+  CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: None
+  CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
+  CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [2]
+  CD: 001 10000 L: b'UNITS' C: 1 R: 19 U: b'' V: None
+  CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
+Objects:
+  OBNAME: O: 0 C: 0 I: b'TIME' 
+    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+    CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
+    CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [2]
+    CD: 001 00001 L: b'UNITS' C: 1 R: 19 U: b'' V: [b'S']
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
+  OBNAME: O: 1 C: 0 I: b'PRESSURE' 
+    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'2')]
+    CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
+    CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [7]
+    CD: 001 00001 L: b'UNITS' C: 1 R: 19 U: b'' V: [b'PSI']
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
+  OBNAME: O: 1 C: 0 I: b'PAD-ARRAY' 
+    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'3')]
+    CD: 001 01001 L: b'ELEMENT-LIMIT' C: 2 R: 18 U: b'' V: [8, 20]
+    CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [13]
+    CD: 000 00000 L: b'UNITS' C: 1 R: 19 U: b'' V: None
+    CD: 001 01001 L: b'DIMENSION' C: 2 R: 18 U: b'' V: [8, 10]"""
+
+# EXPECTED_OBJECTS = [
+#     # Attributes have LCRUV
+#     [b'LONG-NAME', 1, RepCode.REP_CODE_STR_TO_INT['OBNAME'], b'', [RepCode.ObjectName(0, 0, b'1')]],
+# ]
