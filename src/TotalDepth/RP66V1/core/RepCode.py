@@ -276,9 +276,12 @@ def UNITS(ld: LogicalData) -> bytes:
 
 
 # Map of Representation code name to functions that take a LogicalData object.
+# HAs the range 1 to 27 inclusive.
 REP_CODE_MAP = {
     2: FSINGL,
+
     7: FDOUBL,
+
     13: SNORM,
     14: SLONG,
     15: USHORT,
@@ -291,10 +294,14 @@ REP_CODE_MAP = {
     22: ORIGIN,
     23: OBNAME,
     24: OBJREF,
+
     26: STATUS,
     27: UNITS,
 }
 
 
 def code_read(rep_code: int, ld: LogicalData):
-    return REP_CODE_MAP[rep_code](ld)
+    try:
+        return REP_CODE_MAP[rep_code](ld)
+    except KeyError:
+        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
