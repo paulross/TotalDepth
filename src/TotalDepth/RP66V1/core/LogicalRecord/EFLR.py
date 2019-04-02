@@ -22,6 +22,10 @@ class ExceptionEFLRSet(ExceptionEFLR):
     pass
 
 
+class ExceptionEFLRSetDuplicateObjectNames(ExceptionEFLRSet):
+    pass
+
+
 class ExceptionEFLRAttribute(ExceptionEFLR):
     pass
 
@@ -30,8 +34,16 @@ class ExceptionEFLRTemplate(ExceptionEFLR):
     pass
 
 
+class ExceptionEFLRTemplateDuplicateLabel(ExceptionEFLRTemplate):
+    pass
+
+
 class ExceptionEFLRObject(ExceptionEFLR):
     pass
+
+class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
+    pass
+
 
 
 class Set:
@@ -122,11 +134,18 @@ class Attribute(AttributeBase):
 class Template:
     def __init__(self, ld: LogicalData):
         self.attrs: typing.List[TemplateAttribute] = []
+        self.attr_label_map: typing.Dict[bytes, int] = {}
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
-                raise ExceptionEFLRTemplate(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
-            self.attrs.append(TemplateAttribute(component_descriptor, ld))
+                raise ExceptionEFLRTemplate(
+                    f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.'
+                )
+            template_attribute = TemplateAttribute(component_descriptor, ld)
+            if template_attribute.label in self.attr_label_map:
+                raise ExceptionEFLRTemplateDuplicateLabel(f'Duplicate template label {template_attribute.label}')
+            self.attr_label_map[template_attribute.label] = len(self.attrs)
+            self.attrs.append(template_attribute)
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
                 break
@@ -154,16 +173,20 @@ class Object:
                 f'Component Descriptor does not represent a object but a {component_descriptor.type}.')
         self.name: ObjectName = OBNAME(ld)
         self.attrs: typing.List[typing.Union[AttributeBase, None]] = []
+        self.attr_label_map: typing.Dict[bytes, int] = {}
         index: int = 0
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
-                raise ExceptionEFLRObject(f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.')
+                raise ExceptionEFLRObject(
+                    f'Component Descriptor does not represent a attribute but a {component_descriptor.type}.'
+                )
             if template[index].component_descriptor.is_invariant_attribute:
                 self.attrs.append(template[index])
             elif template[index].component_descriptor.is_absent_attribute:
                 self.attrs.append(None)
             else:
+                # TODO: Check the attribute label is the same as the template. Reference [RP66V1 Section 4.5]
                 self.attrs.append(Attribute(component_descriptor, ld, template[index]))
                 if ld.remain == 0 or ComponentDescriptor(ld.peek()).is_object:
                     break
@@ -177,6 +200,15 @@ class Object:
             raise ExceptionEFLRObject(
                 f'Template specifies {len(template)} attributes but Logical Data has {len(self.attrs)}'
             )
+        # Now populate self.attr_label_map
+        for a, attr in enumerate(self.attrs):
+            if attr is None:
+                label = template.attrs[a].label
+            else:
+                label = attr.label
+                # TODO: Assert that the attribute label is the same as the template. Reference [RP66V1 Section 4.5]
+            if label in self.attr_label_map:
+                raise ExceptionEFLRObjectDuplicateLabel(f'Duplicate Attribute label {label}')
 
     def __len__(self) -> int:
         return len(self.attrs)
@@ -204,8 +236,13 @@ class ExplicitlyFormattedLogicalRecord:
         self.set: Set = Set(ld)
         self.template: Template = Template(ld)
         self.objects: typing.List[Object] = []
+        self.object_name_map: typing.Dict[bytes, int] = {}
         while ld:
-            self.objects.append(Object(ld, self.template))
+            obj = Object(ld, self.template)
+            if obj.name in self.object_name_map:
+                raise ExceptionEFLRSetDuplicateObjectNames(f'Object name {obj.name} already in EFLR set.')
+            self.object_name_map[obj.name] = len(self.objects)
+            self.objects.append(obj)
 
     def __len__(self) -> int:
         return len(self.objects)

@@ -11,6 +11,9 @@ import time
 import typing
 
 import colorama
+
+from TotalDepth.RP66V1.core.RepCode import ObjectName
+
 colorama.init(autoreset=True)
 
 import TotalDepth.RP66V1.core.File
@@ -40,9 +43,8 @@ def _output_section_header_trailer(header: str, fillchar: str,
     os.write(s)
 
 
-def _coloured_note(msg: str):
+def _colorama_note(msg: str):
     return colorama.Back.YELLOW + f'NOTE: {msg}'
-    # return colorama.Fore.YELLOW + f'NOTE: {msg}'
 
 
 def _write_storage_unit_label(sul: TotalDepth.RP66V1.core.File.StorageUnitLabel, os: typing.TextIO=sys.stdout) -> None:
@@ -89,6 +91,33 @@ def scan_file(path: str, verbose: int, keep_going: bool) -> None:
         #     )
 
 
+class MinMax:
+    def __init__(self):
+        self.count = 0
+        self._min = 0
+        self._max = 0
+
+    def add(self, value):
+        if self.count == 0:
+            self._min = self._max = value
+        else:
+            self._min = min(self._min, value)
+            self._max = max(self._max, value)
+        self.count += 1
+
+    @property
+    def min(self):
+        if self.count == 0:
+            raise AttributeError('No minimum when there is no data.')
+        return self._min
+
+    @property
+    def max(self):
+        if self.count == 0:
+            raise AttributeError('No maximum when there is no data.')
+        return self._max
+
+
 class DataSummaryBase:
     def __init__(self):
         self.count = 0
@@ -114,7 +143,7 @@ class DataSummaryBase:
             self.label_size_set[obj_name_ident].update([len_bytes])
             self.label_count_map[obj_name_ident] += 1
 
-    def __str__(self) -> str:
+    def _str_lines(self) -> typing.List[str]:
         ret = [
             f'Count {self.count:,d} encrypted {self.count_encrypted:,d} total bytes {self.total_bytes:,d}',
             f'Logical record types [{len(self.lr_type_map)}]:',
@@ -133,10 +162,17 @@ class DataSummaryBase:
             elif len(self.label_size_set[k]) == 1:
                 size_key = list(self.label_size_set[k].keys())[0]
                 ret.append(f'Data size of {str(k):{fw}} LRs are all {size_key} bytes.')
+        return ret
+
+    def __str__(self) -> str:
+        ret = self._str_lines()
         return '\n'.join(ret)
 
 
 class IFLRDataSummary(DataSummaryBase):
+    def __init__(self):
+        super().__init__()
+        self.frame_range_map: typing.Dict[bytes, MinMax] = {}
 
     def add(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData) -> None:
         assert not fld.lr_is_eflr
@@ -148,8 +184,21 @@ class IFLRDataSummary(DataSummaryBase):
             ob_name_ident = iflr.object_name.I
             len_bytes = len(iflr.bytes)
             self._add(fld, ob_name_ident, len_bytes)
+            # Frame numbers
+            if ob_name_ident not in self.frame_range_map:
+                self.frame_range_map[ob_name_ident] = MinMax()
+            self.frame_range_map[ob_name_ident].add(iflr.frame_number)
         fld.logical_data.rewind()
+
+    def __str__(self) -> str:
+        ret = self._str_lines()
         # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
+        ret.append('Frame ranges:')
+        for k in sorted(self.frame_range_map.keys()):
+            if self.frame_range_map[k].count > 0:
+                ret.append(f'{str(k):12} : count: {self.frame_range_map[k].count:8,d}'
+                           f' min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
+        return '\n'.join(ret)
 
 
 class EFLRDataSummary(DataSummaryBase):
@@ -167,21 +216,43 @@ class EFLRDataSummary(DataSummaryBase):
         fld.logical_data.rewind()
 
 
-# def scan_file_logical_records(path: str, verbose: int, encrypted_records: bool, keep_going: bool) -> None:
+class FileContentsSummary:
+    """
+    Captures a high level view of the file with information such as date of survey, well name and log summary.
+    """
+    def __init__(self):
+        self.channels: typing.List[ObjectName] = []
+
+    def add_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+        # TODO: Capture data from EFLRs such as date, lat/long.
+        if eflr.set.type == b'CHANNEL':
+            assert len(self.channels) == 0
+            self.channels = [v.name for v in eflr.objects]
+            # print('TRACE: channels', self.channels)
+
+    def add_iflr(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
+        # TODO: Capture data from IFLRs such as start, stop.
+        pass
+
+    def __str__(self) -> str:
+        return ', '.join(str(c.I) for c in self.channels)
+
+
 def scan_file_logical_records(path: str, **kwargs) -> None:
     encrypted_records: bool = kwargs.get('encrypted_records', False)
     verbose: int = kwargs.get('verbose', 0)
     eflr_set_type = kwargs.get('eflr_set_type', [])
-    print('TRACE: eflr_set_type', eflr_set_type)
     iflr_dump = kwargs['iflr_dump']
+    eflr_dump = kwargs['eflr_dump']
     if not encrypted_records:
-        print(_coloured_note('Encrypted records omitted. Use -e to show them.'))
+        print(_colorama_note('Encrypted records omitted. Use -e to show them.'))
     with open(path, 'rb') as fobj:
         rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
         print(rp66_file)
         _write_storage_unit_label(rp66_file.sul)
         iflr_data_summary: IFLRDataSummary = IFLRDataSummary()
         eflr_data_summary: EFLRDataSummary = EFLRDataSummary()
+        file_contents_summary: FileContentsSummary = FileContentsSummary()
         for lr_index, file_logical_data in enumerate(rp66_file.iter_logical_records()):
             # print('TRACE:', lr_index, file_logical_data)
             if file_logical_data.lr_is_eflr:
@@ -192,28 +263,32 @@ def scan_file_logical_records(path: str, **kwargs) -> None:
                         lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
                         lr_text_summary = f'EFLR {lrsep}'
                 else:
-                    lr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.logical_data)
-                    if lr.set.type in eflr_set_type:
-                        lr_text_summary = str(lr)
-                    else:
-                        lr_text_summary = str(lr.set)
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.logical_data)
+                    file_contents_summary.add_eflr(eflr)
+                    if eflr.set.type in eflr_set_type or '*' in eflr_set_type:
+                        lr_text_summary = str(eflr)
+                    elif eflr_dump:
+                        lr_text_summary = str(eflr.set)
                 if lr_text_summary:
                     if verbose:
                         print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
                     else:
                         print(f'[{lr_index:4d}] {lr_text_summary}')
             else:
+                iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
+                file_logical_data.logical_data.rewind()
                 if iflr_dump:
-                    iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
-                    file_logical_data.logical_data.rewind()
                     lr_text_summary = f'IFLR {iflr}'
                     if verbose:
                         print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
                     else:
                         print(f'[{lr_index:4d}] {lr_text_summary}')
+                file_contents_summary.add_iflr(iflr)
                 iflr_data_summary.add(file_logical_data)
         # Finished iteration
         with _output_section_header_trailer('Logical Record Summary', '='):
+            with _output_section_header_trailer('File Contents Summary', '-'):
+                print(file_contents_summary)
             with _output_section_header_trailer('EFLR Summary', '-'):
                 print(eflr_data_summary)
             with _output_section_header_trailer('IFLR Summary', '-'):
@@ -265,11 +340,15 @@ Scans a RP66V1 file and dumps data."""
     )
     parser.add_argument(
         "--eflr-set-type", action='append', default=[],
-        help="List of EFLR Set Types to output, additive [default: %(default)s]",
+        help="List of EFLR Set Types to output, additive. Use '*' for all. [default: %(default)s]",
     )
     parser.add_argument(
         '-I', '--IFLR', action='store_true',
         help='Dump IFLRs. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-E', '--EFLR', action='store_true',
+        help='Dump EFLR Set. [default: %(default)s]',
     )
     args = parser.parse_args()
     print('args:', args)
@@ -296,6 +375,7 @@ Scans a RP66V1 file and dumps data."""
             verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
             eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
             iflr_dump=args.IFLR,
+            eflr_dump=args.EFLR,
         )
         pass
     else:
