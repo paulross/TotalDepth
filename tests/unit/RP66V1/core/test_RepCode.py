@@ -47,6 +47,20 @@ def test_FDOUBL(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        (LogicalData(b'\x00\x00'), 0),
+        (LogicalData(b'\x00\x99'), 153),
+        (LogicalData(b'\xff\x67'), -153),
+    )
+)
+def test_SNORM(ld, expected):
+    result = RepCode.SNORM(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         (LogicalData(b'\x00\x00\x00\x00'), 0),
         (LogicalData(b'\x00\x00\x00\x99'), 153),
         (LogicalData(b'\xff\xff\xff\x67'), -153),
@@ -82,6 +96,19 @@ def test_USHORT(ld, expected):
 )
 def test_UNORM(ld, expected):
     result = RepCode.UNORM(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (LogicalData(b'\x00\x00\x00\x00'), 0),
+        (LogicalData(b'\x00\x00\x00\x99'), 153),
+    )
+)
+def test_ULONG(ld, expected):
+    result = RepCode.ULONG(ld)
     assert result == expected
     assert ld.remain == 0
 

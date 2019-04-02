@@ -97,6 +97,16 @@ def _pascal_string(ld: LogicalData) -> bytes:
     return ld.chunk(siz)
 
 
+def SNORM(ld: LogicalData) -> int:
+    """
+    Representation code 13, Signed 2-byte integer.
+    [RP66V1 Appendix B Section B.13]
+    """
+    by = ld.chunk(2)
+    value = struct.unpack('>h', by)
+    return value[0]
+
+
 def SLONG(ld: LogicalData) -> int:
     """
     Representation code 14, Signed 4-byte integer.
@@ -124,6 +134,16 @@ def UNORM(ld: LogicalData) -> int:
     ret <<= 8
     ret |= ld.read()
     return ret
+
+
+def ULONG(ld: LogicalData) -> int:
+    """
+    Representation code 16, Unsigned 4-byte integer.
+    [RP66V1 Appendix B Section B.17]
+    """
+    by = ld.chunk(4)
+    value = struct.unpack('>I', by)
+    return value[0]
 
 
 def UVARI(ld: LogicalData) -> int:
@@ -259,9 +279,11 @@ def UNITS(ld: LogicalData) -> bytes:
 REP_CODE_MAP = {
     2: FSINGL,
     7: FDOUBL,
+    13: SNORM,
     14: SLONG,
     15: USHORT,
     16: UNORM,
+    17: ULONG,
     18: UVARI,
     19: IDENT,
     20: ASCII,
