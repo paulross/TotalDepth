@@ -3,11 +3,15 @@ Scans a RP66V1 file an prints out the summary.
 """
 import argparse
 import collections
+import contextlib
 import logging
 import pprint
 import sys
 import time
 import typing
+
+import colorama
+colorama.init(autoreset=True)
 
 import TotalDepth.RP66V1.core.File
 from TotalDepth.RP66V1.core.LogicalRecord.Encryption import LogicalRecordSegmentEncryptionPacket
@@ -22,6 +26,23 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 logger = logging.getLogger(__file__)
+
+
+STANDARD_TEXT_WIDTH = 132
+
+@contextlib.contextmanager
+def _output_section_header_trailer(header: str, fillchar: str,
+                                   width: int = STANDARD_TEXT_WIDTH, os: typing.TextIO = sys.stdout):
+    s = colorama.Fore.GREEN + f' {header} '.center(width, fillchar) + '\n'
+    os.write(s)
+    yield
+    s = colorama.Fore.GREEN + f' END {header} '.center(width, fillchar) + '\n'
+    os.write(s)
+
+
+def _coloured_note(msg: str):
+    return colorama.Back.YELLOW + f'NOTE: {msg}'
+    # return colorama.Fore.YELLOW + f'NOTE: {msg}'
 
 
 def _write_storage_unit_label(sul: TotalDepth.RP66V1.core.File.StorageUnitLabel, os: typing.TextIO=sys.stdout) -> None:
@@ -106,9 +127,12 @@ class DataSummaryBase:
             ret.append(f'{str(k):{fw}} count {self.label_count_map[k]:8,d} total bytes {self.label_total_size_map[k]:8,d}')
         for k in sorted(self.label_size_set.keys()):
             if len(self.label_size_set[k]) > 1:
-                ret.append(f'Size distribution for {str(k):{fw}} (size : count):')
+                ret.append(f'Data size distribution for {str(k):{fw}} LRs (size : count):')
                 for s in sorted(self.label_size_set[k].keys()):
                     ret.append(f'  {s:8,d} : {self.label_size_set[k][s]}')
+            elif len(self.label_size_set[k]) == 1:
+                size_key = list(self.label_size_set[k].keys())[0]
+                ret.append(f'Data size of {str(k):{fw}} LRs are all {size_key} bytes.')
         return '\n'.join(ret)
 
 
@@ -125,6 +149,7 @@ class IFLRDataSummary(DataSummaryBase):
             len_bytes = len(iflr.bytes)
             self._add(fld, ob_name_ident, len_bytes)
         fld.logical_data.rewind()
+        # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
 
 
 class EFLRDataSummary(DataSummaryBase):
@@ -142,72 +167,57 @@ class EFLRDataSummary(DataSummaryBase):
         fld.logical_data.rewind()
 
 
-def scan_file_logical_records(path: str, verbose: int, keep_going: bool) -> None:
+# def scan_file_logical_records(path: str, verbose: int, encrypted_records: bool, keep_going: bool) -> None:
+def scan_file_logical_records(path: str, **kwargs) -> None:
+    encrypted_records: bool = kwargs.get('encrypted_records', False)
+    verbose: int = kwargs.get('verbose', 0)
+    eflr_set_type = kwargs.get('eflr_set_type', [])
+    print('TRACE: eflr_set_type', eflr_set_type)
+    iflr_dump = kwargs['iflr_dump']
+    if not encrypted_records:
+        print(_coloured_note('Encrypted records omitted. Use -e to show them.'))
     with open(path, 'rb') as fobj:
         rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
         print(rp66_file)
         _write_storage_unit_label(rp66_file.sul)
-        # print('Logical Data:')
-        # lr_type_count = {
-        #     'EFLR': collections.Counter(),
-        #     'EFLR_encrypted': collections.Counter(),
-        #     'IFLR': collections.Counter(),
-        #     'IFLR_encrypted': collections.Counter(),
-        # }
-        # # dict of {set_type : count, }
-        # eflr_set_types: typing.Dict[bytes, int] = collections.Counter()
-        # dict of {OBNAME.I : total_number_of_bytes, ...}
         iflr_data_summary: IFLRDataSummary = IFLRDataSummary()
         eflr_data_summary: EFLRDataSummary = EFLRDataSummary()
-        for l, file_logical_data in enumerate(rp66_file.iter_logical_records()):
-            # print(file_logical_data)
+        for lr_index, file_logical_data in enumerate(rp66_file.iter_logical_records()):
+            # print('TRACE:', lr_index, file_logical_data)
             if file_logical_data.lr_is_eflr:
                 eflr_data_summary.add(file_logical_data)
+                lr_text_summary = ''
                 if file_logical_data.lr_is_encrypted:
-                    # lr_type_count['EFLR_encrypted'].update([file_logical_data.lr_type])
-                    lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
-                    print(f'{file_logical_data}')
-                    print(f'EFLR {lrsep}')
+                    if encrypted_records:
+                        lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
+                        lr_text_summary = f'EFLR {lrsep}'
                 else:
-                    # lr_type_count['EFLR'].update([file_logical_data.lr_type])
                     lr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.logical_data)
-                    if lr.set.type in (b'FILE-HEADER', b'ORIGIN'):#b'440-OP-CHANNEL':#b'FRAME':
-                        print(file_logical_data)
-                        print(lr)
+                    if lr.set.type in eflr_set_type:
+                        lr_text_summary = str(lr)
                     else:
-                        print(file_logical_data)
-                        print(lr.set)
-                    # eflr_set_types.update([lr.set.type])
+                        lr_text_summary = str(lr.set)
+                if lr_text_summary:
+                    if verbose:
+                        print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
+                    else:
+                        print(f'[{lr_index:4d}] {lr_text_summary}')
             else:
+                if iflr_dump:
+                    iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
+                    file_logical_data.logical_data.rewind()
+                    lr_text_summary = f'IFLR {iflr}'
+                    if verbose:
+                        print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
+                    else:
+                        print(f'[{lr_index:4d}] {lr_text_summary}')
                 iflr_data_summary.add(file_logical_data)
-                # if file_logical_data.lr_is_encrypted:
-                #     lr_type_count['IFLR_encrypted'].update([file_logical_data.lr_type])
-                #     lr = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
-                # else:
-                #     lr_type_count['IFLR'].update([file_logical_data.lr_type])
-                #     lr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
-                # ob_name_ident = lr.object_name.I
-                # if ob_name_ident not in iflr_data_map:
-                #     iflr_data_map[ob_name_ident] = 0
-                # iflr_data_map[ob_name_ident] += len(lr.bytes)
-                # print(lr)
-        # print(lr_type_count)
-        print('EFLR Summary:')
-        print(eflr_data_summary)
-        # for k in sorted(eflr_set_types.keys()):
-        #     # set_type = k.decode('ascii')
-        #     print(f'{str(k):32} : {eflr_set_types[k]:4,d}')
-        print('IFLR Summary:')
-        print(iflr_data_summary)
-        # for k in sorted(iflr_data_map.keys()):
-        #     # channel = k.decode('ascii')
-        #     print(f'{str(k):32} : {iflr_data_map[k]:12,d}')
-        print()
-        # for k in sorted(lr_type_count.keys()):
-        #     if len(lr_type_count[k]) > 0:
-        #         print(f'{k}:')
-        #         for lr_code in sorted(lr_type_count[k].keys()):
-        #             print(f'{lr_code:3d} {lr_type_count[k][lr_code]:8,d}')
+        # Finished iteration
+        with _output_section_header_trailer('Logical Record Summary', '='):
+            with _output_section_header_trailer('EFLR Summary', '-'):
+                print(eflr_data_summary)
+            with _output_section_header_trailer('IFLR Summary', '-'):
+                print(iflr_data_summary)
 
 
 
@@ -231,6 +241,10 @@ Scans a RP66V1 file and dumps data."""
         help='Show version and exit.'
     )
     parser.add_argument(
+        '-e', '--encrypted', action='store_true',
+        help='Output encrypted records as well. [default: %(default)s]',
+    )
+    parser.add_argument(
         '-k', '--keep-going', action='store_true',
         help='Keep going as far as sensible. [default: %(default)s]',
     )
@@ -249,8 +263,16 @@ Scans a RP66V1 file and dumps data."""
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
+    parser.add_argument(
+        "--eflr-set-type", action='append', default=[],
+        help="List of EFLR Set Types to output, additive [default: %(default)s]",
+    )
+    parser.add_argument(
+        '-I', '--IFLR', action='store_true',
+        help='Dump IFLRs. [default: %(default)s]',
+    )
     args = parser.parse_args()
-    print(args)
+    print('args:', args)
 
     # Extract log level
     if args.log_level in logging._nameToLevel:
@@ -260,15 +282,21 @@ Scans a RP66V1 file and dumps data."""
     # print('Log level:', log_level)
     # Initialise logging etc.
     logging.basicConfig(level=log_level,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        #datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clk_start = time.perf_counter()
     # return 0
     if args.path:
         # Your code here
         # scan_file(args.path, args.verbose, args.keep_going)#, retIntDumpList(opts.dump))
-        scan_file_logical_records(args.path, args.verbose, args.keep_going)#, retIntDumpList(opts.dump))
+        scan_file_logical_records(
+            args.path,
+            # kwargs
+            verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
+            eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
+            iflr_dump=args.IFLR,
+        )
         pass
     else:
         print(parser.format_help())

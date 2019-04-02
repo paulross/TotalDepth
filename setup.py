@@ -18,7 +18,7 @@ with open('HISTORY.rst') as history_file:
 install_requirements = [
     'Cython',
     'numpy',
-#    'Click>=6.0',
+    'colorama',
 ]
 
 setup_requirements = [
