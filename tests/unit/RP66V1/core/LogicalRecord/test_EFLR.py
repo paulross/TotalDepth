@@ -1,4 +1,4 @@
-
+import typing
 
 import pytest
 
@@ -6,6 +6,7 @@ from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
 from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core.RepCode import ObjectName
 
 
 @pytest.mark.parametrize(
@@ -160,11 +161,43 @@ def test_Template(ld, expected_template):
     assert template == expected_template
     assert ld.remain == 1  # Object byte terminates template
 
-@pytest.mark.parametrize(
-    'ld, template, expected_object',
+
+OBJECT_DATA_FROM_STANDARD: typing.Tuple[typing.Tuple[LogicalData, EFLR.Template, EFLR.Object]] = (
     (
-        (
-            # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
+        # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
+        LogicalData(
+            # Object #1
+            # Object: N
+            b'\x70\x00\x00\x04TIME'
+            # Attribute: V
+            b'\x21\x00\x00\x01\x31'
+            # Attribute:
+            b'\x20'
+            # Attribute:
+            b'\x20'
+            # Attribute: V
+            b'\x21\x01S'
+            # Object to terminate the object
+            b'\x70'
+        ),
+        EFLR.Template(
+            LogicalData(
+                # Template
+                # ATTRIB: LR
+                b'\x34\x09LONG-NAME\x17'
+                # ATTRIB: LRV
+                b'\x35\x0dELEMENT-LIMIT\x12\x01'
+                # ATTRIB: LRV
+                b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+                # ATTRIB: L
+                b'\x30\x05UNITS'
+                # ATTRIB: LRV
+                b'\x35\x09DIMENSION\x12\x01'
+                # Object to terminate the template
+                b'\x70'
+            )
+        ),
+        EFLR.Object(
             LogicalData(
                 # Object #1
                 # Object: N
@@ -197,48 +230,37 @@ def test_Template(ld, expected_template):
                     b'\x70'
                 )
             ),
-            EFLR.Object(
-                LogicalData(
-                    # Object #1
-                    # Object: N
-                    b'\x70\x00\x00\x04TIME'
-                    # Attribute: V
-                    b'\x21\x00\x00\x01\x31'
-                    # Attribute:
-                    b'\x20'
-                    # Attribute:
-                    b'\x20'
-                    # Attribute: V
-                    b'\x21\x01S'
-                    # Object to terminate the object
-                    b'\x70'
-                ),
-                EFLR.Template(
-                    LogicalData(
-                        # Template
-                        # ATTRIB: LR
-                        b'\x34\x09LONG-NAME\x17'
-                        # ATTRIB: LRV
-                        b'\x35\x0dELEMENT-LIMIT\x12\x01'
-                        # ATTRIB: LRV
-                        b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-                        # ATTRIB: L
-                        b'\x30\x05UNITS'
-                        # ATTRIB: LRV
-                        b'\x35\x09DIMENSION\x12\x01'
-                        # Object to terminate the template
-                        b'\x70'
-                    )
-                ),
-            ),
         ),
-    )
+    ),
 )
+
+
+@pytest.mark.parametrize('ld, template, expected_object', OBJECT_DATA_FROM_STANDARD)
 def test_Object(ld, template, expected_object):
     obj = EFLR.Object(ld, template)
     assert obj == expected_object
     assert ld.remain == 1  # Object byte terminates template
 
+
+def test_Object_attr_label_map():
+    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    assert obj.attr_label_map == {
+        b'LONG-NAME': 0,
+        b'ELEMENT-LIMIT': 1,
+        b'REPRESENTATION-CODE': 2,
+        b'UNITS': 3,
+        b'DIMENSION': 4,
+    }
+
+
+def test_Object_getitem_index():
+    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    assert obj[0].value == [ObjectName(O=0, C=0, I=b'1')]
+
+
+def test_Object_getitem_label():
+    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    assert obj[b'LONG-NAME'].value == [ObjectName(O=0, C=0, I=b'1')]
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
 LOGICAL_DATA_FROM_STANDARD = LogicalData(
@@ -311,7 +333,7 @@ LOGICAL_DATA_FROM_STANDARD = LogicalData(
 )
 def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
     ld.rewind()
-    EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
 
 
 @pytest.mark.parametrize(
@@ -322,7 +344,7 @@ def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
 )
 def test_ExplicitlyFormattedLogicalRecord_set(ld):
     ld.rewind()
-    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     assert eflr.set.type == b'CHANNEL'
     assert eflr.set.name == b'0'
 
@@ -335,7 +357,7 @@ def test_ExplicitlyFormattedLogicalRecord_set(ld):
 )
 def test_ExplicitlyFormattedLogicalRecord_template(ld):
     ld.rewind()
-    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     assert len(eflr.template) == 5
     # ATTRIB[0]: LR
     assert eflr.template.attrs[0].label == b'LONG-NAME'
@@ -364,7 +386,7 @@ def test_ExplicitlyFormattedLogicalRecord_template(ld):
 )
 def test_ExplicitlyFormattedLogicalRecord_objects(ld):
     ld.rewind()
-    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     assert len(eflr.template) == 5
     assert len(eflr.objects) == 3
     ## Object #1
@@ -495,34 +517,34 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
 )
 def test_ExplicitlyFormattedLogicalRecord_str(ld):
     ld.rewind()
-    eflr = EFLR.ExplicitlyFormattedLogicalRecord(ld)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     # print(eflr)
     assert str(eflr) == """EFLR Set type: b'CHANNEL' name: b'0'
-Template:
-  CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: None
-  CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
-  CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [2]
-  CD: 001 10000 L: b'UNITS' C: 1 R: 19 U: b'' V: None
-  CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
-Objects:
-  OBNAME: O: 0 C: 0 I: b'TIME' 
-    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
-    CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
-    CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [2]
-    CD: 001 00001 L: b'UNITS' C: 1 R: 19 U: b'' V: [b'S']
-    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
-  OBNAME: O: 1 C: 0 I: b'PRESSURE' 
-    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'2')]
-    CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 U: b'' V: [1]
-    CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [7]
-    CD: 001 00001 L: b'UNITS' C: 1 R: 19 U: b'' V: [b'PSI']
-    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 U: b'' V: [1]
-  OBNAME: O: 1 C: 0 I: b'PAD-ARRAY' 
-    CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 U: b'' V: [ObjectName(O=0, C=0, I=b'3')]
-    CD: 001 01001 L: b'ELEMENT-LIMIT' C: 2 R: 18 U: b'' V: [8, 20]
-    CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 U: b'' V: [13]
-    CD: 000 00000 L: b'UNITS' C: 1 R: 19 U: b'' V: None
-    CD: 001 01001 L: b'DIMENSION' C: 2 R: 18 U: b'' V: [8, 10]"""
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: IDENT U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+  Objects [3]:
+    OBNAME: O: 0 C: 0 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: IDENT U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+    OBNAME: O: 1 C: 0 I: b'PRESSURE'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'2')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
+      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [7]
+      CD: 001 00001 L: b'UNITS' C: 1 R: IDENT U: b'' V: [b'PSI']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+    OBNAME: O: 1 C: 0 I: b'PAD-ARRAY'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'3')]
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 2 R: UVARI U: b'' V: [8, 20]
+      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [13]
+      CD: 000 00000 L: b'UNITS' C: 1 R: IDENT U: b'' V: None
+      CD: 001 01001 L: b'DIMENSION' C: 2 R: UVARI U: b'' V: [8, 10]"""
 
 # EXPECTED_OBJECTS = [
 #     # Attributes have LCRUV

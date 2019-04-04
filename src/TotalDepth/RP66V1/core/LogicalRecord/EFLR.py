@@ -209,11 +209,14 @@ class Object:
                 # TODO: Assert that the attribute label is the same as the template. Reference [RP66V1 Section 4.5]
             if label in self.attr_label_map:
                 raise ExceptionEFLRObjectDuplicateLabel(f'Duplicate Attribute label {label}')
+            self.attr_label_map[label] = a
 
     def __len__(self) -> int:
         return len(self.attrs)
 
     def __getitem__(self, item) -> typing.Union[AttributeBase, None]:
+        if item in self.attr_label_map:
+            return self.attrs[self.attr_label_map[item]]
         return self.attrs[item]
 
     def __eq__(self, other) -> bool:
@@ -232,7 +235,8 @@ class Object:
 
 
 class ExplicitlyFormattedLogicalRecord:
-    def __init__(self, ld: LogicalData):
+    def __init__(self, lr_type: int, ld: LogicalData):
+        self.lr_type = lr_type
         self.set: Set = Set(ld)
         self.template: Template = Template(ld)
         self.objects: typing.List[Object] = []
@@ -248,6 +252,8 @@ class ExplicitlyFormattedLogicalRecord:
         return len(self.objects)
 
     def __getitem__(self, item) -> Object:
+        if item in self.object_name_map:
+            return self.objects[self.object_name_map[item]]
         return self.objects[item]
 
     def __str__(self) -> str:

@@ -45,6 +45,8 @@ from TotalDepth.RP66V1.core.File import LogicalData
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
     pass
 
+# TODO: Have static NULL values e.g. IDENT_null = b'' or b'\x00' ?
+
 
 REP_CODE_INT_TO_STR = {
     1: 'FSHORT',
@@ -238,6 +240,7 @@ def OBNAME(ld: LogicalData) -> ObjectName:
     """
     o = ORIGIN(ld)
     c = USHORT(ld)
+    # TODO: Raise if non-null.
     i = IDENT(ld)
     return ObjectName(o, c, i)
 

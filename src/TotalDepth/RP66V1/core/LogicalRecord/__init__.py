@@ -37,7 +37,7 @@ IFLR_PUBLIC_MAP.update(
 TypeDescriptionAllowableSetTypes: typing.Tuple[bytes, str, typing.Set[bytes]] = collections.namedtuple(
     'TypeDescriptionAllowableSetTypes', 'type, description, allowable_set_types')
 
-EFLR_PUBLIC_MAP: typing.Dict[int, TypeDescriptionAllowableSetTypes] = {
+EFLR_PUBLIC_TYPE_MAP: typing.Dict[int, TypeDescriptionAllowableSetTypes] = {
     0: TypeDescriptionAllowableSetTypes(b'FHLR', 'File Header', {b'FILE-HEADER', }),
     1: TypeDescriptionAllowableSetTypes(b'OLR', 'Origin', {b'ORIGIN', b'WELL-REFERENCE', }),
     2: TypeDescriptionAllowableSetTypes(b'AXIS', 'Coordinate Axis', {b'AXIS', }),
@@ -66,8 +66,10 @@ EFLR_PUBLIC_MAP: typing.Dict[int, TypeDescriptionAllowableSetTypes] = {
     ),
 }
 
+# TODO: Reverse map of {set_type : lr_type, ...} ?
+
 # 12-127	-	undefined, reserved	-
-EFLR_PUBLIC_MAP.update(
+EFLR_PUBLIC_TYPE_MAP.update(
     {
         _k: TypeDescriptionAllowableSetTypes(b'', 'undefined, reserved', {b''}) for _k in range(12, 128)
     }

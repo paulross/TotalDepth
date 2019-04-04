@@ -35,7 +35,7 @@ class FileBase:
         return ' '.join(
             [
                 f'{self.size:14,d}',
-                f'{self.ext:4s}',
+                f'{self.ext:5s}',
                 f'{self.bin_type:{TotalDepth.util.bin_file_type.BINARY_FILE_TYPE_CODE_WIDTH}s}',
                 # f'{self.mod_date}',
                 TotalDepth.util.bin_file_type.format_bytes(self.bytes),
@@ -137,10 +137,10 @@ class FileZip(FileArchive):
     def __str__(self):
         str_self = ' '.join(
             [
-                f'{self.size:12,d}',
+                f'{self.size:14,d}',
                 f'{self.ext:4s}',
                 f'{self.bin_type:{TotalDepth.util.bin_file_type.BINARY_FILE_TYPE_CODE_WIDTH}s}',
-                f'{self.mod_date}',
+                # f'{self.mod_date}',
                 TotalDepth.util.bin_file_type.format_bytes(self.bytes),
                 f'{self.path}',
             ]
@@ -216,14 +216,31 @@ class ArchiveSummary:
         self.total_size += file_info.size
 
 
-def analyse_archive(files: typing.List[FileBase]) -> None:
+def analyse_archive(files: typing.List[FileBase],
+                    file_types: typing.List[str],
+                    num_bytes: int,
+                    include_size_histogram: bool,
+                    ) -> None:
     summary: ArchiveSummary = ArchiveSummary()
+    for file in files:
+        if len(file_types) == 0 or file.bin_type in file_types:
+            fields = [
+                f'{file.size:14,d}',
+                f'{file.ext:5s}',
+                f'{file.bin_type:{TotalDepth.util.bin_file_type.BINARY_FILE_TYPE_CODE_WIDTH}s}',
+            ]
+            if num_bytes:
+                fields.append(TotalDepth.util.bin_file_type.format_bytes(file.bytes))
+            fields.append(
+                f'{file.path}',
+            )
+            print(' '.join(fields))
     for file in files:
         summary.add(file)
     print(f'Total number of files {summary.count:,d}, total bytes {summary.total_size:,d}')
     print(f'File extensions:')
     extensions = sorted(summary.ext_count.keys())
-    fw = max(len(v) for v in extensions)
+    fw = max(len(v) for v in extensions) if len(extensions) else 2
     for extension in extensions:
         print(f'{extension:{fw}} : {summary.ext_count[extension].count:8,d}')
     print('Binary file types:')
@@ -237,19 +254,19 @@ def analyse_archive(files: typing.List[FileBase]) -> None:
             f'      Bytes: {archive_count.total_size:,d} [{archive_count.total_size / summary.total_size:.3%}]'
             f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
         # print(archive_count.size_hist)
-
-        # max_count = max(archive_count.size_hist.values())
-        # for k in sorted(archive_count.size_hist.keys()):
-        #     prop = archive_count.size_hist[k] / max_count
-        #     bar_len = int(0.5 + 40 * prop)
-        #     bar = '+' * bar_len
-        #     x_value = f'>2**{k}'
-        #     # print(f'{x_value:10} : {archive_count.size_hist[k]:6d} | {bar}')
-        #     print(f'{x_value:6} | {bar}')
-        # # print(archive_count.date_hist.keys())
-        # # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
-        # # print(archive_count.date_hist)
-        # print()
+        if include_size_histogram:
+            max_count = max(archive_count.size_hist.values())
+            for k in sorted(archive_count.size_hist.keys()):
+                prop = archive_count.size_hist[k] / max_count
+                bar_len = int(0.5 + 40 * prop)
+                bar = '+' * bar_len
+                x_value = f'>2**{k}'
+                # print(f'{x_value:10} : {archive_count.size_hist[k]:6d} | {bar}')
+                print(f'{x_value:6} | {bar}')
+            # print(archive_count.date_hist.keys())
+            # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
+            # print(archive_count.date_hist)
+            print()
 
 
 EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
@@ -267,7 +284,7 @@ def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) 
                 result.append(FileOnDisc(path))
 
 
-def explore_tree(path: str, recurse: bool, file_types: typing.List[str]) -> None:
+def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
     result: typing.List[FileBase] = []
     assert os.path.isdir(path)
     if recurse:
@@ -277,11 +294,10 @@ def explore_tree(path: str, recurse: bool, file_types: typing.List[str]) -> None
     else:
         for file_name in sorted(os.listdir(path)):
             _process_file(path, file_name, result)
-    for r in result:
-        if len(file_types) == 0 or r.bin_type in file_types:
-            print(r)
-    # Output summary
-    analyse_archive(result)
+    # for r in result:
+    #     if len(file_types) == 0 or r.bin_type in file_types:
+    #         print(r)
+    return result
 
 
 def copy_tree(path_from: str, path_to: str, recurse: bool, file_types: typing.List[str], verbose: int, nervous: bool) -> None:
@@ -418,19 +434,31 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
     parser.add_argument('path_from', help='Path to the archive.')
     parser.add_argument('--file-types', default=[], action='append', help='Binary type(s) of file to list, additive.')
-    # parser.add_argument('path_to', help='Path to the archive.', default='')
+    parser.add_argument('-b', '--bytes', help='Number of initial bytes to show.', type=int, default=0)
     parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
+    parser.add_argument('--histogram', help='Include size histogram.', action='store_true')
     # parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
     args = parser.parse_args()
     print(args)
     # return 0
 
+    t_start = time.perf_counter()
+
+    files: typing.List[FileBase] = []
+
+    FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
     if os.path.isdir(args.path_from):
-        explore_tree(args.path_from, args.recurse, args.file_types)
+        files = explore_tree(args.path_from, args.recurse)
+        # Output summary
+        analyse_archive(files, args.file_types, args.bytes, args.histogram)
+
         # if args.path_to == '':
         # else:
         #     expand_archive(args.path_from, args.path_to, args.nervous)
-
+    t_exec = time.perf_counter() - t_start
+    files_per_sec = int(len(files) / t_exec)
+    print('Execution time: {:.3f} (s) {:,d} (files/s)'.format(t_exec, files_per_sec))
+    print('Bye, bye!')
     return 0
 
 

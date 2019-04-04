@@ -209,7 +209,7 @@ class EFLRDataSummary(DataSummaryBase):
             lr = LogicalRecordSegmentEncryptionPacket(fld.logical_data)
             self._add(fld, b'', lr.size)
         else:
-            eflr = EFLR.ExplicitlyFormattedLogicalRecord(fld.logical_data)
+            eflr = EFLR.ExplicitlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             ob_name_ident = eflr.set.type
             len_bytes = len(fld.logical_data)
             self._add(fld, ob_name_ident, len_bytes)
@@ -235,13 +235,16 @@ class FileContentsSummary:
         pass
 
     def __str__(self) -> str:
-        return ', '.join(str(c.I) for c in self.channels)
+        # return ', '.join(str(c.I) for c in self.channels)
+        return ', '.join(repr(c) for c in self.channels)
+        # return '\n'.join(str(c) for c in self.channels)
 
 
 def scan_file_logical_records(path: str, **kwargs) -> None:
     encrypted_records: bool = kwargs.get('encrypted_records', False)
     verbose: int = kwargs.get('verbose', 0)
     eflr_set_type = kwargs.get('eflr_set_type', [])
+    iflr_set_type = kwargs.get('iflr_set_type', [])
     iflr_dump = kwargs['iflr_dump']
     eflr_dump = kwargs['eflr_dump']
     if not encrypted_records:
@@ -263,12 +266,13 @@ def scan_file_logical_records(path: str, **kwargs) -> None:
                         lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
                         lr_text_summary = f'EFLR {lrsep}'
                 else:
-                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.logical_data)
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
                     file_contents_summary.add_eflr(eflr)
                     if eflr.set.type in eflr_set_type or '*' in eflr_set_type:
                         lr_text_summary = str(eflr)
                     elif eflr_dump:
-                        lr_text_summary = str(eflr.set)
+                        lr_text_summary = f'LR type: {eflr.lr_type:3d} {str(eflr.set)}' \
+                            f' Template size: {len(eflr.template)} Objects: {len(eflr.objects)}'
                 if lr_text_summary:
                     if verbose:
                         print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
@@ -277,8 +281,9 @@ def scan_file_logical_records(path: str, **kwargs) -> None:
             else:
                 iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
                 file_logical_data.logical_data.rewind()
-                if iflr_dump:
-                    lr_text_summary = f'IFLR {iflr}'
+                # print('TRACE: iflr.object_name.I', iflr.object_name.I)
+                if iflr_dump and iflr.object_name.I in iflr_set_type or '*' in iflr_set_type:
+                    lr_text_summary = f'{iflr}'
                     if verbose:
                         print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
                     else:
@@ -343,6 +348,10 @@ Scans a RP66V1 file and dumps data."""
         help="List of EFLR Set Types to output, additive. Use '*' for all. [default: %(default)s]",
     )
     parser.add_argument(
+        "--iflr-set-type", action='append', default=[],
+        help="List of IFLR Set Types to output, additive. Use '*' for all. [default: %(default)s]",
+    )
+    parser.add_argument(
         '-I', '--IFLR', action='store_true',
         help='Dump IFLRs. [default: %(default)s]',
     )
@@ -374,6 +383,7 @@ Scans a RP66V1 file and dumps data."""
             # kwargs
             verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
             eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
+            iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
             iflr_dump=args.IFLR,
             eflr_dump=args.EFLR,
         )
