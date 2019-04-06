@@ -222,6 +222,9 @@ def analyse_archive(files: typing.List[FileBase],
                     include_size_histogram: bool,
                     ) -> None:
     summary: ArchiveSummary = ArchiveSummary()
+    common_prefix = os.path.commonpath(file.path for file in files)
+    common_prefix = common_prefix[:1 + common_prefix.rfind(os.sep)]
+    print(f'Common prefix: {common_prefix}')
     for file in files:
         if len(file_types) == 0 or file.bin_type in file_types:
             fields = [
@@ -231,9 +234,7 @@ def analyse_archive(files: typing.List[FileBase],
             ]
             if num_bytes:
                 fields.append(TotalDepth.util.bin_file_type.format_bytes(file.bytes))
-            fields.append(
-                f'{file.path}',
-            )
+            fields.append(f'{file.path[len(common_prefix):]}')
             print(' '.join(fields))
     for file in files:
         summary.add(file)
@@ -245,28 +246,29 @@ def analyse_archive(files: typing.List[FileBase],
         print(f'{extension:{fw}} : {summary.ext_count[extension].count:8,d}')
     print('Binary file types:')
     for bin_type in sorted(summary.bin_count.keys()):
-        archive_count: ArchiveCount = summary.bin_count[bin_type]
-        print(f'Binary type: "{bin_type}"')
-        extensions = ', '.join(sorted(archive_count.extensions))
-        print(f' Extensions: {extensions}')
-        print(f'      Count: {archive_count.count:,d} [{archive_count.count / summary.count:.3%}]')
-        print(
-            f'      Bytes: {archive_count.total_size:,d} [{archive_count.total_size / summary.total_size:.3%}]'
-            f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
-        # print(archive_count.size_hist)
-        if include_size_histogram:
-            max_count = max(archive_count.size_hist.values())
-            for k in sorted(archive_count.size_hist.keys()):
-                prop = archive_count.size_hist[k] / max_count
-                bar_len = int(0.5 + 40 * prop)
-                bar = '+' * bar_len
-                x_value = f'>2**{k}'
-                # print(f'{x_value:10} : {archive_count.size_hist[k]:6d} | {bar}')
-                print(f'{x_value:6} | {bar}')
-            # print(archive_count.date_hist.keys())
-            # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
-            # print(archive_count.date_hist)
-            print()
+        if len(file_types) == 0 or bin_type in file_types:
+            archive_count: ArchiveCount = summary.bin_count[bin_type]
+            print(f'Binary type: "{bin_type}"')
+            extensions = ', '.join(sorted(archive_count.extensions))
+            print(f' Extensions: {extensions}')
+            print(f'      Count: {archive_count.count:,d} [{archive_count.count / summary.count:.3%}]')
+            print(
+                f'      Bytes: {archive_count.total_size:,d} [{archive_count.total_size / summary.total_size:.3%}]'
+                f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
+            # print(archive_count.size_hist)
+            if include_size_histogram:
+                max_count = max(archive_count.size_hist.values())
+                for k in sorted(archive_count.size_hist.keys()):
+                    proportion = archive_count.size_hist[k] / max_count
+                    bar_len = int(0.5 + 40 * proportion)
+                    bar = '+' * bar_len
+                    x_value = f'>2**{k}'
+                    print(f'{x_value:6} [{archive_count.size_hist[k]:6,d}] | {bar}')
+                    # print(f'{x_value:6} | {bar}')
+                # print(archive_count.date_hist.keys())
+                # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
+                # print(archive_count.date_hist)
+                print()
 
 
 EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)

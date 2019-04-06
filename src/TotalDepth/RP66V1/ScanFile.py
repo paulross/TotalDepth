@@ -180,7 +180,7 @@ class IFLRDataSummary(DataSummaryBase):
             lr = LogicalRecordSegmentEncryptionPacket(fld.logical_data)
             self._add(fld, b'', lr.size)
         else:
-            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.logical_data)
+            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             ob_name_ident = iflr.object_name.I
             len_bytes = len(iflr.bytes)
             self._add(fld, ob_name_ident, len_bytes)
@@ -266,10 +266,16 @@ def scan_file_logical_records(path: str, **kwargs) -> None:
                         lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
                         lr_text_summary = f'EFLR {lrsep}'
                 else:
-                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(
+                        file_logical_data.lr_type, file_logical_data.logical_data,
+                    )
                     file_contents_summary.add_eflr(eflr)
                     if eflr.set.type in eflr_set_type or '*' in eflr_set_type:
-                        lr_text_summary = str(eflr)
+                        logger.debug(
+                            f'EFLR bytes [{len(file_logical_data.logical_data.bytes)}]:'
+                            f' {file_logical_data.logical_data.bytes}'
+                        )
+                        lr_text_summary = f'LR type: {eflr.lr_type:3d} {str(eflr)}'
                     elif eflr_dump:
                         lr_text_summary = f'LR type: {eflr.lr_type:3d} {str(eflr.set)}' \
                             f' Template size: {len(eflr.template)} Objects: {len(eflr.objects)}'
@@ -279,15 +285,23 @@ def scan_file_logical_records(path: str, **kwargs) -> None:
                     else:
                         print(f'[{lr_index:4d}] {lr_text_summary}')
             else:
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.logical_data)
+                iflr = IFLR.IndirectlyFormattedLogicalRecord(
+                    file_logical_data.lr_type,
+                    file_logical_data.logical_data,
+                )
                 file_logical_data.logical_data.rewind()
                 # print('TRACE: iflr.object_name.I', iflr.object_name.I)
-                if iflr_dump and iflr.object_name.I in iflr_set_type or '*' in iflr_set_type:
-                    lr_text_summary = f'{iflr}'
-                    if verbose:
-                        print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
-                    else:
-                        print(f'[{lr_index:4d}] {lr_text_summary}')
+                if iflr_dump:
+                    if iflr.object_name.I in iflr_set_type or '*' in iflr_set_type or len(iflr_set_type) == 0:
+                        logger.debug(
+                            f'IFLR bytes [{len(file_logical_data.logical_data.bytes)}]:'
+                            f' {file_logical_data.logical_data.bytes}'
+                        )
+                        lr_text_summary = f'{iflr}'
+                        if verbose:
+                            print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
+                        else:
+                            print(f'[{lr_index:4d}] {lr_text_summary}')
                 file_contents_summary.add_iflr(iflr)
                 iflr_data_summary.add(file_logical_data)
         # Finished iteration
@@ -366,7 +380,7 @@ Scans a RP66V1 file and dumps data."""
     if args.log_level in logging._nameToLevel:
         log_level = logging._nameToLevel[args.log_level]
     else:
-        log_level = args.log_level
+        log_level = int(args.log_level)
     # print('Log level:', log_level)
     # Initialise logging etc.
     logging.basicConfig(level=log_level,

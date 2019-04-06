@@ -6,12 +6,16 @@ RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
 Specifically section 3: http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
 """
 # import collections
+import logging
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
 from TotalDepth.RP66V1.core.RepCode import IDENT, UVARI, USHORT, UNITS, code_read, OBNAME, ObjectName, REP_CODE_INT_TO_STR
+
+
+logger = logging.getLogger(__file__)
 
 
 class ExceptionEFLR(ExceptionTotalDepthRP66V1):
@@ -221,7 +225,7 @@ class Object:
 
     def __eq__(self, other) -> bool:
         if other.__class__ == Object:
-            return self.name == other.name and self.attrs == other.attrs
+            return self.name == other.name and self.attrs == other.attrs and self.attr_label_map == other.attr_label_map
         return NotImplemented
 
     def __str__(self) -> str:
@@ -244,9 +248,20 @@ class ExplicitlyFormattedLogicalRecord:
         while ld:
             obj = Object(ld, self.template)
             if obj.name in self.object_name_map:
-                raise ExceptionEFLRSetDuplicateObjectNames(f'Object name {obj.name} already in EFLR set.')
-            self.object_name_map[obj.name] = len(self.objects)
-            self.objects.append(obj)
+                msg = f'Ignoring Object name {obj.name} as it is already in the EFLR set {self.set}.'
+                # Compare and if same ignore, else raise
+                if obj == self[obj.name]:
+                    logger.info(msg)
+                else:
+                    logger.warning(msg)
+                    # logger.error('WAS:')
+                    # logger.error(str(self[obj.name]))
+                    # logger.error('NOW:')
+                    # logger.error(str(obj))
+                    # raise ExceptionEFLRSetDuplicateObjectNames(msg)
+            else:
+                self.object_name_map[obj.name] = len(self.objects)
+                self.objects.append(obj)
 
     def __len__(self) -> int:
         return len(self.objects)

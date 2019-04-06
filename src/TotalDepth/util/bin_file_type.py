@@ -399,6 +399,30 @@ def _tiff(fobj: typing.BinaryIO) -> int:
     return 1
 
 
+EBCDIC_PRINTABLE = set(
+    b'\x40'  # Space
+    b'\x81\x82\x83\x84\x85\x86\x87\x88\x89'  # a-i
+    b'\x91\x92\x93\x94\x95\x96\x97\x98\x99'  # j-r
+    b'\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9'  # s-z
+    b'\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9'  # A-I
+    b'\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9'  # J-R
+    b'\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9'  # S-Z
+    b'\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9'  # 0-9
+)
+
+
+def _segy(fobj: typing.BinaryIO) -> int:
+    """Returns 0 if the file is a SEGY.
+    EBCDIC charcters used. Reference: https://en.wikipedia.org/wiki/EBCDIC
+    """
+    fobj.seek(0)
+    for i in range(3200):
+        by = fobj.read(1)
+        if len(by) != 1 or by[0] not in EBCDIC_PRINTABLE:
+            return 1
+    return 0
+
+
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP = (
@@ -406,6 +430,7 @@ FUNCTION_ID_MAP = (
     (_ps, 'PS'),  # 2^40
     (_zip, 'ZIP'),  # 2^32
     (_tiff, 'TIFF'),  # 2^32
+    # (_segy, 'SEGY'),  # 3200 EBCDIC characters.
     (_lis_tif, 'LISt'),  # Tests with TIF markers are much more strict.
     (_lis_tif_r, 'LIStr'),
     (_lasv12, 'LAS1.2'),

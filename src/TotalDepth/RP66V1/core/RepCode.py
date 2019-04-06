@@ -37,6 +37,7 @@ Code	Name	Size in Bytes	Descirption (sic)
 """
 import collections
 import struct
+import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
