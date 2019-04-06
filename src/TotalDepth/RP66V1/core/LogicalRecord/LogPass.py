@@ -41,6 +41,12 @@ class FrameChannel:
     def read(self, ld: LogicalData) -> typing.List[float]:
         return [RepCode.code_read(self.rep_code, ld) for i in range(self.count)]
 
+    def append(self, ld: LogicalData, data: typing.List[typing.Any]) -> None:
+        if self.count == 1:
+            data.append(RepCode.code_read(self.rep_code, ld))
+        else:
+            data.append([RepCode.code_read(self.rep_code, ld) for _i in range(self.count)])
+
 
 class FrameObject:
     """A single independent recording of channels.
@@ -59,6 +65,14 @@ class FrameObject:
                 self.channels.append(FrameChannel(channel_eflr[channel_obname]))
             else:
                 raise ExceptionFrameObjectInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
+        self.object_name_map: typing.Dict[ObjectName, int] = {
+            objname : i for i, objname in enumerate(channel_obnames)
+        }
+
+    def __getitem__(self, item) -> FrameChannel:
+        if item in self.object_name_map:
+            return self.channels[self.object_name_map[item]]
+        return self.channels[item]
 
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
         ld: LogicalData = LogicalData(iflr.bytes)
@@ -66,6 +80,15 @@ class FrameObject:
         for channel in self.channels:
             result.append(channel.read(ld))
         return result
+
+    def append(self, iflr: IFLR.IndirectlyFormattedLogicalRecord, data: typing.List[typing.List[typing.Any]]) -> None:
+        if len(data) == 0:
+            for c in range(len(self.channels)):
+                data.append([])
+        # assert len(data) == len(self.channels)
+        ld: LogicalData = LogicalData(iflr.bytes)
+        for c, channel in enumerate(self.channels):
+            channel.append(ld, data[c])
 
 
 class LogPass:
@@ -96,8 +119,14 @@ class LogPass:
         return self.frame_objects[item]
 
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
-        # TODO: Look up iflr.object_name in self
         obname: ObjectName = iflr.object_name
         if obname not in self.object_name_map:
             raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass')
         return self.frame_objects[self.object_name_map[obname]].process_IFLR(iflr)
+
+    def append(self, iflr: IFLR.IndirectlyFormattedLogicalRecord, data: typing.List[typing.List[typing.Any]]) -> None:
+        obname: ObjectName = iflr.object_name
+        if obname not in self.object_name_map:
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass')
+        self.frame_objects[self.object_name_map[obname]].append(iflr, data)
+

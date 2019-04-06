@@ -249,8 +249,27 @@ def test_example_iflr():
 
 def test_example_iflr_process():
     log_pass: LogPass = _create_log_pass()
-    print()
+    # print()
     for by in BYTES_IFLR:
         ld = LogicalData(by)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
-        print(log_pass.process_IFLR(iflr))
+        result = log_pass.process_IFLR(iflr)
+        # print(result)
+
+
+def test_example_iflr_process():
+    log_pass: LogPass = _create_log_pass()
+    print()
+    result = []
+    for by in BYTES_IFLR:
+        ld = LogicalData(by)
+        iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
+        log_pass.append(iflr, result)
+    # print(result)
+    # depth = result[0]
+    # print(depth)
+    # print([depth[i] - depth[i-1] for i in range(1, len(BYTES_IFLR))])
+    # print(log_pass.object_name_map)
+    frame_obj = ObjectName(O=11, C=0, I=b'0B')
+    for r, channel_data in enumerate(result):
+        print(f'{str(log_pass[frame_obj][r].long_name):40}', ', '.join([f'{c:10.2f}' for c in channel_data]))

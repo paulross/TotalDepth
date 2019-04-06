@@ -39,6 +39,8 @@ import collections
 import struct
 import typing
 
+import numpy as np
+
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
 
@@ -309,3 +311,19 @@ def code_read(rep_code: int, ld: LogicalData):
         return REP_CODE_MAP[rep_code](ld)
     except KeyError:
         raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
+
+# Numpy related stuff
+
+# Numpy dtypes, numeric only
+REP_CODE_NUMPY_TYPE_MAP = {
+    2: np.float32,
+
+    7: np.float64,
+
+    13: np.int16,
+    14: np.int32,
+    15: np.uint8,
+    16: np.uint16,
+    17: np.uint32,
+    18: np.uint64,
+}
