@@ -235,6 +235,9 @@ class ObjectName(collections.namedtuple('ObjectName', 'O, C, I')):
     def __str__(self):
         return f'OBNAME: O: {self.O} C: {self.C} I: {self.I}'
 
+    def __format__(self, format_spec):
+        return f'OBNAME: O: {self.O} C: {self.C} I: {str(self.I):{format_spec}}'
+
 
 def OBNAME(ld: LogicalData) -> ObjectName:
     """
@@ -284,10 +287,18 @@ def UNITS(ld: LogicalData) -> bytes:
 # Map of Representation code name to functions that take a LogicalData object.
 # HAs the range 1 to 27 inclusive.
 REP_CODE_MAP = {
+    # 1: FSHORT,
     2: FSINGL,
-
+    # 3: FSING1,
+    # 4: FSING2,
+    # 5: ISINGL,
+    # 6: VSINGL,
     7: FDOUBL,
-
+    # 8: FDOUB1,
+    # 9: FDOUB2,
+    # 10: CSINGL,
+    # 11: CDOUBL,
+    # 12: SSHORT,
     13: SNORM,
     14: SLONG,
     15: USHORT,
@@ -300,7 +311,7 @@ REP_CODE_MAP = {
     22: ORIGIN,
     23: OBNAME,
     24: OBJREF,
-
+    # 25: ATTREF,
     26: STATUS,
     27: UNITS,
 }
@@ -327,3 +338,11 @@ REP_CODE_NUMPY_TYPE_MAP = {
     17: np.uint32,
     18: np.uint64,
 }
+
+
+def numpy_dtype(rep_code: int):
+    try:
+        return REP_CODE_NUMPY_TYPE_MAP[rep_code]
+    except KeyError:
+        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
+

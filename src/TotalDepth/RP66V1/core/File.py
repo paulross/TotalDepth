@@ -106,6 +106,18 @@ class StorageUnitLabel:
         assert len(ret) == self.SIZE
         return ret
 
+    def __str__(self) -> str:
+        return '\n'.join(
+            [
+                'StorageUnitLabel:',
+                f'  Storage Unit Sequence Number: {self.storage_unit_sequence_number}',
+                f'                  DLIS Version: {self.dlis_version}',
+                f'        Storage Unit Structure: {self.storage_unit_structure}',
+                f'         Maximum Record Length: {self.maximum_record_length}',
+                f'        Storage Set Identifier: {self.storage_set_identifier}',
+            ]
+        )
+
 
 def read_one_byte(fobj: typing.BinaryIO) -> int:
     by: bytes = fobj.read(1)

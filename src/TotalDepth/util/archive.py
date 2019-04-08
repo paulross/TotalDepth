@@ -288,21 +288,21 @@ def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) 
 
 def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
     result: typing.List[FileBase] = []
-    assert os.path.isdir(path)
-    if recurse:
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                _process_file(root, file, result)
+    if os.path.isdir(path):
+        if recurse:
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    _process_file(root, file, result)
+        else:
+            for file_name in sorted(os.listdir(path)):
+                _process_file(path, file_name, result)
     else:
-        for file_name in sorted(os.listdir(path)):
-            _process_file(path, file_name, result)
-    # for r in result:
-    #     if len(file_types) == 0 or r.bin_type in file_types:
-    #         print(r)
+        _process_file(os.path.dirname(path), os.path.basename(path), result)
     return result
 
 
-def copy_tree(path_from: str, path_to: str, recurse: bool, file_types: typing.List[str], verbose: int, nervous: bool) -> None:
+def copy_tree(path_from: str, path_to: str, recurse: bool,
+              file_types: typing.List[str], verbose: int, nervous: bool) -> None:
     def _print_message(msg: str) -> None:
         if verbose:
             if nervous:
@@ -434,12 +434,17 @@ def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
-    parser.add_argument('path_from', help='Path to the archive.')
+    parser.add_argument('path', help='Path to the archive.')
     parser.add_argument('--file-types', default=[], action='append', help='Binary type(s) of file to list, additive.')
     parser.add_argument('-b', '--bytes', help='Number of initial bytes to show.', type=int, default=0)
     parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
     parser.add_argument('--histogram', help='Include size histogram.', action='store_true')
-    # parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
+    parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
+    parser.add_argument('copy-to', help='Location to copy the files to.', defualt='')
+    parser.add_argument(
+        "-v", "--verbose", action='count', default=0,
+        help="Increase verbosity, additive [default: %(default)s]",
+    )
     args = parser.parse_args()
     print(args)
     # return 0
@@ -449,14 +454,12 @@ def main() -> int:
     files: typing.List[FileBase] = []
 
     FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
-    if os.path.isdir(args.path_from):
-        files = explore_tree(args.path_from, args.recurse)
-        # Output summary
+    if args.copy_to:
+        assert 0
+        copy_tree(args.path, args.copy_to, args.recurse, args.file_types, args.verbose, args.nervous)
+    else:
+        files = explore_tree(args.path, args.recurse)
         analyse_archive(files, args.file_types, args.bytes, args.histogram)
-
-        # if args.path_to == '':
-        # else:
-        #     expand_archive(args.path_from, args.path_to, args.nervous)
     t_exec = time.perf_counter() - t_start
     files_per_sec = int(len(files) / t_exec)
     print('Execution time: {:.3f} (s) {:,d} (files/s)'.format(t_exec, files_per_sec))
