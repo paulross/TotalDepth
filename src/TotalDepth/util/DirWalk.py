@@ -21,6 +21,7 @@
 
 Created on Jun 9, 2011
 """
+import typing
 
 __author__  = 'Paul Ross'
 __date__    = '2011-06-09'
@@ -31,14 +32,16 @@ import os
 import fnmatch
 import collections
 
-from TotalDepth.LIS import ExceptionTotalDepthLIS
+from TotalDepth import ExceptionTotalDepth
 
 #: A pair of (in, out) file paths
 FileInOut = collections.namedtuple('FileInOut', 'filePathIn, filePathOut')
 
-class ExceptionDirWalk(ExceptionTotalDepthLIS):
+
+class ExceptionDirWalk(ExceptionTotalDepth):
     """Exception class for this module."""
     pass
+
 
 def genBigFirst(d):
     """Generator that yields the biggest files (name not path) first.
@@ -58,7 +61,9 @@ def genBigFirst(d):
         for p in m[s]:
             yield p
 
-def dirWalk(theIn, theOut=None, theFnMatch=None, recursive=False, bigFirst=False):
+
+def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
+            recursive: bool=False, bigFirst: bool=False) -> typing.Sequence[FileInOut]:
     """Walks a directory tree generating file paths.
 
     theIn - The input directory.
@@ -81,36 +86,34 @@ def dirWalk(theIn, theOut=None, theFnMatch=None, recursive=False, bigFirst=False
         # First files
         for fn in genBigFirst(theIn):
             fp = os.path.join(theIn, fn)
-            if theFnMatch is None or fnmatch.fnmatch(fp, theFnMatch):
-                if theOut is None:
-                    yield fp
-                else:
-                    yield FileInOut(fp, os.path.join(theOut, fn))
+            if not theFnMatch or fnmatch.fnmatch(fp, theFnMatch):
+                out_file = ''
+                if theOut:
+                    out_file = os.path.join(theOut, fn)
+                yield FileInOut(fp, out_file)
         # Now directories
         if recursive:
             for n in os.listdir(theIn):
                 fp = os.path.join(theIn, n)
                 if os.path.isdir(fp):
-                    if theOut is None:
-                        outP = None
-                    else:
-                        outP = os.path.join(theOut, n)
-                    for aFp in dirWalk(fp, outP, theFnMatch, recursive, bigFirst):
+                    out_path = ''
+                    if not theOut:
+                        out_path = os.path.join(theOut, n)
+                    for aFp in dirWalk(fp, out_path, theFnMatch, recursive, bigFirst):
                         yield aFp
     else:
         # Straightforward list in alphanumeric order
         for n in os.listdir(theIn):
             fp = os.path.join(theIn, n)
             if os.path.isfile(fp) \
-            and (theFnMatch is None or fnmatch.fnmatch(fp, theFnMatch)):
-                if theOut is None:
-                    yield fp
-                else:
-                    yield FileInOut(fp, os.path.join(theOut, n))
+            and (not theFnMatch or fnmatch.fnmatch(fp, theFnMatch)):
+                out_file = ''
+                if theOut:
+                    out_file = os.path.join(theOut, n)
+                yield FileInOut(fp, out_file)
             elif os.path.isdir(fp) and recursive:
-                if theOut is None:
-                    outP = None
-                else:
-                    outP = os.path.join(theOut, n)
-                for aFp in dirWalk(fp, outP, theFnMatch, recursive):
+                out_path = ''
+                if not theOut:
+                    out_path = os.path.join(theOut, n)
+                for aFp in dirWalk(fp, out_path, theFnMatch, recursive):
                     yield aFp

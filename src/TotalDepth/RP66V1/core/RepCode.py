@@ -81,6 +81,7 @@ REP_CODE_INT_TO_STR = {
     27: 'UNITS',
 }
 REP_CODE_STR_TO_INT = {v: k for k, v in REP_CODE_INT_TO_STR.items()}
+assert len(REP_CODE_INT_TO_STR) == len(REP_CODE_STR_TO_INT)
 
 
 def FSINGL(ld: LogicalData) -> float:

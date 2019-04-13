@@ -42,10 +42,14 @@ class FrameChannel:
         self.count = reduce(lambda x, y: x * y, self.dimensions, 1)
 
     def __str__(self) -> str:
-        return f'FrameChannel: {self.object_name:8} Rc: {self.rep_code:3d} Co: {self.count:4d} Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
+        return f'FrameChannel: {self.object_name:8} Rc: {self.rep_code:3d} Co: {self.count:4d}' \
+            f' Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
 
     def read(self, ld: LogicalData) -> typing.List[float]:
         return [RepCode.code_read(self.rep_code, ld) for _i in range(self.count)]
+
+    def read_one(self, ld: LogicalData) -> typing.Union[float, int]:
+        return RepCode.code_read(self.rep_code, ld)
 
     def append(self, ld: LogicalData, data: typing.List[typing.Any]) -> None:
         if self.count == 1:
@@ -106,9 +110,9 @@ class FrameObject:
             return self.channels[self.object_name_map[item]]
         return self.channels[item]
 
-    def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
+    def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.List[typing.List[float]]:
         ld: LogicalData = LogicalData(iflr.bytes)
-        result = []
+        result: typing.List[typing.List[float]] = []
         for channel in self.channels:
             result.append(channel.read(ld))
         return result
@@ -121,6 +125,12 @@ class FrameObject:
         ld: LogicalData = LogicalData(iflr.bytes)
         for c, channel in enumerate(self.channels):
             channel.append(ld, data[c])
+
+    def first_channel_value(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.Union[float, int]:
+        assert len(self.channels)
+        # TODO: Efficiency here, is this slow?
+        ld: LogicalData = LogicalData(iflr.bytes)
+        return self.channels[0].read_one(ld)
 
 
 class LogPass:
@@ -159,14 +169,23 @@ class LogPass:
         return self.frame_objects[item]
 
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
-        obname: ObjectName = iflr.object_name
-        if obname not in self.object_name_map:
-            raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass')
-        return self.frame_objects[self.object_name_map[obname]].process_IFLR(iflr)
+        object_name: ObjectName = iflr.object_name
+        if object_name not in self.object_name_map:
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass')
+        return self.frame_objects[self.object_name_map[object_name]].process_IFLR(iflr)
 
     def append(self, iflr: IFLR.IndirectlyFormattedLogicalRecord, data: typing.List[typing.List[typing.Any]]) -> None:
+        object_name: ObjectName = iflr.object_name
+        if object_name not in self.object_name_map:
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass')
+        self.frame_objects[self.object_name_map[object_name]].append(iflr, data)
+
+    def first_channel_value(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.Union[float, int]:
+        """
+        Given an IFLR this returns the first Channel value as a number.
+        The first channel is the Index Channel [RP66V1 Section 5.6.1 Frames Para 3]
+        """
         obname: ObjectName = iflr.object_name
         if obname not in self.object_name_map:
             raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass')
-        self.frame_objects[self.object_name_map[obname]].append(iflr, data)
-
+        return self.frame_objects[self.object_name_map[obname]].first_channel_value(iflr)

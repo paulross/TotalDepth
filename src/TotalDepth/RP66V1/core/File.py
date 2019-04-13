@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import re
 import typing
 
@@ -46,6 +47,7 @@ class ExceptionLogicalRecordSegmentHeaderEOF(ExceptionLogicalRecordSegmentHeader
 class ExceptionFileRead(ExceptionFile):
     pass
 
+
 class ExceptionFileReadEOF(ExceptionFileRead):
     pass
 
@@ -80,21 +82,21 @@ class StorageUnitLabel:
         m = self.RE_STORAGE_UNIT_SEQUENCE_NUMBER.match(by[:4])
         if m is None:
             raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on {by}')
-        self.storage_unit_sequence_number = int(m.group(1))
+        self.storage_unit_sequence_number: int = int(m.group(1))
         m = self.RE_DLIS_VERSION.match(by[4:9])
         if m is None:
             raise ExceptionStorageUnitLabel(f'Can not match RE_DLIS_VERSION on {by}')
-        self.dlis_version = m.group(1)
+        self.dlis_version: bytes = m.group(1)
         m = self.RE_STORAGE_UNIT_STRUCTURE.match(by[9:15])
         if m is None:
             raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_STRUCTURE on {by}')
-        self.storage_unit_structure = m.group(1)
+        self.storage_unit_structure: bytes = m.group(1)
         m = self.RE_MAXIMUM_RECORD_LENGTH.match(by[15:20])
         if m is None:
             raise ExceptionStorageUnitLabel(f'Can not match RE_MAXIMUM_RECORD_LENGTH on {by}')
-        self.maximum_record_length = int(m.group(1))
+        self.maximum_record_length: int = int(m.group(1))
         # TODO: Currently no enforcement here. Could check that this is printable ASCII.
-        self.storage_set_identifier = by[20:]
+        self.storage_set_identifier: bytes = by[20:]
 
     def as_bytes(self) -> bytes:
         ret = b''.join(
@@ -134,7 +136,10 @@ def read_two_bytes_big_endian(fobj: typing.BinaryIO) -> int:
 
 
 class VisibleRecord:
-    """RP66V1 visible records. See [RP66V1] 2.3.6"""
+    """
+    RP66V1 visible records. See [RP66V1 Section 2.3.6]
+    (sic) - Place marker for error in the standard in this case
+    """
     VERSION = 0xff01
     NUMBER_OF_BYTES = 4
     MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE + NUMBER_OF_BYTES
@@ -172,9 +177,6 @@ class VisibleRecord:
     def next_position(self) -> int:
         return self.position + self.length
 
-    def expects_visible_record(self, fobj: typing.BinaryIO):
-        return fobj.tell() == self.pos + self.len
-
     def read(self, fobj: typing.BinaryIO) -> None:
         """Read a new Visible Record and check it.
         This may throw a ExceptionVisibleRecord."""
@@ -203,10 +205,7 @@ class LogicalRecordSegmentHeader:
     # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
 
     def __init__(self, fobj: typing.BinaryIO):
-        if fobj is not None:
-            self.position, self.length, self.attributes, self.record_type = self._read(fobj)
-        else:
-            self.position, self.length, self.attributes, self.record_type = 0
+        self.position, self.length, self.attributes, self.record_type = self._read(fobj)
 
     def _read(self, fobj: typing.BinaryIO) -> typing.Tuple[int, int, int, int]:
         position = fobj.tell()
@@ -228,7 +227,8 @@ class LogicalRecordSegmentHeader:
         self.position, self.length, self.attributes, self.record_type = self._read(fobj)
 
     def __format__(self, format_spec) -> str:
-        return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x} attributes=0x{:02x} LR type={:3d}>'.format(
+        return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
+               ' attributes=0x{:02x} LR type={:3d}>'.format(
             self.position, self.length, self.attributes, self.record_type
         )
 
@@ -343,8 +343,8 @@ class LogicalRecordPosition:
             raise ValueError(
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
             )
-        self.vr_position = vr.position
-        self.lrsh_position = lrsh.position
+        self.vr_position: int = vr.position
+        self.lrsh_position: int = lrsh.position
 
     def __str__(self):
         return f'VR: 0x{self.vr_position:08x} LRSH 0x{self.lrsh_position:08x}'
@@ -353,8 +353,10 @@ class LogicalRecordPosition:
 class LogicalData:
     """Class that holds data bytes and can successively read them."""
     def __init__(self, by: bytes):
-        self.bytes = by
-        self.index = 0
+        # TODO: Performance, make this a list of bytes like a rope???
+        self.bytes: bytes = by
+        self.index: int = 0
+        self._sha1: typing.Union[hashlib.sha1, None] = None
 
     def peek(self) -> int:
         """Return the next bytes without incrementing the index."""
@@ -376,6 +378,12 @@ class LogicalData:
     def remain(self) -> int:
         return len(self.bytes) - self.index
 
+    @property
+    def sha1(self) -> hashlib.sha1:
+        if self._sha1 is None:
+            self._sha1 = hashlib.sha1(self.bytes)
+        return self._sha1
+
     def rewind(self) -> None:
         self.index = 0
 
@@ -390,18 +398,31 @@ class LogicalData:
 
 
 class FileLogicalData:
+    """
+    Class that contains information about a Logical Record within a physical file.
+    This is lazily evaluated with only the VisibleRecord and LogicalRecordSegmentHeader
+    provided to the constructor.
+    Eager evaluation is done with one or more add()'s followed by a seal().
+    """
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         self.position = LogicalRecordPosition(vr, lrsh)
+        # self.visible_records = [vr]
         self.lr_type: int = lrsh.record_type
         self.lr_is_eflr: bool = lrsh.is_eflr
         self.lr_is_encrypted: bool = lrsh.is_encrypted
         self._bytes: typing.Union[None, bytearray] = bytearray()
         self.logical_data: typing.Union[None, LogicalData] = None
 
+    # def add_visible_record(self, visible_record: VisibleRecord) -> None:
+    #     assert len(self.visible_records) > 0
+    #     if self.visible_records[-1] != visible_record:
+    #         self.visible_records.append(visible_record)
+
     def add_bytes(self, by: bytes) -> None:
         self._bytes.extend(by)
 
     def seal(self):
+        # TODO: Review the cost of this copy. Maybe a list of bytes, like a rope.
         self.logical_data = LogicalData(bytes(self._bytes))
         self._bytes = None
 
@@ -434,28 +455,42 @@ class FileRead:
         self.file.seek(self.sul.SIZE)
         self.visible_record.read(self.file)
 
-    def _set_file_and_read_first_logical_record(self) -> None:
+    def _set_file_and_read_first_logical_record_segment_header(self) -> None:
         self._set_file_and_read_first_visible_record()
         self.logical_record_segment_header.read(self.file)
         if not self.logical_record_segment_header.is_first:
             raise ExceptionFileRead('TODO: Error message')
 
-    def _move_to_next_visible_and_logical_record_segment(self, vr_position: int, lrsh_position: int) -> None:
-        """Sets the file up to read a LRSH within a Visible Record. It is up to the caller to make sure that
-        the values of vr_position and Logical Record Segment Header position are valid, usually as they have
-        been created by one of the iteration methods of this class."""
-        assert vr_position > 0
-        assert lrsh_position > 0
-        assert vr_position < lrsh_position
-        self.file.seek(vr_position)
-        self.visible_record.read_next(self.file)
-        self.file.seek(lrsh_position)
-        self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
-        if not self.logical_record_segment_header.is_first:
-            raise ExceptionFileRead('TODO: Error message')
+    # def _move_to_next_visible_and_logical_record_segment(self, vr_position: int, lrsh_position: int) -> None:
+    #     """Sets the file up to read a LRSH within a Visible Record. It is up to the caller to make sure that
+    #     the values of vr_position and Logical Record Segment Header position are valid, usually as they have
+    #     been created by one of the iteration methods of this class."""
+    #     assert vr_position > 0
+    #     assert lrsh_position > 0
+    #     assert vr_position < lrsh_position
+    #     self.file.seek(vr_position)
+    #     self.visible_record.read_next(self.file)
+    #     self.file.seek(lrsh_position)
+    #     self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
+    #     if not self.logical_record_segment_header.is_first:
+    #         raise ExceptionFileRead('TODO: Error message')
+
+    # def iter_logical_record_segments(self) -> typing.Sequence[LogicalRecordSegmentHeader]:
+    #     """Iterate across the file yielding the Logical Record Segments as LogicalRecordSegmentHeader objects."""
+    #     self._set_file_and_read_first_logical_record()
+    #     try:
+    #         while True:
+    #             # Caller could possibly mess with this so make a copy.
+    #             yield copy.copy(self.logical_record_segment_header)
+    #             self._seek_and_read_next_logical_record_segment()
+    #     except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
+    #         pass
 
     def iter_visible_records(self) -> typing.Sequence[VisibleRecord]:
-        """Iterate across the file yielding the Visible Records as VisibleRecord objects."""
+        """
+        Iterate across the file yielding the Visible Records as VisibleRecord objects.
+        The iteration cann be further divided by calling iter_LRSHs_for_VR()
+        """
         self._set_file_and_read_first_visible_record()
         try:
             while True:
@@ -467,31 +502,11 @@ class FileRead:
         except ExceptionVisibleRecordEOF:
             pass
 
-    def _seek_and_read_next_logical_record_segment(self):
-        next_position = self.logical_record_segment_header.next_position
-        self.file.seek(next_position)
-        if next_position == self.visible_record.next_position:
-            self.visible_record.read_next(self.file)
-        self.logical_record_segment_header.read(self.file)
-        # is_first has been checked by __init__
-
-    def iter_logical_record_segments(self) -> typing.Sequence[LogicalRecordSegmentHeader]:
-        """Iterate across the file yielding the Logical Record Segments as LogicalRecordSegmentHeader objects."""
-        self._set_file_and_read_first_logical_record()
-        try:
-            while True:
-                # Caller could possibly mess with this so make a copy.
-                yield copy.copy(self.logical_record_segment_header)
-                self._seek_and_read_next_logical_record_segment()
-        except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
-            pass
-
-    def iter_visible_record_logical_record_segments(self, vr_given: VisibleRecord) -> typing.Sequence[LogicalRecordSegmentHeader]:
+    def iter_LRSHs_for_visible_record(self, vr_given: VisibleRecord) -> typing.Sequence[LogicalRecordSegmentHeader]:
         """
         Iterate across the Visible Record yielding the Logical Record Segments as LogicalRecordSegmentHeader objects.
-        TODO: This leaves the file positioned at the next Visible Record.
+        This leaves the file positioned at the next Visible Record or EOF.
         """
-        # TODO: Is this used?
         self.file.seek(vr_given.position)
         self.visible_record.read(self.file)
         assert self.visible_record == vr_given
@@ -506,8 +521,20 @@ class FileRead:
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
+    def _seek_and_read_next_logical_record_segment_header(self):
+        """Seeks to the next Logical Record Segment Header and reads the header data into
+        self.logical_record_segment_header. This also updates self.visible_record if necessary."""
+        next_position = self.logical_record_segment_header.next_position
+        self.file.seek(next_position)
+        if next_position == self.visible_record.next_position:
+            self.visible_record.read_next(self.file)
+        self.logical_record_segment_header.read(self.file)
+        # is_first has been checked by __init__
+
     def iter_logical_records(self) -> typing.Sequence[FileLogicalData]:
-        self._set_file_and_read_first_logical_record()
+        """Iterate across the file from the beginning yielding FileLogicalData objects."""
+        self._set_file_and_read_first_logical_record_segment_header()
+        # TODO: For performance limit the amount of bytes read of the IFLR to the first channel and seek the rest.
         try:
             while True:
                 file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
@@ -528,7 +555,9 @@ class FileRead:
                 file_logical_data.add_bytes(by)
                 while not self.logical_record_segment_header.is_last:
                     # Loop for each subsequent segment
-                    self._seek_and_read_next_logical_record_segment()
+                    self._seek_and_read_next_logical_record_segment_header()
+                    # # This won't do anything if it is the same visible record.
+                    # file_logical_data.add_visible_record(self.visible_record)
                     by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
                     if len(by) != self.logical_record_segment_header.logical_data_length:
                         raise ExceptionFileReadEOF(
@@ -540,7 +569,7 @@ class FileRead:
                     file_logical_data.add_bytes(by)
                 file_logical_data.seal()
                 yield file_logical_data
-                self._seek_and_read_next_logical_record_segment()
+                self._seek_and_read_next_logical_record_segment_header()
                 assert self.logical_record_segment_header.is_first
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass

@@ -55,8 +55,8 @@ class Set:
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_set_group:
             raise ExceptionEFLRSet(f'Component Descriptor does not represent a set but a {component_descriptor.type}.')
-        self.type = IDENT(ld)
-        self.name = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_MAP['N'].global_default
+        self.type: bytes = IDENT(ld)
+        self.name: bytes = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_MAP['N'].global_default
         if component_descriptor.has_set_N:
             self.name = IDENT(ld)
 

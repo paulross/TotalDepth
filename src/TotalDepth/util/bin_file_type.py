@@ -186,7 +186,7 @@ def _lis(fobj: typing.BinaryIO) -> int:
     return _lis_bytes(by)
 
 
-def _lis_tif_initial(by: bytes) -> int:
+def _tif_initial(by: bytes) -> int:
     """Basic LIS with TIF markers correctly written.
     Checks 8 bytes exactly so 2^64.
     """
@@ -202,7 +202,7 @@ def _lis_tif_initial(by: bytes) -> int:
 def _lis_tif_general(by: bytes, tif_next: int) -> int:
     """Basic LIS with TIF markers correctly written (little endian).
     2^64 for first 8 bytes. 2^32 for tif_next. 2^11 for LIS."""
-    r = _lis_tif_initial(by)  # 2^64
+    r = _tif_initial(by)  # 2^64
     assert len(by) >= 12 + 4, f'_lis_tif_general(): needs at least 16 bytes not {len(by):d}'
     if r:
         return r
@@ -278,7 +278,7 @@ RP66V1_LEN_WITH_TIFF = TIF_LEN_REQUIRED_BYTES + 80
 
 def _rp66v1_tif_general(by: bytes, tif_next: int) -> int:
     """RP66V1 with TIF markers correctly written (little endian)."""
-    r = _lis_tif_initial(by)
+    r = _tif_initial(by)
     if r:
         return r
     # First record must be the Storage Unit Label which is 80 bytes long. No padding.
@@ -425,7 +425,7 @@ def _segy(fobj: typing.BinaryIO) -> int:
 
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
-FUNCTION_ID_MAP = (
+FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str]] = (
     (_pdf, 'PDF'),  # 2^40
     (_ps, 'PS'),  # 2^40
     (_zip, 'ZIP'),  # 2^32
@@ -443,7 +443,8 @@ FUNCTION_ID_MAP = (
     (_ascii, 'ASCII'),
     (_lis, 'LIS'),  # LIS without TIF is potentially the weakest test, around 2^11
 )
-BINARY_FILE_TYPE_CODE_WIDTH = max(len(v[1]) for v in FUNCTION_ID_MAP)
+BINARY_FILE_TYPE_CODE_WIDTH: int = max(len(v[1]) for v in FUNCTION_ID_MAP)
+BINARY_FILE_TYPES_SUPPORTED: typing.List[str] = [v[1] for v in FUNCTION_ID_MAP]
 
 
 def binary_file_type(fobj: typing.BinaryIO) -> str:

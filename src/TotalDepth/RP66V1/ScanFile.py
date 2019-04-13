@@ -34,9 +34,11 @@ logger = logging.getLogger(__file__)
 
 STANDARD_TEXT_WIDTH = 132
 
+
 @contextlib.contextmanager
 def _output_section_header_trailer(header: str, fillchar: str,
-                                   width: int = STANDARD_TEXT_WIDTH, os: typing.TextIO = sys.stdout):
+                                   width: int = STANDARD_TEXT_WIDTH,
+                                   os: typing.TextIO = sys.stdout):
     s = colorama.Fore.GREEN + f' {header} '.center(width, fillchar) + '\n'
     os.write(s)
     yield
@@ -114,7 +116,10 @@ class DataSummaryBase:
         for k in sorted(self.lr_type_map):
             ret.append(f'{k:3d} : {self.lr_type_map[k]:8,d}')
         ret.append(f'Labels [{len(self.label_total_size_map)}]:')
-        fw = max(len(str(k)) for k in self.label_total_size_map)
+        if len(self.label_total_size_map) > 0:
+            fw = max(len(str(k)) for k in self.label_total_size_map)
+        else:
+            fw = 1
         for k in sorted(self.label_total_size_map.keys()):
             ret.append(f'{str(k):{fw}} count {self.label_count_map[k]:8,d} total bytes {self.label_total_size_map[k]:8,d}')
         for k in sorted(self.label_size_set.keys()):
@@ -227,20 +232,18 @@ class LogicalFileContentsSummary:
 
     def add_iflr(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
         assert self.log_pass is not None
+        assert len(iflr.bytes) > 0
         logger.debug(f'add_iflr(): {iflr}')
         object_name = iflr.object_name
         if object_name not in self.object_channel_data_map:
             self.object_channel_data_map[object_name] = {}
-        if len(iflr.bytes):
-            data = []
-            self.log_pass.append(iflr, data)
-            # Load the data
-            for c, channel in enumerate(self.log_pass[object_name].channels):
-                if channel.object_name not in self.object_channel_data_map[object_name]:
-                    self.object_channel_data_map[object_name][channel.object_name] = MinMax()
-                self.object_channel_data_map[object_name][channel.object_name].add(data[c])
-        else:
-            logger.warning('Ignoring empty IFLR.')
+        data = []
+        self.log_pass.append(iflr, data)
+        # Load the data
+        for c, channel in enumerate(self.log_pass[object_name].channels):
+            if channel.object_name not in self.object_channel_data_map[object_name]:
+                self.object_channel_data_map[object_name][channel.object_name] = MinMax()
+            self.object_channel_data_map[object_name][channel.object_name].add(data[c])
 
     def dump(self, os: typing.TextIO=sys.stdout) -> None:
         os.write(f'SEQUENCE NUMBER: {self.sequence_number:d} ID: {self.id}\n')
@@ -258,7 +261,32 @@ class LogicalFileContentsSummary:
                 os.write('\n')
 
 
-def _scan_RP66V1_file(fobj: typing.BinaryIO, **kwargs):
+def _scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, **kwargs):
+    with _output_section_header_trailer('RP66V1 Visible Record Summary', '*'):
+        # verbose: int = kwargs.get('verbose', 0)
+        lrsh_dump = kwargs['lrsh_dump']
+        rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
+        # print(rp66_file)
+        # print(rp66_file.sul)
+        vr_position = lr_position = 0
+        for visible_record in rp66_file.iter_visible_records():
+            vr_stride = visible_record.position - vr_position
+            print(f'{visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}')
+            if lrsh_dump:
+                for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
+                    lr_stride = lrsh.position - lr_position
+                    if lrsh.is_first:
+                        output = colorama.Fore.GREEN + f' {lrsh}'
+                    elif lrsh.is_last:
+                        output = colorama.Fore.RED + f'  --{lrsh}'
+                    else:
+                        output = colorama.Fore.YELLOW + f'  ..{lrsh}'
+                    print(f'  {output} Stride: 0x{lr_stride:08x} {lr_stride:6,d}')
+                    lr_position = lrsh.position
+            vr_position = visible_record.position
+
+
+def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
     with _output_section_header_trailer('RP66V1 File Summary', '*'):
         encrypted_records: bool = kwargs.get('encrypted_records', False)
         if not encrypted_records:
@@ -326,7 +354,10 @@ def _scan_RP66V1_file(fobj: typing.BinaryIO, **kwargs):
                         else:
                             print(f'[{lr_index:4d}] {lr_text_summary}')
                 assert len(file_contents_summaries) > 0
-                file_contents_summaries[-1].add_iflr(iflr)
+                if len(iflr.bytes) > 0:
+                    file_contents_summaries[-1].add_iflr(iflr)
+                else:
+                    logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
                 file_logical_data.logical_data.rewind()
                 file_contents_summaries[-1].iflr_data_summary.add(file_logical_data)
         # Finished iteration
@@ -342,14 +373,18 @@ def _scan_RP66V1_file(fobj: typing.BinaryIO, **kwargs):
                     print(summary.iflr_data_summary)
 
 
-def scan_file_logical_records(path: str, **kwargs) -> int:
+def scan_file(path: str, function: typing.Callable, **kwargs) -> int:
+    """
+    If the file in the path is a RP66V1 binary file type the given function will be called on it with the **kwargs.
+    This returns the number of bytes in the file.
+    """
     with open(path, 'rb') as fobj:
         bin_file_type = binary_file_type(fobj)
         if bin_file_type == 'RP66V1':
             # print(f'File: {bin_file_type} at {path}')
             logger.info(f'Procesing file type "{bin_file_type:{BINARY_FILE_TYPE_CODE_WIDTH}}" at {path}')
             try:
-                _scan_RP66V1_file(fobj, **kwargs)
+                function(fobj, **kwargs)
                 return os.path.getsize(path)
             except Exception:
                 logger.error(f'Exception at file position {fobj.tell():d} 0x{fobj.tell():08x}')
@@ -360,23 +395,23 @@ def scan_file_logical_records(path: str, **kwargs) -> int:
     return 0
 
 
-def scan_file_or_dir_logical_records(path: str, recurse: bool, **kwargs) -> typing.Tuple[int, int]:
+def scan_file_or_dir(path: str, function: typing.Callable, recurse: bool, **kwargs) -> typing.Tuple[int, int]:
     files = 0
     file_bytes = 0
     if os.path.isfile(path):
-        file_bytes += scan_file_logical_records(path, **kwargs)
+        file_bytes += scan_file(path, function, **kwargs)
     elif os.path.isdir(path):
         # Process the files in the directory, and sub-directories if recursive
         for name in os.listdir(path):
             child_path = os.path.join(path, name)
             if os.path.isfile(child_path):
-                b = scan_file_logical_records(child_path, **kwargs)
+                b = scan_file(child_path, function, **kwargs)
                 if b > 0:
                     files += 1
                     file_bytes += b
             elif os.path.isdir(child_path):
                 if recurse:
-                    f, b = scan_file_or_dir_logical_records(child_path, recurse, **kwargs)
+                    f, b = scan_file_or_dir(child_path, function, recurse, **kwargs)
                     files += f
                     file_bytes += b
                 else:
@@ -441,6 +476,14 @@ Scans a RP66V1 file and dumps data."""
         '-E', '--EFLR', action='store_true',
         help='Dump EFLR Set. [default: %(default)s]',
     )
+    parser.add_argument(
+        '-V', '--VR', action='store_true',
+        help='Dump the Visible Records. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-L', '--LRSH', action='store_true',
+        help='Dump the Visible Records and the Logical Record Segment Headers. [default: %(default)s]',
+    )
     args = parser.parse_args()
     # print('args:', args)
 
@@ -458,25 +501,26 @@ Scans a RP66V1 file and dumps data."""
     clk_start = time.perf_counter()
     # return 0
     # Your code here
-    # scan_file_logical_records(
-    #     args.path,
-    #     # kwargs
-    #     verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
-    #     eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-    #     iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-    #     iflr_dump=args.IFLR,
-    #     eflr_dump=args.EFLR,
-    # )
-    file_count, file_bytes = scan_file_or_dir_logical_records(
-        args.path,
-        args.recurse,
-        # kwargs
-        verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
-        eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-        iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-        iflr_dump=args.IFLR,
-        eflr_dump=args.EFLR,
-    )
+    if args.VR or args.LRSH:
+        file_count, file_bytes = scan_file_or_dir(
+            args.path,
+            _scan_RP66V1_file_visible_records,
+            args.recurse,
+            # kwargs
+            lrsh_dump=args.LRSH
+        )
+    else:
+        file_count, file_bytes = scan_file_or_dir(
+            args.path,
+            _scan_RP66V1_file_logical_records,
+            args.recurse,
+            # kwargs
+            verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
+            eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
+            iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
+            iflr_dump=args.IFLR,
+            eflr_dump=args.EFLR,
+        )
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)
     if file_bytes > 0:

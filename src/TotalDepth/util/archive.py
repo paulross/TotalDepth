@@ -301,45 +301,45 @@ def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
     return result
 
 
-def copy_tree(path_from: str, path_to: str, recurse: bool,
-              file_types: typing.List[str], verbose: int, nervous: bool) -> None:
-    def _print_message(msg: str) -> None:
-        if verbose:
-            if nervous:
-                print(f'Would {msg}')
-            else:
-                print(f'{msg}')
-
-    def _copy_file(_file_from: str, _file_to: str) -> None:
-        fod = FileOnDisc(_file_from)
-        if len(file_types) == 0 or fod.bin_type in file_types:
-            _dir_to = os.path.dirname(_file_to)
-            if not os.path.isdir(_dir_to):
-                _print_message(f'Create sub-directory{_dir_to}')
-                os.makedirs(_dir_to)
-            _print_message(f'Copy {_file_from} to {_file_to}')
-            if not nervous:
-                shutil.copyfile(_file_from, _file_to)
-        else:
-            _print_message(f'Ignoring {_file_from} of type {fod.bin_type}')
-
-    if not os.path.isdir(path_from):
-        raise ValueError(f'Path {path_from} is not a directory.')
-    if not os.path.isdir(path_to):
-        _print_message(f'Create root directory {path_to}')
-        if not nervous:
-            os.makedirs(path_to)
-    if recurse:
-        for root, dirs, files in os.walk(path_from):
-            for file in files:
-                file_from = os.path.join(root, file)
-                file_to = os.path.join(path_to, file)
-                _copy_file(file_from, file_to)
-    else:
-        for file in sorted(os.listdir(path_from)):
-            file_from = os.path.join(path_from, file)
-            file_to = os.path.join(path_to, file)
-            _copy_file(file_from, file_to)
+# def copy_tree(path_from: str, path_to: str, recurse: bool,
+#               file_types: typing.List[str], verbose: int, nervous: bool) -> None:
+#     def _print_message(msg: str) -> None:
+#         if verbose:
+#             if nervous:
+#                 print(f'Would {msg}')
+#             else:
+#                 print(f'{msg}')
+#
+#     def _copy_file(_file_from: str, _file_to: str) -> None:
+#         fod = FileOnDisc(_file_from)
+#         if len(file_types) == 0 or fod.bin_type in file_types:
+#             _dir_to = os.path.dirname(_file_to)
+#             if not os.path.isdir(_dir_to):
+#                 _print_message(f'Create sub-directory{_dir_to}')
+#                 os.makedirs(_dir_to)
+#             _print_message(f'Copy {_file_from} to {_file_to}')
+#             if not nervous:
+#                 shutil.copyfile(_file_from, _file_to)
+#         else:
+#             _print_message(f'Ignoring {_file_from} of type {fod.bin_type}')
+#
+#     if not os.path.isdir(path_from):
+#         raise ValueError(f'Path {path_from} is not a directory.')
+#     if not os.path.isdir(path_to):
+#         _print_message(f'Create root directory {path_to}')
+#         if not nervous:
+#             os.makedirs(path_to)
+#     if recurse:
+#         for root, dirs, files in os.walk(path_from):
+#             for file in files:
+#                 file_from = os.path.join(root, file)
+#                 file_to = os.path.join(path_to, file)
+#                 _copy_file(file_from, file_to)
+#     else:
+#         for file in sorted(os.listdir(path_from)):
+#             file_from = os.path.join(path_from, file)
+#             file_to = os.path.join(path_to, file)
+#             _copy_file(file_from, file_to)
 
 
 ARCHIVE_EXTENSIONS = frozenset(
@@ -433,28 +433,40 @@ def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
 
 
 def main() -> int:
+    print(f'CMD:', ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
     parser.add_argument('path', help='Path to the archive.')
-    parser.add_argument('--file-types', default=[], action='append', help='Binary type(s) of file to list, additive.')
+    file_types = ', '.join(sorted(TotalDepth.util.bin_file_type.BINARY_FILE_TYPES_SUPPORTED))
+    parser.add_argument(
+        '--file-types', default=[], action='append',
+        help=f'Binary type(s) of file to list, additive. Supported files are: {file_types}',
+    )
     parser.add_argument('-b', '--bytes', help='Number of initial bytes to show.', type=int, default=0)
     parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
     parser.add_argument('--histogram', help='Include size histogram.', action='store_true')
     parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
-    parser.add_argument('copy-to', help='Location to copy the files to.', defualt='')
+    # parser.add_argument('copy-to', help='Location to copy the files to.', nargs='?')
+    parser.add_argument(
+        'path_out', type=str,
+        help='Path to the output directory to copy the files to.'
+             'The results are undefined if path_out conflicts with path_in',
+        # default='',
+        nargs='?')
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
     args = parser.parse_args()
     print(args)
-    # return 0
+    print(args.path_to)
+    return 0
 
     t_start = time.perf_counter()
 
     files: typing.List[FileBase] = []
 
     FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
-    if args.copy_to:
+    if args.path_to:
         assert 0
         copy_tree(args.path, args.copy_to, args.recurse, args.file_types, args.verbose, args.nervous)
     else:

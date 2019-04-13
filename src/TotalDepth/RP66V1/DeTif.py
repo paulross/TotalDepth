@@ -4,10 +4,13 @@ Scans a file and verifies TIF markers reporting errors.
 import argparse
 import collections
 import logging
+import os
 import struct
 import sys
 import time
 import typing
+
+from TotalDepth.util.DirWalk import dirWalk
 
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
@@ -18,6 +21,7 @@ logger = logging.getLogger(__file__)
 TIF_STRUCT = struct.Struct('<L')
 TIF_LEN: int = TIF_STRUCT.size
 TIF_COUNT: int = 3
+
 
 def _read_tif(fobj: typing.BinaryIO) -> int:
     # value = struct.unpack('<L', fobj.read(4))
@@ -64,21 +68,27 @@ def scan(path: str, verbose: int) -> int:
     return count
 
 
-def strip(path_in: str, path_out: str, verbose: int) -> int:
-    bytes_written = 0
+def has_tif(path: str) -> bool:
+    with open(path, 'rb') as fobj_in:
+        tif = _read_tifs(fobj_in)
+        if tif.type != 0 or tif.prev != 0:
+            return False
+    return True
+
+
+def strip(path_in: str, path_out: str) -> typing.Tuple[int, int]:
+    tif_markers_stripped = bytes_written = 0
     with open(path_in, 'rb') as fobj_in:
         tif = _read_tifs(fobj_in)
         if tif.type != 0 or tif.prev != 0:
-            print(f'No initial TIF markers: {tif}')
+            logging.error(f'No initial TIF markers: {tif}')
             return 0
-        if verbose:
-            print(f'{tif}')
+        logging.debug(f'TIF: {tif}')
         with open(path_out, 'wb') as fobj_out:
             while True:
                 read_len = tif.next - tif.tell - TIF_LEN * 3
                 if read_len > 0:
-                    if verbose:
-                        print(f'Writing 0x{read_len:08x} bytes from 0x{fobj_in.tell():08x}')
+                    logging.debug(f'Writing 0x{read_len:08x} bytes from 0x{fobj_in.tell():08x}')
                     fobj_out.write(fobj_in.read(read_len))
                     bytes_written += read_len
                 try:
@@ -88,24 +98,30 @@ def strip(path_in: str, path_out: str, verbose: int) -> int:
                 if tif_new.prev != tif.tell:
                     logger.error(f'TIF prev 0x{tif_new.prev:08x} != tell 0x{tif.tell:08x}')
                 tif = tif_new
-    return bytes_written
+                tif_markers_stripped += 1
+    return tif_markers_stripped, bytes_written
 
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
-    Scans a file for TIF markers and strips them."""
+Scans a file for TIF markers or can copy a directory of files with TIF markers removed."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
-    parser.add_argument('path_in', type=str, help='Path to the input file.')
+    parser.add_argument('path_in', type=str, help='Path to the input file (or file/directory if stripping).')
     parser.add_argument(
         'path_out', type=str,
-        help='Path to the output file, if absent the TIF markers are listed.',
+        help='Path to the output file or directory, if absent the TIF markers for the input file are just listed.'
+             'The results are undefined if path_out conflicts with path_in',
         # default='',
         nargs='?')
-    # parser.add_argument(
-    #     '-r', '--recurse', action='store_true',
-    #     help='Process files recursively. [default: %(default)s]',
-    # )
+    parser.add_argument(
+        '-r', '--recurse', action='store_true',
+        help='Process files recursively. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-n', '--nervous', action='store_true',
+        help='Nervous mode, don\'t do anything but report what would be done. [default: %(default)s]',
+    )
     log_level_help_mapping = ', '.join(
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
     )
@@ -139,8 +155,25 @@ def main() -> int:
         tif_count = scan(args.path_in, args.verbose)
         print(f'Detected {tif_count:,d} TIF Markers.')
     else:
-        byte_count = strip(args.path_in, args.path_out, args.verbose)
-        print(f'Wrote {byte_count:,d} bytes.')
+        tif_stripped = bytes_copied = files_copied = 0
+        for file_in_out in dirWalk(args.path_in, args.path_out, theFnMatch='', recursive=args.recurse, bigFirst=False):
+            if has_tif(file_in_out.filePathIn):
+                out_dir = os.path.dirname(file_in_out.filePathOut)
+                if args.nervous:
+                    logger.info(f'Would make directory: {out_dir}')
+                    logger.info(f'Would copy {file_in_out.filePathIn} to {file_in_out.filePathOut}')
+                    bytes_copied += os.path.getsize(file_in_out.filePathIn)
+                    files_copied += 1
+                else:
+                    logger.info(f'Making directory: {out_dir}')
+                    logger.info(f'Copying {file_in_out.filePathIn} to {file_in_out.filePathOut}')
+                    os.makedirs(out_dir, exist_ok=True)
+                    tif_count, byte_count = strip(file_in_out.filePathIn, file_in_out.filePathOut)
+                    tif_stripped += tif_count
+                    bytes_copied += byte_count
+                    if byte_count:
+                        files_copied += 1
+        print(f'Total bytes: {bytes_copied:,d}, files: {files_copied:,d} TIF markers removed: {tif_stripped:,d}')
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')
