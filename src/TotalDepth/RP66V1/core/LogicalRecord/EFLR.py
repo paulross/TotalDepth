@@ -248,16 +248,17 @@ class ExplicitlyFormattedLogicalRecord:
         while ld:
             obj = Object(ld, self.template)
             if obj.name in self.object_name_map:
-                msg = f'Ignoring Object name {obj.name} as it is already in the EFLR set {self.set}.'
                 # Compare and if same ignore, else raise
                 if obj == self[obj.name]:
+                    msg = f'Ignoring duplicate Object with OBNAME {obj.name} already seen in the {self.set}.'
                     logger.info(msg)
                 else:
+                    msg = f'Ignoring different Object with OBNAME {obj.name} already seen in the {self.set}.'
                     logger.warning(msg)
-                    # logger.error('WAS:')
-                    # logger.error(str(self[obj.name]))
-                    # logger.error('NOW:')
-                    # logger.error(str(obj))
+                    logger.warning('WAS:')
+                    logger.warning(str(self[obj.name]))
+                    logger.warning('NOW:')
+                    logger.warning(str(obj))
                     # raise ExceptionEFLRSetDuplicateObjectNames(msg)
             else:
                 self.object_name_map[obj.name] = len(self.objects)

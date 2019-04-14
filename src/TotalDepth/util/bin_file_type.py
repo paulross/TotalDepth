@@ -457,6 +457,11 @@ def binary_file_type(fobj: typing.BinaryIO) -> str:
     return result
 
 
+def binary_file_type_from_path(path: str) -> str:
+    with open(path, 'rb') as file_object:
+        return binary_file_type(file_object)
+
+
 def xxd(by: bytes) -> str:
     """Returns an xxd style string of the bytes. For example:
     0084 8000 8400 2647 3546 3239 2020 2020 2020 ......&G5F29     """

@@ -1,6 +1,7 @@
 """
 Code for RUn Length Encoding.
 """
+import sys
 import typing
 
 
@@ -50,10 +51,21 @@ class RLEItem:
             self._stride = v - self._datum
             self._repeat = 1
             return True
-        expVal = self._datum + (self._stride * (self._repeat + 1))
-        if v == expVal:
-            self._repeat += 1
-            return True
+        exp_value = self._datum + (self._stride * (self._repeat + 1))
+        # TODO: Investigate this as it does not seem to compact the data in RP66V1 examples.
+        if False and isinstance(v, float):
+            # TODO: Test this
+            diff = abs(v - exp_value)
+            if v != 0.0:
+                diff /= v
+            if diff < sys.float_info.epsilon:
+                # TODO: Recompute stride?
+                self._repeat += 1
+                return True
+        else:
+            if v == exp_value:
+                self._repeat += 1
+                return True
         return False
 
     def values(self):

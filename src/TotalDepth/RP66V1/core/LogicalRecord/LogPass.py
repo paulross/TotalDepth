@@ -35,7 +35,9 @@ class FrameChannel:
     def __init__(self, channel_object: EFLR.Object):
         # TODO: Apply Semantic Restrictions
         self.object_name: ObjectName = channel_object.name
-        self.long_name: bytes = channel_object[b'LONG-NAME'].value[0]
+        self.long_name: bytes = b''
+        if channel_object[b'LONG-NAME'].value is not None:
+            self.long_name: bytes = channel_object[b'LONG-NAME'].value[0]
         self.rep_code: int = channel_object[b'REPRESENTATION-CODE'].value[0]
         self.units: bytes = channel_object[b'UNITS'].value[0]
         self.dimensions: typing.List[int] = channel_object[b'DIMENSION'].value

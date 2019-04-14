@@ -105,15 +105,14 @@ def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
         # Straightforward list in alphanumeric order
         for n in os.listdir(theIn):
             fp = os.path.join(theIn, n)
-            if os.path.isfile(fp) \
-            and (not theFnMatch or fnmatch.fnmatch(fp, theFnMatch)):
+            if os.path.isfile(fp) and (not theFnMatch or fnmatch.fnmatch(fp, theFnMatch)):
                 out_file = ''
                 if theOut:
                     out_file = os.path.join(theOut, n)
                 yield FileInOut(fp, out_file)
             elif os.path.isdir(fp) and recursive:
                 out_path = ''
-                if not theOut:
+                if theOut:
                     out_path = os.path.join(theOut, n)
                 for aFp in dirWalk(fp, out_path, theFnMatch, recursive):
                     yield aFp

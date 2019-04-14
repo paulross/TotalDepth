@@ -47,6 +47,23 @@ def test_FDOUBL(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        (LogicalData(b'\x00'), 0),
+        (LogicalData(b'\x59'), 89),
+        (LogicalData(b'\x7f'), 127),
+        (LogicalData(b'\x80'), -128),
+        (LogicalData(b'\xa7'), -89),
+        (LogicalData(b'\xff'), -1),
+    )
+)
+def test_SSHORT(ld, expected):
+    result = RepCode.SSHORT(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         (LogicalData(b'\x00\x00'), 0),
         (LogicalData(b'\x00\x99'), 153),
         (LogicalData(b'\xff\x67'), -153),

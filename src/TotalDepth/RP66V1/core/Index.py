@@ -481,6 +481,7 @@ class FileIndex:
         for k in self.iflr_summary.keys():
             self.iflr_summary[k].dump(os)
 
+    # TODO: Take an output path and write directly.
     def write_xml(self) -> typing.TextIO:
         xml_fobj = io.StringIO()
         with XmlStream(xml_fobj) as xml_stream:
@@ -504,11 +505,13 @@ class FileIndex:
                         entry.write_xml(xml_stream)
                 with Element(xml_stream, 'IFLRSummary'):
                     # print('TRACE:', [hex(v) for v in self.visible_record_positions[:8]])
-                    xml_write_rle(self._rle_visible_record_positions(), 'VisibleRecords', xml_stream, hex_output=True)
+                    # xml_write_rle(self._rle_visible_record_positions(), 'VisibleRecords', xml_stream, hex_output=True)
                     # xml_dump_positions(self.visible_record_positions, 32, 'VR', xml_stream)
                     for k in self.iflr_summary.keys():
                         attrs = xml_object_name_attributes(k)
                         attrs['lr_count'] = f'{len(self.iflr_summary[k].logical_record_positions)}'
                         with Element(xml_stream, 'IFLRSet', attrs):
                             self.iflr_summary[k].write_xml(xml_stream)
+                # Visible records at the end
+                xml_write_rle(self._rle_visible_record_positions(), 'VisibleRecords', xml_stream, hex_output=True)
         return xml_fobj

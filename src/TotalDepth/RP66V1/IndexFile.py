@@ -1,12 +1,15 @@
 import argparse
+import collections
 import logging
 import os
 import sys
 import time
 import typing
 
-from TotalDepth.RP66V1.core.File import FileRead
+from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.Index import FileIndex
+from TotalDepth.util.DirWalk import dirWalk
+from TotalDepth.util.bin_file_type import binary_file_type_from_path
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -17,19 +20,54 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 logger = logging.getLogger(__file__)
 
 
-def index_file(path_in: str, path_out: str='') -> typing.Tuple[int, int]:
-    with open(path_in, 'rb') as fobj:
-        # rp66_file = FileRead(fobj)
-        # index = FileIndex(rp66_file)
-        # for file_logical_data in rp66_file.iter_logical_records():
-        #     index.add(file_logical_data)
-        index = FileIndex(fobj, path_in)
-        # index.dump(sys.stdout)
-        xml_fobj = index.write_xml()
-        index_output = xml_fobj.getvalue()
-        print(index_output)
-        print(f'Length of XML: {len(index_output)}')
-    return 1, os.path.getsize(path_in)
+IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time')
+
+
+def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
+    logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
+    bin_file_type = binary_file_type_from_path(path_in)
+    if bin_file_type == 'RP66V1':
+        if path_out:
+            out_dir = os.path.dirname(path_out)
+            logger.info(f'Making directory: {out_dir}')
+            os.makedirs(out_dir, exist_ok=True)
+        logger.info(f'Indexing {path_in} to {path_out}')
+        try:
+            with open(path_in, 'rb') as fobj:
+                t_start = time.perf_counter()
+                index = FileIndex(fobj, path_in)
+                # index.dump(sys.stdout)
+                xml_fobj = index.write_xml()
+                index_output = xml_fobj.getvalue()
+                result = IndexResult(
+                    os.path.getsize(path_in),
+                    len(index_output),
+                    time.perf_counter() - t_start
+                )
+                if path_out:
+                    with open(path_out + '.xml', 'w') as f_out:
+                        f_out.write(index_output)
+                else:
+                    print(index_output)
+                logger.info(f'Length of XML: {len(index_output)}')
+                return result
+        except ExceptionTotalDepthRP66V1:
+            logger.exception(f'Failed to index: {path_in}')
+    else:
+        logger.info(f'Ignoring file type {bin_file_type} at {path_in}')
+    return IndexResult(0, 0, 0.0)
+
+
+def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
+    logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
+    ret = {}
+    if os.path.isdir(path_in):
+        for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
+            # print(file_in_out)
+            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut)
+    else:
+        ret[path_in] = index_a_single_file(path_in, path_out)
+    return ret
 
 
 def main() -> int:
@@ -37,7 +75,13 @@ def main() -> int:
 Scans a RP66V1 file and dumps data."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
-    parser.add_argument('path', type=str, help='Path to the file.')
+    parser.add_argument('path_in', type=str, help='Path to the input.')
+    parser.add_argument(
+        'path_out', type=str,
+        help='Path to the output.'
+             'The results are undefined if path_out conflicts with path_in',
+        default='',
+        nargs='?')
     parser.add_argument(
         '-r', '--recurse', action='store_true',
         help='Process files recursively. [default: %(default)s]',
@@ -58,7 +102,8 @@ Scans a RP66V1 file and dumps data."""
         help="Increase verbosity, additive [default: %(default)s]",
     )
     args = parser.parse_args()
-    # print('args:', args)
+    print('args:', args)
+    # return 0
 
     # Extract log level
     if args.log_level in logging._nameToLevel:
@@ -71,20 +116,33 @@ Scans a RP66V1 file and dumps data."""
                         format='%(asctime)s %(levelname)-8s %(message)s',
                         #datefmt='%y-%m-%d % %H:%M:%S',
                         stream=sys.stdout)
-    clk_start = time.perf_counter()
     # return 0
     # Your code here
-    file_count, file_bytes = index_file(
-        args.path,
-        # args.recurse,
+    clk_start = time.perf_counter()
+    result: typing.Dict[str, IndexResult] = index_dir_or_file(
+        args.path_in,
+        args.path_out,
+        args.recurse,
     )
     clk_exec = time.perf_counter() - clk_start
+    size_index = size_input = 0
+    for path in sorted(result.keys()):
+        idx_result = result[path]
+        if idx_result.size_input > 0:
+            ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
+            ratio = idx_result.size_index / idx_result.size_input
+            print(f'{idx_result.size_input:16,d} {idx_result.size_index:10,d} {idx_result.time:8.3f} x{ratio:8.3%} {ms_mb:8.1f} {path}')
+            size_input += result[path].size_input
+            size_index += result[path].size_index
     print('Execution time = %8.3f (S)' % clk_exec)
-    if file_bytes > 0:
-        ms_mb = clk_exec * 1000 / (file_bytes / 1024**2)
+    if size_input > 0:
+        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+        ratio = size_index / size_input
     else:
         ms_mb = 0.0
-    print(f'Processed {file_count:,d} files and {file_bytes:,d} bytes, {ms_mb:.1f} ms/Mb')
+        ratio = 0.0
+    print(f'Processed {len(result):,d} files and {size_input:,d} input bytes')
+    print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0
 

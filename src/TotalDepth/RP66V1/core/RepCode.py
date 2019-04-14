@@ -48,7 +48,7 @@ from TotalDepth.RP66V1.core.File import LogicalData
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
     pass
 
-# TODO: Have static NULL values e.g. IDENT_null = b'' or b'\x00' ?
+# TODO: Have static NULL values e.g. IDENT_null = b'' ?
 
 
 REP_CODE_INT_TO_STR = {
@@ -102,6 +102,16 @@ def _pascal_string(ld: LogicalData) -> bytes:
     siz: int = ld.read()
     return ld.chunk(siz)
 
+
+def SSHORT(ld: LogicalData) -> int:
+    """
+    SSHORT Representation code 12, Signed 1-byte integer.
+    [RP66V1 Appendix B Section B.12]
+    """
+    r = ld.read()
+    if r > 127:
+        r -= 256
+    return r
 
 def SNORM(ld: LogicalData) -> int:
     """
@@ -299,7 +309,7 @@ REP_CODE_MAP = {
     # 9: FDOUB2,
     # 10: CSINGL,
     # 11: CDOUBL,
-    # 12: SSHORT,
+    12: SSHORT,
     13: SNORM,
     14: SLONG,
     15: USHORT,
