@@ -7,7 +7,7 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.Index import FileIndex
+from TotalDepth.RP66V1.core.Index import FileIndexXML
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 
@@ -20,7 +20,7 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 logger = logging.getLogger(__file__)
 
 
-IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time')
+IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception')
 
 
 def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
@@ -35,14 +35,14 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
         try:
             with open(path_in, 'rb') as fobj:
                 t_start = time.perf_counter()
-                index = FileIndex(fobj, path_in)
-                # index.dump(sys.stdout)
+                index = FileIndexXML(fobj, path_in)
                 xml_fobj = index.write_xml()
                 index_output = xml_fobj.getvalue()
                 result = IndexResult(
                     os.path.getsize(path_in),
                     len(index_output),
-                    time.perf_counter() - t_start
+                    time.perf_counter() - t_start,
+                    False,
                 )
                 if path_out:
                     with open(path_out + '.xml', 'w') as f_out:
@@ -52,10 +52,14 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
                 logger.info(f'Length of XML: {len(index_output)}')
                 return result
         except ExceptionTotalDepthRP66V1:
-            logger.exception(f'Failed to index: {path_in}')
+            logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True)
+        except Exception:
+            logger.exception(f'Failed to index with Exception: {path_in}')
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True)
     else:
         logger.info(f'Ignoring file type {bin_file_type} at {path_in}')
-    return IndexResult(0, 0, 0.0)
+    return IndexResult(0, 0, 0.0, False)
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
@@ -131,7 +135,11 @@ Scans a RP66V1 file and dumps data."""
         if idx_result.size_input > 0:
             ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
             ratio = idx_result.size_index / idx_result.size_input
-            print(f'{idx_result.size_input:16,d} {idx_result.size_index:10,d} {idx_result.time:8.3f} x{ratio:8.3%} {ms_mb:8.1f} {path}')
+            print(
+                f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
+                f' {idx_result.time:8.3f} x{ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
+                f' {path}'
+            )
             size_input += result[path].size_input
             size_index += result[path].size_index
     print('Execution time = %8.3f (S)' % clk_exec)

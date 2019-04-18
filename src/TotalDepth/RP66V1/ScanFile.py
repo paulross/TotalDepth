@@ -14,6 +14,7 @@ import typing
 import colorama
 
 import TotalDepth.RP66V1.core.File
+from TotalDepth.RP66V1.core.LogicalFile import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord.Encryption import LogicalRecordSegmentEncryptionPacket
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
@@ -184,72 +185,91 @@ class EFLRDataSummary(DataSummaryBase):
         fld.logical_data.rewind()
 
 
-class LogicalFileContentsSummary:
+class LogicalFileContentsSummary(LogicalFile):
     """
     Captures a high level view of the logical File with information such as date of survey, well name and log summary.
     There may be several Logical Files in a RP66V1 physical file.
     """
+    #
     ORIGIN_KEYS = (b'FILE-ID', b'FILE-TYPE', b'CREATION-TIME', b'WELL-NAME', b'FIELD-NAME', b'COMPANY')
 
     def __init__(self, eflr_file_header: EFLR.ExplicitlyFormattedLogicalRecord):
+        super().__init__(eflr_file_header)
         assert eflr_file_header.set.type == b'FILE-HEADER'
-        self.sequence_number = int(eflr_file_header.objects[0][b'SEQUENCE-NUMBER'].value[0])
-        self.id = eflr_file_header.objects[0][b'ID'].value[0].strip()
-        self.origin = {}
+        # self.origin = {}
         # self.channels: typing.List[ObjectName] = []
-        self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.log_pass: typing.Union[None, LogPass] = None
+        # self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
+        # self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
+        # self.log_pass: typing.Union[None, LogPass] = None
         # Dict off {FrameObject.ObjectName: {FrameChannel.ObjectName: MinMax, ...}, ...}
+
         self.object_channel_data_map: typing.Dict[ObjectName, typing.Dict[ObjectName, MinMax]] = {}
         self.eflr_data_summary: EFLRDataSummary = EFLRDataSummary()
         self.iflr_data_summary: IFLRDataSummary = IFLRDataSummary()
 
 
-    def add_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
-        # TODO: Capture data from EFLRs such as date, lat/long.
-        if eflr.set.type == b'ORIGIN':
-            assert len(self.origin) == 0
-            for k in self.ORIGIN_KEYS:
-                if eflr.objects[0][k].value is not None:
-                    self.origin[k] = eflr.objects[0][k].value[0]
-                else:
-                    self.origin[k] = eflr.objects[0][k].value
-        elif eflr.set.type == b'CHANNEL':
-            assert self.eflr_channels is None
-            self.eflr_channels = eflr
-        elif eflr.set.type == b'FRAME':
-            assert self.eflr_frame is None
-            self.eflr_frame = eflr
-        if self.eflr_channels is not None and self.eflr_frame is not None:
-            if self.log_pass is not None:
-                print('DUPLICATE LogPass, WAS:')
-                print(self.log_pass)
-            # assert self.log_pass is None
-            self.log_pass = LogPass(self.eflr_frame, self.eflr_channels)
-            self.eflr_frame = None
-            self.eflr_channels = None
+    @property
+    def sequence_number(self) -> int:
+        return int(self.file_header_logical_record.objects[0][b'SEQUENCE-NUMBER'].value[0])
 
-    def add_iflr(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
-        assert self.log_pass is not None
+    @property
+    def id(self) -> int:
+        return self.file_header_logical_record.objects[0][b'ID'].value[0].strip()
+
+
+    # def add_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+    #     super().add_eflr(eflr)
+    #     # TODO: Capture data from EFLRs such as date, lat/long.
+    #     if eflr.set.type == b'ORIGIN':
+    #         assert len(self.origin) == 0
+    #         for k in self.ORIGIN_KEYS:
+    #             # Some ORIGIN_KEYS can be missing in badly formed files.
+    #             if k in eflr.object_name_map:
+    #                 if eflr.objects[0][k].value is not None:
+    #                     self.origin[k] = eflr.objects[0][k].value[0]
+    #                 else:
+    #                     self.origin[k] = eflr.objects[0][k].value
+    #         # for k in eflr.object_name_map.keys():
+    #         #     if eflr.objects[0][k.I].value is not None:
+    #         #         self.origin[k.I] = eflr.objects[0][k.I].value[0]
+    #         #     else:
+    #         #         self.origin[k.I] = eflr.objects[0][k.I].value
+    #     # elif eflr.set.type == b'CHANNEL':
+    #     #     assert self.eflr_channels is None
+    #     #     self.eflr_channels = eflr
+    #     # elif eflr.set.type == b'FRAME':
+    #     #     assert self.eflr_frame is None
+    #     #     self.eflr_frame = eflr
+    #     # if self.eflr_channels is not None and self.eflr_frame is not None:
+    #     #     if self.log_pass is not None:
+    #     #         logger.error('DUPLICATE LogPass, WAS:')
+    #     #         logger.error(self.log_pass)
+    #     #     # assert self.log_pass is None
+    #     #     self.log_pass = LogPass(self.eflr_frame, self.eflr_channels)
+    #     #     self.eflr_frame = None
+    #     #     self.eflr_channels = None
+
+    def add_iflr(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
         assert len(iflr.bytes) > 0
-        logger.debug(f'add_iflr(): {iflr}')
-        object_name = iflr.object_name
-        if object_name not in self.object_channel_data_map:
-            self.object_channel_data_map[object_name] = {}
-        data = []
-        self.log_pass.append(iflr, data)
-        # Load the data
-        for c, channel in enumerate(self.log_pass[object_name].channels):
-            if channel.object_name not in self.object_channel_data_map[object_name]:
-                self.object_channel_data_map[object_name][channel.object_name] = MinMax()
-            self.object_channel_data_map[object_name][channel.object_name].add(data[c])
+        self._check_iflr(iflr)
+        if False:
+            logger.debug(f'add_iflr(): {iflr}')
+            object_name = iflr.object_name
+            if object_name not in self.object_channel_data_map:
+                self.object_channel_data_map[object_name] = {}
+            data = []
+            self.log_pass.append(iflr, data)
+            # Load the data
+            for c, channel in enumerate(self.log_pass[object_name].channels):
+                if channel.object_name not in self.object_channel_data_map[object_name]:
+                    self.object_channel_data_map[object_name][channel.object_name] = MinMax()
+                self.object_channel_data_map[object_name][channel.object_name].add(data[c])
 
     def dump(self, os: typing.TextIO=sys.stdout) -> None:
         os.write(f'SEQUENCE NUMBER: {self.sequence_number:d} ID: {self.id}\n')
         os.write('ORIGIN:\n')
-        for k in sorted(self.origin.keys()):
-            os.write(f'  {str(k):16} : {self.origin[k]}\n')
+        for k in sorted(self.origin_logical_record.object_name_map.keys()):
+            os.write(f'  {str(k):16} : {self.origin_logical_record[k]}\n')
         os.write(f'{self.log_pass}\n')
         os.write('Frame Data:\n')
         for frame_object_name in sorted(self.object_channel_data_map.keys()):
@@ -314,10 +334,9 @@ def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
                     eflr = EFLR.ExplicitlyFormattedLogicalRecord(
                         file_logical_data.lr_type, file_logical_data.logical_data,
                     )
-                    if eflr.set.type == b'FILE-HEADER':
+                    if len(file_contents_summaries) == 0 or file_contents_summaries[-1].is_next(eflr):
                         file_contents_summaries.append(LogicalFileContentsSummary(eflr))
                     else:
-                        assert len(file_contents_summaries) > 0
                         file_contents_summaries[-1].add_eflr(eflr)
                     if eflr.set.type in eflr_set_type or '*' in eflr_set_type:
                         logger.debug(
@@ -341,7 +360,7 @@ def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
                     file_logical_data.lr_type,
                     file_logical_data.logical_data,
                 )
-                file_logical_data.logical_data.rewind()
+                # file_logical_data.logical_data.rewind()
                 if iflr_dump:
                     if iflr.object_name.I in iflr_set_type or '*' in iflr_set_type or len(iflr_set_type) == 0:
                         logger.debug(
@@ -355,11 +374,10 @@ def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
                             print(f'[{lr_index:4d}] {lr_text_summary}')
                 assert len(file_contents_summaries) > 0
                 if len(iflr.bytes) > 0:
-                    file_contents_summaries[-1].add_iflr(iflr)
+                    file_contents_summaries[-1].add_iflr(file_logical_data, iflr)
                 else:
                     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
-                file_logical_data.logical_data.rewind()
-                file_contents_summaries[-1].iflr_data_summary.add(file_logical_data)
+                # file_logical_data.logical_data.rewind()
         # Finished iteration
         with _output_section_header_trailer('Summary', '='):
             for summary in file_contents_summaries:

@@ -136,9 +136,11 @@ class Attribute(AttributeBase):
 
 
 class Template:
-    def __init__(self, ld: LogicalData):
+    def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
+
+    def read(self, ld: LogicalData):
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
@@ -238,13 +240,19 @@ class Object:
         return '\n'.join(strs)
 
 
-class ExplicitlyFormattedLogicalRecord:
+class ExplicitlyFormattedLogicalRecordBase:
     def __init__(self, lr_type: int, ld: LogicalData):
-        self.lr_type = lr_type
+        self.lr_type: int = lr_type
         self.set: Set = Set(ld)
-        self.template: Template = Template(ld)
+        self.template: Template = Template()
         self.objects: typing.List[Object] = []
         self.object_name_map: typing.Dict[bytes, int] = {}
+
+
+class ExplicitlyFormattedLogicalRecord(ExplicitlyFormattedLogicalRecordBase):
+    def __init__(self, lr_type: int, ld: LogicalData):
+        super().__init__(lr_type, ld)
+        self.template.read(ld)
         while ld:
             obj = Object(ld, self.template)
             if obj.name in self.object_name_map:
@@ -274,7 +282,7 @@ class ExplicitlyFormattedLogicalRecord:
 
     def __str__(self) -> str:
         ret = [
-            str(self.set),
+            f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>',
             f'  Template [{len(self.template)}]:',
         ]
         ret.extend('    {}'.format(line) for line in str(self.template).split('\n'))

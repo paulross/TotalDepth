@@ -64,13 +64,11 @@ def genBigFirst(d):
 
 def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
             recursive: bool=False, bigFirst: bool=False) -> typing.Sequence[FileInOut]:
-    """Walks a directory tree generating file paths.
+    """Walks a directory tree generating file paths as FileInOut(in, out) objects.
 
     theIn - The input directory.
 
-    theOut - The output directory. If None then input file paths as strings
-    will be generated If non-None this function will yield
-    FileInOut(in, out) objects.
+    theOut - The output directory. If an empty string the out path will be an empty string.
     NOTE: This does not create the output directory structure, it is up to
     the caller to do that.
 
@@ -103,7 +101,7 @@ def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
                         yield aFp
     else:
         # Straightforward list in alphanumeric order
-        for n in os.listdir(theIn):
+        for n in sorted(os.listdir(theIn)):
             fp = os.path.join(theIn, n)
             if os.path.isfile(fp) and (not theFnMatch or fnmatch.fnmatch(fp, theFnMatch)):
                 out_file = ''

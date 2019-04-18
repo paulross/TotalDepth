@@ -173,13 +173,13 @@ class LogPass:
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
         object_name: ObjectName = iflr.object_name
         if object_name not in self.object_name_map:
-            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass')
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass: {self.object_name_map.keys()}')
         return self.frame_objects[self.object_name_map[object_name]].process_IFLR(iflr)
 
     def append(self, iflr: IFLR.IndirectlyFormattedLogicalRecord, data: typing.List[typing.List[typing.Any]]) -> None:
         object_name: ObjectName = iflr.object_name
         if object_name not in self.object_name_map:
-            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass')
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass: {self.object_name_map.keys()}')
         self.frame_objects[self.object_name_map[object_name]].append(iflr, data)
 
     def first_channel_value(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.Union[float, int]:
@@ -189,5 +189,5 @@ class LogPass:
         """
         obname: ObjectName = iflr.object_name
         if obname not in self.object_name_map:
-            raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass')
+            raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname} not in LogPass: {self.object_name_map.keys()}')
         return self.frame_objects[self.object_name_map[obname]].first_channel_value(iflr)

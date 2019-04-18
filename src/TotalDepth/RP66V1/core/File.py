@@ -413,20 +413,25 @@ class FileLogicalData:
         self._bytes: typing.Union[None, bytearray] = bytearray()
         self.logical_data: typing.Union[None, LogicalData] = None
 
-    # def add_visible_record(self, visible_record: VisibleRecord) -> None:
-    #     assert len(self.visible_records) > 0
-    #     if self.visible_records[-1] != visible_record:
-    #         self.visible_records.append(visible_record)
+    def _invariants(self) -> bool:
+        return (self._bytes is None) != (self.logical_data is None)
 
     def add_bytes(self, by: bytes) -> None:
+        assert self._invariants()
         self._bytes.extend(by)
 
     def seal(self):
+        assert self._invariants()
         # TODO: Review the cost of this copy. Maybe a list of bytes, like a rope.
         self.logical_data = LogicalData(bytes(self._bytes))
         self._bytes = None
 
+    def is_complete(self) -> bool:
+        assert self._invariants()
+        return self._bytes is None
+
     def __str__(self) -> str:
+        assert self._invariants()
         lr_is_eflr = 'E' if self.lr_is_eflr else 'I'
         lr_is_encrypted = 'y' if self.lr_is_encrypted else 'n'
         position = str(self.position)
