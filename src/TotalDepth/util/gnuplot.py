@@ -11,6 +11,7 @@ from functools import reduce
 
 logger = logging.getLogger(__file__)
 
+
 def add_gnuplot_to_argument_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--gnuplot', type=str, help='Directory to write the gnuplot data.')
 
@@ -63,7 +64,7 @@ def create_gnuplot_dat(
         lambda l, rows: [max(l, len(str(r))) for l, r in zip(l, rows)],
         [0,] * num_colums,
     )
-    pass
+
 
 
 # def invoke_gnuplot(name: str, fn_dat: typing.Callable, fn_plt: typing.Callable) -> int:

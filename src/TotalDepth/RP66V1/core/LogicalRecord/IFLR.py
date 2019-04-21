@@ -18,4 +18,6 @@ class IndirectlyFormattedLogicalRecord:
         self.bytes: bytes = ld.chunk(ld.remain)
 
     def __str__(self):
-        return f'IFLR: {str(self.object_name.I):10} frame: {self.frame_number:8,d} data[{len(self.bytes):4,d}]: {format_bytes(self.bytes[:16])}'
+        return f'<IndirectlyFormattedLogicalRecord {str(self.object_name.I):10}' \
+            f' frame: {self.frame_number:8,d}' \
+            f' data[{len(self.bytes):4,d}]: {format_bytes(self.bytes[:16])}>'

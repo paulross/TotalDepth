@@ -20,11 +20,11 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 logger = logging.getLogger(__file__)
 
 
-IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception')
+IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception, ignored')
 
 
 def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
-    logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
+    # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     bin_file_type = binary_file_type_from_path(path_in)
     if bin_file_type == 'RP66V1':
         if path_out:
@@ -43,6 +43,7 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
                     len(index_output),
                     time.perf_counter() - t_start,
                     False,
+                    False,
                 )
                 if path_out:
                     with open(path_out + '.xml', 'w') as f_out:
@@ -53,13 +54,12 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
                 return result
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            return IndexResult(os.path.getsize(path_in), 0, 0.0, True)
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True, False)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            return IndexResult(os.path.getsize(path_in), 0, 0.0, True)
-    else:
-        logger.info(f'Ignoring file type {bin_file_type} at {path_in}')
-    return IndexResult(0, 0, 0.0, False)
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True, False)
+    logger.info(f'Ignoring file type "{bin_file_type}" at {path_in}')
+    return IndexResult(0, 0, 0.0, False, True)
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
@@ -130,6 +130,7 @@ Scans a RP66V1 file and dumps data."""
     )
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0
+    files_processed = 0
     for path in sorted(result.keys()):
         idx_result = result[path]
         if idx_result.size_input > 0:
@@ -137,11 +138,12 @@ Scans a RP66V1 file and dumps data."""
             ratio = idx_result.size_index / idx_result.size_input
             print(
                 f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
-                f' {idx_result.time:8.3f} x{ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
+                f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
                 f' {path}'
             )
             size_input += result[path].size_input
             size_index += result[path].size_index
+            files_processed += 1
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
@@ -149,7 +151,7 @@ Scans a RP66V1 file and dumps data."""
     else:
         ms_mb = 0.0
         ratio = 0.0
-    print(f'Processed {len(result):,d} files and {size_input:,d} input bytes')
+    print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
     print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0

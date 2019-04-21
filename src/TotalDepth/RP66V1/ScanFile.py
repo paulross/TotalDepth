@@ -14,7 +14,7 @@ import typing
 import colorama
 
 import TotalDepth.RP66V1.core.File
-from TotalDepth.RP66V1.core.LogicalFile import LogicalFile
+from TotalDepth.RP66V1.core.LogicalFile import LogicalFileBase, LogicalFileSequence
 from TotalDepth.RP66V1.core.LogicalRecord.Encryption import LogicalRecordSegmentEncryptionPacket
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
@@ -145,6 +145,7 @@ class IFLRDataSummary(DataSummaryBase):
 
     def add(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData) -> None:
         assert not fld.lr_is_eflr
+        fld.logical_data.rewind()
         if fld.lr_is_encrypted:
             lr = LogicalRecordSegmentEncryptionPacket(fld.logical_data)
             self._add(fld, b'', lr.size)
@@ -157,7 +158,6 @@ class IFLRDataSummary(DataSummaryBase):
             if ob_name_ident not in self.frame_range_map:
                 self.frame_range_map[ob_name_ident] = MinMax()
             self.frame_range_map[ob_name_ident].add(iflr.frame_number)
-        fld.logical_data.rewind()
 
     def __str__(self) -> str:
         ret = self._str_lines()
@@ -174,6 +174,7 @@ class EFLRDataSummary(DataSummaryBase):
 
     def add(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData) -> None:
         assert fld.lr_is_eflr
+        fld.logical_data.rewind()
         if fld.lr_is_encrypted:
             lr = LogicalRecordSegmentEncryptionPacket(fld.logical_data)
             self._add(fld, b'', lr.size)
@@ -182,112 +183,71 @@ class EFLRDataSummary(DataSummaryBase):
             ob_name_ident = eflr.set.type
             len_bytes = len(fld.logical_data)
             self._add(fld, ob_name_ident, len_bytes)
-        fld.logical_data.rewind()
 
 
-class LogicalFileContentsSummary(LogicalFile):
-    """
-    Captures a high level view of the logical File with information such as date of survey, well name and log summary.
-    There may be several Logical Files in a RP66V1 physical file.
-    """
-    #
-    ORIGIN_KEYS = (b'FILE-ID', b'FILE-TYPE', b'CREATION-TIME', b'WELL-NAME', b'FIELD-NAME', b'COMPANY')
-
-    def __init__(self, eflr_file_header: EFLR.ExplicitlyFormattedLogicalRecord):
-        super().__init__(eflr_file_header)
-        assert eflr_file_header.set.type == b'FILE-HEADER'
-        # self.origin = {}
-        # self.channels: typing.List[ObjectName] = []
-        # self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        # self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        # self.log_pass: typing.Union[None, LogPass] = None
-        # Dict off {FrameObject.ObjectName: {FrameChannel.ObjectName: MinMax, ...}, ...}
-
-        self.object_channel_data_map: typing.Dict[ObjectName, typing.Dict[ObjectName, MinMax]] = {}
-        self.eflr_data_summary: EFLRDataSummary = EFLRDataSummary()
-        self.iflr_data_summary: IFLRDataSummary = IFLRDataSummary()
+class ScanLogicalFile(LogicalFileBase):
+    def __init__(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
+                 fhlr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs):
+        super().__init__(file_logical_data, fhlr)
+        print('TRACE: kwargs', kwargs)
+        self.eflr_set_type = kwargs.get('eflr_set_type', [])
+        self.iflr_set_type = kwargs.get('iflr_set_type', [])
+        self.iflr_dump = kwargs.get('iflr_dump', False)
+        self.eflr_dump = kwargs.get('eflr_dump', False)
+        self.eflr_summary: EFLRDataSummary = EFLRDataSummary()
+        self.iflr_summary: IFLRDataSummary = IFLRDataSummary()
+        if self.eflr_dump and len(self.eflr_set_type) == 0 or fhlr.set.type in self.eflr_set_type:
+            print('TRACE: EFLR', fhlr)
+        self.eflr_summary.add(file_logical_data)
 
 
-    @property
-    def sequence_number(self) -> int:
-        return int(self.file_header_logical_record.objects[0][b'SEQUENCE-NUMBER'].value[0])
+    # Overload @abc.abstractmethod
+    def add_eflr(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
+                 eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
+        super().add_eflr(file_logical_data, eflr)
+        if self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type:
+            print('TRACE: EFLR', eflr)
+        self.eflr_summary.add(file_logical_data)
 
-    @property
-    def id(self) -> int:
-        return self.file_header_logical_record.objects[0][b'ID'].value[0].strip()
+    # Overload @abc.abstractmethod
+    def add_iflr(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
+                 iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
+        super().add_iflr(file_logical_data, iflr)
+        if self.iflr_dump and len(self.iflr_set_type) == 0 or iflr.object_name in self.iflr_set_type:
+            print('TRACE: IFLR', iflr)
+        self.iflr_summary.add(file_logical_data)
+
+    def dump(self) -> None:
+        pass
 
 
-    # def add_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
-    #     super().add_eflr(eflr)
-    #     # TODO: Capture data from EFLRs such as date, lat/long.
-    #     if eflr.set.type == b'ORIGIN':
-    #         assert len(self.origin) == 0
-    #         for k in self.ORIGIN_KEYS:
-    #             # Some ORIGIN_KEYS can be missing in badly formed files.
-    #             if k in eflr.object_name_map:
-    #                 if eflr.objects[0][k].value is not None:
-    #                     self.origin[k] = eflr.objects[0][k].value[0]
-    #                 else:
-    #                     self.origin[k] = eflr.objects[0][k].value
-    #         # for k in eflr.object_name_map.keys():
-    #         #     if eflr.objects[0][k.I].value is not None:
-    #         #         self.origin[k.I] = eflr.objects[0][k.I].value[0]
-    #         #     else:
-    #         #         self.origin[k.I] = eflr.objects[0][k.I].value
-    #     # elif eflr.set.type == b'CHANNEL':
-    #     #     assert self.eflr_channels is None
-    #     #     self.eflr_channels = eflr
-    #     # elif eflr.set.type == b'FRAME':
-    #     #     assert self.eflr_frame is None
-    #     #     self.eflr_frame = eflr
-    #     # if self.eflr_channels is not None and self.eflr_frame is not None:
-    #     #     if self.log_pass is not None:
-    #     #         logger.error('DUPLICATE LogPass, WAS:')
-    #     #         logger.error(self.log_pass)
-    #     #     # assert self.log_pass is None
-    #     #     self.log_pass = LogPass(self.eflr_frame, self.eflr_channels)
-    #     #     self.eflr_frame = None
-    #     #     self.eflr_channels = None
+class ScanFile(LogicalFileSequence):
 
-    def add_iflr(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
-        assert len(iflr.bytes) > 0
-        self._check_iflr(iflr)
-        if False:
-            logger.debug(f'add_iflr(): {iflr}')
-            object_name = iflr.object_name
-            if object_name not in self.object_channel_data_map:
-                self.object_channel_data_map[object_name] = {}
-            data = []
-            self.log_pass.append(iflr, data)
-            # Load the data
-            for c, channel in enumerate(self.log_pass[object_name].channels):
-                if channel.object_name not in self.object_channel_data_map[object_name]:
-                    self.object_channel_data_map[object_name][channel.object_name] = MinMax()
-                self.object_channel_data_map[object_name][channel.object_name].add(data[c])
+    # Overload of @abc.abstractmethod
+    def create_logical_file(self,
+                            file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
+                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFileBase:
+        return ScanLogicalFile(file_logical_data, eflr, **kwargs)
 
-    def dump(self, os: typing.TextIO=sys.stdout) -> None:
-        os.write(f'SEQUENCE NUMBER: {self.sequence_number:d} ID: {self.id}\n')
-        os.write('ORIGIN:\n')
-        for k in sorted(self.origin_logical_record.object_name_map.keys()):
-            os.write(f'  {str(k):16} : {self.origin_logical_record[k]}\n')
-        os.write(f'{self.log_pass}\n')
-        os.write('Frame Data:\n')
-        for frame_object_name in sorted(self.object_channel_data_map.keys()):
-            os.write(f'  {frame_object_name}:\n')
-            for channel_object_name in self.object_channel_data_map[frame_object_name].keys():
-                min_max = self.object_channel_data_map[frame_object_name][channel_object_name]
-                os.write(f'    {str(channel_object_name):32} :')
-                os.write(f' count: {min_max.count:12,d} min: {min_max.min:12.3f} max: {min_max.max:12.3f}')
-                os.write('\n')
+    # Overload of @abc.abstractmethod
+    def create_eflr(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
+        return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+
+    def dump(self) -> None:
+        for logical_file in self.logical_files:
+            logical_file.dump()
+            with _output_section_header_trailer('Logical File', '='):
+                with _output_section_header_trailer('EFLR Summary', '-'):
+                    print(logical_file.eflr_summary)
+                with _output_section_header_trailer('IFLR Summary', '-'):
+                    print(logical_file.iflr_summary)
 
 
 def _scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, **kwargs):
+    """Scans the file reporting Visible Records, optionally Logical Record Segments as well."""
     with _output_section_header_trailer('RP66V1 Visible Record Summary', '*'):
-        # verbose: int = kwargs.get('verbose', 0)
         lrsh_dump = kwargs['lrsh_dump']
         rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
-        # print(rp66_file)
-        # print(rp66_file.sul)
         vr_position = lr_position = 0
         for visible_record in rp66_file.iter_visible_records():
             vr_stride = visible_record.position - vr_position
@@ -306,89 +266,50 @@ def _scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, **kwargs):
             vr_position = visible_record.position
 
 
+def _scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, **kwargs):
+    """Scans the file reporting the raw Logical Data."""
+    with _output_section_header_trailer('RP66V1 Logical Data Summary', '*'):
+        dump_bytes = kwargs.get('dump_bytes', 0)
+        rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
+        vr_position = 0
+        header = [
+            f'{"Visible R":10}',
+            f'{"LRSH":10}',
+            f'{"Typ":3}',
+            f'{" "}',
+            f'{"     "}',
+            f'{"Length":8}',
+        ]
+        undeline = ['-' * len(h) for h in header]
+        print(' '.join(header))
+        print(' '.join(undeline))
+        for logical_data in rp66_file.iter_logical_records():
+            messages = [
+                f'0x{logical_data.position.vr_position:08x}' if logical_data.position.vr_position != vr_position else ' ' * 10,
+                f'0x{logical_data.position.lrsh_position:08x}',
+                f'{logical_data.lr_type:3d}',
+                f'{"E" if logical_data.lr_is_eflr else "I"}',
+                f'{"Crypt" if logical_data.lr_is_encrypted else "Plain"}',
+                f'{len(logical_data.logical_data):8,d}',
+            ]
+            if dump_bytes:
+                messages.append(format_bytes(logical_data.logical_data[:dump_bytes]))
+            print(' '.join(messages))
+            vr_position = logical_data.position.vr_position
+
+
 def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
+    # verbose: int = kwargs.get('verbose', 0)
+    # eflr_set_type = kwargs.get('eflr_set_type', [])
+    # iflr_set_type = kwargs.get('iflr_set_type', [])
+    # iflr_dump = kwargs['iflr_dump']
+    # eflr_dump = kwargs['eflr_dump']
+    scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
     with _output_section_header_trailer('RP66V1 File Summary', '*'):
         encrypted_records: bool = kwargs.get('encrypted_records', False)
         if not encrypted_records:
             print(_colorama_note('Encrypted records omitted. Use -e to show them.'))
-        verbose: int = kwargs.get('verbose', 0)
-        eflr_set_type = kwargs.get('eflr_set_type', [])
-        iflr_set_type = kwargs.get('iflr_set_type', [])
-        iflr_dump = kwargs['iflr_dump']
-        eflr_dump = kwargs['eflr_dump']
-        rp66_file = TotalDepth.RP66V1.core.File.FileRead(fobj)
-        # print(rp66_file)
-        print(rp66_file.sul)
-        # iflr_data_summary: IFLRDataSummary = IFLRDataSummary()
-        # eflr_data_summary: EFLRDataSummary = EFLRDataSummary()
-        file_contents_summaries: typing.List[LogicalFileContentsSummary] = []
-        for lr_index, file_logical_data in enumerate(rp66_file.iter_logical_records()):
-            # print('TRACE:', lr_index, file_logical_data)
-            if file_logical_data.lr_is_eflr:
-                lr_text_summary = ''
-                if file_logical_data.lr_is_encrypted:
-                    if encrypted_records:
-                        lrsep = LogicalRecordSegmentEncryptionPacket(file_logical_data.logical_data)
-                        lr_text_summary = f'EFLR {lrsep}'
-                else:
-                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(
-                        file_logical_data.lr_type, file_logical_data.logical_data,
-                    )
-                    if len(file_contents_summaries) == 0 or file_contents_summaries[-1].is_next(eflr):
-                        file_contents_summaries.append(LogicalFileContentsSummary(eflr))
-                    else:
-                        file_contents_summaries[-1].add_eflr(eflr)
-                    if eflr.set.type in eflr_set_type or '*' in eflr_set_type:
-                        logger.debug(
-                            f'EFLR bytes [{len(file_logical_data.logical_data.bytes)}]:'
-                            f' {file_logical_data.logical_data.bytes}'
-                        )
-                        lr_text_summary = f'LR type: {eflr.lr_type:3d} {str(eflr)}'
-                    elif eflr_dump:
-                        lr_text_summary = f'LR type: {eflr.lr_type:3d} {str(eflr.set)}' \
-                            f' Template size: {len(eflr.template)} Objects: {len(eflr.objects)}'
-                if lr_text_summary:
-                    if verbose:
-                        print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
-                    else:
-                        print(f'[{lr_index:4d}] {lr_text_summary}')
-                assert len(file_contents_summaries) > 0
-                file_logical_data.logical_data.rewind()
-                file_contents_summaries[-1].eflr_data_summary.add(file_logical_data)
-            else:
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(
-                    file_logical_data.lr_type,
-                    file_logical_data.logical_data,
-                )
-                # file_logical_data.logical_data.rewind()
-                if iflr_dump:
-                    if iflr.object_name.I in iflr_set_type or '*' in iflr_set_type or len(iflr_set_type) == 0:
-                        logger.debug(
-                            f'IFLR bytes [{len(file_logical_data.logical_data.bytes)}]:'
-                            f' {file_logical_data.logical_data.bytes}'
-                        )
-                        lr_text_summary = f'{iflr}'
-                        if verbose:
-                            print(f'[{lr_index:4d}] {file_logical_data.position} {lr_text_summary}')
-                        else:
-                            print(f'[{lr_index:4d}] {lr_text_summary}')
-                assert len(file_contents_summaries) > 0
-                if len(iflr.bytes) > 0:
-                    file_contents_summaries[-1].add_iflr(file_logical_data, iflr)
-                else:
-                    logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
-                # file_logical_data.logical_data.rewind()
-        # Finished iteration
-        with _output_section_header_trailer('Summary', '='):
-            for summary in file_contents_summaries:
-                with _output_section_header_trailer(
-                        f'Logical File Contents Summary Number: {summary.sequence_number} ID: {summary.id}', '-'
-                ):
-                    summary.dump()
-                with _output_section_header_trailer('EFLR Summary', '-'):
-                    print(summary.eflr_data_summary)
-                with _output_section_header_trailer('IFLR Summary', '-'):
-                    print(summary.iflr_data_summary)
+        scan_file.dump()
 
 
 def scan_file(path: str, function: typing.Callable, **kwargs) -> int:
@@ -457,7 +378,7 @@ Scans a RP66V1 file and dumps data."""
     )
     parser.add_argument(
         '-e', '--encrypted', action='store_true',
-        help='Output encrypted records as well. [default: %(default)s]',
+        help='Output encrypted Logical Records as well. [default: %(default)s]',
     )
     parser.add_argument(
         '-k', '--keep-going', action='store_true',
@@ -502,8 +423,20 @@ Scans a RP66V1 file and dumps data."""
         '-L', '--LRSH', action='store_true',
         help='Dump the Visible Records and the Logical Record Segment Headers. [default: %(default)s]',
     )
+    parser.add_argument(
+        '-D', '--LD', action='store_true',
+        help='Dump logical data. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-R', '--LR', action='store_true',
+        help='Dump Logical Records. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-d', '--dump-bytes', type=int, default=0,
+        help='Dump X leading raw bytes for certain options. [default: %(default)s]',
+    )
     args = parser.parse_args()
-    # print('args:', args)
+    print('args:', args)
 
     # Extract log level
     if args.log_level in logging._nameToLevel:
@@ -525,9 +458,17 @@ Scans a RP66V1 file and dumps data."""
             _scan_RP66V1_file_visible_records,
             args.recurse,
             # kwargs
-            lrsh_dump=args.LRSH
+            lrsh_dump=args.LRSH,
         )
-    else:
+    if args.LD:
+        file_count, file_bytes = scan_file_or_dir(
+            args.path,
+            _scan_RP66V1_file_logical_data,
+            args.recurse,
+            # kwargs
+            dump_bytes=args.dump_bytes,
+        )
+    if args.LR:
         file_count, file_bytes = scan_file_or_dir(
             args.path,
             _scan_RP66V1_file_logical_records,
@@ -538,6 +479,7 @@ Scans a RP66V1 file and dumps data."""
             iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
             iflr_dump=args.IFLR,
             eflr_dump=args.EFLR,
+            rp66v1_path=args.path,
         )
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)

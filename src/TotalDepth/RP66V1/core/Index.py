@@ -130,6 +130,11 @@ class LogicalFileIndexXML(LogicalFileBase):
         super().__init__(file_logical_data, fhlr)
         self.iflr_x_value_map: typing.Dict[ObjectName: typing.List[typing.Any]] = {}
 
+    # Overload @abc.abstractmethod
+    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> None:
+        super().add_eflr(file_logical_data, eflr)
+
+    # Overload @abc.abstractmethod
     def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
         super().add_iflr(file_logical_data, iflr)
         x_value = self.log_pass.first_channel_value(iflr)
@@ -225,6 +230,7 @@ class FileIndexXML(LogicalFileSequence):
     def create_eflr(self, file_logical_data: FileLogicalData) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
         assert file_logical_data.lr_is_eflr
         assert file_logical_data.is_complete()
+        # TODO: Encrypted records?
         if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
             eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
             return eflr
