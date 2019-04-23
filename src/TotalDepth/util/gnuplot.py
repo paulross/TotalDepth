@@ -13,6 +13,11 @@ logger = logging.getLogger(__file__)
 
 
 def add_gnuplot_to_argument_parser(parser: argparse.ArgumentParser) -> None:
+    v = version()
+    logger.info(f'gnuplot version: "{v}"')
+    print(f'gnuplot version: "{v}"')
+    if not v:
+        raise ValueError('--gnuplot specified but gnuplot not installed.')
     parser.add_argument('--gnuplot', type=str, help='Directory to write the gnuplot data.')
 
 
@@ -65,12 +70,46 @@ def invoke_gnuplot(path: str, name: str, table: typing.Sequence[typing.Sequence[
     proc = subprocess.Popen(
         args=['gnuplot', '-p', f'{name}.plt'],
         shell=False,
-        cwd=os.path.dirname(path),
+        cwd=path,
     )
     try:
-        outs, errs = proc.communicate(timeout=1)
+        stdout, stderr = proc.communicate(timeout=1)
     except subprocess.TimeoutExpired as err:
         logger.exception()
         proc.kill()
-        # outs, errs = proc.communicate()
+        stdout, stderr = proc.communicate()
+    logging.info(f'gnuplot stdout: {stdout}')
+    if stderr:
+        logging.error(f'gnuplot stderr: {stdout}')
+    # TODO: Return stderr?
     return proc.returncode
+
+
+def write_test_file(path: str, typ: str) -> int:
+    test_stdin = '\n'.join(
+        [
+            f'set terminal {typ}',
+            f'set output "test.{typ}"',
+            'test',
+        ]
+    )
+    proc = subprocess.Popen(
+        args=['gnuplot'],
+        shell=False,
+        cwd=path,
+        stdin=subprocess.PIPE,
+    )
+    try:
+        proc.stdin.write(test_stdin)
+        proc.stdin.close()
+        stdout, stderr = proc.communicate(timeout=1, )
+    except subprocess.TimeoutExpired as err:
+        logger.exception()
+        proc.kill()
+        stdout, stderr = proc.communicate()
+    logging.info(f'gnuplot stdout: {stdout}')
+    if stderr:
+        logging.error(f'gnuplot stderr: {stdout}')
+    # TODO: Return stderr?
+    return proc.returncode
+

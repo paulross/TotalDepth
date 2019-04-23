@@ -10,6 +10,7 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.Index import FileIndexXML
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
+from TotalDepth.util import gnuplot
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -29,8 +30,9 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
     if bin_file_type == 'RP66V1':
         if path_out:
             out_dir = os.path.dirname(path_out)
-            logger.info(f'Making directory: {out_dir}')
-            os.makedirs(out_dir, exist_ok=True)
+            if not os.path.exists(out_dir):
+                logger.info(f'Making directory: {out_dir}')
+                os.makedirs(out_dir, exist_ok=True)
         logger.info(f'Indexing {path_in} to {path_out}')
         try:
             with open(path_in, 'rb') as fobj:
@@ -73,6 +75,91 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict
         ret[path_in] = index_a_single_file(path_in, path_out)
     return ret
 
+GNUPLOT_PLT = """set logscale x
+set grid
+set title "XML Index of RP66V1 Files with IndexFile.py."
+set xlabel "RP66V1 File Size (bytes)"
+set mxtics 5
+#set xrange [0:3000]
+#set xtics
+#set format x ""
+
+set logscale y
+set ylabel "XML Index Rate (ms/Mb), XML Compression Ratio"
+# set yrange [1:1e5]
+# set ytics 20
+# set mytics 2
+# set ytics 8,35,3
+
+# set logscale y2
+# set y2label "Ratio index size / original size"
+# set y2range [1e-4:10]
+# set y2tics
+
+set pointsize 1
+set datafile separator whitespace#"	"
+set datafile missing "NaN"
+
+# set fit logfile
+
+# Curve fit, rate
+rate(x) = 10**(a + b * log10(x))
+fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+
+rate2(x) = 10**(5.5 - 0.5 * log10(x))
+
+# Curve fit, size ratio
+size_ratio(x) = 10**(c + d * log10(x))
+fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+# By hand
+# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
+
+# Curve fit, compression ratio
+compression_ratio(x) = 10**(e + f * log10(x))
+fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+
+set terminal svg size 1000,700 # choose the file format
+set output "{name}.svg" # choose the output device
+
+# set key off
+
+#set key title "Window Length"
+#  lw 2 pointsize 2
+
+# Fields: size_input, size_index, time, exception, ignored, path
+
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
+	rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
+    "{name}.dat" using 1:($1/$2) axes x1y1 title "Original Size / XML Index size" lt 3 w points, \
+    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y1 lt 3 lw 2
+
+# Plot size ratio:
+#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, \
+#     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+
+reset
+"""
+
+
+def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
+    if len(data) < 2:
+        raise ValueError(f'Can not plot data with only {len(data)} points.')
+    # First row is header row, create it then comment out the first item.
+    table = [
+        list(IndexResult._fields) + ['Path']
+    ]
+    table[0][0] = f'# {table[0][0]}'
+    for k in sorted(data.keys()):
+        if data[k].size_input > 0 and not data[k].exception:
+            table.append(list(data[k]) + [k])
+    name = 'IndexFile'
+    return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
+    return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
+
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
@@ -105,6 +192,7 @@ Scans a RP66V1 file and dumps data."""
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
+    gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
     # return 0
@@ -144,6 +232,8 @@ Scans a RP66V1 file and dumps data."""
             size_input += result[path].size_input
             size_index += result[path].size_index
             files_processed += 1
+    if args.gnuplot:
+        plot_gnuplot(result, args.gnuplot)
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)

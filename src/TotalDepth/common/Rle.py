@@ -53,11 +53,25 @@ class RLEItem:
             return True
         exp_value = self._datum + (self._stride * (self._repeat + 1))
         # TODO: Investigate this as it does not seem to compact the data in RP66V1 examples.
+        # See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+        # Examples:
+        #             <RLE datum="2262.4542" repeat="12" stride="0.07619999999997162"/>
+        #             <RLE datum="2263.4448" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2264.664" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2265.8832" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2267.1024" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2268.3216" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2269.5408" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2270.76" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2271.9792" repeat="15" stride="0.07619999999997162"/>
+        #             <RLE datum="2273.1984" repeat="16" stride="0.07619999999997162"/>
+        #             <RLE datum="2274.4938" repeat="14" stride="0.07619999999997162"/>
+        #             <RLE datum="2275.6368" repeat="16" stride="0.07619999999997162"/>
         if False and isinstance(v, float):
             # TODO: Test this
             diff = abs(v - exp_value)
             if v != 0.0:
-                diff /= v
+                diff /= (abs(v) + abs(exp_value)) / 2
             if diff < sys.float_info.epsilon:
                 # TODO: Recompute stride?
                 self._repeat += 1

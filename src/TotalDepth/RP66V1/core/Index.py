@@ -16,11 +16,10 @@ import typing
 # import TotalDepth
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core.File import FileRead, FileLogicalData, LogicalRecordPosition
+from TotalDepth.RP66V1.core.File import FileLogicalData
 from TotalDepth.RP66V1.core.LogicalFile import LogicalFileBase, LogicalFileSequence
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
-from TotalDepth.RP66V1.core.RepCode import ObjectName, UNORM
+from TotalDepth.RP66V1.core.RepCode import ObjectName
 from TotalDepth.common import Rle
 from TotalDepth.util.XmlWrite import Element, XmlStream
 
