@@ -9,6 +9,7 @@ tmp/data_unpack/AUS/2010-2015/W005684/Ungani_3_Log_Data_A/Suite3/U3-S3R3-PCOR-FI
 
 """
 import collections
+import datetime
 import io
 import os
 import typing
@@ -119,7 +120,7 @@ def xml_dump_positions(positions: typing.List[int], limit: int, element_name: st
 
 
 class LogicalFileIndexXML(LogicalFileBase):
-    XML_SCHEMA_VERSION = '1.0.0'
+    XML_SCHEMA_VERSION = '0.1.0'
     ALL_OBJECTS_SET_TYPES: typing.Set[bytes] = {b'FILE-HEADER', b'ORIGIN', b'CHANNEL', b'FRAME', b'AXIS'}
     SOME_OBJECTS_SET_TYPES: typing.Dict[bytes, bytes] = {
         b'PARAMETER': {b'CN', b'WN', b'FN', b'DATE', b'LATD', b'LATI', b'LOND', b'LONG'}
@@ -130,12 +131,12 @@ class LogicalFileIndexXML(LogicalFileBase):
         self.iflr_x_value_map: typing.Dict[ObjectName: typing.List[typing.Any]] = {}
 
     # Overload @abc.abstractmethod
-    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> None:
-        super().add_eflr(file_logical_data, eflr)
+    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
+        super().add_eflr(file_logical_data, eflr, **kwargs)
 
     # Overload @abc.abstractmethod
-    def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
-        super().add_iflr(file_logical_data, iflr)
+    def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
+        super().add_iflr(file_logical_data, iflr, **kwargs)
         x_value = self.log_pass.first_channel_value(iflr)
         try:
             self.iflr_x_value_map[iflr.object_name].append(x_value)
@@ -145,6 +146,12 @@ class LogicalFileIndexXML(LogicalFileBase):
     def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
         ret = Rle.RLE()
         for x in self.iflr_x_value_map[frame_object_name]:
+            ret.add(x)
+        return ret
+
+    def _rle_lsrh_positions(self, frame_object_name: ObjectName) -> Rle.RLE:
+        ret = Rle.RLE()
+        for x in self.iflr_position_map[frame_object_name]:
             ret.add(x)
         return ret
 
@@ -160,27 +167,12 @@ class LogicalFileIndexXML(LogicalFileBase):
                     'lr_type': f'{eflr.lr_type:d}',
                     'set_type': f'{eflr.set.type.decode("ascii")}',
                     'set_name': f'{eflr.set.name.decode("ascii")}',
+                    'object_count': f'{len(eflr.objects):d}'
                 }
                 with Element(xml_stream, 'EFLR', attrs):
                     self._write_xml_eflr(xml_stream, eflr)
-            with Element(xml_stream, 'LogPass', {'count': f'{len(self.log_pass.frame_objects)}'}):
-                for frame_object in self.log_pass.frame_objects:
-                    assert frame_object.object_name in self.iflr_x_value_map, \
-                        f'{frame_object.object_name} not in {self.iflr_x_value_map.keys()}'
-                    with Element(
-                            xml_stream,
-                            'FrameObject', xml_object_name_attributes(frame_object.object_name),
-                            ):
-                        positions = self.iflr_positions[frame_object.object_name]
-                        attrs = {
-                            'count': f'{len(positions)}',
-                            'positions': ','.join([f'0x{p:x}' for p in positions]),
-                        }
-                        with Element(xml_stream, 'LRSH', attrs):
-                            pass
-                        # Xaxis output
-                        rle = self._rle_x_axis(frame_object.object_name)
-                        xml_write_rle(rle, 'Xaxis', xml_stream, hex_output=False)
+            if self.log_pass is not None:
+                self._write_xml_log_pass(xml_stream)
 
     def _write_xml_eflr(self, xml_stream: XmlStream, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         all_objects: bool = eflr.set.type in self.ALL_OBJECTS_SET_TYPES
@@ -212,9 +204,43 @@ class LogicalFileIndexXML(LogicalFileBase):
                         with Element(xml_stream, 'Values', {'count': '0'}):
                             pass
 
+    def _write_xml_log_pass(self, xml_stream: XmlStream) -> None:
+        assert self.log_pass is not None
+        with Element(xml_stream, 'LogPass', {'count': f'{len(self.log_pass.frame_objects)}'}):
+            for frame_object in self.log_pass.frame_objects:
+                assert frame_object.object_name in self.iflr_x_value_map, \
+                    f'{frame_object.object_name} not in {self.iflr_x_value_map.keys()}'
+                assert frame_object.object_name in self.iflr_position_map, \
+                    f'{frame_object.object_name} not in {self.iflr_position_map.keys()}'
+                with Element(xml_stream, 'FrameObject', xml_object_name_attributes(frame_object.object_name)):
+                    with Element(xml_stream, 'Channels', {'channel_count': str(len(frame_object.channels))}):
+                        for channel in frame_object.channels:
+                            channel_attrs = xml_object_name_attributes(channel.object_name)
+                            channel_attrs['long_name'] = f'{channel.long_name.decode("ascii")}'
+                            channel_attrs['rep_code'] = f'{channel.rep_code:d}'
+                            channel_attrs['units'] = f'{channel.units.decode("ascii")}'
+                            channel_attrs['dimensions'] = ','.join(f'{v:d}' for v in channel.dimensions)
+                            channel_attrs['count'] = f'{channel.count:d}'
+                            with Element(xml_stream, 'Channel', channel_attrs):
+                                pass
+                    # # LRSH positions as a list
+                    # positions = self.iflr_position_map[frame_object.object_name]
+                    # attrs = {
+                    #     'count': f'{len(positions)}',
+                    #     'positions': ','.join([f'0x{p:x}' for p in positions]),
+                    # }
+                    # with Element(xml_stream, 'LRSH', attrs):
+                    #     pass
+                    # LRSH positions as a RLE
+                    rle = self._rle_lsrh_positions(frame_object.object_name)
+                    xml_write_rle(rle, 'LRSH', xml_stream, hex_output=True)
+                    # Xaxis output
+                    rle = self._rle_x_axis(frame_object.object_name)
+                    xml_write_rle(rle, 'Xaxis', xml_stream, hex_output=False)
+
 
 class FileIndexXML(LogicalFileSequence):
-    XML_SCHEMA_VERSION = '1.0.0'
+    XML_SCHEMA_VERSION = '0.1.0'
 
     # def __init__(self, fobj: typing.BinaryIO, path: str):
     #     super().__init__(fobj, path)
@@ -222,13 +248,13 @@ class FileIndexXML(LogicalFileSequence):
     # Overload of @abc.abstractmethod
     def create_logical_file(self,
                             file_logical_data: FileLogicalData,
-                            eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> LogicalFileBase:
+                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFileBase:
         return LogicalFileIndexXML(file_logical_data, eflr)
 
     # Overload of @abc.abstractmethod
-    def create_eflr(self, file_logical_data: FileLogicalData) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
+    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
         assert file_logical_data.lr_is_eflr
-        assert file_logical_data.is_complete()
+        assert file_logical_data.is_sealed()
         # TODO: Encrypted records?
         if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
             eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
@@ -250,6 +276,8 @@ class FileIndexXML(LogicalFileSequence):
                 'path': self.path,
                 'size': f'{os.path.getsize(self.path):d}',
                 'schema_version': self.XML_SCHEMA_VERSION,
+                'utc_file_mtime' : str(datetime.datetime.utcfromtimestamp(os.stat(self.path).st_mtime)),
+                'utc_now' : str(datetime.datetime.utcnow()),
             }):
                 with Element(
                         xml_stream, 'StorageUnitLabel',

@@ -53,6 +53,8 @@ class RLEItem:
             return True
         exp_value = self._datum + (self._stride * (self._repeat + 1))
         # TODO: Investigate this as it does not seem to compact the data in RP66V1 examples.
+        # Use:
+        # math.isclose(a, b, rel_tol=sys.float_info.epsilon)
         # See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
         # Examples:
         #             <RLE datum="2262.4542" repeat="12" stride="0.07619999999997162"/>
@@ -128,11 +130,11 @@ class RLE:
 
     theFunc - optional unary function to convert all values with.
     """
-    def __init__(self, theFunc=None):
+    def __init__(self, theFunc=lambda x: x):
         """Constructor, optionally takes a unary function to convert all values with."""
         # List of RLEItem
-        self._rleS: typing.Sequence[RLEItem] = []
-        self._func: typing.Union[None, typing.Callable] = theFunc
+        self._rleS: typing.List[RLEItem] = []
+        self._func: typing.Union[typing.Callable] = theFunc
 
     def __str__(self):
         """String representation."""

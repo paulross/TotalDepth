@@ -252,25 +252,26 @@ class ExplicitlyFormattedLogicalRecordBase:
 class ExplicitlyFormattedLogicalRecord(ExplicitlyFormattedLogicalRecordBase):
     def __init__(self, lr_type: int, ld: LogicalData):
         super().__init__(lr_type, ld)
-        self.template.read(ld)
-        while ld:
-            obj = Object(ld, self.template)
-            if obj.name in self.object_name_map:
-                # Compare and if same ignore, else raise
-                if obj == self[obj.name]:
-                    msg = f'Ignoring duplicate Object with OBNAME {obj.name} already seen in the {self.set}.'
-                    logger.info(msg)
+        if ld:
+            self.template.read(ld)
+            while ld:
+                obj = Object(ld, self.template)
+                if obj.name in self.object_name_map:
+                    # Compare and if same ignore, else raise
+                    if obj == self[obj.name]:
+                        msg = f'Ignoring duplicate Object with OBNAME {obj.name} already seen in the {self.set}.'
+                        logger.info(msg)
+                    else:
+                        msg = f'Ignoring different Object with OBNAME {obj.name} already seen in the {self.set}.'
+                        logger.warning(msg)
+                        logger.warning('WAS:')
+                        logger.warning(str(self[obj.name]))
+                        logger.warning('NOW:')
+                        logger.warning(str(obj))
+                        # raise ExceptionEFLRSetDuplicateObjectNames(msg)
                 else:
-                    msg = f'Ignoring different Object with OBNAME {obj.name} already seen in the {self.set}.'
-                    logger.warning(msg)
-                    logger.warning('WAS:')
-                    logger.warning(str(self[obj.name]))
-                    logger.warning('NOW:')
-                    logger.warning(str(obj))
-                    # raise ExceptionEFLRSetDuplicateObjectNames(msg)
-            else:
-                self.object_name_map[obj.name] = len(self.objects)
-                self.objects.append(obj)
+                    self.object_name_map[obj.name] = len(self.objects)
+                    self.objects.append(obj)
 
     def __len__(self) -> int:
         return len(self.objects)

@@ -223,3 +223,25 @@ class TestRleFunction(unittest.TestCase):
         self.assertEqual(myR[2].datum, 105)
         self.assertEqual(myR[2].stride, 2)
         self.assertEqual(myR[2].repeat, ((117-105)//2)-1)
+
+
+def test_floating_point_values():
+    # Example from RP66V1 work:
+    #             <RLE datum="2262.4542" repeat="12" stride="0.07619999999997162"/>
+    #             <RLE datum="2263.4448" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2264.664" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2265.8832" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2267.1024" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2268.3216" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2269.5408" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2270.76" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2271.9792" repeat="15" stride="0.07619999999997162"/>
+    #             <RLE datum="2273.1984" repeat="16" stride="0.07619999999997162"/>
+    #             <RLE datum="2274.4938" repeat="14" stride="0.07619999999997162"/>
+    #             <RLE datum="2275.6368" repeat="16" stride="0.07619999999997162"/>
+    rle = RLE()
+    datum = 2262.4542
+    stride = 0.07619999999997162
+    for i in range(10000):
+        rle.add(datum + i * stride)
+    assert len(rle) == 1

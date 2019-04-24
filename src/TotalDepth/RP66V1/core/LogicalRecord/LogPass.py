@@ -51,6 +51,7 @@ class FrameChannel:
         return [RepCode.code_read(self.rep_code, ld) for _i in range(self.count)]
 
     def read_one(self, ld: LogicalData) -> typing.Union[float, int]:
+        # print(f'TRACE: FrameChannel {ld}')
         return RepCode.code_read(self.rep_code, ld)
 
     def append(self, ld: LogicalData, data: typing.List[typing.Any]) -> None:

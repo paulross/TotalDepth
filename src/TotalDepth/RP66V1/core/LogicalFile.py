@@ -57,7 +57,7 @@ class LogicalFileBase():
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.log_pass: typing.Union[None, LogPass] = None
         # IFLRs
-        self.iflr_positions: typing.Dict[ObjectName, typing.List[int]] = {}
+        self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
     def _check_fld_eflr(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         self._check_fld_matches_eflr(file_logical_data, fhlr)
@@ -151,10 +151,10 @@ class LogicalFileBase():
             super().add_iflr(file_logical_data, iflr)
         """
         self._check_fld_iflr(file_logical_data, iflr)
-        if iflr.object_name in self.iflr_positions:
-            self.iflr_positions[iflr.object_name].append(file_logical_data.position.lrsh_position)
+        if iflr.object_name in self.iflr_position_map:
+            self.iflr_position_map[iflr.object_name].append(file_logical_data.position.lrsh_position)
         else:
-            self.iflr_positions[iflr.object_name] = [file_logical_data.position.lrsh_position]
+            self.iflr_position_map[iflr.object_name] = [file_logical_data.position.lrsh_position]
 
 
 class LogicalFileSequence(abc.ABC):
@@ -169,6 +169,9 @@ class LogicalFileSequence(abc.ABC):
         # Now iterate across the file again for the Logical Records.
         for file_logical_data in rp66_file.iter_logical_records():
             self.add_logical_data(file_logical_data, **kwargs)
+        # for file_logical_data in rp66_file.iter_logical_records_minimal({0, 1, 2, 3, 4, 5}):
+        #     # print(f'TRACE: {file_logical_data}')
+        #     self.add_logical_data(file_logical_data, **kwargs)
 
     def add_logical_data(self, file_logical_data: FileLogicalData, **kwargs) -> None:
         if not file_logical_data.lr_is_encrypted:

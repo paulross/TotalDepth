@@ -83,6 +83,17 @@ REP_CODE_INT_TO_STR = {
 REP_CODE_STR_TO_INT = {v: k for k, v in REP_CODE_INT_TO_STR.items()}
 assert len(REP_CODE_INT_TO_STR) == len(REP_CODE_STR_TO_INT)
 
+# [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2] says:
+# 'If there is an Index Channel, then it must appear first in the Frame and it must be scalar.'
+# but does not specify which Representation Codes are scalar. This is out best estimate:
+# - Numeric values.
+# - Not compound values.
+# - Fixed length representations,
+# TODO: Verify these assumptions, what index Representation Codes are actually experienced in practice?
+SCALAR_CODES = {1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17}
+# Longest Representation Code that is a scalar, FDOUBL.
+LENGTH_LARGEST_INDEX_CHANNEL_CODE = 8
+
 
 def FSINGL(ld: LogicalData) -> float:
     """Representation code 2, IEEE single precision floating point"""
@@ -187,12 +198,35 @@ def UVARI(ld: LogicalData) -> int:
     return value
 
 
+def UVARI_len(by: typing.Union[bytes, bytearray], index: int) -> int:
+    """Return the number of bytes that will be read as a UVARI or zero on failure."""
+    if index < 0:
+        raise ExceptionRepCode('Index can not be negative.')
+    if len(by) <= index:
+        return 0
+    value: int = by[index]
+    if value & 0xc0 == 0x80:
+        return 2
+    elif value & 0xc0 == 0xc0:
+        return 4
+    return 1
+
+
 def IDENT(ld: LogicalData) -> bytes:
     """
     Representation code 19, Variable length identifier. Length up to 256 bytes.
     [RP66V1 Appendix B Section B.19]
     """
     return _pascal_string(ld)
+
+
+def IDENT_len(by: typing.Union[bytes, bytearray], index: int) -> int:
+    """Return the number of bytes that will be read as a IDENT or zero on failure."""
+    if index < 0:
+        raise ExceptionRepCode('Index can not be negative.')
+    if len(by) <= index:
+        return 0
+    return by[index] + 1
 
 
 def ASCII(ld: LogicalData) -> bytes:
@@ -217,6 +251,10 @@ class DateTime:
         self.second: int = USHORT(ld)
         self.millisecond: int = UNORM(ld)
 
+    @staticmethod
+    def strftime_format() -> str:
+        return '%y-%m-%d %H:%M:%S.%f'
+
     def __str__(self):
         # TODO: Timezone
         return f'{self.year}-{self.month:02d}-{self.day:02d}' \
@@ -235,6 +273,11 @@ def DTIME(ld: LogicalData) -> DateTime:
 
 def ORIGIN(ld: LogicalData) -> int:
     return UVARI(ld)
+
+
+def ORIGIN_len(by: typing.Union[bytes, bytearray], index: int) -> int:
+    """Return the number of bytes that will be read as a ORIGIN or zero on failure."""
+    return UVARI_len(by, index)
 
 
 # This has three fields:
@@ -260,6 +303,34 @@ def OBNAME(ld: LogicalData) -> ObjectName:
     # TODO: Raise if non-null.
     i = IDENT(ld)
     return ObjectName(o, c, i)
+
+
+def OBNAME_len(by: typing.Union[bytes, bytearray], index: int) -> int:
+    """Examine the bytes and determine how many bytes are needed for a OBNAME representation.
+    Returns the number of bytes or zero as an error (bytes is not long enough).
+
+    O: Origin Reference is a ORIGIN, a UVARI
+    C: Copy is a USHORT
+    I: Identifier is an IDENT
+    """
+    if index < 0:
+        raise ExceptionRepCode('Index can not be negative.')
+    # O: Origin Reference is a ORIGIN, a UVARI
+    length = ORIGIN_len(by, index)
+    if length == 0:
+        return 0
+    # C: Copy is a USHORT
+    length += 1
+    if len(by) < length:
+        return 0
+    # I: Identifier is an IDENT
+    ident_length = IDENT_len(by, index + length)
+    if ident_length == 0:
+        return 0
+    length += ident_length
+    if len(by) < length:
+        return 0
+    return length
 
 
 # This has three fields:
