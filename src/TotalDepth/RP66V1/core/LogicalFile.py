@@ -167,8 +167,10 @@ class LogicalFileSequence(abc.ABC):
         # as some Visible Records can be missed.
         self.visible_record_positions = [vr.position for vr in rp66_file.iter_visible_records()]
         # Now iterate across the file again for the Logical Records.
+
         for file_logical_data in rp66_file.iter_logical_records():
             self.add_logical_data(file_logical_data, **kwargs)
+
         # for file_logical_data in rp66_file.iter_logical_records_minimal({0, 1, 2, 3, 4, 5}):
         #     # print(f'TRACE: {file_logical_data}')
         #     self.add_logical_data(file_logical_data, **kwargs)

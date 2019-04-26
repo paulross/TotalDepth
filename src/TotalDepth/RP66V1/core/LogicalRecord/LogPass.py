@@ -171,7 +171,7 @@ class LogPass:
             return self.frame_objects[self.object_name_map[item]]
         return self.frame_objects[item]
 
-    def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord):
+    def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.List[typing.List[float]]:
         object_name: ObjectName = iflr.object_name
         if object_name not in self.object_name_map:
             raise ExceptionLogPassProcessIFLR(f'ObjectName: {object_name} not in LogPass: {self.object_name_map.keys()}')

@@ -5,6 +5,7 @@ import argparse
 import collections
 import contextlib
 import logging
+import math
 import os
 import pprint
 import sys
@@ -17,7 +18,7 @@ import TotalDepth.RP66V1.core.File
 from TotalDepth.RP66V1.core.LogicalFile import LogicalFileBase, LogicalFileSequence
 from TotalDepth.RP66V1.core.LogicalRecord.Encryption import LogicalRecordSegmentEncryptionPacket
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
+from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass, FrameObject
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 from TotalDepth.util.bin_file_type import format_bytes, binary_file_type, BINARY_FILE_TYPE_CODE_WIDTH
 
@@ -52,13 +53,17 @@ def _colorama_note(msg: str):
 
 
 class MinMax:
-    def __init__(self):
+    def __init__(self, units):
+        self.units = units
         self.count = 0
+        self.null = 0
         self._min = 0
         self._max = 0
+        self._sum = 0
+        self._ssq = 0
 
-    def add(self, value):
-        if isinstance(value, list):
+    def add(self, value: typing.Union[typing.Union[float, int], typing.Sequence[typing.Union[float, int]]]) -> None:
+        if isinstance(value, (list, tuple)):
             for v in value:
                 self.add(v)
         else:
@@ -69,7 +74,11 @@ class MinMax:
                 else:
                     self._min = min(self._min, value)
                     self._max = max(self._max, value)
+                self._sum += value
+                self._ssq += value * value
                 self.count += 1
+            else:
+                self.null += 1
 
     @property
     def min(self):
@@ -78,10 +87,42 @@ class MinMax:
         return self._min
 
     @property
+    def mean(self):
+        if self.count == 0:
+            raise AttributeError('No mean when there is no data.')
+        return self._sum / self.count
+
+    @property
+    def stddev(self):
+        """
+        The standard deviation.
+        Reference https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
+        """
+        if self.count == 0:
+            raise AttributeError('No stdev when there is no data.')
+        return math.sqrt(self.count * self._ssq - self._sum**2) / self.count
+
+    @property
     def max(self):
         if self.count == 0:
             raise AttributeError('No maximum when there is no data.')
         return self._max
+
+    @property
+    def rate(self):
+        if self.count == 0:
+            raise AttributeError('No maximum when there is no data.')
+        return (self.max - self.min) / self.count
+
+    def __str__(self) -> str:
+        if self.count:
+            return f'count: {self.count:12,d} null: {self.null:10,d}' \
+                f' min: {self.min:12.3f}' \
+                f' mean: {self.mean:12.3f} stddev: {self.stddev:12.3f}' \
+                f' max: {self.max:12.3f}' \
+                f' rate: {self.rate:12.6f}' \
+                f' {self.units}'
+        return f'count: {self.count:12,d}'
 
 
 class DataSummaryBase:
@@ -112,7 +153,7 @@ class DataSummaryBase:
     def _str_lines(self) -> typing.List[str]:
         ret = [
             f'Count {self.count:,d} encrypted {self.count_encrypted:,d} total bytes {self.total_bytes:,d}',
-            f'Logical record types [{len(self.lr_type_map)}]:',
+            f'Logical record types and count of them [{len(self.lr_type_map)}]:',
         ]
         for k in sorted(self.lr_type_map):
             ret.append(f'{k:3d} : {self.lr_type_map[k]:8,d}')
@@ -123,6 +164,7 @@ class DataSummaryBase:
             fw = 1
         for k in sorted(self.label_total_size_map.keys()):
             ret.append(f'{str(k):{fw}} count {self.label_count_map[k]:8,d} total bytes {self.label_total_size_map[k]:8,d}')
+        ret.append('Logical record sizes:')
         for k in sorted(self.label_size_set.keys()):
             if len(self.label_size_set[k]) > 1:
                 ret.append(f'Data size distribution for {str(k):{fw}} LRs (size : count):')
@@ -141,9 +183,10 @@ class DataSummaryBase:
 class IFLRDataSummary(DataSummaryBase):
     def __init__(self):
         super().__init__()
-        self.frame_range_map: typing.Dict[bytes, MinMax] = {}
+        self.frame_range_map: typing.Dict[ObjectName, MinMax] = {}
+        self.object_channel_map: typing.Dict[ObjectName, typing.Dict[bytes, MinMax]] = {}
 
-    def add(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData) -> None:
+    def add(self, fld: TotalDepth.RP66V1.core.File.FileLogicalData, log_pass: LogPass) -> None:
         assert not fld.lr_is_eflr
         fld.logical_data.rewind()
         if fld.lr_is_encrypted:
@@ -151,22 +194,34 @@ class IFLRDataSummary(DataSummaryBase):
             self._add(fld, b'', lr.size)
         else:
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-            ob_name_ident = iflr.object_name.I
+            ob_name = iflr.object_name
             len_bytes = len(iflr.bytes)
-            self._add(fld, ob_name_ident, len_bytes)
+            self._add(fld, ob_name, len_bytes)
             # Frame numbers
-            if ob_name_ident not in self.frame_range_map:
-                self.frame_range_map[ob_name_ident] = MinMax()
-            self.frame_range_map[ob_name_ident].add(iflr.frame_number)
+            if ob_name not in self.frame_range_map:
+                self.frame_range_map[ob_name] = MinMax('')
+                self.object_channel_map[ob_name] = {}
+            self.frame_range_map[ob_name].add(iflr.frame_number)
+            frame_object: FrameObject = log_pass[ob_name]
+            channel_values = log_pass.process_IFLR(iflr)
+            # print('TRACE: values', channel_values)
+            for channel, values in zip(frame_object.channels, channel_values):
+                if channel.object_name not in self.object_channel_map[ob_name]:
+                    self.object_channel_map[ob_name][channel.object_name] = MinMax(channel.units)
+                self.object_channel_map[ob_name][channel.object_name].add(values)
+
 
     def __str__(self) -> str:
         ret = self._str_lines()
         # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
-        ret.append('Frame ranges:')
+        ret.append('Frame indexes:')
         for k in sorted(self.frame_range_map.keys()):
             if self.frame_range_map[k].count > 0:
                 ret.append(f'{str(k):12} : count: {self.frame_range_map[k].count:12,d}'
-                           f' min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
+                           f' Index min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
+            for channel in self.object_channel_map[k]:
+                min_max = self.object_channel_map[k][channel]
+                ret.append(f'  {channel:12} {min_max}')
         return '\n'.join(ret)
 
 
@@ -186,27 +241,34 @@ class EFLRDataSummary(DataSummaryBase):
 
 
 class ScanLogicalFile(LogicalFileBase):
+    EFLR_ALWAYS_PRINT = set()  # {b'FILE-HEADER', b'ORIGIN'}
+
     def __init__(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
                  fhlr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs):
         super().__init__(file_logical_data, fhlr)
-        print('TRACE: kwargs', kwargs)
+        # print('TRACE: kwargs', kwargs)
         self.eflr_set_type = kwargs.get('eflr_set_type', [])
         self.iflr_set_type = kwargs.get('iflr_set_type', [])
         self.iflr_dump = kwargs.get('iflr_dump', False)
         self.eflr_dump = kwargs.get('eflr_dump', False)
         self.eflr_summary: EFLRDataSummary = EFLRDataSummary()
         self.iflr_summary: IFLRDataSummary = IFLRDataSummary()
+        # if self._dump_eflr():
         if self.eflr_dump and len(self.eflr_set_type) == 0 or fhlr.set.type in self.eflr_set_type:
-            print('TRACE: EFLR', fhlr)
+            print('EFLR', fhlr)
         self.eflr_summary.add(file_logical_data)
 
+    def _dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> bool:
+        if eflr.set.type in self.EFLR_ALWAYS_PRINT:
+            return True
+        return self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type
 
     # Overload @abc.abstractmethod
     def add_eflr(self, file_logical_data: TotalDepth.RP66V1.core.File.FileLogicalData,
                  eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
         super().add_eflr(file_logical_data, eflr)
-        if self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type:
-            print('TRACE: EFLR', eflr)
+        if self._dump_eflr(eflr):
+            print('EFLR', eflr)
         self.eflr_summary.add(file_logical_data)
 
     # Overload @abc.abstractmethod
@@ -214,14 +276,16 @@ class ScanLogicalFile(LogicalFileBase):
                  iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
         super().add_iflr(file_logical_data, iflr)
         if self.iflr_dump and len(self.iflr_set_type) == 0 or iflr.object_name in self.iflr_set_type:
-            print('TRACE: IFLR', iflr)
-        self.iflr_summary.add(file_logical_data)
+            print('IFLR', iflr)
+        self.iflr_summary.add(file_logical_data, self.log_pass)
 
     def dump(self) -> None:
         pass
 
 
 class ScanFile(LogicalFileSequence):
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
 
     # Overload of @abc.abstractmethod
     def create_logical_file(self,
@@ -234,9 +298,10 @@ class ScanFile(LogicalFileSequence):
         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
 
     def dump(self) -> None:
-        for logical_file in self.logical_files:
+        print(self.storage_unit_label)
+        for l, logical_file in enumerate(self.logical_files):
             logical_file.dump()
-            with _output_section_header_trailer('Logical File', '='):
+            with _output_section_header_trailer(f'Logical File [Index {l} of {len(self.logical_files)}]', '='):
                 with _output_section_header_trailer('EFLR Summary', '-'):
                     print(logical_file.eflr_summary)
                 with _output_section_header_trailer('IFLR Summary', '-'):
@@ -299,11 +364,6 @@ def _scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, **kwargs):
 
 
 def _scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs):
-    # verbose: int = kwargs.get('verbose', 0)
-    # eflr_set_type = kwargs.get('eflr_set_type', [])
-    # iflr_set_type = kwargs.get('iflr_set_type', [])
-    # iflr_dump = kwargs['iflr_dump']
-    # eflr_dump = kwargs['eflr_dump']
     scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
     with _output_section_header_trailer('RP66V1 File Summary', '*'):
         encrypted_records: bool = kwargs.get('encrypted_records', False)
@@ -325,8 +385,8 @@ def scan_file(path: str, function: typing.Callable, **kwargs) -> int:
             try:
                 function(fobj, **kwargs)
                 return os.path.getsize(path)
-            except Exception:
-                logger.error(f'Exception at file position {fobj.tell():d} 0x{fobj.tell():08x}')
+            except Exception as err:
+                logger.fatal(f'Exception at file position {fobj.tell():d} 0x{fobj.tell():08x} {str(err)}')
                 logger.exception(f'{path}')
                 return 0
         else:
@@ -468,7 +528,7 @@ Scans a RP66V1 file and dumps data."""
             # kwargs
             dump_bytes=args.dump_bytes,
         )
-    if args.LR:
+    if args.LR or args.EFLR or args.IFLR:
         file_count, file_bytes = scan_file_or_dir(
             args.path,
             _scan_RP66V1_file_logical_records,

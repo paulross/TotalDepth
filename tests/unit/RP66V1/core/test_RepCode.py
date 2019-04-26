@@ -156,28 +156,38 @@ def test_UVARI(ld, expected):
     assert ld.remain == 0
 
 
-@pytest.mark.parametrize(
-    'ld, expected',
-    (
-        # Zero byte examples
-        (LogicalData(b''), 0),
-        # One byte examples
-        (LogicalData(b'\x00'), 1),
-        (LogicalData(b'\x01'), 1),
-        (LogicalData(b'\x7e'), 1),
-        (LogicalData(b'\x7F'), 1),
-        # Two byte examples
-        (LogicalData(b'\x80\x80'), 2),
-        (LogicalData(b'\x80\x81'), 2),
-        (LogicalData(b'\xbf\xfe'), 2),
-        (LogicalData(b'\xbf\xff'), 2),
-        # Four byte examples
-        (LogicalData(b'\xc0\x00\x40\x00'), 4),
-        (LogicalData(b'\xc0\x00\x40\x01'), 4),
-        (LogicalData(b'\xff\xff\xff\xfe'), 4),
-        (LogicalData(b'\xff\xff\xff\xff'), 4),
-    )
+UVARI_len_EXAMPLES = (
+    # Zero byte examples
+    (LogicalData(b''), 0),
+    # One byte examples
+    (LogicalData(b'\x00'), 1),
+    (LogicalData(b'\x01'), 1),
+    (LogicalData(b'\x7e'), 1),
+    (LogicalData(b'\x7F'), 1),
+    # Two byte examples
+    (LogicalData(b'\x80\x80'), 2),
+    (LogicalData(b'\x80\x81'), 2),
+    (LogicalData(b'\xbf\xfe'), 2),
+    (LogicalData(b'\xbf\xff'), 2),
+    (LogicalData(b'\x80'), 2),
+    (LogicalData(b'\x80'), 2),
+    (LogicalData(b'\xbf'), 2),
+    (LogicalData(b'\xbf'), 2),
+    # Four byte examples
+    (LogicalData(b'\xc0\x00\x40\x00'), 4),
+    (LogicalData(b'\xc0\x00\x40\x01'), 4),
+    (LogicalData(b'\xff\xff\xff\xfe'), 4),
+    (LogicalData(b'\xff\xff\xff\xff'), 4),
+    (LogicalData(b'\xc0'), 4),
+    (LogicalData(b'\xc0\x00'), 4),
+    (LogicalData(b'\xc0\x00\x40'), 4),
+    (LogicalData(b'\xc0'), 4),
+    (LogicalData(b'\xff'), 4),
+    (LogicalData(b'\xff'), 4),
 )
+
+
+@pytest.mark.parametrize('ld, expected', UVARI_len_EXAMPLES)
 def test_UVARI_len(ld, expected):
     result = RepCode.UVARI_len(ld.bytes, 0)
     assert result == expected
@@ -203,6 +213,7 @@ def test_IDENT(ld, expected):
         (LogicalData(b''), 0),  # Error condition
         (LogicalData(b'\x00'), 1),
         (LogicalData(b'\x03ABC'), 4),
+        (LogicalData(b'\x03'), 4),
         (LogicalData(b'\x05TYPE1'), 6),  # RP66V2 example.
     )
 )
@@ -267,28 +278,7 @@ def test_ORIGIN(ld, expected):
     assert ld.remain == 0
 
 
-@pytest.mark.parametrize(
-    'ld, expected',
-    (
-        # Zero byte examples
-        (LogicalData(b''), 0),
-        # One byte examples
-        (LogicalData(b'\x00'), 1),
-        (LogicalData(b'\x01'), 1),
-        (LogicalData(b'\x7e'), 1),
-        (LogicalData(b'\x7F'), 1),
-        # Two byte examples
-        (LogicalData(b'\x80\x80'), 2),
-        (LogicalData(b'\x80\x81'), 2),
-        (LogicalData(b'\xbf\xfe'), 2),
-        (LogicalData(b'\xbf\xff'), 2),
-        # Four byte examples
-        (LogicalData(b'\xc0\x00\x40\x00'), 4),
-        (LogicalData(b'\xc0\x00\x40\x01'), 4),
-        (LogicalData(b'\xff\xff\xff\xfe'), 4),
-        (LogicalData(b'\xff\xff\xff\xff'), 4),
-    )
-)
+@pytest.mark.parametrize('ld, expected', UVARI_len_EXAMPLES)
 def test_ORIGIN_len(ld, expected):
     result = RepCode.ORIGIN_len(ld.bytes, 0)
     assert result == expected
@@ -329,11 +319,13 @@ def test_OBNAME(ld, expected):
         (LogicalData(b'\x00'), 0),
         # Error as not enough IDENT data
         (LogicalData(b'\x00' + b'\x01'), 0),
-        (LogicalData(b'\x00' + b'\x01' + b'\x03'), 0),
-        (LogicalData(b'\x00' + b'\x01' + b'\x03AB'), 0),
         # Success
+        (LogicalData(b'\x00' + b'\x01' + b'\x03'), 6),
+        (LogicalData(b'\x00' + b'\x01' + b'\x03AB'), 6),
         (LogicalData(b'\x00' + b'\x01' + b'\x03ABC'), 6),
         (LogicalData(b'\x00' + b'\x01' + b'\x03ABCDEF'), 6),
+        # Success with short bytes
+        (LogicalData(b'\x00' + b'\x01' + b'\x03'), 6),
     )
 )
 def test_OBNAME_len(ld, expected):

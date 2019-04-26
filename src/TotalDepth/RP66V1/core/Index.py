@@ -256,6 +256,7 @@ class FileIndexXML(LogicalFileSequence):
         assert file_logical_data.lr_is_eflr
         assert file_logical_data.is_sealed()
         # TODO: Encrypted records?
+        # print('TRACE: create_eflr()', file_logical_data)
         if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
             eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
             return eflr

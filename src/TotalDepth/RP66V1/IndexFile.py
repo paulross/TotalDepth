@@ -79,10 +79,10 @@ GNUPLOT_PLT = """set logscale x
 set grid
 set title "XML Index of RP66V1 Files with IndexFile.py."
 set xlabel "RP66V1 File Size (bytes)"
-set mxtics 5
-#set xrange [0:3000]
-#set xtics
-#set format x ""
+# set mxtics 5
+# set xrange [0:3000]
+# set xtics
+# set format x ""
 
 set logscale y
 set ylabel "XML Index Rate (ms/Mb), XML Compression Ratio"

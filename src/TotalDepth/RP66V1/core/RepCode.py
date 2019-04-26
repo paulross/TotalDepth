@@ -199,7 +199,10 @@ def UVARI(ld: LogicalData) -> int:
 
 
 def UVARI_len(by: typing.Union[bytes, bytearray], index: int) -> int:
-    """Return the number of bytes that will be read as a UVARI or zero on failure."""
+    """
+    Return the number of bytes that will be read as a UVARI or zero on failure.
+    NOTE: This does not check that the length of the bytes object is sufficient.
+    """
     if index < 0:
         raise ExceptionRepCode('Index can not be negative.')
     if len(by) <= index:
@@ -221,12 +224,16 @@ def IDENT(ld: LogicalData) -> bytes:
 
 
 def IDENT_len(by: typing.Union[bytes, bytearray], index: int) -> int:
-    """Return the number of bytes that will be read as a IDENT or zero on failure."""
+    """
+    Return the number of bytes that will be read as a IDENT or zero on failure.
+    NOTE: This does not check that the length of the bytes object is sufficient.
+    """
     if index < 0:
         raise ExceptionRepCode('Index can not be negative.')
     if len(by) <= index:
         return 0
-    return by[index] + 1
+    # One byte for the length plus the length
+    return 1 + by[index]
 
 
 def ASCII(ld: LogicalData) -> bytes:
@@ -309,6 +316,8 @@ def OBNAME_len(by: typing.Union[bytes, bytearray], index: int) -> int:
     """Examine the bytes and determine how many bytes are needed for a OBNAME representation.
     Returns the number of bytes or zero as an error (bytes is not long enough).
 
+    NOTE: This does not check that the length of the bytes object is sufficient.
+
     O: Origin Reference is a ORIGIN, a UVARI
     C: Copy is a USHORT
     I: Identifier is an IDENT
@@ -317,20 +326,16 @@ def OBNAME_len(by: typing.Union[bytes, bytearray], index: int) -> int:
         raise ExceptionRepCode('Index can not be negative.')
     # O: Origin Reference is a ORIGIN, a UVARI
     length = ORIGIN_len(by, index)
-    if length == 0:
-        return 0
-    # C: Copy is a USHORT
-    length += 1
-    if len(by) < length:
-        return 0
-    # I: Identifier is an IDENT
-    ident_length = IDENT_len(by, index + length)
-    if ident_length == 0:
-        return 0
-    length += ident_length
-    if len(by) < length:
-        return 0
-    return length
+    if length:
+        # C: Copy is a USHORT
+        length += 1
+        if len(by) >= length + index:
+            # I: Identifier is an IDENT
+            ident_length = IDENT_len(by, index + length)
+            if ident_length:
+                length += ident_length
+                return length
+    return 0
 
 
 # This has three fields:

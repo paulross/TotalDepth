@@ -1,11 +1,16 @@
 import copy
 import hashlib
-import re
+import io
+import logging
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import RepCode
+# from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core.StorageUnitLabel import StorageUnitLabel, ExceptionStorageUnitLabel
 from TotalDepth.util.bin_file_type import format_bytes
+
+
+logger = logging.getLogger(__file__)
 
 
 class ExceptionFile(ExceptionTotalDepthRP66V1):
@@ -22,10 +27,6 @@ class ExceptionTIF(ExceptionFile):
 
 
 class ExceptionTIFEOF(ExceptionTIF):
-    pass
-
-
-class ExceptionStorageUnitLabel(ExceptionFile):
     pass
 
 
@@ -53,73 +54,7 @@ class ExceptionFileReadEOF(ExceptionFileRead):
     pass
 
 
-# Some constants
-LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE = 16
-# The first one must be StorageUnitLabel.SIZE + TIF_SIZE = 92 or 0x5c little endian
-# 0000 0000 0000 0000 5c00 0000
-TIF_FILE_PREFIX = b'\x00' * 4 + b'\x00' * 4 + b'x5c\x00\x00\x00'
-
-
-class StorageUnitLabel:
-    """The Storage Unit Label that must be at the beginning of a file. See [RP66V1] 2.3.2"""
-    SIZE = 80
-    RE_STORAGE_UNIT_SEQUENCE_NUMBER = re.compile(b'^[0 ]*([1-9]+)$')
-    RE_DLIS_VERSION                 = re.compile(b'^(V1.\\d\\d)$')
-    RE_STORAGE_UNIT_STRUCTURE       = re.compile(b'^(RECORD)$')
-    RE_MAXIMUM_RECORD_LENGTH        = re.compile(b'^[0 ]*([1-9]+)$')
-    # FIELDS = (
-    #     ('RE_STORAGE_UNIT_SEQUENCE_NUMBER', re.compile(b'^[0 ]*([1-9]+)$'), 4),
-    #     ('RE_DLIS_VERSION'                , re.compile(b'^(V1.\\d\\d)$'), 5),
-    #     ('RE_STORAGE_UNIT_STRUCTURE'      , re.compile(b'^(RECORD)$'), 6),
-    #     ('RE_MAXIMUM_RECORD_LENGTH'       , re.compile(b'^[0 ]*([1-9]+)$'), 5),
-    # )
-
-    def __init__(self, by: bytes):
-        if len(by) != self.SIZE:
-            raise ExceptionStorageUnitLabel(f'Expected {self.SIZE} bytes, got {len(by)}')
-        # We do not support TIF markers.
-        if by[len(TIF_FILE_PREFIX):] == TIF_FILE_PREFIX:
-            raise ExceptionStorageUnitLabel(f'This file appears to have TIF markers, de-TIF the file to read it.')
-        m = self.RE_STORAGE_UNIT_SEQUENCE_NUMBER.match(by[:4])
-        if m is None:
-            raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on {by}')
-        self.storage_unit_sequence_number: int = int(m.group(1))
-        m = self.RE_DLIS_VERSION.match(by[4:9])
-        if m is None:
-            raise ExceptionStorageUnitLabel(f'Can not match RE_DLIS_VERSION on {by}')
-        self.dlis_version: bytes = m.group(1)
-        m = self.RE_STORAGE_UNIT_STRUCTURE.match(by[9:15])
-        if m is None:
-            raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_STRUCTURE on {by}')
-        self.storage_unit_structure: bytes = m.group(1)
-        m = self.RE_MAXIMUM_RECORD_LENGTH.match(by[15:20])
-        if m is None:
-            raise ExceptionStorageUnitLabel(f'Can not match RE_MAXIMUM_RECORD_LENGTH on {by}')
-        self.maximum_record_length: int = int(m.group(1))
-        # TODO: Currently no enforcement here. Could check that this is printable ASCII.
-        self.storage_set_identifier: bytes = by[20:]
-
-    def as_bytes(self) -> bytes:
-        ret = b''.join(
-            [
-                bytes('{:4d}'.format(self.storage_unit_sequence_number), 'ascii'),
-                # TODO: Finish this
-            ]
-        )
-        assert len(ret) == self.SIZE
-        return ret
-
-    def __str__(self) -> str:
-        return '\n'.join(
-            [
-                'StorageUnitLabel:',
-                f'  Storage Unit Sequence Number: {self.storage_unit_sequence_number}',
-                f'                  DLIS Version: {self.dlis_version}',
-                f'        Storage Unit Structure: {self.storage_unit_structure}',
-                f'         Maximum Record Length: {self.maximum_record_length}',
-                f'        Storage Set Identifier: {self.storage_set_identifier}',
-            ]
-        )
+# ---------------- Low Level File Read Functions ------------------
 
 
 def read_one_byte(fobj: typing.BinaryIO) -> int:
@@ -134,6 +69,60 @@ def read_two_bytes_big_endian(fobj: typing.BinaryIO) -> int:
     if len(by) != 2:
         raise ExceptionEOF('Premature EOF.')
     return by[0] << 8 | by[1]
+
+
+def read_n_bytes(fobj: typing.BinaryIO, length: int) -> bytes:
+    by: bytes = fobj.read(length)
+    if len(by) != length:
+        raise ExceptionEOF('Premature EOF.')
+    return by
+
+
+# def read_UVARI(fobj: typing.BinaryIO) -> bytes:
+#     # Will raise
+#     by: bytes = read_n_bytes(fobj, 1)
+#     length = RepCode.UVARI_len(by, 0)
+#     assert length != 0
+#     if length != 1:
+#         return by + read_n_bytes(fobj, length - 1)
+#     return by
+#
+#
+# def read_IDENT(fobj: typing.BinaryIO) -> bytes:
+#     # Will raise
+#     by: bytes = read_n_bytes(fobj, 1)
+#     length = RepCode.IDENT_len(by, 0)
+#     assert length > 0
+#     if length != 1:
+#         return by + read_n_bytes(fobj, length - 1)
+#     return by
+#
+#
+# def read_OBNAME(fobj: typing.BinaryIO) -> bytes:
+#     parts: typing.List[bytes] = [
+#         read_UVARI(fobj),
+#         # Count as a USHORT
+#         read_n_bytes(fobj, 1),
+#         read_IDENT(fobj),
+#     ]
+#     return b''.join(parts)
+#
+#
+# def read_IFLR_obname_frame_and_first_channel(fobj: typing.BinaryIO) -> bytes:
+#     parts: typing.List[bytes] = [
+#         read_OBNAME(fobj),
+#         # Frame number as a UVARI
+#         read_UVARI(fobj),
+#         # First channel is X axis as a scalar.
+#         read_n_bytes(fobj, RepCode.LENGTH_LARGEST_INDEX_CHANNEL_CODE),
+#     ]
+#     return b''.join(parts)
+
+# ---------------- END: Low Level File Read Functions ------------------
+
+
+# Some constants
+LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE = 16
 
 
 class VisibleRecord:
@@ -254,7 +243,13 @@ class LogicalRecordSegmentHeader:
 
     @property
     def next_position(self) -> int:
+        """File position of the start of the next Logical Record Segment Header."""
         return self.position + self.length
+
+    @property
+    def logical_data_position(self) -> int:
+        """File position of the start of the Logical Data."""
+        return self.position + self.HEAD_LENGTH
 
     # Attribute access
     @property
@@ -448,6 +443,12 @@ class FileLogicalData:
         assert self._invariants()
         return self._bytes is None
 
+    def __len__(self) -> int:
+        assert self._invariants()
+        if self._bytes is None:
+            return len(self.logical_data)
+        return len(self._bytes)
+
     def __str__(self) -> str:
         assert self._invariants()
         DUMP_BYTE_LEN = 16
@@ -468,7 +469,10 @@ class FileRead:
         self.file = file
         self.file.seek(0)
         # Read the Storage Unit Label, see [RP66V1] 2.3.2
-        self.sul = StorageUnitLabel(self.file.read(StorageUnitLabel.SIZE))
+        try:
+            self.sul = StorageUnitLabel(self.file.read(StorageUnitLabel.SIZE))
+        except ExceptionStorageUnitLabel as err:
+            raise ExceptionFileRead(str(err))
         self.visible_record = VisibleRecord(self.file)
         self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
         if not self.logical_record_segment_header.is_first:
@@ -557,49 +561,70 @@ class FileRead:
         self.logical_record_segment_header.read(self.file)
         # is_first has been checked by __init__
 
+    def _read_full_logical_data(self) -> bytes:
+        """
+        Reads from the current file position the complete Logical Record Segment and returns it.
+        """
+        tell: int = self.file.tell()
+        assert tell == self.logical_record_segment_header.position + self.logical_record_segment_header.HEAD_LENGTH
+        by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
+        if len(by) != self.logical_record_segment_header.logical_data_length:
+            raise ExceptionFileReadEOF(
+                f'Premature EOF reading at {self._current_vr_lr_position()}'
+                f' of {self.logical_record_segment_header.logical_data_length} bytes'
+            )
+        if self.logical_record_segment_header.must_strip_padding:
+            pad_len = by[-1]
+            # The next line is removed as pad lengths of 10 have been seen (!)
+            # assert 0 < pad_len < 4, f'Pad length is {pad_len}'
+            assert len(by) >= 1
+            assert len(by) >= pad_len
+            by = by[:-pad_len]
+            logger.debug(f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x} pad={pad_len}')
+        else:
+            logger.debug(f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x}')
+        return by
+
+    # def _read_partial_logical_data(self, size: int) -> bytes:
+    #     """
+    #     Reads from the current file position the requested number of bytes.
+    #     The number of bytes returned will be <= size.
+    #     This leaves self.file in an indeterminate position, caller must handle this.
+    #     """
+    #     if size >= self.logical_record_segment_header.logical_data_length:
+    #         return self._read_full_logical_data()
+    #     tell: int = self.file.tell()
+    #     assert tell == self.logical_record_segment_header.position + self.logical_record_segment_header.HEAD_LENGTH
+    #     # Partial read. If there is padding we must figure out how much we can read.
+    #     if self.logical_record_segment_header.must_strip_padding:
+    #         self.file.seek(self.logical_record_segment_header.logical_data_length - 1)
+    #         pad_len = read_one_byte(self.file)
+    #         self.file.seek(tell, io.SEEK_SET)
+    #         if self.logical_record_segment_header.length - pad_len < size:
+    #             return self._read_full_logical_data()
+    #     return self.file.read(size)
+
     def iter_logical_records(self) -> typing.Sequence[FileLogicalData]:
         """Iterate across the file from the beginning yielding FileLogicalData objects."""
         self._set_file_and_read_first_logical_record_segment_header()
-        # TODO: For performance limit the amount of bytes read of the EFLR/IFLR to the first channel and seek the rest.
-        # TODO: Remove asserts for production
         try:
             while True:
                 file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
-                by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
-                if len(by) != self.logical_record_segment_header.logical_data_length:
-                    raise ExceptionFileReadEOF(
-                        f'Premature EOF reading at {self._current_vr_lr_position()}'
-                        f' of {self.logical_record_segment_header.length} bytes'
-                    )
-                if self.logical_record_segment_header.must_strip_padding:
-                    pad_len = by[-1]
-                    # Removed as pad lengths of 10 have been seen (!)
-                    # assert 0 < pad_len < 4, f'Pad length is {pad_len}'
-                    assert len(by) >= 1
-                    assert len(by) >= pad_len
-                    # Maximum padding is 3 by observation
-                    by = by[:-pad_len]
-                file_logical_data.add_bytes(by)
+                file_logical_data.add_bytes(self._read_full_logical_data())
                 while not self.logical_record_segment_header.is_last:
-                    # Loop for each subsequent segment
                     self._seek_and_read_next_logical_record_segment_header()
-                    by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
-                    if len(by) != self.logical_record_segment_header.logical_data_length:
-                        raise ExceptionFileReadEOF(
-                            f'Premature EOF reading {self.logical_record_segment_header.length} bytes from LRSH at'
-                            f' {self.logical_record_segment_header.position}'
-                        )
-                    if self.logical_record_segment_header.must_strip_padding:
-                        by = by[:-by[-1]]
-                    file_logical_data.add_bytes(by)
+                    file_logical_data.add_bytes(self._read_full_logical_data())
                 file_logical_data.seal()
                 yield file_logical_data
                 self._seek_and_read_next_logical_record_segment_header()
-                assert self.logical_record_segment_header.is_first
+                if not self.logical_record_segment_header.is_first:
+                    raise ExceptionLogicalRecordSegmentHeader(
+                        'First Logical Record Segment Header is not marked as is_first.'
+                    )
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
-    def iter_logical_records_minimal(self, eflr_codes: typing.Set[int]) -> typing.Sequence[FileLogicalData]:
+    def iter_logical_records_minimal(self, lr_codes: typing.Set[int]) -> typing.Sequence[FileLogicalData]:
         """Iterate across the file from the beginning yielding FileLogicalData objects which contain the minimal
         record information.
 
@@ -617,62 +642,50 @@ class FileRead:
         try:
             while True:
                 file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
-                read_bytes: bool = True  # Set once per Logical Record, once cleared remains cleared for that record.
-                by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
-                if len(by) != self.logical_record_segment_header.logical_data_length:
-                    raise ExceptionFileReadEOF(
-                        f'Premature EOF reading at {self._current_vr_lr_position()}'
-                        f' of {self.logical_record_segment_header.length} bytes'
-                    )
-                if self.logical_record_segment_header.must_strip_padding:
-                    pad_len = by[-1]
-                    # Removed as pad lengths of 10 have been seen (!)
-                    # assert 0 < pad_len < 4, f'Pad length is {pad_len}'
-                    assert len(by) >= 1
-                    assert len(by) >= pad_len
-                    # Maximum padding is 3 by observation
-                    by = by[:-pad_len]
-                file_logical_data.add_bytes(by)
-                while not self.logical_record_segment_header.is_last:
-                    # Loop for each subsequent segment
-                    # See if we have enough data
-                    if read_bytes:
-                        if file_logical_data.lr_is_eflr:
-                            # EFLR
-                            if file_logical_data.lr_type not in eflr_codes:
-                                len_required = RepCode.IDENT_len(file_logical_data._bytes, 0)
-                                if len_required != 0:
-                                    # Slice the logical data to just the ident
-                                    file_logical_data.truncate(len_required)
-                                    # We are done, seek the rest
-                                    read_bytes = False
-                        else:
-                            # IFLR, length is:
-                            # OBNAME (Data Descriptor Reference) + UVARI (frame number) + LENGTH_LARGEST_INDEX_CHANNEL_CODE
-                            len_required = RepCode.OBNAME_len(file_logical_data._bytes, 0)
-                            if len_required != 0:
-                                frame_number_len = RepCode.UVARI_len(file_logical_data._bytes, len_required)
-                                if frame_number_len != 0:
-                                    len_required += frame_number_len
-                                    len_required += RepCode.LENGTH_LARGEST_INDEX_CHANNEL_CODE
-                                    if len(file_logical_data._bytes) > len_required:
-                                        # Slice the logical data to just the OBNAME and first channel value
-                                        file_logical_data.truncate(len_required)
-                                        # We are done, seek the rest
-                                        read_bytes = False
-                    self._seek_and_read_next_logical_record_segment_header()
-                    if read_bytes:
-                        by: bytes = self.file.read(self.logical_record_segment_header.logical_data_length)
-                        if len(by) != self.logical_record_segment_header.logical_data_length:
-                            raise ExceptionFileReadEOF(
-                                f'Premature EOF reading {self.logical_record_segment_header.length} bytes from LRSH at'
-                                f' {self.logical_record_segment_header.position}'
-                            )
-                        if self.logical_record_segment_header.must_strip_padding:
-                            by = by[:-by[-1]]
-                        file_logical_data.add_bytes(by)
+                # TODO: What if the self.logical_record_segment_header.logical_data_length is < the required EFLR/IFLR data?
+                # Hmm, so a crude policy would be to do a 'raw' read of the minimal EFLR/IFLR which does not respect the
+                # Visible Record and Logical Record Segment boundaries. Then if the read data exceeds the logical
+                # segment length then rewind the file and read the logical record segment and try again.
+                if file_logical_data.lr_type in lr_codes:
+                    file_logical_data.add_bytes(self._read_full_logical_data())
+                    while not self.logical_record_segment_header.is_last:
+                        self._seek_and_read_next_logical_record_segment_header()
+                        file_logical_data.add_bytes(self._read_full_logical_data())
+                else:
+                    tell_logical_data_start = self.file.tell()
+                    if file_logical_data.lr_is_eflr:
+                        # logger.info(
+                        #     f'iter_logical_records_minimal(): EFLR first read {self.logical_record_segment_header.logical_data_length}')
+                        by: bytes = read_OBNAME(self.file)
                     else:
-                        self.file.seek(self.logical_record_segment_header.logical_data_length)
+                        # logger.info(
+                        #     f'iter_logical_records_minimal(): IFLR first read {self.logical_record_segment_header.logical_data_length}')
+                        by: bytes = read_IFLR_obname_frame_and_first_channel(self.file)
+                    len_required_bytes = len(by)
+                    # Explain that this assumes we are not going to encroach on the pad bytes.
+                    if self.logical_record_segment_header.logical_data_length < len_required_bytes:
+                        # Rewind
+                        self.file.seek(tell_logical_data_start)
+                        by = self._read_full_logical_data()
+                    file_logical_data.add_bytes(by)
+                    while not self.logical_record_segment_header.is_last:
+                        # Loop for each subsequent segment
+                        # See if we have enough data
+                        required_bytes: int = len_required_bytes - len(file_logical_data)
+                        if required_bytes > 0:
+                            # Must read complete Logical Segment
+                            # We can't do a partial read as we  padding, it is possible that
+                            if self.logical_record_segment_header.logical_data_length <= required_bytes \
+                                    or self.logical_record_segment_header.must_strip_padding:
+                                file_logical_data.add_bytes(self._read_full_logical_data())
+                            else:
+                                # Only read partial Logical Segment
+                                by = self.file.read(required_bytes)
+                                file_logical_data.add_bytes(by)
+                        self._seek_and_read_next_logical_record_segment_header()
+                    # Could have over-read and this will give problems with the EFLR where it will try and read the
+                    # template beyond the OBNAME.
+                    # file_logical_data.truncate(len_required_bytes)
                 file_logical_data.seal()
                 yield file_logical_data
                 self._seek_and_read_next_logical_record_segment_header()

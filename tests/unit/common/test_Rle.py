@@ -239,6 +239,15 @@ def test_floating_point_values():
     #             <RLE datum="2273.1984" repeat="16" stride="0.07619999999997162"/>
     #             <RLE datum="2274.4938" repeat="14" stride="0.07619999999997162"/>
     #             <RLE datum="2275.6368" repeat="16" stride="0.07619999999997162"/>
+
+    # R1T4_8.5_DROVER1_CBIL.dlis:
+    #             <RLE datum="1146.34264" repeat="1" stride="0.005079999999907159"/>
+    #             <RLE datum="1146.3528000000001" repeat="2" stride="0.005079999999907159"/>
+    # 1146.34264 + (1 + 1) * 0.005079999999907159 == 1146.3528000000001
+    # False
+    # (1146.3528000000001 - (1146.34264 + (1 + 1) * 0.005079999999907159)) / 1146 < sys.float_info.epsilon
+    # True
+
     rle = RLE()
     datum = 2262.4542
     stride = 0.07619999999997162
