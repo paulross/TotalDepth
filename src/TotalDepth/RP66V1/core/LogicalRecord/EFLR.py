@@ -170,6 +170,9 @@ class Template:
     def __str__(self) -> str:
         return '\n'.join(str(a) for a in self.attrs)
 
+    def header_as_strings(self) -> typing.List[str]:
+        return [str(attr.label) for attr in self.attrs]
+
 
 class Object:
     def __init__(self, ld: LogicalData, template: Template):
@@ -239,6 +242,17 @@ class Object:
         )
         return '\n'.join(strs)
 
+    def values_as_strings(self) -> typing.List[str]:
+        ret = []
+        for attr in self.attrs:
+            if attr.value is None:
+                ret.append('None')
+            elif isinstance(attr.value[0], bytes):
+                ret.append(str(b', '.join(attr.value)))
+            else:
+                ret.append(', '.join(str(v) for v in attr.value))
+        return ret
+
 
 class ExplicitlyFormattedLogicalRecordBase:
     def __init__(self, lr_type: int, ld: LogicalData):
@@ -259,10 +273,10 @@ class ExplicitlyFormattedLogicalRecord(ExplicitlyFormattedLogicalRecordBase):
                 if obj.name in self.object_name_map:
                     # Compare and if same ignore, else raise
                     if obj == self[obj.name]:
-                        msg = f'Ignoring duplicate Object with OBNAME {obj.name} already seen in the {self.set}.'
+                        msg = f'Ignoring duplicate Object with {obj.name} already seen in the {self.set}.'
                         logger.info(msg)
                     else:
-                        msg = f'Ignoring different Object with OBNAME {obj.name} already seen in the {self.set}.'
+                        msg = f'Ignoring different Object with {obj.name} already seen in the {self.set}.'
                         logger.warning(msg)
                         logger.warning('WAS:')
                         logger.warning(str(self[obj.name]))
