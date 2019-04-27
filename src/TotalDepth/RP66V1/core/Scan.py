@@ -202,12 +202,10 @@ class IFLRDataSummary(DataSummaryBase):
             self.frame_range_map[ob_name].add(iflr.frame_number)
             frame_object: LogPass.FrameObject = log_pass[ob_name]
             channel_values = log_pass.process_IFLR(iflr)
-            # print('TRACE: values', channel_values)
             for channel, values in zip(frame_object.channels, channel_values):
                 if channel.object_name not in self.object_channel_map[ob_name]:
                     self.object_channel_map[ob_name][channel.object_name] = MinMax(channel.units)
                 self.object_channel_map[ob_name][channel.object_name].add(values)
-
 
     def __str__(self) -> str:
         ret = self._str_lines()
@@ -239,25 +237,24 @@ class EFLRDataSummary(DataSummaryBase):
 
 
 class ScanLogicalFile(LogicalFileBase):
-    EFLR_ALWAYS_PRINT = set()  # {b'FILE-HEADER', b'ORIGIN'}
+    EFLR_ALWAYS_DUMP = {b'FILE-HEADER', b'ORIGIN'}
 
     def __init__(self, file_logical_data: File.FileLogicalData,
                  fhlr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs):
         super().__init__(file_logical_data, fhlr)
-        # print('TRACE: kwargs', kwargs)
         self.eflr_set_type = kwargs.get('eflr_set_type', [])
         self.iflr_set_type = kwargs.get('iflr_set_type', [])
         self.iflr_dump = kwargs.get('iflr_dump', False)
         self.eflr_dump = kwargs.get('eflr_dump', False)
         self.eflr_summary: EFLRDataSummary = EFLRDataSummary()
         self.iflr_summary: IFLRDataSummary = IFLRDataSummary()
-        # if self._dump_eflr():
-        if self.eflr_dump and len(self.eflr_set_type) == 0 or fhlr.set.type in self.eflr_set_type:
-            print('EFLR', fhlr)
+        self.dump_strings = []
+        if self._must_dump_eflr(fhlr):
+            self.dump_strings.append(f'EFLR {str(fhlr)}')
         self.eflr_summary.add(file_logical_data)
 
-    def _dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> bool:
-        if eflr.set.type in self.EFLR_ALWAYS_PRINT:
+    def _must_dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> bool:
+        if eflr.set.type in self.EFLR_ALWAYS_DUMP:
             return True
         return self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type
 
@@ -265,8 +262,8 @@ class ScanLogicalFile(LogicalFileBase):
     def add_eflr(self, file_logical_data: File.FileLogicalData,
                  eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
         super().add_eflr(file_logical_data, eflr)
-        if self._dump_eflr(eflr):
-            print('EFLR', eflr)
+        if self._must_dump_eflr(eflr):
+            self.dump_strings.append(f'EFLR {str(eflr)}')
         self.eflr_summary.add(file_logical_data)
 
     # Overload @abc.abstractmethod
@@ -274,11 +271,8 @@ class ScanLogicalFile(LogicalFileBase):
                  iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
         super().add_iflr(file_logical_data, iflr)
         if self.iflr_dump and len(self.iflr_set_type) == 0 or iflr.object_name in self.iflr_set_type:
-            print('IFLR', iflr)
+            self.dump_strings.append(f'IFLR {str(iflr)}')
         self.iflr_summary.add(file_logical_data, self.log_pass)
-
-    def dump(self) -> None:
-        pass
 
 
 class ScanFile(LogicalFileSequence):
@@ -295,12 +289,14 @@ class ScanFile(LogicalFileSequence):
     def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
 
-    def dump(self, fout: io.StringIO) -> None:
+    def dump_scan(self, fout: io.StringIO) -> None:
         fout.write(str(self.storage_unit_label))
         fout.write('\n')
         for l, logical_file in enumerate(self.logical_files):
-            # logical_file.dump()
             with _output_section_header_trailer(f'Logical File [Index {l} of {len(self.logical_files)}]', '=', os=fout):
+                for line in logical_file.dump_strings:
+                    fout.write(line)
+                    fout.write('\n')
                 with _output_section_header_trailer('EFLR Summary', '-', os=fout):
                     fout.write(str(logical_file.eflr_summary))
                     fout.write('\n')
@@ -372,12 +368,12 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, **kwargs) -> str:
 
 
 def scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, **kwargs) -> str:
-    scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
     fout = io.StringIO()
+    scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
     with _output_section_header_trailer('RP66V1 File Summary', '*', os=fout):
         encrypted_records: bool = kwargs.get('encrypted_records', False)
         if not encrypted_records:
             # fout.write(_colorama_note('Encrypted records omitted. Use -e to show them.\n'))
             fout.write('Encrypted records omitted. Use -e to show them.\n')
-        scan_file.dump(fout)
+        scan_file.dump_scan(fout)
     return fout.getvalue()
