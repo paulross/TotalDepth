@@ -248,6 +248,17 @@ def test_floating_point_values():
     # (1146.3528000000001 - (1146.34264 + (1 + 1) * 0.005079999999907159)) / 1146 < sys.float_info.epsilon
     # True
 
+    # More examples from a 43Mb XML file:
+    #           <Xaxis count="821051" rle_len="180749">
+    #             <RLE datum="805.2105103" repeat="1" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2155903" repeat="1" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2206703" repeat="2" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2282903" repeat="1" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2333703" repeat="2" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2409903" repeat="1" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2460703" repeat="2" stride="0.0025399999999535794"/>
+    #             <RLE datum="805.2536903" repeat="1" stride="0.0025399999999535794"/>
+
     rle = RLE()
     datum = 2262.4542
     stride = 0.07619999999997162

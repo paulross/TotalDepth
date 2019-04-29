@@ -73,9 +73,11 @@ def invoke_gnuplot(path: str, name: str, table: typing.Sequence[typing.Sequence[
         cwd=path,
     )
     try:
-        stdout, stderr = proc.communicate(timeout=1)
+        # Timeout 10 seconds as curve fitting cane take a while.
+        # TODO: Make an argument to this function.
+        stdout, stderr = proc.communicate(timeout=10)
     except subprocess.TimeoutExpired as err:
-        logger.exception()
+        logger.exception(str(err))
         proc.kill()
         stdout, stderr = proc.communicate()
     logging.info(f'gnuplot stdout: {stdout}')

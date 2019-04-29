@@ -355,18 +355,23 @@ class LogicalData:
         self._sha1: typing.Union[hashlib.sha1, None] = None
 
     def peek(self) -> int:
-        """Return the next bytes without incrementing the index."""
+        """Return the next bytes without incrementing the index.
+        May raise an IndexError if there is no data left."""
         # raise IndexError(f'IndexError: index out of range {self.index} on length {len(self.bytes)}')
         return self.bytes[self.index]
 
     def read(self) -> int:
-        """Return the next bytes and increment the index."""
+        """Return the next byte and increment the index.
+        May raise an IndexError if there is no data left."""
         ret = self.bytes[self.index]
         self.index += 1
         return ret
 
     def chunk(self, length: int) -> bytes:
-        """Return the next length bytes and increment the index."""
+        """Return the next length bytes and increment the index.
+        May raise an IndexError if there is not enough data."""
+        if length > self.remain:
+            raise IndexError('Chunk length is out of range')
         ret = self.bytes[self.index:self.index + length]
         self.index += length
         return ret

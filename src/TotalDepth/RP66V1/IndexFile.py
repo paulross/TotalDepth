@@ -227,7 +227,7 @@ Scans a RP66V1 file and dumps data."""
             print(
                 f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
                 f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
-                f' {path}'
+                f' "{path}"'
             )
             size_input += result[path].size_input
             size_index += result[path].size_index

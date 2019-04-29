@@ -14,6 +14,7 @@ import colorama
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
     scan_RP66V1_file_logical_records
+from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type, BINARY_FILE_TYPE_CODE_WIDTH, binary_file_type_from_path
 
@@ -79,6 +80,94 @@ def scan_dir_or_file(path_in: str, path_out: str, function: typing.Callable, rec
     else:
         ret[path_in] = scan_a_single_file(path_in, path_out, function, **kwargs)
     return ret
+
+
+GNUPLOT_PLT = """set logscale x
+set grid
+set title "Scan of RP66V1 Files with ScanFile.py."
+set xlabel "RP66V1 File Size (bytes)"
+# set mxtics 5
+# set xrange [0:3000]
+# set xtics
+# set format x ""
+
+set logscale y
+set ylabel "Scan Rate (ms/Mb), Scan Compression Ratio"
+# set yrange [1:1e5]
+# set ytics 20
+# set mytics 2
+# set ytics 8,35,3
+
+set logscale y2
+set y2label "Scan time (s), Ratio original size / index size"
+# set y2range [1e-4:10]
+set y2tics
+
+set pointsize 1
+set datafile separator whitespace#"	"
+set datafile missing "NaN"
+
+# set fit logfile
+
+# Curve fit, rate
+rate(x) = 10**(a + b * log10(x))
+fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+
+rate2(x) = 10**(5.5 - 0.5 * log10(x))
+
+# Curve fit, size ratio
+size_ratio(x) = 10**(c + d * log10(x))
+fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+# By hand
+# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
+
+# Curve fit, compression ratio
+compression_ratio(x) = 10**(e + f * log10(x))
+fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+
+set terminal svg size 1000,700 # choose the file format
+set output "{name}.svg" # choose the output device
+
+# set key off
+
+#set key title "Window Length"
+#  lw 2 pointsize 2
+
+# Fields: size_input, size_index, time, exception, ignored, path
+
+#plot "{name}.dat" using 1:3 axes x1y1 title "Scan Time (s)" lt 1 w points
+
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
+    "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
+    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
+    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
+
+# Plot size ratio:
+#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, #     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+
+reset
+"""
+
+
+def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
+    if len(data) < 2:
+        raise ValueError(f'Can not plot data with only {len(data)} points.')
+    # First row is header row, create it then comment out the first item.
+    table = [
+        list(IndexResult._fields) + ['Path']
+    ]
+    table[0][0] = f'# {table[0][0]}'
+    for k in sorted(data.keys()):
+        if data[k].size_input > 0 and not data[k].exception:
+            table.append(list(data[k]) + [k])
+    name = 'ScanFile'
+    return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
+    return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
 def main() -> int:
@@ -155,6 +244,7 @@ Scans a RP66V1 file and dumps data."""
         '-d', '--dump-bytes', type=int, default=0,
         help='Dump X leading raw bytes for certain options. [default: %(default)s]',
     )
+    gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
 
@@ -217,12 +307,14 @@ Scans a RP66V1 file and dumps data."""
             print(
                 f'{idx_result.size_input:16,d} {idx_result.size_output:10,d}'
                 f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
-                f' {path}'
+                f' "{path}"'
             )
             size_input += result[path].size_input
             size_scan += result[path].size_output
             files_processed += 1
 
+    if args.gnuplot:
+        plot_gnuplot(result, args.gnuplot)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input / 1024**2)
     else:
