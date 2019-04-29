@@ -225,7 +225,7 @@ class TestRleFunction(unittest.TestCase):
         self.assertEqual(myR[2].repeat, ((117-105)//2)-1)
 
 
-def test_floating_point_values():
+def test_floating_point_values_A():
     # Example from RP66V1 work:
     #             <RLE datum="2262.4542" repeat="12" stride="0.07619999999997162"/>
     #             <RLE datum="2263.4448" repeat="15" stride="0.07619999999997162"/>
@@ -260,8 +260,47 @@ def test_floating_point_values():
     #             <RLE datum="805.2536903" repeat="1" stride="0.0025399999999535794"/>
 
     rle = RLE()
-    datum = 2262.4542
-    stride = 0.07619999999997162
-    for i in range(10000):
-        rle.add(datum + i * stride)
+    values = [
+        805.2105103,
+        805.2105103 + 0.0025399999999535794,
+        805.2155903,
+        805.2155903 + 0.0025399999999535794,
+        # 805.2206703,
+        # 805.2206703 + 0.0025399999999535794,
+        # 805.2206703 + 0.0025399999999535794,
+    ]
+    for v in values:
+        rle.add(v)
     assert len(rle) == 1
+
+
+# def test_floating_point_values_B():
+#     rle = RLE()
+#     datum = 805.2105103
+#     stride = 0.0025399999999535794
+#     # Actual
+#     x = datum + 2 * stride - 805.2155903
+#     # assert x == 0
+#     for i in range(3):
+#         rle.add(datum + i * stride)
+#     assert len(rle) != 1
+
+
+def test_floating_point_values_C():
+    # R1T4_8.5_DROVER1_CBIL.dlis:
+    #             <RLE datum="1146.34264" repeat="1" stride="0.005079999999907159"/>
+    #             <RLE datum="1146.3528000000001" repeat="2" stride="0.005079999999907159"/>
+    # 1146.34264 + (1 + 1) * 0.005079999999907159 == 1146.3528000000001
+    # False
+    # (1146.3528000000001 - (1146.34264 + (1 + 1) * 0.005079999999907159)) / 1146 < sys.float_info.epsilon
+    # True
+    rle = RLE()
+    values = [
+        1146.34264,
+        1146.34264 + 0.005079999999907159,
+        1146.3528000000001,
+    ]
+    for v in values:
+        rle.add(v)
+    assert len(rle) == 1
+

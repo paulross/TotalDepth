@@ -1,6 +1,7 @@
 """
 Code for RUn Length Encoding.
 """
+import math
 import sys
 import typing
 
@@ -69,15 +70,19 @@ class RLEItem:
         #             <RLE datum="2273.1984" repeat="16" stride="0.07619999999997162"/>
         #             <RLE datum="2274.4938" repeat="14" stride="0.07619999999997162"/>
         #             <RLE datum="2275.6368" repeat="16" stride="0.07619999999997162"/>
-        if False and isinstance(v, float):
-            # TODO: Test this
-            diff = abs(v - exp_value)
-            if v != 0.0:
-                diff /= (abs(v) + abs(exp_value)) / 2
-            if diff < sys.float_info.epsilon:
+        if isinstance(v, float):
+            if math.isclose(v, exp_value, rel_tol=sys.float_info.epsilon):
                 # TODO: Recompute stride?
                 self._repeat += 1
                 return True
+            # # TODO: Test this
+            # diff = abs(v - exp_value)
+            # if v != 0.0:
+            #     diff /= (abs(v) + abs(exp_value)) / 2
+            # if diff < sys.float_info.epsilon:
+            #     # TODO: Recompute stride?
+            #     self._repeat += 1
+            #     return True
         else:
             if v == exp_value:
                 self._repeat += 1
