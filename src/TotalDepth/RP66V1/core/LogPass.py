@@ -1,5 +1,11 @@
 """
-Extracts CHANNEL and FRAME data from a RP66V1 file to represent multiple sets of FRAME data.
+Extracts CHANNEL and FRAME structure from a RP66V1 file to represent, potential, multiple sets of FRAME data.
+
+Code here gives an internal API to RP66V1 EFLRs that describe the data structure of log data.
+
+The actual data representation, rather than the structure, is done by the FrameArray module that takes an instance of
+this LogPass and provides a read/write API to the actual log data.
+
 """
 import itertools
 import typing
@@ -31,22 +37,42 @@ class ExceptionFrameObjectInit(ExceptionLogPass):
     pass
 
 
-class FrameChannel:
-    def __init__(self, channel_object: EFLR.Object):
+class FrameChannelBase:
+    """Subclass this depending on the source of the information: DLIS file, XML index etc."""
+    def __init__(self,
+                 object_name: ObjectName,
+                 long_name: bytes,
+                 rep_code: int,
+                 units: bytes,
+                 dimensions: typing.List[int],
+                 ):
         # TODO: Apply Semantic Restrictions
-        self.object_name: ObjectName = channel_object.name
-        self.long_name: bytes = b''
-        if channel_object[b'LONG-NAME'].value is not None:
-            self.long_name: bytes = channel_object[b'LONG-NAME'].value[0]
-        self.rep_code: int = channel_object[b'REPRESENTATION-CODE'].value[0]
-        self.units: bytes = channel_object[b'UNITS'].value[0]
-        self.dimensions: typing.List[int] = channel_object[b'DIMENSION'].value
+        self.object_name: ObjectName = object_name
+        self.long_name: bytes = long_name
+        self.rep_code: int = rep_code
+        self.units: bytes = units
+        self.dimensions: typing.List[int] = dimensions
         self.count = reduce(lambda x, y: x * y, self.dimensions, 1)
 
     def __str__(self) -> str:
         return f'FrameChannel: {self.object_name:8} Rc: {self.rep_code:3d} Co: {self.count:4d}' \
             f' Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
 
+
+class FrameChannelDLIS(FrameChannelBase):
+
+    def __init__(self, channel_object: EFLR.Object):
+        # TODO: Apply Semantic Restrictions
+        # TODO: Further to the above, check no multiple values for those fields that we are indexing [0].
+        super().__init__(
+            object_name=channel_object.name,
+            long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
+            rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
+            units=channel_object[b'UNITS'].value[0],
+            dimensions=channel_object[b'DIMENSION'].value,
+        )
+
+    # TODO: This is IFLR processing that should be left to the FrameArray class
     def read(self, ld: LogicalData) -> typing.List[float]:
         return [RepCode.code_read(self.rep_code, ld) for _i in range(self.count)]
 
@@ -60,29 +86,34 @@ class FrameChannel:
         else:
             data.append([RepCode.code_read(self.rep_code, ld) for _i in range(self.count)])
 
-    def numpy_empty(self, frames: int) -> np.ndarray:
-        """Returns an empty Numpy array suitable to fill with <frames> number of frame data for this channel."""
-        return np.empty((frames, *self.dimensions), dtype=RepCode.numpy_dtype(self.rep_code))
-
-    def numpy_indexes(self, frame: int) -> itertools.product:# typing.Sequence[typing.Tuple[int, ...]]:
-        """Returns a generator of numpy indexes."""
-        # TODO: Test
-        products = [frame]
-        products.extend(range(d) for d in self.dimensions)
-        return itertools.product(products)
-
-    def numpy_fill(self, ld: LogicalData, array: np.ndarray, frame: int) -> None:
-        """Writes into a Numpy array from logical data."""
-        # TODO: Test
-        for dim in self.numpy_indexes(frame):
-            # dim is a tuple of length self.dimensions
-            value = RepCode.code_read(self.rep_code, ld)
-            array[dim] = value
+    # def numpy_empty(self, frames: int) -> np.ndarray:
+    #     """Returns an empty Numpy array suitable to fill with <frames> number of frame data for this channel."""
+    #     return np.empty((frames, *self.dimensions), dtype=RepCode.numpy_dtype(self.rep_code))
+    #
+    # def numpy_indexes(self, frame: int) -> itertools.product:# typing.Sequence[typing.Tuple[int, ...]]:
+    #     """Returns a generator of numpy indexes."""
+    #     # TODO: Test
+    #     products = [frame]
+    #     products.extend(range(d) for d in self.dimensions)
+    #     return itertools.product(products)
+    #
+    # def numpy_fill(self, ld: LogicalData, array: np.ndarray, frame: int) -> None:
+    #     """Writes into a Numpy array from logical data."""
+    #     # TODO: Test
+    #     for dim in self.numpy_indexes(frame):
+    #         # dim is a tuple of length self.dimensions
+    #         value = RepCode.code_read(self.rep_code, ld)
+    #         array[dim] = value
 
 
 class FrameObject:
-    """A single independent recording of channels.
-    In the olden days we would record this on a single chunk of continuous film."""
+    """
+    A single independent recording of channels along a particular axis which is the first channel. Reference
+    [RP66V1 Section 5.7.1 Frame Objects Figure 5-8 Comment 2 "When a Frame has an Index, then it must be the first
+    Channel in the Frame, and it must be scalar."].
+
+    In the olden days we would record this on a single chunk of continuous film.
+    """
     def __init__(self, frame_object: EFLR.Object, channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord):
         self.object_name: ObjectName = frame_object.name
         # TODO: Apply Semantic Restrictions?
@@ -91,10 +122,10 @@ class FrameObject:
         if frame_object[b'DESCRIPTION'].count == 1 and frame_object[b'DESCRIPTION'].value is not None:
             self.description = frame_object[b'DESCRIPTION'].value[0]
         channel_obnames: typing.List[ObjectName] = frame_object[b'CHANNELS'].value
-        self.channels: typing.List[FrameChannel] = []
-        for channel_obname in channel_obnames:
+        self.channels: typing.List[FrameChannelDLIS] = []
+        for c, channel_obname in enumerate(channel_obnames):
             if channel_obname in channel_eflr.object_name_map:
-                self.channels.append(FrameChannel(channel_eflr[channel_obname]))
+                self.channels.append(FrameChannelDLIS(channel_eflr[channel_obname]))
             else:
                 raise ExceptionFrameObjectInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
         self.object_name_map: typing.Dict[ObjectName, int] = {
@@ -108,11 +139,12 @@ class FrameObject:
             ] + [f'  {str(c)}' for c in self.channels]
         )
 
-    def __getitem__(self, item) -> FrameChannel:
+    def __getitem__(self, item) -> FrameChannelDLIS:
         if item in self.object_name_map:
             return self.channels[self.object_name_map[item]]
         return self.channels[item]
 
+    # TODO: This is IFLR processing that should be left to the FrameArray class
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.List[typing.List[float]]:
         ld: LogicalData = LogicalData(iflr.bytes)
         result: typing.List[typing.List[float]] = []
@@ -136,7 +168,20 @@ class FrameObject:
         return self.channels[0].read_one(ld)
 
 
-class LogPass:
+class LogPassBase:
+    pass
+
+
+class LogPass(LogPassBase):
+    """
+    This represents the structure a single run of data acquisition such as 'Repeat Section' or 'Main Log'.
+    These runs have one or more independent simultaneous recordings of different sensors at different depth/time
+    resolutions.
+    These are called Frame Objects.
+
+    This class is constructed with a FRAME EFLR that represents the independent simultaneous recordings and the X axis
+    and a CHANNEL EFLR that represents all known channels (representation codes, dimensions etc.).
+    """
     def __init__(self, frame: EFLR.ExplicitlyFormattedLogicalRecord, channels: EFLR.ExplicitlyFormattedLogicalRecord):
         if frame.set.type != b'FRAME':
             raise ExceptionLogPassInit(f"Expected frame set type to be b'FRAME' but got {frame.set.type}")
@@ -154,6 +199,7 @@ class LogPass:
         # This is a list of independent recordings.
         # In the olden days we would record each of these on a separate chunks of separate films.
         self.frame_objects: typing.List[FrameObject] = [FrameObject(obj, channels) for obj in frame.objects]
+        # Enable __getitem__ by integer index or label.
         self.object_name_map: typing.Dict[ObjectName, int] = {
             obj.object_name: i for i, obj in enumerate(self.frame_objects)
         }
@@ -171,6 +217,8 @@ class LogPass:
             return self.frame_objects[self.object_name_map[item]]
         return self.frame_objects[item]
 
+
+    # TODO: This is IFLR processing that should be left to the FrameArray class
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.List[typing.List[float]]:
         object_name: ObjectName = iflr.object_name
         if object_name not in self.object_name_map:

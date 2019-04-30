@@ -1,8 +1,6 @@
-import pytest
-
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
+from TotalDepth.RP66V1.core.LogPass import LogPass
 from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 

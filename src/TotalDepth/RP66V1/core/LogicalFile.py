@@ -5,7 +5,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import FileLogicalData, FileRead
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogicalRecord.LogPass import LogPass
+from TotalDepth.RP66V1.core.LogPass import LogPass
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 
 
