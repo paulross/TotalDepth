@@ -42,19 +42,20 @@ def scan_a_single_file(path_in: str, path_out: str, function: typing.Callable, *
         with open(path_in, 'rb') as fobj:
             t_start = time.perf_counter()
             try:
-                scan_output = function(fobj, **kwargs)
                 if path_out:
                     out_dir = os.path.dirname(path_out)
                     if not os.path.exists(out_dir):
                         logger.info(f'Making directory: {out_dir}')
                         os.makedirs(out_dir, exist_ok=True)
                     with open(path_out + '.txt', 'w') as fout:
-                        fout.write(scan_output)
+                        function(fobj, fout, **kwargs)
+                    len_scan_output = os.path.getsize(path_out + '.txt')
                 else:
-                    print(scan_output)
+                    function(fobj, sys.stdout, **kwargs)
+                    len_scan_output = -1
                 result = IndexResult(
                     os.path.getsize(path_in),
-                    len(scan_output),
+                    len_scan_output,
                     time.perf_counter() - t_start,
                     False,
                     False,
@@ -271,6 +272,7 @@ Scans a RP66V1 file and dumps data."""
             args.recurse,
             # kwargs
             lrsh_dump=args.LRSH,
+            verbose=args.verbose,
         )
     if args.LD:
         result = scan_dir_or_file(
@@ -280,6 +282,7 @@ Scans a RP66V1 file and dumps data."""
             args.recurse,
             # kwargs
             dump_bytes=args.dump_bytes,
+            verbose=args.verbose,
         )
     if args.LR or args.EFLR or args.IFLR:
         result = scan_dir_or_file(
@@ -288,7 +291,9 @@ Scans a RP66V1 file and dumps data."""
             scan_RP66V1_file_logical_records,
             args.recurse,
             # kwargs
-            verbose=args.verbose, encrypted=args.encrypted, keep_going=args.keep_going,
+            verbose=args.verbose,
+            encrypted=args.encrypted,
+            keep_going=args.keep_going,
             eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
             iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
             iflr_dump=args.IFLR,
