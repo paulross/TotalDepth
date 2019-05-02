@@ -1,9 +1,8 @@
 """
 Python implementation the Representation Codes [RP66V1 Appendix B]
 
-References:
-RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
-Specifically Appendix B: http://w3.energistics.org/rp66/v1/rp66v1_appb.html
+References: [RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html]
+Specifically: [RP66V1 Appendix B: http://w3.energistics.org/rp66/v1/rp66v1_appb.html]
 
 From: http://w3.energistics.org/rp66/v1/rp66v1_appb.html
 Code	Name	Size in Bytes	Descirption (sic)
@@ -291,6 +290,7 @@ def ORIGIN_len(by: typing.Union[bytes, bytearray], index: int) -> int:
 # O - Origin Reference as a ORIGIN type (UVARI).
 # C - Copy number as a USHORT type.
 # I - Identifier as an IDENT type.
+# TODO: Make the a sub-class of typing.NamedTuple with types.
 class ObjectName(collections.namedtuple('ObjectName', 'O, C, I')):
 
     def __str__(self):
@@ -418,6 +418,7 @@ REP_CODE_NUMPY_TYPE_MAP = {
 
     7: np.float64,
 
+    12: np.int8,
     13: np.int16,
     14: np.int32,
     15: np.uint8,

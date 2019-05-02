@@ -63,7 +63,9 @@ class MinMax:
                 self.add(v)
         else:
             # TODO: Remove this hack for absent values.
-            if value not in (-999.0, -999.25):
+            # TODO: Huh explain this. Well -999.25 is the common LIS79 value. -999 is the closest to that for signed
+            # integers. -9999.0 has been seen for some resistivity channels that are encoded as a FSINGL.
+            if value not in (-999.25, -999, -9999.0):
                 if self.count == 0:
                     self._min = self._max = value
                 else:
@@ -185,7 +187,7 @@ class IFLRDataSummary(DataSummaryBase):
         self.frame_range_map: typing.Dict[RepCode.ObjectName, MinMax] = {}
         self.object_channel_map: typing.Dict[RepCode.ObjectName, typing.Dict[bytes, MinMax]] = {}
 
-    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPass) -> None:
+    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPassDLIS) -> None:
         assert not fld.lr_is_eflr
         fld.logical_data.rewind()
         if fld.lr_is_encrypted:
@@ -201,24 +203,25 @@ class IFLRDataSummary(DataSummaryBase):
                 self.frame_range_map[ob_name] = MinMax('')
                 self.object_channel_map[ob_name] = {}
             self.frame_range_map[ob_name].add(iflr.frame_number)
-            frame_object: LogPass.FrameObject = log_pass[ob_name]
+            frame_object: LogPass.FrameObjectDLIS = log_pass[ob_name.I]
             channel_values = log_pass.process_IFLR(iflr)
             for channel, values in zip(frame_object.channels, channel_values):
-                if channel.object_name not in self.object_channel_map[ob_name]:
-                    self.object_channel_map[ob_name][channel.object_name] = MinMax(channel.units)
-                self.object_channel_map[ob_name][channel.object_name].add(values)
+                if channel.ident not in self.object_channel_map[ob_name]:
+                    self.object_channel_map[ob_name][channel.ident] = MinMax(channel.units)
+                self.object_channel_map[ob_name][channel.ident].add(values)
 
     def __str__(self) -> str:
         ret = self._str_lines()
         # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
-        ret.append('Frame indexes:')
+        ret.append('')
+        ret.append(f'Log passes [{len(self.frame_range_map)}]:')
         for k in sorted(self.frame_range_map.keys()):
             if self.frame_range_map[k].count > 0:
-                ret.append(f'{str(k):12} : count: {self.frame_range_map[k].count:12,d}'
-                           f' Index min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
+                ret.append(f'    {str(k):12} : frame count: {self.frame_range_map[k].count:12,d}'
+                           f' Frame min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
             for channel in self.object_channel_map[k]:
                 min_max = self.object_channel_map[k][channel]
-                ret.append(f'  {channel:12} {min_max}')
+                ret.append(f'        {str(channel):12} {min_max}')
         return '\n'.join(ret)
 
 

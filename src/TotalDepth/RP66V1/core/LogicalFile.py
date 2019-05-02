@@ -5,7 +5,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import FileLogicalData, FileRead
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogPass import LogPass
+from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 
 
@@ -55,7 +55,7 @@ class LogicalFileBase():
         # For interpreting IFLRs
         self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.log_pass: typing.Union[None, LogPass] = None
+        self.log_pass: typing.Union[None, LogPass.LogPassDLIS] = None
         # IFLRs
         self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
@@ -128,7 +128,7 @@ class LogicalFileBase():
                 self.eflr_frame = eflr
             if self.eflr_channels is not None and self.eflr_frame is not None:
                 assert self.log_pass is None
-                self.log_pass = LogPass(self.eflr_frame, self.eflr_channels)
+                self.log_pass = LogPass.LogPassDLIS(self.eflr_frame, self.eflr_channels)
                 self.eflr_channels = None
                 self.eflr_frame = None
 
@@ -139,7 +139,7 @@ class LogicalFileBase():
         if self.log_pass is None:
             raise ExceptionLogicalFileAdd(
                 'LogicalFile can not add IFLR as have not been able to construct'
-                ' a LogPass (missing CHANNEL and FRAME records).'
+                ' a LogPass.LogPassDLIS (missing CHANNEL and FRAME records).'
             )
         if len(iflr.bytes) == 0:
             raise ExceptionLogicalFileAdd('LogicalFile can not add empty IFLR.')

@@ -128,7 +128,8 @@ class LogicalFileIndexXML(LogicalFileBase):
 
     def __init__(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
         super().__init__(file_logical_data, fhlr)
-        self.iflr_x_value_map: typing.Dict[ObjectName: typing.List[typing.Any]] = {}
+        self.iflr_frame_number_map: typing.Dict[ObjectName, typing.List[int]] = {}
+        self.iflr_x_value_map: typing.Dict[ObjectName, typing.List[typing.Any]] = {}
 
     # Overload @abc.abstractmethod
     def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
@@ -139,21 +140,28 @@ class LogicalFileIndexXML(LogicalFileBase):
         super().add_iflr(file_logical_data, iflr, **kwargs)
         x_value = self.log_pass.first_channel_value(iflr)
         try:
+            self.iflr_frame_number_map[iflr.object_name].append(iflr.frame_number)
+        except KeyError:
+            self.iflr_frame_number_map[iflr.object_name] = [iflr.frame_number]
+        try:
             self.iflr_x_value_map[iflr.object_name].append(x_value)
         except KeyError:
             self.iflr_x_value_map[iflr.object_name] = [x_value]
 
-    def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
+    def _rle(self, frame_object_name: ObjectName, iflr_map: typing.Dict[ObjectName, typing.List[int]]) -> Rle.RLE:
         ret = Rle.RLE()
-        for x in self.iflr_x_value_map[frame_object_name]:
+        for x in iflr_map[frame_object_name]:
             ret.add(x)
         return ret
 
+    def _rle_frame_number(self, frame_object_name: ObjectName) -> Rle.RLE:
+        return self._rle(frame_object_name, self.iflr_frame_number_map)
+
+    def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
+        return self._rle(frame_object_name, self.iflr_x_value_map)
+
     def _rle_lsrh_positions(self, frame_object_name: ObjectName) -> Rle.RLE:
-        ret = Rle.RLE()
-        for x in self.iflr_position_map[frame_object_name]:
-            ret.add(x)
-        return ret
+        return self._rle(frame_object_name, self.iflr_x_value_map)
 
     def write_xml(self, xml_stream: XmlStream) -> None:
         with Element(xml_stream, 'LogicalFile', {
@@ -232,10 +240,13 @@ class LogicalFileIndexXML(LogicalFileBase):
                     # with Element(xml_stream, 'LRSH', attrs):
                     #     pass
                     # LRSH positions as a RLE
-                    rle = self._rle_lsrh_positions(frame_object.object_name)
+                    rle = self._rle(frame_object.object_name, self.iflr_position_map)
                     xml_write_rle(rle, 'LRSH', xml_stream, hex_output=True)
+                    # Frame number output
+                    rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
+                    xml_write_rle(rle, 'FrameNumbers', xml_stream, hex_output=False)
                     # Xaxis output
-                    rle = self._rle_x_axis(frame_object.object_name)
+                    rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
                     xml_write_rle(rle, 'Xaxis', xml_stream, hex_output=False)
 
 

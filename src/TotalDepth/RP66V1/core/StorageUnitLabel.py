@@ -17,6 +17,15 @@ class StorageUnitLabel:
     """
     The Storage Unit Label that must be at the beginning of a file.
     See [RP66V1 Section 2.3.2 Storage Unit Label (SUL)].
+
+    Unique Storage Unit Labels seen in practice::
+
+        $ grep -rIh StorageUnitLabel <XML indexes> | sort | uniq -c
+          16   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="16384" sequence_number="1" storage_set_identifier="CUSTOMER                                                    " storage_unit_structure="RECORD"/>
+           2   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="16384" sequence_number="1" storage_set_identifier="PRODUCER                                                    " storage_unit_structure="RECORD"/>
+           1   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="                                                            " storage_unit_structure="RECORD"/>
+          34   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="DLIS ATLAS 1                                                " storage_unit_structure="RECORD"/>
+         537   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="Default Storage Set                                         " storage_unit_structure="RECORD"/>
     """
     SIZE = 80
     RE_STORAGE_UNIT_SEQUENCE_NUMBER = re.compile(b'^[0 ]*([1-9]+)$')
