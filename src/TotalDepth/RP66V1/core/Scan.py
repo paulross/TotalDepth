@@ -187,7 +187,7 @@ class IFLRDataSummary(DataSummaryBase):
         self.frame_range_map: typing.Dict[RepCode.ObjectName, MinMax] = {}
         self.object_channel_map: typing.Dict[RepCode.ObjectName, typing.Dict[bytes, MinMax]] = {}
 
-    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPassDLIS) -> None:
+    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPassRP66V1) -> None:
         assert not fld.lr_is_eflr
         fld.logical_data.rewind()
         if fld.lr_is_encrypted:
@@ -203,7 +203,7 @@ class IFLRDataSummary(DataSummaryBase):
                 self.frame_range_map[ob_name] = MinMax('')
                 self.object_channel_map[ob_name] = {}
             self.frame_range_map[ob_name].add(iflr.frame_number)
-            frame_object: LogPass.FrameObjectDLIS = log_pass[ob_name.I]
+            frame_object: LogPass.FrameArrayRP66V1 = log_pass[ob_name.I]
             channel_values = log_pass.process_IFLR(iflr)
             for channel, values in zip(frame_object.channels, channel_values):
                 if channel.ident not in self.object_channel_map[ob_name]:
@@ -293,7 +293,7 @@ class ScanFile(LogicalFileSequence):
     def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
 
-    def dump_scan(self, fout: io.StringIO) -> None:
+    def dump_scan(self, fout: typing.TextIO) -> None:
         fout.write(str(self.storage_unit_label))
         fout.write('\n')
         for l, logical_file in enumerate(self.logical_files):
@@ -396,6 +396,7 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
     if not verbose:
         fout.write(colorama.Fore.YELLOW  + 'Use -v to see individual logical data.\n')
     dump_bytes = kwargs.get('dump_bytes', 0)
+    dump_raw_bytes = kwargs.get('dump_raw_bytes', 0)
     if not dump_bytes:
         fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
     # Both a dict of {record_type : collections.Counter(length)
@@ -435,7 +436,16 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
                     f'{len(logical_data.logical_data):8,d}',
                 ]
                 if dump_bytes:
-                    messages.append(format_bytes(logical_data.logical_data[:dump_bytes]))
+                    if dump_bytes == -1:
+                        if dump_raw_bytes:
+                            messages.append(str(logical_data.logical_data.bytes))
+                        else:
+                            messages.append(format_bytes(logical_data.logical_data.bytes))
+                    else:
+                        if dump_raw_bytes:
+                            messages.append(str(logical_data.logical_data.bytes[:dump_bytes]))
+                        else:
+                            messages.append(format_bytes(logical_data.logical_data.bytes[:dump_bytes]))
                 fout.write(' '.join(messages))
                 fout.write('\n')
             vr_position = logical_data.position.vr_position

@@ -18,6 +18,7 @@ with open('HISTORY.rst') as history_file:
 install_requirements = [
     'Cython',
     'numpy',
+    'lxml',
     'colorama',
 ]
 

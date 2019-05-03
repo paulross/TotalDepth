@@ -119,7 +119,7 @@ def xml_dump_positions(positions: typing.List[int], limit: int, element_name: st
             break
 
 
-class LogicalFileIndexXML(LogicalFileBase):
+class LogicalFileRP66V1IndexXML(LogicalFileBase):
     XML_SCHEMA_VERSION = '0.1.0'
     ALL_OBJECTS_SET_TYPES: typing.Set[bytes] = {b'FILE-HEADER', b'ORIGIN', b'CHANNEL', b'FRAME', b'AXIS'}
     SOME_OBJECTS_SET_TYPES: typing.Dict[bytes, bytes] = {
@@ -250,7 +250,7 @@ class LogicalFileIndexXML(LogicalFileBase):
                     xml_write_rle(rle, 'Xaxis', xml_stream, hex_output=False)
 
 
-class FileIndexXML(LogicalFileSequence):
+class FileRP66V1IndexXML(LogicalFileSequence):
     XML_SCHEMA_VERSION = '0.1.0'
 
     # def __init__(self, fobj: typing.BinaryIO, path: str):
@@ -260,7 +260,7 @@ class FileIndexXML(LogicalFileSequence):
     def create_logical_file(self,
                             file_logical_data: FileLogicalData,
                             eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFileBase:
-        return LogicalFileIndexXML(file_logical_data, eflr)
+        return LogicalFileRP66V1IndexXML(file_logical_data, eflr)
 
     # Overload of @abc.abstractmethod
     def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:

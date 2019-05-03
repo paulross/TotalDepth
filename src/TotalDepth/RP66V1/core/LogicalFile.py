@@ -55,7 +55,7 @@ class LogicalFileBase():
         # For interpreting IFLRs
         self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.log_pass: typing.Union[None, LogPass.LogPassDLIS] = None
+        self.log_pass: typing.Union[None, LogPass.LogPassRP66V1] = None
         # IFLRs
         self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
@@ -128,7 +128,7 @@ class LogicalFileBase():
                 self.eflr_frame = eflr
             if self.eflr_channels is not None and self.eflr_frame is not None:
                 assert self.log_pass is None
-                self.log_pass = LogPass.LogPassDLIS(self.eflr_frame, self.eflr_channels)
+                self.log_pass = LogPass.LogPassRP66V1File(self.eflr_frame, self.eflr_channels)
                 self.eflr_channels = None
                 self.eflr_frame = None
 

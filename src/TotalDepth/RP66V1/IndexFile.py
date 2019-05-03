@@ -7,7 +7,7 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.Index import FileIndexXML
+from TotalDepth.RP66V1.core.Index import FileRP66V1IndexXML
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -37,7 +37,7 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
         try:
             with open(path_in, 'rb') as fobj:
                 t_start = time.perf_counter()
-                index = FileIndexXML(fobj, path_in)
+                index = FileRP66V1IndexXML(fobj, path_in)
                 xml_fobj = index.write_xml()
                 index_output = xml_fobj.getvalue()
                 result = IndexResult(

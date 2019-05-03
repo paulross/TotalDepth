@@ -211,11 +211,11 @@ Scans a RP66V1 file and dumps data."""
     )
     parser.add_argument(
         "--eflr-set-type", action='append', default=[],
-        help="List of EFLR Set Types to output, additive. Use '*' for all. [default: %(default)s]",
+        help="List of EFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
     )
     parser.add_argument(
         "--iflr-set-type", action='append', default=[],
-        help="List of IFLR Set Types to output, additive. Use '*' for all. [default: %(default)s]",
+        help="List of IFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
     )
     parser.add_argument(
         '-I', '--IFLR', action='store_true',
@@ -243,7 +243,12 @@ Scans a RP66V1 file and dumps data."""
     )
     parser.add_argument(
         '-d', '--dump-bytes', type=int, default=0,
-        help='Dump X leading raw bytes for certain options. [default: %(default)s]',
+        help='Dump X leading raw bytes for certain options, if -1 all bytes are dumped. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '--dump-raw-bytes', action='store_true',
+        help='Dump the raw bytes for certain options in raw format,'
+             ' otherwise Hex format is used. [default: %(default)s]',
     )
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
@@ -282,6 +287,7 @@ Scans a RP66V1 file and dumps data."""
             args.recurse,
             # kwargs
             dump_bytes=args.dump_bytes,
+            dump_raw_bytes=args.dump_raw_bytes,
             verbose=args.verbose,
         )
     if args.LR or args.EFLR or args.IFLR:

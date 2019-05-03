@@ -13,7 +13,7 @@ from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
 from TotalDepth.RP66V1.core.RepCode import ObjectName
-
+from TotalDepth.common import xml
 
 class ExceptionLogPass(ExceptionTotalDepthRP66V1):
     pass
@@ -97,22 +97,10 @@ class FrameChannelBase:
         return itertools.product(products)
 
 
-class FrameChannelDLIS(FrameChannelBase):
+class FrameChannelRP66V1(FrameChannelBase):
     """
-    A specialisation of a FrameChannel created from a RP66V1 file.
+    RP66V1 specialisation of a Frame Channel which provides read() methods.
     """
-    def __init__(self, channel_object: EFLR.Object):
-        # TODO: Apply Semantic Restrictions
-        # TODO: Further to the above, check no multiple values for those fields that we are indexing [0].
-        super().__init__(
-            ident=channel_object.name.I,
-            long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
-            rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
-            units=channel_object[b'UNITS'].value[0],
-            dimensions=channel_object[b'DIMENSION'].value,
-            function_np_dtype=RepCode.numpy_dtype
-        )
-
     def read(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the Logical Data into the numpy frame."""
         if self.array is None:
@@ -142,12 +130,47 @@ class FrameChannelDLIS(FrameChannelBase):
             data.append([RepCode.code_read(self.rep_code, ld) for _i in range(self.count)])
 
 
-class FrameObjectBase:
+class FrameChannelRP66V1File(FrameChannelRP66V1):
     """
-    A single independent recording of channels along a particular axis which is the first channel. Reference
-    [RP66V1 Section 5.7.1 Frame Objects Figure 5-8 Comment 2 "When a Frame has an Index, then it must be the first
-    Channel in the Frame, and it must be scalar."].
+    A specialisation of a FrameChannel created from a RP66V1 file.
+    """
+    def __init__(self, channel_object: EFLR.Object):
+        # TODO: Apply Semantic Restrictions
+        # TODO: Further to the above, check no multiple values for those fields that we are indexing [0].
+        self.object_name = channel_object.name
+        super().__init__(
+            ident=channel_object.name.I,
+            long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
+            rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
+            units=channel_object[b'UNITS'].value[0],
+            dimensions=channel_object[b'DIMENSION'].value,
+            function_np_dtype=RepCode.numpy_dtype
+        )
 
+
+class FrameChannelRP66V1IndexXML(FrameChannelRP66V1):
+    """
+    A specialisation of a FrameChannel created from a RP66V1 file index represented in xml.
+    """
+    def __init__(self, channel_node: xml.etree.Element):
+        """Initialise with a XML Channel node.
+
+        Example::
+
+            <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+        """
+        super().__init__(
+            ident=channel_node.attrib['I'],
+            long_name=channel_node.attrib['long_name'],
+            rep_code=int(channel_node.attrib['rep_code']),
+            units=channel_node.attrib['units'],
+            dimensions=[int(v) for v in channel_node.attrib['dimensions'].split(',')],
+            function_np_dtype=RepCode.numpy_dtype
+        )
+
+
+class FrameArrayBase:
+    """
     In the olden days we would record this on a single chunk of continuous film.
 
     Subclass this depending on the source of the information: DLIS file, XML index etc.
@@ -188,20 +211,16 @@ class FrameObjectBase:
             channel.init_array(number_of_frames)
 
 
-class FrameObjectDLIS(FrameObjectBase):
+class FrameArrayRP66V1(FrameArrayBase):
+    """
+    A single independent recording of channels along a particular axis which is the first channel. Reference
+    [RP66V1 Section 5.7.1 Frame Objects Figure 5-8 Comment 2 "When a Frame has an Index, then it must be the first
+    Channel in the Frame, and it must be scalar."].
+    """
+    def __init__(self, object_name: ObjectName):
+        self.object_name = object_name
+        super().__init__(object_name.I)
 
-    def __init__(self, frame_object: EFLR.Object, channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord):
-        super().__init__(frame_object.name.I)
-        # TODO: Apply Semantic Restrictions?
-        # Hmm, [RP66V1 Section 5.7.1 Frame Objects] says that C=1 for DESCRIPTION but our example data shows C=0
-        if frame_object[b'DESCRIPTION'].count == 1 and frame_object[b'DESCRIPTION'].value is not None:
-            self.description = frame_object[b'DESCRIPTION'].value[0]
-        for c, channel_obname in enumerate(frame_object[b'CHANNELS'].value):
-            if channel_obname in channel_eflr.object_name_map:
-                self.channels.append(FrameChannelDLIS(channel_eflr[channel_obname]))
-            else:
-                raise ExceptionFrameObjectInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
-        self._init_channel_map()
 
     def read(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the Logical Data into the numpy frame."""
@@ -232,19 +251,66 @@ class FrameObjectDLIS(FrameObjectBase):
         return self.channels[0].read_one(ld)
 
 
+class FrameArrayRP66V1File(FrameArrayRP66V1):
+
+    def __init__(self, frame_object: EFLR.Object, channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord):
+        super().__init__(frame_object.name)
+        # TODO: Apply Semantic Restrictions?
+        # Hmm, [RP66V1 Section 5.7.1 Frame Objects] says that C=1 for DESCRIPTION but our example data shows C=0
+        if frame_object[b'DESCRIPTION'].count == 1 and frame_object[b'DESCRIPTION'].value is not None:
+            self.description = frame_object[b'DESCRIPTION'].value[0]
+        for channel_obname in frame_object[b'CHANNELS'].value:
+            if channel_obname in channel_eflr.object_name_map:
+                self.channels.append(FrameChannelRP66V1File(channel_eflr[channel_obname]))
+            else:
+                raise ExceptionFrameObjectInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
+        self._init_channel_map()
+
+
+class FrameArrayRP66V1IndexXML(FrameArrayRP66V1):
+    """
+    A specialisation of a FrameObject created from a RP66V1 file index represented in xml.
+    """
+    def __init__(self, frame_node: xml.etree.Element):
+        """Initialise with a XML Frame node.
+
+        Example::
+
+            <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
+                <Channels channel_count="56">
+                    <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+                    ...
+                </Channels>
+                <LRSH count="29201" rle_len="11860">...</LRSH>
+                <Xaxis count="29201" rle_len="3038">...</Xaxis>
+            </FrameObject>
+
+        """
+        super().__init__(frame_node.attrib['I'])
+        for channel_node in frame_node.iterfind('./Channels/Channel'):
+            self.channels.append(FrameChannelRP66V1IndexXML(channel_node))
+        self._init_channel_map()
+
+
 class LogPassBase:
     """
     This represents the structure a single run of data acquisition such as 'Repeat Section' or 'Main Log'.
     These runs have one or more independent simultaneous recordings of different sensors at different depth/time
-    resolutions.
-    These are called Frame Objects.
+    resolutions. Each of these simultaneous recordings is represented as a FrameObject
+
+    This is a file format independent design. Different file formats use this in different ways:
+
+        LIS79 - While the format allows for two simultaneous recordings (IFLR types 0 and 1) this has never been seen
+            in the wild.
+        LAS (all versions) - The format does not allow for multiple simultaneous recordings.
+        RP66V1 - The format allows for multiple simultaneous recordings and this is common.
 
     Subclass this depending on the source of the information: DLIS file, XML index etc.
     """
     def __init__(self):
         # This is a list of independent recordings.
         # In the olden days we would record each of these on a separate chunks of separate films.
-        self.frame_objects: typing.List[FrameObjectBase] = []
+        self.frame_objects: typing.List[FrameArrayBase] = []
         self.frame_object_map: typing.Dict[bytes, int] = {}
 
     def _init_frame_object_map(self) -> None:
@@ -262,38 +328,13 @@ class LogPassBase:
             lines.extend(f'  {line}' for line in str(fobj).split('\n'))
         return '\n'.join(lines)
 
-    def __getitem__(self, item: typing.Union[int, bytes]) -> FrameObjectBase:
+    def __getitem__(self, item: typing.Union[int, bytes]) -> FrameArrayBase:
         if item in self.frame_object_map:
             return self.frame_objects[self.frame_object_map[item]]
         return self.frame_objects[item]
 
 
-class LogPassDLIS(LogPassBase):
-    """
-
-    This class is constructed with a FRAME EFLR that represents the independent simultaneous recordings and the X axis
-    and a CHANNEL EFLR that represents all known channels (representation codes, dimensions etc.).
-    """
-    def __init__(self, frame: EFLR.ExplicitlyFormattedLogicalRecord, channels: EFLR.ExplicitlyFormattedLogicalRecord):
-        super().__init__()
-        if frame.set.type != b'FRAME':
-            raise ExceptionLogPassInit(f"Expected frame set type to be b'FRAME' but got {frame.set.type}")
-        if frame.lr_type != EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME']:
-            raise ExceptionLogPassInit(
-                f"Expected frame Logical Record type to be"
-                f" {EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME']} but got {frame.lr_type}"
-            )
-        if channels.set.type != b'CHANNEL':
-            raise ExceptionLogPassInit(f"Expected channel set type to be b'CHANNEL' but got {channels.set.type}")
-        if channels.lr_type != EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL']:
-            raise ExceptionLogPassInit(
-                f"Expected channel Logical Record type to be"
-                f" {EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL']} but got {channels.lr_type}")
-        # This is a list of independent recordings.
-        # In the olden days we would record each of these on a separate chunks of separate films.
-        self.frame_objects: typing.List[FrameObjectDLIS] = [FrameObjectDLIS(obj, channels) for obj in frame.objects]
-        self._init_frame_object_map()
-
+class LogPassRP66V1(LogPassBase):
     # TODO: This is IFLR processing that should be left to the FrameArray class
     def process_IFLR(self, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> typing.List[typing.List[float]]:
         object_name: ObjectName = iflr.object_name
@@ -316,3 +357,55 @@ class LogPassDLIS(LogPassBase):
         if obname.I not in self.frame_object_map:
             raise ExceptionLogPassProcessIFLR(f'ObjectName: {obname.I} not in LogPass: {self.frame_object_map.keys()}')
         return self.frame_objects[self.frame_object_map[obname.I]].first_channel_value(iflr)
+
+
+class LogPassRP66V1File(LogPassRP66V1):
+    """
+    This class is constructed with a FRAME EFLR that represents the independent simultaneous recordings and the X axis
+    and a CHANNEL EFLR that represents all known channels (representation codes, dimensions etc.).
+    """
+    def __init__(self, frame: EFLR.ExplicitlyFormattedLogicalRecord, channels: EFLR.ExplicitlyFormattedLogicalRecord):
+        super().__init__()
+        if frame.set.type != b'FRAME':
+            raise ExceptionLogPassInit(f"Expected frame set type to be b'FRAME' but got {frame.set.type}")
+        if frame.lr_type != EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME']:
+            raise ExceptionLogPassInit(
+                f"Expected frame Logical Record type to be"
+                f" {EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME']} but got {frame.lr_type}"
+            )
+        if channels.set.type != b'CHANNEL':
+            raise ExceptionLogPassInit(f"Expected channel set type to be b'CHANNEL' but got {channels.set.type}")
+        if channels.lr_type != EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL']:
+            raise ExceptionLogPassInit(
+                f"Expected channel Logical Record type to be"
+                f" {EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL']} but got {channels.lr_type}")
+        # This is a list of independent recordings.
+        # In the olden days we would record each of these on a separate chunks of separate films.
+        self.frame_objects: typing.List[FrameArrayRP66V1File] = [
+            FrameArrayRP66V1File(obj, channels) for obj in frame.objects
+        ]
+        self._init_frame_object_map()
+
+
+class LogPassRP66V1IndexXML(LogPassBase):
+    """
+
+            <LogPass count="1">
+                <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
+                    <Channels channel_count="56">
+                        <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+                        ...
+                    </Channels>
+                    <LRSH count="29201" rle_len="11860">
+                        <RLE datum="0x22a8" repeat="2" stride="0xcf8"/>
+                        ...
+                    </LRSH>
+                    <Xaxis count="29201" rle_len="3038">
+                        <RLE datum="2343.4" repeat="6" stride="0.0019999999999527063"/>
+                        ...
+                    </Xaxis>
+                </FrameObject>
+            </LogPass>
+    """
+    def __init__(self, log_pass_node: xml.etree.Element):
+        super().__init__()
