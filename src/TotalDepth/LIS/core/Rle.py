@@ -73,9 +73,7 @@ class RLEItemType01(RLEItem):
         
     def __str__(self):
         """String representation."""
-        return 'RLEItemType01: ' \
-            + self._propStr() \
-            + ' frames={:d}'.format(self._numFrames)
+        return '<RLEItemType01: ' + super().__str__() + ' frames={:d}'.format(self._numFrames)
         
     @property
     def numFrames(self):
@@ -114,7 +112,7 @@ class RLEItemType01(RLEItem):
 
     def totalFrames(self):
         """Returns the total number of frames in this RLE item."""
-        return self._numFrames * (self._repeat + 1)
+        return self._numFrames * (self.repeat + 1)
 
     def tellLrForFrame(self, fNum):
         """Returns the Logical Record position that contains the integer frame number."""
@@ -145,8 +143,8 @@ class RLEType01(RLE):
         """String representation."""
         #return 'RLEType01: func={:s}\n  '.format(str(self._func)) \
         #    + '\n  '.join([str(r) for r in self._rleS])
-        return '{:s}: func={:s}: '.format(self.__class__.__name__, str(self._func)) \
-            + '[' + ', '.join([str(r) for r in self._rleS]) + ']'
+        return '{:s}: func={:s}: '.format(self.__class__.__name__, str(self.function)) \
+               + '[' + ', '.join([str(r) for r in self.rle_items]) + ']'
     
     @property
     def xAxisUnits(self):
@@ -161,14 +159,14 @@ class RLEType01(RLE):
     def add(self, tellLrPos, numFrameS, xAxisValue):
         """Adds a value to this RLE object."""
         #logging.debug('RLEType01.add(0x{:x}, {:d}, {:f})'.format(tellLrPos, numFrameS, xAxisValue))
-        if self._func is not None:
-            tellLrPos = self._func(tellLrPos)
+        if self.function is not None:
+            tellLrPos = self.function(tellLrPos)
         # NOTE: Side effect in second test
         #logging.debug('RLEType01.add(): self._rleS={:s}'.format(self._rleS))
-        if len(self._rleS) == 0 \
-        or not self._rleS[-1].add(tellLrPos, numFrameS, xAxisValue):
+        if len(self.rle_items) == 0 \
+        or not self.rle_items[-1].add(tellLrPos, numFrameS, xAxisValue):
             #logging.debug('RLEType01.add(...) new RLEItemType01')
-            self._rleS.append(RLEItemType01(tellLrPos, numFrameS, xAxisValue))
+            self.rle_items.append(RLEItemType01(tellLrPos, numFrameS, xAxisValue))
             #logging.debug('RLEType01.add(...) self._rleS now={:s}'.format(self))
 
     def tellLrForFrame(self, fNum):
@@ -177,7 +175,7 @@ class RLEType01(RLE):
         #logging.debug('RLEType01.tellLrForFrame({:d})'.format(fNum))
         if fNum < 0:
             raise IndexError('list index out of range')
-        for r in self._rleS:
+        for r in self.rle_items:
             fNum, v = r.tellLrForFrame(fNum)
             if v is not None:
                 return v[0], fNum
@@ -186,34 +184,34 @@ class RLEType01(RLE):
     def totalFrames(self):
         """Returns the total number of frames in this RLE object."""
         #logging.debug('RLEType01.totalFrames() self._rleS={:s}'.format(self))
-        return sum([r.totalFrames() for r in self._rleS])
+        return sum([r.totalFrames() for r in self.rle_items])
 
     def xAxisFirst(self):
         """Returns the first X-axis value loaded or None if nothing loaded."""
-        if len(self._rleS) > 0:
-            return self._rleS[0].xAxisFirst()
+        if len(self.rle_items) > 0:
+            return self.rle_items[0].xAxisFirst()
 
     def xAxisLast(self):
         """Returns the last X-axis value at the satart of the last Logical Record loaded or None if nothing loaded."""
-        if len(self._rleS) > 0:
-            return self._rleS[-1].xAxisLast() 
+        if len(self.rle_items) > 0:
+            return self.rle_items[-1].xAxisLast()
         
     def xAxisLastFrame(self):
         """Returns the last X-axis value of the last frame loaded or None if nothing loaded."""
-        if len(self._rleS) > 0:
-            return self._rleS[-1].xAxisLast() \
-                + (self._rleS[-1].numFrames - 1) * self.frameSpacing()
+        if len(self.rle_items) > 0:
+            return self.rle_items[-1].xAxisLast() \
+                   + (self.rle_items[-1].numFrames - 1) * self.frameSpacing()
         
     def _numFramesInLast(self):
         """Returns the number of frames in the last entry or None if nothing loaded.
         This is useful for subtracting from the totalFrames for the frame spacing."""
-        if len(self._rleS) > 0:
-            return self._rleS[-1].numFrames
+        if len(self.rle_items) > 0:
+            return self.rle_items[-1].numFrames
         
     def frameSpacing(self):
         """Returns the frame spacing from the first/last entries, or None if nothing loaded.
         Returned value is -ve for decreasing X (up logs), +ve for increasing X
         (down and time logs)."""
         totalFrames = self.totalFrames()
-        if len(self._rleS) > 0 and totalFrames > 1:
+        if len(self.rle_items) > 0 and totalFrames > 1:
             return (self.xAxisLast() - self.xAxisFirst()) / (totalFrames - self._numFramesInLast())
