@@ -142,6 +142,14 @@ def test_rle_item_largest_le_raises():
         SIMPLE_RLE_ITEM.largest_le(4)
     assert err.value.args[0] == 'RLEItem.largest_le(): datum 5 > value 4'
 
+
+def test_rle_item_direct_construction():
+    # range(5, 5 + 8 * 3, 3)
+    rle_item = Rle.RLEItem(5)
+    rle_item.repeat = 7
+    rle_item.stride = 3
+    assert list(rle_item.values()) == list(SIMPLE_RLE_ITEM.values())
+
 # ====================== END: Test of Rle.RLEItem ======================
 
 # ====================== Test of Rle.RLE ======================
@@ -295,3 +303,21 @@ def test_rle_mt_function():
     assert rle[1].datum == 4
     assert rle[1].stride == 5
     assert rle[1].repeat == 1
+
+
+def test_rle_direct_construction():
+    rle = Rle.RLE()
+    # range(5, 5 + 8 * 3, 3)
+    rle_item = Rle.RLEItem(5)
+    rle_item.repeat = 7
+    rle_item.stride = 3
+    rle.rle_items.append(rle_item)
+    # range(500, 500 + 8 * 3, 3)
+    rle_item = Rle.RLEItem(500)
+    rle_item.repeat = 7
+    rle_item.stride = 3
+    rle.rle_items.append(rle_item)
+    assert list(rle.values()) == list(RLE_TWO_RANGES.values())
+
+
+# ====================== END: Test of Rle.RLE ======================

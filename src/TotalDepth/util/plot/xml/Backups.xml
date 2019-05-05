@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Backups>
+    <!-- See src/TotalDepth/util/plot/PRESCfg.py:383 -->
+    <Backup id="NONE" left="1" right="-1" description="No backup"/>
+    <Backup id="ALL" left="0" right="0" description="Unlimited backups"/>
+    <Backup id="ONCE" left="-1" right="1" description="Single backup to the left or right"/>
+    <Backup id="TWICE" left="-2" right="2" description="Two backups to the left or right"/>
+    <Backup id="LEFT" left="0" right="-1" description="Single backup to the left"/>
+    <Backup id="RIGHT" left="1" right="0" description="Single backup to the right"/>
+</Backups>

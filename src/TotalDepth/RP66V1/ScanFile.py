@@ -13,7 +13,7 @@ import colorama
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
-    scan_RP66V1_file_logical_records
+    scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type, BINARY_FILE_TYPE_CODE_WIDTH, binary_file_type_from_path
@@ -172,16 +172,70 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
 
 
 def main() -> int:
-    description = """usage: %(prog)s [options] file
-Scans a RP66V1 file and dumps data."""
+    description = 'usage: %(prog)s [options] file'
+    description = """Scans a RP66V1 file and dumps data from the lowest level upwards:
+    --VR ~ Visible Records only.
+    --LRSH ~ Logical Record segments.
+    --LD ~ Logical data i.e. all Logical Record segments concatenated for each Logical Record.
+    --EFLR ~ Explicitly Formatted Logical Records.
+    --IFLR ~ Implicitly Formatted Logical Records.
+    --LR ~ All data, including frame data from all Logical Records.
+    """
     print('Cmd: %s' % ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
+    parser = argparse.ArgumentParser(
+        description=description,
+        epilog=__rights__,
+        prog=sys.argv[0],
+    )
     parser.add_argument('path_in', type=str, help='Path to the input file.')
-    parser.add_argument('path_out', type=str, default='', nargs='?', help='Path to the output file.')
+    parser.add_argument('path_out', type=str, default='', nargs='?', help='Path to the output scan to write.')
     # parser.add_argument(
     #     '--version', action='version', version='%(prog)s Version: ' + __version__,
     #     help='Show version and exit.'
     # )
+    parser.add_argument(
+        '-V', '--VR', action='store_true',
+        help='Dump the Visible Records. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-L', '--LRSH', action='store_true',
+        help='Summarise the Visible Records and the Logical Record'
+             ' Segment Headers, use -v to dump records. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-D', '--LD', action='store_true',
+        help='Summarise logical data, use -v to dump records.'
+             ' See also --dump-bytes, --dump-raw-bytes. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-E', '--EFLR', action='store_true',
+        help='Dump EFLR Set. [default: %(default)s]',
+    )
+    parser.add_argument(
+        "--eflr-set-type", action='append', default=[],
+        help="List of EFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
+    )
+    parser.add_argument(
+        '-I', '--IFLR', action='store_true',
+        help='Dump IFLRs. [default: %(default)s]',
+    )
+    parser.add_argument(
+        "--iflr-set-type", action='append', default=[],
+        help="List of IFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
+    )
+    parser.add_argument(
+        '-R', '--LR', action='store_true',
+        help='Dump all data, including frame data from Logical Records. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '-d', '--dump-bytes', type=int, default=0,
+        help='Dump X leading raw bytes for certain options, if -1 all bytes are dumped. [default: %(default)s]',
+    )
+    parser.add_argument(
+        '--dump-raw-bytes', action='store_true',
+        help='Dump the raw bytes for certain options in raw format,'
+             ' otherwise Hex format is used. [default: %(default)s]',
+    )
     parser.add_argument(
         '-r', '--recurse', action='store_true',
         help='Process files recursively. [default: %(default)s]',
@@ -208,47 +262,6 @@ Scans a RP66V1 file and dumps data."""
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
-    )
-    parser.add_argument(
-        "--eflr-set-type", action='append', default=[],
-        help="List of EFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
-    )
-    parser.add_argument(
-        "--iflr-set-type", action='append', default=[],
-        help="List of IFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
-    )
-    parser.add_argument(
-        '-I', '--IFLR', action='store_true',
-        help='Dump IFLRs. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-E', '--EFLR', action='store_true',
-        help='Dump EFLR Set. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-V', '--VR', action='store_true',
-        help='Dump the Visible Records. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-L', '--LRSH', action='store_true',
-        help='Dump the Visible Records and the Logical Record Segment Headers. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-D', '--LD', action='store_true',
-        help='Dump logical data. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-R', '--LR', action='store_true',
-        help='Dump Logical Records. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-d', '--dump-bytes', type=int, default=0,
-        help='Dump X leading raw bytes for certain options, if -1 all bytes are dumped. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '--dump-raw-bytes', action='store_true',
-        help='Dump the raw bytes for certain options in raw format,'
-             ' otherwise Hex format is used. [default: %(default)s]',
     )
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
@@ -290,11 +303,27 @@ Scans a RP66V1 file and dumps data."""
             dump_raw_bytes=args.dump_raw_bytes,
             verbose=args.verbose,
         )
-    if args.LR or args.EFLR or args.IFLR:
+    if args.EFLR or args.IFLR:
         result = scan_dir_or_file(
             args.path_in,
             args.path_out,
-            scan_RP66V1_file_logical_records,
+            scan_RP66V1_file_EFLR_IFLR,
+            args.recurse,
+            # kwargs
+            verbose=args.verbose,
+            encrypted=args.encrypted,
+            keep_going=args.keep_going,
+            eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
+            iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
+            iflr_dump=args.IFLR,
+            eflr_dump=args.EFLR,
+            rp66v1_path=args.path_in,
+        )
+    if args.LR:
+        result = scan_dir_or_file(
+            args.path_in,
+            args.path_out,
+            scan_RP66V1_file_data_content,
             args.recurse,
             # kwargs
             verbose=args.verbose,

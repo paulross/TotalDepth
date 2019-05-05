@@ -2,6 +2,7 @@
 This provides a representation of the structure of recorded data.
 """
 import itertools
+import logging
 import typing
 from functools import reduce
 
@@ -14,6 +15,10 @@ from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 from TotalDepth.common import xml
+
+
+logger = logging.getLogger(__file__)
+
 
 class ExceptionLogPass(ExceptionTotalDepthRP66V1):
     pass
@@ -75,10 +80,16 @@ class FrameChannelBase:
             f' Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
 
     def init_array(self, number_of_frames: int) -> None:
-        """Initialises an empty Numpy array suitable to fill with <frames> number of frame data for this channel."""
+        """
+        Initialises an empty Numpy array suitable to fill with <frames> number of frame data for this channel.
+        If an array already exists of the correct length it is reused.
+        """
         if number_of_frames <= 0:
-            raise ExceptionFrameChannel(f'FrameChannel.init_array() number of frames must be > 0 not {number_of_frames}')
-        self.array = np.empty((number_of_frames, *self.dimensions), dtype=self.function_np_dtype(self.rep_code))
+            raise ExceptionFrameChannel(
+                f'FrameChannel.init_array() number of frames must be > 0 not {number_of_frames}'
+            )
+        if self.array is None or len(self.array) != number_of_frames:
+            self.array = np.empty((number_of_frames, *self.dimensions), dtype=self.function_np_dtype(self.rep_code))
 
     def numpy_indexes(self, frame_number: int) -> itertools.product:
         """
@@ -186,8 +197,10 @@ class FrameArrayBase:
         self.channel_ident_map = {}
         for c, channel in enumerate(self.channels):
             if channel.ident in self.channel_ident_map:
-                raise ExceptionFrameObject(f'Duplicate channel identity {channel.ident}')
-            self.channel_ident_map[channel.ident] = c
+                # raise ExceptionFrameObject(f'Duplicate channel identity {channel.ident}')
+                logger.warning(f'Duplicate channel identity {channel.ident} ignored')
+            else:
+                self.channel_ident_map[channel.ident] = c
 
     def __str__(self) -> str:
         return '\n'.join(
@@ -390,22 +403,25 @@ class LogPassRP66V1File(LogPassRP66V1):
 class LogPassRP66V1IndexXML(LogPassBase):
     """
 
-            <LogPass count="1">
-                <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
-                    <Channels channel_count="56">
-                        <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
-                        ...
-                    </Channels>
-                    <LRSH count="29201" rle_len="11860">
-                        <RLE datum="0x22a8" repeat="2" stride="0xcf8"/>
-                        ...
-                    </LRSH>
-                    <Xaxis count="29201" rle_len="3038">
-                        <RLE datum="2343.4" repeat="6" stride="0.0019999999999527063"/>
-                        ...
-                    </Xaxis>
-                </FrameObject>
-            </LogPass>
+    Reads an XML node 'LogPass' that has 0 or more FrameObject nodes. Example::
+
+        <LogPass count="1">
+            <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
+                <Channels channel_count="56">
+                    <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+                    ...
+                </Channels>
+                # FIXME: We have the frame numbers somewhere here, no? Or we rely on the count of IFLRs and Xaxis.
+                <LRSH count="29201" rle_len="11860">
+                    <RLE datum="0x22a8" repeat="2" stride="0xcf8"/>
+                    ...
+                </LRSH>
+                <Xaxis count="29201" rle_len="3038">
+                    <RLE datum="2343.4" repeat="6" stride="0.0019999999999527063"/>
+                    ...
+                </Xaxis>
+            </FrameObject>
+        </LogPass>
     """
     def __init__(self, log_pass_node: xml.etree.Element):
         super().__init__()

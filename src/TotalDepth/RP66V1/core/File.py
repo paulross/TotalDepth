@@ -494,7 +494,29 @@ class FileRead:
         self._set_file_and_read_first_visible_record()
         self.logical_record_segment_header.read(self.file)
         if not self.logical_record_segment_header.is_first:
-            raise ExceptionFileRead('TODO: Error message')
+            raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
+
+    def get_file_logical_data(self, vr_seek: int, lrsh_seek: int) -> FileLogicalData:
+        """
+        Returns a FileLogicalData object from the Visible Record Position and Logical Record Segment Header position.
+        This allows random access to the file.
+        """
+        # Hmm, seek() always succeeds and tell() returns the current position even if beyond EOF.
+        self.file.seek(vr_seek)
+        # May raise
+        self.visible_record.read(self.file)
+        self.file.seek(lrsh_seek)
+        # May raise
+        self.logical_record_segment_header.read(self.file)
+        if not self.logical_record_segment_header.is_first:
+            raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
+        file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
+        file_logical_data.add_bytes(self._read_full_logical_data())
+        while not self.logical_record_segment_header.is_last:
+            self._seek_and_read_next_logical_record_segment_header()
+            file_logical_data.add_bytes(self._read_full_logical_data())
+        file_logical_data.seal()
+        return file_logical_data
 
     # def _move_to_next_visible_and_logical_record_segment(self, vr_position: int, lrsh_position: int) -> None:
     #     """Sets the file up to read a LRSH within a Visible Record. It is up to the caller to make sure that

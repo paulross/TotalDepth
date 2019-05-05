@@ -7,7 +7,7 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.Index import FileRP66V1IndexXML
+from TotalDepth.RP66V1.core.Index import RP66V1IndexXMLWrite
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -37,7 +37,7 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
         try:
             with open(path_in, 'rb') as fobj:
                 t_start = time.perf_counter()
-                index = FileRP66V1IndexXML(fobj, path_in)
+                index = RP66V1IndexXMLWrite(fobj, path_in)
                 xml_fobj = index.write_xml()
                 index_output = xml_fobj.getvalue()
                 result = IndexResult(
@@ -219,21 +219,24 @@ Scans a RP66V1 file and dumps data."""
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0
     files_processed = 0
-    for path in sorted(result.keys()):
-        idx_result = result[path]
-        if idx_result.size_input > 0:
-            ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
-            ratio = idx_result.size_index / idx_result.size_input
-            print(
-                f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
-                f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
-                f' "{path}"'
-            )
-            size_input += result[path].size_input
-            size_index += result[path].size_index
-            files_processed += 1
-    if args.gnuplot:
-        plot_gnuplot(result, args.gnuplot)
+    try:
+        for path in sorted(result.keys()):
+            idx_result = result[path]
+            if idx_result.size_input > 0:
+                ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
+                ratio = idx_result.size_index / idx_result.size_input
+                print(
+                    f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
+                    f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
+                    f' "{path}"'
+                )
+                size_input += result[path].size_input
+                size_index += result[path].size_index
+                files_processed += 1
+        if args.gnuplot:
+            plot_gnuplot(result, args.gnuplot)
+    except Exception as err:
+        logger.exception(str(err))
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)

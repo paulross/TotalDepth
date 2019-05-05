@@ -45,9 +45,9 @@ class ExceptionEFLRTemplateDuplicateLabel(ExceptionEFLRTemplate):
 class ExceptionEFLRObject(ExceptionEFLR):
     pass
 
+
 class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
     pass
-
 
 
 class Set:

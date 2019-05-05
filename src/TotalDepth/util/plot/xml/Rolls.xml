@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Rolls>
+    <Roll id="Standard">
+        <Description>Standard wireline output 8.5 inches wide.</Description>
+        <BackgroundColor rgb="FFFFFF"/>
+        <Width value="8.5" units="in"/>
+        <MarginLeft value="0.25" units="in"/>
+        <MarginRight value="0.25" units="in"/>
+    </Roll>
+</Rolls>

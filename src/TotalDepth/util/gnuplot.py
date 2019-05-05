@@ -81,7 +81,7 @@ def invoke_gnuplot(path: str, name: str, table: typing.Sequence[typing.Sequence[
         proc.kill()
         stdout, stderr = proc.communicate()
     logging.info(f'gnuplot stdout: {stdout}')
-    if stderr:
+    if proc.returncode or stderr:
         logging.error(f'gnuplot stderr: {stdout}')
     # TODO: Return stderr?
     return proc.returncode
@@ -102,7 +102,7 @@ def write_test_file(path: str, typ: str) -> int:
         stdin=subprocess.PIPE,
     )
     try:
-        proc.stdin.write(test_stdin)
+        proc.stdin.write(bytes(test_stdin, 'ascii'))
         proc.stdin.close()
         stdout, stderr = proc.communicate(timeout=1, )
     except subprocess.TimeoutExpired as err:

@@ -490,12 +490,54 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
         fout.write(f'Total length EFLR/IFLR: {length_total_eflr/length_total_iflr:.3%}\n')
 
 
-def scan_RP66V1_file_logical_records(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
+def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
+    """Scans the file reporting the individual EFLR and IFLR."""
+    verbose = kwargs.get('verbose', 0)
+    if not verbose:
+        fout.write(colorama.Fore.YELLOW  + 'Use -v to see individual logical data.\n')
+    dump_eflr = kwargs.get('eflr_dump', 0)
+    eflr_set_type = kwargs.get('eflr_set_type', [])
+    dump_iflr = kwargs.get('iflr_dump', 0)
+    iflr_set_type = kwargs.get('iflr_set_type', [])
+    dump_bytes = kwargs.get('dump_bytes', 0)
+    dump_raw_bytes = kwargs.get('dump_raw_bytes', 0)
+    if not dump_bytes:
+        fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
+    with _output_section_header_trailer('RP66V1 EFLR and IFLR Data Summary', '*', os=fout):
+        rp66_file = File.FileRead(fobj)
+        vr_position = 0
+        header = [
+            f'{"Visible R":10}',
+            f'{"LRSH":10}',
+            f'{"Typ":3}',
+            f'{" "}',
+            f'{"     "}',
+            f'{"Length":8}',
+        ]
+        underline = ['-' * len(h) for h in header]
+        if verbose:
+            fout.write(' '.join(header) + '\n')
+            fout.write(' '.join(underline) + '\n')
+        for file_logical_data in rp66_file.iter_logical_records():
+            if file_logical_data.lr_is_eflr:
+                eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
+                    fout.write(str(eflr))
+                    fout.write('\n')
+            else:
+                # IFLR
+                iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                if dump_iflr and len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
+                    fout.write(str(iflr))
+                    fout.write('\n')
+
+
+def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
     scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
-    with _output_section_header_trailer('RP66V1 File Summary', '*', os=fout):
+    with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
         encrypted_records: bool = kwargs.get('encrypted_records', False)
         if not encrypted_records:
             # fout.write(_colorama_note('Encrypted records omitted. Use -e to show them.\n'))
