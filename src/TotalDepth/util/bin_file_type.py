@@ -399,6 +399,15 @@ def _tiff(fobj: typing.BinaryIO) -> int:
     return 1
 
 
+def _xml(fobj: typing.BinaryIO) -> int:
+    """Returns 0 if the file is a XML file, non-zero otherwise.
+    """
+    fobj.seek(0)
+    if fobj.read(6) == b'<?xml ':
+        return 0
+    return 1
+
+
 EBCDIC_PRINTABLE = set(
     b'\x40'  # Space
     b'\x81\x82\x83\x84\x85\x86\x87\x88\x89'  # a-i
@@ -426,11 +435,12 @@ def _segy(fobj: typing.BinaryIO) -> int:
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str]] = (
+    (_xml, 'XML'),  # '<?xml ', 6 characters so 2^(6*8) 2^48
     (_pdf, 'PDF'),  # 2^40
     (_ps, 'PS'),  # 2^40
     (_zip, 'ZIP'),  # 2^32
     (_tiff, 'TIFF'),  # 2^32
-    # (_segy, 'SEGY'),  # 3200 EBCDIC characters.
+    (_segy, 'SEGY'),  # 3200 EBCDIC characters.
     (_lis_tif, 'LISt'),  # Tests with TIF markers are much more strict.
     (_lis_tif_r, 'LIStr'),
     (_lasv12, 'LAS1.2'),
