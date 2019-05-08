@@ -14,8 +14,6 @@ from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
 from TotalDepth.RP66V1.core.RepCode import ObjectName
-from TotalDepth.common import xml
-
 
 logger = logging.getLogger(__file__)
 
@@ -159,27 +157,6 @@ class FrameChannelRP66V1File(FrameChannelRP66V1):
         )
 
 
-class FrameChannelRP66V1IndexXML(FrameChannelRP66V1):
-    """
-    A specialisation of a FrameChannel created from a RP66V1 file index represented in xml.
-    """
-    def __init__(self, channel_node: xml.etree.Element):
-        """Initialise with a XML Channel node.
-
-        Example::
-
-            <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
-        """
-        super().__init__(
-            ident=channel_node.attrib['I'],
-            long_name=channel_node.attrib['long_name'],
-            rep_code=int(channel_node.attrib['rep_code']),
-            units=channel_node.attrib['units'],
-            dimensions=[int(v) for v in channel_node.attrib['dimensions'].split(',')],
-            function_np_dtype=RepCode.numpy_dtype
-        )
-
-
 class FrameArrayBase:
     """
     In the olden days we would record this on a single chunk of continuous film.
@@ -280,31 +257,6 @@ class FrameArrayRP66V1File(FrameArrayRP66V1):
         self._init_channel_map()
 
 
-class FrameArrayRP66V1IndexXML(FrameArrayRP66V1):
-    """
-    A specialisation of a FrameObject created from a RP66V1 file index represented in xml.
-    """
-    def __init__(self, frame_node: xml.etree.Element):
-        """Initialise with a XML Frame node.
-
-        Example::
-
-            <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
-                <Channels channel_count="56">
-                    <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
-                    ...
-                </Channels>
-                <LRSH count="29201" rle_len="11860">...</LRSH>
-                <Xaxis count="29201" rle_len="3038">...</Xaxis>
-            </FrameObject>
-
-        """
-        super().__init__(frame_node.attrib['I'])
-        for channel_node in frame_node.iterfind('./Channels/Channel'):
-            self.channels.append(FrameChannelRP66V1IndexXML(channel_node))
-        self._init_channel_map()
-
-
 class LogPassBase:
     """
     This represents the structure a single run of data acquisition such as 'Repeat Section' or 'Main Log'.
@@ -400,28 +352,3 @@ class LogPassRP66V1File(LogPassRP66V1):
         self._init_frame_object_map()
 
 
-class LogPassRP66V1IndexXML(LogPassBase):
-    """
-
-    Reads an XML node 'LogPass' that has 0 or more FrameObject nodes. Example::
-
-        <LogPass count="1">
-            <FrameObject C="0" I="SCMI1_RAW_2322-2403M" O="35">
-                <Channels channel_count="56">
-                    <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
-                    ...
-                </Channels>
-                # FIXME: We have the frame numbers somewhere here, no? Or we rely on the count of IFLRs and Xaxis.
-                <LRSH count="29201" rle_len="11860">
-                    <RLE datum="0x22a8" repeat="2" stride="0xcf8"/>
-                    ...
-                </LRSH>
-                <Xaxis count="29201" rle_len="3038">
-                    <RLE datum="2343.4" repeat="6" stride="0.0019999999999527063"/>
-                    ...
-                </Xaxis>
-            </FrameObject>
-        </LogPass>
-    """
-    def __init__(self, log_pass_node: xml.etree.Element):
-        super().__init__()
