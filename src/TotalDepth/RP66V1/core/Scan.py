@@ -187,7 +187,7 @@ class IFLRDataSummary(DataSummaryBase):
         self.frame_range_map: typing.Dict[RepCode.ObjectName, MinMax] = {}
         self.object_channel_map: typing.Dict[RepCode.ObjectName, typing.Dict[bytes, MinMax]] = {}
 
-    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPassRP66V1) -> None:
+    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPass) -> None:
         assert not fld.lr_is_eflr
         fld.logical_data.rewind()
         if fld.lr_is_encrypted:
@@ -203,7 +203,7 @@ class IFLRDataSummary(DataSummaryBase):
                 self.frame_range_map[ob_name] = MinMax('')
                 self.object_channel_map[ob_name] = {}
             self.frame_range_map[ob_name].add(iflr.frame_number)
-            frame_object: LogPass.FrameArrayRP66V1 = log_pass[ob_name.I]
+            frame_object: LogPass.FrameArray = log_pass[ob_name.I]
             channel_values = log_pass.process_IFLR(iflr)
             for channel, values in zip(frame_object.channels, channel_values):
                 if channel.ident not in self.object_channel_map[ob_name]:
@@ -257,14 +257,14 @@ class ScanLogicalFile(LogicalFileBase):
             self.dump_strings.append(f'EFLR {str(fhlr)}')
         self.eflr_summary.add(file_logical_data)
 
-    def _must_dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> bool:
+    def _must_dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
         if eflr.set.type in self.EFLR_ALWAYS_DUMP:
             return True
         return self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type
 
     # Overload @abc.abstractmethod
     def add_eflr(self, file_logical_data: File.FileLogicalData,
-                 eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
+                 eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
         super().add_eflr(file_logical_data, eflr)
         if self._must_dump_eflr(eflr):
             self.dump_strings.append(f'EFLR {str(eflr)}')
@@ -290,7 +290,7 @@ class ScanFile(LogicalFileSequence):
         return ScanLogicalFile(file_logical_data, eflr, **kwargs)
 
     # Overload of @abc.abstractmethod
-    def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
+    def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
 
     def dump_scan(self, fout: typing.TextIO) -> None:

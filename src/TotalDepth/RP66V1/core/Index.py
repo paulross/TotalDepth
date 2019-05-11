@@ -45,40 +45,57 @@ class LogicalFileRP66V1IndexXML(LogicalFileBase):
 
     def __init__(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
         super().__init__(file_logical_data, fhlr)
-        self.iflr_frame_number_map: typing.Dict[ObjectName, typing.List[int]] = {}
-        self.iflr_x_value_map: typing.Dict[ObjectName, typing.List[typing.Any]] = {}
+        self.iflr_map: typing.Dict[ObjectName, typing.List[LogPassXML.IFLRData]] = {}
+        # self.iflr_frame_number_map: typing.Dict[ObjectName, typing.List[int]] = {}
+        # self.iflr_x_value_map: typing.Dict[ObjectName, typing.List[typing.Any]] = {}
+        # self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
     # Overload @abc.abstractmethod
-    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
+    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
         super().add_eflr(file_logical_data, eflr, **kwargs)
 
     # Overload @abc.abstractmethod
     def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
         super().add_iflr(file_logical_data, iflr, **kwargs)
-        x_value = self.log_pass.first_channel_value(iflr)
-        try:
-            self.iflr_frame_number_map[iflr.object_name].append(iflr.frame_number)
-        except KeyError:
-            self.iflr_frame_number_map[iflr.object_name] = [iflr.frame_number]
-        try:
-            self.iflr_x_value_map[iflr.object_name].append(x_value)
-        except KeyError:
-            self.iflr_x_value_map[iflr.object_name] = [x_value]
+        assert self.log_pass is not None
+        self.log_pass[iflr.object_name].read_x_axis(iflr.logical_data, frame_number=0)
+        x_value = self.log_pass[iflr.object_name].channels[0].array.mean()
 
-    def _rle(self, frame_object_name: ObjectName, iflr_map: typing.Dict[ObjectName, typing.List[int]]) -> Rle.RLE:
-        ret = Rle.RLE()
-        for x in iflr_map[frame_object_name]:
-            ret.add(x)
-        return ret
+        iflr_data = LogPassXML.IFLRData(
+            iflr.frame_number, file_logical_data.position.lrsh_position, x_value
+        )
+        if iflr.object_name in self.iflr_map:
+            self.iflr_map[iflr.object_name].append(iflr_data)
+        else:
+            self.iflr_map[iflr.object_name] = [iflr_data]
+        # try:
+        #     self.iflr_map[iflr.object_name].append(iflr_data)
+        # except KeyError:
+        #     self.iflr_map[iflr.object_name] = [iflr_data]
 
-    def _rle_frame_number(self, frame_object_name: ObjectName) -> Rle.RLE:
-        return self._rle(frame_object_name, self.iflr_frame_number_map)
+        # try:
+        #     self.iflr_frame_number_map[iflr.object_name].append(iflr.frame_number)
+        # except KeyError:
+        #     self.iflr_frame_number_map[iflr.object_name] = [iflr.frame_number]
+        # try:
+        #     self.iflr_x_value_map[iflr.object_name].append(x_value)
+        # except KeyError:
+        #     self.iflr_x_value_map[iflr.object_name] = [x_value]
 
-    def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
-        return self._rle(frame_object_name, self.iflr_x_value_map)
-
-    def _rle_lsrh_positions(self, frame_object_name: ObjectName) -> Rle.RLE:
-        return self._rle(frame_object_name, self.iflr_x_value_map)
+    # def _rle(self, frame_object_name: ObjectName, iflr_map: typing.Dict[ObjectName, typing.List[int]]) -> Rle.RLE:
+    #     ret = Rle.RLE()
+    #     for x in iflr_map[frame_object_name]:
+    #         ret.add(x)
+    #     return ret
+    #
+    # def _rle_frame_number(self, frame_object_name: ObjectName) -> Rle.RLE:
+    #     return self._rle(frame_object_name, self.iflr_frame_number_map)
+    #
+    # def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
+    #     return self._rle(frame_object_name, self.iflr_x_value_map)
+    #
+    # def _rle_lsrh_positions(self, frame_object_name: ObjectName) -> Rle.RLE:
+    #     return self._rle(frame_object_name, self.iflr_x_value_map)
 
     def write_xml(self, xml_stream: XmlStream) -> None:
         with Element(xml_stream, 'LogicalFile', {
@@ -131,40 +148,51 @@ class LogicalFileRP66V1IndexXML(LogicalFileBase):
 
     def _write_xml_log_pass(self, xml_stream: XmlStream) -> None:
         assert self.log_pass is not None
-        with Element(xml_stream, 'LogPass', {'count': f'{len(self.log_pass.frame_objects)}'}):
-            for frame_object in self.log_pass.frame_objects:
-                assert frame_object.object_name in self.iflr_x_value_map, \
-                    f'{frame_object.object_name} not in {self.iflr_x_value_map.keys()}'
-                assert frame_object.object_name in self.iflr_position_map, \
-                    f'{frame_object.object_name} not in {self.iflr_position_map.keys()}'
-                with Element(xml_stream, 'FrameArray', LogPassXML.xml_object_name_attributes(frame_object.object_name)):
-                    with Element(xml_stream, 'Channels', {'channel_count': str(len(frame_object.channels))}):
-                        for channel in frame_object.channels:
-                            channel_attrs = LogPassXML.xml_object_name_attributes(channel.object_name)
-                            channel_attrs['long_name'] = f'{channel.long_name.decode("ascii")}'
-                            channel_attrs['rep_code'] = f'{channel.rep_code:d}'
-                            channel_attrs['units'] = f'{channel.units.decode("ascii")}'
-                            channel_attrs['dimensions'] = ','.join(f'{v:d}' for v in channel.dimensions)
-                            channel_attrs['count'] = f'{channel.count:d}'
-                            with Element(xml_stream, 'Channel', channel_attrs):
-                                pass
-                    # # LRSH positions as a list
-                    # positions = self.iflr_position_map[frame_object.object_name]
-                    # attrs = {
-                    #     'count': f'{len(positions)}',
-                    #     'positions': ','.join([f'0x{p:x}' for p in positions]),
-                    # }
-                    # with Element(xml_stream, 'LRSH', attrs):
-                    #     pass
-                    # LRSH positions as a RLE
-                    rle = self._rle(frame_object.object_name, self.iflr_position_map)
-                    LogPassXML.xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
-                    # Frame number output
-                    rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
-                    LogPassXML.xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
-                    # Xaxis output
-                    rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
-                    LogPassXML.xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
+        # # LRSH positions as a RLE
+        # rle = self._rle(frame_object.object_name, self.iflr_position_map)
+        # LogPassXML.xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
+        # # Frame number output
+        # rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
+        # LogPassXML.xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
+        # # Xaxis output
+        # rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
+        # LogPassXML.xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
+        LogPassXML.log_pass_to_XML(self.log_pass, self.iflr_map, xml_stream)
+
+        # with Element(xml_stream, 'LogPass', {'count': f'{len(self.log_pass.frame_objects)}'}):
+        #     for frame_object in self.log_pass.frame_objects:
+        #         assert frame_object.object_name in self.iflr_x_value_map, \
+        #             f'{frame_object.object_name} not in {self.iflr_x_value_map.keys()}'
+        #         assert frame_object.object_name in self.iflr_position_map, \
+        #             f'{frame_object.object_name} not in {self.iflr_position_map.keys()}'
+        #         with Element(xml_stream, 'FrameArray', LogPassXML.xml_object_name_attributes(frame_object.object_name)):
+        #             with Element(xml_stream, 'Channels', {'channel_count': str(len(frame_object.channels))}):
+        #                 for channel in frame_object.channels:
+        #                     channel_attrs = LogPassXML.xml_object_name_attributes(channel.object_name)
+        #                     channel_attrs['long_name'] = f'{channel.long_name.decode("ascii")}'
+        #                     channel_attrs['rep_code'] = f'{channel.rep_code:d}'
+        #                     channel_attrs['units'] = f'{channel.units.decode("ascii")}'
+        #                     channel_attrs['dimensions'] = ','.join(f'{v:d}' for v in channel.dimensions)
+        #                     channel_attrs['count'] = f'{channel.count:d}'
+        #                     with Element(xml_stream, 'Channel', channel_attrs):
+        #                         pass
+        #             # # LRSH positions as a list
+        #             # positions = self.iflr_position_map[frame_object.object_name]
+        #             # attrs = {
+        #             #     'count': f'{len(positions)}',
+        #             #     'positions': ','.join([f'0x{p:x}' for p in positions]),
+        #             # }
+        #             # with Element(xml_stream, 'LRSH', attrs):
+        #             #     pass
+        #             # LRSH positions as a RLE
+        #             rle = self._rle(frame_object.object_name, self.iflr_position_map)
+        #             LogPassXML.xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
+        #             # Frame number output
+        #             rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
+        #             LogPassXML.xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
+        #             # Xaxis output
+        #             rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
+        #             LogPassXML.xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
 
 
 class RP66V1IndexXMLWrite(LogicalFileSequence):
@@ -179,7 +207,7 @@ class RP66V1IndexXMLWrite(LogicalFileSequence):
         return LogicalFileRP66V1IndexXML(file_logical_data, eflr)
 
     # Overload of @abc.abstractmethod
-    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
+    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
         assert file_logical_data.lr_is_eflr
         assert file_logical_data.is_sealed()
         # TODO: Encrypted records?
@@ -187,7 +215,7 @@ class RP66V1IndexXMLWrite(LogicalFileSequence):
         if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
             eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
             return eflr
-        return EFLR.ExplicitlyFormattedLogicalRecordBase(file_logical_data.lr_type, file_logical_data.logical_data)
+        return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
 
     def _rle_visible_record_positions(self) -> Rle.RLE:
         ret = Rle.RLE()

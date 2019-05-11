@@ -173,3 +173,11 @@ class RLE:
         if lo:
             return self.rle_items[lo-1].largest_le(value)
         raise ValueError(f'Can not find largest_le for value {value}')
+
+
+def create_rle(values: typing.Iterable, fn: typing.Callable = None) -> RLE:
+    """Create a RLE object from an iterable."""
+    ret = RLE(fn)
+    for v in values:
+        ret.add(v)
+    return ret

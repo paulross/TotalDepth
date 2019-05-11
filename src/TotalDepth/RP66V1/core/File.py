@@ -367,11 +367,18 @@ class LogicalData:
         self.index += 1
         return ret
 
+    def view_remaining(self, length: int) -> bytes:
+        if length < 0:
+            raise IndexError(f'view_remaining length {length} must be >= 0')
+        return self.bytes[self.remain:self.remain+length]
+
     def chunk(self, length: int) -> bytes:
         """Return the next length bytes and increment the index.
         May raise an IndexError if there is not enough data."""
         if length > self.remain:
-            raise IndexError('Chunk length is out of range')
+            raise IndexError(
+                f'Chunk length {length} is out of range where remain is {self.remain} of length {len(self.bytes)}'
+            )
         ret = self.bytes[self.index:self.index + length]
         self.index += length
         return ret

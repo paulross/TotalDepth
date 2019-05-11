@@ -27,11 +27,11 @@ class ExceptionLogicalFileMissingRecord(ExceptionLogicalFile):
 
 # Consists of:
 # - File.LogicalRecordPosition
-# - EFLR.ExplicitlyFormattedLogicalRecord or EFLR.ExplicitlyFormattedLogicalRecordBase
+# - EFLR.ExplicitlyFormattedLogicalRecord or EFLR.ExplicitlyFormattedLogicalRecord
 PositionEFLR = collections.namedtuple('PositionEFLR', 'position, eflr')
 
 
-class LogicalFileBase():
+class LogicalFileBase(abc.ABC):
     """This represents a RP66V1 Logical File.
 
     From the standard [RP66V1 Definitions]:
@@ -55,9 +55,9 @@ class LogicalFileBase():
         # For interpreting IFLRs
         self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.log_pass: typing.Union[None, LogPass.LogPassRP66V1] = None
-        # IFLRs
-        self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
+        self.log_pass: typing.Union[None, LogPass.LogPass] = None
+        # # IFLRs
+        # self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
     def _check_fld_eflr(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         self._check_fld_matches_eflr(file_logical_data, fhlr)
@@ -101,11 +101,11 @@ class LogicalFileBase():
             raise ExceptionLogicalFileMissingRecord('Have not yet seen an ORIGIN record.')
         return self.eflrs[1].eflr
 
-    def is_next(self, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase) -> bool:
+    def is_next(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
         return eflr.set.type == b'FILE-HEADER'
 
     @abc.abstractmethod
-    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecordBase, **kwargs) -> None:
+    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
         if self.is_next(eflr):
             raise ExceptionLogicalFileAdd(f'Can not add EFLR code {eflr.lr_type}, type {eflr.set.type}')
         self._check_fld_matches_eflr(file_logical_data, eflr)
@@ -128,7 +128,7 @@ class LogicalFileBase():
                 self.eflr_frame = eflr
             if self.eflr_channels is not None and self.eflr_frame is not None:
                 assert self.log_pass is None
-                self.log_pass = LogPass.LogPassRP66V1File(self.eflr_frame, self.eflr_channels)
+                self.log_pass = LogPass.log_pass_from_RP66V1(self.eflr_frame, self.eflr_channels)
                 self.eflr_channels = None
                 self.eflr_frame = None
 
@@ -141,7 +141,7 @@ class LogicalFileBase():
                 'LogicalFile can not add IFLR as have not been able to construct'
                 ' a LogPass.LogPassDLIS (missing CHANNEL and FRAME records).'
             )
-        if len(iflr.bytes) == 0:
+        if iflr.logical_data.remain == 0:
             raise ExceptionLogicalFileAdd('LogicalFile can not add empty IFLR.')
 
     @abc.abstractmethod
@@ -151,10 +151,10 @@ class LogicalFileBase():
             super().add_iflr(file_logical_data, iflr)
         """
         self._check_fld_iflr(file_logical_data, iflr)
-        if iflr.object_name in self.iflr_position_map:
-            self.iflr_position_map[iflr.object_name].append(file_logical_data.position.lrsh_position)
-        else:
-            self.iflr_position_map[iflr.object_name] = [file_logical_data.position.lrsh_position]
+        # if iflr.object_name in self.iflr_position_map:
+        #     self.iflr_position_map[iflr.object_name].append(file_logical_data.position.lrsh_position)
+        # else:
+        #     self.iflr_position_map[iflr.object_name] = [file_logical_data.position.lrsh_position]
 
 
 class LogicalFileSequence(abc.ABC):
@@ -187,7 +187,7 @@ class LogicalFileSequence(abc.ABC):
                 # IFLRs
                 assert len(self.logical_files) > 0
                 iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                if len(iflr.bytes) > 0:
+                if iflr.logical_data.remain > 0:
                     self.logical_files[-1].add_iflr(file_logical_data, iflr, **kwargs)
                 # else:
                 #     self.logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
@@ -200,7 +200,7 @@ class LogicalFileSequence(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecordBase:
+    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
         """Overload this to create specific EFLRs of interest."""
         pass
 

@@ -254,18 +254,13 @@ class Object:
         return ret
 
 
-class ExplicitlyFormattedLogicalRecordBase:
+class ExplicitlyFormattedLogicalRecord:
     def __init__(self, lr_type: int, ld: LogicalData):
         self.lr_type: int = lr_type
         self.set: Set = Set(ld)
         self.template: Template = Template()
         self.objects: typing.List[Object] = []
         self.object_name_map: typing.Dict[bytes, int] = {}
-
-
-class ExplicitlyFormattedLogicalRecord(ExplicitlyFormattedLogicalRecordBase):
-    def __init__(self, lr_type: int, ld: LogicalData):
-        super().__init__(lr_type, ld)
         if ld:
             self.template.read(ld)
             while ld:
