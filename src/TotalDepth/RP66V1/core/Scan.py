@@ -10,7 +10,7 @@ import colorama
 
 from TotalDepth.RP66V1.core import File, LogPass
 from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core.LogicalFile import LogicalFileBase, LogicalFileSequence
+from TotalDepth.RP66V1.core.LogicalFile import LogicalFile, LogicalFileSequence
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
 from TotalDepth.common import Rle
@@ -240,7 +240,7 @@ class EFLRDataSummary(DataSummaryBase):
             self._add(fld, ob_name_ident, len_bytes)
 
 
-class ScanLogicalFile(LogicalFileBase):
+class ScanLogicalFile(LogicalFile):
     EFLR_ALWAYS_DUMP = {b'FILE-HEADER', b'ORIGIN'}
 
     def __init__(self, file_logical_data: File.FileLogicalData,
@@ -286,7 +286,7 @@ class ScanFile(LogicalFileSequence):
     # Overload of @abc.abstractmethod
     def create_logical_file(self,
                             file_logical_data: File.FileLogicalData,
-                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFileBase:
+                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFile:
         return ScanLogicalFile(file_logical_data, eflr, **kwargs)
 
     # Overload of @abc.abstractmethod

@@ -16,16 +16,14 @@ import io
 import os
 import typing
 
-# import TotalDepth
-# import TotalDepth.RP66V1.core.LogPassXML
+import TotalDepth.RP66V1.core.LogicalFile
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import RepCode, LogPassXML, File
 from TotalDepth.RP66V1.core.File import FileLogicalData
-from TotalDepth.RP66V1.core.LogicalFile import LogicalFileBase, LogicalFileSequence
-from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.RepCode import ObjectName
+from TotalDepth.RP66V1.core.LogicalFile import LogicalFile, LogicalFileSequence
+from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.common import Rle, xml
-from TotalDepth.util.XmlWrite import Element, XmlStream
+from TotalDepth.util import XmlWrite
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 
 
@@ -37,226 +35,241 @@ class ExceptionRP66V1IndexXMLRead(ExceptionIndex):
     pass
 
 
-class LogicalFileRP66V1IndexXML(LogicalFileBase):
-    ALL_OBJECTS_SET_TYPES: typing.Set[bytes] = {b'FILE-HEADER', b'ORIGIN', b'CHANNEL', b'FRAME', b'AXIS'}
-    SOME_OBJECTS_SET_TYPES: typing.Dict[bytes, bytes] = {
-        b'PARAMETER': {b'CN', b'WN', b'FN', b'DATE', b'LATD', b'LATI', b'LOND', b'LONG'}
-    }
+# class LogicalFileRP66V1IndexXML(LogicalFile):
+#     ALL_OBJECTS_SET_TYPES: typing.Set[bytes] = {b'FILE-HEADER', b'ORIGIN', b'CHANNEL', b'FRAME', b'AXIS'}
+#     SOME_OBJECTS_SET_TYPES: typing.Dict[bytes, bytes] = {
+#         b'PARAMETER': {b'CN', b'WN', b'FN', b'DATE', b'LATD', b'LATI', b'LOND', b'LONG'}
+#     }
+#
+#     def __init__(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
+#         super().__init__(file_logical_data, fhlr)
+#         # self.iflr_map: typing.Dict[ObjectName, typing.List[TotalDepth.RP66V1.core.LogicalFile.IFLRData]] = {}
+#
+#     # Overload @abc.abstractmethod
+#     def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
+#         # TODO: Why don't we just read every EFLR even for the index, the EFLRs are a tiny amount of the total file.
+#         super().add_eflr(file_logical_data, eflr, **kwargs)
+#
+#     # Overload @abc.abstractmethod
+#     def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
+#         super().add_iflr(file_logical_data, iflr, **kwargs)
+#         # assert self.log_pass is not None
+#         # self.log_pass[iflr.object_name].read_x_axis(iflr.logical_data, frame_number=0)
+#         # x_value = self.log_pass[iflr.object_name].channels[0].array.mean()
+#         #
+#         # iflr_data = TotalDepth.RP66V1.core.LogicalFile.IFLRData(
+#         #     iflr.frame_number, file_logical_data.position.lrsh_position, x_value
+#         # )
+#         # if iflr.object_name in self.iflr_map:
+#         #     self.iflr_map[iflr.object_name].append(iflr_data)
+#         # else:
+#         #     self.iflr_map[iflr.object_name] = [iflr_data]
+#
+#     def write_xml(self, xml_stream: XmlStream) -> None:
+#         with Element(xml_stream, 'LogicalFile', {
+#             'has_log_pass' : str(self.log_pass is not None),
+#             'schema_version': LogPassXML.XML_SCHEMA_VERSION,
+#         }):
+#             for position, eflr in self.eflrs:
+#                 attrs = {
+#                     'vr_position': f'0x{position.vr_position:x}',
+#                     'lrsh_position': f'0x{position.lrsh_position:x}',
+#                     'lr_type': f'{eflr.lr_type:d}',
+#                     'set_type': f'{eflr.set.type.decode("ascii")}',
+#                     'set_name': f'{eflr.set.name.decode("ascii")}',
+#                     'object_count': f'{len(eflr.objects):d}'
+#                 }
+#                 with Element(xml_stream, 'EFLR', attrs):
+#                     self._write_xml_eflr(xml_stream, eflr)
+#             if self.log_pass is not None:
+#                 self._write_xml_log_pass(xml_stream)
+#
+#     def _write_xml_eflr(self, xml_stream: XmlStream, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+#         all_objects: bool = eflr.set.type in self.ALL_OBJECTS_SET_TYPES
+#         some_objects: typing.Set[bytes] = set()
+#         if eflr.set.type in self.SOME_OBJECTS_SET_TYPES:
+#             some_objects = self.SOME_OBJECTS_SET_TYPES[eflr.set.type]
+#         if all_objects or some_objects:
+#             for obj in eflr.objects:
+#                 if all_objects or obj.name.I in some_objects:
+#                     self._write_xml_object(xml_stream, obj)
+#
+#     def _write_xml_object(self, xml_stream: XmlStream, obj: EFLR.Object) -> None:
+#         with Element(xml_stream, 'Object', LogPassXML.xml_object_name_attributes(obj.name)):
+#             for attr in obj.attrs:
+#                 attr_atributes = {
+#                     'label': attr.label.decode('ascii'),
+#                     'count': f'{attr.count:d}',
+#                     'rc': f'{attr.rep_code:d}',
+#                     # TODO: Remove this as duplicate?
+#                     'rc_ascii': f'{RepCode.REP_CODE_INT_TO_STR[attr.rep_code]}',
+#                     'units': attr.units.decode('ascii'),
+#                 }
+#                 with Element(xml_stream, 'Attribute', attr_atributes):
+#                     if attr.value is not None:
+#                         with Element(xml_stream, 'Values', {'count': f'{len(attr.value)}'}):
+#                             for v in attr.value:
+#                                 LogPassXML.xml_write_value(xml_stream, v)
+#                     else:
+#                         with Element(xml_stream, 'Values', {'count': '0'}):
+#                             pass
+#
+#     def _write_xml_log_pass(self, xml_stream: XmlStream) -> None:
+#         assert self.log_pass is not None
+#         LogPassXML.log_pass_to_XML(self.log_pass, self.iflr_map, xml_stream)
 
-    def __init__(self, file_logical_data: FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
-        super().__init__(file_logical_data, fhlr)
-        self.iflr_map: typing.Dict[ObjectName, typing.List[LogPassXML.IFLRData]] = {}
-        # self.iflr_frame_number_map: typing.Dict[ObjectName, typing.List[int]] = {}
-        # self.iflr_x_value_map: typing.Dict[ObjectName, typing.List[typing.Any]] = {}
-        # self.iflr_position_map: typing.Dict[ObjectName, typing.List[int]] = {}
 
-    # Overload @abc.abstractmethod
-    def add_eflr(self, file_logical_data: FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
-        super().add_eflr(file_logical_data, eflr, **kwargs)
+# class RP66V1IndexXMLWrite(LogicalFileSequence):
+#
+#     # def __init__(self, fobj: typing.BinaryIO, path: str):
+#     #     super().__init__(fobj, path)
+#
+#     # Overload of @abc.abstractmethod
+#     def create_logical_file(self,
+#                             file_logical_data: FileLogicalData,
+#                             eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFile:
+#         return LogicalFileRP66V1IndexXML(file_logical_data, eflr)
+#
+#     # Overload of @abc.abstractmethod
+#     def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
+#         assert file_logical_data.lr_is_eflr
+#         assert file_logical_data.is_sealed()
+#         # TODO: Encrypted records?
+#         # print('TRACE: create_eflr()', file_logical_data)
+#         if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
+#             eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+#             return eflr
+#         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+#
+#     def _rle_visible_record_positions(self) -> Rle.RLE:
+#         ret = Rle.RLE()
+#         for p in self.visible_record_positions:
+#             ret.add(p)
+#         return ret
+#
+#     # TODO: Take an output path and write directly.
+#     def write_xml(self) -> typing.TextIO:
+#         xml_fobj = io.StringIO()
+#         with XmlStream(xml_fobj) as xml_stream:
+#             # TODO: Write UTC timestamp of indexing? User? Timestamp of file?
+#             with Element(xml_stream, 'RP66V1FileIndex', {
+#                 'path': self.path,
+#                 'size': f'{os.path.getsize(self.path):d}',
+#                 'schema_version': LogPassXML.XML_SCHEMA_VERSION,
+#                 'utc_file_mtime' : str(datetime.datetime.utcfromtimestamp(os.stat(self.path).st_mtime)),
+#                 'utc_now' : str(datetime.datetime.utcnow()),
+#             }):
+#                 with Element(
+#                         xml_stream, 'StorageUnitLabel',
+#                         {
+#                          'sequence_number': str(self.storage_unit_label.storage_unit_sequence_number),
+#                          'dlis_version': self.storage_unit_label.dlis_version.decode('ascii'),
+#                          'storage_unit_structure' : self.storage_unit_label.storage_unit_structure.decode('ascii'),
+#                          'maximum_record_length': str(self.storage_unit_label.maximum_record_length),
+#                          'storage_set_identifier': self.storage_unit_label.storage_set_identifier.decode('ascii'),
+#                         }):
+#                     pass
+#                 with Element(xml_stream, 'LogicalFiles', {'count': f'{len(self.logical_files):d}'}):
+#                     for logical_file in self.logical_files:
+#                             logical_file.write_xml(xml_stream)
+#                 # Visible records at the end
+#                 LogPassXML.xml_rle_write(
+#                     self._rle_visible_record_positions(), 'VisibleRecords', xml_stream, hex_output=True,
+#                 )
+#         return xml_fobj
 
-    # Overload @abc.abstractmethod
-    def add_iflr(self, file_logical_data: FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
-        super().add_iflr(file_logical_data, iflr, **kwargs)
-        assert self.log_pass is not None
-        self.log_pass[iflr.object_name].read_x_axis(iflr.logical_data, frame_number=0)
-        x_value = self.log_pass[iflr.object_name].channels[0].array.mean()
 
-        iflr_data = LogPassXML.IFLRData(
-            iflr.frame_number, file_logical_data.position.lrsh_position, x_value
-        )
-        if iflr.object_name in self.iflr_map:
-            self.iflr_map[iflr.object_name].append(iflr_data)
-        else:
-            self.iflr_map[iflr.object_name] = [iflr_data]
-        # try:
-        #     self.iflr_map[iflr.object_name].append(iflr_data)
-        # except KeyError:
-        #     self.iflr_map[iflr.object_name] = [iflr_data]
+XML_SCHEMA_VERSION = '0.1.0'
+XML_TIMESTAMP_FORMAT_NO_TZ = '%Y-%m-%d %H:%M:%S.%f'
 
-        # try:
-        #     self.iflr_frame_number_map[iflr.object_name].append(iflr.frame_number)
-        # except KeyError:
-        #     self.iflr_frame_number_map[iflr.object_name] = [iflr.frame_number]
-        # try:
-        #     self.iflr_x_value_map[iflr.object_name].append(x_value)
-        # except KeyError:
-        #     self.iflr_x_value_map[iflr.object_name] = [x_value]
 
-    # def _rle(self, frame_object_name: ObjectName, iflr_map: typing.Dict[ObjectName, typing.List[int]]) -> Rle.RLE:
-    #     ret = Rle.RLE()
-    #     for x in iflr_map[frame_object_name]:
-    #         ret.add(x)
-    #     return ret
-    #
-    # def _rle_frame_number(self, frame_object_name: ObjectName) -> Rle.RLE:
-    #     return self._rle(frame_object_name, self.iflr_frame_number_map)
-    #
-    # def _rle_x_axis(self, frame_object_name: ObjectName) -> Rle.RLE:
-    #     return self._rle(frame_object_name, self.iflr_x_value_map)
-    #
-    # def _rle_lsrh_positions(self, frame_object_name: ObjectName) -> Rle.RLE:
-    #     return self._rle(frame_object_name, self.iflr_x_value_map)
-
-    def write_xml(self, xml_stream: XmlStream) -> None:
-        with Element(xml_stream, 'LogicalFile', {
-            'has_log_pass' : str(self.log_pass is not None),
-            'schema_version': LogPassXML.XML_SCHEMA_VERSION,
-        }):
-            for position, eflr in self.eflrs:
-                attrs = {
-                    'vr_position': f'0x{position.vr_position:x}',
-                    'lrsh_position': f'0x{position.lrsh_position:x}',
-                    'lr_type': f'{eflr.lr_type:d}',
-                    'set_type': f'{eflr.set.type.decode("ascii")}',
-                    'set_name': f'{eflr.set.name.decode("ascii")}',
-                    'object_count': f'{len(eflr.objects):d}'
-                }
-                with Element(xml_stream, 'EFLR', attrs):
-                    self._write_xml_eflr(xml_stream, eflr)
-            if self.log_pass is not None:
-                self._write_xml_log_pass(xml_stream)
-
-    def _write_xml_eflr(self, xml_stream: XmlStream, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
-        all_objects: bool = eflr.set.type in self.ALL_OBJECTS_SET_TYPES
-        some_objects: typing.Set[bytes] = set()
-        if eflr.set.type in self.SOME_OBJECTS_SET_TYPES:
-            some_objects = self.SOME_OBJECTS_SET_TYPES[eflr.set.type]
-        if all_objects or some_objects:
-            for obj in eflr.objects:
-                if all_objects or obj.name.I in some_objects:
-                    self._write_xml_object(xml_stream, obj)
-
-    def _write_xml_object(self, xml_stream: XmlStream, obj: EFLR.Object) -> None:
-        with Element(xml_stream, 'Object', LogPassXML.xml_object_name_attributes(obj.name)):
-            for attr in obj.attrs:
-                attr_atributes = {
-                    'label': attr.label.decode('ascii'),
-                    'count': f'{attr.count:d}',
-                    'rc': f'{attr.rep_code:d}',
-                    # TODO: Remove this as duplicate?
-                    'rc_ascii': f'{RepCode.REP_CODE_INT_TO_STR[attr.rep_code]}',
-                    'units': attr.units.decode('ascii'),
-                }
-                with Element(xml_stream, 'Attribute', attr_atributes):
-                    if attr.value is not None:
-                        with Element(xml_stream, 'Values', {'count': f'{len(attr.value)}'}):
-                            for v in attr.value:
-                                LogPassXML.xml_write_value(xml_stream, v)
-                    else:
-                        with Element(xml_stream, 'Values', {'count': '0'}):
+def _write_xml_eflr_object(obj: EFLR.Object, xml_stream: XmlWrite.XmlStream) -> None:
+    with XmlWrite.Element(xml_stream, 'Object', LogPassXML.xml_object_name_attributes(obj.name)):
+        for attr in obj.attrs:
+            attr_atributes = {
+                'label': attr.label.decode('ascii'),
+                'count': f'{attr.count:d}',
+                'rc': f'{attr.rep_code:d}',
+                # TODO: Remove this as duplicate?
+                'rc_ascii': f'{RepCode.REP_CODE_INT_TO_STR[attr.rep_code]}',
+                'units': attr.units.decode('ascii'),
+            }
+            with XmlWrite.Element(xml_stream, 'Attribute', attr_atributes):
+                if attr.value is not None:
+                    with XmlWrite.Element(xml_stream, 'Values', {'count': f'{len(attr.value)}'}):
+                        for v in attr.value:
+                            LogPassXML.xml_write_value(xml_stream, v)
+                else:
+                    with XmlWrite.Element(xml_stream, 'Values', {'count': '0'}):
                             pass
 
-    def _write_xml_log_pass(self, xml_stream: XmlStream) -> None:
-        assert self.log_pass is not None
-        # # LRSH positions as a RLE
-        # rle = self._rle(frame_object.object_name, self.iflr_position_map)
-        # LogPassXML.xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
-        # # Frame number output
-        # rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
-        # LogPassXML.xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
-        # # Xaxis output
-        # rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
-        # LogPassXML.xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
-        LogPassXML.log_pass_to_XML(self.log_pass, self.iflr_map, xml_stream)
 
-        # with Element(xml_stream, 'LogPass', {'count': f'{len(self.log_pass.frame_objects)}'}):
-        #     for frame_object in self.log_pass.frame_objects:
-        #         assert frame_object.object_name in self.iflr_x_value_map, \
-        #             f'{frame_object.object_name} not in {self.iflr_x_value_map.keys()}'
-        #         assert frame_object.object_name in self.iflr_position_map, \
-        #             f'{frame_object.object_name} not in {self.iflr_position_map.keys()}'
-        #         with Element(xml_stream, 'FrameArray', LogPassXML.xml_object_name_attributes(frame_object.object_name)):
-        #             with Element(xml_stream, 'Channels', {'channel_count': str(len(frame_object.channels))}):
-        #                 for channel in frame_object.channels:
-        #                     channel_attrs = LogPassXML.xml_object_name_attributes(channel.object_name)
-        #                     channel_attrs['long_name'] = f'{channel.long_name.decode("ascii")}'
-        #                     channel_attrs['rep_code'] = f'{channel.rep_code:d}'
-        #                     channel_attrs['units'] = f'{channel.units.decode("ascii")}'
-        #                     channel_attrs['dimensions'] = ','.join(f'{v:d}' for v in channel.dimensions)
-        #                     channel_attrs['count'] = f'{channel.count:d}'
-        #                     with Element(xml_stream, 'Channel', channel_attrs):
-        #                         pass
-        #             # # LRSH positions as a list
-        #             # positions = self.iflr_position_map[frame_object.object_name]
-        #             # attrs = {
-        #             #     'count': f'{len(positions)}',
-        #             #     'positions': ','.join([f'0x{p:x}' for p in positions]),
-        #             # }
-        #             # with Element(xml_stream, 'LRSH', attrs):
-        #             #     pass
-        #             # LRSH positions as a RLE
-        #             rle = self._rle(frame_object.object_name, self.iflr_position_map)
-        #             LogPassXML.xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
-        #             # Frame number output
-        #             rle = self._rle(frame_object.object_name, self.iflr_frame_number_map)
-        #             LogPassXML.xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
-        #             # Xaxis output
-        #             rle = self._rle(frame_object.object_name, self.iflr_x_value_map)
-        #             LogPassXML.xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
+def write_logical_file_to_xml(logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream) -> None:
+    with XmlWrite.Element(xml_stream, 'LogicalFile', {
+        'has_log_pass' : str(logical_file.log_pass is not None),
+        'schema_version': XML_SCHEMA_VERSION,
+    }):
+        for position, eflr in logical_file.eflrs:
+            attrs = {
+                'vr_position': f'0x{position.vr_position:x}',
+                'lrsh_position': f'0x{position.lrsh_position:x}',
+                'lr_type': f'{eflr.lr_type:d}',
+                'set_type': f'{eflr.set.type.decode("ascii")}',
+                'set_name': f'{eflr.set.name.decode("ascii")}',
+                'object_count': f'{len(eflr.objects):d}'
+            }
+            with XmlWrite.Element(xml_stream, 'EFLR', attrs):
+                # all_objects: bool = eflr.set.type in self.ALL_OBJECTS_SET_TYPES
+                # some_objects: typing.Set[bytes] = set()
+                # if eflr.set.type in self.SOME_OBJECTS_SET_TYPES:
+                #     some_objects = self.SOME_OBJECTS_SET_TYPES[eflr.set.type]
+                # if all_objects or some_objects:
+                #     for obj in eflr.objects:
+                #         if all_objects or obj.name.I in some_objects:
+                #             _write_xml_object(obj, xml_stream)
+                for obj in eflr.objects:
+                    _write_xml_eflr_object(obj, xml_stream)
+        if logical_file.log_pass is not None:
+            LogPassXML.log_pass_to_XML(logical_file.log_pass, logical_file.iflr_position_map, xml_stream)
 
 
-class RP66V1IndexXMLWrite(LogicalFileSequence):
-
-    # def __init__(self, fobj: typing.BinaryIO, path: str):
-    #     super().__init__(fobj, path)
-
-    # Overload of @abc.abstractmethod
-    def create_logical_file(self,
-                            file_logical_data: FileLogicalData,
-                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFileBase:
-        return LogicalFileRP66V1IndexXML(file_logical_data, eflr)
-
-    # Overload of @abc.abstractmethod
-    def create_eflr(self, file_logical_data: FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
-        assert file_logical_data.lr_is_eflr
-        assert file_logical_data.is_sealed()
-        # TODO: Encrypted records?
-        # print('TRACE: create_eflr()', file_logical_data)
-        if file_logical_data.lr_type in (0, 1, 2, 3, 4, 5):
-            eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-            return eflr
-        return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-
-    def _rle_visible_record_positions(self) -> Rle.RLE:
-        ret = Rle.RLE()
-        for p in self.visible_record_positions:
-            ret.add(p)
-        return ret
-
-    # TODO: Take an output path and write directly.
-    def write_xml(self) -> typing.TextIO:
-        xml_fobj = io.StringIO()
-        with XmlStream(xml_fobj) as xml_stream:
-            # TODO: Write UTC timestamp of indexing? User? Timestamp of file?
-            with Element(xml_stream, 'RP66V1FileIndex', {
-                'path': self.path,
-                'size': f'{os.path.getsize(self.path):d}',
-                'schema_version': LogPassXML.XML_SCHEMA_VERSION,
-                'utc_file_mtime' : str(datetime.datetime.utcfromtimestamp(os.stat(self.path).st_mtime)),
-                'utc_now' : str(datetime.datetime.utcnow()),
-            }):
-                with Element(
-                        xml_stream, 'StorageUnitLabel',
-                        {
-                         'sequence_number': str(self.storage_unit_label.storage_unit_sequence_number),
-                         'dlis_version': self.storage_unit_label.dlis_version.decode('ascii'),
-                         'storage_unit_structure' : self.storage_unit_label.storage_unit_structure.decode('ascii'),
-                         'maximum_record_length': str(self.storage_unit_label.maximum_record_length),
-                         'storage_set_identifier': self.storage_unit_label.storage_set_identifier.decode('ascii'),
-                        }):
-                    pass
-                with Element(xml_stream, 'LogicalFiles', {'count': f'{len(self.logical_files):d}'}):
-                    for logical_file in self.logical_files:
-                            logical_file.write_xml(xml_stream)
-                # Visible records at the end
-                LogPassXML.xml_rle_write(
-                    self._rle_visible_record_positions(), 'VisibleRecords', xml_stream, hex_output=True,
-                )
-        return xml_fobj
+def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFileSequence, ostream: io.StringIO) -> None:
+    """Takes a LogicalFileSequence and writes the index to an XML stream."""
+    with XmlWrite.XmlStream(ostream) as xml_stream:
+        # TODO: Write UTC timestamp of indexing? User? Timestamp of file?
+        with XmlWrite.Element(xml_stream, 'RP66V1FileIndex', {
+            'path': logical_file_sequence.path,
+            'size': f'{os.path.getsize(logical_file_sequence.path):d}',
+            'schema_version': XML_SCHEMA_VERSION,
+            'utc_file_mtime': str(datetime.datetime.utcfromtimestamp(os.stat(logical_file_sequence.path).st_mtime)),
+            'utc_now': str(datetime.datetime.utcnow()),
+        }):
+            with XmlWrite.Element(
+                    xml_stream, 'StorageUnitLabel',
+                    {
+                        'sequence_number': str(logical_file_sequence.storage_unit_label.storage_unit_sequence_number),
+                        'dlis_version': logical_file_sequence.storage_unit_label.dlis_version.decode('ascii'),
+                        'storage_unit_structure': logical_file_sequence.storage_unit_label.storage_unit_structure.decode('ascii'),
+                        'maximum_record_length': str(logical_file_sequence.storage_unit_label.maximum_record_length),
+                        'storage_set_identifier': logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii'),
+                    }):
+                pass
+            with XmlWrite.Element(xml_stream, 'LogicalFiles', {'count': f'{len(logical_file_sequence.logical_files):d}'}):
+                for logical_file in logical_file_sequence.logical_files:
+                    write_logical_file_to_xml(logical_file, xml_stream)
+            # Visible records at the end
+            rle_visible_records = Rle.create_rle(logical_file_sequence.visible_record_positions)
+            LogPassXML.xml_rle_write(rle_visible_records, 'VisibleRecords', xml_stream, hex_output=True)
 
 
 # ============== Reading XML ================================
 
+
+
+
+
+
+# FIXME: Replace this with using LogPassXML.log_pass_from_XML etc.
 class RP66V1IndexXMLEFLRRead:
     TAG = 'EFLR'
 
@@ -318,18 +331,18 @@ class RP66V1IndexXMLRead:
         #     size="1937848"
         #     utc_file_mtime="2019-03-18 16:07:28"
         #     utc_now="2019-04-27 10:24:13.982071">
-        if root.attrib['schema_version'] != LogPassXML.XML_SCHEMA_VERSION:
+        if root.attrib['schema_version'] != XML_SCHEMA_VERSION:
             raise LogPassXML.ExceptionIndexXMLRead(
-                f'Found schema version {root.attrib["schema_version"]} but expected {LogPassXML.XML_SCHEMA_VERSION}'
+                f'Found schema version {root.attrib["schema_version"]} but expected {XML_SCHEMA_VERSION}'
             )
         self.path = root.attrib['path']
         self.size = int(root.attrib['size'])
         # TODO: Write UTC timestamps with +00:00 for timezone.
         self.utc_file_mtime = datetime.datetime.strptime(
-            root.attrib['utc_file_mtime'], LogPassXML.XML_TIMESTAMP_FORMAT_NO_TZ,
+            root.attrib['utc_file_mtime'], XML_TIMESTAMP_FORMAT_NO_TZ,
         )
         self.utc_now = datetime.datetime.strptime(
-            root.attrib['utc_now'], LogPassXML.XML_TIMESTAMP_FORMAT_NO_TZ,
+            root.attrib['utc_now'], XML_TIMESTAMP_FORMAT_NO_TZ,
         )
         # Read the StorageUnitLabel element. Example::
         #
@@ -341,10 +354,9 @@ class RP66V1IndexXMLRead:
         exp = b'V1.00'
         if self.dlis_version != exp:
             raise LogPassXML.ExceptionIndexXMLRead(f'Found DLIS version {self.dlis_version} but expected {exp}')
-        # TODO: Error check, > minimum which is?
-        # TODO: Error check, > 0
         self.sequence_number = int(sul_element.attrib['sequence_number'])
         if self.sequence_number <= 0:
+            # Reference [RP66V1 2.3.2 Storage Unit Label (SUL), Comment 1]
             raise LogPassXML.ExceptionIndexXMLRead(f'Sequence number must be >0 not {self.sequence_number}')
         self.storage_set_identifier = bytes(sul_element.attrib['storage_set_identifier'], 'ascii')
         self.storage_unit_structure = bytes(sul_element.attrib['storage_unit_structure'], 'ascii')

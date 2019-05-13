@@ -2,9 +2,9 @@ import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import RepCode, LogPass
+from TotalDepth.RP66V1.core.LogicalFile import IFLRData
 from TotalDepth.common import Rle, xml
 from TotalDepth.util import XmlWrite
-# from TotalDepth.util.XmlWrite import XmlStream, Element
 
 
 class ExceptionIndexXML(ExceptionTotalDepthRP66V1):
@@ -126,10 +126,6 @@ def xml_dump_positions(positions: typing.List[int], limit: int, element_name: st
             break
 
 
-XML_SCHEMA_VERSION = '0.1.0'
-XML_TIMESTAMP_FORMAT_NO_TZ = '%Y-%m-%d %H:%M:%S.%f'
-
-
 def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML Channel node suitable for RP66V1.
 
@@ -168,12 +164,6 @@ def frame_channel_from_XML(channel_node: xml.etree.Element) -> LogPass.FrameChan
         dimensions=[int(v) for v in channel_node.attrib['dimensions'].split(',')],
         function_np_dtype=RepCode.numpy_dtype
     )
-
-
-class IFLRData(typing.NamedTuple):
-    frame_number: int
-    lrsh_position: int
-    x_axis: typing.Union[int, float]
 
 
 def frame_array_to_XML(frame_array: LogPass.FrameArray,

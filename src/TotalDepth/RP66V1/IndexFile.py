@@ -1,5 +1,6 @@
 import argparse
 import collections
+import io
 import logging
 import os
 import sys
@@ -7,7 +8,8 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.Index import RP66V1IndexXMLWrite
+from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import Index
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -37,22 +39,26 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
         try:
             with open(path_in, 'rb') as fobj:
                 t_start = time.perf_counter()
-                index = RP66V1IndexXMLWrite(fobj, path_in)
-                xml_fobj = index.write_xml()
-                index_output = xml_fobj.getvalue()
+                # index = RP66V1IndexXMLWrite(fobj, path_in)
+                logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, path_in)
+                if path_out:
+                    with open(path_out + '.xml', 'w') as f_out:
+                        Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out)
+                    index_size = os.path.getsize(path_out + '.xml')
+                else:
+                    xml_fobj = io.StringIO()
+                    Index.write_logical_file_sequence_to_xml(logical_file_sequence, xml_fobj)
+                    index_output = xml_fobj.getvalue()
+                    index_size = len(index_output)
+                    print(index_output)
                 result = IndexResult(
                     os.path.getsize(path_in),
-                    len(index_output),
+                    index_size,
                     time.perf_counter() - t_start,
                     False,
                     False,
                 )
-                if path_out:
-                    with open(path_out + '.xml', 'w') as f_out:
-                        f_out.write(index_output)
-                else:
-                    print(index_output)
-                logger.info(f'Length of XML: {len(index_output)}')
+                logger.info(f'Length of XML: {index_size}')
                 return result
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
