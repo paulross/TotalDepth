@@ -7,10 +7,9 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import Index, LogPassXML, File
+from TotalDepth.RP66V1.core import Index
 from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
-from TotalDepth.util.bin_file_type import binary_file_type_from_path
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -31,36 +30,21 @@ def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
     logger.info(f'Reading XML index: {xml_path_in}')
     try:
         t_start = time.perf_counter()
-        with Index.RP66V1IndexXMLRead(xml_path_in, archive_root) as rp66v1_index:
-            # TODO: Read all frames is chunks of 1024?
-            logical_file: Index.RP66V1IndexXMLLogicalFileRead
-            for logical_file in rp66v1_index.logical_files:
-                log_pass: LogPassXML.LogPassRP66V1IndexXML
-                for log_pass in logical_file.log_passes:
-                    frame_object: LogPassXML.FrameArrayRP66V1IndexXML
-                    for frame_object in log_pass.frame_objects:
-                        num_frames = frame_object.number_of_frames
-                        if FRAME_CHUNK < 0 or num_frames < FRAME_CHUNK:
-                            frame_object.init_arrays(num_frames)
-                            for frame_number, iflr_pos in enumerate(frame_object.rle_lrsh.values()):
-                                fld: File.FileLogicalData = rp66v1_index.get_logical_data(iflr_pos)
-                                frame_object.read(fld, frame_number)
-            result = IndexResult(
-                os.path.getsize(rp66v1_index.original_file_path),
-                os.path.getsize(xml_path_in),
-                time.perf_counter() - t_start,
-                False,
-                False,
-            )
-            return result
+        logical_file_sequence = Index.read_logical_file_sequence_from_xml(xml_path_in, archive_root)
+        result = IndexResult(
+            os.path.getsize(logical_file_sequence.path),
+            os.path.getsize(xml_path_in),
+            time.perf_counter() - t_start,
+            False,
+            False,
+        )
+        return result
     except ExceptionTotalDepthRP66V1:
         logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {xml_path_in}')
         return IndexResult(os.path.getsize(xml_path_in), 0, 0.0, True, False)
     except Exception:
         logger.exception(f'Failed to index with Exception: {xml_path_in}')
         return IndexResult(os.path.getsize(xml_path_in), 0, 0.0, True, False)
-    # logger.info(f'Ignoring file type "{bin_file_type}" at {xml_path_in}')
-    # return IndexResult(0, 0, 0.0, False, True)
 
 
 def read_index_dir_or_file(path_in: str, archive_root: str, recurse: bool) -> typing.Dict[str, IndexResult]:

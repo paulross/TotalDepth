@@ -19,6 +19,10 @@ class ExceptionLogPassXML(LogPass.ExceptionLogPass):
     pass
 
 
+# FIXME: A lot of this is generic XML manipulation so move it up the stack into a common place, or RP66V1.common
+
+
+# FIXME: Move to TotalDepth.common.xml, fix exception
 def xml_single_element(element: xml.etree.Element, xpath: str) -> xml.etree.Element:
     """Selects a single XML element in the Xpath."""
     elems = list(element.iterfind(xpath))
@@ -27,6 +31,7 @@ def xml_single_element(element: xml.etree.Element, xpath: str) -> xml.etree.Elem
     return elems[0]
 
 
+# FIXME: Move to TotalDepth.common.xml
 def xml_rle_write(rle: Rle.RLE, element_name: str, xml_stream: XmlWrite.XmlStream, hex_output: bool) -> None:
     with XmlWrite.Element(xml_stream, element_name, {'count': f'{rle.num_values():d}', 'rle_len': f'{len(rle):d}',}):
         for rle_item in rle.rle_items:
@@ -39,6 +44,15 @@ def xml_rle_write(rle: Rle.RLE, element_name: str, xml_stream: XmlWrite.XmlStrea
                 pass
 
 
+# FIXME: Move to TotalDepth.common.xml
+def xml_integer_attribute_read(element: xml.etree.Element, attr: str) -> int:
+    attribute = element.attrib[attr]
+    if attribute.startswith('0x'):
+        return int(attribute, 16)
+    return int(attribute)
+
+
+# FIXME: Move to TotalDepth.common.xml, fix exception.
 def xml_rle_read(element: xml.etree.Element) -> Rle.RLE:
     """Read the RLE values under an element and return the RLE object. Example::
 
@@ -74,6 +88,7 @@ def xml_rle_read(element: xml.etree.Element) -> Rle.RLE:
     return ret
 
 
+# FIXME: Move to TotalDepth.RP66V1.common.xml
 def xml_object_name_attributes(object_name: RepCode.ObjectName) -> typing.Dict[str, str]:
     return {
         'O': f'{object_name.O}',
@@ -82,10 +97,12 @@ def xml_object_name_attributes(object_name: RepCode.ObjectName) -> typing.Dict[s
     }
 
 
+# FIXME: Move to TotalDepth.RP66V1.common.xml
 def xml_object_name(node: xml.etree.Element) -> RepCode.ObjectName:
     return RepCode.ObjectName(node.attrib['O'], node.attrib['C'], node.attrib['I'].encode('ascii'))
 
 
+# FIXME: Move to TotalDepth.RP66V1.common.xml possibly some common stuff here?
 def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
     """Write a value to the XML stream with specific type as an attribute."""
     if isinstance(value, RepCode.ObjectName):
@@ -110,20 +127,6 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
             _value = str(value)
         with XmlWrite.Element(xml_stream, 'Value', {'type': typ}):
             xml_stream.characters(_value)
-
-
-def xml_dump_positions(positions: typing.List[int], limit: int, element_name: str, xml_stream: XmlWrite.XmlStream) -> None:
-    for i, position in enumerate(positions):
-        attrs = {'pos': f'{position:d}', 'posx': f'0x{position:0x}'}
-        if i > 0:
-            d_pos = positions[i] - positions[i - 1]
-            attrs['dpos'] = f'{d_pos:d}'
-            attrs['dposx'] = f'0x{d_pos:0x}'
-        with XmlWrite.Element(xml_stream, element_name, attrs):
-            pass
-        if i >= limit:
-            xml_stream.comment(' TRACE: break ')
-            break
 
 
 def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
@@ -216,6 +219,17 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
             xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
 
 
+def iflr_data_from_xml(frame_array_node: xml.etree.Element) -> typing.Iterator[IFLRData]:
+    """Returns a sequence of IFLRData objects from XML."""
+    iflr_node = xml_single_element(frame_array_node, './IFLR')
+    rle_lrsh = xml_rle_read(xml_single_element(iflr_node, './LRSH'))
+    rle_frames = xml_rle_read(xml_single_element(iflr_node, './FrameNumbers'))
+    rle_xaxis = xml_rle_read(xml_single_element(iflr_node, './Xaxis'))
+    if len({int(iflr_node.attrib['count']), rle_lrsh.num_values(), rle_frames.num_values(), rle_xaxis.num_values()}) != 1:
+        raise LogPass.ExceptionFrameArrayInit('Mismatched counts of LRSH, FrameNumbers and Xaxis')
+    return (IFLRData(*v) for v in zip(rle_lrsh.values(), rle_frames.values(), rle_xaxis.values()))
+
+
 def frame_array_from_XML(frame_array_node: xml.etree.Element) \
         -> typing.Tuple[LogPass.FrameArray, typing.Iterator[IFLRData]]:
     """Initialise a FrameArray from a XML Channel node. For an example of the XML see frame_array_to_XML."""
@@ -228,13 +242,7 @@ def frame_array_from_XML(frame_array_node: xml.etree.Element) \
     # TODO: Check Channel count
     for channnel_node in frame_array_node.iterfind('./Channels/Channel'):
         ret.append(frame_channel_from_XML(channnel_node))
-    iflr_node = xml_single_element(frame_array_node, './IFLR')
-    rle_lrsh = xml_rle_read(xml_single_element(iflr_node, './LRSH'))
-    rle_frames = xml_rle_read(xml_single_element(iflr_node, './FrameNumbers'))
-    rle_xaxis = xml_rle_read(xml_single_element(iflr_node, './Xaxis'))
-    if len({int(iflr_node.attrib['count']), rle_lrsh.num_values(), rle_frames.num_values(), rle_xaxis.num_values()}) != 1:
-        raise LogPass.ExceptionFrameArrayInit('Mismatched counts of LRSH, FrameNumbers and Xaxis')
-    return ret, (IFLRData(*v) for v in zip(rle_lrsh.values(), rle_frames.values(), rle_xaxis.values()))
+    return ret, iflr_data_from_xml(frame_array_node)
 
 
 def log_pass_to_XML(log_pass: LogPass.LogPass,

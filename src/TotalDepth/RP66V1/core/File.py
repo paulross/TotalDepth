@@ -77,47 +77,6 @@ def read_n_bytes(fobj: typing.BinaryIO, length: int) -> bytes:
         raise ExceptionEOF('Premature EOF.')
     return by
 
-
-# def read_UVARI(fobj: typing.BinaryIO) -> bytes:
-#     # Will raise
-#     by: bytes = read_n_bytes(fobj, 1)
-#     length = RepCode.UVARI_len(by, 0)
-#     assert length != 0
-#     if length != 1:
-#         return by + read_n_bytes(fobj, length - 1)
-#     return by
-#
-#
-# def read_IDENT(fobj: typing.BinaryIO) -> bytes:
-#     # Will raise
-#     by: bytes = read_n_bytes(fobj, 1)
-#     length = RepCode.IDENT_len(by, 0)
-#     assert length > 0
-#     if length != 1:
-#         return by + read_n_bytes(fobj, length - 1)
-#     return by
-#
-#
-# def read_OBNAME(fobj: typing.BinaryIO) -> bytes:
-#     parts: typing.List[bytes] = [
-#         read_UVARI(fobj),
-#         # Count as a USHORT
-#         read_n_bytes(fobj, 1),
-#         read_IDENT(fobj),
-#     ]
-#     return b''.join(parts)
-#
-#
-# def read_IFLR_obname_frame_and_first_channel(fobj: typing.BinaryIO) -> bytes:
-#     parts: typing.List[bytes] = [
-#         read_OBNAME(fobj),
-#         # Frame number as a UVARI
-#         read_UVARI(fobj),
-#         # First channel is X axis as a scalar.
-#         read_n_bytes(fobj, RepCode.LENGTH_LARGEST_INDEX_CHANNEL_CODE),
-#     ]
-#     return b''.join(parts)
-
 # ---------------- END: Low Level File Read Functions ------------------
 
 

@@ -1,4 +1,5 @@
 import re
+import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 
@@ -46,6 +47,7 @@ class StorageUnitLabel:
     def __init__(self, by: bytes):
         if len(by) != self.SIZE:
             raise ExceptionStorageUnitLabel(f'Expected {self.SIZE} bytes, got {len(by)}')
+        # FIXME: Make this the responsibility of FileRead
         # We do not support TIF markers.
         if by[len(TIF_FILE_PREFIX):] == TIF_FILE_PREFIX:
             raise ExceptionStorageUnitLabel(f'This file appears to have TIF markers, de-TIF the file to read it.')
@@ -72,14 +74,13 @@ class StorageUnitLabel:
         self.storage_set_identifier: bytes = by[20:]
 
     def as_bytes(self) -> bytes:
-        ret = b''.join(
-            [
-                bytes('{:4d}'.format(self.storage_unit_sequence_number), 'ascii'),
-                # TODO: Finish this
-            ]
+        by = _create_bytes(
+            self.storage_unit_sequence_number,
+            self.dlis_version,
+            self.maximum_record_length,
+            self.storage_set_identifier,
         )
-        assert len(ret) == self.SIZE
-        return ret
+        return by
 
     def __str__(self) -> str:
         return '\n'.join(
@@ -92,3 +93,38 @@ class StorageUnitLabel:
                 f'        Storage Set Identifier: {self.storage_set_identifier}',
             ]
         )
+
+
+def _create_bytes(storage_unit_sequence_number: int,
+                  dlis_version: bytes,
+                  maximum_record_length: int,
+                  storage_set_identifier: bytes,
+                  ) -> bytes:
+    fields: typing.List[typing.Tuple[int, bytes]] = [
+        (4, f'{storage_unit_sequence_number:04d}'.encode('ascii')),
+        (5, dlis_version),
+        (6, b'RECORD'),
+        (5, f'{maximum_record_length:05}'.encode('ascii')),
+        (60, storage_set_identifier),
+    ]
+    bya = bytearray()
+    for length, field in fields:
+        if len(field) != length:
+            raise ExceptionStorageUnitLabel(f'{field} expected length {length} but got {len(field)}')
+        bya.extend(field)
+    assert len(bya) == StorageUnitLabel.SIZE
+    return bytes(bya)
+
+
+def create_storage_unit_label(storage_unit_sequence_number: int,
+                              dlis_version: bytes,
+                              maximum_record_length: int,
+                              storage_set_identifier: bytes,
+                              ) -> StorageUnitLabel:
+    by = _create_bytes(
+        storage_unit_sequence_number,
+        dlis_version,
+        maximum_record_length,
+        storage_set_identifier,
+    )
+    return StorageUnitLabel(by)

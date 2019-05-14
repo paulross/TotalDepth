@@ -26,6 +26,14 @@ class ExceptionLogicalFileMissingRecord(ExceptionLogicalFile):
     pass
 
 
+class ExceptionLogicalFileSequence(ExceptionLogicalFile):
+    pass
+
+
+class ExceptionLogicalFileSequenceCtor(ExceptionLogicalFileSequence):
+    pass
+
+
 class PositionEFLR(typing.NamedTuple):
     """POD class that represents the Logical Record Segment Header position in the file of the Explicitly Formatted
     Logical Record and the EFLR itself."""
@@ -54,10 +62,18 @@ class LogicalFile:
     For the File Header Logical Record see [RP66V1 Section 5.1 File Header Logical Record (FHLR)]
     For the Origin Logical Record see [RP66V1 Section 5.2 Origin Logical Record (OLR)]
 
-    This is actually two stage construction with the FHLR first. The OLR is extracted from the first add().
+    This is actually two/multi stage construction with the FHLR first. The OLR is extracted from the first add().
     """
     def __init__(self, file_logical_data: File.FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
-        self._check_fld_eflr(file_logical_data, fhlr)
+        if fhlr.lr_type != 0:
+            raise ExceptionLogicalFileCtor(
+                f'Logical File requires first EFLR code 0 not {str(fhlr.lr_type)}\n{fhlr}'
+            )
+        if fhlr.set.type != b'FILE-HEADER':
+            raise ExceptionLogicalFileCtor(
+                f'Logical File requires first EFLR type b\'FILE-HEADER\' not {str(fhlr.set.type)}'
+            )
+        self._check_fld_matches_eflr(file_logical_data, fhlr)
         self.eflrs: typing.List[PositionEFLR] = [
             PositionEFLR(file_logical_data.position, fhlr)
         ]
@@ -68,21 +84,12 @@ class LogicalFile:
         self.iflr_position_map: typing.Dict[RepCode.ObjectName, typing.List[IFLRData]] = {}
 
 
-    def _check_fld_eflr(self, file_logical_data: File.FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
-        self._check_fld_matches_eflr(file_logical_data, fhlr)
-        if fhlr.lr_type != 0:
-            raise ExceptionLogicalFileCtor(
-                f'Logical File requires first EFLR code 0 not {str(fhlr.lr_type)}\n{fhlr}'
-            )
-        if fhlr.set.type != b'FILE-HEADER':
-            raise ExceptionLogicalFileCtor(
-                f'Logical File requires first EFLR type b\'FILE-HEADER\' not {str(fhlr.set.type)}'
-            )
-
     def _check_fld_matches_eflr(self, file_logical_data: File.FileLogicalData,
-                                fhlr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
-        # TODO: file_logical_data.lr_is_eflr
-        pass
+                                eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+        if file_logical_data.lr_type != eflr.lr_type:
+            raise ExceptionLogicalFile(
+                f'File logical data LR type {file_logical_data.lr_type} does not match {eflr.lr_type}'
+            )
 
     def _add_origin_eflr(self, file_logical_data: File.FileLogicalData, olr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         # assert self.origin_logical_record is None
@@ -153,10 +160,8 @@ class LogicalFile:
         if iflr.logical_data.remain == 0:
             raise ExceptionLogicalFileAdd('LogicalFile can not add empty IFLR.')
 
-    def add_iflr(self, file_logical_data: File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
-        """Child classes should re-implement this but call it all the same with::
-
-            super().add_iflr(file_logical_data, iflr)
+    def add_iflr(self, file_logical_data: File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
+        """
         """
         self._check_fld_iflr(file_logical_data, iflr)
         self.log_pass[iflr.object_name].read_x_axis(iflr.logical_data, frame_number=0)
@@ -169,50 +174,39 @@ class LogicalFile:
 
 
 class LogicalFileSequence:
-    def __init__(self, fobj: typing.BinaryIO, path: str, **kwargs):
-        self.logical_files: typing.List[LogicalFile] = []
+    def __init__(self, fobj: typing.Union[typing.BinaryIO, None], path: str):
         self.path = path
-        rp66_file = File.FileRead(fobj)
-        self.storage_unit_label = rp66_file.sul
-        # Capture all the Visible Records, this can not be done by looking at the Logical Records only
-        # as some Visible Records can be missed.
-        self.visible_record_positions = [vr.position for vr in rp66_file.iter_visible_records()]
-        # Now iterate across the file again for the Logical Records.
+        self.logical_files: typing.List[LogicalFile] = []
+        self.storage_unit_label = None
+        self.visible_record_positions = []
+        if fobj is not None:
+            rp66_file = File.FileRead(fobj)
+            self.storage_unit_label = rp66_file.sul
+            # Capture all the Visible Records, this can not be done by looking at the Logical Records only
+            # as some Visible Records can be missed.
+            self.visible_record_positions = [vr.position for vr in rp66_file.iter_visible_records()]
+            # Now iterate across the file again for the Logical Records.
+            for file_logical_data in rp66_file.iter_logical_records():
+                assert file_logical_data.is_sealed()
+                if not file_logical_data.lr_is_encrypted:
+                    if file_logical_data.lr_is_eflr:
+                        # EFLRs
+                        eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                     file_logical_data.logical_data)
+                        if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
+                            self.logical_files.append(LogicalFile(file_logical_data, eflr))
+                        else:
+                            self.logical_files[-1].add_eflr(file_logical_data, eflr)
+                    else:
+                        # IFLRs
+                        if len(self.logical_files) == 0:
+                            raise ExceptionLogicalFileSequenceCtor('IFLR when there are no Logical Files.')
+                        iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                     file_logical_data.logical_data)
+                        if iflr.logical_data.remain > 0:
+                            self.logical_files[-1].add_iflr(file_logical_data, iflr)
+                        else:
+                            logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
 
-        for file_logical_data in rp66_file.iter_logical_records():
-            self.add_logical_data(file_logical_data, **kwargs)
-
-        # for file_logical_data in rp66_file.iter_logical_records_minimal({0, 1, 2, 3, 4, 5}):
-        #     # print(f'TRACE: {file_logical_data}')
-        #     self.add_logical_data(file_logical_data, **kwargs)
-
-    def add_logical_data(self, file_logical_data: File.FileLogicalData) -> None:
-        if not file_logical_data.lr_is_encrypted:
-            if file_logical_data.lr_is_eflr:
-                eflr = self.create_eflr(file_logical_data)
-                if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
-                    self.logical_files.append(self.create_logical_file(file_logical_data, eflr))
-                else:
-                    self.logical_files[-1].add_eflr(file_logical_data, eflr)
-            else:
-                # IFLRs
-                assert len(self.logical_files) > 0
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                if iflr.logical_data.remain > 0:
-                    self.logical_files[-1].add_iflr(file_logical_data, iflr)
-                else:
-                    logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
-
-    def create_logical_file(self,
-                            file_logical_data: File.FileLogicalData,
-                            eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> LogicalFile:
-        return LogicalFile(file_logical_data, eflr)
-
-    def create_eflr(self, file_logical_data: File.FileLogicalData) -> EFLR.ExplicitlyFormattedLogicalRecord:
-        assert file_logical_data.lr_is_eflr
-        assert file_logical_data.is_sealed()
-        return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-
-    @property
-    def current_logical_file(self) -> LogicalFile:
-        return self.logical_files[-1]
+    def __len__(self) -> int:
+        return len(self.logical_files)
