@@ -578,7 +578,7 @@ def _scan_log_pass_content(
                     frame_table.append(
                         [channel_ident, arr.size, arr.min(), arr.mean(), arr.std(), arr.max(), channel.units, arr.dtype]
                     )
-                fout.write('\n'.join(table.format_table(frame_table, heading_underline='-', pad='   ')))
+                fout.write('\n'.join(data_table.format_table(frame_table, heading_underline='-', pad='   ')))
                 fout.write('\n')
             else:
                 fout.write('No frames.')
