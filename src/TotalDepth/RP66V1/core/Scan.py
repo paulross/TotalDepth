@@ -10,10 +10,10 @@ import colorama
 
 from TotalDepth.RP66V1.core import File, LogPass
 from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core.LogicalFile import LogicalFile, LogicalFileSequence
+from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
-from TotalDepth.common import Rle
+from TotalDepth.common import Rle, table
 from TotalDepth.util.bin_file_type import format_bytes
 
 
@@ -47,266 +47,266 @@ def _colorama_note(msg: str):
     return colorama.Back.YELLOW + f'NOTE: {msg}'
 
 
-class MinMax:
-    def __init__(self, units):
-        self.units = units
-        self.count = 0
-        self.null = 0
-        self._min = 0
-        self._max = 0
-        self._sum = 0
-        self._ssq = 0
-
-    def add(self, value: typing.Union[typing.Union[float, int], typing.Sequence[typing.Union[float, int]]]) -> None:
-        if isinstance(value, (list, tuple)):
-            for v in value:
-                self.add(v)
-        else:
-            # TODO: Remove this hack for absent values.
-            # TODO: Huh explain this. Well -999.25 is the common LIS79 value. -999 is the closest to that for signed
-            # integers. -9999.0 has been seen for some resistivity channels that are encoded as a FSINGL.
-            if value not in (-999.25, -999, -9999.0):
-                if self.count == 0:
-                    self._min = self._max = value
-                else:
-                    self._min = min(self._min, value)
-                    self._max = max(self._max, value)
-                self._sum += value
-                self._ssq += value * value
-                self.count += 1
-            else:
-                self.null += 1
-
-    @property
-    def min(self):
-        if self.count == 0:
-            raise AttributeError('No minimum when there is no data.')
-        return self._min
-
-    @property
-    def mean(self):
-        if self.count == 0:
-            raise AttributeError('No mean when there is no data.')
-        return self._sum / self.count
-
-    @property
-    def stddev(self):
-        """
-        The standard deviation.
-        Reference https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
-        """
-        if self.count == 0:
-            raise AttributeError('No stdev when there is no data.')
-        try:
-            return math.sqrt(self.count * self._ssq - self._sum**2) / self.count
-        except ValueError:
-            # TODO: WTF?
-            return 0.0
-
-    @property
-    def max(self):
-        if self.count == 0:
-            raise AttributeError('No maximum when there is no data.')
-        return self._max
-
-    @property
-    def rate(self):
-        if self.count == 0:
-            raise AttributeError('No maximum when there is no data.')
-        return (self.max - self.min) / self.count
-
-    def __str__(self) -> str:
-        if self.count:
-            return f'count: {self.count:12,d} null: {self.null:10,d}' \
-                f' min: {self.min:12.3f}' \
-                f' mean: {self.mean:12.3f} stddev: {self.stddev:12.3f}' \
-                f' max: {self.max:12.3f}' \
-                f' rate: {self.rate:12.6f}' \
-                f' {self.units}'
-        return f'count: {self.count:12,d}'
-
-
-class DataSummaryBase:
-    def __init__(self):
-        self.count = 0
-        self.count_encrypted = 0
-        self.total_bytes = 0
-        # dict of {LR_type : total_number_of_bytes, ...}
-        self.lr_type_map: typing.Dict[int, int] = collections.defaultdict(int)
-        # dict of {OBNAME.I : total_number_of_bytes, ...}
-        self.label_total_size_map: typing.Dict[bytes, int] = collections.defaultdict(int)
-        # dict of {OBNAME.I : count_of_records, ...}
-        self.label_count_map: typing.Dict[bytes, int] = collections.defaultdict(int)
-        # dict of {OBNAME.I : set(byte_length), ...}
-        self.label_size_set: typing.Dict[bytes, collections.Counter] = collections.defaultdict(collections.Counter)
-
-    def _add(self, fld: File.FileLogicalData, obj_name_ident: bytes, len_bytes: int) -> None:
-        self.count += 1
-        self.lr_type_map[fld.lr_type] += 1
-        if fld.lr_is_encrypted:
-            self.count_encrypted += 1
-        else:
-            self.total_bytes += len_bytes
-            self.label_total_size_map[obj_name_ident] += len_bytes
-            self.label_size_set[obj_name_ident].update([len_bytes])
-            self.label_count_map[obj_name_ident] += 1
-
-    def _str_lines(self) -> typing.List[str]:
-        ret = [
-            f'Count {self.count:,d} encrypted {self.count_encrypted:,d} total bytes {self.total_bytes:,d}',
-            f'Logical record types and count of them [{len(self.lr_type_map)}]:',
-        ]
-        for k in sorted(self.lr_type_map):
-            ret.append(f'{k:3d} : {self.lr_type_map[k]:8,d}')
-        ret.append(f'Labels [{len(self.label_total_size_map)}]:')
-        if len(self.label_total_size_map) > 0:
-            fw = max(len(str(k)) for k in self.label_total_size_map)
-        else:
-            fw = 1
-        for k in sorted(self.label_total_size_map.keys()):
-            ret.append(f'{str(k):{fw}} count {self.label_count_map[k]:8,d} total bytes {self.label_total_size_map[k]:8,d}')
-        ret.append('Logical record sizes:')
-        for k in sorted(self.label_size_set.keys()):
-            if len(self.label_size_set[k]) > 1:
-                ret.append(f'Data size distribution for {str(k):{fw}} LRs (size : count):')
-                for s in sorted(self.label_size_set[k].keys()):
-                    ret.append(f'  {s:8,d} : {self.label_size_set[k][s]}')
-            elif len(self.label_size_set[k]) == 1:
-                size_key = list(self.label_size_set[k].keys())[0]
-                ret.append(f'Data size of {str(k):{fw}} LRs are all {size_key} bytes.')
-        return ret
-
-    def __str__(self) -> str:
-        ret = self._str_lines()
-        return '\n'.join(ret)
-
-
-class IFLRDataSummary(DataSummaryBase):
-    def __init__(self):
-        super().__init__()
-        self.frame_range_map: typing.Dict[RepCode.ObjectName, MinMax] = {}
-        self.object_channel_map: typing.Dict[RepCode.ObjectName, typing.Dict[bytes, MinMax]] = {}
-
-    def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPass) -> None:
-        assert not fld.lr_is_eflr
-        fld.logical_data.rewind()
-        if fld.lr_is_encrypted:
-            lr = Encryption.LogicalRecordSegmentEncryptionPacket(fld.logical_data)
-            self._add(fld, b'', lr.size)
-        else:
-            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-            ob_name = iflr.object_name
-            len_bytes = len(iflr.bytes)
-            self._add(fld, ob_name, len_bytes)
-            # Frame numbers
-            if ob_name not in self.frame_range_map:
-                self.frame_range_map[ob_name] = MinMax('')
-                self.object_channel_map[ob_name] = {}
-            self.frame_range_map[ob_name].add(iflr.frame_number)
-            frame_object: LogPass.FrameArray = log_pass[ob_name.I]
-            channel_values = log_pass.process_IFLR(iflr)
-            for channel, values in zip(frame_object.channels, channel_values):
-                if channel.ident not in self.object_channel_map[ob_name]:
-                    self.object_channel_map[ob_name][channel.ident] = MinMax(channel.units)
-                self.object_channel_map[ob_name][channel.ident].add(values)
-
-    def __str__(self) -> str:
-        ret = self._str_lines()
-        # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
-        ret.append('')
-        ret.append(f'Log passes [{len(self.frame_range_map)}]:')
-        for k in sorted(self.frame_range_map.keys()):
-            if self.frame_range_map[k].count > 0:
-                ret.append(f'    {str(k):12} : frame count: {self.frame_range_map[k].count:12,d}'
-                           f' Frame min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
-            for channel in self.object_channel_map[k]:
-                min_max = self.object_channel_map[k][channel]
-                ret.append(f'        {str(channel):12} {min_max}')
-        return '\n'.join(ret)
-
-
-class EFLRDataSummary(DataSummaryBase):
-
-    def add(self, fld: File.FileLogicalData) -> None:
-        assert fld.lr_is_eflr
-        fld.logical_data.rewind()
-        if fld.lr_is_encrypted:
-            lr = Encryption.LogicalRecordSegmentEncryptionPacket(fld.logical_data)
-            self._add(fld, b'', lr.size)
-        else:
-            eflr = EFLR.ExplicitlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-            ob_name_ident = eflr.set.type
-            len_bytes = len(fld.logical_data)
-            self._add(fld, ob_name_ident, len_bytes)
-
-
-class ScanLogicalFile(LogicalFile):
-    EFLR_ALWAYS_DUMP = {b'FILE-HEADER', b'ORIGIN'}
-
-    def __init__(self, file_logical_data: File.FileLogicalData,
-                 fhlr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs):
-        super().__init__(file_logical_data, fhlr)
-        self.eflr_set_type = kwargs.get('eflr_set_type', [])
-        self.iflr_set_type = kwargs.get('iflr_set_type', [])
-        self.iflr_dump = kwargs.get('iflr_dump', False)
-        self.eflr_dump = kwargs.get('eflr_dump', False)
-        self.eflr_summary: EFLRDataSummary = EFLRDataSummary()
-        self.iflr_summary: IFLRDataSummary = IFLRDataSummary()
-        self.dump_strings = []
-        if self._must_dump_eflr(fhlr):
-            self.dump_strings.append(f'EFLR {str(fhlr)}')
-        self.eflr_summary.add(file_logical_data)
-
-    def _must_dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
-        if eflr.set.type in self.EFLR_ALWAYS_DUMP:
-            return True
-        return self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type
-
-    # Overload @abc.abstractmethod
-    def add_eflr(self, file_logical_data: File.FileLogicalData,
-                 eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
-        super().add_eflr(file_logical_data, eflr)
-        if self._must_dump_eflr(eflr):
-            self.dump_strings.append(f'EFLR {str(eflr)}')
-        self.eflr_summary.add(file_logical_data)
-
-    # Overload @abc.abstractmethod
-    def add_iflr(self, file_logical_data: File.FileLogicalData,
-                 iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
-        super().add_iflr(file_logical_data, iflr)
-        if self.iflr_dump and len(self.iflr_set_type) == 0 or iflr.object_name in self.iflr_set_type:
-            self.dump_strings.append(f'IFLR {str(iflr)}')
-        self.iflr_summary.add(file_logical_data, self.log_pass)
-
-
-class ScanFile(LogicalFileSequence):
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-
-    # Overload of @abc.abstractmethod
-    def create_logical_file(self,
-                            file_logical_data: File.FileLogicalData,
-                            eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFile:
-        return ScanLogicalFile(file_logical_data, eflr, **kwargs)
-
-    # Overload of @abc.abstractmethod
-    def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
-        return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-
-    def dump_scan(self, fout: typing.TextIO) -> None:
-        fout.write(str(self.storage_unit_label))
-        fout.write('\n')
-        for l, logical_file in enumerate(self.logical_files):
-            with _output_section_header_trailer(f'Logical File [Index {l} of {len(self.logical_files)}]', '=', os=fout):
-                for line in logical_file.dump_strings:
-                    fout.write(line)
-                    fout.write('\n')
-                with _output_section_header_trailer('EFLR Summary', '-', os=fout):
-                    fout.write(str(logical_file.eflr_summary))
-                    fout.write('\n')
-                with _output_section_header_trailer('IFLR Summary', '-', os=fout):
-                    fout.write(str(logical_file.iflr_summary))
-                    fout.write('\n')
+# class MinMax:
+#     def __init__(self, units):
+#         self.units = units
+#         self.count = 0
+#         self.null = 0
+#         self._min = 0
+#         self._max = 0
+#         self._sum = 0
+#         self._ssq = 0
+#
+#     def add(self, value: typing.Union[typing.Union[float, int], typing.Sequence[typing.Union[float, int]]]) -> None:
+#         if isinstance(value, (list, tuple)):
+#             for v in value:
+#                 self.add(v)
+#         else:
+#             # TODO: Remove this hack for absent values.
+#             # TODO: Huh explain this. Well -999.25 is the common LIS79 value. -999 is the closest to that for signed
+#             # integers. -9999.0 has been seen for some resistivity channels that are encoded as a FSINGL.
+#             if value not in (-999.25, -999, -9999.0):
+#                 if self.count == 0:
+#                     self._min = self._max = value
+#                 else:
+#                     self._min = min(self._min, value)
+#                     self._max = max(self._max, value)
+#                 self._sum += value
+#                 self._ssq += value * value
+#                 self.count += 1
+#             else:
+#                 self.null += 1
+#
+#     @property
+#     def min(self):
+#         if self.count == 0:
+#             raise AttributeError('No minimum when there is no data.')
+#         return self._min
+#
+#     @property
+#     def mean(self):
+#         if self.count == 0:
+#             raise AttributeError('No mean when there is no data.')
+#         return self._sum / self.count
+#
+#     @property
+#     def stddev(self):
+#         """
+#         The standard deviation.
+#         Reference https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
+#         """
+#         if self.count == 0:
+#             raise AttributeError('No stdev when there is no data.')
+#         try:
+#             return math.sqrt(self.count * self._ssq - self._sum**2) / self.count
+#         except ValueError:
+#             # TODO: WTF?
+#             return 0.0
+#
+#     @property
+#     def max(self):
+#         if self.count == 0:
+#             raise AttributeError('No maximum when there is no data.')
+#         return self._max
+#
+#     @property
+#     def rate(self):
+#         if self.count == 0:
+#             raise AttributeError('No maximum when there is no data.')
+#         return (self.max - self.min) / self.count
+#
+#     def __str__(self) -> str:
+#         if self.count:
+#             return f'count: {self.count:12,d} null: {self.null:10,d}' \
+#                 f' min: {self.min:12.3f}' \
+#                 f' mean: {self.mean:12.3f} stddev: {self.stddev:12.3f}' \
+#                 f' max: {self.max:12.3f}' \
+#                 f' rate: {self.rate:12.6f}' \
+#                 f' {self.units}'
+#         return f'count: {self.count:12,d}'
+#
+#
+# class DataSummaryBase:
+#     def __init__(self):
+#         self.count = 0
+#         self.count_encrypted = 0
+#         self.total_bytes = 0
+#         # dict of {LR_type : total_number_of_bytes, ...}
+#         self.lr_type_map: typing.Dict[int, int] = collections.defaultdict(int)
+#         # dict of {OBNAME.I : total_number_of_bytes, ...}
+#         self.label_total_size_map: typing.Dict[bytes, int] = collections.defaultdict(int)
+#         # dict of {OBNAME.I : count_of_records, ...}
+#         self.label_count_map: typing.Dict[bytes, int] = collections.defaultdict(int)
+#         # dict of {OBNAME.I : set(byte_length), ...}
+#         self.label_size_set: typing.Dict[bytes, collections.Counter] = collections.defaultdict(collections.Counter)
+#
+#     def _add(self, fld: File.FileLogicalData, obj_name_ident: bytes, len_bytes: int) -> None:
+#         self.count += 1
+#         self.lr_type_map[fld.lr_type] += 1
+#         if fld.lr_is_encrypted:
+#             self.count_encrypted += 1
+#         else:
+#             self.total_bytes += len_bytes
+#             self.label_total_size_map[obj_name_ident] += len_bytes
+#             self.label_size_set[obj_name_ident].update([len_bytes])
+#             self.label_count_map[obj_name_ident] += 1
+#
+#     def _str_lines(self) -> typing.List[str]:
+#         ret = [
+#             f'Count {self.count:,d} encrypted {self.count_encrypted:,d} total bytes {self.total_bytes:,d}',
+#             f'Logical record types and count of them [{len(self.lr_type_map)}]:',
+#         ]
+#         for k in sorted(self.lr_type_map):
+#             ret.append(f'{k:3d} : {self.lr_type_map[k]:8,d}')
+#         ret.append(f'Labels [{len(self.label_total_size_map)}]:')
+#         if len(self.label_total_size_map) > 0:
+#             fw = max(len(str(k)) for k in self.label_total_size_map)
+#         else:
+#             fw = 1
+#         for k in sorted(self.label_total_size_map.keys()):
+#             ret.append(f'{str(k):{fw}} count {self.label_count_map[k]:8,d} total bytes {self.label_total_size_map[k]:8,d}')
+#         ret.append('Logical record sizes:')
+#         for k in sorted(self.label_size_set.keys()):
+#             if len(self.label_size_set[k]) > 1:
+#                 ret.append(f'Data size distribution for {str(k):{fw}} LRs (size : count):')
+#                 for s in sorted(self.label_size_set[k].keys()):
+#                     ret.append(f'  {s:8,d} : {self.label_size_set[k][s]}')
+#             elif len(self.label_size_set[k]) == 1:
+#                 size_key = list(self.label_size_set[k].keys())[0]
+#                 ret.append(f'Data size of {str(k):{fw}} LRs are all {size_key} bytes.')
+#         return ret
+#
+#     def __str__(self) -> str:
+#         ret = self._str_lines()
+#         return '\n'.join(ret)
+#
+#
+# class IFLRDataSummary(DataSummaryBase):
+#     def __init__(self):
+#         super().__init__()
+#         self.frame_range_map: typing.Dict[RepCode.ObjectName, MinMax] = {}
+#         self.object_channel_map: typing.Dict[RepCode.ObjectName, typing.Dict[bytes, MinMax]] = {}
+#
+#     def add(self, fld: File.FileLogicalData, log_pass: LogPass.LogPass) -> None:
+#         assert not fld.lr_is_eflr
+#         fld.logical_data.rewind()
+#         if fld.lr_is_encrypted:
+#             lr = Encryption.LogicalRecordSegmentEncryptionPacket(fld.logical_data)
+#             self._add(fld, b'', lr.size)
+#         else:
+#             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+#             ob_name = iflr.object_name
+#             len_bytes = len(iflr.bytes)
+#             self._add(fld, ob_name, len_bytes)
+#             # Frame numbers
+#             if ob_name not in self.frame_range_map:
+#                 self.frame_range_map[ob_name] = MinMax('')
+#                 self.object_channel_map[ob_name] = {}
+#             self.frame_range_map[ob_name].add(iflr.frame_number)
+#             frame_object: LogPass.FrameArray = log_pass[ob_name.I]
+#             channel_values = log_pass.process_IFLR(iflr)
+#             for channel, values in zip(frame_object.channels, channel_values):
+#                 if channel.ident not in self.object_channel_map[ob_name]:
+#                     self.object_channel_map[ob_name][channel.ident] = MinMax(channel.units)
+#                 self.object_channel_map[ob_name][channel.ident].add(values)
+#
+#     def __str__(self) -> str:
+#         ret = self._str_lines()
+#         # TODO: Add frame range, means __init__(), add() and __str__(). Or create _str_lines():
+#         ret.append('')
+#         ret.append(f'Log passes [{len(self.frame_range_map)}]:')
+#         for k in sorted(self.frame_range_map.keys()):
+#             if self.frame_range_map[k].count > 0:
+#                 ret.append(f'    {str(k):12} : frame count: {self.frame_range_map[k].count:12,d}'
+#                            f' Frame min: {self.frame_range_map[k].min:8,d} max: {self.frame_range_map[k].max:8,d}')
+#             for channel in self.object_channel_map[k]:
+#                 min_max = self.object_channel_map[k][channel]
+#                 ret.append(f'        {str(channel):12} {min_max}')
+#         return '\n'.join(ret)
+#
+#
+# class EFLRDataSummary(DataSummaryBase):
+#
+#     def add(self, fld: File.FileLogicalData) -> None:
+#         assert fld.lr_is_eflr
+#         fld.logical_data.rewind()
+#         if fld.lr_is_encrypted:
+#             lr = Encryption.LogicalRecordSegmentEncryptionPacket(fld.logical_data)
+#             self._add(fld, b'', lr.size)
+#         else:
+#             eflr = EFLR.ExplicitlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+#             ob_name_ident = eflr.set.type
+#             len_bytes = len(fld.logical_data)
+#             self._add(fld, ob_name_ident, len_bytes)
+#
+#
+# class ScanLogicalFile(LogicalFile.LogicalFile):
+#     EFLR_ALWAYS_DUMP = {b'FILE-HEADER', b'ORIGIN'}
+#
+#     def __init__(self, file_logical_data: File.FileLogicalData,
+#                  fhlr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs):
+#         super().__init__(file_logical_data, fhlr)
+#         self.eflr_set_type = kwargs.get('eflr_set_type', [])
+#         self.iflr_set_type = kwargs.get('iflr_set_type', [])
+#         self.iflr_dump = kwargs.get('iflr_dump', False)
+#         self.eflr_dump = kwargs.get('eflr_dump', False)
+#         self.eflr_summary: EFLRDataSummary = EFLRDataSummary()
+#         self.iflr_summary: IFLRDataSummary = IFLRDataSummary()
+#         self.dump_strings = []
+#         if self._must_dump_eflr(fhlr):
+#             self.dump_strings.append(f'EFLR {str(fhlr)}')
+#         self.eflr_summary.add(file_logical_data)
+#
+#     def _must_dump_eflr(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
+#         if eflr.set.type in self.EFLR_ALWAYS_DUMP:
+#             return True
+#         return self.eflr_dump and len(self.eflr_set_type) == 0 or eflr.set.type in self.eflr_set_type
+#
+#     # Overload @abc.abstractmethod
+#     def add_eflr(self, file_logical_data: File.FileLogicalData,
+#                  eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
+#         super().add_eflr(file_logical_data, eflr)
+#         if self._must_dump_eflr(eflr):
+#             self.dump_strings.append(f'EFLR {str(eflr)}')
+#         self.eflr_summary.add(file_logical_data)
+#
+#     # Overload @abc.abstractmethod
+#     def add_iflr(self, file_logical_data: File.FileLogicalData,
+#                  iflr: IFLR.IndirectlyFormattedLogicalRecord, **kwargs) -> None:
+#         super().add_iflr(file_logical_data, iflr)
+#         if self.iflr_dump and len(self.iflr_set_type) == 0 or iflr.object_name in self.iflr_set_type:
+#             self.dump_strings.append(f'IFLR {str(iflr)}')
+#         self.iflr_summary.add(file_logical_data, self.log_pass)
+#
+#
+# class ScanFile(LogicalFile.LogicalFileSequence):
+#     # def __init__(self, *args, **kwargs):
+#     #     super().__init__(*args, **kwargs)
+#
+#     # Overload of @abc.abstractmethod
+#     def create_logical_file(self,
+#                             file_logical_data: File.FileLogicalData,
+#                             eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> LogicalFile:
+#         return ScanLogicalFile(file_logical_data, eflr, **kwargs)
+#
+#     # Overload of @abc.abstractmethod
+#     def create_eflr(self, file_logical_data: File.FileLogicalData, **kwargs) -> EFLR.ExplicitlyFormattedLogicalRecord:
+#         return EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+#
+#     def dump_scan(self, fout: typing.TextIO) -> None:
+#         fout.write(str(self.storage_unit_label))
+#         fout.write('\n')
+#         for l, logical_file in enumerate(self.logical_files):
+#             with _output_section_header_trailer(f'Logical File [Index {l} of {len(self.logical_files)}]', '=', os=fout):
+#                 for line in logical_file.dump_strings:
+#                     fout.write(line)
+#                     fout.write('\n')
+#                 with _output_section_header_trailer('EFLR Summary', '-', os=fout):
+#                     fout.write(str(logical_file.eflr_summary))
+#                     fout.write('\n')
+#                 with _output_section_header_trailer('IFLR Summary', '-', os=fout):
+#                     fout.write(str(logical_file.iflr_summary))
+#                     fout.write('\n')
 
 
 def _write_position_rle(rle: Rle.RLE, fout: typing.TextIO) -> None:
@@ -539,14 +539,73 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                     fout.write('\n')
 
 
+def _scan_log_pass_content(
+        rp66_file: File.FileRead,
+        logical_file_sequence: LogicalFile.LogicalFileSequence,
+        index: int,
+        fout: typing.TextIO,
+        **kwargs) -> None:
+    logical_file: LogicalFile.LogicalFile = logical_file_sequence.logical_files[index]
+    assert logical_file.has_log_pass
+    lp: LogPass.LogPass = logical_file.log_pass
+    # fout.write(str(lp))
+    # fout.write('\n')
+    frame_array: LogPass.FrameArray
+    for fa, frame_array in enumerate(lp.frame_arrays):
+        with _output_section_header_trailer(f'Frame Array [{fa}/{len(lp.frame_arrays)}]', '^', os=fout):
+            fout.write(str(frame_array))
+            fout.write('\n')
+            iflrs = logical_file.iflr_position_map[frame_array.ident]
+            if len(iflrs):
+                fout.write(f'Frames [{len(iflrs)}] from: {iflrs[0].x_axis} to {iflrs[-1].x_axis} {frame_array.x_axis.units}')
+                fout.write('\n')
+                frame_array.init_arrays(len(iflrs))
+                for f, (frame_number, lrsh_position, x_axis) in enumerate(iflrs):
+                    # TODO: raise
+                    assert f + 1 == frame_number
+                    vr_position = logical_file_sequence.visible_record_prior(lrsh_position)
+                    fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+                    # TODO: Hard-coded zero!
+                    iflr = IFLR.IndirectlyFormattedLogicalRecord(0, fld.logical_data)
+                    frame_array.read(iflr.logical_data, f)
+                # TODO: Ignore null values -999.25
+                fout.write(f'{"Channel":16} {"Min":16}\n')
+                frame_table = [['Channel', 'Size', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
+                for channel in frame_array.channels:
+                    channel_ident = channel.ident.I.decode("ascii")
+                    arr = channel.array
+                    frame_table.append(
+                        [channel_ident, arr.size, arr.min(), arr.mean(), arr.std(), arr.max(), channel.units, arr.dtype]
+                    )
+                fout.write('\n'.join(table.format_table(frame_table, heading_underline='-', pad='   ')))
+                fout.write('\n')
+            else:
+                fout.write('No frames.')
+            fout.write('\n')
+
+
 def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
-    scan_file: ScanFile = ScanFile(fobj, kwargs['rp66v1_path'], **kwargs)
+    logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, kwargs['rp66v1_path'])
+    rp66_file = File.FileRead(fobj)
     with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
-        encrypted_records: bool = kwargs.get('encrypted_records', False)
-        if not encrypted_records:
-            # fout.write(_colorama_note('Encrypted records omitted. Use -e to show them.\n'))
-            fout.write('Encrypted records omitted. Use -e to show them.\n')
-        scan_file.dump_scan(fout)
+        fout.write(str(logical_file_sequence.storage_unit_label))
+        fout.write('\n')
+        logical_file: LogicalFile.LogicalFile
+        for lf, logical_file in enumerate(logical_file_sequence.logical_files):
+            with _output_section_header_trailer(f'Logical File [{lf}/{len(logical_file_sequence.logical_files)}]', '=', os=fout):
+                fout.write(str(logical_file))
+                fout.write('\n')
+                for e, (eflr_position, eflr) in enumerate(logical_file.eflrs):
+                    header = f'EFLR [{e}/{len(logical_file.eflrs)}] at {str(eflr_position)}'
+                    with _output_section_header_trailer(header, '-', os=fout):
+                        fout.write(str(eflr))
+                        fout.write('\n')
+                # Now the LogPass(s)
+                if logical_file.has_log_pass:
+                    with _output_section_header_trailer('Log Pass', '-', os=fout):
+                        _scan_log_pass_content(rp66_file, logical_file_sequence, lf, fout, **kwargs)
+                else:
+                    fout.write('NO Log Pass for this Logical Record\n')

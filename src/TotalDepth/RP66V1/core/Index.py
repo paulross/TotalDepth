@@ -86,9 +86,9 @@ def write_logical_file_to_xml(logical_file: LogicalFile, xml_stream: XmlWrite.Xm
 
 
 def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.LogicalFileSequence,
-                                       ostream: io.StringIO) -> None:
+                                       output_stream: typing.TextIO) -> None:
     """Takes a LogicalFileSequence and writes the index to an XML stream."""
-    with XmlWrite.XmlStream(ostream) as xml_stream:
+    with XmlWrite.XmlStream(output_stream) as xml_stream:
         # TODO: Write UTC timestamp of indexing? User? Timestamp of file?
         with XmlWrite.Element(xml_stream, 'RP66V1FileIndex', {
             'path': logical_file_sequence.path,

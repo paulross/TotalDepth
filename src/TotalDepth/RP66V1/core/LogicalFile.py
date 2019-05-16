@@ -1,4 +1,5 @@
 import abc
+import bisect
 import logging
 import typing
 
@@ -118,7 +119,12 @@ class LogicalFile:
             raise ExceptionLogicalFileMissingRecord('Have not yet seen an ORIGIN record.')
         return self.eflrs[1].eflr
 
-    def is_next(self, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
+    @property
+    def has_log_pass(self) -> bool:
+        return self.log_pass is not None
+
+    @staticmethod
+    def is_next(eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
         return eflr.set.type == b'FILE-HEADER'
 
     def add_eflr(self, file_logical_data: File.FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
@@ -174,6 +180,7 @@ class LogicalFile:
 
 
 class LogicalFileSequence:
+    # TODO: Consider renaming this to FileIndex. See LIS for a compatible name.
     def __init__(self, fobj: typing.Union[typing.BinaryIO, None], path: str):
         self.path = path
         self.logical_files: typing.List[LogicalFile] = []
@@ -210,3 +217,37 @@ class LogicalFileSequence:
 
     def __len__(self) -> int:
         return len(self.logical_files)
+
+    def visible_record_prior(self, lrsh_position: int) -> int:
+        """Find rightmost value of visible record position less than the lrsh position.
+
+        See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
+        example function find_lt().
+        """
+        i = bisect.bisect_left(self.visible_record_positions, lrsh_position)
+        if i:
+            return self.visible_record_positions[i - 1]
+        raise ValueError
+
+
+class FileRandomAccess:
+    def __init__(self, logical_file_sequence: LogicalFileSequence):
+        self.logical_file_sequence = logical_file_sequence
+        self.binary_file: typing.BinaryIO = None
+        self.rp66v1_file: File.FileRead = None
+
+    def __enter__(self):
+        if self.binary_file is not None:
+            self.binary_file.close()
+            self.binary_file = None
+        self.binary_file = open(self.logical_file_sequence.path, 'rb')
+        self.rp66v1_file = File.FileRead(self.binary_file)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.binary_file is not None:
+            self.binary_file.close()
+            self.binary_file = None
+        self.rp66v1_file = None
+        return False
+

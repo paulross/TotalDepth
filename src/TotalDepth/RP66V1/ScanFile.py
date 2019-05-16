@@ -326,13 +326,13 @@ def main() -> int:
             scan_RP66V1_file_data_content,
             args.recurse,
             # kwargs
-            verbose=args.verbose,
-            encrypted=args.encrypted,
-            keep_going=args.keep_going,
-            eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-            iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-            iflr_dump=args.IFLR,
-            eflr_dump=args.EFLR,
+            # verbose=args.verbose,
+            # encrypted=args.encrypted,
+            # keep_going=args.keep_going,
+            # eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
+            # iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
+            # iflr_dump=args.IFLR,
+            # eflr_dump=args.EFLR,
             rp66v1_path=args.path_in,
         )
     clk_exec = time.perf_counter() - clk_start

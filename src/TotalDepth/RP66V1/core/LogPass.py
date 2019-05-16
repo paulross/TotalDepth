@@ -71,7 +71,7 @@ class FrameChannel:
         self.array: np.ndarray = self._init_array(1)
 
     def __str__(self) -> str:
-        return f'FrameChannel: {self.ident:8} Rc: {self.rep_code:3d} Co: {self.count:4d}' \
+        return f'FrameChannel: {self.ident:18} Rc: {self.rep_code:3d} Co: {self.count:4d}' \
             f' Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
 
     def _init_array(self, number_of_frames: int) -> np.ndarray:
@@ -192,6 +192,14 @@ class FrameArray:
         """Reads the Logical Data into the numpy frame."""
         for channel in self.channels:
             channel.read(ld, frame_number)
+        if ld.remain != 0:
+            raise ExceptionFrameArray(f'Not all logical data consumed, remaining {ld.remain} bytes')
+
+    @property
+    def x_axis(self) -> FrameChannel:
+        if len(self.channels) == 0:
+            raise ExceptionFrameArray('No channels to find X axis from.')
+        return self.channels[0]
 
     def init_x_axis_array(self, number_of_frames: int) -> None:
         """
@@ -199,8 +207,7 @@ class FrameArray:
         """
         if number_of_frames <= 0:
             raise ExceptionFrameArray(f'Number of frames must be > 0 not {number_of_frames}')
-        assert len(self.channels) > 0
-        self.channels[0].init_array(number_of_frames)
+        self.x_axis.init_array(number_of_frames)
 
     def read_x_axis(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the first channel of the Logical Data into the numpy frame."""

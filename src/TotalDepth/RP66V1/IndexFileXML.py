@@ -26,7 +26,13 @@ IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, tim
 FRAME_CHUNK = 1024
 FRAME_CHUNK = -1024
 
+
 def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
+    """
+    Reads a single XML index and create a populated LogicalFileSequence.
+
+    Returns the performance of this activity.
+    """
     logger.info(f'Reading XML index: {xml_path_in}')
     try:
         t_start = time.perf_counter()
