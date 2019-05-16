@@ -13,7 +13,7 @@ from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
-from TotalDepth.common import Rle, table
+from TotalDepth.common import Rle, data_table
 from TotalDepth.util.bin_file_type import format_bytes
 
 
@@ -505,6 +505,7 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
         fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
     with _output_section_header_trailer('RP66V1 EFLR and IFLR Data Summary', '*', os=fout):
         rp66_file = File.FileRead(fobj)
+        # TODO: use data_table.format_table
         vr_position = 0
         header = [
             f'{"Visible R":10}',

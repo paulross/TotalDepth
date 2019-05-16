@@ -1,7 +1,7 @@
 
 import pytest
 
-from TotalDepth.common import table
+from TotalDepth.common import data_table
 
 SIMPLE_TABLE = [['Col 1', 'Col 2'], [1,2], [3, 4], [5, 6]]
 
