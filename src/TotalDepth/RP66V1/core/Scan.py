@@ -591,13 +591,6 @@ def _scan_log_pass_content(
                         fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
                         iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
                         frame_array.read(iflr.logical_data, f // frame_spacing)
-                # TODO: Ignore null values -999.25
-                # New array
-                # marr = np.ma.masked_equal(arr, 3)
-                # View on original array:
-                # marr2 = arr.view(np.ma.MaskedArray)
-                # marr2.mask = arr!=3
-                fout.write(f'{"Channel":16} {"Min":16}\n')
                 frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
                     channel_ident = channel.ident.I.decode("ascii")

@@ -7,7 +7,7 @@ SIMPLE_TABLE = [['Col 1', 'Col 2'], [1,2], [3, 4], [5, 6]]
 
 
 def test_format_table_simple():
-    formatted_table = table.format_table(SIMPLE_TABLE)
+    formatted_table = data_table.format_table(SIMPLE_TABLE)
     expected = """Col 1 Col 2
     1     2
     3     4
@@ -18,7 +18,7 @@ def test_format_table_simple():
 
 
 def test_format_table_simple_sphinx():
-    formatted_table = table.format_table(SIMPLE_TABLE, heading_underline='=')
+    formatted_table = data_table.format_table(SIMPLE_TABLE, heading_underline='=')
     expected = """Col 1 Col 2
 ===== =====
     1     2
@@ -30,7 +30,7 @@ def test_format_table_simple_sphinx():
 
 
 def test_format_table_simple_pad():
-    formatted_table = table.format_table(SIMPLE_TABLE, pad=' | ')
+    formatted_table = data_table.format_table(SIMPLE_TABLE, pad=' | ')
     expected = """Col 1 | Col 2
     1 |     2
     3 |     4
