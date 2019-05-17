@@ -198,12 +198,16 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
           </IFLR>
         </FrameArray>
     """
-    with XmlWrite.Element(xml_stream, 'FrameArray', {
+    frame_array_attrs = {
         'O': f'{frame_array.ident.O}',
         'C': f'{frame_array.ident.C}',
         'I': f'{frame_array.ident.I.decode("ascii")}',
-        'description': frame_array.description.decode('ascii')
-    }):
+        'description': frame_array.description.decode('ascii'),
+        'x_axis' : frame_array.channels[0].ident.I.decode("ascii"),
+        'x_units' : frame_array.channels[0].units.decode("ascii"),
+    }
+
+    with XmlWrite.Element(xml_stream, 'FrameArray', frame_array_attrs):
         with XmlWrite.Element(xml_stream, 'Channels', {'count': f'{len(frame_array)}'}):
             for channel in frame_array.channels:
                     frame_channel_to_XML(channel, xml_stream)
