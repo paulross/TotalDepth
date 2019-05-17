@@ -87,6 +87,10 @@ class FrameChannel:
         if self.array is None or len(self.array) != number_of_frames:
             self.array = self._init_array(number_of_frames)
 
+    @property
+    def sizeof_array(self) -> int:
+        return self.array.size * self.array.itemsize
+
     def numpy_indexes(self, frame_number: int) -> itertools.product:
         """
         Returns a generator of numpy indexes for a particular frame.
@@ -178,6 +182,10 @@ class FrameArray:
         if item in self.channel_ident_map:
             return self.channels[self.channel_ident_map[item]]
         return self.channels[item]
+
+    @property
+    def sizeof_array(self) -> int:
+        return sum(ch.sizeof_array for ch in self.channels)
 
     def init_arrays(self, number_of_frames: int) -> None:
         """

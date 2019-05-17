@@ -545,9 +545,11 @@ def _scan_log_pass_content(
         logical_file_sequence: LogicalFile.LogicalFileSequence,
         index: int,
         fout: typing.TextIO,
-        **kwargs) -> None:
+        *,
+        frame_spacing) -> None:
     logical_file: LogicalFile.LogicalFile = logical_file_sequence.logical_files[index]
     assert logical_file.has_log_pass
+    assert frame_spacing >= 1
     lp: LogPass.LogPass = logical_file.log_pass
     # fout.write(str(lp))
     # fout.write('\n')
@@ -558,18 +560,36 @@ def _scan_log_pass_content(
             fout.write('\n')
             iflrs = logical_file.iflr_position_map[frame_array.ident]
             if len(iflrs):
-                fout.write(f'Frames [{len(iflrs)}] from: {iflrs[0].x_axis} to {iflrs[-1].x_axis} {frame_array.x_axis.units}')
+                num_frames = 1 + len(iflrs) // frame_spacing
+                # if num_frames == 0:
+                #     num_frames = 1
+                # frame_array.init_arrays(len(iflrs))
+                frame_array.init_arrays(num_frames)
+                interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / len(iflrs)
+                fout.write(
+                    f'Frames [{len(iflrs)}]'
+                    f' from: {float(iflrs[0].x_axis):0.3f}'
+                    f' to {float(iflrs[-1].x_axis):0.3f}'
+                    f' Interval: {interval:0.3f}'
+                    f' {frame_array.x_axis.units}'
+                )
                 fout.write('\n')
-                frame_array.init_arrays(len(iflrs))
-                for f, (frame_number, lrsh_position, x_axis) in enumerate(iflrs):
+                fout.write(
+                    f'Frame spacing: {frame_spacing}'
+                    f' number of frames: {num_frames}'
+                    f' numpy size: {frame_array.sizeof_array:,d} bytes'
+                )
+                fout.write('\n')
+                for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
                     # TODO: raise
-                    assert f + 1 == frame_number
-                    vr_position = logical_file_sequence.visible_record_prior(lrsh_position)
-                    fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-                    # TODO: Hard-coded zero!
-                    iflr = IFLR.IndirectlyFormattedLogicalRecord(0, fld.logical_data)
-                    frame_array.read(iflr.logical_data, f)
+                    assert f + 1 == iflr_frame_number
+                    if f % frame_spacing == 0:
+                        vr_position = logical_file_sequence.visible_record_prior(lrsh_position)
+                        fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+                        iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+                        frame_array.read(iflr.logical_data, f // frame_spacing)
                 # TODO: Ignore null values -999.25
+                # marr = np.ma.masked_equal(arr, 3)
                 fout.write(f'{"Channel":16} {"Min":16}\n')
                 frame_table = [['Channel', 'Size', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
@@ -585,12 +605,14 @@ def _scan_log_pass_content(
             fout.write('\n')
 
 
-def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
+def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, *, rp66v1_path, frame_spacing) -> None:
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
-    logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, kwargs['rp66v1_path'])
+    logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, rp66v1_path)
     rp66_file = File.FileRead(fobj)
+    if frame_spacing <= 0:
+        frame_spacing = 1
     with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
         fout.write(str(logical_file_sequence.storage_unit_label))
         fout.write('\n')
@@ -607,6 +629,6 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, **
                 # Now the LogPass(s)
                 if logical_file.has_log_pass:
                     with _output_section_header_trailer('Log Pass', '-', os=fout):
-                        _scan_log_pass_content(rp66_file, logical_file_sequence, lf, fout, **kwargs)
+                        _scan_log_pass_content(rp66_file, logical_file_sequence, lf, fout, frame_spacing=frame_spacing)
                 else:
                     fout.write('NO Log Pass for this Logical Record\n')

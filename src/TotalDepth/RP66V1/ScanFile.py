@@ -248,6 +248,11 @@ def main() -> int:
         '-k', '--keep-going', action='store_true',
         help='Keep going as far as sensible. [default: %(default)s]',
     )
+    parser.add_argument(
+        '--frame-spacing', type=int, default=1,
+        help='With --LR read log data at this frame spacing.'
+             ' For example --frame-spacing=8 then read every eighth frame. [default: %(default)s]',
+    )
     log_level_help_mapping = ', '.join(
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
     )
@@ -334,6 +339,7 @@ def main() -> int:
             # iflr_dump=args.IFLR,
             # eflr_dump=args.EFLR,
             rp66v1_path=args.path_in,
+            frame_spacing=args.frame_spacing,
         )
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)
