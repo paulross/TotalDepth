@@ -8,7 +8,7 @@ import typing
 
 import colorama
 
-from TotalDepth.RP66V1.core import File, LogPass
+from TotalDepth.RP66V1.core import File, LogPass, AbsentValue
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
@@ -560,7 +560,10 @@ def _scan_log_pass_content(
             fout.write('\n')
             iflrs = logical_file.iflr_position_map[frame_array.ident]
             if len(iflrs):
-                num_frames = 1 + len(iflrs) // frame_spacing
+                if frame_spacing > 1:
+                    num_frames = 1 + len(iflrs) // frame_spacing
+                else:
+                    num_frames = len(iflrs)
                 # if num_frames == 0:
                 #     num_frames = 1
                 # frame_array.init_arrays(len(iflrs))
@@ -589,14 +592,23 @@ def _scan_log_pass_content(
                         iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
                         frame_array.read(iflr.logical_data, f // frame_spacing)
                 # TODO: Ignore null values -999.25
+                # New array
                 # marr = np.ma.masked_equal(arr, 3)
+                # View on original array:
+                # marr2 = arr.view(np.ma.MaskedArray)
+                # marr2.mask = arr!=3
                 fout.write(f'{"Channel":16} {"Min":16}\n')
-                frame_table = [['Channel', 'Size', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
+                frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
                     channel_ident = channel.ident.I.decode("ascii")
-                    arr = channel.array
+                    # arr = channel.array
+                    arr = AbsentValue.mask_absent_values(channel.array)
                     frame_table.append(
-                        [channel_ident, arr.size, arr.min(), arr.mean(), arr.std(), arr.max(), channel.units, arr.dtype]
+                        [channel_ident, arr.size,
+                         # NOTE: Not the masked array!
+                         AbsentValue.count_of_absent_values(channel.array),
+                         arr.min(), arr.mean(),
+                         arr.std(), arr.max(), channel.units, arr.dtype]
                     )
                 fout.write('\n'.join(data_table.format_table(frame_table, heading_underline='-', pad='   ')))
                 fout.write('\n')

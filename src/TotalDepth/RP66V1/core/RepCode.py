@@ -35,6 +35,7 @@ Code	Name	Size in Bytes	Descirption (sic)
 27	    UNITS	V	            Units expression
 """
 import collections
+import enum
 import struct
 import typing
 
@@ -49,19 +50,30 @@ class ExceptionRepCode(ExceptionTotalDepthRP66V1):
 
 # TODO: Have static NULL values e.g. IDENT_null = b'' ?
 
+REP_CODES_ALL = set(range(28))
+REP_CODES_SUPPORTED = {
+    # 1,
+    2,
+    # 3, 4, 5, 6,
+    7,
+    # 8, 9, 10, 11,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    # 25,
+    26, 27}
+REP_CODES_UNSUPPORTED = REP_CODES_ALL - REP_CODES_SUPPORTED
 
-REP_CODE_INT_TO_STR = {
-    1: 'FSHORT',
+REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
+    # 1: 'FSHORT',
     2: 'FSINGL',
-    3: 'FSING1',
-    4: 'FSING2',
-    5: 'ISINGL',
-    6: 'VSINGL',
+    # 3: 'FSING1',
+    # 4: 'FSING2',
+    # 5: 'ISINGL',
+    # 6: 'VSINGL',
     7: 'FDOUBL',
-    8: 'FDOUB1',
-    9: 'FDOUB2',
-    10: 'CSINGL',
-    11: 'CDOUBL',
+    # 8: 'FDOUB1',
+    # 9: 'FDOUB2',
+    # 10: 'CSINGL',
+    # 11: 'CDOUBL',
     12: 'SSHORT',
     13: 'SNORM',
     14: 'SLONG',
@@ -75,12 +87,16 @@ REP_CODE_INT_TO_STR = {
     22: 'ORIGIN',
     23: 'OBNAME',
     24: 'OBJREF',
-    25: 'ATTREF',
+    # 25: 'ATTREF',
     26: 'STATUS',
     27: 'UNITS',
 }
+assert set(REP_CODE_INT_TO_STR.keys()) == REP_CODES_SUPPORTED
+
 REP_CODE_STR_TO_INT = {v: k for k, v in REP_CODE_INT_TO_STR.items()}
 assert len(REP_CODE_INT_TO_STR) == len(REP_CODE_STR_TO_INT)
+assert set(REP_CODE_STR_TO_INT.values()) == REP_CODES_SUPPORTED, \
+    f'{set(REP_CODE_STR_TO_INT.values())} != {REP_CODES_SUPPORTED}'
 
 # [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2] says:
 # 'If there is an Index Channel, then it must appear first in the Frame and it must be scalar.'
@@ -89,7 +105,7 @@ assert len(REP_CODE_INT_TO_STR) == len(REP_CODE_STR_TO_INT)
 # - Not compound values.
 # - Fixed length representations,
 # TODO: Verify these assumptions, what index Representation Codes are actually experienced in practice?
-SCALAR_CODES = {1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17}
+REP_CODE_SCALAR_CODES = {1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17}
 # Longest Representation Code that is a scalar, FDOUBL.
 LENGTH_LARGEST_INDEX_CHANNEL_CODE = 8
 
@@ -402,6 +418,7 @@ REP_CODE_MAP = {
     26: STATUS,
     27: UNITS,
 }
+assert set(REP_CODE_MAP.keys()) == REP_CODES_SUPPORTED
 
 
 def code_read(rep_code: int, ld: LogicalData):
@@ -426,6 +443,7 @@ REP_CODE_NUMPY_TYPE_MAP = {
     17: np.uint32,
     18: np.uint64,
 }
+assert set(REP_CODE_NUMPY_TYPE_MAP.keys()) - REP_CODES_SUPPORTED == set()
 
 
 def numpy_dtype(rep_code: int):
@@ -434,3 +452,51 @@ def numpy_dtype(rep_code: int):
     except KeyError:
         raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
 
+
+class NumericCategory(enum.Enum):
+    """Categories of Representation Codes. Useful for deciding absent value."""
+    NONE = 0
+    INTEGER = 1
+    FLOAT = 2
+
+# Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
+REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
+    # 1: FSHORT,
+    2: NumericCategory.FLOAT,  # FSINGL,
+    # 3: NumericCategory.NONE,  # FSING1,
+    # 4: NumericCategory.NONE,  # FSING2,
+    # 5: NumericCategory.FLOAT,  # ISINGL,
+    # 6: NumericCategory.FLOAT,  # VSINGL,
+    7: NumericCategory.FLOAT,  # FDOUBL,
+    # 8: NumericCategory.NONE,  # FDOUB1,
+    # 9: NumericCategory.NONE,  # FDOUB2,
+    # 10: NumericCategory.NONE,  # CSINGL,
+    # 11: NumericCategory.NONE,  # CDOUBL,
+    12: NumericCategory.INTEGER,  # SSHORT,
+    13: NumericCategory.INTEGER,  # SNORM,
+    14: NumericCategory.INTEGER,  # SLONG,
+    15: NumericCategory.INTEGER,  # USHORT,
+    16: NumericCategory.INTEGER,  # UNORM,
+    17: NumericCategory.INTEGER,  # ULONG,
+    18: NumericCategory.INTEGER,  # UVARI,
+    19: NumericCategory.NONE,  # IDENT,
+    20: NumericCategory.NONE,  # ASCII,
+    21: NumericCategory.NONE,  # DTIME,
+    22: NumericCategory.NONE,  # ORIGIN,
+    23: NumericCategory.NONE,  # OBNAME,
+    24: NumericCategory.NONE,  # OBJREF,
+    # 25: NumericCategory.NONE,  # ATTREF,
+    26: NumericCategory.NONE,  # STATUS,
+    27: NumericCategory.NONE,  # UNITS,
+}
+assert set(REP_CODE_CATEGORY_MAP.keys()) == REP_CODES_SUPPORTED
+
+
+for r in REP_CODE_NUMPY_TYPE_MAP.keys():
+    if np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.integer):
+        assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.INTEGER
+    elif np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.floating):
+        assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.FLOAT
+    else:
+        assert 0
+del r
