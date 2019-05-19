@@ -92,8 +92,8 @@ import typing
 
 _CONVERSION_FACTORS = {
     (b'0.1 in', b'm'): 0.3048 / 120,
-    (b'in', b'm'): 0.3048 / 12,
-    (b'ft', b'm'): 0.3048,
+    # (b'in', b'm'): 0.3048 / 12,
+    # (b'ft', b'm'): 0.3048,
 }
 
 

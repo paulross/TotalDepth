@@ -291,12 +291,31 @@ class ExplicitlyFormattedLogicalRecord:
         return self.objects[item]
 
     def __str__(self) -> str:
-        ret = [
-            f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>',
-            f'  Template [{len(self.template)}]:',
-        ]
+        return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}> Template [{len(self.template)}]:'
+
+    def str_long(self) -> str:
+        ret = [str(self)]
         ret.extend('    {}'.format(line) for line in str(self.template).split('\n'))
         ret.append(f'  Objects [{len(self.objects)}]:')
         for obj in self.objects:
             ret.extend('    {}'.format(line) for line in str(obj).split('\n'))
         return '\n'.join(ret)
+
+    def table_as_strings(self) -> typing.List[typing.List[str]]:
+        ret = [
+            ['ObjectName IDENT'] + self.template.header_as_strings(),
+        ]
+        for obj in self.objects:
+            row = [obj.name.I] + obj.values_as_strings()
+            ret.append(row)
+        return ret
+
+    def is_key_value(self) -> bool:
+        return len(self.objects) == 1
+
+    def key_value(self) -> typing.List[typing.Tuple[str, str]]:
+        if self.is_key_value():
+            ret = [['KEY', 'VALUE']]
+            ret.extend(list(zip(self.template.header_as_strings(), self.objects[0].values_as_strings())))
+            return ret
+        raise ExceptionEFLR('Can not represent EFLR as key->value table.')
