@@ -55,34 +55,3 @@ def format_table(rows: typing.Sequence[typing.Sequence[typing.Any]],
             for row in str_table:
                 ret.append(pad.join([f'{s:>{w}}' for s, w in zip(row, column_widths)]))
     return ret
-
-
-RE_BREAK_POINT = re.compile(r'^(.+)[ ,\-].+$')
-
-
-def _split_cell(s: str, max_width: int) -> typing.Sequence[typing.Sequence[str]]:
-    assert max_width > 0
-    if len(s) <= max_width:
-        return [s]
-    ret = []
-    while s:
-        m = RE_BREAK_POINT.match(s[:max_width])
-        if m:
-            ret.append(m.group(1))
-            s = s[:len(ret[-1])+1].strip()
-        else:
-            ret.append(s[:max_width])
-            s = s[:max_width]
-    return ret
-
-
-def wrap_cells(str_table: typing.Sequence[typing.Sequence[str]], max_width: int) -> typing.Sequence[typing.Sequence[str]]:
-    column_widths = [max([len(s) for s in col]) for col in zip(*str_table)]
-    must_wrap = [w > max_width for w in column_widths]
-    if not any(must_wrap):
-        return str_table
-    ret = []
-    for row in str_table:
-        pass
-
-    return ret

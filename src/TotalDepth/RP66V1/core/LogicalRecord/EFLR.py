@@ -306,16 +306,18 @@ class ExplicitlyFormattedLogicalRecord:
             ['ObjectName IDENT'] + self.template.header_as_strings(),
         ]
         for obj in self.objects:
-            row = [obj.name.I] + obj.values_as_strings()
+            row = [obj.name.I.decode('ascii')] + obj.values_as_strings()
             ret.append(row)
         return ret
 
     def is_key_value(self) -> bool:
         return len(self.objects) == 1
 
-    def key_value(self) -> typing.List[typing.Tuple[str, str]]:
+    def key_values(self) -> typing.List[typing.Tuple[str, str]]:
         if self.is_key_value():
             ret = [['KEY', 'VALUE']]
-            ret.extend(list(zip(self.template.header_as_strings(), self.objects[0].values_as_strings())))
+            # ret.extend(list(zip(self.template.header_as_strings(), self.objects[0].values_as_strings())))
+            for k, v in zip(self.template.header_as_strings(), self.objects[0].values_as_strings()):
+                ret.append([k, v])
             return ret
         raise ExceptionEFLR('Can not represent EFLR as key->value table.')

@@ -1,5 +1,6 @@
 import abc
 import bisect
+import collections
 import logging
 import typing
 
@@ -179,19 +180,39 @@ class LogicalFile:
             self.iflr_position_map[iflr.object_name] = [iflr_data]
 
 
+class VisibleRecordPositions(collections.UserList):
+
+    def visible_record_prior(self, lrsh_position: int) -> int:
+        """Find rightmost value of visible record position less than the lrsh position.
+
+        See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
+        example function find_lt().
+        """
+        i = bisect.bisect_left(self.data, lrsh_position)
+        if i:
+            return self.data[i - 1]
+        if len(self) == 0:
+            msg = f'No Visible Record positions for LRSH position {lrsh_position}.'
+        else:
+            msg = f'Can not find Visible Record position prior to {lrsh_position}, earliest is {self[0]}.'
+        raise ValueError(msg)
+
+
 class LogicalFileSequence:
     # TODO: Consider renaming this to FileIndex. See LIS for a compatible name.
     def __init__(self, fobj: typing.Union[typing.BinaryIO, None], path: str):
         self.path = path
         self.logical_files: typing.List[LogicalFile] = []
         self.storage_unit_label = None
-        self.visible_record_positions = []
+        self.visible_record_positions: VisibleRecordPositions = VisibleRecordPositions()
         if fobj is not None:
             rp66_file = File.FileRead(fobj)
             self.storage_unit_label = rp66_file.sul
             # Capture all the Visible Records, this can not be done by looking at the Logical Records only
             # as some Visible Records can be missed.
-            self.visible_record_positions = [vr.position for vr in rp66_file.iter_visible_records()]
+            self.visible_record_positions = VisibleRecordPositions(
+                vr.position for vr in rp66_file.iter_visible_records()
+            )
             # Now iterate across the file again for the Logical Records.
             for file_logical_data in rp66_file.iter_logical_records():
                 assert file_logical_data.is_sealed()
@@ -218,16 +239,16 @@ class LogicalFileSequence:
     def __len__(self) -> int:
         return len(self.logical_files)
 
-    def visible_record_prior(self, lrsh_position: int) -> int:
-        """Find rightmost value of visible record position less than the lrsh position.
-
-        See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
-        example function find_lt().
-        """
-        i = bisect.bisect_left(self.visible_record_positions, lrsh_position)
-        if i:
-            return self.visible_record_positions[i - 1]
-        raise ValueError
+    # def visible_record_prior(self, lrsh_position: int) -> int:
+    #     """Find rightmost value of visible record position less than the lrsh position.
+    #
+    #     See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
+    #     example function find_lt().
+    #     """
+    #     i = bisect.bisect_left(self.visible_record_positions, lrsh_position)
+    #     if i:
+    #         return self.visible_record_positions[i - 1]
+    #     raise ValueError
 
 
 class FileRandomAccess:

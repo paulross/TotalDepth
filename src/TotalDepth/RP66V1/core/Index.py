@@ -280,5 +280,5 @@ def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> L
     # Read the Visible Record section and construct a RLE for them. This is for IFLRs that only have their
     # LRSH position, EFLRs record their Visible Record position along with their LRSH position.
     rle_vr = LogPassXML.xml_rle_read(LogPassXML.xml_single_element(root, './VisibleRecords'))
-    logical_file_sequence.visible_record_positions = list(rle_vr.values())
+    logical_file_sequence.visible_record_positions = LogicalFile.VisibleRecordPositions(rle_vr.values())
     return logical_file_sequence

@@ -271,6 +271,7 @@ class XmlStream(object):
         # TODO: This code does not seem to handle theStr bytes objects with '\x00' in them for example
         retL = []
         for c in theStr:
+            # assert isinstance(c, str), f'{c} is not a string {theStr}'
             try:
                 retL.append(self.ENTITY_MAP[c])
             except KeyError:

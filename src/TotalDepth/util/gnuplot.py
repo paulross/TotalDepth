@@ -29,6 +29,8 @@ def version() -> bytes:
         return proc.stdout.read().strip()
 
 
+# TODO: Use TotalDepth.common.data_table
+
 def _num_columns(table: typing.Sequence[typing.Sequence[typing.Any]]) -> int:
     num_colums_set = set(len(r) for r in table)
     if len(num_colums_set) != 1:

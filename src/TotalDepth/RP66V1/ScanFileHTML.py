@@ -166,7 +166,7 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
             table.append(list(data[k]) + [k])
-    name = 'ScanFile'
+    name = 'ScanFileHTML'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
@@ -177,16 +177,9 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
 
 def main() -> int:
     description = 'usage: %(prog)s [options] file'
-    description = """Scans a RP66V1 file and dumps data from the lowest level upwards:
-    --VR ~ Visible Records only.
-    --LRSH ~ Logical Record segments.
-    --LD ~ Logical data i.e. all Logical Record segments concatenated for each Logical Record.
-    --EFLR ~ Explicitly Formatted Logical Records.
-    --IFLR ~ Implicitly Formatted Logical Records.
-    --LR ~ All data, including frame data from all Logical Records.
-    """
-    print('Cmd: %s' % ' '.join(sys.argv))
+    description = """Scans a RP66V1 file and dumps data in HTML"""
     # TODO: Use CmnCmdOpts
+    print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(
         description=description,
         epilog=__rights__,
@@ -198,49 +191,6 @@ def main() -> int:
     #     '--version', action='version', version='%(prog)s Version: ' + __version__,
     #     help='Show version and exit.'
     # )
-    parser.add_argument(
-        '-V', '--VR', action='store_true',
-        help='Dump the Visible Records. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-L', '--LRSH', action='store_true',
-        help='Summarise the Visible Records and the Logical Record'
-             ' Segment Headers, use -v to dump records. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-D', '--LD', action='store_true',
-        help='Summarise logical data, use -v to dump records.'
-             ' See also --dump-bytes, --dump-raw-bytes. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-E', '--EFLR', action='store_true',
-        help='Dump EFLR Set. [default: %(default)s]',
-    )
-    parser.add_argument(
-        "--eflr-set-type", action='append', default=[],
-        help="List of EFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
-    )
-    parser.add_argument(
-        '-I', '--IFLR', action='store_true',
-        help='Dump IFLRs. [default: %(default)s]',
-    )
-    parser.add_argument(
-        "--iflr-set-type", action='append', default=[],
-        help="List of IFLR Set Types to output, additive, if absent then dump all. [default: %(default)s]",
-    )
-    parser.add_argument(
-        '-R', '--LR', action='store_true',
-        help='Dump all data, including frame data from Logical Records. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '-d', '--dump-bytes', type=int, default=0,
-        help='Dump X leading raw bytes for certain options, if -1 all bytes are dumped. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '--dump-raw-bytes', action='store_true',
-        help='Dump the raw bytes for certain options in raw format,'
-             ' otherwise Hex format is used. [default: %(default)s]',
-    )
     parser.add_argument(
         '-r', '--recurse', action='store_true',
         help='Process files recursively. [default: %(default)s]',
@@ -257,11 +207,6 @@ def main() -> int:
         '--frame-spacing', type=int, default=1,
         help='With --LR read log data at this frame spacing.'
              ' For example --frame-spacing=8 then read every eighth frame. [default: %(default)s]',
-    )
-    parser.add_argument(
-        '--eflr-as-table', action='store_true',
-        help='When with --LR and not --html then dump EFLRs as tables, otherwise every EFLR object.'
-             ' [default: %(default)s]',
     )
     log_level_help_mapping = ', '.join(
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
@@ -296,67 +241,15 @@ def main() -> int:
     clk_start = time.perf_counter()
     # return 0
     # Your code here
-    result: typing.Dict[str, IndexResult] = {}
-    output_extension = '.txt'
-    if args.VR or args.LRSH:
-        result = scan_dir_or_file(
-            args.path_in,
-            args.path_out,
-            Scan.scan_RP66V1_file_visible_records,
-            args.recurse,
-            output_extension,
-            # kwargs passed to scanning function
-            lrsh_dump=args.LRSH,
-            verbose=args.verbose,
-        )
-    if args.LD:
-        result = scan_dir_or_file(
-            args.path_in,
-            args.path_out,
-            Scan.scan_RP66V1_file_logical_data,
-            args.recurse,
-            output_extension,
-            # kwargs passed to scanning function
-            dump_bytes=args.dump_bytes,
-            dump_raw_bytes=args.dump_raw_bytes,
-            verbose=args.verbose,
-        )
-    if args.EFLR or args.IFLR:
-        result = scan_dir_or_file(
-            args.path_in,
-            args.path_out,
-            Scan.scan_RP66V1_file_EFLR_IFLR,
-            args.recurse,
-            output_extension,
-            # kwargs passed to scanning function
-            verbose=args.verbose,
-            encrypted=args.encrypted,
-            keep_going=args.keep_going,
-            eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-            iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-            iflr_dump=args.IFLR,
-            eflr_dump=args.EFLR,
-            rp66v1_path=args.path_in,
-        )
-    if args.LR:
-        result = scan_dir_or_file(
-            args.path_in,
-            args.path_out,
-            Scan.scan_RP66V1_file_data_content,
-            args.recurse,
-            output_extension,
-            # kwargs passed to scanning function
-            # verbose=args.verbose,
-            # encrypted=args.encrypted,
-            # keep_going=args.keep_going,
-            # eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-            # iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-            # iflr_dump=args.IFLR,
-            # eflr_dump=args.EFLR,
-            rp66v1_path=args.path_in,
-            frame_spacing=args.frame_spacing,
-            eflr_as_table=args.eflr_as_table,
-        )
+    result: typing.Dict[str, IndexResult] = scan_dir_or_file(
+        args.path_in,
+        args.path_out,
+        HTML.html_scan_RP66V1_file_data_content,
+        args.recurse,
+        '.xhtml',
+        rp66v1_path=args.path_in,
+        frame_spacing=args.frame_spacing,
+    )
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0
