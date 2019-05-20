@@ -170,8 +170,8 @@ class Template:
     def __str__(self) -> str:
         return '\n'.join(str(a) for a in self.attrs)
 
-    def header_as_strings(self) -> typing.List[str]:
-        return [str(attr.label) for attr in self.attrs]
+    def header_as_strings(self, conversion_function: typing.Callable) -> typing.List[str]:
+        return [conversion_function(attr.label) for attr in self.attrs]
 
 
 class Object:
@@ -242,15 +242,15 @@ class Object:
         )
         return '\n'.join(strs)
 
-    def values_as_strings(self) -> typing.List[str]:
-        ret = []
-        for attr in self.attrs:
-            if attr.value is None:
-                ret.append('None')
-            elif isinstance(attr.value[0], bytes):
-                ret.append(str(b', '.join(attr.value)))
-            else:
-                ret.append(', '.join(str(v) for v in attr.value))
+    def values_as_strings(self, conversion_function: typing.Callable) -> typing.List[str]:
+        ret = [conversion_function(attr) for attr in self.attrs]
+        # for attr in self.attrs:
+        #     if attr.value is None:
+        #         ret.append('None')
+        #     elif isinstance(attr.value[0], bytes):
+        #         ret.append(str(b', '.join(attr.value)))
+        #     else:
+        #         ret.append(', '.join(conversion_function(v) for v in attr.value))
         return ret
 
 
@@ -301,23 +301,31 @@ class ExplicitlyFormattedLogicalRecord:
             ret.extend('    {}'.format(line) for line in str(obj).split('\n'))
         return '\n'.join(ret)
 
-    def table_as_strings(self) -> typing.List[typing.List[str]]:
+    def table_as_strings(self, conversion_function: typing.Callable) -> typing.List[typing.List[str]]:
         ret = [
-            ['ObjectName IDENT'] + self.template.header_as_strings(),
+            ['ObjectName IDENT'] + self.template.header_as_strings(conversion_function),
         ]
         for obj in self.objects:
-            row = [obj.name.I.decode('ascii')] + obj.values_as_strings()
+            row = [conversion_function(obj.name)] + obj.values_as_strings(conversion_function)
             ret.append(row)
         return ret
 
     def is_key_value(self) -> bool:
         return len(self.objects) == 1
 
-    def key_values(self) -> typing.List[typing.Tuple[str, str]]:
+    def key_values(self, conversion_function: typing.Callable) -> typing.List[typing.List[str]]:
         if self.is_key_value():
             ret = [['KEY', 'VALUE']]
             # ret.extend(list(zip(self.template.header_as_strings(), self.objects[0].values_as_strings())))
-            for k, v in zip(self.template.header_as_strings(), self.objects[0].values_as_strings()):
+            for k, v in zip(
+                    self.template.header_as_strings(conversion_function),
+                    self.objects[0].values_as_strings(conversion_function)
+            ):
                 ret.append([k, v])
             return ret
         raise ExceptionEFLR('Can not represent EFLR as key->value table.')
+
+    @property
+    def shape(self) -> typing.Tuple[int, int]:
+        """Shape as (rows, columns)"""
+        return len(self), len(self.template)

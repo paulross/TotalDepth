@@ -306,8 +306,10 @@ def ORIGIN_len(by: typing.Union[bytes, bytearray], index: int) -> int:
 # O - Origin Reference as a ORIGIN type (UVARI).
 # C - Copy number as a USHORT type.
 # I - Identifier as an IDENT type.
-# TODO: Make the a sub-class of typing.NamedTuple with types.
-class ObjectName(collections.namedtuple('ObjectName', 'O, C, I')):
+class ObjectName(typing.NamedTuple):
+    O: int
+    C: int
+    I: bytes
 
     def __str__(self):
         return f'OBNAME: O: {self.O} C: {self.C} I: {self.I}'
