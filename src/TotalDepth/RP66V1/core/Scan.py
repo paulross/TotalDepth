@@ -610,7 +610,8 @@ def _scan_log_pass_content(
             fout.write('\n')
 
 
-def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, *, rp66v1_path, frame_spacing) -> None:
+def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
+                                  *, rp66v1_path: str, frame_spacing: int, eflr_as_table: bool) -> None:
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
@@ -632,12 +633,15 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO, *,
                     with _output_section_header_trailer(header, '-', os=fout):
                         fout.write(str(eflr_position.eflr))
                         fout.write('\n')
-                        if eflr_position.eflr.is_key_value():
-                            eflr_str_table = eflr_position.eflr.key_value()
+                        if eflr_as_table:
+                            if eflr_position.eflr.is_key_value():
+                                eflr_str_table = eflr_position.eflr.key_value()
+                            else:
+                                eflr_str_table = eflr_position.eflr.table_as_strings()
+                            fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
+                            fout.write('\n')
                         else:
-                            eflr_str_table = eflr_position.eflr.table_as_strings()
-                        fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
-                        fout.write('\n')
+                            fout.write(eflr_position.eflr.str_long())
                 # Now the LogPass(s)
                 if logical_file.has_log_pass:
                     with _output_section_header_trailer('Log Pass', '-', os=fout):
