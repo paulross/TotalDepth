@@ -82,6 +82,7 @@ def _write_log_pass_content_in_html(
         logical_file: LogicalFile.LogicalFile,
         xhtml_stream: XmlWrite.XhtmlStream,
         *,
+        # TODO: Replace with a slice object
         frame_spacing) -> None:
     assert logical_file.has_log_pass
     assert frame_spacing >= 1
@@ -94,13 +95,16 @@ def _write_log_pass_content_in_html(
             xhtml_stream.characters('Channels')
         # Table describing channels
         table_as_strings = [
-            ['Channel', 'Rep Code', 'Dimensions', 'Count', 'Units', 'Long Name']
+            ['Channel', 'O', 'C', 'Rep Code', 'Dimensions', 'Count', 'Units', 'Long Name']
         ]
         # Table body.
+        channel: LogPass.FrameChannel
         for channel in frame_array.channels:
             table_as_strings.append(
                 [
-                    str(channel.ident),
+                    channel.ident.I.decode('ascii'),
+                    f'{channel.ident.O}',
+                    f'{channel.ident.C}',
                     f'{channel.rep_code:d} ({RepCode.REP_CODE_INT_TO_STR[channel.rep_code]})',
                     str(channel.dimensions),
                     f'{channel.count:d}',
@@ -141,14 +145,15 @@ def _write_log_pass_content_in_html(
                     fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
                     iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
                     frame_array.read(iflr.logical_data, f // frame_spacing)
-            frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
+            frame_table = [['Channel', 'O', 'C', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
             for channel in frame_array.channels:
-                channel_ident = channel.ident.I.decode("ascii")
                 # arr = channel.array
                 arr = AbsentValue.mask_absent_values(channel.array)
                 frame_table.append(
                     [
-                        f'{channel_ident}',
+                        channel.ident.I.decode("ascii"),
+                        f'{channel.ident.O}',
+                        f'{channel.ident.C}',
                         f'{arr.size:d}',
                         # NOTE: Not the masked array!
                         f'{AbsentValue.count_of_absent_values(channel.array):d}',
