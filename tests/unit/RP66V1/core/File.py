@@ -123,5 +123,17 @@ def test_visible_record_read_next(fobj, position, length, version):
     assert vr.version == version
 
 
+@pytest.mark.parametrize(
+    'by, length',
+    (
+        (b'\x01\x00\xff\x01', 4),
+    )
+)
+def test_logical_data_ctor(by, length):
+    ld = File.LogicalData(by)
+    assert ld.index == 0
+    assert ld.remain == length
+
+
 
 

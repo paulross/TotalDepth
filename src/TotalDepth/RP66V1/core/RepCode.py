@@ -35,7 +35,9 @@ Code	Name	Size in Bytes	Descirption (sic)
 27	    UNITS	V	            Units expression
 """
 import collections
+import datetime
 import enum
+import string
 import struct
 import typing
 
@@ -108,6 +110,44 @@ assert set(REP_CODE_STR_TO_INT.values()) == REP_CODES_SUPPORTED, \
 REP_CODE_SCALAR_CODES = {1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17}
 # Longest Representation Code that is a scalar, FDOUBL.
 LENGTH_LARGEST_INDEX_CHANNEL_CODE = 8
+
+
+REP_CODE_FIXED_LENGTHS = {
+    1: 2,  # Low precision floating point
+    2: 4,  # IEEE single precision floating point
+    3: 8,  #Validated single precision floating point
+    4: 12,  #Two-way validated single precision floating point
+    5: 4,  # IBM single precision floating point
+    6: 4,  # VAX single precision floating point
+    7: 8,  # IEEE double precision floating point
+    8: 16,  # Validated double precision floating point
+    9: 24,  # Two-way validated double precision floating point
+    10: 8,  # Single precision complex
+    11: 16,  # Double precision complex
+    12: 1,  # Short signed integer
+    13: 2,  # Normal signed integer
+    14: 4,  # Long signed integer
+    15: 1,  # Short unsigned integer
+    16: 2,  # Normal unsigned integer
+    17: 4,  #  Long unsigned integer
+    # 18	    UVARI	1, 2, or 4	    Variable-length unsigned integer
+    # 19	    IDENT	V	            Variable-length identifier
+    # 20	    ASCII	V	            Variable-length ASCII character string
+    21: 8,  # Date and time
+    # 22	    ORIGIN	V	            Origin reference
+    # 23	    OBNAME	V	            Object name
+    # 24	    OBJREF	V	            Object reference
+    # 25	    ATTREF	V	            Attribute reference
+    26: 1,  # Boolean status
+    # 27	    UNITS	V	            Units expression
+}
+
+
+def rep_code_fixed_length(rc: int) -> int:
+    try:
+        return REP_CODE_FIXED_LENGTHS[rc]
+    except KeyError:
+        raise ExceptionRepCode(f'Representation code {rc} is not fixed length.')
 
 
 def FSINGL(ld: LogicalData) -> float:
@@ -261,11 +301,18 @@ def ASCII(ld: LogicalData) -> bytes:
 
 
 class DateTime:
+    """Representation code 21, Date/time. [RP66V1 Appendix B Section B.21]
+    TZ = Time Zone (0 = Local Standard, 1 = Local Daylight Savings, 2 = Greenwich Mean Time)"""
+    TZ_ABBREVIATION: typing.Dict[int, typing.Tuple[str, str]] = {
+        0: ('STD', 'Local Standard'),
+        1: ('DST', 'Local Daylight Savings'),
+        2: ('GMT', 'Greenwich Mean Time'),
+    }
     def __init__(self, ld: LogicalData):
         # TODO: Check ranges
         self.year: int = USHORT(ld) + 1900
         v: int = ld.read()
-        self.tz = (v >> 4) & 0xf
+        self.tz: int = (v >> 4) & 0xf
         self.month: int = v & 0xf
         self.day: int = USHORT(ld)
         self.hour: int = USHORT(ld)
@@ -277,12 +324,25 @@ class DateTime:
     def strftime_format() -> str:
         return '%y-%m-%d %H:%M:%S.%f'
 
-    def __str__(self):
+    @property
+    def tz_abbreviation(self) -> str:
+        try:
+            return self.TZ_ABBREVIATION[self.tz][0]
+        except KeyError:
+            return ''
+
+    def __str__(self) -> str:
         # TODO: Timezone
         return f'{self.year}-{self.month:02d}-{self.day:02d}' \
-            f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d}'
+            f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d} {self.tz_abbreviation}'
 
-    __repr__ = __str__
+    def __repr__(self) -> str:
+        return f'<{self.__class__} {str(self)}>'
+
+    def as_datetime(self) -> datetime.datetime:
+        return datetime.datetime(
+            self.year, self.month, self.day, self.hour, self.minute, self.second, microsecond=self.millisecond*1000
+        )
 
 
 def DTIME(ld: LogicalData) -> DateTime:
@@ -316,6 +376,17 @@ class ObjectName(typing.NamedTuple):
 
     def __format__(self, format_spec):
         return f'OBNAME: O: {self.O} C: {self.C} I: {str(self.I):{format_spec}}'
+
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return self.O == other.O and self.C == other.C and self.I == other.I
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self.__class__ == other.__class__:
+            # NOTE: Order of fields.
+            return self.I < other.I or self.O < other.O or self.C < other.C
+        return NotImplemented
 
 
 def OBNAME(ld: LogicalData) -> ObjectName:
@@ -383,9 +454,48 @@ def STATUS(ld: LogicalData) -> int:
     return USHORT(ld)
 
 
+# [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+# Syntactically, Representation Code UNITS is similar to Representation Codes IDENT and ASCII.
+# However, upper case and lower case are considered distinct (e.g., "A" and "a" for Ampere and annum, respectively),
+# and permissible characters are restricted to the following ASCII codes:
+# lower case letters [a, b, c, ..., z]
+# upper case letters [A, B, C, ..., Z]
+# digits [0, 1, 2, ..., 9]
+# blank [ ]
+# hyphen or minus sign [-] dot or period [.]
+# slash [/]
+# parentheses [(, )]
+# In particular this allows bytes.decode('ascii')
+
+# Found in actuality
+UNITS_ALLOWABLE_CHARACTERS_EXTENDED: str = '%'
+
+UNITS_ALLOWABLE_CHARACTERS: typing.Set[int] = set(
+    bytes(
+        string.ascii_lowercase
+        + string.ascii_uppercase
+        + string.digits
+        + ' '
+        + '-.'
+        + '/'
+        + '()'
+        + UNITS_ALLOWABLE_CHARACTERS_EXTENDED
+        , 'ascii')
+)
+UNITS_ALLOWABLE_CHARACTERS_AS_STRING: str = ''.join(sorted(chr(v) for v in UNITS_ALLOWABLE_CHARACTERS))
+
+
 def UNITS(ld: LogicalData) -> bytes:
-    ret = _pascal_string(ld)
-    # TODO: Validate according to the specification
+    ret: bytes = _pascal_string(ld)
+    # [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+    bad_chars = set(ret) - UNITS_ALLOWABLE_CHARACTERS
+    if bad_chars:
+        bad_chars_as_str = ''.join(sorted(chr(v) for v in bad_chars))
+        raise ExceptionRepCode(
+            f'UNITS has characters {bad_chars} "{bad_chars_as_str}"'
+            f' that are not allowed "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"'
+            f' See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
+        )
     return ret
 
 
@@ -494,6 +604,7 @@ REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
 assert set(REP_CODE_CATEGORY_MAP.keys()) == REP_CODES_SUPPORTED
 
 
+# Sanity check
 for r in REP_CODE_NUMPY_TYPE_MAP.keys():
     if np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.integer):
         assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.INTEGER

@@ -24,7 +24,7 @@ class ExceptionLogicalFileAdd(ExceptionLogicalFile):
     pass
 
 
-class ExceptionLogicalFileMissingRecord(ExceptionLogicalFile):
+class ExceptionLogicalFileMissingData(ExceptionLogicalFile):
     pass
 
 
@@ -65,6 +65,10 @@ class LogicalFile:
     For the Origin Logical Record see [RP66V1 Section 5.2 Origin Logical Record (OLR)]
 
     This is actually two/multi stage construction with the FHLR first. The OLR is extracted from the first add().
+
+    TODO: Check the FHLR references the ORIGIN record. [RP66V1 Section 5.1 File Header Logical Record (FHLR)]:
+    "The Origin Subfield of the Name of the File-Header Object must reference the Defining Origin (see §5.2.1)."
+    Is this done in practice?
     """
     def __init__(self, file_logical_data: File.FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
         if fhlr.lr_type != 0:
@@ -110,15 +114,30 @@ class LogicalFile:
         self.eflrs.append(PositionEFLR(file_logical_data.position, olr))
 
     @property
-    def file_header_logical_record(self):
+    def file_header_logical_record(self) -> EFLR.ExplicitlyFormattedLogicalRecord:
+        """Returns the FILE-HEADER EFLR."""
         assert len(self.eflrs) > 0
         return self.eflrs[0].eflr
 
     @property
-    def origin_logical_record(self):
+    def origin_logical_record(self) -> EFLR.ExplicitlyFormattedLogicalRecord:
+        """Returns the ORIGIN EFLR."""
         if len(self.eflrs) < 2:
-            raise ExceptionLogicalFileMissingRecord('Have not yet seen an ORIGIN record.')
+            raise ExceptionLogicalFileMissingData('Have not yet seen an ORIGIN record.')
         return self.eflrs[1].eflr
+
+    @property
+    def defining_origin(self) -> EFLR.Object:
+        """Returns the Defining Origin of the Logical File. This is the first row of the ORIGIN Logical Record.
+        From [RP66V1 Section 5.2.1 Origin Objects]:
+        "The first Object in the first ORIGIN Set is the Defining Origin for the Logical File in which it is contained,
+        and the corresponding Logical File is called the Origin's Parent File.
+        It is intended that no two Logical Files will ever have Defining Origins with all Attribute Values identical."
+        """
+        origin = self.origin_logical_record
+        if len(origin) == 0:
+            raise ExceptionLogicalFileMissingData('ORIGIN record is empty.')
+        return origin.objects[0]
 
     @property
     def has_log_pass(self) -> bool:
@@ -126,9 +145,10 @@ class LogicalFile:
 
     @staticmethod
     def is_next(eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
+        """Returns True if the given EFLR belongs to the next Logical Record."""
         return eflr.set.type == b'FILE-HEADER'
 
-    def add_eflr(self, file_logical_data: File.FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord, **kwargs) -> None:
+    def add_eflr(self, file_logical_data: File.FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         if self.is_next(eflr):
             raise ExceptionLogicalFileAdd(f'Can not add EFLR code {eflr.lr_type}, type {eflr.set.type}')
         self._check_fld_matches_eflr(file_logical_data, eflr)
@@ -200,13 +220,12 @@ class VisibleRecordPositions(collections.UserList):
 
 class LogicalFileSequence:
     # TODO: Consider renaming this to FileIndex. See LIS for a compatible name.
-    def __init__(self, fobj: typing.Union[typing.BinaryIO, None], path: str):
+    def __init__(self, rp66_file: typing.Union[File.FileRead, None], path: str):
         self.path = path
         self.logical_files: typing.List[LogicalFile] = []
         self.storage_unit_label = None
         self.visible_record_positions: VisibleRecordPositions = VisibleRecordPositions()
-        if fobj is not None:
-            rp66_file = File.FileRead(fobj)
+        if rp66_file is not None:
             self.storage_unit_label = rp66_file.sul
             # Capture all the Visible Records, this can not be done by looking at the Logical Records only
             # as some Visible Records can be missed.
@@ -251,24 +270,24 @@ class LogicalFileSequence:
     #     raise ValueError
 
 
-class FileRandomAccess:
-    def __init__(self, logical_file_sequence: LogicalFileSequence):
-        self.logical_file_sequence = logical_file_sequence
-        self.binary_file: typing.BinaryIO = None
-        self.rp66v1_file: File.FileRead = None
-
-    def __enter__(self):
-        if self.binary_file is not None:
-            self.binary_file.close()
-            self.binary_file = None
-        self.binary_file = open(self.logical_file_sequence.path, 'rb')
-        self.rp66v1_file = File.FileRead(self.binary_file)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.binary_file is not None:
-            self.binary_file.close()
-            self.binary_file = None
-        self.rp66v1_file = None
-        return False
+# class FileRandomAccess:
+#     def __init__(self, logical_file_sequence: LogicalFileSequence):
+#         self.logical_file_sequence = logical_file_sequence
+#         self.binary_file: typing.BinaryIO = None
+#         self.rp66v1_file: File.FileRead = None
+#
+#     def __enter__(self):
+#         if self.binary_file is not None:
+#             self.binary_file.close()
+#             self.binary_file = None
+#         self.binary_file = open(self.logical_file_sequence.path, 'rb')
+#         self.rp66v1_file = File.FileRead(self.binary_file)
+#         return self
+#
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         if self.binary_file is not None:
+#             self.binary_file.close()
+#             self.binary_file = None
+#         self.rp66v1_file = None
+#         return False
 

@@ -17,7 +17,7 @@ def add_gnuplot_to_argument_parser(parser: argparse.ArgumentParser) -> None:
     logger.info(f'gnuplot version: "{v}"')
     print(f'gnuplot version: "{v}"')
     if not v:
-        raise ValueError('--gnuplot specified but gnuplot not installed.')
+        raise ValueError('--gnuplot option is requested but gnuplot is not installed.')
     parser.add_argument('--gnuplot', type=str, help='Directory to write the gnuplot data.')
 
 

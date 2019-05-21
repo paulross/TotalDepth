@@ -326,6 +326,10 @@ class LogicalData:
         self.index += 1
         return ret
 
+    def seek(self, length: int) -> None:
+        """Increments the index. There is no error checking."""
+        self.index += length
+
     def view_remaining(self, length: int) -> bytes:
         if length < 0:
             raise IndexError(f'view_remaining length {length} must be >= 0')

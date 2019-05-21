@@ -119,21 +119,26 @@ setup(
         # All TotalDepth scripts have a 'td' prefix.
         # Experimental scripts have a 'tdX' prefix.
         'console_scripts': [
+            # General
+            'tdarchive=TotalDepth.util.archive:main',
             'tdplotlogs=TotalDepth.PlotLogs:main',
-            'tdlisdetif=TotalDepth.LIS.DeTif:main',
+            # LIS
+            'tdlisdetif=TotalDepth.LIS.DeTif:main', # TODO: Decide which de-TIF and put it the general section.
             'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
             'tdlisindex=TotalDepth.LIS.Index:main',
             'tdlistohtml=TotalDepth.LIS.LisToHtml:main',
             'tdlisplotlogpasses=TotalDepth.LIS.PlotLogPasses:main',
-            'tdXlisrandomframesetread=TotalDepth.LIS.RandomFrameSetRead:main',
+            # 'tdXlisrandomframesetread=TotalDepth.LIS.RandomFrameSetRead:main',
             'tdlisscanlogidata=TotalDepth.LIS.ScanLogiData:main',
             'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRec:main',
             'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
             'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
+            # LAS
             'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
-            'tdarchive=TotalDepth.util.archive:main',
+            # RP66V1
             'tdrp66v1scanfiles=TotalDepth.RP66V1.ScanFile:main',
-#            'TotalDepth=TotalDepth.cli:main'
+            'tdrp66v1tolas=TotalDepth.RP66V1.ToLAS:main',
+            'tdrp66v1scanfilehtml=TotalDepth.RP66V1.ScanFileHTML:main',
         ]
     },
     include_package_data=True,

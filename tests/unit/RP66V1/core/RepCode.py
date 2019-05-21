@@ -285,6 +285,60 @@ def test_ORIGIN_len(ld, expected):
 
 
 @pytest.mark.parametrize(
+    'args, expected',
+    (
+        ((1, 2, b''), RepCode.ObjectName(1, 2, b'')),
+    )
+)
+def test_ObjectName_ctor_eq(args, expected):
+    object_name = RepCode.ObjectName(*args)
+    assert object_name == expected
+
+
+@pytest.mark.parametrize(
+    'args, expected',
+    (
+        ((1, 2, b'123'), "OBNAME: O: 1 C: 2 I: b'123'"),
+    )
+)
+def test_ObjectName_str(args, expected):
+    object_name = RepCode.ObjectName(*args)
+    assert str(object_name) == expected
+
+
+@pytest.mark.parametrize(
+    'args, fmt, expected',
+    (
+        ((1, 2, b'123'), '', "OBNAME: O: 1 C: 2 I: b'123'"),
+        ((1, 2, b'123'), '10', "OBNAME: O: 1 C: 2 I: b'123'    "),
+        ((1, 2, b'123'), '>10', "OBNAME: O: 1 C: 2 I:     b'123'"),
+    )
+)
+def test_ObjectName_format(args, fmt, expected):
+    object_name = RepCode.ObjectName(*args)
+    assert f'{object_name:{fmt}}' == expected
+
+
+@pytest.mark.parametrize(
+    'args_0, args_1, expected_0_1, expected_1_0',
+    (
+        ((1, 2, b'123'), (1, 2, b'123'), False, False),
+        # Same I, C diffferent O
+        ((1, 2, b'123'), (2, 2, b'123'), True, False),
+        # Same I, O diffferent C
+        ((1, 2, b'123'), (1, 3, b'123'), True, False),
+        # Different I
+        ((1, 2, b'123'), (1, 2, b'234'), True, False),
+    )
+)
+def test_ObjectName_lt(args_0, args_1, expected_0_1, expected_1_0):
+    object_0 = RepCode.ObjectName(*args_0)
+    object_1 = RepCode.ObjectName(*args_1)
+    assert (object_0 < object_1) == expected_0_1
+    assert (object_1 < object_0) == expected_1_0
+
+
+@pytest.mark.parametrize(
     'ld, expected',
     (
         (LogicalData(b'\x00' + b'\x01' + b'\x03ABC'), RepCode.ObjectName(0, 1, b'ABC')),
@@ -368,5 +422,19 @@ def test_STATUS(ld, expected):
 
 
 # TODO: Test: UNITS
+# UNITS must be in ASCII [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+# So .decode("ascii") must be OK.
+# Syntactically, Representation Code UNITS is similar to Representation Codes IDENT and ASCII.
+# However, upper case and lower case are considered distinct (e.g., "A" and "a" for Ampere and annum, respectively),
+# and permissible characters are restricted to the following ASCII codes:
+# lower case letters [a, b, c, ..., z]
+# upper case letters [A, B, C, ..., Z]
+# digits [0, 1, 2, ..., 9]
+# blank [ ]
+# hyphen or minus sign [-] dot or period [.]
+# slash [/]
+# parentheses [(, )]
+
+
 # TODO: Test code_read()
 

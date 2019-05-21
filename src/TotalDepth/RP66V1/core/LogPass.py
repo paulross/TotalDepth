@@ -45,6 +45,47 @@ def default_np_type(_rep_code: int) -> typing.Type:
     return np.float64
 
 
+class Slice:
+    def __init__(self, start=None, stop=None, step=None):
+        self.slice = slice(start, stop, step)
+
+    def count(self, length: int) -> int:
+        start, stop, step = self.slice.indices(length)
+        ret = (stop - start) // step
+        return ret
+
+    def range(self, length: int) -> typing.Iterator[int]:
+        return range(*self.slice.indices(length))
+
+    def indices(self, length: int) -> typing.List[int]:
+        return list(self.range(length))
+
+    def __eq__(self, other) -> bool:
+        if other.__class__ == self.__class__:
+            return other.slice == self.slice
+        return NotImplemented
+
+
+def create_slice(slice_string: str) -> Slice:
+    """Returns a Slice object from a string such as:
+    '', 'None,72', 'None,72,14'
+    """
+    def convert(a_string):
+        if a_string == 'None':
+            return None
+        return int(a_string)
+
+    parts = [convert(p.strip()) for p in slice_string.split(',')]
+    if len(parts) > 3:
+        raise ValueError(f'Too many parts in {slice_string}')
+    if len(parts) == 0:
+        return Slice()
+    if len(parts) == 1:
+        return Slice(stop=parts[0])
+    # 2 or 3 parts
+    return Slice(*parts)
+
+
 class FrameChannel:
     """
     This represents a single channel in a frame. It is file independent and can be used depending on the
@@ -67,8 +108,7 @@ class FrameChannel:
         self.function_np_dtype: typing.Callable = function_np_dtype
         self.rank: int = len(self.dimensions)
         self.count: int = reduce(lambda x, y: x * y, self.dimensions, 1)
-        # Allow space so that at least one frame can be read.
-        self.array: np.ndarray = self._init_array(1)
+        self.array: np.ndarray = self._init_array(0)
 
     def __str__(self) -> str:
         return f'FrameChannel: {self.ident:18} Rc: {self.rep_code:3d} Co: {self.count:4d}' \
@@ -82,10 +122,14 @@ class FrameChannel:
         Initialises an empty Numpy array suitable to fill with <frames> number of frame data for this channel.
         If an array already exists of the correct length it is reused.
         """
-        if number_of_frames <= 0:
-            raise ExceptionFrameChannel(f'Number of frames must be > 0 not {number_of_frames}')
+        if number_of_frames < 0:
+            raise ExceptionFrameChannel(f'Number of frames must be >= 0 not {number_of_frames}')
         if self.array is None or len(self.array) != number_of_frames:
             self.array = self._init_array(number_of_frames)
+
+    @property
+    def len_array(self) -> int:
+        return self.array.size
 
     @property
     def sizeof_array(self) -> int:
@@ -127,6 +171,12 @@ class FrameChannel:
             # dim is a tuple of length self.rank + 1
             value = RepCode.code_read(self.rep_code, ld)
             self.array[dim] = value
+
+    def seek(self, ld: LogicalData) -> None:
+        """Increments the logical data without reading any values into the array."""
+        if len(self.array) != 0:
+            raise ExceptionFrameChannel('seek() on empty array. This seems like a logical error.')
+        ld.seek(RepCode.rep_code_fixed_length(self.rep_code) * self.count)
 
 
 def frame_channel_from_RP66V1(channel_object: EFLR.Object) -> FrameChannel:
@@ -178,7 +228,7 @@ class FrameArray:
     def __len__(self) -> int:
         return len(self.channels)
 
-    def __getitem__(self, item: typing.Union[int, bytes]) -> FrameChannel:
+    def __getitem__(self, item: typing.Union[int, RepCode.ObjectName]) -> FrameChannel:
         if item in self.channel_ident_map:
             return self.channels[self.channel_ident_map[item]]
         return self.channels[item]
@@ -196,6 +246,18 @@ class FrameArray:
         for channel in self.channels:
             channel.init_array(number_of_frames)
 
+    def init_arrays_partial(self, number_of_frames: int, channels: typing.Set[typing.Hashable]) -> None:
+        """
+        Initialises empty Numpy arrays for each of the specified channels suitable to fill with <frames> number of frame data.
+        """
+        if number_of_frames <= 0:
+            raise ExceptionFrameArray(f'Number of frames must be > 0 not {number_of_frames}')
+        for channel in self.channels:
+            if channel.ident in channels:
+                channel.init_array(number_of_frames)
+            else:
+                channel.init_array(0)
+
     def read(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the Logical Data into the numpy frame."""
         for channel in self.channels:
@@ -203,10 +265,20 @@ class FrameArray:
         if ld.remain != 0:
             raise ExceptionFrameArray(f'Not all logical data consumed, remaining {ld.remain} bytes')
 
+    def read_partial(self, ld: LogicalData, frame_number: int, channels: typing.Set[typing.Hashable]) -> None:
+        """Reads the Logical Data into the numpy frame for the nominated channels."""
+        for channel in self.channels:
+            if channel.ident in channels:
+                channel.read(ld, frame_number)
+            else:
+                channel.seek(ld)
+        if ld.remain != 0:
+            raise ExceptionFrameArray(f'Not all logical data consumed, remaining {ld.remain} bytes')
+
     @property
     def x_axis(self) -> FrameChannel:
         if len(self.channels) == 0:
-            raise ExceptionFrameArray('No channels to find X axis from.')
+            raise ExceptionFrameArray('Zero channels. Expected one channel as the X axis.')
         return self.channels[0]
 
     def init_x_axis_array(self, number_of_frames: int) -> None:
@@ -219,8 +291,9 @@ class FrameArray:
 
     def read_x_axis(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the first channel of the Logical Data into the numpy frame."""
-        assert len(self.channels) > 0
-        self.channels[0].read(ld, frame_number)
+        if self.x_axis.len_array == 0:
+            self.x_axis.init_array(1)
+        self.x_axis.read(ld, frame_number)
 
 
 def frame_array_from_RP66V1(frame_object: EFLR.Object,
@@ -286,7 +359,7 @@ class LogPass:
     def __len__(self) -> int:
         return len(self.frame_arrays)
 
-    def __getitem__(self, item: typing.Union[int, bytes]) -> FrameArray:
+    def __getitem__(self, item: typing.Union[int, RepCode.ObjectName]) -> FrameArray:
         if item in self.frame_array_map:
             return self.frame_arrays[self.frame_array_map[item]]
         return self.frame_arrays[item]

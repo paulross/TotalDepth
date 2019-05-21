@@ -117,53 +117,39 @@ def test_TemplateAttribute(cd, ld, expected_label, expected_count, expected_rep_
 #     )
 
 @pytest.mark.parametrize(
-    'ld, expected_template',
+    'ld',
+    # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
     (
-        (
-            # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
-            LogicalData(
-                # Template
-                # ATTRIB: LR
-                b'\x34\x09LONG-NAME\x17'
-                # ATTRIB: LRV
-                b'\x35\x0dELEMENT-LIMIT\x12\x01'
-                # ATTRIB: LRV
-                b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-                # ATTRIB: L
-                b'\x30\x05UNITS'
-                # ATTRIB: LRV
-                b'\x35\x09DIMENSION\x12\x01'
-                # Object to terminate the template
-                b'\x70'
-            ),
-            EFLR.Template(
-                LogicalData(
-                    # Template
-                    # ATTRIB: LR
-                    b'\x34\x09LONG-NAME\x17'
-                    # ATTRIB: LRV
-                    b'\x35\x0dELEMENT-LIMIT\x12\x01'
-                    # ATTRIB: LRV
-                    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-                    # ATTRIB: L
-                    b'\x30\x05UNITS'
-                    # ATTRIB: LRV
-                    b'\x35\x09DIMENSION\x12\x01'
-                    # Object to terminate the template
-                    b'\x70'
-                )
-            ),
+        LogicalData(
+            # Template
+            # ATTRIB: LR
+            b'\x34\x09LONG-NAME\x17'
+            # ATTRIB: LRV
+            b'\x35\x0dELEMENT-LIMIT\x12\x01'
+            # ATTRIB: LRV
+            b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+            # ATTRIB: L
+            b'\x30\x05UNITS'
+            # ATTRIB: LRV
+            b'\x35\x09DIMENSION\x12\x01'
+            # Object to terminate the template
+            b'\x70'
         ),
     )
 )
-def test_Template(ld, expected_template):
-    template = EFLR.Template(ld)
-    assert template == expected_template
+def test_Template(ld):
+    template = EFLR.Template()
+    template.read(ld)
     assert ld.remain == 1  # Object byte terminates template
 
 
-OBJECT_DATA_FROM_STANDARD: typing.Tuple[typing.Tuple[LogicalData, EFLR.Template, EFLR.Object]] = (
-    (
+class DataForEFLR(typing.NamedTuple):
+    object: LogicalData
+    template: LogicalData
+
+
+OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
+    DataForEFLR(
         # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
         LogicalData(
             # Object #1
@@ -180,70 +166,39 @@ OBJECT_DATA_FROM_STANDARD: typing.Tuple[typing.Tuple[LogicalData, EFLR.Template,
             # Object to terminate the object
             b'\x70'
         ),
-        EFLR.Template(
-            LogicalData(
-                # Template
-                # ATTRIB: LR
-                b'\x34\x09LONG-NAME\x17'
-                # ATTRIB: LRV
-                b'\x35\x0dELEMENT-LIMIT\x12\x01'
-                # ATTRIB: LRV
-                b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-                # ATTRIB: L
-                b'\x30\x05UNITS'
-                # ATTRIB: LRV
-                b'\x35\x09DIMENSION\x12\x01'
-                # Object to terminate the template
-                b'\x70'
-            )
-        ),
-        EFLR.Object(
-            LogicalData(
-                # Object #1
-                # Object: N
-                b'\x70\x00\x00\x04TIME'
-                # Attribute: V
-                b'\x21\x00\x00\x01\x31'
-                # Attribute:
-                b'\x20'
-                # Attribute:
-                b'\x20'
-                # Attribute: V
-                b'\x21\x01S'
-                # Object to terminate the object
-                b'\x70'
-            ),
-            EFLR.Template(
-                LogicalData(
-                    # Template
-                    # ATTRIB: LR
-                    b'\x34\x09LONG-NAME\x17'
-                    # ATTRIB: LRV
-                    b'\x35\x0dELEMENT-LIMIT\x12\x01'
-                    # ATTRIB: LRV
-                    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-                    # ATTRIB: L
-                    b'\x30\x05UNITS'
-                    # ATTRIB: LRV
-                    b'\x35\x09DIMENSION\x12\x01'
-                    # Object to terminate the template
-                    b'\x70'
-                )
-            ),
+        LogicalData(
+            # Template
+            # ATTRIB: LR
+            b'\x34\x09LONG-NAME\x17'
+            # ATTRIB: LRV
+            b'\x35\x0dELEMENT-LIMIT\x12\x01'
+            # ATTRIB: LRV
+            b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+            # ATTRIB: L
+            b'\x30\x05UNITS'
+            # ATTRIB: LRV
+            b'\x35\x09DIMENSION\x12\x01'
+            # Object to terminate the template
+            b'\x70'
         ),
     ),
+    # ...
 )
 
 
-@pytest.mark.parametrize('ld, template, expected_object', OBJECT_DATA_FROM_STANDARD)
-def test_Object(ld, template, expected_object):
-    obj = EFLR.Object(ld, template)
-    assert obj == expected_object
-    assert ld.remain == 1  # Object byte terminates template
+@pytest.mark.parametrize('eflr_data', OBJECT_DATA_FROM_STANDARD)
+def test_Object(eflr_data: DataForEFLR):
+    template = EFLR.Template()
+    template.read(eflr_data.template)
+    obj = EFLR.Object(eflr_data.object, template)
+    assert obj.name == RepCode.ObjectName(O=0, C=0, I=b'TIME')
+    assert eflr_data.object.remain == 1  # Object byte terminates template
 
 
 def test_Object_attr_label_map():
-    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj.attr_label_map == {
         b'LONG-NAME': 0,
         b'ELEMENT-LIMIT': 1,
@@ -254,12 +209,16 @@ def test_Object_attr_label_map():
 
 
 def test_Object_getitem_index():
-    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[0].value == [ObjectName(O=0, C=0, I=b'1')]
 
 
 def test_Object_getitem_label():
-    obj = OBJECT_DATA_FROM_STANDARD[0][2]
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[b'LONG-NAME'].value == [ObjectName(O=0, C=0, I=b'1')]
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
@@ -515,12 +474,11 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
         LOGICAL_DATA_FROM_STANDARD,
     )
 )
-def test_ExplicitlyFormattedLogicalRecord_str(ld):
+def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
     ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
-    # print(eflr)
-    assert str(eflr) == """EFLR Set type: b'CHANNEL' name: b'0'
-  Template [5]:
+    # print(eflr.str_long())
+    assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'> Template [5]:
     CD: 001 10100 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: None
     CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
     CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [2]

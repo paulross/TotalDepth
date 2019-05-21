@@ -8,6 +8,8 @@ References:
 Links:
     http://w3.energistics.org/rp66/v1/rp66v1_sec4.html
     http://w3.energistics.org/rp66/v1/rp66v1_sec5.html
+
+TODO: Use this for validating EFLRs.
 """
 import collections
 import typing

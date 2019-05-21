@@ -79,3 +79,6 @@ data/
 
 private/
 
+# Sphinx documentation
+docs/publish/_build/*
+

@@ -8,6 +8,57 @@ from TotalDepth.util import XmlWrite
 
 
 @pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        ((None, None, None), 7, 7),
+        ((None, 7, None), 7, 7),
+        ((None, 7, None), 42, 7),
+        ((None, None, None), 1, 1),
+        ((None, -1, None), 1, 0),
+        ((None, 8, 2), 8, 4),
+        ((2, 8, 2), 8, 3),
+    )
+)
+def test_slice_count(init, length, expected):
+    s = LogPass.Slice(*init)
+    assert s.count(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        ((None, None, None), 7, list(range(7))),
+        ((None, 7, None), 7, list(range(7))),
+        ((None, 7, None), 42, list(range(7))),
+        ((None, None, None), 1, [0]),
+        ((None, -1, None), 1, []),
+        ((None, 8, 2), 8, [0, 2, 4, 6]),
+        ((2, 8, 2), 8, [2, 4, 6]),
+    )
+)
+def test_slice_indices(init, length, expected):
+    s = LogPass.Slice(*init)
+    assert s.indices(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, expected',
+    (
+        ('None,None,None', LogPass.Slice()),
+        ('None,None,None  ', LogPass.Slice()),
+        ('  None,None,None', LogPass.Slice()),
+        ('None , None , None', LogPass.Slice()),
+        ('None,1,None', LogPass.Slice(stop=1)),
+        ('1,10,None', LogPass.Slice(1, 10)),
+        ('1,10,2', LogPass.Slice(1, 10, 2)),
+    )
+)
+def test_slice_create_slice(init, expected):
+    s = LogPass.create_slice(init)
+    assert s == expected
+
+
+@pytest.mark.parametrize(
     'dimensions, frame_number, expected',
     (
         ([1], 7, [(7, 0)]),
@@ -32,6 +83,7 @@ def test_frame_channel_numpy_indexes(dimensions, frame_number, expected):
 
 
 # Data from PRASLIN-1_MWD_SUITE1_RUN1_HDS1-L_SURVEY_0MD-2125MD_EOS.dlis
+# 9 channels and 83 frames but here are just the frames [1:9]
 BYTES_EFLR_CHANNEL = b'\xf8\x07CHANNEL\x0259<\tLONG-NAME\x00\x14<\nPROPERTIES\x00\x14<\x13REPRESENTATION-CODE\x00\x0e<\x05UNITS\x00\x14<\tDIMENSION\x00\x0e<\x04AXIS\x00\x17<\rELEMENT-LIMIT\x00\x0e<\x06SOURCE\x00\x18<\tRELOG-NUM\x00\x0ep\x0b\x00\x04DEPT)\x01\x1aMWD Tool Measurement Depth\x00)\x01\x00\x00\x00\x02)\x01\x060.1 in)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03INC)\x01\x0bInclination\x00)\x01\x00\x00\x00\x02)\x01\x03deg)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03AZI)\x01\x07Azimuth\x00)\x01\x00\x00\x00\x02)\x01\x03deg)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x05MTTVD)\x01\x18MWD Tool Measurement TVD\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x04SECT)\x01\x07Section\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03RCN)\x01\x1eRectangular Co-ordinates North\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03RCE)\x01\x1dRectangular Co-ordinates East\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x05DLSEV)\x01\x10Dog-leg Severity\x00)\x01\x00\x00\x00\x02)\x01\x07deg/30m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x04TLTS)\x01\x17Tool Temperature Static\x00)\x01\x00\x00\x00\x02)\x01\x04degC)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00'
 BYTES_EFLR_FRAME = b'\xf8\x05FRAME\x0260<\x0bDESCRIPTION\x00\x14<\x08CHANNELS\x00\x17<\nINDEX-TYPE\x00\x14<\tDIRECTION\x00\x14>\x07SPACING\x00\x02\x060.1 in<\tENCRYPTED\x00\x0e>\tINDEX-MIN\x00\x02\x060.1 in>\tINDEX-MAX\x00\x02\x060.1 inp\x0b\x00\x020B\x00)\t\x0b\x00\x04DEPT\x0b\x00\x03INC\x0b\x00\x03AZI\x0b\x00\x05MTTVD\x0b\x00\x04SECT\x0b\x00\x03RCN\x0b\x00\x03RCE\x0b\x00\x05DLSEV\x0b\x00\x04TLTS)\x01\x0eBOREHOLE-DEPTH\x00+\x01\x060.1 in\x00\x00\x00\x00)\x01\x00\x00\x00\x00+\x01\x060.1 in\x00\x00\x00\x00+\x01\x060.1 inILJ\xb0'
 # NOTE: Missing first IFLR as is seems to be all nulls.
@@ -225,6 +277,50 @@ def test_read_iflr():
  [  58.4252]]"""
 
 
+def test_read_iflr_partial():
+    log_pass = _log_pass()
+    frame_array: LogPass.FrameArray = log_pass[FRAME_ARRAY_IDENT]
+    channels = {
+            RepCode.ObjectName(O=11, C=0, I=b'DEPT'),
+            RepCode.ObjectName(O=11, C=0, I=b'INC'),
+            RepCode.ObjectName(O=11, C=0, I=b'SECT'),
+    }
+    frame_array.init_arrays_partial(len(IFLR_BYTES), channels)
+    for f, by in enumerate(IFLR_BYTES):
+        iflr = _iflr(by)
+        frame_array.read_partial(iflr.logical_data, f, channels)
+    assert str(frame_array.channels[0].array) == """[[ 75197.]
+ [154724.]
+ [234606.]
+ [311024.]
+ [381102.]
+ [386839.]
+ [428193.]
+ [447720.]]"""
+    assert str(frame_array.channels[1].array) == """[[0.50002027]
+ [0.50002027]
+ [0.7500017 ]
+ [0.50002027]
+ [0.99998325]
+ [0.9699998 ]
+ [0.9699998 ]
+ [0.69999975]]"""
+    assert str(frame_array.channels[2].array) == """[]"""
+    assert str(frame_array.channels[3].array) == """[]"""
+    assert str(frame_array.channels[4].array) == """[[0.833423]
+ [2.596255]
+ [4.809544]
+ [6.92684 ]
+ [9.256786]
+ [9.268364]
+ [7.632412]
+ [6.981416]]"""
+    assert str(frame_array.channels[5].array) == """[]"""
+    assert str(frame_array.channels[6].array) == """[]"""
+    assert str(frame_array.channels[7].array) == """[]"""
+    assert str(frame_array.channels[8].array) == """[]"""
+
+
 def test_log_pass_write_XML():
     log_pass = _log_pass()
     ostream = io.StringIO()
@@ -236,7 +332,7 @@ def test_log_pass_write_XML():
     # print(ostream.getvalue())
     expected = """
 <LogPass count="1">
-  <FrameArray C="0" I="0B" O="11" description="">
+  <FrameArray C="0" I="0B" O="11" description="" x_axis="DEPT" x_units="0.1 in">
     <Channels count="9">
       <Channel C="0" I="DEPT" O="11" count="1" dimensions="1" long_name="MWD Tool Measurement Depth" rep_code="2" units="0.1 in"/>
       <Channel C="0" I="INC" O="11" count="1" dimensions="1" long_name="Inclination" rep_code="2" units="deg"/>
@@ -249,8 +345,8 @@ def test_log_pass_write_XML():
       <Channel C="0" I="TLTS" O="11" count="1" dimensions="1" long_name="Tool Temperature Static" rep_code="2" units="degC"/>
     </Channels>
     <IFLR count="0">
-      <LRSH count="0" rle_len="0"/>
       <FrameNumbers count="0" rle_len="0"/>
+      <LRSH count="0" rle_len="0"/>
       <Xaxis count="0" rle_len="0"/>
     </IFLR>
   </FrameArray>

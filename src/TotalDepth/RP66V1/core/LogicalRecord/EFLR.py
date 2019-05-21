@@ -90,6 +90,14 @@ class AttributeBase:
         return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
             f' R: {REP_CODE_INT_TO_STR[self.rep_code]} U: {self.units} V: {self.value}'
 
+    def stringify_value(self, stringify_function: typing.Callable) -> str:
+        value_as_string = stringify_function(self.value)
+        if self.units == ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_MAP['U'].global_default:
+            return value_as_string
+        # UNITS must be in ASCII [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+        # So .decode("ascii") must be OK.
+        return f'{value_as_string} [{self.units.decode("ascii")}]'
+
 
 class TemplateAttribute(AttributeBase):
     def __init__(self, component_descriptor: ComponentDescriptor, ld: LogicalData):
@@ -170,8 +178,8 @@ class Template:
     def __str__(self) -> str:
         return '\n'.join(str(a) for a in self.attrs)
 
-    def header_as_strings(self, conversion_function: typing.Callable) -> typing.List[str]:
-        return [conversion_function(attr.label) for attr in self.attrs]
+    def header_as_strings(self, stringify_function: typing.Callable) -> typing.List[str]:
+        return [stringify_function(attr.label) for attr in self.attrs]
 
 
 class Object:
@@ -242,15 +250,8 @@ class Object:
         )
         return '\n'.join(strs)
 
-    def values_as_strings(self, conversion_function: typing.Callable) -> typing.List[str]:
-        ret = [conversion_function(attr) for attr in self.attrs]
-        # for attr in self.attrs:
-        #     if attr.value is None:
-        #         ret.append('None')
-        #     elif isinstance(attr.value[0], bytes):
-        #         ret.append(str(b', '.join(attr.value)))
-        #     else:
-        #         ret.append(', '.join(conversion_function(v) for v in attr.value))
+    def values_as_strings(self, stringify_function: typing.Callable) -> typing.List[str]:
+        ret = [attr.stringify_value(stringify_function) for attr in self.attrs]
         return ret
 
 
@@ -260,7 +261,7 @@ class ExplicitlyFormattedLogicalRecord:
         self.set: Set = Set(ld)
         self.template: Template = Template()
         self.objects: typing.List[Object] = []
-        self.object_name_map: typing.Dict[bytes, int] = {}
+        self.object_name_map: typing.Dict[ObjectName, int] = {}
         if ld:
             self.template.read(ld)
             while ld:
@@ -269,7 +270,8 @@ class ExplicitlyFormattedLogicalRecord:
                     # Compare and if same ignore, else raise
                     if obj == self[obj.name]:
                         msg = f'Ignoring duplicate Object with {obj.name} already seen in the {self.set}.'
-                        logger.info(msg)
+                        # logger.info(msg)
+                        logger.debug(msg)
                     else:
                         msg = f'Ignoring different Object with {obj.name} already seen in the {self.set}.'
                         logger.warning(msg)
@@ -291,37 +293,51 @@ class ExplicitlyFormattedLogicalRecord:
         return self.objects[item]
 
     def __str__(self) -> str:
-        return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}> Template [{len(self.template)}]:'
+        return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>'
 
     def str_long(self) -> str:
-        ret = [str(self)]
+        ret = [
+            str(self),
+            f'  Template [{len(self.template)}]:'
+        ]
         ret.extend('    {}'.format(line) for line in str(self.template).split('\n'))
         ret.append(f'  Objects [{len(self.objects)}]:')
         for obj in self.objects:
             ret.extend('    {}'.format(line) for line in str(obj).split('\n'))
         return '\n'.join(ret)
 
-    def table_as_strings(self, conversion_function: typing.Callable) -> typing.List[typing.List[str]]:
+    def table_as_strings(self, stringify_function: typing.Callable, sort: bool) -> typing.List[typing.List[str]]:
         ret = [
-            ['ObjectName IDENT'] + self.template.header_as_strings(conversion_function),
+            ['ObjectName IDENT'] + self.template.header_as_strings(stringify_function),
         ]
-        for obj in self.objects:
-            row = [conversion_function(obj.name)] + obj.values_as_strings(conversion_function)
+        if sort:
+            # print(f'TRACE: {sorted(self.object_name_map.keys())}')
+            objects = [self[object_id] for object_id in sorted(self.object_name_map.keys())]
+        else:
+            objects = self.objects
+        for obj in objects:
+            row = [stringify_function(obj.name)] + obj.values_as_strings(stringify_function)
             ret.append(row)
         return ret
 
     def is_key_value(self) -> bool:
         return len(self.objects) == 1
 
-    def key_values(self, conversion_function: typing.Callable) -> typing.List[typing.List[str]]:
+    def key_values(self, stringify_function: typing.Callable, sort: bool) -> typing.List[typing.List[str]]:
         if self.is_key_value():
             ret = [['KEY', 'VALUE']]
-            # ret.extend(list(zip(self.template.header_as_strings(), self.objects[0].values_as_strings())))
-            for k, v in zip(
-                    self.template.header_as_strings(conversion_function),
-                    self.objects[0].values_as_strings(conversion_function)
-            ):
-                ret.append([k, v])
+            # key_values = zip(
+            #     self.template.header_as_strings(conversion_function),
+            #     self.objects[0].values_as_strings(conversion_function)
+            # )
+            key_values = zip(
+                (attr.label for attr in self.template.attrs),
+                self.objects[0].attrs
+            )
+            if sort:
+                key_values = sorted(key_values)
+            for k, v in key_values:
+                ret.append([stringify_function(k), stringify_function(v)])
             return ret
         raise ExceptionEFLR('Can not represent EFLR as key->value table.')
 
@@ -329,3 +345,19 @@ class ExplicitlyFormattedLogicalRecord:
     def shape(self) -> typing.Tuple[int, int]:
         """Shape as (rows, columns)"""
         return len(self), len(self.template)
+
+
+def reduced_object_map(eflr: ExplicitlyFormattedLogicalRecord) -> typing.Dict[bytes, int]:
+    """
+    This returns a reduced lookup map that refers to the latest object by count.
+    Key is the object IDENT, value is the ordinal into self.
+    """
+    ret: typing.Dict[bytes, int] = {}
+    # Temporary to keep track of counts.
+    name_count: typing.Dict[bytes, int] = {}
+    for index, obj in enumerate(eflr.objects):
+        name = obj.name.I
+        if name not in ret or obj.name.C > name_count[name]:
+            ret[name] = index
+            name_count[name] = obj.name.C
+    return ret

@@ -82,7 +82,7 @@ def strip(path_in: str, path_out: str) -> typing.Tuple[int, int]:
         tif = _read_tifs(fobj_in)
         if tif.type != 0 or tif.prev != 0:
             logging.error(f'No initial TIF markers: {tif}')
-            return 0
+            return 0, 0
         logging.debug(f'TIF: {tif}')
         with open(path_out, 'wb') as fobj_out:
             while True:

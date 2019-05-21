@@ -434,7 +434,7 @@ def _segy(fobj: typing.BinaryIO) -> int:
 
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
-FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str]] = (
+FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_xml, 'XML'),  # '<?xml ', 6 characters so 2^(6*8) 2^48
     (_pdf, 'PDF'),  # 2^40
     (_ps, 'PS'),  # 2^40
@@ -449,21 +449,62 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str]] = (
     (_rp66v1, 'RP66V1'),
     (_rp66v1_tif, 'RP66V1t'),
     (_rp66v1_tif_r, 'RP66V1tr'),
-    (_rp66v2, 'RP66v2'),
+    (_rp66v2, 'RP66V2'),
     (_ascii, 'ASCII'),
     (_lis, 'LIS'),  # LIS without TIF is potentially the weakest test, around 2^11
 )
 BINARY_FILE_TYPE_CODE_WIDTH: int = max(len(v[1]) for v in FUNCTION_ID_MAP)
-BINARY_FILE_TYPES_SUPPORTED: typing.List[str] = [v[1] for v in FUNCTION_ID_MAP]
+BINARY_FILE_TYPES_SUPPORTED: typing.Set[str] = {v[1] for v in FUNCTION_ID_MAP}
+
+
+# TODO: Allow more generic cases such as 'LAS', 'RP66" ?
+
+BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
+    'XML': 'eXtensible Markup Language',
+    'PDF': 'Portable Document Format',
+    'PS': 'Postscript',
+    'ZIP': 'ZIP Compressed Archive',
+    'TIFF': 'Tagged Image File Format',
+    'SEGY': 'Society of Exploration Geophysicists seismic format Y',
+    'LIS': 'Schlumberger LIS-79 well logging format',
+    'LISt': 'Schlumberger LIS-79 well logging format with TIF markers',
+    'LIStr': 'Schlumberger LIS-79 well logging format with reversed TIF markers',
+    'LAS1.2': 'Canadian Well Logging Society Log ASCII Standard version 1.2',
+    'LAS2.0': 'Canadian Well Logging Society Log ASCII Standard version 2.0',
+    'LAS3.0': 'Canadian Well Logging Society Log ASCII Standard version 3.0',
+    'RP66V1': 'American Petroleum Institute Recommended Practice 66 version 1',
+    'RP66V1t': 'American Petroleum Institute Recommended Practice 66 version 1 with TIF markers',
+    'RP66V1tr': 'American Petroleum Institute Recommended Practice 66 version 1 with reversed TIF markers',
+    'RP66V2': 'American Petroleum Institute Recommended Practice 66 version 2',
+    'ASCII': 'American Standard Code for Information Interchange',
+}
+
+assert set(BINARY_FILE_TYPE_DESCRIPTIONS.keys()) == BINARY_FILE_TYPES_SUPPORTED, \
+    f'{set(BINARY_FILE_TYPE_DESCRIPTIONS.keys())} != {BINARY_FILE_TYPES_SUPPORTED}'
+
+
+def summary_file_types_supported(short: bool) -> str:
+    """Returns a string of the supported file types. If short is False this is a multi-line string."""
+    if short:
+        return ", ".join(sorted(BINARY_FILE_TYPES_SUPPORTED))
+    width = max(len(v) for v in BINARY_FILE_TYPE_DESCRIPTIONS.keys())
+    lst = []
+    for b in sorted(BINARY_FILE_TYPE_DESCRIPTIONS.keys()):
+        lst.append(f'{b:{width}} - {BINARY_FILE_TYPE_DESCRIPTIONS[b]}')
+    return '\n'.join(lst)
 
 
 def binary_file_type(fobj: typing.BinaryIO) -> str:
     """Function that takes a file object that supports read() and seek() and returns a file type based on the
-    analysis of the contents of the file."""
+    analysis of the contents of the file.
+    On success fobj will be at the start of file. On failure fobj will be in an indeterminate state.
+    """
     result = ''
     for fn, typ in FUNCTION_ID_MAP:
         if fn(fobj) == 0:
-            return typ
+            result = typ
+            break
+    fobj.seek(0)
     return result
 
 

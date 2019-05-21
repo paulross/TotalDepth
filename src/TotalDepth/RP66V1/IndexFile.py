@@ -8,7 +8,7 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import LogicalFile, File
 from TotalDepth.RP66V1.core import Index
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
@@ -40,7 +40,8 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
             with open(path_in, 'rb') as fobj:
                 t_start = time.perf_counter()
                 # index = RP66V1IndexXMLWrite(fobj, path_in)
-                logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, path_in)
+                rp66v1_file = File.FileRead(fobj)
+                logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, path_in)
                 if path_out:
                     with open(path_out + '.xml', 'w') as f_out:
                         Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out)
@@ -198,7 +199,7 @@ Scans a RP66V1 file and dumps data."""
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
-    gnuplot.add_gnuplot_to_argument_parser(parser)
+    # gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
     # return 0

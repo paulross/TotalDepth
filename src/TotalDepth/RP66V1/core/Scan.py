@@ -612,8 +612,8 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
-    logical_file_sequence = LogicalFile.LogicalFileSequence(fobj, rp66v1_path)
-    rp66_file = File.FileRead(fobj)
+    rp66v1_file = File.FileRead(fobj)
+    logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, rp66v1_path)
     if frame_spacing <= 0:
         raise ValueError(f'Frame spacing must be > 0 not {frame_spacing}')
     with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
@@ -632,9 +632,9 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                         fout.write('\n')
                         if eflr_as_table:
                             if eflr_position.eflr.is_key_value():
-                                eflr_str_table = eflr_position.eflr.key_values()
+                                eflr_str_table = eflr_position.eflr.key_values(sort=True)
                             else:
-                                eflr_str_table = eflr_position.eflr.table_as_strings()
+                                eflr_str_table = eflr_position.eflr.table_as_strings(sort=True)
                             fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
                             fout.write('\n')
                         else:
@@ -643,7 +643,7 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                 if logical_file.has_log_pass:
                     with _output_section_header_trailer('Log Pass', '-', os=fout):
                         _scan_log_pass_content(
-                            rp66_file, logical_file_sequence.visible_record_positions,
+                            rp66v1_file, logical_file_sequence.visible_record_positions,
                             logical_file, fout, frame_spacing=frame_spacing)
                 else:
                     fout.write('NO Log Pass for this Logical Record\n')

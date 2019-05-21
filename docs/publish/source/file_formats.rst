@@ -18,11 +18,11 @@ LIS79              Full     0.1.0
 LIS-A              Partial  0.1.0     No direct XNAM support.
 LAS version 1.2    Full     0.1.0     
 LAS version 2.0    Full     0.1.0     
-LAS version 3.0    None
-WellLogML          None               Absence of good test cases.
+LAS version 3.0    None				  No evidence that this is used by the industry.
+WellLogML          None               No evidence that this is used by the industry.
                                       The format seems to have made little impact on the industry.
-RP66v1 "DLIS"      Proto.             Absence of good test cases.
-RP66v2 "DLIS"      Proto.             Absence of good test cases.
-SEG-Y etc.         None               Use cases?
-Positioning        None               Fairly simple, use cases?
+RP66v1 "DLIS"      Full     0.4.0     
+RP66v2 "DLIS"      None               No evidence that this is used by the industry.
+SEG-Y etc.         None               
+Positioning        None               
 =================  =======  ========  ============================================================================
