@@ -16,7 +16,7 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 # from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
 #     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.RP66V1.core import Scan, HTML
-from TotalDepth.util import gnuplot, XmlWrite
+from TotalDepth.util import gnuplot, XmlWrite, DictTree
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
 
@@ -36,7 +36,7 @@ logger = logging.getLogger(__file__)
 
 # IndexResult = collections.namedtuple('IndexResult', 'size_input, size_output, time, exception, ignored')
 
-class FileResult(typing.NamedTuple):
+class HTMLResult(typing.NamedTuple):
     path_input: str
     path_output: str
     size_input: int
@@ -44,11 +44,10 @@ class FileResult(typing.NamedTuple):
     time: float
     exception: bool
     ignored: bool
-    link_text: str
+    html_summary: typing.Union[HTML.HTMLBodySummary, None]
 
 
-
-def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> FileResult:
+def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
     logger.debug(f'Scanning "{path_in}" to "{path_out}"')
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     file_path_out = path_out + '.xhtml'
@@ -62,12 +61,12 @@ def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> FileResult:
                     logger.debug(f'Making directory: {out_dir}')
                     os.makedirs(out_dir, exist_ok=True)
                 with open(file_path_out, 'w') as fout:
-                    link_text = HTML.html_scan_RP66V1_file_data_content(path_in, fout, **kwargs)
+                    html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, fout, **kwargs)
                 len_scan_output = os.path.getsize(file_path_out)
             else:
-                link_text = HTML.html_scan_RP66V1_file_data_content(path_in, sys.stdout, **kwargs)
+                html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, sys.stdout, **kwargs)
                 len_scan_output = -1
-            result = FileResult(
+            result = HTMLResult(
                 path_in,
                 file_path_out,
                 os.path.getsize(path_in),
@@ -75,17 +74,17 @@ def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> FileResult:
                 time.perf_counter() - t_start,
                 False,
                 False,
-                link_text,
+                html_summary,
             )
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            result = FileResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, '')
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            result = FileResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, '')
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
     else:
         logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
-        result = FileResult(path_in, file_path_out, 0, 0, 0.0, False, True, '')
+        result = HTMLResult(path_in, file_path_out, 0, 0, 0.0, False, True, None)
     return result
 
 
@@ -175,12 +174,18 @@ padding:           2px 6px 2px 6px;
 }
 """
 
+INDEX_FILE = 'index.html'
 
-def _write_indexes(path_out: str, index: typing.Dict[str, FileResult]) -> None:
+
+def _write_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
     assert os.path.isdir(path_out)
-    INDEX_FILE = 'index.html'
-    # print('TRACE:')
+    # print('TRACE: _write_indexes():')
     # pprint.pprint(index)
+
+
+
+
+
     # Write low level indexes
     for root, dirs, files in os.walk(path_out):
         files_to_link_to = []
@@ -203,23 +208,62 @@ def _write_indexes(path_out: str, index: typing.Dict[str, FileResult]) -> None:
                         with XmlWrite.Element(xhtml_stream, 'style'):
                             xhtml_stream.literal(CSS_RP66V1_INDEX)
                     with XmlWrite.Element(xhtml_stream, 'body'):
-                        with XmlWrite.Element(xhtml_stream, 'table', {'class' : 'monospace'}):
-                            with XmlWrite.Element(xhtml_stream, 'tr', {}):
+                        with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
+                            with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
                                 for cell in ('File', 'Storage Unit Label'):
-                                    with XmlWrite.Element(xhtml_stream, 'th', {}):
+                                    with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
                                         xhtml_stream.characters(cell)
                             for file in files_to_link_to:
-                                with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                                    with XmlWrite.Element(xhtml_stream, 'td', {}):
+                                with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
+                                    with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable'}):
                                         with XmlWrite.Element(xhtml_stream, 'a', {'href': file}):
                                             xhtml_stream.characters(os.path.basename(file))
-                                    with XmlWrite.Element(xhtml_stream, 'td', {}):
-                                        xhtml_stream.characters(index[os.path.join(root, file)].link_text)
-    # Write top level index, this might overwrite the index in a single directory
-    # This index is just a table with two columns: directory, file
-    index_map: typing.Dict[str, typing.List[str]] = collections.defaultdict(list)
-    for k in index.keys():
-        index_map[os.path.dirname(k)].append(k)
+                                    with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable'}):
+                                        xhtml_stream.characters(
+                                            str(index[os.path.join(root, file)].html_summary.link_text)
+                                        )
+    # # Write top level index, this might overwrite the index in a single directory
+    # # This index is just a table with two columns: directory, file
+    # index_map: typing.Dict[str, typing.List[HTMLResult]] = collections.defaultdict(list)
+    # for k in index.keys():
+    #     index_map[os.path.dirname(k)].append(k)
+    # index_file_path = os.path.join(path_out, INDEX_FILE)
+    _write_top_level_index(path_out, index)
+
+
+class FileNameLinkHref(typing.NamedTuple):
+    file_name: str
+    link_text: str
+    href: str
+
+
+def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult]) -> None:
+    # print('TRACE: _write_top_level_index():')
+    # pprint.pprint(index_map)
+    # Create a DictTree from the paths.
+    dict_tree = DictTree.DictTreeHtmlTable(None)
+    # We have to add two more DoF which are the Logical File index and the Frame Array ident.
+    for k in index_map:
+        branch = k.split(os.sep)
+        # Mark the file name with the link text and href
+        file_name = branch.pop()
+        branch.append(
+            # FIXME: Relative link from index to file.
+            FileNameLinkHref(
+                file_name, index_map[k].html_summary.link_text, index_map[k].path_output[len(path_out):],
+            )
+        )
+        result = index_map[k]
+        # print('TRACE: _write_top_level_index():', result)
+        if result.html_summary is not None:
+            for lf, logical_file_result in enumerate(result.html_summary.logical_files):
+                branch.append(f'{lf}')
+                for frame_array_result in logical_file_result.frame_arrays:
+                    # HTMLFrameArraySummary
+                    branch.append(frame_array_result.ident)
+                    dict_tree.add(branch, frame_array_result)
+                    branch.pop()
+                branch.pop()
     index_file_path = os.path.join(path_out, INDEX_FILE)
     with open(index_file_path, 'w') as fout:
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
@@ -235,32 +279,70 @@ def _write_indexes(path_out: str, index: typing.Dict[str, FileResult]) -> None:
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1_INDEX)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                with XmlWrite.Element(xhtml_stream, 'table', {'class' : 'monospace'}):
-                    with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                        for cell in ('Directory', 'File'):
-                            with XmlWrite.Element(xhtml_stream, 'th', {}):
-                                xhtml_stream.characters(cell)
-                    for directory in sorted(index_map.keys()):
-                        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                                xhtml_stream.characters(directory)
-                            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                                for file in sorted(index_map[directory]):
-                                    # TODO: Fix href, has root duplicated
-                                    relative_path = index[file].path_output[1+len(os.path.dirname(index_file_path)):]
-                                    with XmlWrite.Element(xhtml_stream, 'a', {'href': relative_path}):
-                                        xhtml_stream.characters(os.path.basename(file))
-                                    with XmlWrite.Element(xhtml_stream, 'br', {}):
-                                        pass
+                with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
+                    # Heading Row
+                    with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
+                        for i in range(dict_tree.depth() - 2):
+                            with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                                pass
+                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                            xhtml_stream.characters('File')
+                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                            xhtml_stream.characters('Frame Array')
+                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                            xhtml_stream.characters('Frames')
+                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                            xhtml_stream.characters('Channels')
+                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                            xhtml_stream.characters('X Axis')
+                    # Table body
+                    file_href = ''
+                    for event in dict_tree.genColRowEvents():
+                        if event == dict_tree.ROW_OPEN:
+                            # Write out the '<tr>' element
+                            xhtml_stream.startElement('tr', {'class': 'filetable'})
+                        elif event == dict_tree.ROW_CLOSE:
+                            # Write out the '</tr>' element
+                            xhtml_stream.endElement('tr')
+                        else:
+                            td_attrs = {'class': 'filetable'}
+                            if event.row_span > 1:
+                                td_attrs['rowspan'] = f'{event.row_span:d}'
+                            if event.col_span > 1:
+                                td_attrs['colspan'] = f'{event.col_span:d}'
+                            if event.node is None:
+                                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                                    if isinstance(event.branch[-1], FileNameLinkHref):
+                                        file_href = event.branch[-1].href
+                                        with XmlWrite.Element(xhtml_stream, 'a', {'href': file_href}):
+                                            xhtml_stream.characters(str(event.branch[-1].file_name))
+                                            # xhtml_stream.characters(f'FILE: {str(event.branch[-1])}')
+                                    else:
+                                        xhtml_stream.characters(f'{str(event.branch[-1])}')
+                            else:
+                                node: HTML.HTMLFrameArraySummary = event.node
+                                # Frame Array
+                                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                                    with XmlWrite.Element(xhtml_stream, 'a', {'href': f'{file_href}#{node.href}'}):
+                                        xhtml_stream.characters(str(event.branch[-1]))
+                                # Write the node cells
+                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                                    xhtml_stream.characters(f'{node.num_frames:,d}')
+                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                                    xhtml_stream.characters(f'{len(node.channels):,d}')
+                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                                    xhtml_stream.characters(
+                                        f'{node.x_start:.1f} to {node.x_stop:.1f} {node.x_units.decode("ascii")}'
+                                    )
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
                      recurse: bool,
-                     **kwargs) -> typing.Dict[str, FileResult]:
+                     **kwargs) -> typing.Dict[str, HTMLResult]:
     logging.info(f'scan_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
-    ret: typing.Dict[str, FileResult] = {}
+    ret: typing.Dict[str, HTMLResult] = {}
     # Output file path to FIleResult
-    index: typing.Dict[str, FileResult] = {}
+    index_map: typing.Dict[str, HTMLResult] = {}
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             # print(file_in_out)
@@ -269,9 +351,9 @@ def scan_dir_or_file(path_in: str, path_out: str,
             )
             ret[file_in_out.filePathIn] = result
             if not result.exception and not result.ignored:
-                index[result.path_output] = result
+                index_map[result.path_output] = result
         # Now write all the index.xhtml
-        _write_indexes(path_out, index)
+        _write_indexes(path_out, index_map)
     else:
         ret[path_in] = scan_a_single_file(path_in, path_out, **kwargs)
     return ret
@@ -345,12 +427,12 @@ reset
 """
 
 
-def plot_gnuplot(data: typing.Dict[str, FileResult], gnuplot_dir: str) -> None:
+def plot_gnuplot(data: typing.Dict[str, HTMLResult], gnuplot_dir: str) -> None:
     if len(data) < 2:
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
-        list(FileResult._fields) + ['Path']
+        list(HTMLResult._fields) + ['Path']
     ]
     table[0][0] = f'# {table[0][0]}'
     for k in sorted(data.keys()):
@@ -367,7 +449,7 @@ def plot_gnuplot(data: typing.Dict[str, FileResult], gnuplot_dir: str) -> None:
 
 def main() -> int:
     description = 'usage: %(prog)s [options] file'
-    description = """Scans a RP66V1 file and dumps data in HTML"""
+    description = """Scans a RP66V1 file or directory and writes HTML version of the data."""
     # TODO: Use CmnCmdOpts
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(
@@ -432,7 +514,7 @@ def main() -> int:
     clk_start = time.perf_counter()
     # return 0
     # Your code here
-    result: typing.Dict[str, FileResult] = scan_dir_or_file(
+    result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
         args.path_in,
         args.path_out,
         args.recurse,
@@ -462,7 +544,7 @@ def main() -> int:
         ms_mb = clk_exec * 1000 / (size_input / 1024**2)
     else:
         ms_mb = 0.0
-    print(f'Processed {len(result):,d} files and {size_input:,d} bytes, {ms_mb:.1f} ms/Mb')
+    print(f'Processed {len(result):,d} files and {size_input:,d} bytes in {clk_exec:.3f} s, {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0
 

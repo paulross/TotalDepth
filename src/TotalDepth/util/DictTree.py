@@ -18,6 +18,7 @@
 # 
 # Paul Ross: apaulross@gmail.com
 """A dictionary that takes a list of hashables as a key and behaves like a tree."""
+import typing
 
 __author__  = 'Paul Ross'
 __date__    = '2009-09-15'
@@ -197,7 +198,14 @@ class DictTree(object):
                 self._ir[k]._indentedStr(theL, kStk)
                 kStk.pop()
                 
-                
+
+class DictTreeTableEvent(typing.NamedTuple):
+    branch: typing.List[typing.Any]
+    node: typing.Union[None, typing.Any]
+    row_span: int
+    col_span: int
+
+
 class DictTreeHtmlTable(DictTree):
     """A sub-class of DictTree that helps writing HTML row/col span tables
     Suppose we have a tree like this::
@@ -248,14 +256,19 @@ class DictTreeHtmlTable(DictTree):
     The HTML code generator can be used like this::
     
         # Write: <table border="2" width="100%">
-        for anEvent in myTree.genColRowEvents():
-            if anEvent == myTree.ROW_OPEN:
-                # Write out the '<tr>' element
-            elif anEvent == myTree.ROW_CLOSE:
-                # Write out the '</tr>' element
-            else:
-                k, v, r, c = anEvent
-                # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, v)
+        with XmlWrite.Element(xhtml_stream, 'table', {}):
+            for anEvent in myTree.genColRowEvents():
+                if anEvent == myTree.ROW_OPEN:
+                    # Write out the '<tr>' element
+                    xhtml_stream.startElement('tr', {})
+                elif anEvent == myTree.ROW_CLOSE:
+                    # Write out the '</tr>' element
+                    xhtml_stream.endElement('tr')
+                else:
+                    k, v, r, c = anEvent
+                    # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, v)
+                    with XmlWrite.Element(xhtml_stream, 'td', {'rowspan' : "%d" % r, 'colspan' : "%d" % c}):
+                        xhtml_stream.characters(v)
         # Write: </table>
     
     And the HTML will look like this::
@@ -291,8 +304,10 @@ class DictTreeHtmlTable(DictTree):
     
     """
     # HTML table events
-    ROW_OPEN = (None, 0, 0)
-    ROW_CLOSE = (None, -1, -1)
+    # TODO: Make events a named tuple.
+    # TODO: Make these sentinels 4-tuple.
+    ROW_OPEN = DictTreeTableEvent([], None, 0, 0)
+    ROW_CLOSE = DictTreeTableEvent([], None, -1, -1)
     def __init__(self, *args):
         super(DictTreeHtmlTable, self).__init__(*args)
         self._colSpan = self._rowSpan = 1
@@ -355,7 +370,7 @@ class DictTreeHtmlTable(DictTree):
         if hasYielded:
             yield self.ROW_CLOSE
     
-    def _genColRowEvents(self, keyBranch):
+    def _genColRowEvents(self, keyBranch) -> typing.Iterable[DictTreeTableEvent]:
         """Returns a set of events that are a tuple of quadruples.
         (key_branch, value, rowspan_integer, colspan_integer)
         For example: (['a', 'b'], 'c', 3, 7)
@@ -370,18 +385,18 @@ class DictTreeHtmlTable(DictTree):
                 if i != 0:
                     yield self.ROW_CLOSE
                     yield self.ROW_OPEN
-                yield (keyBranch[:], self._ir[k]._v, self._ir[k].rowSpan, self._ir[k].colSpan)
+                yield DictTreeTableEvent(keyBranch[:], self._ir[k]._v, self._ir[k].rowSpan, self._ir[k].colSpan)
                 # Recurse
                 for anEvent in self._ir[k]._genColRowEvents(keyBranch):
                     yield anEvent
                 keyBranch.pop()
 
-    def walkColRowSpan(self):
+    def walkColRowSpan(self) -> str:
         dMax = self.depth()
         #print 'dMax=%d' % dMax
         return self._walkColRowSpan(0, dMax)
 
-    def _walkColRowSpan(self, d, dMax):
+    def _walkColRowSpan(self, d, dMax) -> str:
         #print '%srow=%d col=%d "%s"' \
         #    % ('  '*d, self.rowSpan(), dMax-self.colSpan(), self._v)
         retVal = ""
@@ -391,6 +406,3 @@ class DictTreeHtmlTable(DictTree):
                 retVal += '%s%s r=%d, c=%d\n' % ('  '*d, k, self._ir[k].rowSpan, self._ir[k].colSpan)
                 retVal += self._ir[k]._walkColRowSpan(d+1, dMax)
         return retVal
-                
-
-        

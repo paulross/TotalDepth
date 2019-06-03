@@ -106,7 +106,6 @@ padding:           2px 6px 2px 6px;
 
 """
 
-
 def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('Storage Unit Label')
@@ -163,6 +162,16 @@ def html_write_EFLR_as_table(eflr: EFLR.ExplicitlyFormattedLogicalRecord, xhtml_
         html_write_table(table_as_strings, xhtml_stream, style='eflr', border='1')
 
 
+class HTMLFrameArraySummary(typing.NamedTuple):
+    ident: bytes
+    num_frames: int
+    channels: typing.Tuple[bytes]
+    x_start: float
+    x_stop: float
+    x_units: bytes
+    href: str
+
+
 def _write_log_pass_content_in_html(
         rp66_file: File.FileRead,
         visible_record_positions: LogicalFile.VisibleRecordPositions,
@@ -172,14 +181,16 @@ def _write_log_pass_content_in_html(
         logical_file_index: int,
         number_of_preceeding_eflrs: int,
         *,
-        # TODO: Replace with a slice object
-        frame_spacing) -> None:
+        # TODO: Replace frame_spacing with a slice object
+        frame_spacing) -> typing.Tuple[HTMLFrameArraySummary]:
     assert logical_file.has_log_pass
     assert frame_spacing >= 1
     lp: LogPass.LogPass = logical_file.log_pass
     frame_array: LogPass.FrameArray
+    ret = []
     for fa, frame_array in enumerate(lp.frame_arrays):
-        with XmlWrite.Element(xhtml_stream, 'a', {'id': f'{_anchor(logical_file_index, number_of_preceeding_eflrs, fa)}'}):
+        anchor = _anchor(logical_file_index, number_of_preceeding_eflrs, fa)
+        with XmlWrite.Element(xhtml_stream, 'a', {'id': anchor}):
             pass
         with XmlWrite.Element(xhtml_stream, 'h3'):
             xhtml_stream.characters(f'Frame Array: {stringify_object_by_type(frame_array.ident)} [{fa}/{len(lp.frame_arrays)}]')
@@ -206,7 +217,7 @@ def _write_log_pass_content_in_html(
         html_write_table(table_as_strings, xhtml_stream, style='monospace', border='1')
         with XmlWrite.Element(xhtml_stream, 'h4'):
             xhtml_stream.characters('Frame Data')
-        iflrs = logical_file.iflr_position_map[frame_array.ident]
+        iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
         if len(iflrs):
             if frame_spacing > 1:
                 num_frames = 1 + len(iflrs) // frame_spacing
@@ -257,9 +268,24 @@ def _write_log_pass_content_in_html(
                     ]
                 )
             html_write_table(frame_table, xhtml_stream, style='monospace', border='1')
+            x_axis_start = iflrs[0].x_axis
+            x_axis_stop = iflrs[-1].x_axis
         else:
             with XmlWrite.Element(xhtml_stream, 'p'):
                 xhtml_stream.characters('No frames.')
+            x_axis_start = x_axis_stop = 0.0
+        ret.append(
+            HTMLFrameArraySummary(
+                frame_array.ident.I,
+                len(iflrs),
+                tuple(c.ident.I for c in frame_array.channels),
+                x_axis_start,
+                x_axis_stop,
+                frame_array.x_axis.units,
+                anchor,
+            )
+        )
+    return tuple(ret)
 
 
 # def _anchor(*args: typing.Tuple[int, ...]) -> str:
@@ -314,24 +340,37 @@ def html_write_file_info(path_in: str, xhtml_stream: XmlWrite.XhtmlStream) -> No
     html_write_table(table, xhtml_stream, **{'class': 'monospace', 'border':'1'})
 
 
+class HTMLLogicalFileSummary(typing.NamedTuple):
+    eflr_types: typing.Tuple[bytes]
+    frame_arrays: typing.Tuple[HTMLFrameArraySummary]
+
+
+class HTMLBodySummary(typing.NamedTuple):
+    link_text: str
+    logical_files: typing.Tuple[HTMLLogicalFileSummary]
+
+
 def html_write_body(
         rp66_file: File.FileRead,
         logical_file_sequence: LogicalFile.LogicalFileSequence,
         frame_spacing: int,
         xhtml_stream: XmlWrite.XhtmlStream,
-    ) -> None:
+    ) -> HTMLBodySummary:
     """Write out the <body> of the document."""
     with XmlWrite.Element(xhtml_stream, 'h1'):
         xhtml_stream.characters('RP66V1 File Data Summary')
     html_write_file_info(logical_file_sequence.path, xhtml_stream)
     html_write_storage_unit_label(logical_file_sequence.storage_unit_label, xhtml_stream)
     html_write_table_of_contents(logical_file_sequence, xhtml_stream)
+    logical_file_summaries: typing.List[HTMLLogicalFileSummary] = []
     logical_file: LogicalFile.LogicalFile
     for lf, logical_file in enumerate(logical_file_sequence.logical_files):
+        eflr_types: typing.List[bytes] = []
         with XmlWrite.Element(xhtml_stream, 'h2'):
             xhtml_stream.characters(f'Logical File [{lf}/{len(logical_file_sequence.logical_files)}]')
         eflr_position: LogicalFile.PositionEFLR
         for e, eflr_position in enumerate(logical_file.eflrs):
+            eflr_types.append(eflr_position.eflr.set.type)
             header = [
                 f'EFLR: {eflr_position.eflr.set.type.decode("ascii")}',
                 f'Shape: {eflr_position.eflr.shape}'
@@ -362,18 +401,25 @@ def html_write_body(
         if logical_file.has_log_pass:
             with XmlWrite.Element(xhtml_stream, 'a', {'id': f'{_anchor(lf, len(logical_file.eflrs))}'}):
                 pass
-            _write_log_pass_content_in_html(
-                rp66_file, logical_file_sequence.visible_record_positions,
-                logical_file, xhtml_stream,
-                lf, len(logical_file.eflrs),
-                frame_spacing=frame_spacing)
+            frame_array_summary = _write_log_pass_content_in_html(
+                    rp66_file, logical_file_sequence.visible_record_positions,
+                    logical_file, xhtml_stream,
+                    lf, len(logical_file.eflrs),
+                    frame_spacing=frame_spacing,
+            )
+            logical_file_summaries.append((HTMLLogicalFileSummary(tuple(eflr_types), frame_array_summary)))
         else:
             with XmlWrite.Element(xhtml_stream, 'p'):
                 xhtml_stream.characters('NO Log Pass for this Logical Record')
+            logical_file_summaries.append((HTMLLogicalFileSummary(tuple(eflr_types), tuple())))
+    return HTMLBodySummary(
+        logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii'),
+        tuple(logical_file_summaries),
+    )
 
 
 def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
-                                       *, frame_spacing: int) -> str:
+                                       *, frame_spacing: int) -> HTMLBodySummary:
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
@@ -401,5 +447,5 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                html_write_body(rp66v1_file, logical_file_sequence, frame_spacing, xhtml_stream)
-        return logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii')
+                return html_write_body(rp66v1_file, logical_file_sequence, frame_spacing, xhtml_stream)
+        # return logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii')
