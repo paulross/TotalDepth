@@ -181,18 +181,19 @@ def _write_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
     assert os.path.isdir(path_out)
     # print('TRACE: _write_indexes():')
     # pprint.pprint(index)
+    _write_low_level_indexes(path_out, index)
+    _write_top_level_index(path_out, index)
 
 
-
-
-
+def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
+    assert os.path.isdir(path_out)
     # Write low level indexes
     for root, dirs, files in os.walk(path_out):
         files_to_link_to = []
         for file in files:
             out_file_path = os.path.join(root, file)
             if out_file_path in index:
-                files_to_link_to.append(file)#out_file_path)
+                files_to_link_to.append(file)
         if len(files_to_link_to):
             with open(os.path.join(root, INDEX_FILE), 'w') as fout:
                 with XmlWrite.XhtmlStream(fout) as xhtml_stream:
@@ -204,31 +205,30 @@ def _write_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
                         }):
                             pass
                         with XmlWrite.Element(xhtml_stream, 'title'):
-                            xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan {root}')
+                            xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {root}')
                         with XmlWrite.Element(xhtml_stream, 'style'):
                             xhtml_stream.literal(CSS_RP66V1_INDEX)
                     with XmlWrite.Element(xhtml_stream, 'body'):
+                        with XmlWrite.Element(xhtml_stream, 'h1'):
+                            xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan {root}')
                         with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
                             with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
-                                for cell in ('File', 'Storage Unit Label'):
+                                for header in ('Physical File', 'File', 'Frame Array', 'Frames', 'Channels', 'X Start', 'X Stop', 'dX', 'X Units'):
                                     with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                                        xhtml_stream.characters(cell)
+                                        xhtml_stream.characters(header)
+                            dict_tree = DictTree.DictTreeHtmlTable(None)
                             for file in files_to_link_to:
-                                with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
-                                    with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable'}):
-                                        with XmlWrite.Element(xhtml_stream, 'a', {'href': file}):
-                                            xhtml_stream.characters(os.path.basename(file))
-                                    with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable'}):
-                                        xhtml_stream.characters(
-                                            str(index[os.path.join(root, file)].html_summary.link_text)
-                                        )
-    # # Write top level index, this might overwrite the index in a single directory
-    # # This index is just a table with two columns: directory, file
-    # index_map: typing.Dict[str, typing.List[HTMLResult]] = collections.defaultdict(list)
-    # for k in index.keys():
-    #     index_map[os.path.dirname(k)].append(k)
-    # index_file_path = os.path.join(path_out, INDEX_FILE)
-    _write_top_level_index(path_out, index)
+                                branch = [FileNameLinkHref(file, file, file)]
+                                html_summary = index[os.path.join(root, file)].html_summary
+                                for lf, logical_file_result in enumerate(html_summary.logical_files):
+                                    branch.append(f'{lf}')
+                                    for frame_array_result in logical_file_result.frame_arrays:
+                                        # HTMLFrameArraySummary
+                                        branch.append(frame_array_result.ident)
+                                        dict_tree.add(branch, frame_array_result)
+                                        branch.pop()
+                                    branch.pop()
+                            _write_table_body(xhtml_stream, dict_tree)
 
 
 class FileNameLinkHref(typing.NamedTuple):
@@ -248,9 +248,8 @@ def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult
         # Mark the file name with the link text and href
         file_name = branch.pop()
         branch.append(
-            # FIXME: Relative link from index to file.
             FileNameLinkHref(
-                file_name, index_map[k].html_summary.link_text, index_map[k].path_output[len(path_out):],
+                file_name, index_map[k].html_summary.link_text, index_map[k].path_output[len(path_out)+1:],
             )
         )
         result = index_map[k]
@@ -279,61 +278,73 @@ def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1_INDEX)
             with XmlWrite.Element(xhtml_stream, 'body'):
+                with XmlWrite.Element(xhtml_stream, 'h1'):
+                    xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {path_out}')
                 with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
                     # Heading Row
                     with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
                         for i in range(dict_tree.depth() - 2):
                             with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
                                 pass
-                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                            xhtml_stream.characters('File')
-                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                            xhtml_stream.characters('Frame Array')
-                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                            xhtml_stream.characters('Frames')
-                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                            xhtml_stream.characters('Channels')
-                        with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                            xhtml_stream.characters('X Axis')
-                    # Table body
-                    file_href = ''
-                    for event in dict_tree.genColRowEvents():
-                        if event == dict_tree.ROW_OPEN:
-                            # Write out the '<tr>' element
-                            xhtml_stream.startElement('tr', {'class': 'filetable'})
-                        elif event == dict_tree.ROW_CLOSE:
-                            # Write out the '</tr>' element
-                            xhtml_stream.endElement('tr')
-                        else:
-                            td_attrs = {'class': 'filetable'}
-                            if event.row_span > 1:
-                                td_attrs['rowspan'] = f'{event.row_span:d}'
-                            if event.col_span > 1:
-                                td_attrs['colspan'] = f'{event.col_span:d}'
-                            if event.node is None:
-                                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
-                                    if isinstance(event.branch[-1], FileNameLinkHref):
-                                        file_href = event.branch[-1].href
-                                        with XmlWrite.Element(xhtml_stream, 'a', {'href': file_href}):
-                                            xhtml_stream.characters(str(event.branch[-1].file_name))
-                                            # xhtml_stream.characters(f'FILE: {str(event.branch[-1])}')
-                                    else:
-                                        xhtml_stream.characters(f'{str(event.branch[-1])}')
-                            else:
-                                node: HTML.HTMLFrameArraySummary = event.node
-                                # Frame Array
-                                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
-                                    with XmlWrite.Element(xhtml_stream, 'a', {'href': f'{file_href}#{node.href}'}):
-                                        xhtml_stream.characters(str(event.branch[-1]))
-                                # Write the node cells
-                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
-                                    xhtml_stream.characters(f'{node.num_frames:,d}')
-                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
-                                    xhtml_stream.characters(f'{len(node.channels):,d}')
-                                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
-                                    xhtml_stream.characters(
-                                        f'{node.x_start:.1f} to {node.x_stop:.1f} {node.x_units.decode("ascii")}'
-                                    )
+                        for header in ('File', 'Frame Array', 'Frames', 'Channels', 'X Start', 'X Stop', 'dX', 'X Units'):
+                            with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
+                                xhtml_stream.characters(header)
+                    _write_table_body(xhtml_stream, dict_tree)
+
+
+def _write_table_body(xhtml_stream: XmlWrite.XhtmlStream, dict_tree: DictTree.DictTreeHtmlTable) -> None:
+    # Table body
+    file_href = ''
+    for event in dict_tree.genColRowEvents():
+        if event == dict_tree.ROW_OPEN:
+            # Write out the '<tr>' element
+            xhtml_stream.startElement('tr', {'class': 'filetable'})
+        elif event == dict_tree.ROW_CLOSE:
+            # Write out the '</tr>' element
+            xhtml_stream.endElement('tr')
+        else:
+            td_attrs = {'class': 'filetable'}
+            if event.row_span > 1:
+                td_attrs['rowspan'] = f'{event.row_span:d}'
+            if event.col_span > 1:
+                td_attrs['colspan'] = f'{event.col_span:d}'
+            if event.node is None:
+                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                    if isinstance(event.branch[-1], FileNameLinkHref):
+                        file_href = event.branch[-1].href
+                        with XmlWrite.Element(xhtml_stream, 'a', {'href': file_href}):
+                            xhtml_stream.characters(str(event.branch[-1].file_name))
+                    else:
+                        xhtml_stream.characters(f'{str(event.branch[-1])}')
+            else:
+                node: HTML.HTMLFrameArraySummary = event.node
+                # Frame Array
+                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                    with XmlWrite.Element(xhtml_stream, 'a', {'href': f'{file_href}#{node.href}'}):
+                        xhtml_stream.characters(str(event.branch[-1]))
+                # Write the node cells
+                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                    xhtml_stream.characters(f'{node.num_frames:,d}')
+                with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                    xhtml_stream.characters(f'{len(node.channels):,d}')
+                # with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                #     if node.num_frames > 1:
+                #         frame_spacing = f'{(node.x_stop - node.x_start) / (node.num_frames - 1):.1f}'
+                #     else:
+                #         frame_spacing = 'N/A'
+                #     xhtml_stream.characters(f'{node.x_start:.1f}')
+                #     xhtml_stream.literal('&nbsp;to&nbsp;')
+                #     xhtml_stream.characters(f'{node.x_stop:.1f}')
+                #     xhtml_stream.literal('&nbsp;')
+                #     xhtml_stream.characters('dx')
+                #     xhtml_stream.literal('&nbsp;')
+                #     xhtml_stream.characters(f'{frame_spacing}')
+                #     xhtml_stream.literal('&nbsp;')
+                #     xhtml_stream.characters(f'[{node.x_units.decode("ascii")}]')
+                frame_spacing = (node.x_stop - node.x_start) / (node.num_frames - 1) if node.num_frames > 1 else 0.0
+                for value in (f'{node.x_start:.1f}', f'{node.x_stop:.1f}', f'{frame_spacing:.1f}', f'{node.x_units.decode("ascii")}'):
+                    with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
+                        xhtml_stream.characters(value)
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
@@ -521,7 +532,7 @@ def main() -> int:
         frame_spacing=args.frame_spacing,
     )
     clk_exec = time.perf_counter() - clk_start
-    print('Execution time = %8.3f (S)' % clk_exec)
+    # print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0
     files_processed = 0
     for path in sorted(result.keys()):

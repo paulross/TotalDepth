@@ -205,6 +205,12 @@ class DictTreeTableEvent(typing.NamedTuple):
     row_span: int
     col_span: int
 
+    def html_attrs(self) -> typing.Dict[str, str]:
+        return {
+            'rowspan': f'{self.row_span}',
+            'colspan': f'{self.col_span}'
+        }
+
 
 class DictTreeHtmlTable(DictTree):
     """A sub-class of DictTree that helps writing HTML row/col span tables
@@ -243,32 +249,32 @@ class DictTreeHtmlTable(DictTree):
         | C     | CA    | CAA   |
         |-----------------------|
 
-    In this example the tree is loaded branch by branch thus:
-    myTree = DictTreeHtmlTable()
-    myTree.add(('A', 'AA', 'AAA'), None)
-    myTree.add(('A', 'AA', 'AAB'), None)
-    myTree.add(('A', 'AA', 'AAC'), None)
-    myTree.add(('A', 'AB',), None)
-    myTree.add(('A', 'AC', 'ACA'), None)
-    myTree.add(('B',), None)
-    myTree.add(('C', 'CA', 'CAA'), None)
+    In this example the tree is loaded branch by branch thus::
+
+        myTree = DictTreeHtmlTable()
+        myTree.add(('A', 'AA', 'AAA'), None)
+        myTree.add(('A', 'AA', 'AAB'), None)
+        myTree.add(('A', 'AA', 'AAC'), None)
+        myTree.add(('A', 'AB',), None)
+        myTree.add(('A', 'AC', 'ACA'), None)
+        myTree.add(('B',), None)
+        myTree.add(('C', 'CA', 'CAA'), None)
 
     The HTML code generator can be used like this::
     
         # Write: <table border="2" width="100%">
         with XmlWrite.Element(xhtml_stream, 'table', {}):
-            for anEvent in myTree.genColRowEvents():
-                if anEvent == myTree.ROW_OPEN:
+            for event in myTree.genColRowEvents():
+                if event == myTree.ROW_OPEN:
                     # Write out the '<tr>' element
                     xhtml_stream.startElement('tr', {})
-                elif anEvent == myTree.ROW_CLOSE:
+                elif event == myTree.ROW_CLOSE:
                     # Write out the '</tr>' element
                     xhtml_stream.endElement('tr')
                 else:
-                    k, v, r, c = anEvent
-                    # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, v)
-                    with XmlWrite.Element(xhtml_stream, 'td', {'rowspan' : "%d" % r, 'colspan' : "%d" % c}):
-                        xhtml_stream.characters(v)
+                    # Write '<td rowspan="..." colspan="...">...</td>' % (r, c, v)
+                    with XmlWrite.Element(xhtml_stream, 'td', event.html_attrs()):
+                        xhtml_stream.characters(str(event.node))
         # Write: </table>
     
     And the HTML will look like this::
@@ -304,10 +310,9 @@ class DictTreeHtmlTable(DictTree):
     
     """
     # HTML table events
-    # TODO: Make events a named tuple.
-    # TODO: Make these sentinels 4-tuple.
     ROW_OPEN = DictTreeTableEvent([], None, 0, 0)
     ROW_CLOSE = DictTreeTableEvent([], None, -1, -1)
+
     def __init__(self, *args):
         super(DictTreeHtmlTable, self).__init__(*args)
         self._colSpan = self._rowSpan = 1
