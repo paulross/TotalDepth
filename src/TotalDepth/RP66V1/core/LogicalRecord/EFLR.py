@@ -273,6 +273,7 @@ class ExplicitlyFormattedLogicalRecord:
                         # logger.info(msg)
                         logger.debug(msg)
                     else:
+                        # FIXME: This is wrong. Walk through the attributes replacing any that have a greater copy number.
                         msg = f'Ignoring different Object with {obj.name} already seen in the {self.set}.'
                         logger.warning(msg)
                         logger.warning('WAS:')

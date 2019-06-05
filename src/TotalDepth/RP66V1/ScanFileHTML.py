@@ -387,7 +387,7 @@ set ylabel "Scan Rate (ms/Mb), Scan Compression Ratio"
 # set ytics 8,35,3
 
 set logscale y2
-set y2label "Scan time (s), Ratio original size / index size"
+set y2label "Scan time (s), Ratio original size / HTML size"
 # set y2range [1e-4:10]
 set y2tics
 
@@ -443,12 +443,21 @@ def plot_gnuplot(data: typing.Dict[str, HTMLResult], gnuplot_dir: str) -> None:
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
-        list(HTMLResult._fields) + ['Path']
+        # list(HTMLResult._fields) + ['Path']
+        ['size_input', 'size_output', 'time', 'Path']
     ]
     table[0][0] = f'# {table[0][0]}'
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
-            table.append(list(data[k]) + [k])
+            # table.append(list(data[k]) + [k])
+            table.append(
+                [
+                    data[k].size_input,
+                    data[k].size_output,
+                    data[k].time,
+                    k
+                ]
+            )
     name = 'ScanFileHTML'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:
@@ -506,7 +515,7 @@ def main() -> int:
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
-    # gnuplot.add_gnuplot_to_argument_parser(parser)
+    gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
 
@@ -549,8 +558,11 @@ def main() -> int:
             size_scan += result[path].size_output
             files_processed += 1
 
-    # if args.gnuplot:
-    #     plot_gnuplot(result, args.gnuplot)
+    if args.gnuplot:
+        try:
+            plot_gnuplot(result, args.gnuplot)
+        except IOError:
+            logger.exception('Plotting with gnuplot failed.')
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input / 1024**2)
     else:

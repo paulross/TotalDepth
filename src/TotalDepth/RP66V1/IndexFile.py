@@ -92,16 +92,16 @@ set xlabel "RP66V1 File Size (bytes)"
 # set format x ""
 
 set logscale y
-set ylabel "XML Index Rate (ms/Mb), XML Compression Ratio"
+set ylabel "XML Index Rate (ms/Mb)"
 # set yrange [1:1e5]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
-# set logscale y2
-# set y2label "Ratio index size / original size"
+set logscale y2
+set y2label "Ratio index size / original size"
 # set y2range [1e-4:10]
-# set y2tics
+set y2tics
 
 set pointsize 1
 set datafile separator whitespace#"	"
@@ -123,7 +123,7 @@ fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
 
 # Curve fit, compression ratio
 compression_ratio(x) = 10**(e + f * log10(x))
-fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+fit compression_ratio(x) "{name}.dat" using 1:($2/$1) via e,f
 
 set terminal svg size 1000,700 # choose the file format
 set output "{name}.svg" # choose the output device
@@ -136,9 +136,9 @@ set output "{name}.svg" # choose the output device
 # Fields: size_input, size_index, time, exception, ignored, path
 
 plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
-	rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
-    "{name}.dat" using 1:($1/$2) axes x1y1 title "Original Size / XML Index size" lt 3 w points, \
-    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y1 lt 3 lw 2
+    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
+    "{name}.dat" using 1:($2/$1) axes x1y2 title "XML Index size / Original Size" lt 2 w points, \
+    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 2 lw 2
 
 # Plot size ratio:
 #    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, \
@@ -199,7 +199,7 @@ Scans a RP66V1 file and dumps data."""
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
-    # gnuplot.add_gnuplot_to_argument_parser(parser)
+    gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
     # return 0

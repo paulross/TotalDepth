@@ -105,7 +105,7 @@ def write_test_file(path: str, typ: str) -> int:
     )
     try:
         proc.stdin.write(bytes(test_stdin, 'ascii'))
-        proc.stdin.close()
+        # proc.stdin.close()
         stdout, stderr = proc.communicate(timeout=1, )
     except subprocess.TimeoutExpired as err:
         logger.exception()

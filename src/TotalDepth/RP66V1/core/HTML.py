@@ -109,7 +109,7 @@ padding:           2px 6px 2px 6px;
 def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('Storage Unit Label')
-    with XmlWrite.Element(xhtml_stream, 'table', {'border': '1', 'style': 'sul'}):
+    with XmlWrite.Element(xhtml_stream, 'table', {'border': '1', 'class': 'sul'}):
         with XmlWrite.Element(xhtml_stream, 'tr', {}):
             with XmlWrite.Element(xhtml_stream, 'td', {}):
                 xhtml_stream.characters('Storage Unit Sequence Number:')
@@ -159,7 +159,7 @@ def html_write_EFLR_as_table(eflr: EFLR.ExplicitlyFormattedLogicalRecord, xhtml_
             table_as_strings = eflr.key_values(stringify_function=stringify_object_by_type, sort=True)
         else:
             table_as_strings = eflr.table_as_strings(stringify_function=stringify_object_by_type, sort=True)
-        html_write_table(table_as_strings, xhtml_stream, style='eflr', border='1')
+        html_write_table(table_as_strings, xhtml_stream, **{'class': 'eflr',})
 
 
 class HTMLFrameArraySummary(typing.NamedTuple):
