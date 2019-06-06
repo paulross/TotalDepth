@@ -104,7 +104,8 @@ def xml_object_name(node: xml.etree.Element) -> RepCode.ObjectName:
 
 # FIXME: Move to TotalDepth.RP66V1.common.xml possibly some common stuff here?
 def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
-    """Write a value to the XML stream with specific type as an attribute."""
+    """Write a value to the XML stream with specific type as an attribute.
+    This writes either a <Value> or an <ObjectName> element."""
     if isinstance(value, RepCode.ObjectName):
         with XmlWrite.Element(xml_stream, 'ObjectName', xml_object_name_attributes(value)):
             pass
@@ -125,8 +126,9 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
         else:
             typ = 'unknown'
             _value = str(value)
-        with XmlWrite.Element(xml_stream, 'Value', {'type': typ}):
-            xml_stream.characters(_value)
+        with XmlWrite.Element(xml_stream, 'Value', {'type': typ, 'value': _value}):
+            # xml_stream.characters(_value)
+            pass
 
 
 def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:

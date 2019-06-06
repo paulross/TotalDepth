@@ -241,7 +241,10 @@ Scans a RP66V1 file and dumps data."""
                 size_index += result[path].size_index
                 files_processed += 1
         if args.gnuplot:
-            plot_gnuplot(result, args.gnuplot)
+            try:
+                plot_gnuplot(result, args.gnuplot)
+            except Exception:
+                logger.exception('gunplot failed')
     except Exception as err:
         logger.exception(str(err))
     print('Execution time = %8.3f (S)' % clk_exec)

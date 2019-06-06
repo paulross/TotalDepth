@@ -254,6 +254,43 @@ class Object:
         ret = [attr.stringify_value(stringify_function) for attr in self.attrs]
         return ret
 
+"""
+2019-06-05 22:31:49,839 - EFLR.py - 1704 - WARNING  - Ignoring different Object with OBNAME: O: 0 C: 0 I: b'MLL/CP/K_FAC' already seen in the EFLR Set type: b'CALIBRATION-MEASUREMENT' name: b'216'.
+2019-06-05 22:31:49,839 - EFLR.py - 1704 - WARNING  - WAS:
+2019-06-05 22:31:49,839 - EFLR.py - 1704 - WARNING  - OBNAME: O: 0 C: 0 I: b'MLL/CP/K_FAC'
+  CD: 001 00001 L: b'PHASE' C: 1 R: IDENT U: b'' V: [b'MASTER']
+  CD: 000 00000 L: b'MEASUREMENT-SOURCE' C: 1 R: OBJREF U: b'' V: None
+  CD: 001 00001 L: b'TYPE' C: 1 R: IDENT U: b'' V: [b'K_FAC']
+  CD: 000 00000 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: None
+  CD: 000 00000 L: b'AXIS' C: 1 R: OBNAME U: b'' V: None
+  CD: 001 00101 L: b'MEASUREMENT' C: 1 R: FSINGL U: b'' V: [0.014299999922513962]
+  CD: 000 00000 L: b'SAMPLE-COUNT' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'MAXIMUM-DEVIATION' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'STANDARD-DEVIATION' C: 1 R: IDENT U: b'' V: None
+  CD: 001 00101 L: b'BEGIN-TIME' C: 1 R: DTIME U: b'' V: [<<class 'TotalDepth.RP66V1.core.RepCode.DateTime'> 2014-08-24 00:56:19.000 STD>]
+  CD: 000 00000 L: b'DURATION' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'REFERENCE' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'STANDARD' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'PLUS-TOLERANCE' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'MINUS-TOLERANCE' C: 1 R: IDENT U: b'' V: None
+2019-06-05 22:31:49,840 - EFLR.py - 1704 - WARNING  - NOW:
+2019-06-05 22:31:49,840 - EFLR.py - 1704 - WARNING  - OBNAME: O: 0 C: 0 I: b'MLL/CP/K_FAC'
+  CD: 001 00001 L: b'PHASE' C: 1 R: IDENT U: b'' V: [b'MASTER']
+  CD: 000 00000 L: b'MEASUREMENT-SOURCE' C: 1 R: OBJREF U: b'' V: None
+  CD: 001 00001 L: b'TYPE' C: 1 R: IDENT U: b'' V: [b'K_FAC']
+  CD: 000 00000 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: None
+  CD: 000 00000 L: b'AXIS' C: 1 R: OBNAME U: b'' V: None
+  CD: 001 00101 L: b'MEASUREMENT' C: 1 R: FSINGL U: b'' V: [0.014299999922513962]
+  CD: 000 00000 L: b'SAMPLE-COUNT' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'MAXIMUM-DEVIATION' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'STANDARD-DEVIATION' C: 1 R: IDENT U: b'' V: None
+  CD: 001 00101 L: b'BEGIN-TIME' C: 1 R: DTIME U: b'' V: [<<class 'TotalDepth.RP66V1.core.RepCode.DateTime'> 2014-08-16 08:55:50.000 STD>]
+  CD: 000 00000 L: b'DURATION' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'REFERENCE' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'STANDARD' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'PLUS-TOLERANCE' C: 1 R: IDENT U: b'' V: None
+  CD: 000 00000 L: b'MINUS-TOLERANCE' C: 1 R: IDENT U: b'' V: None
+"""
 
 class ExplicitlyFormattedLogicalRecord:
     def __init__(self, lr_type: int, ld: LogicalData):
