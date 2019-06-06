@@ -20,6 +20,7 @@ install_requirements = [
     'numpy',
     'lxml',
     'colorama',
+    'psutil',
 ]
 
 setup_requirements = [
