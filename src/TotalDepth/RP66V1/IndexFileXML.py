@@ -1,5 +1,6 @@
 import argparse
 import collections
+import io
 import logging
 import os
 import sys
@@ -7,9 +8,11 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
+from TotalDepth.RP66V1.core import LogicalFile, File
 from TotalDepth.RP66V1.core import Index
-from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
+from TotalDepth.util.bin_file_type import binary_file_type_from_path
+from TotalDepth.util import gnuplot
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -23,60 +26,160 @@ logger = logging.getLogger(__file__)
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception, ignored')
 
 
-FRAME_CHUNK = 1024
-FRAME_CHUNK = -1024
+def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
+    # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
+    bin_file_type = binary_file_type_from_path(path_in)
+    if bin_file_type == 'RP66V1':
+        if path_out:
+            out_dir = os.path.dirname(path_out)
+            if not os.path.exists(out_dir):
+                logger.info(f'Making directory: {out_dir}')
+                os.makedirs(out_dir, exist_ok=True)
+        logger.info(f'Indexing {path_in} to {path_out}')
+        try:
+            with open(path_in, 'rb') as fobj:
+                t_start = time.perf_counter()
+                # index = RP66V1IndexXMLWrite(fobj, path_in)
+                rp66v1_file = File.FileRead(fobj)
+                logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, path_in)
+                if path_out:
+                    with open(path_out + '.xml', 'w') as f_out:
+                        Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out)
+                    index_size = os.path.getsize(path_out + '.xml')
+                else:
+                    xml_fobj = io.StringIO()
+                    Index.write_logical_file_sequence_to_xml(logical_file_sequence, xml_fobj)
+                    index_output = xml_fobj.getvalue()
+                    index_size = len(index_output)
+                    print(index_output)
+                result = IndexResult(
+                    os.path.getsize(path_in),
+                    index_size,
+                    time.perf_counter() - t_start,
+                    False,
+                    False,
+                )
+                logger.info(f'Length of XML: {index_size}')
+                return result
+        except ExceptionTotalDepthRP66V1:
+            logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True, False)
+        except Exception:
+            logger.exception(f'Failed to index with Exception: {path_in}')
+            return IndexResult(os.path.getsize(path_in), 0, 0.0, True, False)
+    logger.info(f'Ignoring file type "{bin_file_type}" at {path_in}')
+    return IndexResult(0, 0, 0.0, False, True)
 
 
-def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
-    """
-    Reads a single XML index and create a populated LogicalFileSequence.
-
-    Returns the performance of this activity.
-    """
-    logger.info(f'Reading XML index: {xml_path_in}')
-    try:
-        t_start = time.perf_counter()
-        logical_file_sequence = Index.read_logical_file_sequence_from_xml(xml_path_in, archive_root)
-        result = IndexResult(
-            os.path.getsize(logical_file_sequence.path),
-            os.path.getsize(xml_path_in),
-            time.perf_counter() - t_start,
-            False,
-            False,
-        )
-        return result
-    except ExceptionTotalDepthRP66V1:
-        logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {xml_path_in}')
-        return IndexResult(os.path.getsize(xml_path_in), 0, 0.0, True, False)
-    except Exception:
-        logger.exception(f'Failed to index with Exception: {xml_path_in}')
-        return IndexResult(os.path.getsize(xml_path_in), 0, 0.0, True, False)
-
-
-def read_index_dir_or_file(path_in: str, archive_root: str, recurse: bool) -> typing.Dict[str, IndexResult]:
-    logging.info(f'index_dir_or_file(): "{path_in}" to "{archive_root}" recurse: {recurse}')
+def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
+    logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     if os.path.isdir(path_in):
-        for file_in_out in dirWalk(path_in, theFnMatch='', recursive=recurse, bigFirst=False):
+        for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             # print(file_in_out)
-            ret[file_in_out.filePathIn] = read_a_single_index(file_in_out.filePathIn, archive_root)
+            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut)
     else:
-        ret[path_in] = read_a_single_index(path_in, archive_root)
+        ret[path_in] = index_a_single_file(path_in, path_out)
     return ret
+
+GNUPLOT_PLT = """set logscale x
+set grid
+set title "XML Index of RP66V1 Files with IndexFile.py."
+set xlabel "RP66V1 File Size (bytes)"
+# set mxtics 5
+# set xrange [0:3000]
+# set xtics
+# set format x ""
+
+set logscale y
+set ylabel "XML Index Rate (ms/Mb)"
+# set yrange [1:1e5]
+# set ytics 20
+# set mytics 2
+# set ytics 8,35,3
+
+set logscale y2
+set y2label "Ratio index size / original size"
+# set y2range [1e-4:10]
+set y2tics
+
+set pointsize 1
+set datafile separator whitespace#"	"
+set datafile missing "NaN"
+
+# set fit logfile
+
+# Curve fit, rate
+rate(x) = 10**(a + b * log10(x))
+fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+
+rate2(x) = 10**(5.5 - 0.5 * log10(x))
+
+# Curve fit, size ratio
+size_ratio(x) = 10**(c + d * log10(x))
+fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+# By hand
+# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
+
+# Curve fit, compression ratio
+compression_ratio(x) = 10**(e + f * log10(x))
+fit compression_ratio(x) "{name}.dat" using 1:($2/$1) via e,f
+
+set terminal svg size 1000,700 # choose the file format
+set output "{name}.svg" # choose the output device
+
+# set key off
+
+#set key title "Window Length"
+#  lw 2 pointsize 2
+
+# Fields: size_input, size_index, time, exception, ignored, path
+
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
+    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
+    "{name}.dat" using 1:($2/$1) axes x1y2 title "XML Index size / Original Size" lt 2 w points, \
+    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 2 lw 2
+
+# Plot size ratio:
+#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, \
+#     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+
+reset
+"""
+
+
+def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
+    if len(data) < 2:
+        raise ValueError(f'Can not plot data with only {len(data)} points.')
+    # First row is header row, create it then comment out the first item.
+    table = [
+        list(IndexResult._fields) + ['Path']
+    ]
+    table[0][0] = f'# {table[0][0]}'
+    for k in sorted(data.keys()):
+        if data[k].size_input > 0 and not data[k].exception:
+            table.append(list(data[k]) + [k])
+    name = 'IndexFile'
+    return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
+    return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
-Reads a RP66V1 index XML file and all the data."""
+Scans a RP66V1 file and dumps data."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
     parser.add_argument('path_in', type=str, help='Path to the input.')
     parser.add_argument(
-        'archive', type=str,
-        help='Path to the root directory of the archive.',
+        'path_out', type=str,
+        help='Path to the output.'
+             'The results are undefined if path_out conflicts with path_in',
         default='',
-        # nargs='?',
-    )
+        nargs='?')
     parser.add_argument(
         '-r', '--recurse', action='store_true',
         help='Process files recursively. [default: %(default)s]',
@@ -87,6 +190,8 @@ Reads a RP66V1 index XML file and all the data."""
     log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
     parser.add_argument(
             "-l", "--log-level",
+            # type=int,
+            # dest="loglevel",
             default=30,
             help=log_level_help
         )
@@ -113,9 +218,9 @@ Reads a RP66V1 index XML file and all the data."""
     # return 0
     # Your code here
     clk_start = time.perf_counter()
-    result: typing.Dict[str, IndexResult] = read_index_dir_or_file(
+    result: typing.Dict[str, IndexResult] = index_dir_or_file(
         args.path_in,
-        args.archive,
+        args.path_out,
         args.recurse,
     )
     clk_exec = time.perf_counter() - clk_start
@@ -136,7 +241,10 @@ Reads a RP66V1 index XML file and all the data."""
                 size_index += result[path].size_index
                 files_processed += 1
         if args.gnuplot:
-            plot_gnuplot(result, args.gnuplot)
+            try:
+                plot_gnuplot(result, args.gnuplot)
+            except Exception:
+                logger.exception('gunplot failed')
     except Exception as err:
         logger.exception(str(err))
     print('Execution time = %8.3f (S)' % clk_exec)

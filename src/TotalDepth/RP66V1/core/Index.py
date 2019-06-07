@@ -72,16 +72,16 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
         # 'schema_version': XML_SCHEMA_VERSION,
     }):
         for position, eflr in logical_file.eflrs:
-            if LogicalRecord.Types.is_public(eflr.lr_type):
-                attrs = {
-                    'vr_position': f'0x{position.vr_position:x}',
-                    'lrsh_position': f'0x{position.lrsh_position:x}',
-                    'lr_type': f'{eflr.lr_type:d}',
-                    'set_type': f'{eflr.set.type.decode("ascii")}',
-                    'set_name': f'{eflr.set.name.decode("ascii")}',
-                    'object_count': f'{len(eflr.objects):d}'
-                }
-                with XmlWrite.Element(xml_stream, 'EFLR', attrs):
+            attrs = {
+                'vr_position': f'0x{position.vr_position:x}',
+                'lrsh_position': f'0x{position.lrsh_position:x}',
+                'lr_type': f'{eflr.lr_type:d}',
+                'set_type': f'{eflr.set.type.decode("ascii")}',
+                'set_name': f'{eflr.set.name.decode("ascii")}',
+                'object_count': f'{len(eflr.objects):d}'
+            }
+            with XmlWrite.Element(xml_stream, 'EFLR', attrs):
+                if LogicalRecord.Types.is_public(eflr.lr_type):
                     for obj in eflr.objects:
                         _write_xml_eflr_object(obj, xml_stream)
         if logical_file.log_pass is not None:
