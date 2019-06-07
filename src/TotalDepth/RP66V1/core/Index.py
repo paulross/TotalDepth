@@ -98,6 +98,7 @@ def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.Logica
             'schema_version': XML_SCHEMA_VERSION,
             'utc_file_mtime': str(datetime.datetime.utcfromtimestamp(os.stat(logical_file_sequence.path).st_mtime)),
             'utc_now': str(datetime.datetime.utcnow()),
+            'creator': f'{__name__}',
         }):
             with XmlWrite.Element(
                     xml_stream, 'StorageUnitLabel',

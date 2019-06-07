@@ -184,7 +184,7 @@ def frame_channel_from_RP66V1(channel_object: EFLR.Object) -> FrameChannel:
         ident=channel_object.name,
         long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
         rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
-        units=channel_object[b'UNITS'].value[0],
+        units=channel_object[b'UNITS'].value[0] if channel_object[b'UNITS'].value is not None else b'',
         dimensions=channel_object[b'DIMENSION'].value,
         function_np_dtype=RepCode.numpy_dtype
     )
@@ -298,7 +298,9 @@ class FrameArray:
 
 def frame_array_from_RP66V1(frame_object: EFLR.Object,
                             channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> FrameArray:
-    if frame_object[b'DESCRIPTION'].count == 1 and frame_object[b'DESCRIPTION'].value is not None:
+    # print('TRACE: frame_object.attr_label_map', frame_object.attr_label_map)
+    key = b'DESCRIPTION'
+    if key in frame_object.attr_label_map and frame_object[key].count == 1 and frame_object[key].value is not None:
         description = frame_object[b'DESCRIPTION'].value[0]
     else:
         description = b''

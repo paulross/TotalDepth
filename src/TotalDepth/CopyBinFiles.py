@@ -16,7 +16,7 @@ from TotalDepth.util import DirWalk, bin_file_type
 logger = logging.getLogger(__file__)
 
 
-def _recurse_zip_archive(
+def _recurse_copy_zip_archive(
         instream: typing.BinaryIO, path_out: str, binary_file_types: typing.Set[str], nervous: bool) -> typing.List[str]:
     logger.debug(f'_recurse_zip_archive(): path_out="{path_out}"')
     ret = []
@@ -29,16 +29,16 @@ def _recurse_zip_archive(
                 with zip_file.open(zip_info.filename) as zip_stream:
                     bin_type = bin_file_type.binary_file_type(zip_stream)
                     zip_stream.seek(0)
-                    file_path_out = os.path.join(path_out, zip_info.filename)
-                    if bin_file_type.binary_file_type(zip_stream) == 'ZIP':
+                    if bin_type == 'ZIP':
                         # Recurse
                         try:
                             ret.extend(
-                                _recurse_zip_archive(zip_stream, os.path.dirname(file_path_out), binary_file_types, nervous)
+                                _recurse_copy_zip_archive(zip_stream, os.path.dirname(file_path_out), binary_file_types, nervous)
                             )
                         except zipfile.BadZipFile:
                             logger.debug(f'_recurse_zip_archive(): Appears to be "{bin_type}" but _recurse_zip_archive() raises.')
                     elif len(binary_file_types) == 0 or bin_type in binary_file_types:
+                        file_path_out = os.path.join(path_out, zip_info.filename)
                         # Extract
                         if nervous:
                             print(
@@ -57,14 +57,14 @@ def _recurse_zip_archive(
     return ret
 
 
-def _analyse_zip_archive(path_in: str, path_out: str, binary_file_types: typing.Set[str], nervous: bool) -> typing.List[str]:
-    assert zipfile.is_zipfile(path_in)
-    logger.debug(f'_analyse_zip_archive(): At "{path_in}" path_out: "{path_out}"')
-    with open(path_in, 'rb') as instream:
-        try:
-            return _recurse_zip_archive(instream, path_out, binary_file_types, nervous)
-        except Exception:
-            logger.exception('_recurse_zip_archive() FAILED')
+# def _analyse_zip_archive(path_in: str, path_out: str, binary_file_types: typing.Set[str], nervous: bool) -> typing.List[str]:
+#     assert zipfile.is_zipfile(path_in)
+#     logger.debug(f'_analyse_zip_archive(): At "{path_in}" path_out: "{path_out}"')
+#     with open(path_in, 'rb') as instream:
+#         try:
+#             return _recurse_zip_archive(instream, path_out, binary_file_types, nervous)
+#         except Exception:
+#             logger.exception('_recurse_zip_archive() FAILED')
 
 
 def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], move: bool, nervous: bool) -> typing.List[str]:
@@ -99,7 +99,14 @@ def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], 
                     ret.append(shutil.copy2(file_in_out.filePathIn, file_in_out.filePathOut))
         elif zipfile.is_zipfile(file_in_out.filePathIn):
             zip_out_path = os.path.splitext(file_in_out.filePathOut)[0]
-            ret.extend(_analyse_zip_archive(file_in_out.filePathIn, zip_out_path, binary_file_types, nervous))
+            # ret.extend(_analyse_zip_archive(file_in_out.filePathIn, zip_out_path, binary_file_types, nervous))
+            logger.debug(f'_analyse_zip_archive(): At "{file_in_out.filePathIn}" path_out: "{zip_out_path}"')
+            with open(file_in_out.filePathIn, 'rb') as zip_instream:
+                try:
+                    return _recurse_copy_zip_archive(zip_instream, zip_out_path, binary_file_types, nervous)
+                except Exception:
+                    logger.exception('_recurse_copy_zip_archive() FAILED')
+
         else:
             logger.debug(f'copy_files(): Ignoring type "{bin_type}" at "{file_in_out.filePathOut}"')
     return ret

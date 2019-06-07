@@ -120,6 +120,9 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
         elif isinstance(value, int):
             typ = 'int'
             _value = str(value)
+        elif isinstance(value, RepCode.DateTime):
+            typ = 'TotalDepth.RP66V1.core.RepCode.DateTime'
+            _value = str(value)
         elif isinstance(value, str):
             typ = 'str'
             _value = value

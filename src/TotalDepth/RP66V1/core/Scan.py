@@ -628,8 +628,8 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                 for e, eflr_position in enumerate(logical_file.eflrs):
                     header = f'EFLR [{e}/{len(logical_file.eflrs)}] at {str(eflr_position.lrsh_position)}'
                     with _output_section_header_trailer(header, '-', os=fout):
-                        fout.write(str(eflr_position.eflr))
-                        fout.write('\n')
+                        # fout.write(str(eflr_position.eflr))
+                        # fout.write('\n')
                         if eflr_as_table:
                             if eflr_position.eflr.is_key_value():
                                 eflr_str_table = eflr_position.eflr.key_values(sort=True)
@@ -639,6 +639,7 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                             fout.write('\n')
                         else:
                             fout.write(eflr_position.eflr.str_long())
+                        fout.write('\n')
                 # Now the LogPass(s)
                 if logical_file.has_log_pass:
                     with _output_section_header_trailer('Log Pass', '-', os=fout):

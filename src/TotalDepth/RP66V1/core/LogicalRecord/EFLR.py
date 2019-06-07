@@ -87,8 +87,13 @@ class AttributeBase:
     #         f' R: {self.rep_code} U: {self.units} V: {self.value}'
     #
     def __str__(self) -> str:
+        # print('TRACE: rep_code', self.rep_code)
+        try:
+            rep_code_str = REP_CODE_INT_TO_STR[self.rep_code]
+        except KeyError:
+            rep_code_str = 'UNKNOWN'
         return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
-            f' R: {REP_CODE_INT_TO_STR[self.rep_code]} U: {self.units} V: {self.value}'
+            f' R: {self.rep_code:d} ({rep_code_str}) U: {self.units} V: {self.value}'
 
     def stringify_value(self, stringify_function: typing.Callable) -> str:
         value_as_string = stringify_function(self.value)
@@ -160,6 +165,9 @@ class Template:
                 raise ExceptionEFLRTemplateDuplicateLabel(f'Duplicate template label {template_attribute.label}')
             self.attr_label_map[template_attribute.label] = len(self.attrs)
             self.attrs.append(template_attribute)
+            if ld.remain == 0:
+                # This is kind of unusual, it is an EFLR with a template but no objects.
+                break
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
                 break
