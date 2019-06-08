@@ -196,11 +196,7 @@ Scans a RP66V1 file and dumps data."""
             default=30,
             help=log_level_help
         )
-    parser.add_argument(
-        '--log-process', default=0.0, type=float,
-        help='Writes process data such as memory usage as log INFO every n seconds.'
-             ' If 0.0 no process data is logged. [default: %(default)s]',
-    )
+    process.add_process_logger_to_argument_parser(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
@@ -225,7 +221,7 @@ Scans a RP66V1 file and dumps data."""
     # Your code here
     clk_start = time.perf_counter()
     if args.log_process > 0.0:
-        with process.log_process(1.0):
+        with process.log_process(args.log_process):
             result: typing.Dict[str, IndexResult] = index_dir_or_file(
                 args.path_in,
                 args.path_out,

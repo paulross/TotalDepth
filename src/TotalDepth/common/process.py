@@ -12,6 +12,7 @@ There are several DoF here:
 Also need to add a log parser to, well what?
 
 """
+import argparse
 import contextlib
 import datetime
 import json
@@ -103,6 +104,14 @@ def log_process(*args, **kwargs):
         yield
     finally:
         process_thread.join()
+
+
+def add_process_logger_to_argument_parser(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--log-process', default=0.0, type=float,
+        help='Writes process data such as memory usage as a log INFO line every LOG_PROCESS seconds.'
+             ' If 0.0 no process data is logged. [default: %(default)s]',
+    )
 
 
 def main() -> int:
