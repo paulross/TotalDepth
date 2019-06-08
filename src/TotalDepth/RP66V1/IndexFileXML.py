@@ -10,6 +10,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import LogicalFile, File
 from TotalDepth.RP66V1.core import Index
+from TotalDepth.common import process
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -196,6 +197,11 @@ Scans a RP66V1 file and dumps data."""
             help=log_level_help
         )
     parser.add_argument(
+        '--log-process', default=0.0, type=float,
+        help='Writes process data such as memory usage as log INFO every n seconds.'
+             ' If 0.0 no process data is logged. [default: %(default)s]',
+    )
+    parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
@@ -218,11 +224,19 @@ Scans a RP66V1 file and dumps data."""
     # return 0
     # Your code here
     clk_start = time.perf_counter()
-    result: typing.Dict[str, IndexResult] = index_dir_or_file(
-        args.path_in,
-        args.path_out,
-        args.recurse,
-    )
+    if args.log_process > 0.0:
+        with process.log_process(1.0):
+            result: typing.Dict[str, IndexResult] = index_dir_or_file(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+            )
+    else:
+        result: typing.Dict[str, IndexResult] = index_dir_or_file(
+            args.path_in,
+            args.path_out,
+            args.recurse,
+        )
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0
     files_processed = 0

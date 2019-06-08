@@ -105,13 +105,11 @@ def log_process(*args, **kwargs):
         process_thread.join()
 
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(filename)s - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s',
-)
-
-
 def main() -> int:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(filename)s - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s',
+    )
     memory = []
     with log_process(1.0):
         for i in range(8):
