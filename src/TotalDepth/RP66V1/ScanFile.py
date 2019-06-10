@@ -358,7 +358,6 @@ def main() -> int:
             eflr_as_table=args.eflr_as_table,
         )
     clk_exec = time.perf_counter() - clk_start
-    print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0
     files_processed = 0
     for path in sorted(result.keys()):
@@ -381,6 +380,7 @@ def main() -> int:
         ms_mb = clk_exec * 1000 / (size_input / 1024**2)
     else:
         ms_mb = 0.0
+    print('Execution time = %8.3f (S)' % clk_exec)
     print(f'Processed {len(result):,d} files and {size_input:,d} bytes, {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0

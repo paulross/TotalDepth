@@ -521,23 +521,36 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
             fout.write(' '.join(underline) + '\n')
         for file_logical_data in rp66_file.iter_logical_records():
             if file_logical_data.lr_is_eflr:
-                eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
-                    lines = str(eflr).split('\n')
-                    for i, line in enumerate(lines):
-                        if i == 0:
-                            fout.write(colorama.Fore.MAGENTA + line + colorama.Style.RESET_ALL)
-                        else:
-                            fout.write(line)
-                        fout.write('\n')
-                    # fout.write(str(eflr))
-                    # fout.write('\n')
+                if file_logical_data.lr_is_encrypted:
+                    if verbose:
+                        fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                    else:
+                        fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                    fout.write('\n')
+                else:
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                    if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
+                        lines = str(eflr).split('\n')
+                        for i, line in enumerate(lines):
+                            if i == 0:
+                                fout.write(colorama.Fore.MAGENTA + line + colorama.Style.RESET_ALL)
+                            else:
+                                fout.write(line)
+                            fout.write('\n')
             else:
                 # IFLR
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                if dump_iflr and len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
-                    fout.write(str(iflr))
-                    fout.write('\n')
+                if dump_iflr:
+                    if file_logical_data.lr_is_encrypted:
+                        if verbose:
+                            fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                        else:
+                            fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                        fout.write('\n')
+                    else:
+                        iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                        if len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
+                            fout.write(str(iflr))
+                            fout.write('\n')
 
 
 def _scan_log_pass_content(
