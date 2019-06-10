@@ -6,6 +6,7 @@ RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
 Specifically section 3: http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
 """
 # import collections
+import enum
 import logging
 import typing
 
@@ -300,35 +301,107 @@ class Object:
   CD: 000 00000 L: b'MINUS-TOLERANCE' C: 1 R: IDENT U: b'' V: None
 """
 
+
+class DuplicateObjectStrategy(enum.Enum):
+    """Different strategies for dealing with a duplicate object already encountered in a table.
+
+    RAISE: Raise an exception.
+
+    IGNORE: Ignore the duplicate object, do not add it to the table or the object_name_map.
+
+    REPLACE: Always use the duplicate object and replace the object in the object_name_map
+        (the original is retained in the list of objects).
+
+    REPLACE_IF_DIFFERENT: Use the duplicate object only if different then replace the object in the object_name_map
+        (the original is retained in the list of objects).
+
+    REPLACE_LATER_COPY: Use the duplicate object only if the object copy number is greater than the original copy number
+    then replace the object in the object_name_map (the original is retained in the list of objects).
+
+    NOTE: With any strategy other than IGNORE the table and the object_name_map will be out of sync.
+
+    Other possibilities:
+
+    - Walk through the attributes replacing any that have a greater copy number?
+    """
+    RAISE = enum.auto()
+    IGNORE = enum.auto()
+    REPLACE = enum.auto()
+    REPLACE_IF_DIFFERENT = enum.auto()
+    REPLACE_LATER_COPY = enum.auto()
+
+
 class ExplicitlyFormattedLogicalRecord:
+    DUPE_OBJECT_STRATEGY = DuplicateObjectStrategy.REPLACE
+    DUPE_OBJECT_LOGGER = logger.debug
+
     def __init__(self, lr_type: int, ld: LogicalData):
         self.lr_type: int = lr_type
         self.set: Set = Set(ld)
         self.template: Template = Template()
         self.objects: typing.List[Object] = []
-        self.object_name_map: typing.Dict[ObjectName, int] = {}
+        temp_object_name_map: typing.Dict[ObjectName, int] = {}
+        dupes_to_remove: typing.List[int] = []
         if ld:
             self.template.read(ld)
             while ld:
                 obj = Object(ld, self.template)
-                if obj.name in self.object_name_map:
-                    # Compare and if same ignore, else raise
-                    if obj == self[obj.name]:
-                        msg = f'Ignoring duplicate Object with {obj.name} already seen in the {self.set}.'
-                        # logger.info(msg)
-                        logger.debug(msg)
-                    else:
-                        # FIXME: This is wrong. Walk through the attributes replacing any that have a greater copy number.
-                        msg = f'Ignoring different Object with {obj.name} already seen in the {self.set}.'
-                        logger.warning(msg)
-                        logger.warning('WAS:')
-                        logger.warning(str(self[obj.name]))
-                        logger.warning('NOW:')
-                        logger.warning(str(obj))
-                        # raise ExceptionEFLRSetDuplicateObjectNames(msg)
-                else:
-                    self.object_name_map[obj.name] = len(self.objects)
+                if obj.name not in temp_object_name_map:
+                    temp_object_name_map[obj.name] = len(self.objects)
                     self.objects.append(obj)
+                else:
+                    self._handle_duplicate_object(obj, temp_object_name_map, dupes_to_remove)
+        dupes_to_remove.sort()
+        for i in reversed(dupes_to_remove):
+            self.DUPE_OBJECT_LOGGER(f'Cleaning table by removing overwritten object:\n{self.objects[i]}')
+            del self.objects[i]
+        self.object_name_map: typing.Dict[ObjectName, int] = {}
+        for i, obj in enumerate(self.objects):
+            self.object_name_map[obj.name] = i
+
+    def _handle_duplicate_object(self, obj: Object,
+                                 temp_object_name_map: typing.Dict[ObjectName, int],
+                                 dupes_to_remove: typing.List[int]) -> None:
+        """Applies a strategy to handle duplicate objects."""
+        if self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.RAISE:
+            raise ExceptionEFLRSetDuplicateObjectNames(
+                f'Duplicate Object {obj.name} already seen in the {self.set}.'
+            )
+        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.IGNORE:
+            self.DUPE_OBJECT_LOGGER(f'Ignoring duplicate Object {obj.name} already seen in the {self.set}.')
+        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE:
+            self.DUPE_OBJECT_LOGGER(f'Replacing Object {obj.name} previously seen in the {self.set}.')
+            dupes_to_remove.append(temp_object_name_map[obj.name])
+            temp_object_name_map[obj.name] = len(self.objects)
+            self.objects.append(obj)
+        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE_IF_DIFFERENT:
+            if obj == self[obj.name]:
+                self.DUPE_OBJECT_LOGGER(f'Ignoring duplicate Object {obj.name} already seen in the {self.set}.')
+            else:
+                self.DUPE_OBJECT_LOGGER(f'Replacing different Object {obj.name} already seen in the {self.set}.')
+                self.DUPE_OBJECT_LOGGER('WAS:')
+                self.DUPE_OBJECT_LOGGER(str(self[obj.name]))
+                self.DUPE_OBJECT_LOGGER('NOW:')
+                self.DUPE_OBJECT_LOGGER(str(obj))
+                dupes_to_remove.append(temp_object_name_map[obj.name])
+                temp_object_name_map[obj.name] = len(self.objects)
+                self.objects.append(obj)
+        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE_LATER_COPY:
+            if obj.name.C > self[obj.name].name.C:
+                self.DUPE_OBJECT_LOGGER(
+                    f'Replacing Object {obj.name} already seen in the {self.set}'
+                    f' as C: {obj.name.C} > {self[obj.name].name.C}.'
+                )
+                dupes_to_remove.append(temp_object_name_map[obj.name])
+                temp_object_name_map[obj.name] = len(self.objects)
+                self.objects.append(obj)
+            else:
+                self.DUPE_OBJECT_LOGGER(
+                    f'Ignoring Object {obj.name} already seen in the {self.set}'
+                    f' as C: {obj.name.C} > {self[obj.name].name.C}.'
+                )
+        else:
+            assert 0, f'Unsupported DuplicateObjectStrategy {self.DUPE_OBJECT_STRATEGY}'
 
     def __len__(self) -> int:
         return len(self.objects)
@@ -354,7 +427,7 @@ class ExplicitlyFormattedLogicalRecord:
 
     def table_as_strings(self, stringify_function: typing.Callable, sort: bool) -> typing.List[typing.List[str]]:
         ret = [
-            ['ObjectName IDENT'] + self.template.header_as_strings(stringify_function),
+            ['ObjectName IDENT', 'O', 'C'] + self.template.header_as_strings(stringify_function),
         ]
         if sort:
             # print(f'TRACE: {sorted(self.object_name_map.keys())}')
@@ -362,7 +435,8 @@ class ExplicitlyFormattedLogicalRecord:
         else:
             objects = self.objects
         for obj in objects:
-            row = [stringify_function(obj.name)] + obj.values_as_strings(stringify_function)
+            row = [stringify_function(obj.name.I), f'{obj.name.O}', f'{obj.name.C}']
+            row.extend(obj.values_as_strings(stringify_function))
             ret.append(row)
         return ret
 

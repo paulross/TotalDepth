@@ -78,78 +78,74 @@ th.filetable, td.filetable {
 
 table.eflr {
     border:         2px solid black;
+    border-collapse:   collapse;
     font-family:    monospace;
     color:          black;
 }
 th.eflr, td.eflr {
-    /* border: 1px solid black; */
-    border: 1px;
-    border-top-style:solid;
-    border-right-style:dotted;
-    border-bottom-style:none;
-    border-left-style:none;
+    border: 1px solid black;
+    /* border-top-style:solid; */
+    /* border-right-style:dotted; */
+    /* border-bottom-style:none; */
+    /* border-left-style:none; */
     vertical-align:top;
     padding: 2px 6px 2px 6px; 
 }
 
-table.monospace {
-border:            2px solid black;
-border-collapse:   collapse;
-font-family:       monospace;
-color:             black;
-}
-th.monospace, td.monospace {
-border:            1px solid black;
-vertical-align:    top;
-padding:           2px 6px 2px 6px; 
+table.sul {
+    border:            2px solid black;
+    border-collapse:   collapse;
+    /* font-family:       monospace; */
+    color:             black;
 }
 
+th.sul, td.sul {
+    border:            1px solid black;
+    vertical-align:    top;
+    padding:           2px 6px 2px 6px; 
+}
+
+table.monospace {
+    border:            2px solid black;
+    border-collapse:   collapse;
+    font-family:       monospace;
+    color:             black;
+}
+th.monospace, td.monospace {
+    border:            1px solid black;
+    vertical-align:    top;
+    padding:           2px 6px 2px 6px; 
+}
 """
+
 
 def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('Storage Unit Label')
-    with XmlWrite.Element(xhtml_stream, 'table', {'border': '1', 'class': 'sul'}):
-        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters('Storage Unit Sequence Number:')
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters(f'{sul.storage_unit_sequence_number:d}')
-        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters('DLIS Version:')
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters(f'{sul.dlis_version.decode("ascii")}')
-        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters('Storage Unit Structure:')
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters(f'{sul.storage_unit_structure.decode("ascii")}')
-        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters('Maximum Record Length:')
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters(f'{sul.maximum_record_length:d}')
-        with XmlWrite.Element(xhtml_stream, 'tr', {}):
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters('Storage Set Identifier:')
-            with XmlWrite.Element(xhtml_stream, 'td', {}):
-                xhtml_stream.characters(f'{sul.storage_set_identifier.decode("ascii")}')
+    table = [
+        ['KEY', 'VALUE'],
+        ['Storage Unit Sequence Number:', f'{sul.storage_unit_sequence_number:d}'],
+        ['DLIS Version:', f'{sul.dlis_version.decode("ascii")}'],
+        ['Storage Unit Structure:', f'{sul.storage_unit_structure.decode("ascii")}'],
+        ['Maximum Record Length:', f'{sul.maximum_record_length:d}'],
+        ['Storage Set Identifier:', f'{sul.storage_set_identifier.decode("ascii")}'],
+    ]
+    html_write_table(table, xhtml_stream, class_style='sul')
 
 
 def html_write_table(table_as_strings: typing.List[typing.List[str]],
                      xhtml_stream: XmlWrite.XhtmlStream,
-                     **kwargs) -> None:
+                     class_style) -> None:
     if len(table_as_strings):
-        with XmlWrite.Element(xhtml_stream, 'table', kwargs):
+        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}):
             with XmlWrite.Element(xhtml_stream, 'tr', {}):
                 for cell in table_as_strings[0]:
-                    with XmlWrite.Element(xhtml_stream, 'th', {}):
+                    with XmlWrite.Element(xhtml_stream, 'th', {'class': class_style}):
                         xhtml_stream.characters(cell)
             for row in table_as_strings[1:]:
                 with XmlWrite.Element(xhtml_stream, 'tr', {}):
                     for cell in row:
-                        with XmlWrite.Element(xhtml_stream, 'td', {}):
+                        with XmlWrite.Element(xhtml_stream, 'td', {'class': class_style}):
                             assert isinstance(cell, str), f'{cell} is not a string but {type(cell)}'
                             xhtml_stream.charactersWithBr(cell)
 
@@ -159,7 +155,7 @@ def html_write_EFLR_as_table(eflr: EFLR.ExplicitlyFormattedLogicalRecord, xhtml_
             table_as_strings = eflr.key_values(stringify_function=stringify_object_by_type, sort=True)
         else:
             table_as_strings = eflr.table_as_strings(stringify_function=stringify_object_by_type, sort=True)
-        html_write_table(table_as_strings, xhtml_stream, **{'class': 'eflr',})
+        html_write_table(table_as_strings, xhtml_stream, class_style='eflr')
 
 
 class HTMLFrameArraySummary(typing.NamedTuple):
@@ -182,100 +178,109 @@ def _write_log_pass_content_in_html(
         number_of_preceeding_eflrs: int,
         *,
         # TODO: Replace frame_spacing with a slice object
-        frame_spacing) -> typing.Tuple[HTMLFrameArraySummary]:
+        frame_spacing: int) -> typing.Tuple[HTMLFrameArraySummary]:
     assert logical_file.has_log_pass
     assert frame_spacing >= 1
+    ret = []
     lp: LogPass.LogPass = logical_file.log_pass
     frame_array: LogPass.FrameArray
-    ret = []
     for fa, frame_array in enumerate(lp.frame_arrays):
         anchor = _anchor(logical_file_index, number_of_preceeding_eflrs, fa)
         with XmlWrite.Element(xhtml_stream, 'a', {'id': anchor}):
             pass
         with XmlWrite.Element(xhtml_stream, 'h3'):
             xhtml_stream.characters(f'Frame Array: {stringify_object_by_type(frame_array.ident)} [{fa}/{len(lp.frame_arrays)}]')
-        with XmlWrite.Element(xhtml_stream, 'h4'):
-            xhtml_stream.characters('Channels')
-        # Table describing channels
-        table_as_strings = [
-            ['Channel', 'O', 'C', 'Rep Code', 'Dimensions', 'Count', 'Units', 'Long Name']
-        ]
-        # Table body.
-        channel: LogPass.FrameChannel
-        for channel in frame_array.channels:
-            row = [
-                channel.ident,
-                channel.ident.O,
-                channel.ident.C,
-                f'{channel.rep_code:d} ({RepCode.REP_CODE_INT_TO_STR[channel.rep_code]})',
-                channel.dimensions,
-                channel.count,
-                channel.units,
-                channel.long_name,
-            ]
-            table_as_strings.append(stringify_object_by_type(v) for v in row)
-        html_write_table(table_as_strings, xhtml_stream, style='monospace', border='1')
-        with XmlWrite.Element(xhtml_stream, 'h4'):
-            xhtml_stream.characters('Frame Data')
-        iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
-        if len(iflrs):
-            if frame_spacing > 1:
-                num_frames = 1 + len(iflrs) // frame_spacing
-            else:
-                num_frames = len(iflrs)
-            frame_array.init_arrays(num_frames)
-            interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / len(iflrs)
-            with XmlWrite.Element(xhtml_stream, 'p'):
-                xhtml_stream.characters(
-                    f'Frames [{len(iflrs)}]'
-                    f' from: {float(iflrs[0].x_axis):0.3f}'
-                    f' to {float(iflrs[-1].x_axis):0.3f}'
-                    f' Interval: {interval:0.3f}'
-                    f' {stringify_object_by_type(frame_array.x_axis.units)}'
-                )
-            with XmlWrite.Element(xhtml_stream, 'p'):
-                xhtml_stream.characters(
-                    f'Frame spacing: {frame_spacing}'
-                    f' number of frames: {num_frames}'
-                    f' numpy size: {frame_array.sizeof_array:,d} bytes'
-                )
-            for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
-                # TODO: raise
-                assert f + 1 == iflr_frame_number
-                if f % frame_spacing == 0:
-                    vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-                    fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-                    iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-                    frame_array.read(iflr.logical_data, f // frame_spacing)
-            frame_table = [['Channel', 'O', 'C', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
-            for channel in frame_array.channels:
-                # arr = channel.array
-                arr = AbsentValue.mask_absent_values(channel.array)
-                frame_table.append(
-                    [
-                        channel.ident.I.decode("ascii"),
-                        f'{channel.ident.O}',
-                        f'{channel.ident.C}',
-                        f'{arr.size:d}',
-                        # NOTE: Not the masked array!
-                        f'{AbsentValue.count_of_absent_values(channel.array):d}',
-                        f'{arr.min():.3f}',
-                        f'{arr.mean():.3f}',
-                        f'{arr.std():.3f}',
-                        f'{arr.max():.3f}',
-                        f'{stringify_object_by_type(channel.units)}',
-                        f'{arr.dtype}',
-                    ]
-                )
-            html_write_table(frame_table, xhtml_stream, style='monospace', border='1')
-            x_axis_start = iflrs[0].x_axis
-            x_axis_stop = iflrs[-1].x_axis
-        else:
-            with XmlWrite.Element(xhtml_stream, 'p'):
-                xhtml_stream.characters('No frames.')
-            x_axis_start = x_axis_stop = 0.0
         ret.append(
-            HTMLFrameArraySummary(
+            _write_frame_array_in_html(
+                rp66_file,
+                visible_record_positions,
+                logical_file,
+                frame_array,
+                frame_spacing,
+                anchor,
+                xhtml_stream,
+            )
+       )
+    return tuple(ret)
+
+
+def _write_frame_array_in_html(
+        rp66_file: File.FileRead,
+        visible_record_positions: LogicalFile.VisibleRecordPositions,
+        logical_file: LogicalFile.LogicalFile,
+        frame_array: LogPass.FrameArray,
+        frame_spacing: int,
+        anchor: str,
+        xhtml_stream: XmlWrite.XhtmlStream,
+    ) -> HTMLFrameArraySummary:
+
+    with XmlWrite.Element(xhtml_stream, 'h4'):
+        xhtml_stream.characters('Frame Data')
+    iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
+    if len(iflrs):
+        if frame_spacing > 1:
+            num_frames = 1 + len(iflrs) // frame_spacing
+        else:
+            num_frames = len(iflrs)
+        frame_array.init_arrays(num_frames)
+        interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / (len(iflrs) - 1) if len(iflrs) > 1 else 0.0
+        with XmlWrite.Element(xhtml_stream, 'p'):
+            xhtml_stream.characters(
+                f'Available frames: {len(iflrs)}'
+                f' X axis from {float(iflrs[0].x_axis):0.3f}'
+                f' to {float(iflrs[-1].x_axis):0.3f}'
+                f' interval {interval:0.3f}'
+                f' [{stringify_object_by_type(frame_array.x_axis.units)}]'
+            )
+        with XmlWrite.Element(xhtml_stream, 'p'):
+            xhtml_stream.characters(
+                f'Sampled every {frame_spacing} frame(s).'
+                f' Number of frames created: {num_frames}'
+                f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
+            )
+        for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
+            # TODO: raise
+            assert f + 1 == iflr_frame_number
+            if f % frame_spacing == 0:
+                vr_position = visible_record_positions.visible_record_prior(lrsh_position)
+                fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+                iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+                frame_array.read(iflr.logical_data, f // frame_spacing)
+        frame_table = [
+            ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
+             'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],
+        ]
+        for channel in frame_array.channels:
+            # arr = channel.array
+            arr = AbsentValue.mask_absent_values(channel.array)
+            frame_table.append(
+                [
+                    channel.ident.I.decode("ascii"),
+                    f'{channel.ident.O}',
+                    f'{channel.ident.C}',
+                    f'{channel.rep_code:d} ({RepCode.REP_CODE_INT_TO_STR[channel.rep_code]})',
+                    stringify_object_by_type(channel.dimensions),
+                    stringify_object_by_type(channel.count),
+                    stringify_object_by_type(channel.units),
+                    stringify_object_by_type(channel.long_name),
+                    f'{arr.size:d}',
+                    # NOTE: Not the masked array!
+                    f'{AbsentValue.count_of_absent_values(channel.array):d}',
+                    f'{arr.min():.3f}',
+                    f'{arr.mean():.3f}',
+                    f'{arr.std():.3f}',
+                    f'{arr.max():.3f}',
+                    f'{arr.dtype}',
+                ]
+            )
+        html_write_table(frame_table, xhtml_stream, class_style='monospace')
+        x_axis_start = iflrs[0].x_axis
+        x_axis_stop = iflrs[-1].x_axis
+    else:
+        with XmlWrite.Element(xhtml_stream, 'p'):
+            xhtml_stream.characters('No frames.')
+        x_axis_start = x_axis_stop = 0.0
+    return HTMLFrameArraySummary(
                 frame_array.ident.I,
                 len(iflrs),
                 tuple(c.ident.I for c in frame_array.channels),
@@ -284,8 +289,6 @@ def _write_log_pass_content_in_html(
                 frame_array.x_axis.units,
                 anchor,
             )
-        )
-    return tuple(ret)
 
 
 # def _anchor(*args: typing.Tuple[int, ...]) -> str:
@@ -333,11 +336,11 @@ def html_write_file_info(path_in: str, xhtml_stream: XmlWrite.XhtmlStream) -> No
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('File information')
     table = [
-        ['Key', 'Value'],
+        ['KEY', 'VALUE'],
         ['File Path:', path_in],
         ['File size:', f'{os.path.getsize(path_in):,d}'],
     ]
-    html_write_table(table, xhtml_stream, **{'class': 'monospace', 'border':'1'})
+    html_write_table(table, xhtml_stream, class_style='monospace')
 
 
 class HTMLLogicalFileSummary(typing.NamedTuple):

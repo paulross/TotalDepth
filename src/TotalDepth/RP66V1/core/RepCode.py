@@ -492,7 +492,7 @@ def UNITS(ld: LogicalData) -> bytes:
     if bad_chars:
         bad_chars_as_str = ''.join(sorted(chr(v) for v in bad_chars))
         raise ExceptionRepCode(
-            f'UNITS has characters {bad_chars} "{bad_chars_as_str}"'
+            f'UNITS "{ret}" has characters {bad_chars} "{bad_chars_as_str}"'
             f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"'
             f' is specified. See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
         )

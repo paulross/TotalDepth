@@ -16,6 +16,7 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 # from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
 #     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.RP66V1.core import Scan, HTML
+from TotalDepth.common import process
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
@@ -48,11 +49,12 @@ class HTMLResult(typing.NamedTuple):
 
 
 def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
-    logger.debug(f'Scanning "{path_in}" to "{path_out}"')
-    # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
+    # logger.debug(f'Scanning "{path_in}" to "{path_out}"')
     file_path_out = path_out + '.xhtml'
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
+        # logging.info(f'ScanFileHTML.scan_a_single_file(): "{path_in}" to "{path_out}"')
+        logging.info(f'ScanFileHTML.scan_a_single_file(): "{path_in}"')
         t_start = time.perf_counter()
         try:
             if path_out:
@@ -88,7 +90,7 @@ def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
     return result
 
 
-CSS_RP66V1_INDEX = """/* CSS for RP66V1 */
+CSS_RP66V1_INDEX = """/* CSS for RP66V1 index pages */
 body {
 font-size:      12px;
 font-family:    arial,helvetica,sans-serif;
@@ -130,7 +132,7 @@ span.file {
 
 table.filetable {
     border:         2px solid black;
-    font-family:    monospace;
+/*    font-family:    monospace; */
     color:          black;
 }
 th.filetable, td.filetable {
@@ -142,35 +144,6 @@ th.filetable, td.filetable {
     border-left-style:none;
     vertical-align:top;
     padding: 2px 6px 2px 6px; 
-}
-
-
-table.eflr {
-    border:         2px solid black;
-    font-family:    monospace;
-    color:          black;
-}
-th.eflr, td.eflr {
-    /* border: 1px solid black; */
-    border: 1px;
-    border-top-style:solid;
-    border-right-style:dotted;
-    border-bottom-style:none;
-    border-left-style:none;
-    vertical-align:top;
-    padding: 2px 6px 2px 6px; 
-}
-
-table.monospace {
-border:            2px solid black;
-border-collapse:   collapse;
-font-family:       monospace;
-color:             black;
-}
-th.monospace, td.monospace {
-border:            1px solid black;
-vertical-align:    top;
-padding:           2px 6px 2px 6px; 
 }
 """
 
@@ -228,72 +201,12 @@ def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult])
                                         dict_tree.add(branch, frame_array_result)
                                         branch.pop()
                                     branch.pop()
-                            _write_table_body(xhtml_stream, dict_tree)
+                            _write_low_level_index_table_body(xhtml_stream, dict_tree)
 
 
-class FileNameLinkHref(typing.NamedTuple):
-    file_name: str
-    link_text: str
-    href: str
-
-
-def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult]) -> None:
-    # print('TRACE: _write_top_level_index():')
-    # pprint.pprint(index_map)
-    # Create a DictTree from the paths.
-    dict_tree = DictTree.DictTreeHtmlTable(None)
-    # We have to add two more DoF which are the Logical File index and the Frame Array ident.
-    for k in index_map:
-        branch = k.split(os.sep)
-        # Mark the file name with the link text and href
-        file_name = branch.pop()
-        branch.append(
-            FileNameLinkHref(
-                file_name, index_map[k].html_summary.link_text, index_map[k].path_output[len(path_out)+1:],
-            )
-        )
-        result = index_map[k]
-        # print('TRACE: _write_top_level_index():', result)
-        if result.html_summary is not None:
-            for lf, logical_file_result in enumerate(result.html_summary.logical_files):
-                branch.append(f'{lf}')
-                for frame_array_result in logical_file_result.frame_arrays:
-                    # HTMLFrameArraySummary
-                    branch.append(frame_array_result.ident)
-                    dict_tree.add(branch, frame_array_result)
-                    branch.pop()
-                branch.pop()
-    index_file_path = os.path.join(path_out, INDEX_FILE)
-    with open(index_file_path, 'w') as fout:
-        with XmlWrite.XhtmlStream(fout) as xhtml_stream:
-            with XmlWrite.Element(xhtml_stream, 'head'):
-                with XmlWrite.Element(xhtml_stream, 'meta', {
-                    'charset': "UTF-8",
-                    'name': "viewport",
-                    'content': "width=device-width, initial-scale=1",
-                }):
-                    pass
-                with XmlWrite.Element(xhtml_stream, 'title'):
-                    xhtml_stream.charactersWithBr(f'RP66V1 Scan of {path_out}')
-                with XmlWrite.Element(xhtml_stream, 'style'):
-                    xhtml_stream.literal(CSS_RP66V1_INDEX)
-            with XmlWrite.Element(xhtml_stream, 'body'):
-                with XmlWrite.Element(xhtml_stream, 'h1'):
-                    xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {path_out}')
-                with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
-                    # Heading Row
-                    with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
-                        for i in range(dict_tree.depth() - 2):
-                            with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                                pass
-                        for header in ('File', 'Frame Array', 'Frames', 'Channels', 'X Start', 'X Stop', 'dX', 'X Units'):
-                            with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
-                                xhtml_stream.characters(header)
-                    _write_table_body(xhtml_stream, dict_tree)
-
-
-def _write_table_body(xhtml_stream: XmlWrite.XhtmlStream, dict_tree: DictTree.DictTreeHtmlTable) -> None:
+def _write_low_level_index_table_body(xhtml_stream: XmlWrite.XhtmlStream, dict_tree: DictTree.DictTreeHtmlTable) -> None:
     # Table body
+    # print('TRACE:', dict_tree.indentedStr())
     file_href = ''
     for event in dict_tree.genColRowEvents():
         if event == dict_tree.ROW_OPEN:
@@ -316,6 +229,7 @@ def _write_table_body(xhtml_stream: XmlWrite.XhtmlStream, dict_tree: DictTree.Di
                             xhtml_stream.characters(str(event.branch[-1].file_name))
                     else:
                         xhtml_stream.characters(f'{str(event.branch[-1])}')
+                    # xhtml_stream.characters(f'{str(event.branch[-1])}')
             else:
                 node: HTML.HTMLFrameArraySummary = event.node
                 # Frame Array
@@ -327,24 +241,77 @@ def _write_table_body(xhtml_stream: XmlWrite.XhtmlStream, dict_tree: DictTree.Di
                     xhtml_stream.characters(f'{node.num_frames:,d}')
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
                     xhtml_stream.characters(f'{len(node.channels):,d}')
-                # with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
-                #     if node.num_frames > 1:
-                #         frame_spacing = f'{(node.x_stop - node.x_start) / (node.num_frames - 1):.1f}'
-                #     else:
-                #         frame_spacing = 'N/A'
-                #     xhtml_stream.characters(f'{node.x_start:.1f}')
-                #     xhtml_stream.literal('&nbsp;to&nbsp;')
-                #     xhtml_stream.characters(f'{node.x_stop:.1f}')
-                #     xhtml_stream.literal('&nbsp;')
-                #     xhtml_stream.characters('dx')
-                #     xhtml_stream.literal('&nbsp;')
-                #     xhtml_stream.characters(f'{frame_spacing}')
-                #     xhtml_stream.literal('&nbsp;')
-                #     xhtml_stream.characters(f'[{node.x_units.decode("ascii")}]')
                 frame_spacing = (node.x_stop - node.x_start) / (node.num_frames - 1) if node.num_frames > 1 else 0.0
                 for value in (f'{node.x_start:.1f}', f'{node.x_stop:.1f}', f'{frame_spacing:.1f}', f'{node.x_units.decode("ascii")}'):
                     with XmlWrite.Element(xhtml_stream, 'td', {'class': 'filetable', 'align': 'right'}):
                         xhtml_stream.characters(value)
+
+
+class FileNameLinkHref(typing.NamedTuple):
+    file_name: str
+    link_text: str
+    href: str
+
+
+def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult]) -> None:
+    # Create a DictTree from the paths.
+    dict_tree = DictTree.DictTreeHtmlTable(None)
+    for k in index_map:
+        branch = k.split(os.sep)
+        dict_tree.add(branch, index_map[k])
+
+    index_file_path = os.path.join(path_out, INDEX_FILE)
+    with open(index_file_path, 'w') as fout:
+        with XmlWrite.XhtmlStream(fout) as xhtml_stream:
+            with XmlWrite.Element(xhtml_stream, 'head'):
+                with XmlWrite.Element(xhtml_stream, 'meta', {
+                    'charset': "UTF-8",
+                    'name': "viewport",
+                    'content': "width=device-width, initial-scale=1",
+                }):
+                    pass
+                with XmlWrite.Element(xhtml_stream, 'title'):
+                    xhtml_stream.charactersWithBr(f'RP66V1 Scan of {path_out}')
+                with XmlWrite.Element(xhtml_stream, 'style'):
+                    xhtml_stream.literal(CSS_RP66V1_INDEX)
+            with XmlWrite.Element(xhtml_stream, 'body'):
+                with XmlWrite.Element(xhtml_stream, 'h1'):
+                    xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {path_out}')
+                with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
+                    _write_top_level_index_table_body(index_file_path, dict_tree, xhtml_stream)
+
+
+def _write_top_level_index_table_body(index_file_path: str,
+                                      dict_tree: DictTree.DictTreeHtmlTable,
+                                      xhtml_stream: XmlWrite.XhtmlStream) -> None:
+    strip_out_path = len(os.path.dirname(index_file_path)) + 1
+    for event in dict_tree.genColRowEvents():
+        if event == dict_tree.ROW_OPEN:
+            # Write out the '<tr>' element
+            xhtml_stream.startElement('tr', {'class': 'filetable'})
+        elif event == dict_tree.ROW_CLOSE:
+            # Write out the '</tr>' element
+            xhtml_stream.endElement('tr')
+        else:
+            td_attrs = {'class': 'filetable'}
+            if event.row_span > 1:
+                td_attrs['rowspan'] = f'{event.row_span:d}'
+            if event.col_span > 1:
+                td_attrs['colspan'] = f'{event.col_span:d}'
+            if event.node is None:
+                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                    if isinstance(event.branch[-1], FileNameLinkHref):
+                        # TODO: Is this code block used?
+                        # file_href = event.branch[-1].href
+                        with XmlWrite.Element(xhtml_stream, 'a', {'href': event.branch[-1].href}):
+                            xhtml_stream.characters(str(event.branch[-1].file_name))
+                    else:
+                        xhtml_stream.characters(f'{str(event.branch[-1])}')
+            else:
+                node: HTMLResult = event.node
+                with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                    with XmlWrite.Element(xhtml_stream, 'a', {'href': f'{node.path_output[strip_out_path:]}'}):
+                        xhtml_stream.characters(str(event.branch[-1]))
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
@@ -511,6 +478,7 @@ def main() -> int:
             default=30,
             help=log_level_help
         )
+    process.add_process_logger_to_argument_parser(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
@@ -532,14 +500,22 @@ def main() -> int:
                         #datefmt='%y-%m-%d % %H:%M:%S',
                         stream=sys.stdout)
     clk_start = time.perf_counter()
-    # return 0
     # Your code here
-    result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
-        args.path_in,
-        args.path_out,
-        args.recurse,
-        frame_spacing=args.frame_spacing,
-    )
+    if args.log_process > 0.0:
+        with process.log_process(args.log_process):
+            result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+                frame_spacing=args.frame_spacing,
+            )
+    else:
+        result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
+            args.path_in,
+            args.path_out,
+            args.recurse,
+            frame_spacing=args.frame_spacing,
+        )
     clk_exec = time.perf_counter() - clk_start
     # print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0
