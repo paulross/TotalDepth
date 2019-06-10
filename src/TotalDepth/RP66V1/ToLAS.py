@@ -355,7 +355,6 @@ def write_array_section_to_las(
         fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, lrsh_position)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
         frame_array.read(iflr.logical_data, f)
-    # TODO: Write out frames. Take mean, first value.
     for f in range(num_frames):
         for c, channel in enumerate(frame_array.channels):
             if c:
@@ -368,6 +367,8 @@ def write_array_section_to_las(
             else:
                 ostream.write(str(value))
         ostream.write('\n')
+    # Free up numpy memory
+    frame_array.init_arrays(1)
 
 
 def write_logical_sequence_to_las(

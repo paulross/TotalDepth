@@ -20,24 +20,27 @@
 """A dictionary that takes a list of hashables as a key and behaves like a tree."""
 import typing
 
+from TotalDepth.LIS import ExceptionTotalDepthLIS
+
 __author__  = 'Paul Ross'
 __date__    = '2009-09-15'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-from TotalDepth.LIS import ExceptionTotalDepthLIS
 
 class ExceptionDictTree(ExceptionTotalDepthLIS):
     """Exception when handling a DictTree object."""
     pass
 
-class DictTree(object):
-    """A dictionary that takes a list of hashables as a key and behaves like a tree"""
+
+class DictTree:
+    """A dictionary that takes a list of hashables as a key and behaves like a tree."""
     INDENT_STR = '  '
     ITERABLE_TYPE = (None, 'list', 'set')
     # HTML table events
     ROW_OPEN = (None, 0, 0)
     ROW_CLOSE = (None, -1, -1)
+
     def __init__(self, valIterable=None):
         if valIterable not in self.ITERABLE_TYPE:
             raise ExceptionDictTree('"%s" not in acceptable range: %s' \
