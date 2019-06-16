@@ -42,7 +42,7 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
                 t_start = time.perf_counter()
                 # index = RP66V1IndexXMLWrite(fobj, path_in)
                 rp66v1_file = File.FileRead(fobj)
-                logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, path_in)
+                logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
                 if path_out:
                     with open(path_out + '.xml', 'w') as f_out:
                         Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out)

@@ -29,7 +29,7 @@ FRAME_CHUNK = -1024
 
 def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
     """
-    Reads a single XML index and create a populated LogicalFileSequence.
+    Reads a single XML index and create a populated LogicalIndex.
 
     Returns the performance of this activity.
     """

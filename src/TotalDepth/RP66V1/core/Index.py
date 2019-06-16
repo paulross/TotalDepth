@@ -88,9 +88,9 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
             LogPassXML.log_pass_to_XML(logical_file.log_pass, logical_file.iflr_position_map, xml_stream)
 
 
-def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.LogicalFileSequence,
+def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.LogicalIndex,
                                        output_stream: typing.TextIO) -> None:
-    """Takes a LogicalFileSequence and writes the index to an XML stream."""
+    """Takes a LogicalIndex and writes the index to an XML stream."""
     with XmlWrite.XmlStream(output_stream) as xml_stream:
         with XmlWrite.Element(xml_stream, 'RP66V1FileIndex', {
             'path': logical_file_sequence.path,
@@ -233,7 +233,7 @@ def read_storage_unit_label_from_xml(root: xml.etree.Element) -> StorageUnitLabe
     return ret
 
 
-def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> LogicalFile.LogicalFileSequence:
+def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> LogicalFile.LogicalIndex:
     # self.index_path = index_path
     # self.archive_root = archive_root
     # TODO: Is binary required for XML?
@@ -267,7 +267,7 @@ def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> L
     # utc_now = datetime.datetime.strptime(
     #     root.attrib['utc_now'], XML_TIMESTAMP_FORMAT_NO_TZ,
     # )
-    logical_file_sequence = LogicalFile.LogicalFileSequence(None, original_file_path)
+    logical_file_sequence = LogicalFile.LogicalIndex(None, original_file_path)
     logical_file_sequence.storage_unit_label = read_storage_unit_label_from_xml(root)
     # Logical Files
     logical_files_node = LogPassXML.xml_single_element(root, './LogicalFiles')

@@ -279,7 +279,7 @@ def _colorama_note(msg: str):
 #         self.iflr_summary.add(file_logical_data, self.log_pass)
 #
 #
-# class ScanFile(LogicalFile.LogicalFileSequence):
+# class ScanFile(LogicalFile.LogicalIndex):
 #     # def __init__(self, *args, **kwargs):
 #     #     super().__init__(*args, **kwargs)
 #
@@ -626,7 +626,7 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
     rp66v1_file = File.FileRead(fobj)
-    logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, rp66v1_path)
+    logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, rp66v1_path)
     if frame_spacing <= 0:
         raise ValueError(f'Frame spacing must be > 0 not {frame_spacing}')
     with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):

@@ -28,11 +28,11 @@ class ExceptionLogicalFileMissingData(ExceptionLogicalFile):
     pass
 
 
-class ExceptionLogicalFileSequence(ExceptionLogicalFile):
+class ExceptionLogicalIndex(ExceptionLogicalFile):
     pass
 
 
-class ExceptionLogicalFileSequenceCtor(ExceptionLogicalFileSequence):
+class ExceptionLogicalIndexCtor(ExceptionLogicalIndex):
     pass
 
 
@@ -218,7 +218,7 @@ class VisibleRecordPositions(collections.UserList):
         raise ValueError(msg)
 
 
-class LogicalFileSequence:
+class LogicalIndex:
     # TODO: Consider renaming this to FileIndex. See LIS for a compatible name.
     def __init__(self, rp66_file: typing.Union[File.FileRead, None], path: str):
         self.path = path
@@ -247,7 +247,7 @@ class LogicalFileSequence:
                     else:
                         # IFLRs
                         if len(self.logical_files) == 0:
-                            raise ExceptionLogicalFileSequenceCtor('IFLR when there are no Logical Files.')
+                            raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
                         iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
                                                                      file_logical_data.logical_data)
                         if iflr.logical_data.remain > 0:
@@ -271,7 +271,7 @@ class LogicalFileSequence:
 
 
 # class FileRandomAccess:
-#     def __init__(self, logical_file_sequence: LogicalFileSequence):
+#     def __init__(self, logical_file_sequence: LogicalIndex):
 #         self.logical_file_sequence = logical_file_sequence
 #         self.binary_file: typing.BinaryIO = None
 #         self.rp66v1_file: File.FileRead = None

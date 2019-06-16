@@ -323,7 +323,7 @@ def write_curve_section_to_las(
 
 def write_array_section_to_las(
         rp66v1_file: File.FileRead,
-        logical_file_sequence: LogicalFile.LogicalFileSequence,
+        logical_file_sequence: LogicalFile.LogicalIndex,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
         array_reduction: str,
@@ -373,7 +373,7 @@ def write_array_section_to_las(
 
 def write_logical_sequence_to_las(
         rp66v1_file: File.FileRead,
-        logical_file_sequence: LogicalFile.LogicalFileSequence,
+        logical_file_sequence: LogicalFile.LogicalIndex,
         array_reduction: str,
         path_out: str,
         ) -> typing.List[str]:
@@ -422,7 +422,7 @@ def single_rp66v1_file_to_las(path_in: str, array_reduction: str, path_out: str 
                 t_start = time.perf_counter()
                 # index = RP66V1IndexXMLWrite(fobj, path_in)
                 rp66v1_file = File.FileRead(fobj)
-                logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, path_in)
+                logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
                 las_files_written = write_logical_sequence_to_las(
                     rp66v1_file, logical_file_sequence, array_reduction, path_out
                 )

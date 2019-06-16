@@ -298,7 +298,7 @@ def _anchor(*args) -> str:
 
 
 def html_write_table_of_contents(
-        logical_file_sequence: LogicalFile.LogicalFileSequence,
+        logical_file_sequence: LogicalFile.LogicalIndex,
         xhtml_stream: XmlWrite.XhtmlStream) -> None:
     """Write out the table of contents."""
     with XmlWrite.Element(xhtml_stream, 'h2'):
@@ -355,7 +355,7 @@ class HTMLBodySummary(typing.NamedTuple):
 
 def html_write_body(
         rp66_file: File.FileRead,
-        logical_file_sequence: LogicalFile.LogicalFileSequence,
+        logical_file_sequence: LogicalFile.LogicalIndex,
         frame_spacing: int,
         xhtml_stream: XmlWrite.XhtmlStream,
     ) -> HTMLBodySummary:
@@ -432,10 +432,10 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
         raise ValueError(f'Frame spacing must be > 0 not {frame_spacing}')
     with open(path_in, 'rb') as fobj:
         # FIXME: Make this a bit of a generic pattern like LIS by:
-        # - Get LogicalFileSequence take a File.FileRead
-        # - Rename LogicalFileSequence to be FileIndex or similar.
+        # - Get LogicalIndex take a File.FileRead
+        # - Rename LogicalIndex to be FileIndex or similar.
         rp66v1_file = File.FileRead(fobj)
-        logical_file_sequence = LogicalFile.LogicalFileSequence(rp66v1_file, path_in)
+        logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
 
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
