@@ -16,7 +16,7 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 # from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
 #     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.RP66V1.core import Scan, HTML
-from TotalDepth.common import process
+from TotalDepth.common import process, Slice
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
@@ -151,7 +151,7 @@ INDEX_FILE = 'index.html'
 
 
 def _write_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
-    assert os.path.isdir(path_out)
+    assert os.path.isdir(path_out), f'{path_out} is not a directory'
     # print('TRACE: _write_indexes():')
     # pprint.pprint(index)
     _write_low_level_indexes(path_out, index)
@@ -462,11 +462,7 @@ def main() -> int:
         '-k', '--keep-going', action='store_true',
         help='Keep going as far as sensible. [default: %(default)s]',
     )
-    parser.add_argument(
-        '--frame-spacing', type=int, default=1,
-        help='With --LR read log data at this frame spacing.'
-             ' For example --frame-spacing=8 then read every eighth frame. [default: %(default)s]',
-    )
+    Slice.add_frame_slice_to_argument_parser(parser)
     log_level_help_mapping = ', '.join(
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
     )
@@ -507,14 +503,16 @@ def main() -> int:
                 args.path_in,
                 args.path_out,
                 args.recurse,
-                frame_spacing=args.frame_spacing,
+                # frame_spacing=args.frame_spacing,
+                frame_slice=Slice.create_slice(args.frame_slice),
             )
     else:
         result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
             args.path_in,
             args.path_out,
             args.recurse,
-            frame_spacing=args.frame_spacing,
+            # frame_spacing=args.frame_spacing,
+            frame_slice=Slice.create_slice(args.frame_slice),
         )
     clk_exec = time.perf_counter() - clk_start
     # print('Execution time = %8.3f (S)' % clk_exec)

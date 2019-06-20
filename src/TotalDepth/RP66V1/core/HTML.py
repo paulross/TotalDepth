@@ -2,14 +2,18 @@
 RP66V1 HTML support.
 
 """
+import logging
 import os
 import typing
 
 from TotalDepth.RP66V1.core import LogicalFile, File, StorageUnitLabel, LogPass, RepCode, AbsentValue
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.stringify import stringify_object_by_type
+from TotalDepth.common import Slice
 from TotalDepth.util import XmlWrite
 
+
+logger = logging.getLogger(__file__)
 
 # Examples: https://jrgraphix.net/r/Unicode/25A0-25FF
 UNICODE_SYMBOLS = {
@@ -177,10 +181,8 @@ def _write_log_pass_content_in_html(
         logical_file_index: int,
         number_of_preceeding_eflrs: int,
         *,
-        # TODO: Replace frame_spacing with a slice object
-        frame_spacing: int) -> typing.Tuple[HTMLFrameArraySummary]:
+        frame_slice: Slice.Slice) -> typing.Tuple[HTMLFrameArraySummary]:
     assert logical_file.has_log_pass
-    assert frame_spacing >= 1
     ret = []
     lp: LogPass.LogPass = logical_file.log_pass
     frame_array: LogPass.FrameArray
@@ -196,7 +198,7 @@ def _write_log_pass_content_in_html(
                 visible_record_positions,
                 logical_file,
                 frame_array,
-                frame_spacing,
+                frame_slice,
                 anchor,
                 xhtml_stream,
             )
@@ -209,7 +211,7 @@ def _write_frame_array_in_html(
         visible_record_positions: LogicalFile.VisibleRecordPositions,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
-        frame_spacing: int,
+        frame_slice: Slice.Slice,
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
     ) -> HTMLFrameArraySummary:
@@ -218,10 +220,9 @@ def _write_frame_array_in_html(
         xhtml_stream.characters('Frame Data')
     iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
-        if frame_spacing > 1:
-            num_frames = 1 + len(iflrs) // frame_spacing
-        else:
-            num_frames = len(iflrs)
+        # NOTE: +1
+        num_frames = frame_slice.count(len(iflrs)) + 1
+        logger.info(f'Creating space for {num_frames} frames from {len(iflrs)} IFLRs.')
         frame_array.init_arrays(num_frames)
         interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / (len(iflrs) - 1) if len(iflrs) > 1 else 0.0
         with XmlWrite.Element(xhtml_stream, 'p'):
@@ -234,18 +235,19 @@ def _write_frame_array_in_html(
             )
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
-                f'Sampled every {frame_spacing} frame(s).'
+                f'Frames {frame_slice.long_str(len(iflrs))} frame(s).'
                 f' Number of frames created: {num_frames}'
                 f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
             )
-        for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
-            # TODO: raise
-            assert f + 1 == iflr_frame_number
-            if f % frame_spacing == 0:
-                vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-                fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-                frame_array.read(iflr.logical_data, f // frame_spacing)
+        # TODO: Make this code part of the FrameArray, or a free function in LogPass returning num_frames.
+        # See also the code in Scan.py which is very similar
+        for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
+            # logger.info(f'Reading frame {frame_number} into frame {f}.')
+            iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
+            vr_position = visible_record_positions.visible_record_prior(lrsh_position)
+            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+            frame_array.read(iflr.logical_data, f)
         frame_table = [
             ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
              'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],
@@ -356,7 +358,7 @@ class HTMLBodySummary(typing.NamedTuple):
 def html_write_body(
         rp66_file: File.FileRead,
         logical_file_sequence: LogicalFile.LogicalIndex,
-        frame_spacing: int,
+        frame_slice: Slice.Slice,
         xhtml_stream: XmlWrite.XhtmlStream,
     ) -> HTMLBodySummary:
     """Write out the <body> of the document."""
@@ -408,7 +410,7 @@ def html_write_body(
                     rp66_file, logical_file_sequence.visible_record_positions,
                     logical_file, xhtml_stream,
                     lf, len(logical_file.eflrs),
-                    frame_spacing=frame_spacing,
+                    frame_slice=frame_slice,
             )
             logical_file_summaries.append((HTMLLogicalFileSummary(tuple(eflr_types), frame_array_summary)))
         else:
@@ -422,14 +424,12 @@ def html_write_body(
 
 
 def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
-                                       *, frame_spacing: int) -> HTMLBodySummary:
+                                       *, frame_slice: Slice.Slice) -> HTMLBodySummary:
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
     Return text to use as a link.
     """
-    if frame_spacing <= 0:
-        raise ValueError(f'Frame spacing must be > 0 not {frame_spacing}')
     with open(path_in, 'rb') as fobj:
         # FIXME: Make this a bit of a generic pattern like LIS by:
         # - Get LogicalIndex take a File.FileRead
@@ -450,5 +450,5 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                return html_write_body(rp66v1_file, logical_file_sequence, frame_spacing, xhtml_stream)
+                return html_write_body(rp66v1_file, logical_file_sequence, frame_slice, xhtml_stream)
         # return logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii')

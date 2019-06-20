@@ -8,57 +8,6 @@ from TotalDepth.util import XmlWrite
 
 
 @pytest.mark.parametrize(
-    'init, length, expected',
-    (
-        ((None, None, None), 7, 7),
-        ((None, 7, None), 7, 7),
-        ((None, 7, None), 42, 7),
-        ((None, None, None), 1, 1),
-        ((None, -1, None), 1, 0),
-        ((None, 8, 2), 8, 4),
-        ((2, 8, 2), 8, 3),
-    )
-)
-def test_slice_count(init, length, expected):
-    s = LogPass.Slice(*init)
-    assert s.count(length) == expected
-
-
-@pytest.mark.parametrize(
-    'init, length, expected',
-    (
-        ((None, None, None), 7, list(range(7))),
-        ((None, 7, None), 7, list(range(7))),
-        ((None, 7, None), 42, list(range(7))),
-        ((None, None, None), 1, [0]),
-        ((None, -1, None), 1, []),
-        ((None, 8, 2), 8, [0, 2, 4, 6]),
-        ((2, 8, 2), 8, [2, 4, 6]),
-    )
-)
-def test_slice_indices(init, length, expected):
-    s = LogPass.Slice(*init)
-    assert s.indices(length) == expected
-
-
-@pytest.mark.parametrize(
-    'init, expected',
-    (
-        ('None,None,None', LogPass.Slice()),
-        ('None,None,None  ', LogPass.Slice()),
-        ('  None,None,None', LogPass.Slice()),
-        ('None , None , None', LogPass.Slice()),
-        ('None,1,None', LogPass.Slice(stop=1)),
-        ('1,10,None', LogPass.Slice(1, 10)),
-        ('1,10,2', LogPass.Slice(1, 10, 2)),
-    )
-)
-def test_slice_create_slice(init, expected):
-    s = LogPass.create_slice(init)
-    assert s == expected
-
-
-@pytest.mark.parametrize(
     'dimensions, frame_number, expected',
     (
         ([1], 7, [(7, 0)]),

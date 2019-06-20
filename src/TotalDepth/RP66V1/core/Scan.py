@@ -13,7 +13,7 @@ from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
-from TotalDepth.common import Rle, data_table
+from TotalDepth.common import Rle, data_table, Slice
 from TotalDepth.util.bin_file_type import format_bytes
 
 
@@ -559,9 +559,8 @@ def _scan_log_pass_content(
         logical_file: LogicalFile.LogicalFile,
         fout: typing.TextIO,
         *,
-        frame_spacing) -> None:
+        frame_slice: Slice.Slice) -> None:
     assert logical_file.has_log_pass
-    assert frame_spacing >= 1
     lp: LogPass.LogPass = logical_file.log_pass
     frame_array: LogPass.FrameArray
     for fa, frame_array in enumerate(lp.frame_arrays):
@@ -570,13 +569,8 @@ def _scan_log_pass_content(
             fout.write('\n')
             iflrs = logical_file.iflr_position_map[frame_array.ident]
             if len(iflrs):
-                if frame_spacing > 1:
-                    num_frames = 1 + len(iflrs) // frame_spacing
-                else:
-                    num_frames = len(iflrs)
-                # if num_frames == 0:
-                #     num_frames = 1
-                # frame_array.init_arrays(len(iflrs))
+                # NOTE: +1
+                num_frames = frame_slice.count(len(iflrs)) + 1
                 frame_array.init_arrays(num_frames)
                 interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / len(iflrs)
                 fout.write(
@@ -588,19 +582,20 @@ def _scan_log_pass_content(
                 )
                 fout.write('\n')
                 fout.write(
-                    f'Frame spacing: {frame_spacing}'
+                    f'Frame spacing: {frame_slice.long_str(len(iflrs))}'
                     f' number of frames: {num_frames}'
                     f' numpy size: {frame_array.sizeof_array:,d} bytes'
                 )
                 fout.write('\n')
-                for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
-                    # TODO: raise
-                    assert f + 1 == iflr_frame_number
-                    if f % frame_spacing == 0:
-                        vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-                        fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-                        iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-                        frame_array.read(iflr.logical_data, f // frame_spacing)
+                # TODO: Make this code part of the FrameArray, or a free function in LogPass returning num_frames.
+                # See also the code in HTML.py which is very similar
+                for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
+                    # logger.info(f'Reading frame {frame_number} into frame {f}.')
+                    iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
+                    vr_position = visible_record_positions.visible_record_prior(lrsh_position)
+                    fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+                    iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+                    frame_array.read(iflr.logical_data, f)
                 frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
                     channel_ident = channel.ident.I.decode("ascii")
@@ -621,14 +616,12 @@ def _scan_log_pass_content(
 
 
 def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
-                                  *, rp66v1_path: str, frame_spacing: int, eflr_as_table: bool) -> None:
+                                  *, rp66v1_path: str, frame_slice: Slice.Slice, eflr_as_table: bool) -> None:
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
     rp66v1_file = File.FileRead(fobj)
     logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, rp66v1_path)
-    if frame_spacing <= 0:
-        raise ValueError(f'Frame spacing must be > 0 not {frame_spacing}')
     with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
         fout.write(str(logical_file_sequence.storage_unit_label))
         fout.write('\n')
@@ -658,6 +651,6 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                     with _output_section_header_trailer('Log Pass', '-', os=fout):
                         _scan_log_pass_content(
                             rp66v1_file, logical_file_sequence.visible_record_positions,
-                            logical_file, fout, frame_spacing=frame_spacing)
+                            logical_file, fout, frame_slice=frame_slice)
                 else:
                     fout.write('NO Log Pass for this Logical Record\n')

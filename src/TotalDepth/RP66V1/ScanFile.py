@@ -1,5 +1,15 @@
 """
 Scans a RP66V1 file an prints out the summary.
+
+This produces text output at various levels of encapsulation:
+
+    --VR ~ Visible Records only.
+    --LRSH ~ Logical Record segments.
+    --LD ~ Logical data i.e. all Logical Record segments concatenated for each Logical Record.
+    --EFLR ~ Explicitly Formatted Logical Records.
+    --IFLR ~ Implicitly Formatted Logical Records.
+    --LR ~ All data, including frame data from all Logical Records.
+
 """
 import argparse
 import collections
@@ -12,9 +22,8 @@ import typing
 import colorama
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-# from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
-#     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
-from TotalDepth.RP66V1.core import Scan, HTML
+from TotalDepth.RP66V1.core import Scan
+from TotalDepth.common import Slice
 from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
@@ -73,7 +82,12 @@ def scan_a_single_file(path_in: str, path_out: str, output_extension: str, funct
     return IndexResult(0, 0, 0.0, False, True)
 
 
-def scan_dir_or_file(path_in: str, path_out: str, function: typing.Callable, recurse: bool, output_extension: str, **kwargs) -> typing.Dict[str, IndexResult]:
+def scan_dir_or_file(path_in: str,
+                     path_out: str,
+                     function: typing.Callable,
+                     recurse: bool,
+                     output_extension: str,
+                     **kwargs) -> typing.Dict[str, IndexResult]:
     logging.info(f'scan_dir_or_file(): "{path_in}" to "{path_out}" with {function} recurse: {recurse}')
     ret = {}
     if os.path.isdir(path_in):
@@ -177,13 +191,15 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
 
 def main() -> int:
     description = 'usage: %(prog)s [options] file'
-    description = """Scans a RP66V1 file and dumps data from the lowest level upwards:
+    description = """Scans a RP66V1 file and dumps data about the file to stdout.
+    This is useful for examining the details of RP66V1 files and can dump data at various levels of encapsulation,
+    from the lowest level upwards:
     --VR ~ Visible Records only.
     --LRSH ~ Logical Record segments.
     --LD ~ Logical data i.e. all Logical Record segments concatenated for each Logical Record.
     --EFLR ~ Explicitly Formatted Logical Records.
     --IFLR ~ Implicitly Formatted Logical Records.
-    --LR ~ All data, including frame data from all Logical Records.
+    --LR ~ All data, including the numerical analysis of frame data.
     """
     print('Cmd: %s' % ' '.join(sys.argv))
     # TODO: Use CmnCmdOpts
@@ -192,12 +208,10 @@ def main() -> int:
         epilog=__rights__,
         prog=sys.argv[0],
     )
-    parser.add_argument('path_in', type=str, help='Path to the input file.')
-    parser.add_argument('path_out', type=str, default='', nargs='?', help='Path to the output scan to write.')
-    # parser.add_argument(
-    #     '--version', action='version', version='%(prog)s Version: ' + __version__,
-    #     help='Show version and exit.'
-    # )
+    parser.add_argument('path_in', type=str, help='Path to the input file or directory.')
+    parser.add_argument(
+        'path_out', type=str, default='', nargs='?', help='Path to the output scan to write [default: stdout].'
+    )
     parser.add_argument(
         '-V', '--VR', action='store_true',
         help='Dump the Visible Records. [default: %(default)s]',
@@ -253,11 +267,7 @@ def main() -> int:
         '-k', '--keep-going', action='store_true',
         help='Keep going as far as sensible. [default: %(default)s]',
     )
-    parser.add_argument(
-        '--frame-spacing', type=int, default=1,
-        help='With --LR read log data at this frame spacing.'
-             ' For example --frame-spacing=8 then read every eighth frame. [default: %(default)s]',
-    )
+    Slice.add_frame_slice_to_argument_parser(parser, help_prefix='NOTE: Requires -R, --LR.')
     parser.add_argument(
         '--eflr-as-table', action='store_true',
         help='When with --LR and not --html then dump EFLRs as tables, otherwise every EFLR object.'
@@ -345,16 +355,8 @@ def main() -> int:
             Scan.scan_RP66V1_file_data_content,
             args.recurse,
             output_extension,
-            # kwargs passed to scanning function
-            # verbose=args.verbose,
-            # encrypted=args.encrypted,
-            # keep_going=args.keep_going,
-            # eflr_set_type=[bytes(v, 'ascii') for v in args.eflr_set_type],
-            # iflr_set_type=[bytes(v, 'ascii') for v in args.iflr_set_type],
-            # iflr_dump=args.IFLR,
-            # eflr_dump=args.EFLR,
             rp66v1_path=args.path_in,
-            frame_spacing=args.frame_spacing,
+            frame_slice=Slice.create_slice(args.frame_slice),
             eflr_as_table=args.eflr_as_table,
         )
     clk_exec = time.perf_counter() - clk_start

@@ -45,47 +45,6 @@ def default_np_type(_rep_code: int) -> typing.Type:
     return np.float64
 
 
-class Slice:
-    def __init__(self, start=None, stop=None, step=None):
-        self.slice = slice(start, stop, step)
-
-    def count(self, length: int) -> int:
-        start, stop, step = self.slice.indices(length)
-        ret = (stop - start) // step
-        return ret
-
-    def range(self, length: int) -> typing.Iterator[int]:
-        return range(*self.slice.indices(length))
-
-    def indices(self, length: int) -> typing.List[int]:
-        return list(self.range(length))
-
-    def __eq__(self, other) -> bool:
-        if other.__class__ == self.__class__:
-            return other.slice == self.slice
-        return NotImplemented
-
-
-def create_slice(slice_string: str) -> Slice:
-    """Returns a Slice object from a string such as:
-    '', 'None,72', 'None,72,14'
-    """
-    def convert(a_string):
-        if a_string == 'None':
-            return None
-        return int(a_string)
-
-    parts = [convert(p.strip()) for p in slice_string.split(',')]
-    if len(parts) > 3:
-        raise ValueError(f'Too many parts in {slice_string}')
-    if len(parts) == 0:
-        return Slice()
-    if len(parts) == 1:
-        return Slice(stop=parts[0])
-    # 2 or 3 parts
-    return Slice(*parts)
-
-
 class FrameChannel:
     """
     This represents a single channel in a frame. It is file independent and can be used depending on the
@@ -294,6 +253,9 @@ class FrameArray:
         if self.x_axis.len_array == 0:
             self.x_axis.init_array(1)
         self.x_axis.read(ld, frame_number)
+
+
+
 
 
 def frame_array_from_RP66V1(frame_object: EFLR.Object,
