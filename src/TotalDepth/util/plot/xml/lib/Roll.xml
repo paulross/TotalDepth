@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RollRoot>
+    <Roll id="WIRELINE_TRADITIONAL" description="Standard wireline output 8.5 inches wide." color="FFFFFF" width="8.5in" left="0.25in" right="0.25in"/>
+</RollRoot>

@@ -347,6 +347,7 @@ def write_array_section_to_las(
         f' and {num_values:,d} values per frame'
         f', total: {num_frames * num_values:,d} input values.'
     )
+    # TODO: Could init_arrays(1), read one IFLR, write it out and repeat.
     frame_array.init_arrays(num_frames)
     for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
         # TODO: raise

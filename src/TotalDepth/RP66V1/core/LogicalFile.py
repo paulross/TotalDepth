@@ -7,7 +7,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core import LogPass, File, RepCode
-
+from TotalDepth.common import Slice
 
 logger = logging.getLogger(__file__)
 
@@ -290,4 +290,38 @@ class LogicalIndex:
 #             self.binary_file = None
 #         self.rp66v1_file = None
 #         return False
+
+
+def populate_frame_array(
+        rp66_file: File.FileRead,
+        visible_record_positions: VisibleRecordPositions,
+        logical_file: LogicalFile,
+        frame_array: LogPass.FrameArray,
+        frame_slice: Slice.Slice,
+        channels: typing.Union[typing.Set[typing.Hashable], None] = None,
+) -> int:
+    """Populates a FrameArray with channel values."""
+    iflrs = logical_file.iflr_position_map[frame_array.ident]
+    if len(iflrs):
+        # NOTE: +1
+        num_frames = frame_slice.count(len(iflrs)) + 1
+        if channels is not None:
+            frame_array.init_arrays_partial(num_frames, channels)
+        else:
+            frame_array.init_arrays(num_frames)
+        for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
+            # logger.info(f'Reading frame {frame_number} into frame {f}.')
+            iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
+            vr_position = visible_record_positions.visible_record_prior(lrsh_position)
+            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+            if channels is not None:
+                frame_array.read_partial(iflr.logical_data, f, channels)
+            else:
+                frame_array.read(iflr.logical_data, f)
+    else:
+        num_frames = 0
+        frame_array.init_arrays(num_frames)
+    return num_frames
+
 

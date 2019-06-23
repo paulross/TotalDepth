@@ -214,17 +214,24 @@ def _write_frame_array_in_html(
         frame_slice: Slice.Slice,
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
-    ) -> HTMLFrameArraySummary:
-
+) -> HTMLFrameArraySummary:
     with XmlWrite.Element(xhtml_stream, 'h4'):
         xhtml_stream.characters('Frame Data')
     iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
         # NOTE: +1
-        num_frames = frame_slice.count(len(iflrs)) + 1
-        logger.info(f'Creating space for {num_frames} frames from {len(iflrs)} IFLRs.')
-        frame_array.init_arrays(num_frames)
-        interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / (len(iflrs) - 1) if len(iflrs) > 1 else 0.0
+        # num_frames = frame_slice.count(len(iflrs)) + 1
+        # logger.info(f'Creating space for {num_frames} frames from {len(iflrs)} IFLRs.')
+        # frame_array.init_arrays(num_frames)
+        num_frames = LogicalFile.populate_frame_array(
+            rp66_file,
+            visible_record_positions,
+            logical_file,
+            frame_array,
+            frame_slice,
+            None
+        )
+        interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / (len(iflrs) - 1)
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
                 f'Available frames: {len(iflrs)}'
@@ -239,15 +246,6 @@ def _write_frame_array_in_html(
                 f' Number of frames created: {num_frames}'
                 f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
             )
-        # TODO: Make this code part of the FrameArray, or a free function in LogPass returning num_frames.
-        # See also the code in Scan.py which is very similar
-        for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
-            # logger.info(f'Reading frame {frame_number} into frame {f}.')
-            iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
-            vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-            frame_array.read(iflr.logical_data, f)
         frame_table = [
             ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
              'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],
@@ -283,14 +281,14 @@ def _write_frame_array_in_html(
             xhtml_stream.characters('No frames.')
         x_axis_start = x_axis_stop = 0.0
     return HTMLFrameArraySummary(
-                frame_array.ident.I,
-                len(iflrs),
-                tuple(c.ident.I for c in frame_array.channels),
-                x_axis_start,
-                x_axis_stop,
-                frame_array.x_axis.units,
-                anchor,
-            )
+        frame_array.ident.I,
+        len(iflrs),
+        tuple(c.ident.I for c in frame_array.channels),
+        x_axis_start,
+        x_axis_stop,
+        frame_array.x_axis.units,
+        anchor,
+    )
 
 
 # def _anchor(*args: typing.Tuple[int, ...]) -> str:

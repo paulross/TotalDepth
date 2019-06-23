@@ -567,11 +567,16 @@ def _scan_log_pass_content(
         with _output_section_header_trailer(f'Frame Array [{fa}/{len(lp.frame_arrays)}]', '^', os=fout):
             fout.write(str(frame_array))
             fout.write('\n')
-            iflrs = logical_file.iflr_position_map[frame_array.ident]
-            if len(iflrs):
-                # NOTE: +1
-                num_frames = frame_slice.count(len(iflrs)) + 1
-                frame_array.init_arrays(num_frames)
+            num_frames = LogicalFile.populate_frame_array(
+                rp66_file,
+                visible_record_positions,
+                logical_file,
+                frame_array,
+                frame_slice,
+                None
+            )
+            if num_frames > 0:
+                iflrs = logical_file.iflr_position_map[frame_array.ident]
                 interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / len(iflrs)
                 fout.write(
                     f'Frames [{len(iflrs)}]'
@@ -587,15 +592,6 @@ def _scan_log_pass_content(
                     f' numpy size: {frame_array.sizeof_array:,d} bytes'
                 )
                 fout.write('\n')
-                # TODO: Make this code part of the FrameArray, or a free function in LogPass returning num_frames.
-                # See also the code in HTML.py which is very similar
-                for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
-                    # logger.info(f'Reading frame {frame_number} into frame {f}.')
-                    iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
-                    vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-                    fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
-                    iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-                    frame_array.read(iflr.logical_data, f)
                 frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
                     channel_ident = channel.ident.I.decode("ascii")
@@ -613,6 +609,7 @@ def _scan_log_pass_content(
             else:
                 fout.write('No frames.')
             fout.write('\n')
+
 
 
 def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
