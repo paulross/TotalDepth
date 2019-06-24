@@ -23,7 +23,7 @@ import numpy as np
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import LogicalFile, File, RepCode, LogPass, stringify
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
-from TotalDepth.common import data_table
+from TotalDepth.common import data_table, Slice
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -201,13 +201,13 @@ def write_well_information_to_las(
     if len(iflr_data):
         x_strt: float = iflr_data[0].x_axis
         x_stop: float = iflr_data[-1].x_axis
-        las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start depth')
+        las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
         las_map['STOP'] = UnitValueDescription(
-            x_units, stringify.stringify_object_by_type(x_stop), f'Stop depth, frames: {len(iflr_data):,d}'
+            x_units, stringify.stringify_object_by_type(x_stop), f'Stop X, frames: {len(iflr_data):,d}'
         )
     else:
-        las_map['STRT'] = UnitValueDescription(x_units, 'N/A', 'Start depth')
-        las_map['STOP'] = UnitValueDescription(x_units, 'N/A', 'Stop depth')
+        las_map['STRT'] = UnitValueDescription(x_units, 'N/A', 'Start X')
+        las_map['STOP'] = UnitValueDescription(x_units, 'N/A', 'Stop X')
     if len(iflr_data) > 1:
         x_step: float = (iflr_data[-1].x_axis - iflr_data[0].x_axis) / (len(iflr_data) - 1)
         las_map['STEP'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_step), 'Step (average)')
@@ -301,6 +301,7 @@ def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
 
 def write_curve_section_to_las(
         frame_array: LogPass.FrameArray,
+        channels: typing.Set[str],
         ostream: typing.TextIO,
     ) -> None:
     ostream.write('~Curve Information Section\n')
@@ -308,13 +309,16 @@ def write_curve_section_to_las(
         ['#MNEM.UNIT', 'Curve Description'],
         ['#---------', '-----------------'],
     ]
+    # print('TRACE:', channels)
     for c, channel in enumerate(frame_array.channels):
-        desc = ' '.join([
-            f': {channel.long_name.decode("ascii")}',
-            f'Rep Code: {RepCode.REP_CODE_INT_TO_STR[channel.rep_code]}',
-            f'Dimensions: {channel.dimensions}'
-        ])
-        table.append([f'{channel.ident.I.decode("ascii"):<4}.{channel.units.decode("ascii"):<4}', desc])
+        if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
+            # print('TRACE: channel', channel)
+            desc = ' '.join([
+                f': {channel.long_name.decode("ascii")}',
+                f'Rep Code: {RepCode.REP_CODE_INT_TO_STR[channel.rep_code]}',
+                f'Dimensions: {channel.dimensions}'
+            ])
+            table.append([f'{channel.ident.I.decode("ascii"):<4}.{channel.units.decode("ascii"):<4}', desc])
     rows = data_table.format_table(table, pad='  ', left_flush=True)
     for row in rows:
         ostream.write(row)
@@ -327,16 +331,19 @@ def write_array_section_to_las(
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
         array_reduction: str,
+        frame_slice: Slice.Slice,
+        channels: typing.Set[str],
         ostream: typing.TextIO,
     ) -> None:
     assert array_reduction in ARRAY_REDUCTIONS
     ostream.write('~A')
     for c, channel in enumerate(frame_array.channels):
-        if c == 0:
-            ostream.write(f'{channel.ident.I.decode("ascii"):>14}')
-        else:
-            ostream.write(' ')
-            ostream.write(f'{channel.ident.I.decode("ascii"):>16}')
+        if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
+            if c == 0:
+                ostream.write(f'{channel.ident.I.decode("ascii"):>14}')
+            else:
+                ostream.write(' ')
+                ostream.write(f'{channel.ident.I.decode("ascii"):>16}')
     ostream.write('\n')
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     num_frames = len(iflrs)
@@ -358,15 +365,16 @@ def write_array_section_to_las(
         frame_array.read(iflr.logical_data, f)
     for f in range(num_frames):
         for c, channel in enumerate(frame_array.channels):
-            if c:
-                ostream.write(' ')
-            value = array_reduce(channel.array[f], array_reduction)
-            if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
-                ostream.write(f'{value:16.0f}')
-            elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
-                ostream.write(f'{value:16.3f}')
-            else:
-                ostream.write(str(value))
+            if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
+                if c:
+                    ostream.write(' ')
+                value = array_reduce(channel.array[f], array_reduction)
+                if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
+                    ostream.write(f'{value:16.0f}')
+                elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
+                    ostream.write(f'{value:16.3f}')
+                else:
+                    ostream.write(str(value))
         ostream.write('\n')
     # Free up numpy memory
     frame_array.init_arrays(1)
@@ -377,6 +385,8 @@ def write_logical_sequence_to_las(
         logical_file_sequence: LogicalFile.LogicalIndex,
         array_reduction: str,
         path_out: str,
+        frame_slice: Slice.Slice,
+        channels: typing.Set[str],
         ) -> typing.List[str]:
     ret = []
     for lf, logical_file in enumerate(logical_file_sequence.logical_files):
@@ -393,10 +403,11 @@ def write_logical_sequence_to_las(
                         logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
                     )
                     write_well_information_to_las(logical_file, frame_array, ostream)
-                    write_curve_section_to_las(frame_array, ostream)
+                    write_curve_section_to_las(frame_array, channels, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
                     write_array_section_to_las(
-                        rp66v1_file, logical_file_sequence, logical_file, frame_array, array_reduction, ostream
+                        rp66v1_file, logical_file_sequence, logical_file, frame_array, array_reduction, frame_slice,
+                        channels, ostream
                     )
                     ret.append(file_path_out)
         else:
@@ -413,7 +424,13 @@ def write_logical_sequence_to_las(
     return ret
 
 
-def single_rp66v1_file_to_las(path_in: str, array_reduction: str, path_out: str = '') -> LASWriteResult:
+def single_rp66v1_file_to_las(
+        path_in: str,
+        array_reduction: str,
+        path_out: str,
+        frame_slice: Slice.Slice,
+        channels: typing.Set[str],
+) -> LASWriteResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     bin_file_type = binary_file_type_from_path(path_in)
     if bin_file_type == 'RP66V1':
@@ -423,9 +440,9 @@ def single_rp66v1_file_to_las(path_in: str, array_reduction: str, path_out: str 
                 t_start = time.perf_counter()
                 # index = RP66V1IndexXMLWrite(fobj, path_in)
                 rp66v1_file = File.FileRead(fobj)
-                logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+                logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
                 las_files_written = write_logical_sequence_to_las(
-                    rp66v1_file, logical_file_sequence, array_reduction, path_out
+                    rp66v1_file, logical_index, array_reduction, path_out, frame_slice, channels,
                 )
                 output_size = sum(os.path.getsize(f) for f in las_files_written)
                 result = LASWriteResult(
@@ -448,21 +465,75 @@ def single_rp66v1_file_to_las(path_in: str, array_reduction: str, path_out: str 
     return LASWriteResult(0, 0, 0, 0.0, False, True)
 
 
-def convert_rp66v1_dir_or_file_to_las(path_in: str, path_out: str, recurse: bool, array_reduction: str) -> typing.Dict[str, LASWriteResult]:
+def convert_rp66v1_dir_or_file_to_las(
+        path_in: str,
+        path_out: str,
+        recurse: bool,
+        array_reduction: str,
+        frame_slice: Slice.Slice,
+        channels: typing.Set[str],
+) -> typing.Dict[str, LASWriteResult]:
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     try:
         if os.path.isdir(path_in):
             for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
-                # print(file_in_out)
                 ret[file_in_out.filePathIn] = single_rp66v1_file_to_las(
-                    file_in_out.filePathIn, array_reduction, file_in_out.filePathOut
+                    file_in_out.filePathIn, array_reduction, file_in_out.filePathOut, frame_slice, channels,
                 )
         else:
-            ret[path_in] = single_rp66v1_file_to_las(path_in, array_reduction, path_out)
+            ret[path_in] = single_rp66v1_file_to_las(path_in, array_reduction, path_out, frame_slice, channels)
     except KeyboardInterrupt:
         logger.critical('Keyboard interrupt, last file is probably incomplete or corrupt.')
     return ret
+
+
+def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, channels) -> None:
+    bin_file_type = binary_file_type_from_path(path_in)
+    if bin_file_type == 'RP66V1':
+        logger.info(f'Reading RP66V1 {path_in}')
+        try:
+            with open(path_in, 'rb') as fobj:
+                rp66v1_file = File.FileRead(fobj)
+                logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+                for logical_file in logical_index.logical_files:
+                    print(f'Logical file: {logical_file}')
+                    # print(f'Logical file: {logical_file.file_header_logical_record.set.type}')
+                    if logical_file.has_log_pass:
+                        for frame_array in logical_file.log_pass.frame_arrays:
+                            print(f'Frame Array: {frame_array.ident.I}')
+                            if channels:
+                                channel_text = b','.join(c.ident.I for c in frame_array.channels)
+                                print(f'Channels: {channel_text}')
+                            if frame_slices:
+                                print(f'X axis: {frame_array.x_axis}')
+                                iflr_refs = logical_file.iflr_position_map[frame_array.ident]
+                                # print(f'TRACE: Frames: {len(iflr_refs)} from {iflr_refs[0]} to {iflr_refs[-1]}')
+                                x_spacing = (iflr_refs[-1].x_axis - iflr_refs[0].x_axis) / (len(iflr_refs)  -1)
+                                print(
+                                    f'Frames: {len(iflr_refs)}'
+                                    f' from {iflr_refs[0].x_axis}'
+                                    f' to {iflr_refs[-1].x_axis}'
+                                    f' interval {x_spacing}'
+                                    f' [{frame_array.x_axis.units}]'
+                                )
+                            print()
+                    else:
+                        print('No log pass')
+                    print()
+        except ExceptionTotalDepthRP66V1:
+            logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
+        except Exception:
+            logger.exception(f'Failed to index with Exception: {path_in}')
+
+
+def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, channels: str) -> None:
+    assert frame_slice == '?' or channels == '?'
+    if os.path.isdir(path_in):
+        for file_in_out in dirWalk(path_in, '', theFnMatch='', recursive=recurse, bigFirst=False):
+            dump_frames_and_or_channels_single_rp66v1_file(file_in_out.filePathIn, frame_slice == '?', channels == '?')
+    else:
+        dump_frames_and_or_channels_single_rp66v1_file(path_in, frame_slice == '?', channels == '?')
 
 
 GNUPLOT_PLT = """set logscale x
@@ -573,6 +644,14 @@ Scans a RP66V1 file and dumps data."""
         default='mean',
         choices=list(sorted(ARRAY_REDUCTIONS)),
         )
+    # Add --frame-slice
+    Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
+    parser.add_argument(
+        '--channels', type=str,
+        help='Comma separated list of channels to write out (X axis is always included).'
+             ' Use \'?\' to see what channels exist without writing anything. [default: %(default)s]',
+        default='',
+        )
     log_level_help_mapping = ', '.join(
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
     )
@@ -598,73 +677,72 @@ Scans a RP66V1 file and dumps data."""
         log_level = logging._nameToLevel[args.log_level]
     else:
         log_level = int(args.log_level)
-    # print('Log level:', log_level)
     # Initialise logging etc.
     logging.basicConfig(level=log_level,
                         format='%(asctime)s %(levelname)-8s %(message)s',
                         #datefmt='%y-%m-%d % %H:%M:%S',
                         stream=sys.stdout)
-    # return 0
     # Your code here
     clk_start = time.perf_counter()
-    result: typing.Dict[str, LASWriteResult] = convert_rp66v1_dir_or_file_to_las(
-        args.path_in,
-        args.path_out,
-        args.recurse,
-        args.array_reduction,
-    )
-    clk_exec = time.perf_counter() - clk_start
-    size_index = size_input = 0
-    files_processed = 0
-    table = [
-        ['Input', 'Output', 'LAS Count', 'Time', 'Ratio', 'ms/Mb', 'Exception', 'Path']
-    ]
-    for path in sorted(result.keys()):
-        las_result = result[path]
-        # print('TRACE: las_result', las_result)
-        if las_result.size_input > 0:
-            ms_mb = las_result.time * 1000 / (las_result.size_input / 1024 ** 2)
-            ratio = las_result.size_output / las_result.size_input
-            # out = []
-            # out.append(f'{las_result.size_input:16,d}')
-            # out.append(f'{las_result.size_output:16,d}')
-            # out.append(f'{las_result.las_count:4,d}')
-            # out.append(f'{las_result.time:8.3f}')
-            # out.append(f'{ratio:8.1%}')
-            # out.append(f'{ms_mb:8.1f}')
-            # out.append(f'{str(las_result.exception):5}')
-            # out.append(f'"{path}"')
-            out = [
-                f'{las_result.size_input:,d}',
-                f'{las_result.size_output:,d}',
-                f'{las_result.las_count:,d}',
-                f'{las_result.time:.3f}',
-                f'{ratio:.1%}',
-                f'{ms_mb:.1f}',
-                f'{str(las_result.exception)}',
-                f'"{path}"',
-            ]
-            table.append(out)
-            # print(' '.join(out))
-            size_input += result[path].size_input
-            size_index += result[path].size_output
-            files_processed += 1
-    for row in data_table.format_table(table, pad=' ', heading_underline='-'):
-        print(row)
-    try:
-        if args.gnuplot:
-            plot_gnuplot(result, args.gnuplot)
-    except Exception as err:
-        logger.exception(str(err))
-    print('Execution time = %8.3f (S)' % clk_exec)
-    if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
-        ratio = size_index / size_input
+    result: typing.Dict[str, LASWriteResult] = {}
+    if args.frame_slice.strip() == '?' or args.channels.strip() == '?':
+        dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
     else:
-        ms_mb = 0.0
-        ratio = 0.0
-    print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
-    print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
+        result = convert_rp66v1_dir_or_file_to_las(
+            args.path_in,
+            args.path_out,
+            args.recurse,
+            args.array_reduction,
+            Slice.create_slice(args.frame_slice),
+            set(args.channels.strip().split(',')),
+        )
+    clk_exec = time.perf_counter() - clk_start
+    # Report output
+    if result:
+        size_index = size_input = 0
+        files_processed = 0
+        table = [
+            ['Input', 'Output', 'LAS Count', 'Time', 'Ratio', 'ms/Mb', 'Exception', 'Path']
+        ]
+        for path in sorted(result.keys()):
+            las_result = result[path]
+            # print('TRACE: las_result', las_result)
+            if las_result.size_input > 0:
+                ms_mb = las_result.time * 1000 / (las_result.size_input / 1024 ** 2)
+                ratio = las_result.size_output / las_result.size_input
+                out = [
+                    f'{las_result.size_input:,d}',
+                    f'{las_result.size_output:,d}',
+                    f'{las_result.las_count:,d}',
+                    f'{las_result.time:.3f}',
+                    f'{ratio:.1%}',
+                    f'{ms_mb:.1f}',
+                    f'{str(las_result.exception)}',
+                    f'"{path}"',
+                ]
+                table.append(out)
+                # print(' '.join(out))
+                size_input += result[path].size_input
+                size_index += result[path].size_output
+                files_processed += 1
+        for row in data_table.format_table(table, pad=' ', heading_underline='-'):
+            print(row)
+        try:
+            if args.gnuplot:
+                plot_gnuplot(result, args.gnuplot)
+        except Exception as err:
+            logger.exception(str(err))
+        print('Execution time = %8.3f (S)' % clk_exec)
+        if size_input > 0:
+            ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+            ratio = size_index / size_input
+        else:
+            ms_mb = 0.0
+            ratio = 0.0
+        print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
+        print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
+    else:
+        print(f'Execution time: {clk_exec:.3f} (s)')
     print('Bye, bye!')
     return 0
 

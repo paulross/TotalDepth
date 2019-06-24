@@ -65,16 +65,23 @@ def create_slice(slice_string: str) -> Slice:
     return Slice(*parts)
 
 
-def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser, help_prefix: str='') -> None:
-    help_text = 'Slice the frames by start,stop,step as a comma separated list.' \
-        ' Values can be absent or  "None".' \
-        ' Examples: ",," - every frame' \
-        ', ",,2" - every other frame' \
-        ', ",10," - frames 0 to 9' \
-        ', "4,10,2" - frames 4, 6, 8' \
-        ', "40,-1,4" - every fourth frame from 40 to the end' \
-        '. Results will be truncated by frame array length.' \
-        ' [default: "%(default)s"]'
+def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser, help_prefix: str='', use_what: bool = False) -> None:
+    help_list = []
     if help_prefix:
-        help_text = f'{help_prefix} {help_text}'
-    parser.add_argument('--frame-slice', default=',,', type=str, help=help_text)
+        help_list.append(f'{help_prefix}')
+    help_list.extend(
+        [
+            'Slice the frames by start,stop,step as a comma separated list.',
+            'Values can be absent or  "None".',
+            'Examples: ",," - every frame,',
+            '",,2" - every other frame,',
+            '",10," - frames 0 to 9,',
+            '"4,10,2" - frames 4, 6, 8,',
+            '"40,-1,4" - every fourth frame from 40 to the end.',
+            'Results will be truncated by frame array length.',
+        ]
+    )
+    if use_what:
+        help_list.append(' Use \'?\' to see what frames are available')
+    help_list.append(' [default: "%(default)s"]')
+    parser.add_argument('--frame-slice', default=',,', type=str, help=' '.join(help_list))
