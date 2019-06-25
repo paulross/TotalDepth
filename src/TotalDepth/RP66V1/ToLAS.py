@@ -336,6 +336,22 @@ def write_array_section_to_las(
         ostream: typing.TextIO,
     ) -> None:
     assert array_reduction in ARRAY_REDUCTIONS
+    iflrs = logical_file.iflr_position_map[frame_array.ident]
+    num_input_frames = len(iflrs)
+    # Write information about how the frames and channels were processed
+    ostream.write(f'# Array processing information:\n')
+    ostream.write(f'# Frame Array: ID: {frame_array.ident} description: {frame_array.description}\n')
+    if len(channels):
+        original_channels = ','.join(channel.ident.I.decode("ascii") for channel in frame_array.channels)
+        ostream.write(f'# Original channels in Frame Array [{len(frame_array.channels):4d}]: {original_channels}\n')
+        ostream.write(f'# Requested Channels this LAS file [{len(channels):4d}]: {",".join(channels)}\n')
+    else:
+        ostream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
+    ostream.write(f'# Number of original frames: {num_input_frames}\n')
+    ostream.write(
+        f'# Requested frame slicing: {frame_slice.long_str(num_input_frames)}'
+        f' total: {frame_slice.count(num_input_frames)}\n'
+    )
     ostream.write('~A')
     for c, channel in enumerate(frame_array.channels):
         if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
@@ -345,30 +361,27 @@ def write_array_section_to_las(
                 ostream.write(' ')
                 ostream.write(f'{channel.ident.I.decode("ascii"):>16}')
     ostream.write('\n')
-    iflrs = logical_file.iflr_position_map[frame_array.ident]
-    num_frames = len(iflrs)
     num_values = sum(c.count for c in frame_array.channels)
     logger.info(
-        f'Writing array section with {num_frames:,d} frames'
+        f'Writing array section with {num_input_frames:,d} frames'
         f', {len(frame_array):,d} channels'
         f' and {num_values:,d} values per frame'
-        f', total: {num_frames * num_values:,d} input values.'
+        f', total: {num_input_frames * num_values:,d} input values.'
     )
-    # TODO: Could init_arrays(1), read one IFLR, write it out and repeat.
-    frame_array.init_arrays(num_frames)
-    for f, (iflr_frame_number, lrsh_position, x_axis) in enumerate(iflrs):
-        # TODO: raise
-        assert f + 1 == iflr_frame_number
-        vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(lrsh_position)
-        fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, lrsh_position)
+    frame_array.init_arrays(1)
+    for frame_number in frame_slice.range(num_input_frames):
+        # print(iflrs[frame_number])
+        vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(
+            iflrs[frame_number].lrsh_position
+        )
+        fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, iflrs[frame_number].lrsh_position)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-        frame_array.read(iflr.logical_data, f)
-    for f in range(num_frames):
+        frame_array.read(iflr.logical_data, 0)
         for c, channel in enumerate(frame_array.channels):
             if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
                 if c:
                     ostream.write(' ')
-                value = array_reduce(channel.array[f], array_reduction)
+                value = array_reduce(channel.array[0], array_reduction)
                 if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
                     ostream.write(f'{value:16.0f}')
                 elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
@@ -376,8 +389,33 @@ def write_array_section_to_las(
                 else:
                     ostream.write(str(value))
         ostream.write('\n')
-    # Free up numpy memory
-    frame_array.init_arrays(1)
+
+
+
+    # # TODO: Could init_arrays(1), read one IFLR, write it out and repeat.
+    # frame_array.init_arrays(num_input_frames)
+    # for f, (lrsh_position, iflr_frame_number, x_axis) in enumerate(iflrs):
+    #     # TODO: raise
+    #     assert f + 1 == iflr_frame_number
+    #     vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(lrsh_position)
+    #     fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, lrsh_position)
+    #     iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+    #     frame_array.read(iflr.logical_data, f)
+    # for f in range(num_input_frames):
+    #     for c, channel in enumerate(frame_array.channels):
+    #         if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
+    #             if c:
+    #                 ostream.write(' ')
+    #             value = array_reduce(channel.array[f], array_reduction)
+    #             if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
+    #                 ostream.write(f'{value:16.0f}')
+    #             elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
+    #                 ostream.write(f'{value:16.3f}')
+    #             else:
+    #                 ostream.write(str(value))
+    #     ostream.write('\n')
+    # # Free up numpy memory
+    # frame_array.init_arrays(1)
 
 
 def write_logical_sequence_to_las(
@@ -688,13 +726,17 @@ Scans a RP66V1 file and dumps data."""
     if args.frame_slice.strip() == '?' or args.channels.strip() == '?':
         dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
     else:
+        channel_set = set()
+        for ch in args.channels.strip().split(','):
+            if ch.strip() != '':
+                channel_set.add(ch.strip())
         result = convert_rp66v1_dir_or_file_to_las(
             args.path_in,
             args.path_out,
             args.recurse,
             args.array_reduction,
             Slice.create_slice(args.frame_slice),
-            set(args.channels.strip().split(',')),
+            channel_set,
         )
     clk_exec = time.perf_counter() - clk_start
     # Report output
