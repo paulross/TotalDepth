@@ -2,7 +2,7 @@ import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import RepCode, LogPass
-from TotalDepth.RP66V1.core.LogicalFile import IFLRData
+from TotalDepth.RP66V1.core.XAxis import IFLRReference
 from TotalDepth.common import Rle, xml
 from TotalDepth.util import XmlWrite
 
@@ -175,7 +175,7 @@ def frame_channel_from_XML(channel_node: xml.etree.Element) -> LogPass.FrameChan
 
 
 def frame_array_to_XML(frame_array: LogPass.FrameArray,
-                       iflr_data: typing.Sequence[IFLRData],
+                       iflr_data: typing.Sequence[IFLRReference],
                        xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML FrameArray node suitable for RP66V1.
 
@@ -228,19 +228,19 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
             xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
 
 
-def iflr_data_from_xml(frame_array_node: xml.etree.Element) -> typing.Iterator[IFLRData]:
-    """Returns a sequence of IFLRData objects from XML."""
+def iflr_data_from_xml(frame_array_node: xml.etree.Element) -> typing.Iterator[IFLRReference]:
+    """Returns a sequence of IFLRReference objects from XML."""
     iflr_node = xml_single_element(frame_array_node, './IFLR')
     rle_lrsh = xml_rle_read(xml_single_element(iflr_node, './LRSH'))
     rle_frames = xml_rle_read(xml_single_element(iflr_node, './FrameNumbers'))
     rle_xaxis = xml_rle_read(xml_single_element(iflr_node, './Xaxis'))
     if len({int(iflr_node.attrib['count']), rle_lrsh.num_values(), rle_frames.num_values(), rle_xaxis.num_values()}) != 1:
         raise LogPass.ExceptionFrameArrayInit('Mismatched counts of LRSH, FrameNumbers and Xaxis')
-    return (IFLRData(*v) for v in zip(rle_lrsh.values(), rle_frames.values(), rle_xaxis.values()))
+    return (IFLRReference(*v) for v in zip(rle_lrsh.values(), rle_frames.values(), rle_xaxis.values()))
 
 
 def frame_array_from_XML(frame_array_node: xml.etree.Element) \
-        -> typing.Tuple[LogPass.FrameArray, typing.Iterator[IFLRData]]:
+        -> typing.Tuple[LogPass.FrameArray, typing.Iterator[IFLRReference]]:
     """Initialise a FrameArray from a XML Channel node. For an example of the XML see frame_array_to_XML."""
     if frame_array_node.tag != 'FrameArray':
         raise ValueError(f'Got element tag of "{frame_array_node.tag}" but expected "FrameArray"')
@@ -255,7 +255,7 @@ def frame_array_from_XML(frame_array_node: xml.etree.Element) \
 
 
 def log_pass_to_XML(log_pass: LogPass.LogPass,
-                    iflr_data_map: typing.Dict[typing.Hashable, typing.Sequence[IFLRData]],
+                    iflr_data_map: typing.Dict[typing.Hashable, typing.Sequence[IFLRReference]],
                     xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML LogPass node suitable for RP66V1. Example::
 

@@ -6,7 +6,8 @@ import logging
 import os
 import typing
 
-from TotalDepth.RP66V1.core import LogicalFile, File, StorageUnitLabel, LogPass, RepCode, AbsentValue
+import TotalDepth.RP66V1.core.XAxis
+from TotalDepth.RP66V1.core import LogicalFile, File, StorageUnitLabel, LogPass, RepCode, AbsentValue, XAxis
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.stringify import stringify_object_by_type
 from TotalDepth.common import Slice
@@ -206,6 +207,40 @@ def _write_log_pass_content_in_html(
     return tuple(ret)
 
 
+def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+    # Parent section is heading h3
+
+    # with XmlWrite.Element(xhtml_stream, 'h4'):
+    #     xhtml_stream.characters('X Axis summary (all IFLRs)')
+    with XmlWrite.Element(xhtml_stream, 'h4'):
+        xhtml_stream.characters('X Axis')
+    units = x_axis.units.decode('ascii')
+    x_axis_table = [['X Axis', 'Value'],]
+    x_axis_table.append(['Channel', f'{x_axis.ident}'])
+    x_axis_table.append(['Long Name', f'{x_axis.long_name.decode("ascii")}'])
+    x_axis_table.append(['Minimum', f'{x_axis.summary.min} [{units}]'])
+    x_axis_table.append(['Maximum', f'{x_axis.summary.min} [{units}]'])
+    x_axis_table.append(['Frame Count', f'{x_axis.summary.count}'])
+    html_write_table(x_axis_table, xhtml_stream, class_style='monospace')
+    with XmlWrite.Element(xhtml_stream, 'h4'):
+        xhtml_stream.characters('X Axis Spacing')
+    x_spacing_table = [['X Axis Spacing', 'Value'],]
+    spacing = x_axis.summary.spacing
+    x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]'])
+    x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]'])
+    x_spacing_table.append(['Median', f'{spacing.median} [{units}]'])
+    x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]'])
+    x_spacing_table.append(['Normal', f'{spacing.counts.normal:,d}'])
+    x_spacing_table.append(['Duplicate', f'{spacing.counts.duplicate:,d}'])
+    x_spacing_table.append(['Skipped', f'{spacing.counts.skipped:,d}'])
+    x_spacing_table.append(['Back', f'{spacing.counts.back:,d}'])
+    html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
+    with XmlWrite.Element(xhtml_stream, 'p'):
+        xhtml_stream.characters('Frame spacing frequency:')
+    with XmlWrite.Element(xhtml_stream, 'pre'):
+        xhtml_stream.characters(x_axis.summary.spacing.histogram_str())
+
+
 def _write_frame_array_in_html(
         rp66_file: File.FileRead,
         visible_record_positions: LogicalFile.VisibleRecordPositions,
@@ -215,14 +250,12 @@ def _write_frame_array_in_html(
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
 ) -> HTMLFrameArraySummary:
-    with XmlWrite.Element(xhtml_stream, 'h4'):
-        xhtml_stream.characters('Frame Data')
-    iflrs: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
+    # Parent section is heading h3
+
+    # with XmlWrite.Element(xhtml_stream, 'h4'):
+    #     xhtml_stream.characters('Frame Data')
+    iflrs: typing.List[TotalDepth.RP66V1.core.XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
-        # NOTE: +1
-        # num_frames = frame_slice.count(len(iflrs)) + 1
-        # logger.info(f'Creating space for {num_frames} frames from {len(iflrs)} IFLRs.')
-        # frame_array.init_arrays(num_frames)
         num_frames = LogicalFile.populate_frame_array(
             rp66_file,
             visible_record_positions,
@@ -231,7 +264,12 @@ def _write_frame_array_in_html(
             frame_slice,
             None
         )
-        interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / (len(iflrs) - 1)
+        x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+        _write_x_axis_summary(x_axis, xhtml_stream)
+        interval = x_axis.summary.spacing.median
+
+        with XmlWrite.Element(xhtml_stream, 'h4'):
+            xhtml_stream.characters('Frame Analysis')
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
                 f'Available frames: {len(iflrs)}'
@@ -242,7 +280,7 @@ def _write_frame_array_in_html(
             )
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
-                f'Frames {frame_slice.long_str(len(iflrs))} frame(s).'
+                f'Frame analysis on {frame_slice.long_str(len(iflrs))} frame(s).'
                 f' Number of frames created: {num_frames}'
                 f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
             )

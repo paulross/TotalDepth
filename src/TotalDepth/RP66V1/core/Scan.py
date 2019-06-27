@@ -8,7 +8,7 @@ import typing
 
 import colorama
 
-from TotalDepth.RP66V1.core import File, LogPass, AbsentValue
+from TotalDepth.RP66V1.core import File, LogPass, AbsentValue, XAxis
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
@@ -553,6 +553,24 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                             fout.write('\n')
 
 
+def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
+    fout.write('X Axis summary (all IFLRs):\n')
+    fout.write(f'Min: {x_axis.summary.min} Max: {x_axis.summary.max} [{x_axis.units}] Count: {x_axis.summary.count}\n')
+    fout.write('X Axis spacing summary:\n')
+    fout.write(
+        f'Min: {x_axis.summary.spacing.min} Max: {x_axis.summary.spacing.max}'
+        f' Mean: {x_axis.summary.spacing.mean} Median: {x_axis.summary.spacing.median}\n'
+    )
+    fout.write(f'   Normal: {x_axis.summary.spacing.counts.normal}\n')
+    fout.write(f'Duplicate: {x_axis.summary.spacing.counts.duplicate}\n')
+    fout.write(f'  Skipped: {x_axis.summary.spacing.counts.skipped}\n')
+    fout.write(f'     Back: {x_axis.summary.spacing.counts.back}\n')
+
+    fout.write(f'Spacing histogram\n')
+    fout.write(str(x_axis.summary.spacing.histogram_str()))
+    fout.write('\n')
+
+
 def _scan_log_pass_content(
         rp66_file: File.FileRead,
         visible_record_positions: LogicalFile.VisibleRecordPositions,
@@ -576,18 +594,19 @@ def _scan_log_pass_content(
                 None
             )
             if num_frames > 0:
-                iflrs = logical_file.iflr_position_map[frame_array.ident]
-                interval = (iflrs[-1].x_axis - iflrs[0].x_axis) / len(iflrs)
+                x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+                _write_x_axis_summary(x_axis, fout)
+                interval = x_axis.summary.spacing.median
                 fout.write(
-                    f'Frames [{len(iflrs)}]'
-                    f' from: {float(iflrs[0].x_axis):0.3f}'
-                    f' to {float(iflrs[-1].x_axis):0.3f}'
+                    f'Frames [{len(x_axis)}]'
+                    f' from: {float(x_axis[0].x_axis):0.3f}'
+                    f' to {float(x_axis[-1].x_axis):0.3f}'
                     f' Interval: {interval:0.3f}'
                     f' {frame_array.x_axis.units}'
                 )
                 fout.write('\n')
                 fout.write(
-                    f'Frame spacing: {frame_slice.long_str(len(iflrs))}'
+                    f'Frame spacing: {frame_slice.long_str(len(x_axis))}'
                     f' number of frames: {num_frames}'
                     f' numpy size: {frame_array.sizeof_array:,d} bytes'
                 )

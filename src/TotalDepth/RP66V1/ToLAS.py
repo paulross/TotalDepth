@@ -20,6 +20,7 @@ import typing
 
 import numpy as np
 
+import TotalDepth.RP66V1.core.XAxis
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import LogicalFile, File, RepCode, LogPass, stringify
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
@@ -197,7 +198,7 @@ def write_well_information_to_las(
     las_map: typing.Dict[str, UnitValueDescription] = extract_well_information_from_origin(logical_file)
     # Add the start/stop/step data
     x_units: str = frame_array.x_axis.units.decode('ascii')
-    iflr_data: typing.List[LogicalFile.IFLRData] = logical_file.iflr_position_map[frame_array.ident]
+    iflr_data: typing.List[TotalDepth.RP66V1.core.XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflr_data):
         x_strt: float = iflr_data[0].x_axis
         x_stop: float = iflr_data[-1].x_axis

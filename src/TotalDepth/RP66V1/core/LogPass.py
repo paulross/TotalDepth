@@ -255,9 +255,6 @@ class FrameArray:
         self.x_axis.read(ld, frame_number)
 
 
-
-
-
 def frame_array_from_RP66V1(frame_object: EFLR.Object,
                             channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> FrameArray:
     # print('TRACE: frame_object.attr_label_map', frame_object.attr_label_map)

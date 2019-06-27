@@ -22,6 +22,9 @@ class Slice:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
         start, stop, step = self.slice.indices(length)
         ret = (stop - start) // step
+        # TODO: This works but looks dodgy.
+        if abs(step) != 1:
+            ret += 1
         return ret
 
     def range(self, length: int) -> range:

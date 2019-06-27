@@ -1,4 +1,3 @@
-import abc
 import bisect
 import collections
 import logging
@@ -6,7 +5,7 @@ import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core import LogPass, File, RepCode
+from TotalDepth.RP66V1.core import LogPass, File, RepCode, XAxis
 from TotalDepth.common import Slice
 
 logger = logging.getLogger(__file__)
@@ -41,13 +40,6 @@ class PositionEFLR(typing.NamedTuple):
     Logical Record and the EFLR itself."""
     lrsh_position: File.LogicalRecordPosition
     eflr: EFLR.ExplicitlyFormattedLogicalRecord
-
-
-class IFLRData(typing.NamedTuple):
-    """POD class that represents the position of the IFLR in the file."""
-    frame_number: int
-    lrsh_position: int
-    x_axis: typing.Union[int, float]
 
 
 class LogicalFile:
@@ -87,7 +79,7 @@ class LogicalFile:
         self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.log_pass: typing.Union[None, LogPass.LogPass] = None
-        self.iflr_position_map: typing.Dict[RepCode.ObjectName, typing.List[IFLRData]] = {}
+        self.iflr_position_map: typing.Dict[RepCode.ObjectName, XAxis.XAxis] = {}
 
 
     def _check_fld_matches_eflr(self, file_logical_data: File.FileLogicalData,
@@ -191,13 +183,19 @@ class LogicalFile:
         """
         """
         self._check_fld_iflr(file_logical_data, iflr)
-        self.log_pass[iflr.object_name].read_x_axis(iflr.logical_data, frame_number=0)
-        x_value = self.log_pass[iflr.object_name].channels[0].array.mean()
-        iflr_data = IFLRData(iflr.frame_number, file_logical_data.position.lrsh_position, x_value)
-        if iflr.object_name in self.iflr_position_map:
-            self.iflr_position_map[iflr.object_name].append(iflr_data)
-        else:
-            self.iflr_position_map[iflr.object_name] = [iflr_data]
+        frame_array: LogPass.FrameArray = self.log_pass[iflr.object_name]
+        frame_array.read_x_axis(iflr.logical_data, frame_number=0)
+        if iflr.object_name not in self.iflr_position_map:
+            self.iflr_position_map[iflr.object_name] = XAxis.XAxis(
+                frame_array.x_axis.ident,
+                frame_array.x_axis.long_name,
+                frame_array.x_axis.units,
+            )
+        self.iflr_position_map[iflr.object_name].append(
+            file_logical_data.position.lrsh_position,
+            iflr.frame_number,
+            self.log_pass[iflr.object_name].channels[0].array.mean(),
+        )
 
 
 class VisibleRecordPositions(collections.UserList):
@@ -304,16 +302,16 @@ def populate_frame_array(
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
         # NOTE: +1
-        num_frames = frame_slice.count(len(iflrs)) + 1
+        num_frames = frame_slice.count(len(iflrs))# + 1
         if channels is not None:
             frame_array.init_arrays_partial(num_frames, channels)
         else:
             frame_array.init_arrays(num_frames)
         for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
             # logger.info(f'Reading frame {frame_number} into frame {f}.')
-            iflr_frame_number, lrsh_position, x_axis = iflrs[frame_number]
-            vr_position = visible_record_positions.visible_record_prior(lrsh_position)
-            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, lrsh_position)
+            iflr_reference = iflrs[frame_number]
+            vr_position = visible_record_positions.visible_record_prior(iflr_reference.lrsh_position)
+            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, iflr_reference.lrsh_position)
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             if channels is not None:
                 frame_array.read_partial(iflr.logical_data, f, channels)
