@@ -137,9 +137,9 @@ setup(
             # LAS
             'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
             # RP66V1
-            'tdrp66v1scanfiles=TotalDepth.RP66V1.ScanFile:main',
+            'tdrp66v1scan=TotalDepth.RP66V1.Scan:main',
             'tdrp66v1tolas=TotalDepth.RP66V1.ToLAS:main',
-            'tdrp66v1scanfilehtml=TotalDepth.RP66V1.ScanFileHTML:main',
+            'tdrp66v1scanhtml=TotalDepth.RP66V1.ScanHTML:main',
         ]
     },
     include_package_data=True,
