@@ -219,7 +219,7 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
     x_axis_table.append(['Channel', f'{x_axis.ident}'])
     x_axis_table.append(['Long Name', f'{x_axis.long_name.decode("ascii")}'])
     x_axis_table.append(['Minimum', f'{x_axis.summary.min} [{units}]'])
-    x_axis_table.append(['Maximum', f'{x_axis.summary.min} [{units}]'])
+    x_axis_table.append(['Maximum', f'{x_axis.summary.max} [{units}]'])
     x_axis_table.append(['Frame Count', f'{x_axis.summary.count}'])
     html_write_table(x_axis_table, xhtml_stream, class_style='monospace')
     with XmlWrite.Element(xhtml_stream, 'h4'):
@@ -467,12 +467,8 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
     Return text to use as a link.
     """
     with open(path_in, 'rb') as fobj:
-        # FIXME: Make this a bit of a generic pattern like LIS by:
-        # - Get LogicalIndex take a File.FileRead
-        # - Rename LogicalIndex to be FileIndex or similar.
         rp66v1_file = File.FileRead(fobj)
-        logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
-
+        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
                 with XmlWrite.Element(xhtml_stream, 'meta', {
@@ -486,5 +482,5 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                return html_write_body(rp66v1_file, logical_file_sequence, frame_slice, xhtml_stream)
+                return html_write_body(rp66v1_file, logical_index, frame_slice, xhtml_stream)
         # return logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii')
