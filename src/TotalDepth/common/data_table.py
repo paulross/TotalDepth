@@ -44,8 +44,9 @@ def format_table(rows: typing.Sequence[typing.Sequence[typing.Any]],
     ret = []
     flush_char = '<' if left_flush else '>'
     if len(rows):
-        if len(set(len(row) for row in rows)) != 1:
-            raise ValueError(f'Rows not of equal length but lengths of {rows}')
+        len_rows = set(len(row) for row in rows)
+        if len(len_rows) != 1:
+            raise ValueError(f'Rows not of equal length but lengths of {len_rows}')
         str_table = [[format_object(o) for o in row] for row in rows]
         column_widths = [max([len(s) for s in col]) for col in zip(*str_table)]
         if heading_underline:

@@ -37,14 +37,19 @@ Code	Name	Size in Bytes	Descirption (sic)
 import collections
 import datetime
 import enum
+import logging
 import string
 import struct
 import typing
+import warnings
 
 import numpy as np
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
+
+
+logger = logging.getLogger(__file__)
 
 
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
@@ -491,11 +496,12 @@ def UNITS(ld: LogicalData) -> bytes:
     bad_chars = set(ret) - UNITS_ALLOWABLE_CHARACTERS
     if bad_chars:
         bad_chars_as_str = ''.join(sorted(chr(v) for v in bad_chars))
-        raise ExceptionRepCode(
-            f'UNITS "{ret}" has characters {bad_chars} "{bad_chars_as_str}"'
-            f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"'
+        msg = f'UNITS "{ret}" has characters {bad_chars} "{bad_chars_as_str}"' \
+            f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"' \
             f' is specified. See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
-        )
+        # warnings.warn(msg)
+        logger.warn(msg)
+        # raise ExceptionRepCode(msg)
     return ret
 
 

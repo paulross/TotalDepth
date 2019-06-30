@@ -1,6 +1,7 @@
 import bisect
 import collections
 import logging
+import pickle
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
@@ -217,7 +218,6 @@ class VisibleRecordPositions(collections.UserList):
 
 
 class LogicalIndex:
-    # TODO: Consider renaming this to FileIndex. See LIS for a compatible name.
     def __init__(self, rp66_file: typing.Union[File.FileRead, None], path: str):
         self.path = path
         self.logical_files: typing.List[LogicalFile] = []
@@ -266,6 +266,11 @@ class LogicalIndex:
     #     if i:
     #         return self.visible_record_positions[i - 1]
     #     raise ValueError
+
+
+def unpickle(path: str) -> LogicalIndex:
+    with open(path, 'rb') as in_stream:
+        return pickle.loads(in_stream.read())
 
 
 # class FileRandomAccess:
