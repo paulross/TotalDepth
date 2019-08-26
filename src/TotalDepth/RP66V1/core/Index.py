@@ -163,6 +163,7 @@ def read_logical_file_from_xml(logical_file_node: xml.etree.Element,
 
     We take the IFLR data from the XML index however.
     """
+    # FIXME: This should not have to go to the original file. This is reading EFLRs from the file rather than the index.
     assert logical_file_node.tag == 'LogicalFile'
     eflr_nodes: typing.List[xml.etree.Element] = list(logical_file_node.iterfind('./EFLR'))
     # Error checking the EFLRs are sensible.
@@ -233,7 +234,8 @@ def read_storage_unit_label_from_xml(root: xml.etree.Element) -> StorageUnitLabe
     return ret
 
 
-def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> LogicalFile.LogicalIndex:
+def read_logical_index_from_xml(index_path: str, archive_root: str) -> LogicalFile.LogicalIndex:
+    # FIXME: This should not have to go to the original file.
     # self.index_path = index_path
     # self.archive_root = archive_root
     # TODO: Is binary required for XML?
@@ -253,6 +255,7 @@ def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> L
             f'Found schema version {root.attrib["schema_version"]} but expected {XML_SCHEMA_VERSION}'
         )
     path = root.attrib['path']
+
     original_file_path: str = os.path.join(archive_root, path)
     if not os.path.isfile(original_file_path):
         raise ExceptionRP66V1IndexXMLRead(f'Not a file: "{original_file_path}"')
@@ -260,6 +263,7 @@ def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> L
     if bin_file_type != 'RP66V1':
         raise ExceptionRP66V1IndexXMLRead(
             f'File: "{original_file_path}" is not a RP66V1 file but "{bin_file_type}"')
+
     # size = int(root.attrib['size'])
     # utc_file_mtime = datetime.datetime.strptime(
     #     root.attrib['utc_file_mtime'], XML_TIMESTAMP_FORMAT_NO_TZ,
@@ -267,21 +271,21 @@ def read_logical_file_sequence_from_xml(index_path: str, archive_root: str) -> L
     # utc_now = datetime.datetime.strptime(
     #     root.attrib['utc_now'], XML_TIMESTAMP_FORMAT_NO_TZ,
     # )
-    logical_file_sequence = LogicalFile.LogicalIndex(None, original_file_path)
-    logical_file_sequence.storage_unit_label = read_storage_unit_label_from_xml(root)
+    logical_index = LogicalFile.LogicalIndex(None, original_file_path)
+    logical_index.storage_unit_label = read_storage_unit_label_from_xml(root)
     # Logical Files
     logical_files_node = LogPassXML.xml_single_element(root, './LogicalFiles')
     logical_file_count = int(logical_files_node.attrib['count'])
     with open(original_file_path, 'rb') as fobj:
         rp66v1file = File.FileRead(fobj)
         for logical_file_node in logical_files_node.iterfind('./LogicalFile'):
-            logical_file_sequence.logical_files.append(read_logical_file_from_xml(logical_file_node, rp66v1file))
-    if len(logical_file_sequence.logical_files) != logical_file_count:
+            logical_index.logical_files.append(read_logical_file_from_xml(logical_file_node, rp66v1file))
+    if len(logical_index.logical_files) != logical_file_count:
         raise ExceptionRP66V1IndexXMLRead(
-            f'Found {len(logical_file_sequence.logical_files)} logical Files but expected {logical_file_count}'
+            f'Found {len(logical_index.logical_files)} logical Files but expected {logical_file_count}'
         )
     # Read the Visible Record section and construct a RLE for them. This is for IFLRs that only have their
     # LRSH position, EFLRs record their Visible Record position along with their LRSH position.
     rle_vr = LogPassXML.xml_rle_read(LogPassXML.xml_single_element(root, './VisibleRecords'))
-    logical_file_sequence.visible_record_positions = LogicalFile.VisibleRecordPositions(rle_vr.values())
-    return logical_file_sequence
+    logical_index.visible_record_positions = LogicalFile.VisibleRecordPositions(rle_vr.values())
+    return logical_index

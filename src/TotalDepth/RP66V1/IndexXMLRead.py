@@ -36,9 +36,9 @@ def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
     logger.info(f'Reading XML index: {xml_path_in}')
     try:
         t_start = time.perf_counter()
-        logical_file_sequence = Index.read_logical_file_sequence_from_xml(xml_path_in, archive_root)
+        logical_index = Index.read_logical_index_from_xml(xml_path_in, archive_root)
         result = IndexResult(
-            os.path.getsize(logical_file_sequence.path),
+            os.path.getsize(logical_index.path),
             os.path.getsize(xml_path_in),
             time.perf_counter() - t_start,
             False,

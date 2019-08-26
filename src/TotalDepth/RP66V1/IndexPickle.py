@@ -33,7 +33,7 @@ logger = logging.getLogger(__file__)
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time_write, time_read, exception, ignored')
 
 
-def index_a_single_file(path_in: str, path_out: str) -> IndexResult:
+def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     bin_file_type = binary_file_type_from_path(path_in)
     if bin_file_type == 'RP66V1':
@@ -54,14 +54,17 @@ def index_a_single_file(path_in: str, path_out: str) -> IndexResult:
                 with open(pickle_path, 'wb') as out_stream:
                     out_stream.write(pickled_index)
                 write_time = time.perf_counter() - t_start
-                t_start = time.perf_counter()
-                _read_index = LogicalFile.unpickle(pickle_path)
-                reaad_time = time.perf_counter() - t_start
+                if read_back:
+                    t_start = time.perf_counter()
+                    _read_index = LogicalFile.unpickle(pickle_path)
+                    read_time = time.perf_counter() - t_start
+                else:
+                    read_time = 0.0
                 result = IndexResult(
                     os.path.getsize(path_in),
                     len(pickled_index),
                     write_time,
-                    reaad_time,
+                    read_time,
                     False,
                     False,
                 )
@@ -76,15 +79,15 @@ def index_a_single_file(path_in: str, path_out: str) -> IndexResult:
     return IndexResult(0, 0, 0.0, 0.0, False, True)
 
 
-def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
+def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             # print(file_in_out)
-            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut)
+            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
     else:
-        ret[path_in] = index_a_single_file(path_in, path_out)
+        ret[path_in] = index_a_single_file(path_in, path_out, read_back)
     return ret
 
 
@@ -96,18 +99,8 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
     parser.add_argument('path_in', type=str, help='Path to the input.')
     parser.add_argument('path_out', type=str, help='Path to the directory of pickled indexes.')
     parser.add_argument('-r', '--recurse', action='store_true', help='Process recursively. [default: %(default)s]')
+    parser.add_argument('--read-back', action='store_true', help='Read and time the output. [default: %(default)s]')
     td_logging.add_logging_option(parser)
-    # log_level_help_mapping = ', '.join(
-    #     ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
-    # )
-    # log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
-    # parser.add_argument(
-    #         "-l", "--log-level",
-    #         # type=int,
-    #         # dest="loglevel",
-    #         default=30,
-    #         help=log_level_help
-    #     )
     process.add_process_logger_to_argument_parser(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
@@ -117,18 +110,6 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
     args = parser.parse_args()
     print('args:', args)
     # return 0
-
-    # # Extract log level
-    # if args.log_level in logging._nameToLevel:
-    #     log_level = logging._nameToLevel[args.log_level]
-    # else:
-    #     log_level = int(args.log_level)
-    # # print('Log level:', log_level)
-    # # Initialise logging etc.
-    # logging.basicConfig(level=log_level,
-    #                     format='%(asctime)s %(levelname)-8s %(message)s',
-    #                     #datefmt='%y-%m-%d % %H:%M:%S',
-    #                     stream=sys.stdout)
     td_logging.set_logging_from_argparse(args)
     # return 0
     # Your code here
@@ -139,12 +120,14 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
                 args.path_in,
                 args.path_out,
                 args.recurse,
+                args.read_back,
             )
     else:
         result: typing.Dict[str, IndexResult] = index_dir_or_file(
             args.path_in,
             args.path_out,
             args.recurse,
+            args.read_back,
         )
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0

@@ -58,3 +58,18 @@ def format_table(rows: typing.Sequence[typing.Sequence[typing.Any]],
             for row in str_table:
                 ret.append(pad.join([f'{s:{flush_char}{w}}' for s, w in zip(row, column_widths)]))
     return ret
+
+
+def format_table_columns(
+        rows: typing.Sequence[typing.Sequence[typing.Any]],
+        column_formats: typing.List[str],
+        pad: str = ' ',
+        heading_underline: str = '',
+        ) -> typing.List[str]:
+    table = [rows[0]]
+    for row in rows[1:]:
+        table_row = []
+        for c, value in enumerate(row):
+            table_row.append(f'{value:{column_formats[c]}}')
+        table.append(table_row)
+    return format_table(table, pad, heading_underline)
