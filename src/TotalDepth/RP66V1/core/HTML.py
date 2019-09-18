@@ -16,12 +16,14 @@ from TotalDepth.util import XmlWrite
 
 logger = logging.getLogger(__file__)
 
-# Examples: https://jrgraphix.net/r/Unicode/25A0-25FF
+# Examples:
+# https://jrgraphix.net/r/Unicode/
+# https://jrgraphix.net/r/Unicode/25A0-25FF
 UNICODE_SYMBOLS = {
-    'TAPE_DRIVE': '\u2707',
-    'TABLE': '\u2637',
-    'TABLE_FINE': '\u2586',
-    'CHANNEL': '\u2307',
+    'TAPE_DRIVE': '\u2707',  # https://jrgraphix.net/r/Unicode/2700-27BF
+    'TABLE': '\u2637',  # https://jrgraphix.net/r/Unicode/2600-26FF
+    'TABLE_FINE': '\u25A6',  # https://jrgraphix.net/r/Unicode/25A0-25FF
+    'CHANNEL': '\u2307',  # https://jrgraphix.net/r/Unicode/2300-23FF
 }
 
 CSS_RP66V1 = """/* CSS for RP66V1 */
@@ -120,6 +122,19 @@ th.monospace, td.monospace {
     border:            1px solid black;
     vertical-align:    top;
     padding:           2px 6px 2px 6px; 
+}
+"""
+
+SCRIPT_RP66V1 = """
+/* Sidebar animation */
+var toggler = document.getElementsByClassName("caret");
+var i;
+
+for (i = 0; i < toggler.length; i++) {
+    toggler[i].addEventListener("click", function () {
+        this.parentElement.querySelector(".nested").classList.toggle("active");
+        this.classList.toggle("caret-down");
+    });
 }
 """
 
@@ -224,16 +239,19 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
     html_write_table(x_axis_table, xhtml_stream, class_style='monospace')
     with XmlWrite.Element(xhtml_stream, 'h4'):
         xhtml_stream.characters('X Axis Spacing')
+    with XmlWrite.Element(xhtml_stream, 'p'):
+        xhtml_stream.characters(f'Definitions: {XAxis.SPACING_DEFINITIONS}')
     x_spacing_table = [['X Axis Spacing', 'Value'],]
     spacing = x_axis.summary.spacing
     x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]'])
     x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]'])
     x_spacing_table.append(['Median', f'{spacing.median} [{units}]'])
     x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]'])
-    x_spacing_table.append(['Normal', f'{spacing.counts.normal:,d}'])
-    x_spacing_table.append(['Duplicate', f'{spacing.counts.duplicate:,d}'])
-    x_spacing_table.append(['Skipped', f'{spacing.counts.skipped:,d}'])
-    x_spacing_table.append(['Back', f'{spacing.counts.back:,d}'])
+    x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]'])
+    x_spacing_table.append(['Count of Normal', f'{spacing.counts.norm:,d}'])
+    x_spacing_table.append(['Count of Duplicate', f'{spacing.counts.dupe:,d}'])
+    x_spacing_table.append(['Count of Skipped', f'{spacing.counts.skip:,d}'])
+    x_spacing_table.append(['Count of Back', f'{spacing.counts.back:,d}'])
     html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
     with XmlWrite.Element(xhtml_stream, 'p'):
         xhtml_stream.characters('Frame spacing frequency:')
@@ -464,7 +482,7 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
-    Return text to use as a link.
+    Returns the text to use as a link.
     """
     with open(path_in, 'rb') as fobj:
         rp66v1_file = File.FileRead(fobj)

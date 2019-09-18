@@ -435,7 +435,6 @@ def plot_gnuplot(data: typing.Dict[str, HTMLResult], gnuplot_dir: str) -> None:
 
 
 def main() -> int:
-    description = 'usage: %(prog)s [options] file'
     description = """Scans a RP66V1 file or directory and writes HTML version of the data."""
     # TODO: Use CmnCmdOpts
     print('Cmd: %s' % ' '.join(sys.argv))

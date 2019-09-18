@@ -8,14 +8,14 @@ import numpy as np
 
 
 class XAxisSpacingCounts(typing.NamedTuple):
-    normal: int
-    duplicate: int
-    skipped: int
+    norm: int
+    dupe: int
+    skip: int
     back: int
 
     @property
     def total(self) -> int:
-        return self.normal + self.duplicate + self.skipped + self.back
+        return self.norm + self.dupe + self.skip + self.back
 
 
 class XAxisSpacingSummary(typing.NamedTuple):
@@ -23,6 +23,7 @@ class XAxisSpacingSummary(typing.NamedTuple):
     max: float
     mean: float
     median: float
+    std: float
     counts: XAxisSpacingCounts
     histogram: typing.Tuple[np.ndarray, np.ndarray]
 
@@ -41,26 +42,44 @@ class XAxisSpacingSummary(typing.NamedTuple):
         return '\n'.join(ret)
 
 
+SPACING_DEFINITIONS = """'backward' if space < -0.5 median
+'duplicate' if -0.5 median <= space < 0.5 median
+'normal' if 0.5 median <= space < 1.5 median
+'skipped' if space >= 1.5 median
+"""
+
+
+def compute_spacing_counts(diff: np.ndarray) -> typing.Tuple[float, XAxisSpacingCounts]:
+    median: float = np.median(diff)
+    half = median / 2.0
+    if median < 0:
+        skipped: int = len(diff[diff < 3 * half])
+        normal: int = len(diff[(diff < half) & (diff >= 3 * half)])
+        duplicate: int = len(diff[(diff < -half) & (diff >= half)])
+        back: int = len(diff[diff >= -half])
+    else:
+        skipped: int = len(diff[diff >= 3 * half])
+        normal: int = len(diff[(diff >= half) & (diff < 3 * half)])
+        duplicate: int = len(diff[(diff >= -half) & (diff < half)])
+        back: int = len(diff[diff < -half])
+    return median, XAxisSpacingCounts(normal, duplicate, skipped, back)
+
+
 def compute_spacing(x_array: np.ndarray) -> XAxisSpacingSummary:
     """Given an array this computes the summary of the first differential of the array.
 
-    Given a median of the first differential, m, a subsequent differential, dx, is considered:
-    'backward' if dx < -0.5 m
-    'duplicate' if -0.5 m <= dx < 0.5 m
-    'normal' if 0.5 m <= dx < 1.5 m
-    'skipped' if dx >= 1.5 m
+    Given a median of the first differential, median, a subsequent differential, dx, is considered:
+    'backward' if dx < -0.5 median
+    'duplicate' if -0.5 median <= dx < 0.5 median
+    'normal' if 0.5 median <= dx < 1.5 median
+    'skipped' if dx >= 1.5 median
     """
     diff = x_array[1:] - x_array[:-1]
-    median = np.median(diff)
-    half = median / 2.0
-    skipped: int = len(diff[diff >= 3 * half])
-    normal: int = len(diff[(diff >= half) & (diff < 3 * half)])
-    duplicate: int = len(diff[(diff >= -half) & (diff < half)])
-    back: int = len(diff[diff < -half])
+    median, counts = compute_spacing_counts(diff)
     bins = 10 if diff.min() != diff.max() else 1
     return XAxisSpacingSummary(
-        diff.min(), diff.max(), diff.mean(), float(median),
-        XAxisSpacingCounts(normal, duplicate, skipped, back),
+        diff.min(), diff.max(), diff.mean(), float(median), diff.std(),
+        counts,
         np.histogram(diff, bins=bins)
     )
 
