@@ -20,7 +20,7 @@
 """
 TIF Markers
 ===========
-These are 3x32bit big-endian integers at the beginning of each Physical Record.
+These are 3x32bit little-endian integers at the beginning of each Physical Record.
 
 Word[0]
 -------

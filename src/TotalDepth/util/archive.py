@@ -5,6 +5,7 @@ import argparse
 import collections
 import datetime
 import functools
+import logging
 import math
 import os
 import shutil
@@ -14,6 +15,9 @@ import typing
 import zipfile
 
 import TotalDepth.util.bin_file_type
+from TotalDepth.common import td_logging
+
+logger = logging.getLogger(__file__)
 
 
 class FileBase:
@@ -301,45 +305,48 @@ def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
     return result
 
 
-# def copy_tree(path_from: str, path_to: str, recurse: bool,
-#               file_types: typing.List[str], verbose: int, nervous: bool) -> None:
-#     def _print_message(msg: str) -> None:
-#         if verbose:
-#             if nervous:
-#                 print(f'Would {msg}')
-#             else:
-#                 print(f'{msg}')
-#
-#     def _copy_file(_file_from: str, _file_to: str) -> None:
-#         fod = FileOnDisc(_file_from)
-#         if len(file_types) == 0 or fod.bin_type in file_types:
-#             _dir_to = os.path.dirname(_file_to)
-#             if not os.path.isdir(_dir_to):
-#                 _print_message(f'Create sub-directory{_dir_to}')
-#                 os.makedirs(_dir_to)
-#             _print_message(f'Copy {_file_from} to {_file_to}')
-#             if not nervous:
-#                 shutil.copyfile(_file_from, _file_to)
-#         else:
-#             _print_message(f'Ignoring {_file_from} of type {fod.bin_type}')
-#
-#     if not os.path.isdir(path_from):
-#         raise ValueError(f'Path {path_from} is not a directory.')
-#     if not os.path.isdir(path_to):
-#         _print_message(f'Create root directory {path_to}')
-#         if not nervous:
-#             os.makedirs(path_to)
-#     if recurse:
-#         for root, dirs, files in os.walk(path_from):
-#             for file in files:
-#                 file_from = os.path.join(root, file)
-#                 file_to = os.path.join(path_to, file)
-#                 _copy_file(file_from, file_to)
-#     else:
-#         for file in sorted(os.listdir(path_from)):
-#             file_from = os.path.join(path_from, file)
-#             file_to = os.path.join(path_to, file)
-#             _copy_file(file_from, file_to)
+def copy_tree(path_from: str, path_to: str, recurse: bool,
+              file_types: typing.List[str], nervous: bool) -> typing.Dict[str, int]:
+    """ Copies particular binary file types from one directory structure to another."""
+    def _log_message(msg: str) -> None:
+        if nervous:
+            logger.info(f'Would {msg}')
+        else:
+            logger.info(f'{msg}')
+
+    def _copy_file(_file_from: str, _file_to: str) -> str:
+        fod = FileOnDisc(_file_from)
+        if len(file_types) == 0 or fod.bin_type in file_types:
+            _dir_to = os.path.dirname(_file_to)
+            if not os.path.isdir(_dir_to):
+                _log_message(f'Create sub-directory{_dir_to}')
+                os.makedirs(_dir_to)
+            _log_message(f'Copy {_file_from} to {_file_to}')
+            if not nervous:
+                shutil.copyfile(_file_from, _file_to)
+        else:
+            _log_message(f'Ignoring {_file_from} of type {fod.bin_type}')
+        return fod.bin_type
+
+    if not os.path.isdir(path_from):
+        raise ValueError(f'Path {path_from} is not a directory.')
+    if not os.path.isdir(path_to):
+        _log_message(f'Create directory {path_to}')
+        if not nervous:
+            os.makedirs(path_to)
+    ret = collections.defaultdict(int)
+    if recurse:
+        for root, dirs, files in os.walk(path_from):
+            for file in files:
+                file_from = os.path.join(root, file)
+                file_to = os.path.join(path_to, file)
+                ret[_copy_file(file_from, file_to)] += 1
+    else:
+        for file in sorted(os.listdir(path_from)):
+            file_from = os.path.join(path_from, file)
+            file_to = os.path.join(path_to, file)
+            ret[_copy_file(file_from, file_to)] += 1
+    return ret
 
 
 ARCHIVE_EXTENSIONS = frozenset(
@@ -347,94 +354,102 @@ ARCHIVE_EXTENSIONS = frozenset(
 )
 
 
-def expand_and_delete_archives(dir_to: str) -> None:
+def _find_archive_paths(directory: str) -> typing.List[str]:
+    """Returns a list of paths in directory that can be expanded by shutil.unpack_archive().
+    This is done greedily as we are going to mutate the directory that os.walk is called on.
     """
-    Recursively searches for archives in dir_to, expands them and deletes the original archive.
-    This assumes that expanding an archive does not write to a directory above dir_to, only in or below
-    dir_to.
-    """
-    nervous = False
-    has_expanded = True
-    while has_expanded:
-        has_expanded = False
-        for name in sorted(os.listdir(dir_to)):
-            path = os.path.join(dir_to, name)
-            if os.path.isfile(path):
-                if path not in EXCLUDE_FILENAMES:
-                    if os.path.splitext(path)[1] in ARCHIVE_EXTENSIONS:
-                        extract_dir = os.path.splitext(path)[0]
-                        extract_dir = os.path.dirname(path)
-                        if nervous:
-                            print(f'XXX Would expand {path} to {extract_dir}')
-                            print(f'XXX Would delete {path}')
-                            has_expanded = False
-                        else:
-                            print(f'Expanding {path} to {extract_dir}')
-                            shutil.unpack_archive(path, extract_dir=extract_dir)
-                            os.remove(path)
-                            has_expanded = True
-    # Finally recurse
-    for name in sorted(os.listdir(dir_to)):
-        path = os.path.join(dir_to, name)
-        if os.path.isdir(path):
-            expand_and_delete_archives(path)
+    assert os.path.isdir(directory)
+    ret = []
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            file_path = os.path.join(root, name)
+            if os.path.splitext(file_path)[1] in ARCHIVE_EXTENSIONS:
+                ret.append(file_path)
+    return ret
 
 
-def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
-    # if not nervous and os.path.samefile(dir_from, dir_to):
-    #     raise ValueError(f'From {dir_from} is the same as to {dir_to}')
-    if not os.path.exists(dir_to):
+def _gen_archive_paths(directory: str, multipass: bool) -> typing.Sequence[str]:
+    """Since os.walk is greedy and does not change if new files or directories are added this repeatedly walks the
+    directory yielding archive file paths until none are left.
+    """
+    assert os.path.isdir(directory)
+    has_found = True
+    while has_found:
+        has_found = False
+        for root, dirs, files in os.walk(directory):
+            for name in files:
+                file_path = os.path.join(root, name)
+                if os.path.splitext(file_path)[1] in ARCHIVE_EXTENSIONS:
+                    # logger.info(f'Archive path: {file_path}')
+                    yield file_path
+                    if multipass:
+                        has_found = True
+
+
+def expand_and_delete_archives(target_dir: str, nervous: bool) -> None:
+    """Recursively searches for archives in target_dir, expands them and deletes the original archive.
+    This repeatedly scans the target_dir until no more archive paths are found.
+    """
+    if not os.path.isdir(target_dir):
+        raise ValueError(f'{target_dir} is not a directory.')
+    multipass = False if nervous else True
+    for file_path in _gen_archive_paths(target_dir, multipass):
         if nervous:
-            print(f'Would create target directory {dir_to}')
+            logger.info(f'Would expand and delete archive at {file_path}')
         else:
-            print(f'Creating target directory {dir_to}')
-            os.makedirs(dir_to)
-    for path in sorted(os.listdir(dir_from)):
-        path_from = os.path.join(dir_from, path)
-        path_to = os.path.join(dir_to, path)
-        if os.path.isfile(path_from):
-            if path not in EXCLUDE_FILENAMES:
-                if os.path.splitext(path_from)[1] in ARCHIVE_EXTENSIONS:
-                    extract_dir = os.path.splitext(path_to)[0]
-                    # extract_dir = os.path.dirname(path_to)
-                    if nervous:
-                        print(f'Would expand {path_from} to {extract_dir}')
-                    else:
-                        print(f'Expanding {path_from} to {extract_dir}')
-                        shutil.unpack_archive(path_from, extract_dir=extract_dir)
-                    expand_and_delete_archives(extract_dir)
-                else:
-                    if nervous:
-                        print(f'Would copy {path_from} to {path_to}')
-                    else:
-                        print(f'Copying {path_from} to {path_to}')
-                        shutil.copyfile(path_from, path_to)
-        elif os.path.isdir(path_from):
-            # if nervous:
-            #     print(f'Would make target directory {path_to}')
-            # else:
-            #     os.makedirs(path_to)
-            expand_archive(path_from, path_to, nervous)
-        else:
-            raise IOError(f'Path {path_from} is not a file or directory')
+            logger.info(f'Expanding and deleting archive at {file_path}')
+            try:
+                shutil.unpack_archive(file_path, extract_dir=os.path.dirname(file_path))
+                os.remove(file_path)
+            except shutil.ReadError as err:
+                logger.error(str(err))
 
-    # for root, dirs, files in os.walk(dir_from):
-    #     # print(root, dirs, files)
-    #     for path_dir in dirs:
-    #         path_to = os.path.join(dir_to, path_dir)
-    #         print(f'Would create directory {path_to}')
-    #     for file in files:
-    #         print(f'File: {file}')
-    #         path_from = os.path.join(root, file)
-    #         path_to = os.path.join(dir_to, file)
-    #         if os.path.splitext(file)[1] in archive_extensions:
-    #             print(f'Would expand {path_from} to {os.path.dirname(path_to)}')
-    #             # shutil.unpack_archive(path_from, extract_dir=os.path.dirname(path_to))
+
+# def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
+#     # if not nervous and os.path.samefile(dir_from, dir_to):
+#     #     raise ValueError(f'From {dir_from} is the same as to {dir_to}')
+#     if not os.path.exists(dir_to):
+#         if nervous:
+#             print(f'Would create target directory {dir_to}')
+#         else:
+#             print(f'Creating target directory {dir_to}')
+#             os.makedirs(dir_to)
+#     for path in sorted(os.listdir(dir_from)):
+#         path_from = os.path.join(dir_from, path)
+#         path_to = os.path.join(dir_to, path)
+#         if os.path.isfile(path_from):
+#             if path not in EXCLUDE_FILENAMES:
+#                 if os.path.splitext(path_from)[1] in ARCHIVE_EXTENSIONS:
+#                     extract_dir = os.path.splitext(path_to)[0]
+#                     # extract_dir = os.path.dirname(path_to)
+#                     if nervous:
+#                         print(f'Would expand {path_from} to {extract_dir}')
+#                     else:
+#                         print(f'Expanding {path_from} to {extract_dir}')
+#                         shutil.unpack_archive(path_from, extract_dir=extract_dir)
+#                     expand_and_delete_archives(extract_dir)
+#                 else:
+#                     if nervous:
+#                         print(f'Would copy {path_from} to {path_to}')
+#                     else:
+#                         print(f'Copying {path_from} to {path_to}')
+#                         shutil.copyfile(path_from, path_to)
+#         elif os.path.isdir(path_from):
+#             # if nervous:
+#             #     print(f'Would make target directory {path_to}')
+#             # else:
+#             #     os.makedirs(path_to)
+#             expand_archive(path_from, path_to, nervous)
+#         else:
+#             raise IOError(f'Path {path_from} is not a file or directory')
 
 
 def main() -> int:
     print(f'CMD:', ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
+    parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.
+If a single path is given then the directory will be analysed or, if --expand-and-delete is given then
+all archives will be expanded and deleted. If two paths are given then the selected file types given by --file-types
+will be copied across.""")
     parser.add_argument('path', help='Path to the archive.')
     file_types = ', '.join(sorted(TotalDepth.util.bin_file_type.BINARY_FILE_TYPES_SUPPORTED))
     parser.add_argument(
@@ -443,35 +458,40 @@ def main() -> int:
     )
     parser.add_argument('-b', '--bytes', help='Number of initial bytes to show.', type=int, default=0)
     parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
+    parser.add_argument(
+        '--expand-and-delete', help='Expand and delete archive files, implies --recurse.', action='store_true'
+    )
     parser.add_argument('--histogram', help='Include size histogram.', action='store_true')
-    parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but reports.', action='store_true')
+    parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but report.', action='store_true')
     # parser.add_argument('copy-to', help='Location to copy the files to.', nargs='?')
     parser.add_argument(
         'path_out', type=str,
-        help='Path to the output directory to copy the files to.'
+        help='Path to the output directory to write the files to.'
              'The results are undefined if path_out conflicts with path_in',
         # default='',
         nargs='?')
+    td_logging.add_logging_option(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
     args = parser.parse_args()
     print(args)
-    print(args.path_to)
-    return 0
-
+    # print(args.path_out)
+    # return 0
+    td_logging.set_logging_from_argparse(args)
     t_start = time.perf_counter()
-
     files: typing.List[FileBase] = []
-
     FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
-    if args.path_to:
+    if args.path_out:
         assert 0
-        copy_tree(args.path, args.copy_to, args.recurse, args.file_types, args.verbose, args.nervous)
+        copy_tree(args.path, args.path_out, args.recurse, args.file_types, args.verbose, args.nervous)
     else:
-        files = explore_tree(args.path, args.recurse)
-        analyse_archive(files, args.file_types, args.bytes, args.histogram)
+        if args.expand_and_delete:
+            expand_and_delete_archives(args.path, args.nervous)
+        else:
+            files = explore_tree(args.path, args.recurse)
+            analyse_archive(files, args.file_types, args.bytes, args.histogram)
     t_exec = time.perf_counter() - t_start
     files_per_sec = int(len(files) / t_exec)
     print('Execution time: {:.3f} (s) {:,d} (files/s)'.format(t_exec, files_per_sec))

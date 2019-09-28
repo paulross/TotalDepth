@@ -123,8 +123,8 @@ setup(
             # General
             'tdarchive=TotalDepth.util.archive:main',
             'tdplotlogs=TotalDepth.PlotLogs:main',
+            'tdlisdetif=TotalDepth.DeTif:main',
             # LIS
-            'tdlisdetif=TotalDepth.LIS.DeTif:main', # TODO: Decide which de-TIF and put it the general section.
             'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
             'tdlisindex=TotalDepth.LIS.Index:main',
             'tdlistohtml=TotalDepth.LIS.LisToHtml:main',

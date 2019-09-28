@@ -318,7 +318,7 @@ def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
 
 def main() -> int:
     print(f'CMD:', ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.""")
+    parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data or copy data by file type.""")
     parser.add_argument('path', help='Path to the archive.')
     file_types = ', '.join(sorted(bin_file_type.BINARY_FILE_TYPES_SUPPORTED))
     parser.add_argument(
