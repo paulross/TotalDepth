@@ -126,17 +126,23 @@ class FileZip(FileArchive):
                         with zipfile.ZipFile(z_member_file) as z_member_archive:
                             self._expand_archive(z_member_archive, depth + 1)
                     else:
-                        bin_file_type = TotalDepth.util.bin_file_type.binary_file_type(z_member_file)
-                        # by: bytes = z_member_file.read(XXD_NUM_BYTES)
-                        # print(
-                        #     f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d}'
-                        #     f' {bin_file_type:8s} {z_info.filename}'
-                        # )
-                        z_member_file.seek(0)
-                        by = z_member_file.read(self.XXD_NUM_BYTES)
-                        self.members.append(
-                            z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time), by
-                        )
+                        try:
+                            bin_file_type = TotalDepth.util.bin_file_type.binary_file_type(z_member_file)
+                        except Exception as err:
+                            logger.exception(
+                                f'Can not determine binary file type for member {z_member_file} of {z_archive}'
+                            )
+                        else:
+                            # by: bytes = z_member_file.read(XXD_NUM_BYTES)
+                            # print(
+                            #     f'{xxd(by):{xxd_size(XXD_NUM_BYTES)}s} {z_info.file_size:12,d}'
+                            #     f' {bin_file_type:8s} {z_info.filename}'
+                            # )
+                            z_member_file.seek(0)
+                            by = z_member_file.read(self.XXD_NUM_BYTES)
+                            self.members.append(
+                                z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time), by
+                            )
 
     def __str__(self):
         str_self = ' '.join(
@@ -233,7 +239,7 @@ def analyse_archive(files: typing.List[FileBase],
         if len(file_types) == 0 or file.bin_type in file_types:
             fields = [
                 f'{file.size:14,d}',
-                f'{file.ext:5s}',
+                f'{file.ext:10s}',
                 f'{file.bin_type:{TotalDepth.util.bin_file_type.BINARY_FILE_TYPE_CODE_WIDTH}s}',
             ]
             if num_bytes:
@@ -314,19 +320,15 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
         else:
             logger.info(f'{msg}')
 
-    def _copy_file(_file_from: str, _file_to: str) -> str:
-        fod = FileOnDisc(_file_from)
-        if len(file_types) == 0 or fod.bin_type in file_types:
-            _dir_to = os.path.dirname(_file_to)
-            if not os.path.isdir(_dir_to):
-                _log_message(f'Create sub-directory{_dir_to}')
-                os.makedirs(_dir_to)
-            _log_message(f'Copy {_file_from} to {_file_to}')
-            if not nervous:
-                shutil.copyfile(_file_from, _file_to)
-        else:
-            _log_message(f'Ignoring {_file_from} of type {fod.bin_type}')
-        return fod.bin_type
+    # def _copy_file(file_from: str, path_to: str) -> str:
+    #     fod = FileOnDisc(file_from)
+    #     if len(file_types) == 0 or fod.bin_type in file_types:
+    #         file_to = os.path.join(path_to, fod.bin_type, file)
+    #         _log_message(f'Copy {file_from} to {file_to}')
+    #         if not nervous:
+    #             os.makedirs(os.path.dirname(file_to), exist_ok=True)
+    #             shutil.copyfile(file_from, file_to)
+    #             ret[fod.bin_type] += 1
 
     if not os.path.isdir(path_from):
         raise ValueError(f'Path {path_from} is not a directory.')
@@ -339,13 +341,25 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
         for root, dirs, files in os.walk(path_from):
             for file in files:
                 file_from = os.path.join(root, file)
-                file_to = os.path.join(path_to, file)
-                ret[_copy_file(file_from, file_to)] += 1
+                fod = FileOnDisc(file_from)
+                if len(file_types) == 0 or fod.bin_type in file_types:
+                    file_to = os.path.join(path_to, fod.bin_type, file)
+                    _log_message(f'Copy {file_from} to {file_to}')
+                    if not nervous:
+                        os.makedirs(os.path.dirname(file_to), exist_ok=True)
+                        shutil.copyfile(file_from, file_to)
+                        ret[fod.bin_type] += 1
     else:
         for file in sorted(os.listdir(path_from)):
             file_from = os.path.join(path_from, file)
-            file_to = os.path.join(path_to, file)
-            ret[_copy_file(file_from, file_to)] += 1
+            fod = FileOnDisc(file_from)
+            if len(file_types) == 0 or fod.bin_type in file_types:
+                file_to = os.path.join(path_to, fod.bin_type, file)
+                _log_message(f'Copy {file_from} to {file_to}')
+                if not nervous:
+                    os.makedirs(os.path.dirname(file_to), exist_ok=True)
+                    shutil.copyfile(file_from, file_to)
+                    ret[fod.bin_type] += 1
     return ret
 
 
@@ -361,7 +375,7 @@ def _find_archive_paths(directory: str) -> typing.List[str]:
     assert os.path.isdir(directory)
     ret = []
     for root, dirs, files in os.walk(directory):
-        for name in files:
+        for name in sorted(files):
             file_path = os.path.join(root, name)
             if os.path.splitext(file_path)[1] in ARCHIVE_EXTENSIONS:
                 ret.append(file_path)
@@ -376,8 +390,10 @@ def _gen_archive_paths(directory: str, multipass: bool) -> typing.Sequence[str]:
     has_found = True
     while has_found:
         has_found = False
+        logger.info(f'_gen_archive_paths: {directory}, multipass {multipass}')
         for root, dirs, files in os.walk(directory):
-            for name in files:
+            for name in sorted(files):
+                logger.debug(f'Looking at: {name}')
                 file_path = os.path.join(root, name)
                 if os.path.splitext(file_path)[1] in ARCHIVE_EXTENSIONS:
                     # logger.info(f'Archive path: {file_path}')
@@ -403,6 +419,8 @@ def expand_and_delete_archives(target_dir: str, nervous: bool) -> None:
                 os.remove(file_path)
             except shutil.ReadError as err:
                 logger.error(str(err))
+            except Exception as err:
+                logger.critical(str(err))
 
 
 # def expand_archive(dir_from: str, dir_to: str, nervous: bool = True) -> None:
@@ -484,8 +502,8 @@ will be copied across.""")
     files: typing.List[FileBase] = []
     FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
     if args.path_out:
-        assert 0
-        copy_tree(args.path, args.path_out, args.recurse, args.file_types, args.verbose, args.nervous)
+        # assert 0
+        copy_tree(args.path, args.path_out, args.recurse, args.file_types, args.nervous)
     else:
         if args.expand_and_delete:
             expand_and_delete_archives(args.path, args.nervous)
