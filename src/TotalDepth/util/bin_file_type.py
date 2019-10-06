@@ -32,13 +32,14 @@ RE_COMPILED = {
 
 # string.printable contains tab, backspace etc. which is undesirable:
 # '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
-PRINTABLE_ASCII_BYTES = set(
+ASCII_PRINTABLE_BYTES = set(
     # bytes(string.digits + string.ascii_letters + string.punctuation + ' \n\x0d\x0a', 'ascii')
     bytes(string.printable, 'ascii')
 )
-VISUAL_ASCII_BYTES = set(
+ASCII_VISUAL_BYTES = set(
     bytes(string.digits + string.ascii_letters + string.punctuation + ' ', 'ascii')
 )
+ASCII_BYTES_LOWER_128 = set(bytes(range(128)))
 RE_LAS_VERSION_LINE = re.compile(br'^\s*VERS\s*\.\s+([\d.]+)\s*:\s*(.+?)?\s*$')
 
 
@@ -262,7 +263,7 @@ def _rp66v1_bytes(by: bytes) -> int:
     if len(by[20:80]) != 60:
         return 5
     for c in by[20:80]:
-        if c not in PRINTABLE_ASCII_BYTES:
+        if c not in ASCII_PRINTABLE_BYTES:
             return 6
     return 0
 
@@ -340,15 +341,16 @@ def _rp66v2(fobj: typing.BinaryIO) -> int:
     if by[62:68] != b'      ':
         return 9
     for c in by[68:128]:
-        if c not in PRINTABLE_ASCII_BYTES:
+        if c not in ASCII_PRINTABLE_BYTES:
             return 10
     return 0
 
 
 def _ascii(fobj: typing.BinaryIO) -> int:
-    """Returns 0 if all the bytes are ASCII printable, non-zero otherwise."""
+    """Returns 0 if all the bytes are ASCII characters 0 to 127, non-zero otherwise.
+    """
     fobj.seek(0)
-    if set(fobj.read()).issubset(PRINTABLE_ASCII_BYTES):
+    if set(fobj.read(256)).issubset(ASCII_BYTES_LOWER_128):#ASCII_PRINTABLE_BYTES):
         return 0
     return 1
 
@@ -519,7 +521,7 @@ def xxd(by: bytes) -> str:
     hex_list = []
     chr_list = []
     for i in range(len(by)):
-        if by[i] in VISUAL_ASCII_BYTES:
+        if by[i] in ASCII_VISUAL_BYTES:
             chr_list.append(chr(by[i]))
         else:
             chr_list.append('.')

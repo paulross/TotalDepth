@@ -9,6 +9,7 @@ import sys
 import time
 import typing
 
+from TotalDepth.common import td_logging
 from TotalDepth.util.DirWalk import dirWalk
 
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
@@ -38,6 +39,7 @@ class DeTifExceptionRead(DeTifException):
 
 
 class TifMarker(typing.NamedTuple):
+    # We do not correct reversed TIF markers (that is a commercial service).
     tell: int
     type: int
     prev: int
@@ -48,7 +50,6 @@ class TifMarker(typing.NamedTuple):
 
     @property
     def is_tif_start(self) -> bool:
-        # TODO: Raise on reversed TIF markers. We do not correct reversed TIF markers (that is a commercial service).
         return self.type == 0 and self.prev == 0
 
     @property
@@ -91,7 +92,8 @@ def has_tif(path: str) -> bool:
         return has_tif_file(fobj_in)
 
 
-def scan_file_object(fobj: typing.BinaryIO) -> typing.List[TifMarker]:
+def tif_scan_file_object(fobj: typing.BinaryIO) -> typing.List[TifMarker]:
+    """Scan a file object and return the list of TIF markers."""
     tifs: typing.List[TifMarker] = []
     fobj.seek(0)
     try:
@@ -111,14 +113,15 @@ def scan_file_object(fobj: typing.BinaryIO) -> typing.List[TifMarker]:
     return tifs
 
 
-def scan(path: str) -> typing.List[TifMarker]:
+def tif_scan_path(path: str) -> typing.List[TifMarker]:
     """Scan a file at path and return the list of TIF markers."""
     with open(path, 'rb') as fobj:
-        tifs = scan_file_object(fobj)
+        tifs = tif_scan_file_object(fobj)
     return tifs
 
 
 def get_errors(tifs: typing.List[TifMarker], file_size: int) -> typing.List[str]:
+    """Return a list of TIF marker errors."""
     if file_size < TIF_MIN_FILE_SIZE:
         raise ValueError(f'get_errors() file_size must be >= {TIF_MIN_FILE_SIZE} not {file_size}')
     ret = []
@@ -163,7 +166,8 @@ def get_errors(tifs: typing.List[TifMarker], file_size: int) -> typing.List[str]
 
 
 def strip_tif(file_in: typing.BinaryIO, file_out: typing.BinaryIO) -> typing.Tuple[int, int]:
-    """Read file_in then strip TIF markers and write to file_out."""
+    """Read file_in then strip TIF markers and write to file_out.
+    The only error detected is negative """
     file_in.seek(0)
     file_out.seek(0)
     tif = _read_tifs(file_in)
@@ -172,7 +176,6 @@ def strip_tif(file_in: typing.BinaryIO, file_out: typing.BinaryIO) -> typing.Tup
     tif_markers_stripped = 1
     bytes_written = 0
     while True:
-        # read_len = tif.next - tif.tell - TIF_WORD_NUM_BYTES * 3
         if tif.read_len < 0:
             raise DeTifExceptionRead(f'TIF marker suggests negative block size: {tif}')
         logging.debug(f'Writing 0x{tif.read_len:08x} bytes from 0x{file_in.tell():08x}')
@@ -182,16 +185,38 @@ def strip_tif(file_in: typing.BinaryIO, file_out: typing.BinaryIO) -> typing.Tup
             tif = _read_tifs(file_in)
         except struct.error:
             break
-        # if tif_new.prev != tif.tell:
-        #     logger.warning(f'TIF prev 0x{tif_new.prev:08x} != tell 0x{tif.tell:08x}. Markers are probably corrupt.')
         tif_markers_stripped += 1
-    return bytes_written, tif_markers_stripped
+    return tif_markers_stripped, bytes_written
 
 
 def strip_path(path_in: str, path_out: str) -> typing.Tuple[int, int]:
+    """Read path_in then strip TIF markers and write to path_out."""
     with open(path_in, 'rb') as fobj_in:
         with open(path_out, 'wb') as fobj_out:
             return strip_tif(fobj_in, fobj_out)
+
+
+def de_tif_file(path_in: str, path_out: str, nervous: bool, over_write: bool) -> typing.Tuple[int, int, int]:
+    """De-TIFs a file path_in writing to path_out. Returns a tuple of (files_copied, tif_count, byte_count) where
+    files_copied is 0 or 1, tif_count is the number of 12 byte TIF markers and byte_count is the number of bytes
+    in path_in (if no file written) or path_out if the file is written."""
+    files_copied = tif_count = byte_count = 0
+    if has_tif(path_in):
+        if nervous:
+            logger.info(f'Would copy {path_in} to {path_out}')
+            byte_count = os.path.getsize(path_in)
+            tif_count = len(tif_scan_path(path_in))
+        else:
+            if not os.path.exists(path_out) or over_write:
+                logger.info(f'De-TIF {path_in} to {path_out}')
+                os.makedirs(os.path.dirname(path_out), exist_ok=True)
+                tif_count, byte_count = strip_path(path_in, path_out)
+                files_copied = 1
+            else:
+                logger.warning(f'Not overwriting file at {path_out}')
+    else:
+        logger.info(f'Ignoring non-TIF file: {path_in}')
+    return files_copied, tif_count, byte_count
 
 
 def main() -> int:
@@ -214,61 +239,40 @@ Scans a file for TIF markers or can copy a directory of files with TIF markers r
         '-n', '--nervous', action='store_true',
         help='Nervous mode, don\'t do anything but report what would be done. [default: %(default)s]',
     )
-    log_level_help_mapping = ', '.join(
-        ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
-    )
-    log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
-    parser.add_argument(
-        "-l", "--log-level",
-        default=30,
-        help=log_level_help
-    )
+    td_logging.add_logging_option(parser, 30)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
     )
+    parser.add_argument('-o', '--over-write', help='Over write existing files, otherwise warns.', action='store_true')
     args = parser.parse_args()
     # print('args:', args)
     # return 0
-    # Extract log level
-    if args.log_level in logging._nameToLevel:
-        log_level = logging._nameToLevel[args.log_level]
-    else:
-        log_level = int(args.log_level)
-    # Initialise logging etc.
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s %(levelname)-8s %(message)s',
-                        # datefmt='%y-%m-%d % %H:%M:%S',
-                        stream=sys.stdout)
+    td_logging.set_logging_from_argparse(args)
     clk_start = time.perf_counter()
     # Your code here
     if args.path_out is None:
-        tif_markers = scan(args.path_in)
+        tif_markers = tif_scan_path(args.path_in)
         print(f'Detected {len(tif_markers):,d} TIF Markers in {args.path_in}')
         if args.verbose:
-            for tif_marker in tif_markers:
-                print(tif_marker)
+            for t, tif_marker in enumerate(tif_markers):
+                print(f'[{t:6,d}] {tif_marker}')
         else:
             print('Use -v option to see the actual TIF markers.')
     else:
         # Strip the TIF markers, respecting the nervous option.
-        tif_stripped = bytes_copied = files_copied = 0
-        for file_in_out in dirWalk(args.path_in, args.path_out, theFnMatch='', recursive=args.recurse, bigFirst=False):
-            if has_tif(file_in_out.filePathIn):
-                out_dir = os.path.dirname(file_in_out.filePathOut)
-                if args.nervous:
-                    logger.info(f'Would copy {file_in_out.filePathIn} to {file_in_out.filePathOut}')
-                    bytes_copied += os.path.getsize(file_in_out.filePathIn)
-                else:
-                    logger.info(f'Copying {file_in_out.filePathIn} to {file_in_out.filePathOut}')
-                    os.makedirs(out_dir, exist_ok=True)
-                    tif_count, byte_count = strip_path(file_in_out.filePathIn, file_in_out.filePathOut)
-                    tif_stripped += tif_count
-                    bytes_copied += byte_count
-                files_copied += 1
-            else:
-                logger.info(f'Ignoring non-TIF file: {file_in_out.filePathIn}')
-        print(f'Total bytes: {bytes_copied:,d}, files: {files_copied:,d} TIF markers removed: {tif_stripped:,d}')
+        files_copied = tif_count = bytes_copied = 0
+        if os.path.isfile(args.path_in):
+            files_copied, tif_count, bytes_copied = de_tif_file(args.path_in, args.path_out, args.nervous, args.over_write)
+        else:
+            for file_in_out in dirWalk(args.path_in, args.path_out, theFnMatch='', recursive=args.recurse, bigFirst=False):
+                _files_copied, _tif_count, _byte_count = de_tif_file(
+                    file_in_out.filePathIn, file_in_out.filePathOut, args.nervous, args.over_write
+                )
+                files_copied += _files_copied
+                tif_count += _tif_count
+                bytes_copied += _byte_count
+        print(f'Files: {files_copied:,d} 12 byte TIF markers removed: {tif_count:,d} bytes: {bytes_copied:,d}')
     clk_exec = time.perf_counter() - clk_start
     print('Execution time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')

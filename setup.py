@@ -123,7 +123,7 @@ setup(
             # General
             'tdarchive=TotalDepth.util.archive:main',
             'tdplotlogs=TotalDepth.PlotLogs:main',
-            'tdlisdetif=TotalDepth.DeTif:main',
+            'tddetif=TotalDepth.DeTif:main',
             # LIS
             'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
             'tdlisindex=TotalDepth.LIS.Index:main',

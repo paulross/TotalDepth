@@ -32,7 +32,7 @@ def test_has_tif_file(file_in, has_tif):
 
 def test_scan_empty_file():
     fobj = io.BytesIO(TIF_EMPTY_FILE)
-    tifs = DeTif.scan_file_object(fobj)
+    tifs = DeTif.tif_scan_file_object(fobj)
     # print(tifs)
     expected = [
         DeTif.TifMarker(0, 0, 0, 12),
@@ -44,7 +44,7 @@ def test_scan_empty_file():
 
 def test_scan_empty_file_and_stringify():
     fobj = io.BytesIO(TIF_EMPTY_FILE)
-    tifs = DeTif.scan_file_object(fobj)
+    tifs = DeTif.tif_scan_file_object(fobj)
     result = '\n'.join(str(t) for t in tifs)
     # print(tifs)
     expected = """TifMarker: 0x00000000 Type: 0x00000000 Prev: 0x00000000 Next: 0x0000000c
@@ -56,14 +56,14 @@ TifMarker: 0x00000018 Type: 0x00000001 Prev: 0x0000000c Next: 0x00000024"""
 def test_tif_too_short_error():
     fobj = io.BytesIO(b'')
     with pytest.raises(DeTif.DeTifExceptionRead) as err:
-        DeTif.scan_file_object(fobj)
+        DeTif.tif_scan_file_object(fobj)
     assert err.value.args[0] == 'Could not read TIF marker: unpack requires a buffer of 12 bytes'
 
 
 def test_is_tif_start_error():
     fobj = io.BytesIO(b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x0c\x00\x00\x00')
     with pytest.raises(DeTif.DeTifExceptionRead) as err:
-        DeTif.scan_file_object(fobj)
+        DeTif.tif_scan_file_object(fobj)
     exp = 'Initial TIF marker is wrong type: TifMarker: 0x00000000 Type: 0x00000001 Prev: 0x00000000 Next: 0x0000000c'
     assert err.value.args[0] == exp
 
@@ -92,7 +92,7 @@ def test_strip_tif(file_in, expected_bytes_written, expected_tif_markers_strippe
     )
 )
 def test_get_errors(file_in, file_size, expected_errors):
-    tifs = DeTif.scan_file_object(file_in)
+    tifs = DeTif.tif_scan_file_object(file_in)
     result = DeTif.get_errors(tifs, file_size)
     # print(result)
     assert result == expected_errors

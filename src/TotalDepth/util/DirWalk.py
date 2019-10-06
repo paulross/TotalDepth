@@ -35,7 +35,16 @@ import collections
 from TotalDepth import ExceptionTotalDepth
 
 #: A pair of (in, out) file paths
-FileInOut = collections.namedtuple('FileInOut', 'filePathIn, filePathOut')
+# FileInOut = collections.namedtuple('FileInOut', 'filePathIn, filePathOut')
+
+
+class FileInOut(typing.NamedTuple):
+    filePathIn: str
+    filePathOut: str
+
+    @property
+    def commonprefix(self):
+        return os.path.commonprefix([self.filePathIn, self.filePathOut])
 
 
 class ExceptionDirWalk(ExceptionTotalDepth):
@@ -91,7 +100,7 @@ def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
                 yield FileInOut(fp, out_file)
         # Now directories
         if recursive:
-            for n in os.listdir(theIn):
+            for n in sorted(os.listdir(theIn)):
                 fp = os.path.join(theIn, n)
                 if os.path.isdir(fp):
                     out_path = ''

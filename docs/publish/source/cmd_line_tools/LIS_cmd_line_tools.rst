@@ -29,7 +29,7 @@ Tool Name                   Description
 Scanning LIS Files
 ***************************************************
 
-These command line tools scan LIS files without changing them.
+These command line tools tif_scan_path LIS files without changing them.
 
 ``tdlisscanphysrec``
 ----------------------
@@ -691,7 +691,7 @@ Options
 Examples
 ^^^^^^^^^
 
-Simple scan of a single file::
+Simple tif_scan_path of a single file::
 
     $ ``tdlisindex`` Simple/LIS.lis
     Cmd: Index.py Simple/LIS.lis
@@ -704,7 +704,7 @@ Simple scan of a single file::
     CPU time =    0.004 (S)
     Bye, bye!
 
-Simple scan of a single file with verbose output::
+Simple tif_scan_path of a single file with verbose output::
 
     $ ``tdlisindex`` -v Simple/LIS.lis 
     Cmd: Index.py -v Simple/LIS.lis
