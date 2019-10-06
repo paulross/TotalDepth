@@ -171,7 +171,7 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
-Scans a RP66V1 file and writes out the index in XML."""
+Scans a RP66V1 file or directory and writes out the index(es) in XML."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
     parser.add_argument('path_in', type=str, help='Path to the input.')
