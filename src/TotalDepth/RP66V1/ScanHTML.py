@@ -16,7 +16,7 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 # from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
 #     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.RP66V1.core import Scan, HTML
-from TotalDepth.common import process, Slice
+from TotalDepth.common import process, Slice, td_logging
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
@@ -462,17 +462,7 @@ def main() -> int:
         help='Keep going as far as sensible. [default: %(default)s]',
     )
     Slice.add_frame_slice_to_argument_parser(parser)
-    log_level_help_mapping = ', '.join(
-        ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
-    )
-    log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
-    parser.add_argument(
-            "-l", "--log-level",
-            # type=int,
-            # dest="loglevel",
-            default=30,
-            help=log_level_help
-        )
+    td_logging.add_logging_option(parser, 20)
     process.add_process_logger_to_argument_parser(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
@@ -481,19 +471,7 @@ def main() -> int:
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
-
-    # Extract log level
-    if args.log_level in logging._nameToLevel:
-        log_level = logging._nameToLevel[args.log_level]
-    else:
-        log_level = int(args.log_level)
-    # print('Log level:', log_level)
-    # Initialise logging etc.
-    logging.basicConfig(level=log_level,
-                        # format='%(asctime)s %(levelname)-8s %(message)s',
-                        format='%(asctime)s - %(filename)s - %(process)d - %(levelname)-8s - %(message)s',
-                        #datefmt='%y-%m-%d % %H:%M:%S',
-                        stream=sys.stdout)
+    td_logging.set_logging_from_argparse(args)
     clk_start = time.perf_counter()
     # Your code here
     if args.log_process > 0.0:

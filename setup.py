@@ -88,17 +88,21 @@ ext_modules = [
     ),
 ]
 
-ext_modules.extend(
-    [
-        Extension(
-            "TotalDepth.LIS.core.cpRepCode",
-            sources=[
-                "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
-                "src/TotalDepth/LIS/core/LISRepCode.cpp",
-            ],
-        ),
-    ]
-)
+# ext_modules.extend(
+#     [
+#         Extension(
+#             "TotalDepth.LIS.core.cpRepCode",
+#             sources=[
+#                 "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
+#                 "src/TotalDepth/LIS/core/LISRepCode.cpp",
+#             ],
+#             extra_compile_args=[
+#                 # '-std=libc++',
+#                 '-std=c++14',
+#             ],
+#         ),
+#     ]
+# )
 
 print('TRACE:', ext_modules)
 
