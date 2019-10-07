@@ -17,27 +17,32 @@ logger = logging.getLogger(__file__)
 
 def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
     """Scans a directory tree removing duplicate files detected by their SHA512."""
+    BLOCK_SIZE = 1024**2
     file_count = byte_count = 0
     dupes: typing.Dict[bytes, str] = {}
-    file_num = 0
     for root, dirs, files in os.walk(path):
         for file in sorted(files):
-            file_path = os.path.join(root, file)
-            msg = f'{file_num:,d}'
-            logger.debug(f'Checking {file_path}')
-            with open(file_path, 'rb') as fobj:
-                hash_digest = hashlib.sha512(fobj.read()).digest()
-            if hash_digest in dupes:
-                byte_count += os.path.getsize(file_path)
-                file_count += 1
-                if nervous:
-                    logger.info(f'Would remove {file_path} as duplicate of {dupes[hash_digest]}')
-                else:
-                    logger.info(f'Removing {file_path} as duplicate of {dupes[hash_digest]}')
-                    os.remove(file_path)
-            else:
-                dupes[hash_digest] = file_path
-        file_num += 1
+            if not file.startswith('.'):
+                file_path = os.path.join(root, file)
+                logger.debug(f'Checking {file_path}')
+                with open(file_path, 'rb') as fobj:
+                    hash_digest = hashlib.sha512()
+                    while True:
+                        data = fobj.read(BLOCK_SIZE)
+                        if not data:
+                            break
+                        hash_digest.update(data)
+                    hash_digest = hash_digest.digest()
+                    if hash_digest in dupes:
+                        byte_count += os.path.getsize(file_path)
+                        file_count += 1
+                        if nervous:
+                            logger.info(f'Would remove {file_path} as duplicate of {dupes[hash_digest]}')
+                        else:
+                            logger.info(f'Removing {file_path} as duplicate of {dupes[hash_digest]}')
+                            os.remove(file_path)
+                    else:
+                        dupes[hash_digest] = file_path
     return file_count, byte_count
 
 
