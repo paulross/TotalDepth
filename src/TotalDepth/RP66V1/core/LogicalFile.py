@@ -250,8 +250,8 @@ class LogicalIndex:
                                                                      file_logical_data.logical_data)
                         if iflr.logical_data.remain > 0:
                             self.logical_files[-1].add_iflr(file_logical_data, iflr)
-                        else:
-                            logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
+                        # else:
+                        #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
 
     def __len__(self) -> int:
         return len(self.logical_files)
@@ -326,5 +326,3 @@ def populate_frame_array(
         num_frames = 0
         frame_array.init_arrays(num_frames)
     return num_frames
-
-

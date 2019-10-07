@@ -59,13 +59,15 @@ class ExceptionRepCode(ExceptionTotalDepthRP66V1):
 
 REP_CODES_ALL = set(range(28))
 REP_CODES_SUPPORTED = {
-    # 1,
+    # 1, # - Not found in practice.
     2,
-    # 3, 4, 5, 6,
+    # 3, 4, # - Not found in practice.
+    # 5, 6, # - Antiquated types, rarely if ever found.
     7,
-    # 8, 9, 10, 11,
+    # 8, 9, # - Not found in practice.
+    # 10, 11, # - Not found in practice.
     12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    # 25,
+    # 25,  # - Not found in practice.
     26, 27}
 REP_CODES_UNSUPPORTED = REP_CODES_ALL - REP_CODES_SUPPORTED
 
@@ -151,8 +153,8 @@ REP_CODE_FIXED_LENGTHS = {
 def rep_code_fixed_length(rc: int) -> int:
     try:
         return REP_CODE_FIXED_LENGTHS[rc]
-    except KeyError:
-        raise ExceptionRepCode(f'Representation code {rc} is not fixed length.')
+    except KeyError as err:
+        raise ExceptionRepCode(f'Representation code {rc} is not fixed length.') from err
 
 
 def FSINGL(ld: LogicalData) -> float:
@@ -542,8 +544,8 @@ assert set(REP_CODE_MAP.keys()) == REP_CODES_SUPPORTED
 def code_read(rep_code: int, ld: LogicalData):
     try:
         return REP_CODE_MAP[rep_code](ld)
-    except KeyError:
-        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
+    except KeyError as err:
+        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}') from err
 
 # Numpy related stuff
 
@@ -567,8 +569,8 @@ assert set(REP_CODE_NUMPY_TYPE_MAP.keys()) - REP_CODES_SUPPORTED == set()
 def numpy_dtype(rep_code: int):
     try:
         return REP_CODE_NUMPY_TYPE_MAP[rep_code]
-    except KeyError:
-        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}')
+    except KeyError as err:
+        raise ExceptionRepCode(f'Unsupported Representation code {rep_code}') from err
 
 
 class NumericCategory(enum.Enum):

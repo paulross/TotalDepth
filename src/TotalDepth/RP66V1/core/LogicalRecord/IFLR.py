@@ -31,10 +31,15 @@ class IndirectlyFormattedLogicalRecord:
         self.object_name: ObjectName = OBNAME(ld)
         # [RP66V1 Section 5.6.1 Frames]
         self.frame_number = UVARI(ld)
+        # Frame numbers start from 1 but there are many observed cases of IFLRs that have a 0 frame number and zero
+        # remaining data. Here we only warn if the frame number is zero and the remaining data is non-zero.
+        # We warn rather than raising in the spirit of optimism.
         # if self.frame_number < 1:
         #     raise ExceptionIFLR(f'Frame number needs to be >= 1, not {self.frame_number}')
-        if self.frame_number == 0:
-            logger.warning(f'Frame number needs to be >= 1, not {self.frame_number} [RP66V1 Section 5.6.1 Frames]')
+        if self.frame_number == 0 and ld.remain != 0:
+            logger.warning(
+                f'Frame number needs to be >= 1, not {self.frame_number} [RP66V1 Section 5.6.1 Frames] (there is data remaining)'
+            )
         self.preamble_length = ld.index
         self.logical_data: LogicalData = ld
 

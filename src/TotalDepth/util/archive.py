@@ -457,7 +457,7 @@ will be copied across.""")
         help="Increase verbosity, additive [default: %(default)s]",
     )
     args = parser.parse_args()
-    print(args)
+    # print(args)
     # print(args.path_out)
     # return 0
     td_logging.set_logging_from_argparse(args)
