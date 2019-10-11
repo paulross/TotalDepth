@@ -279,7 +279,10 @@ class XmlStream(object):
                 #u = unichr(ord(c))
                 #retL.append(u.encode('ascii', 'xmlcharrefreplace'))
                 # Python 3.x code
-                retL.append(c.encode('ascii', 'xmlcharrefreplace').decode(self._enc))
+                if ord(c) < ord(' '):
+                    retL.append(f'&#{ord(c):03d};')
+                else:
+                    retL.append(c.encode('ascii', 'xmlcharrefreplace').decode(self._enc))
         return ''.join(retL)
     
     def __enter__(self):

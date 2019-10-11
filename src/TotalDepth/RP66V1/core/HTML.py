@@ -242,16 +242,23 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
     with XmlWrite.Element(xhtml_stream, 'p'):
         xhtml_stream.characters(f'Definitions: {XAxis.SPACING_DEFINITIONS}')
     x_spacing_table = [['X Axis Spacing', 'Value'],]
-    spacing = x_axis.summary.spacing
-    x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]'])
-    x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]'])
-    x_spacing_table.append(['Median', f'{spacing.median} [{units}]'])
-    x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]'])
-    x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]'])
-    x_spacing_table.append(['Count of Normal', f'{spacing.counts.norm:,d}'])
-    x_spacing_table.append(['Count of Duplicate', f'{spacing.counts.dupe:,d}'])
-    x_spacing_table.append(['Count of Skipped', f'{spacing.counts.skip:,d}'])
-    x_spacing_table.append(['Count of Back', f'{spacing.counts.back:,d}'])
+    if x_axis.summary.spacing is not None:
+        spacing = x_axis.summary.spacing
+        x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]'])
+        x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]'])
+        x_spacing_table.append(['Median', f'{spacing.median} [{units}]'])
+        x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]'])
+        if spacing.median != 0:
+            x_spacing_table.append(
+                ['Range', f'{spacing.max - spacing.min} ({(spacing.max - spacing.min) / spacing.median:%}) [{units}]']
+            )
+        else:
+            x_spacing_table.append(['Range', f'{spacing.max - spacing.min} [{units}]'])
+        x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]'])
+        x_spacing_table.append(['Count of Normal', f'{spacing.counts.norm:,d}'])
+        x_spacing_table.append(['Count of Duplicate', f'{spacing.counts.dupe:,d}'])
+        x_spacing_table.append(['Count of Skipped', f'{spacing.counts.skip:,d}'])
+        x_spacing_table.append(['Count of Back', f'{spacing.counts.back:,d}'])
     html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
     with XmlWrite.Element(xhtml_stream, 'p'):
         xhtml_stream.characters('Frame spacing frequency:')
@@ -264,7 +271,7 @@ def _write_frame_array_in_html(
         visible_record_positions: LogicalFile.VisibleRecordPositions,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
-        frame_slice: Slice.Slice,
+        frame_slice: typing.Union[Slice.Slice, Slice.Split],
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
 ) -> HTMLFrameArraySummary:
@@ -284,16 +291,19 @@ def _write_frame_array_in_html(
         )
         x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
         _write_x_axis_summary(x_axis, xhtml_stream)
-        interval = x_axis.summary.spacing.median
 
         with XmlWrite.Element(xhtml_stream, 'h4'):
             xhtml_stream.characters('Frame Analysis')
         with XmlWrite.Element(xhtml_stream, 'p'):
+            if x_axis.summary.spacing is not None:
+                interval = f'{x_axis.summary.spacing.median:0.3f}'
+            else:
+                interval = 'N/A'
             xhtml_stream.characters(
                 f'Available frames: {len(iflrs)}'
                 f' X axis from {float(iflrs[0].x_axis):0.3f}'
                 f' to {float(iflrs[-1].x_axis):0.3f}'
-                f' interval {interval:0.3f}'
+                f' interval {interval}'
                 f' [{stringify_object_by_type(frame_array.x_axis.units)}]'
             )
         with XmlWrite.Element(xhtml_stream, 'p'):

@@ -300,28 +300,34 @@ def populate_frame_array(
         visible_record_positions: VisibleRecordPositions,
         logical_file: LogicalFile,
         frame_array: LogPass.FrameArray,
-        frame_slice: Slice.Slice,
+        frame_slice: typing.Union[Slice.Slice, Slice.Split],
         channels: typing.Union[typing.Set[typing.Hashable], None] = None,
 ) -> int:
     """Populates a FrameArray with channel values."""
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
-        # NOTE: +1
-        num_frames = frame_slice.count(len(iflrs))# + 1
+        num_frames = frame_slice.count(len(iflrs))
+        # logger.info(
+        #     f'populate_frame_array()'
+        #     f' len(iflrs): {len(iflrs)}'
+        #     f' Slice: {frame_slice}'
+        #     f' Number of frames: {num_frames}'
+        #     f' range: {frame_slice.range(len(iflrs))}'
+        # )
         if channels is not None:
             frame_array.init_arrays_partial(num_frames, channels)
         else:
             frame_array.init_arrays(num_frames)
-        for f, frame_number in enumerate(frame_slice.range(len(iflrs))):
-            # logger.info(f'Reading frame {frame_number} into frame {f}.')
+        for array_index, frame_number in enumerate(frame_slice.range(len(iflrs))):
+            # logger.info(f'Reading frame {frame_number} into frame {array_index}.')
             iflr_reference = iflrs[frame_number]
             vr_position = visible_record_positions.visible_record_prior(iflr_reference.lrsh_position)
             fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, iflr_reference.lrsh_position)
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             if channels is not None:
-                frame_array.read_partial(iflr.logical_data, f, channels)
+                frame_array.read_partial(iflr.logical_data, array_index, channels)
             else:
-                frame_array.read(iflr.logical_data, f)
+                frame_array.read(iflr.logical_data, array_index)
     else:
         num_frames = 0
         frame_array.init_arrays(num_frames)

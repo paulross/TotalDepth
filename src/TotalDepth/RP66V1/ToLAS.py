@@ -736,7 +736,7 @@ Scans a RP66V1 file and dumps data."""
             args.path_out,
             args.recurse,
             args.array_reduction,
-            Slice.create_slice(args.frame_slice),
+            Slice.create_slice_or_split(args.frame_slice),
             channel_set,
         )
     clk_exec = time.perf_counter() - clk_start

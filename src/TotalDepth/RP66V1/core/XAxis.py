@@ -65,8 +65,9 @@ def compute_spacing_counts(diff: np.ndarray) -> typing.Tuple[float, XAxisSpacing
     return median, XAxisSpacingCounts(normal, duplicate, skipped, back)
 
 
-def compute_spacing(x_array: np.ndarray) -> XAxisSpacingSummary:
-    """Given an array this computes the summary of the first differential of the array.
+def compute_spacing(x_array: np.ndarray) -> typing.Union[XAxisSpacingSummary, None]:
+    """Given an array this computes the summary of the first differential of the array or None if there are less than
+    two values in the array.
 
     Given a median of the first differential, median, a subsequent differential, dx, is considered:
     'backward' if dx < -0.5 median
@@ -74,21 +75,23 @@ def compute_spacing(x_array: np.ndarray) -> XAxisSpacingSummary:
     'normal' if 0.5 median <= dx < 1.5 median
     'skipped' if dx >= 1.5 median
     """
-    diff = x_array[1:] - x_array[:-1]
-    median, counts = compute_spacing_counts(diff)
-    bins = 10 if diff.min() != diff.max() else 1
-    return XAxisSpacingSummary(
-        diff.min(), diff.max(), diff.mean(), float(median), diff.std(),
-        counts,
-        np.histogram(diff, bins=bins)
-    )
+    if len(x_array) > 1:
+        diff = x_array[1:] - x_array[:-1]
+        median, counts = compute_spacing_counts(diff)
+        bins = 10 if diff.min() != diff.max() else 1
+        return XAxisSpacingSummary(
+            diff.min(), diff.max(), diff.mean(), float(median), diff.std(),
+            counts,
+            np.histogram(diff, bins=bins)
+        )
 
 
 class XAxisSummary(typing.NamedTuple):
     min: float
     max: float
     count: int
-    spacing: XAxisSpacingSummary
+    # If there are < 2 values this will be None
+    spacing: typing.Union[XAxisSpacingSummary, None]
 
 
 class IFLRReference(typing.NamedTuple):

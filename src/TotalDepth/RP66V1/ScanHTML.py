@@ -50,7 +50,7 @@ class HTMLResult(typing.NamedTuple):
 
 def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
     # logger.debug(f'Scanning "{path_in}" to "{path_out}"')
-    file_path_out = path_out + '.xhtml'
+    file_path_out = path_out + '.html'
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         # logging.info(f'ScanFileHTML.scan_a_single_file(): "{path_in}" to "{path_out}"')
@@ -186,7 +186,8 @@ def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult])
                             xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan {root}')
                         with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
                             with XmlWrite.Element(xhtml_stream, 'tr', {'class': 'filetable'}):
-                                for header in ('Physical File', 'File', 'Frame Array', 'Frames', 'Channels', 'X Start', 'X Stop', 'dX', 'X Units'):
+                                for header in ('Physical File', 'File', 'Frame Array', 'Frames', 'Channels', 'X Start',
+                                               'X Stop', 'dX', 'X Units'):
                                     with XmlWrite.Element(xhtml_stream, 'th', {'class': 'filetable'}):
                                         xhtml_stream.characters(header)
                             dict_tree = DictTree.DictTreeHtmlTable(None)
@@ -194,7 +195,7 @@ def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult])
                                 branch = [FileNameLinkHref(file, file, file)]
                                 html_summary = index[os.path.join(root, file)].html_summary
                                 for lf, logical_file_result in enumerate(html_summary.logical_files):
-                                    branch.append(f'{lf}')
+                                    branch.append(lf)
                                     for frame_array_result in logical_file_result.frame_arrays:
                                         # HTMLFrameArraySummary
                                         branch.append(frame_array_result.ident)
@@ -301,15 +302,19 @@ def _write_top_level_index_table_body(index_file_path: str,
             if event.node is None:
                 with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
                     if isinstance(event.branch[-1], FileNameLinkHref):
+                        xhtml_stream.comment(' Writing event branch[-1] with link ')
                         # TODO: Is this code block used?
+                        assert 0
                         # file_href = event.branch[-1].href
                         with XmlWrite.Element(xhtml_stream, 'a', {'href': event.branch[-1].href}):
                             xhtml_stream.characters(str(event.branch[-1].file_name))
                     else:
+                        xhtml_stream.comment(' Writing event branch[-1] without link ')
                         xhtml_stream.characters(f'{str(event.branch[-1])}')
             else:
                 node: HTMLResult = event.node
                 with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                    xhtml_stream.comment(' Writing event.node with link ')
                     with XmlWrite.Element(xhtml_stream, 'a', {'href': f'{node.path_output[strip_out_path:]}'}):
                         xhtml_stream.characters(str(event.branch[-1]))
 
@@ -317,21 +322,46 @@ def _write_top_level_index_table_body(index_file_path: str,
 def scan_dir_or_file(path_in: str, path_out: str,
                      recurse: bool,
                      **kwargs) -> typing.Dict[str, HTMLResult]:
+    # Required as we are going to split them by os.sep
+    # NOTE: normpath removes trailing os.sep which is what we want.
+    path_in = os.path.normpath(path_in)
+    path_out = os.path.normpath(path_out)
     logging.info(f'scan_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret: typing.Dict[str, HTMLResult] = {}
-    # Output file path to FIleResult
-    index_map: typing.Dict[str, HTMLResult] = {}
+    # Output file path to FileResult
     if os.path.isdir(path_in):
-        for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
-            # print(file_in_out)
-            result = scan_a_single_file(
-                file_in_out.filePathIn, file_in_out.filePathOut, **kwargs
-            )
-            ret[file_in_out.filePathIn] = result
-            if not result.exception and not result.ignored:
-                index_map[result.path_output] = result
-        # Now write all the index.xhtml
-        _write_indexes(path_out, index_map)
+        index_map: typing.Dict[str, HTMLResult] = {}
+        if not recurse:
+            for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
+                # print(file_in_out)
+                result = scan_a_single_file(
+                    file_in_out.filePathIn, file_in_out.filePathOut, **kwargs
+                )
+                ret[file_in_out.filePathIn] = result
+                if not result.exception and not result.ignored:
+                    index_map[result.path_output] = result
+            # # Now write all the index.xhtml
+            # _write_indexes(path_out, index_map)
+            # Now write the top level index.xhtml
+            _write_top_level_index(path_out, index_map)
+        else:
+            len_path_in = len(path_in.split(os.sep))
+            for root, dirs, files in os.walk(path_in, topdown=False):
+                for file in files:
+                    file_path_in = os.path.join(root, file)
+                    # Respect sub-directories in root
+                    root_rel_to_path_in = root.split(os.sep)[len_path_in:]
+                    root_rel_to_path_in.append(file)
+                    file_path_out = os.path.join(path_out, *root_rel_to_path_in)
+                    result = scan_a_single_file(file_path_in, file_path_out, **kwargs)
+                    ret[file_path_in] = result
+                    if not result.exception and not result.ignored:
+                        index_map[result.path_output] = result
+                # Write the local index file in root/index.html, this has links to:
+                # - adir/index.html for adir in dirs
+                # - direct links to any file in files
+            # Now write the top level index.xhtml
+            _write_top_level_index(path_out, index_map)
     else:
         ret[path_in] = scan_a_single_file(path_in, path_out, **kwargs)
     return ret
@@ -481,7 +511,7 @@ def main() -> int:
                 args.path_out,
                 args.recurse,
                 # frame_spacing=args.frame_spacing,
-                frame_slice=Slice.create_slice(args.frame_slice),
+                frame_slice=Slice.create_slice_or_split(args.frame_slice),
             )
     else:
         result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
@@ -489,12 +519,23 @@ def main() -> int:
             args.path_out,
             args.recurse,
             # frame_spacing=args.frame_spacing,
-            frame_slice=Slice.create_slice(args.frame_slice),
+            frame_slice=Slice.create_slice_or_split(args.frame_slice),
         )
     clk_exec = time.perf_counter() - clk_start
     # print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0
     files_processed = 0
+    header = (
+        f'{"Size In":>16}',
+        f'{"Size Out":>10}',
+        f'{"Time":>8}',
+        f'{"Ratio %":>8}',
+        f'{"ms/Mb":>8}',
+        f'{"Fail?":5}',
+        f'Path',
+    )
+    print(' '.join(header))
+    print(' '.join('-' * len(v) for v in header))
     for path in sorted(result.keys()):
         idx_result = result[path]
         if idx_result.size_input > 0:

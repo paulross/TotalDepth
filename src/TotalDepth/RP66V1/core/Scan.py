@@ -557,14 +557,15 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
     fout.write('X Axis summary (all IFLRs):\n')
     fout.write(f'Min: {x_axis.summary.min} Max: {x_axis.summary.max} [{x_axis.units}] Count: {x_axis.summary.count}\n')
     fout.write('X Axis spacing summary:\n')
-    fout.write(
-        f'Min: {x_axis.summary.spacing.min} Max: {x_axis.summary.spacing.max}'
-        f' Mean: {x_axis.summary.spacing.mean} Median: {x_axis.summary.spacing.median}\n'
-    )
-    fout.write(f'   Normal: {x_axis.summary.spacing.counts.normal}\n')
-    fout.write(f'Duplicate: {x_axis.summary.spacing.counts.duplicate}\n')
-    fout.write(f'  Skipped: {x_axis.summary.spacing.counts.skipped}\n')
-    fout.write(f'     Back: {x_axis.summary.spacing.counts.back}\n')
+    if x_axis.summary.spacing is not None:
+        fout.write(
+            f'Min: {x_axis.summary.spacing.min} Max: {x_axis.summary.spacing.max}'
+            f' Mean: {x_axis.summary.spacing.mean} Median: {x_axis.summary.spacing.median}\n'
+        )
+        fout.write(f'   Normal: {x_axis.summary.spacing.counts.normal}\n')
+        fout.write(f'Duplicate: {x_axis.summary.spacing.counts.duplicate}\n')
+        fout.write(f'  Skipped: {x_axis.summary.spacing.counts.skipped}\n')
+        fout.write(f'     Back: {x_axis.summary.spacing.counts.back}\n')
 
     fout.write(f'Spacing histogram\n')
     fout.write(str(x_axis.summary.spacing.histogram_str()))
@@ -596,12 +597,15 @@ def _scan_log_pass_content(
             if num_frames > 0:
                 x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
                 _write_x_axis_summary(x_axis, fout)
-                interval = x_axis.summary.spacing.median
+                if x_axis.summary.spacing is not None:
+                    interval = f'{x_axis.summary.spacing.median:0.3f}'
+                else:
+                    interval = 'N/A'
                 fout.write(
                     f'Frames [{len(x_axis)}]'
                     f' from: {float(x_axis[0].x_axis):0.3f}'
                     f' to {float(x_axis[-1].x_axis):0.3f}'
-                    f' Interval: {interval:0.3f}'
+                    f' Interval: {interval}'
                     f' {frame_array.x_axis.units}'
                 )
                 fout.write('\n')
@@ -628,7 +632,6 @@ def _scan_log_pass_content(
             else:
                 fout.write('No frames.')
             fout.write('\n')
-
 
 
 def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
