@@ -261,6 +261,10 @@ def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult
         branch = k.split(os.sep)
         dict_tree.add(branch, index_map[k])
 
+    # logger.info('DictTree:')
+    # logger.info(dict_tree.indentedStr())
+    logger.info(f'_write_top_level_index(): {path_out}')
+
     index_file_path = os.path.join(path_out, INDEX_FILE)
     with open(index_file_path, 'w') as fout:
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
@@ -301,15 +305,15 @@ def _write_top_level_index_table_body(index_file_path: str,
                 td_attrs['colspan'] = f'{event.col_span:d}'
             if event.node is None:
                 with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
-                    if isinstance(event.branch[-1], FileNameLinkHref):
-                        xhtml_stream.comment(' Writing event branch[-1] with link ')
-                        # TODO: Is this code block used?
-                        assert 0
-                        # file_href = event.branch[-1].href
-                        with XmlWrite.Element(xhtml_stream, 'a', {'href': event.branch[-1].href}):
-                            xhtml_stream.characters(str(event.branch[-1].file_name))
+                    possible_index_file = os.path.join(*event.branch) + os.sep + INDEX_FILE
+                    if os.path.exists(possible_index_file):
+                        xhtml_stream.comment(f' Writing event branch[-1] with link to {INDEX_FILE} ')
+                        with XmlWrite.Element(xhtml_stream, 'a', {'href': possible_index_file[strip_out_path:]}):
+                            xhtml_stream.characters(f'{str(event.branch[-1])}')
                     else:
-                        xhtml_stream.comment(' Writing event branch[-1] without link ')
+                        xhtml_stream.comment(
+                            f' Writing event branch[-1] without link to absent {possible_index_file}'
+                        )
                         xhtml_stream.characters(f'{str(event.branch[-1])}')
             else:
                 node: HTMLResult = event.node
@@ -330,7 +334,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
     ret: typing.Dict[str, HTMLResult] = {}
     # Output file path to FileResult
     if os.path.isdir(path_in):
-        index_map: typing.Dict[str, HTMLResult] = {}
+        index_map_global: typing.Dict[str, HTMLResult] = {}
         if not recurse:
             for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
                 # print(file_in_out)
@@ -339,29 +343,23 @@ def scan_dir_or_file(path_in: str, path_out: str,
                 )
                 ret[file_in_out.filePathIn] = result
                 if not result.exception and not result.ignored:
-                    index_map[result.path_output] = result
-            # # Now write all the index.xhtml
-            # _write_indexes(path_out, index_map)
-            # Now write the top level index.xhtml
-            _write_top_level_index(path_out, index_map)
+                    index_map_global[result.path_output] = result
+            _write_indexes(path_out, index_map_global)
         else:
             len_path_in = len(path_in.split(os.sep))
             for root, dirs, files in os.walk(path_in, topdown=False):
+                root_rel_to_path_in = root.split(os.sep)[len_path_in:]
+                dir_out = os.path.join(path_out, *root_rel_to_path_in)
                 for file in files:
                     file_path_in = os.path.join(root, file)
                     # Respect sub-directories in root
-                    root_rel_to_path_in = root.split(os.sep)[len_path_in:]
-                    root_rel_to_path_in.append(file)
-                    file_path_out = os.path.join(path_out, *root_rel_to_path_in)
+                    # root_rel_to_path_in.append(file)
+                    file_path_out = os.path.join(dir_out, file)
                     result = scan_a_single_file(file_path_in, file_path_out, **kwargs)
                     ret[file_path_in] = result
                     if not result.exception and not result.ignored:
-                        index_map[result.path_output] = result
-                # Write the local index file in root/index.html, this has links to:
-                # - adir/index.html for adir in dirs
-                # - direct links to any file in files
-            # Now write the top level index.xhtml
-            _write_top_level_index(path_out, index_map)
+                        index_map_global[result.path_output] = result
+            _write_indexes(path_out, index_map_global)
     else:
         ret[path_in] = scan_a_single_file(path_in, path_out, **kwargs)
     return ret

@@ -10,7 +10,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import LogicalFile, File
 from TotalDepth.RP66V1.core import Index
-from TotalDepth.common import process
+from TotalDepth.common import process, td_logging
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -27,7 +27,7 @@ logger = logging.getLogger(__file__)
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception, ignored')
 
 
-def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
+def index_a_single_file(path_in: str, path_out: str, private: bool) -> IndexResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     bin_file_type = binary_file_type_from_path(path_in)
     if bin_file_type == 'RP66V1':
@@ -45,11 +45,11 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
                 logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, path_in)
                 if path_out:
                     with open(path_out + '.xml', 'w') as f_out:
-                        Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out)
+                        Index.write_logical_file_sequence_to_xml(logical_file_sequence, f_out, private)
                     index_size = os.path.getsize(path_out + '.xml')
                 else:
                     xml_fobj = io.StringIO()
-                    Index.write_logical_file_sequence_to_xml(logical_file_sequence, xml_fobj)
+                    Index.write_logical_file_sequence_to_xml(logical_file_sequence, xml_fobj, private)
                     index_output = xml_fobj.getvalue()
                     index_size = len(index_output)
                     print(index_output)
@@ -72,15 +72,15 @@ def index_a_single_file(path_in: str, path_out: str = '') -> IndexResult:
     return IndexResult(0, 0, 0.0, False, True)
 
 
-def index_dir_or_file(path_in: str, path_out: str, recurse: bool) -> typing.Dict[str, IndexResult]:
+def index_dir_or_file(path_in: str, path_out: str, recurse: bool, private: bool) -> typing.Dict[str, IndexResult]:
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             # print(file_in_out)
-            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut)
+            ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, private)
     else:
-        ret[path_in] = index_a_single_file(path_in, path_out)
+        ret[path_in] = index_a_single_file(path_in, path_out, private)
     return ret
 
 GNUPLOT_PLT = """set logscale x
@@ -185,17 +185,11 @@ Scans a RP66V1 file or directory and writes out the index(es) in XML."""
         '-r', '--recurse', action='store_true',
         help='Process files recursively. [default: %(default)s]',
     )
-    log_level_help_mapping = ', '.join(
-        ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
-    )
-    log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
     parser.add_argument(
-            "-l", "--log-level",
-            # type=int,
-            # dest="loglevel",
-            default=30,
-            help=log_level_help
-        )
+        '-p', '--private', action='store_true',
+        help='Also write out private EFLRs. [default: %(default)s]',
+    )
+    td_logging.add_logging_option(parser, 20)
     process.add_process_logger_to_argument_parser(parser)
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
@@ -205,19 +199,7 @@ Scans a RP66V1 file or directory and writes out the index(es) in XML."""
     args = parser.parse_args()
     print('args:', args)
     # return 0
-
-    # Extract log level
-    if args.log_level in logging._nameToLevel:
-        log_level = logging._nameToLevel[args.log_level]
-    else:
-        log_level = int(args.log_level)
-    # print('Log level:', log_level)
-    # Initialise logging etc.
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s %(levelname)-8s %(message)s',
-                        #datefmt='%y-%m-%d % %H:%M:%S',
-                        stream=sys.stdout)
-    # return 0
+    td_logging.set_logging_from_argparse(args)
     # Your code here
     clk_start = time.perf_counter()
     if args.log_process > 0.0:
@@ -226,24 +208,37 @@ Scans a RP66V1 file or directory and writes out the index(es) in XML."""
                 args.path_in,
                 args.path_out,
                 args.recurse,
+                args.private,
             )
     else:
         result: typing.Dict[str, IndexResult] = index_dir_or_file(
             args.path_in,
             args.path_out,
             args.recurse,
+            args.private,
         )
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0
     files_processed = 0
     try:
+        header = (
+            f'{"Size In":>16}',
+            f'{"Size Out":>16}',
+            f'{"Time":>8}',
+            f'{"Ratio %":>8}',
+            f'{"ms/Mb":>8}',
+            f'{"Fail?":5}',
+            f'Path',
+        )
+        print(' '.join(header))
+        print(' '.join('-' * len(v) for v in header))
         for path in sorted(result.keys()):
             idx_result = result[path]
             if idx_result.size_input > 0:
                 ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
                 ratio = idx_result.size_index / idx_result.size_input
                 print(
-                    f'{idx_result.size_input:16,d} {idx_result.size_index:10,d}'
+                    f'{idx_result.size_input:16,d} {idx_result.size_index:16,d}'
                     f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
                     f' "{path}"'
                 )

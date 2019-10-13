@@ -65,7 +65,7 @@ def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.
                 #         pass
 
 
-def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream) -> None:
+def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream, private: bool) -> None:
     with XmlWrite.Element(xml_stream, 'LogicalFile', {
         'has_log_pass': str(logical_file.log_pass is not None),
         'index': f'{logical_file_index:d}',
@@ -81,7 +81,7 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
                 'object_count': f'{len(eflr.objects):d}'
             }
             with XmlWrite.Element(xml_stream, 'EFLR', attrs):
-                if LogicalRecord.Types.is_public(eflr.lr_type):
+                if private or LogicalRecord.Types.is_public(eflr.lr_type):
                     for obj in eflr.objects:
                         _write_xml_eflr_object(obj, xml_stream)
         if logical_file.log_pass is not None:
@@ -89,7 +89,7 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
 
 
 def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.LogicalIndex,
-                                       output_stream: typing.TextIO) -> None:
+                                       output_stream: typing.TextIO, private: bool) -> None:
     """Takes a LogicalIndex and writes the index to an XML stream."""
     with XmlWrite.XmlStream(output_stream) as xml_stream:
         with XmlWrite.Element(xml_stream, 'RP66V1FileIndex', {
@@ -112,7 +112,7 @@ def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.Logica
                 pass
             with XmlWrite.Element(xml_stream, 'LogicalFiles', {'count': f'{len(logical_file_sequence.logical_files):d}'}):
                 for lf, logical_file in enumerate(logical_file_sequence.logical_files):
-                    write_logical_file_to_xml(lf, logical_file, xml_stream)
+                    write_logical_file_to_xml(lf, logical_file, xml_stream, private)
             # Visible records at the end
             rle_visible_records = Rle.create_rle(logical_file_sequence.visible_record_positions)
             LogPassXML.xml_rle_write(rle_visible_records, 'VisibleRecords', xml_stream, hex_output=True)
