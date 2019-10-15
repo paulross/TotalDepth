@@ -307,13 +307,6 @@ def populate_frame_array(
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
         num_frames = frame_slice.count(len(iflrs))
-        # logger.info(
-        #     f'populate_frame_array()'
-        #     f' len(iflrs): {len(iflrs)}'
-        #     f' Slice: {frame_slice}'
-        #     f' Number of frames: {num_frames}'
-        #     f' range: {frame_slice.range(len(iflrs))}'
-        # )
         if channels is not None:
             frame_array.init_arrays_partial(num_frames, channels)
         else:

@@ -8,7 +8,7 @@ def add_logging_option(parser: argparse.ArgumentParser, default_log_level: int =
         ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
     )
     log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
-    parser.add_argument( "-l", "--log-level", default=default_log_level, help=log_level_help)
+    parser.add_argument("-l", "--log-level", default=default_log_level, help=log_level_help)
 
 
 def set_logging_from_argparse(args: argparse.Namespace, **kwargs) -> None:

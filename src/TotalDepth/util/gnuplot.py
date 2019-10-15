@@ -34,7 +34,7 @@ def version() -> bytes:
 def _num_columns(table: typing.Sequence[typing.Sequence[typing.Any]]) -> int:
     num_colums_set = set(len(r) for r in table)
     if len(num_colums_set) != 1:
-        raise ValueError('Not rectangular.')
+        raise ValueError(f'Not rectangular: {num_colums_set}.')
     return num_colums_set.pop()
 
 
@@ -63,8 +63,7 @@ def invoke_gnuplot(path: str, name: str, table: typing.Sequence[typing.Sequence[
     Returns the gnuplot error code.
     """
     logger.info('Writing gnuplot data "{}" in path {}'.format(name, path))
-    if not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
+    os.makedirs(path, exist_ok=True)
     with open(os.path.join(path, f'{name}.dat'), 'w') as outfile:
         outfile.write(create_gnuplot_dat(table))
     with open(os.path.join(path, f'{name}.plt'), 'w') as outfile:
