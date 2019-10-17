@@ -260,10 +260,11 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
         x_spacing_table.append(['Count of Skipped', f'{spacing.counts.skip:,d}'])
         x_spacing_table.append(['Count of Back', f'{spacing.counts.back:,d}'])
     html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
-    with XmlWrite.Element(xhtml_stream, 'p'):
-        xhtml_stream.characters('Frame spacing frequency:')
-    with XmlWrite.Element(xhtml_stream, 'pre'):
-        xhtml_stream.characters(x_axis.summary.spacing.histogram_str())
+    if x_axis.summary.spacing is not None:
+        with XmlWrite.Element(xhtml_stream, 'p'):
+            xhtml_stream.characters('Frame spacing frequency:')
+        with XmlWrite.Element(xhtml_stream, 'pre'):
+            xhtml_stream.characters(x_axis.summary.spacing.histogram_str())
 
 
 def _write_frame_array_in_html(
