@@ -20,7 +20,16 @@ def set_logging_from_argparse(args: argparse.Namespace, **kwargs) -> None:
     # Initialise logging etc. Overwrite kwargs['level']
     kwargs['level'] = log_level
     if 'format' not in kwargs:
-        kwargs['format'] = '%(asctime)s - %(process)5d - %(levelname)-8s - %(filename)-16s - %(message)s'# '%(asctime)s %(levelname)-8s %(message)s'
+        kwargs['format'] = ' - '.join(
+            [
+                '%(asctime)s',
+                '%(process)5d',
+                '%(threadName)-10s',
+                '%(levelname)-8s',
+                '%(filename)-16s',
+                '%(message)s'
+            ]
+        )
     if 'stream' not in kwargs:
         kwargs['stream'] = sys.stdout
     #datefmt='%y-%m-%d % %H:%M:%S',

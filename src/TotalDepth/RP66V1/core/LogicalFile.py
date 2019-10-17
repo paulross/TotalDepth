@@ -177,15 +177,17 @@ class LogicalFile:
                 'LogicalFile can not add IFLR as have not been able to construct'
                 ' a LogPass.LogPassDLIS (missing CHANNEL and FRAME records).'
             )
-        if iflr.logical_data.remain == 0:
+        if iflr.remain == 0:
             raise ExceptionLogicalFileAdd('LogicalFile can not add empty IFLR.')
 
     def add_iflr(self, file_logical_data: File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
-        """
+        """Adds a IFLR entry to the index. The IFLR just contains the object name and frame number.
+        This extracts the X axis from the first value in the IFLR free data and appends this to the
+        iflr_position_map.
         """
         self._check_fld_iflr(file_logical_data, iflr)
         frame_array: LogPass.FrameArray = self.log_pass[iflr.object_name]
-        frame_array.read_x_axis(iflr.logical_data, frame_number=0)
+        frame_array.read_x_axis(file_logical_data.logical_data, frame_number=0)
         if iflr.object_name not in self.iflr_position_map:
             self.iflr_position_map[iflr.object_name] = XAxis.XAxis(
                 frame_array.x_axis.ident,
@@ -195,7 +197,7 @@ class LogicalFile:
         self.iflr_position_map[iflr.object_name].append(
             file_logical_data.position.lrsh_position,
             iflr.frame_number,
-            self.log_pass[iflr.object_name].channels[0].array.mean(),
+            frame_array.x_axis.array.mean(),
         )
 
 
@@ -248,7 +250,7 @@ class LogicalIndex:
                             raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
                         iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
                                                                      file_logical_data.logical_data)
-                        if iflr.logical_data.remain > 0:
+                        if iflr.remain > 0:
                             self.logical_files[-1].add_iflr(file_logical_data, iflr)
                         # else:
                         #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
@@ -320,7 +322,7 @@ def populate_frame_array(
             if channels is not None:
                 frame_array.read_partial(iflr.logical_data, array_index, channels)
             else:
-                frame_array.read(iflr.logical_data, array_index)
+                frame_array.read(fld.logical_data, array_index)
     else:
         num_frames = 0
         frame_array.init_arrays(num_frames)

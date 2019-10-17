@@ -122,6 +122,7 @@ def extract_json_as_table(istream: typing.TextIO) -> typing.List[typing.List[str
     for record in json_data:
         mean_cpu_user = record["cpu_times"]["user"] / record["elapsed_time"]
         inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu) / (record["elapsed_time"] - prev_elapsed_time)
+        # record["memory_info"]["pfaults"] is the cumulative total.
         inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults) / (record["elapsed_time"] - prev_elapsed_time)
         ret.append(
             [
@@ -152,6 +153,15 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
     log_name = os.path.basename(log_path)
     ret = gnuplot.invoke_gnuplot(gnuplot_dir, log_name, table, GNUPLOT_PLT.format(name=log_name))
     return ret
+
+# TODO: Have a module level queue.Queue the can be used to pass messages to this thread.
+#   These are then written out and the process data can be associated with them.
+# TODO: The can be plotted by gnuplot as labels:
+#   # arrows and labels
+#   set arrow from 27.57,70 to 27.57,87 lt 1
+#   set label "Threshold\nt=27.6s" at 27.57,69 center font ",12"
+#   set arrow from 33.83,70 to 33.83,82 lt 1
+#   set label "Touchdown\nt=33.8s" at 33.83,69 center font ",12"
 
 
 class ProcessLoggingThread(threading.Thread):

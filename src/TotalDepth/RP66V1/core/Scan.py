@@ -8,7 +8,7 @@ import typing
 
 import colorama
 
-from TotalDepth.RP66V1.core import File, LogPass, AbsentValue, XAxis
+from TotalDepth.RP66V1.core import File, LogPass, AbsentValue, XAxis, stringify
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
@@ -657,9 +657,15 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                         # fout.write('\n')
                         if eflr_as_table:
                             if eflr_position.eflr.is_key_value():
-                                eflr_str_table = eflr_position.eflr.key_values(sort=True)
+                                eflr_str_table = eflr_position.eflr.key_values(
+                                    stringify_function=stringify.stringify_object_by_type,
+                                    sort=True
+                                )
                             else:
-                                eflr_str_table = eflr_position.eflr.table_as_strings(sort=True)
+                                eflr_str_table = eflr_position.eflr.table_as_strings(
+                                    stringify_function=stringify.stringify_object_by_type,
+                                    sort=True
+                                )
                             fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
                             fout.write('\n')
                         else:

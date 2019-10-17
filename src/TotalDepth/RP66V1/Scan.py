@@ -200,6 +200,7 @@ def main() -> int:
     --EFLR ~ Explicitly Formatted Logical Records.
     --IFLR ~ Implicitly Formatted Logical Records.
     --LR ~ All data, including the numerical analysis of frame data.
+    If these are combined then the input is scanned multiple times.
     """
     print('Cmd: %s' % ' '.join(sys.argv))
     # TODO: Use CmnCmdOpts

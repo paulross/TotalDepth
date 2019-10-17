@@ -102,6 +102,10 @@ class IFLRReference(typing.NamedTuple):
 
 
 class XAxis:
+    """This represents an X axis of a log pass for a particular object in that log pass.
+    It has an ident, long name and units. It accumulates, for every IFLR in the set, the LRSH position, frame number
+    and X axis value.
+    """
     def __init__(self, ident: bytes, long_name: bytes, units: bytes):
         self.ident = ident
         self.long_name = long_name
@@ -109,7 +113,7 @@ class XAxis:
         self._data: typing.List[IFLRReference] = []
         self._summary: typing.Union[None, XAxisSummary] = None
 
-    def append(self, lrsh_position: int, frame_number: int, x_axis: float) -> None:
+    def append(self, lrsh_position: int, frame_number: int, x_axis: typing.Union[int, float]) -> None:
         # TODO: Verify the data position, frame number increasing etc.
         self._summary = None
         self._data.append(IFLRReference(lrsh_position, frame_number, x_axis))

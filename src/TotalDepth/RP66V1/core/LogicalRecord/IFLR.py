@@ -19,6 +19,7 @@ logger = logging.getLogger(__file__)
 
 class IndirectlyFormattedLogicalRecord:
     """Indirectly Formatted Logical Record has an OBNAME as its identity, a UVARI as the frame number then free data.
+    This just reads the OBNAME and UVARI but not the free data.
 
     Reference: [RP66V1 Section 3.3 Indirectly Formatted Logical Record]
 
@@ -31,23 +32,17 @@ class IndirectlyFormattedLogicalRecord:
         self.object_name: ObjectName = OBNAME(ld)
         # [RP66V1 Section 5.6.1 Frames]
         self.frame_number = UVARI(ld)
+        self.preamble_length = ld.index
+        self.remain = ld.remain
         # Frame numbers start from 1 but there are many observed cases of IFLRs that have a 0 frame number and zero
         # remaining data. Here we only warn if the frame number is zero and the remaining data is non-zero.
         # We warn rather than raising in the spirit of optimism.
-        # if self.frame_number < 1:
-        #     raise ExceptionIFLR(f'Frame number needs to be >= 1, not {self.frame_number}')
-        if self.frame_number == 0 and ld.remain != 0:
+        if self.frame_number == 0 and self.remain != 0:
             logger.warning(
                 f'Frame number needs to be >= 1, not {self.frame_number} [RP66V1 Section 5.6.1 Frames] (there is data remaining)'
             )
-        self.preamble_length = ld.index
-        self.logical_data: LogicalData = ld
-
-    def rewind(self) -> None:
-        """Resets the Logical Data to the start of the free data section immediately following the frame number."""
-        self.logical_data.index = self.preamble_length
 
     def __str__(self):
         return f'<IndirectlyFormattedLogicalRecord {str(self.object_name.I):10}' \
             f' frame: {self.frame_number:8,d}' \
-            f' free data[{self.logical_data.remain:4,d}]: {format_bytes(self.logical_data.view_remaining(16))}>'
+            f' free data[{self.remain:4,d}]>'

@@ -54,7 +54,7 @@ def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         # logging.info(f'ScanFileHTML.scan_a_single_file(): "{path_in}" to "{path_out}"')
-        logging.info(f'ScanFileHTML.scan_a_single_file(): "{path_in}"')
+        logging.info(f'scan_a_single_file(): "{path_in}"')
         t_start = time.perf_counter()
         try:
             if path_out:
