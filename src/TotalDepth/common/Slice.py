@@ -20,9 +20,7 @@ class Slice:
 
     def count(self, length: int) -> int:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
-        start, stop, step = self._slice.indices(length)
-        ret = (stop - start) // step
-        return ret
+        return len(self.range(length))
 
     def range(self, length: int) -> range:
         """Returns a builtin range object for the sequence of the given length."""

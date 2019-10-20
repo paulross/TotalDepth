@@ -313,8 +313,11 @@ def populate_frame_array(
             frame_array.init_arrays_partial(num_frames, channels)
         else:
             frame_array.init_arrays(num_frames)
-        for array_index, frame_number in enumerate(frame_slice.range(len(iflrs))):
-            # logger.info(f'Reading frame {frame_number} into frame {array_index}.')
+        range_gen = frame_slice.range(len(iflrs))
+        logger.debug(f'populate_frame_array(): len(iflrs): {len(iflrs)} slice: {frame_slice}'
+                     f' num_frames: {num_frames} range_gen: {range_gen}.')
+        for array_index, frame_number in enumerate(range_gen):
+            # logger.debug(f'Reading frame {frame_number} into frame {array_index}.')
             iflr_reference = iflrs[frame_number]
             vr_position = visible_record_positions.visible_record_prior(iflr_reference.lrsh_position)
             fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, iflr_reference.lrsh_position)

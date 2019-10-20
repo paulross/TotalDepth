@@ -282,6 +282,11 @@ def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult
             with XmlWrite.Element(xhtml_stream, 'body'):
                 with XmlWrite.Element(xhtml_stream, 'h1'):
                     xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {path_out}')
+                with XmlWrite.Element(xhtml_stream, 'p'):
+                    xhtml_stream.characters('Command:')
+                with XmlWrite.Element(xhtml_stream, 'p'):
+                    with XmlWrite.Element(xhtml_stream, 'pre'):
+                        xhtml_stream.characters(' '.join(sys.argv))
                 with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
                     _write_top_level_index_table_body(index_file_path, dict_tree, xhtml_stream)
 

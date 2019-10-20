@@ -30,7 +30,9 @@ def test_slice_ctor_raises(init, error_message):
         ((None, -1, None), 1, 0),
         ((None, 8, 2), 8, 4),
         ((2, 8, 2), 8, 3),
-        ((None, None, 64), 921, 14),
+        ((None, None, 64), 921, len(list(range(0, 921, 64)))),
+        ((None, None, 64), 3181, len(list(range(0, 3181, 64)))),
+        ((None, None, 64), 3012, len(list(range(0, 3012, 64)))),
     )
 )
 def test_slice_count(init, length, expected):
@@ -49,6 +51,8 @@ def test_slice_count(init, length, expected):
         ((None, 8, 2), 8, range(0, 8, 2)),
         ((2, 8, 2), 8, range(2, 8, 2)),
         ((None, None, 64), 921, range(0, 921, 64)),
+        ((None, None, 64), 3181, range(0, 3181, 64)),
+        ((None, None, 64), 3012, range(0, 3012, 64)),
     )
 )
 def test_slice_range(init, length, expected):

@@ -11,6 +11,140 @@ This describes the command line tools that are available for processing any Tota
 
 The tools are located in ``TotalDepth/``
 
+=========================== ===========================================================================
+Tool Name                   Description
+=========================== ===========================================================================
+``tdarchive``               Scans a directory of files and provides an analysis by file type.
+``tddetif``                 Removes TIF markers from a file.
+``tdplotlogs``              Plots logs from LIS and LAS data.
+=========================== ===========================================================================
+
+***************************************************
+Analysing a Directory of Files
+***************************************************
+
+.. _TotalDepth-cmdline-archive:
+
+tdarchive
+===================
+
+Scans a directory of files and provides an analysis by file type.
+
+Usage
+--------------
+
+Usage::
+
+	usage: tdarchive [-h] [--file-type FILE_TYPE] [-b BYTES] [-r]
+					 [--expand-and-delete] [--histogram] [-n] [-o] [-l LOG_LEVEL]
+					 [-v]
+					 path [path_out]
+
+Arguments
+-------------------
+
+#. The path to the input directory
+#. [Optional] Path to the output directory to write the files to. The results are undefined if path_out conflicts with path_in.
+
+Options
+--------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``--file-type``                      | Types of files to analyse, this option is is additive so can be used multiple   |
+|                                      | times.                                                                          |
+|                                      | Supported (and default) file types are:                                         |
+|                                      | ASCII, LAS1.2, LAS2.0, LAS3.0, LIS, LISt, LIStr, PDF, PS, RP66V1, RP66V1t,      |
+|                                      | RP66V1tr, RP66V2, SEGY, TIFF, XML, ZIP                                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-b, --bytes=``                     | The number of initial bytes of the file to show [default: 0].                   |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-r, --recursive``                  | Process input recursively. [default: False]                                     |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``--expand-and-delete``              | Expand and delete archive files, implies ``--recurse``. [default: False]        |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``--histogram``                      | Plot a histogram of file sizes. [default: False]                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-n, --nervous``                    | Nervous mode, does not do anything but report.                                  |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-o, --over-write``                 | Overwrite existing files, otherwise warns.                                      |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l, --log-level=``                 | Log Level as an integer or symbol. (0<->NOTSET, 10<->DEBUG, 20<->INFO,          |
+|                                      | 30<->WARNING, 40<->ERROR, 50<->CRITICAL) [default: 30]                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-v, --verbose``                    | Increase verbosity, additive [default: 0]                                       |
++--------------------------------------+---------------------------------------------------------------------------------+
+
+
+Examples
+-----------------
+
+todo::
+	
+	Put examples here.
+
+***************************************************
+Removing TIF Markers From Files
+***************************************************
+
+.. _TotalDepth-cmdline-detif:
+
+tddetif
+===================
+
+Scans a directory of files and removes TIF markers.
+TIF markers are 12 bytes of data inserted in various places.
+They are not part of any standard and, except for one case, provide no value.
+This tool rewrites the input file without TIF markers if they are found.
+
+Usage
+--------------
+
+Usage::
+
+	usage: tddetif [-h] [-r] [-n]
+		  [-l LOG_LEVEL] [-v] [-o]
+		  path_in [path_out]
+
+Arguments
+-------------------
+
+#. The path to the input directory
+#. Path to the output directory to write the files to. The results are undefined if path_out conflicts with path_in.
+
+Options
+--------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-r, --recurse``                    | Process input recursively. [default: False]                                     |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-n, --nervous``                    | Nervous mode, does not do anything but report.                                  |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l, --log-level=``                 | Log Level as an integer or symbol. (0<->NOTSET, 10<->DEBUG, 20<->INFO,          |
+|                                      | 30<->WARNING, 40<->ERROR, 50<->CRITICAL) [default: 30]                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-v, --verbose``                    | Increase verbosity, additive [default: 0]                                       |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-o, --over-write``                 | Overwrite existing files if found, otherwise warns of existing target file.     |
++--------------------------------------+---------------------------------------------------------------------------------+
+
+
+Examples
+-----------------
+
+todo::
+	
+	Put examples here.
+
 ***************************************************
 Plotting Well Logs
 ***************************************************

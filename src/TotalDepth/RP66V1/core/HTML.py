@@ -497,7 +497,9 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
     """
     with open(path_in, 'rb') as fobj:
         rp66v1_file = File.FileRead(fobj)
+        logger.info(f'html_scan_RP66V1_file_data_content(): Creating LogicalFile.LogicalIndex()')
         logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+        logger.info(f'html_scan_RP66V1_file_data_content(): Writing to HTML.')
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
                 with XmlWrite.Element(xhtml_stream, 'meta', {
@@ -511,5 +513,6 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                return html_write_body(rp66v1_file, logical_index, frame_slice, xhtml_stream)
-        # return logical_file_sequence.storage_unit_label.storage_set_identifier.decode('ascii')
+                ret = html_write_body(rp66v1_file, logical_index, frame_slice, xhtml_stream)
+    logger.info(f'html_scan_RP66V1_file_data_content(): Done.')
+    return ret

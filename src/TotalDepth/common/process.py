@@ -18,6 +18,7 @@ import datetime
 import json
 import logging
 import os
+import queue
 import re
 import sys
 import threading
@@ -103,8 +104,11 @@ def extract_json(istream: typing.TextIO) -> typing.List[typing.Dict[str, typing.
     return ret
 
 
-def extract_json_as_table(istream: typing.TextIO) -> typing.List[typing.List[str]]:
-    json_data = extract_json(istream)
+def extract_labels_from_json(json_data) -> typing.List[typing.List[str]]:
+    return [v for v in json_data if 'label' in v]
+
+
+def extract_json_as_table(json_data) -> typing.List[typing.List[str]]:
     ret = [
         [
             f'{"#t(s)":12}',
@@ -149,8 +153,11 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
         logger.error(f'Can not write gnuplot test file with error code {ret}')
         return ret
     with open(log_path) as instream:
-        table = extract_json_as_table(instream)
+        json_data = extract_json(instream)
+    table = extract_json_as_table(json_data)
     log_name = os.path.basename(log_path)
+    labels = extract_labels_from_json(json_data)
+    # TODO: Convert label entry into a gnuplot arrows and label pair
     ret = gnuplot.invoke_gnuplot(gnuplot_dir, log_name, table, GNUPLOT_PLT.format(name=log_name))
     return ret
 
@@ -164,9 +171,20 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
 #   set label "Touchdown\nt=33.8s" at 33.83,69 center font ",12"
 
 
+# Message passing
+process_queue = queue.Queue()
+
+
+def add_message_to_queue(self, msg: str) -> None:
+    """Adds a message onto the queue."""
+    process_queue.put(msg)
+
+
 class ProcessLoggingThread(threading.Thread):
 
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+        if name is None:
+            name = 'ProcMon'
         super().__init__(group=group, target=target, name=name, daemon=daemon)
         self.args = args
         self.kwargs = kwargs
@@ -174,7 +192,7 @@ class ProcessLoggingThread(threading.Thread):
         self._process = psutil.Process()
         self._run = True
 
-    def _get_process_data(self):
+    def _get_process_data(self, **kwargs):
         ret = {
             KEY_TIMESTAMP: datetime.datetime.now().strftime(DATETIME_NOW_FORMAT),
         }
@@ -186,11 +204,18 @@ class ProcessLoggingThread(threading.Thread):
         ret['elapsed_time'] =  time.time() - self._process.create_time()
         # WARNING: This is super verbose and leaks information such as user, environment etc. into the log file.
         # ret.update(self._process.as_dict())
+        # kwargs trump everything
+        ret.update(kwargs)
         return ret
 
     def run(self):
         while self._run:
-            logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data())}')
+            if process_queue.empty():
+                logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data())}')
+            else:
+                while not process_queue.empty():
+                    msg = process_queue.get()
+                    logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data(label=msg))}')
             time.sleep(self._interval)
 
     def join(self, *args, **kwargs):

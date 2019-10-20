@@ -10,10 +10,8 @@ Example reference in this source code:
 import argparse
 import collections
 import datetime
-import io
 import logging
 import os
-import pprint
 import sys
 import time
 import typing
@@ -83,7 +81,10 @@ def _write_las_header(input_file: str,
         ['PROD.', 'TotalDepth', ':LAS Producer'],
         ['PROG.', 'TotalDepth.RP66V1.ToLAS', ': LAS Program name and version'],
         ['CREA.', f'{now.strftime(LAS_DATE_HM_FORMAT)}', f': LAS Creation date [{LAS_DATE_HM_FORMAT_TEXT}]'],
-        [f'DLIS_CREA.', f'{dt.strftime(LAS_DATE_HM_FORMAT)}', f': DLIS Creation date and time [{LAS_DATE_HM_FORMAT_TEXT}]'],
+        [
+            f'DLIS_CREA.',
+            f'{dt.strftime(LAS_DATE_HM_FORMAT)}', f': DLIS Creation date and time [{LAS_DATE_HM_FORMAT_TEXT}]'
+        ],
         ['SOURCE.', f'{os.path.basename(input_file)}', ': DLIS File Name'],
         ['FILE-ID.', f'{file_id}', ': File Identification Number'],
         ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the DLIS file'],
@@ -147,7 +148,8 @@ WELL_INFORMATION_FROM_ORIGIN: typing.Dict[bytes, str] = {
 }
 
 
-def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) -> typing.Dict[str, UnitValueDescription]:
+def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) \
+        -> typing.Dict[str, UnitValueDescription]:
     """Extracts partial well information from the ORIGIN record. Example::
 
       Objects [1]:

@@ -12,7 +12,6 @@ This describes the command line tools that are available for processing LIS file
 =========================== ===========================================================================
 Tool Name                   Description
 =========================== ===========================================================================
-``tdlisdetif``              Removes TIF markers from a LIS file.
 ``tdlisdumpframeset``       Writes out the frame values as a CSV file.
 ``tdlisindex``              Indexes a LIS file.
 ``tdlisplotlogpasses``      Plots the log data as SVG pages.
@@ -21,7 +20,6 @@ Tool Name                   Description
 ``tdlisscanphysrec``        Scans all the Physical Records.
 ``tdlistablehistogram``     Analyses the contents of table Logical Records.
 ``tdlistohtml``             Generates a HTML page about the LIS file.
-``tdplotlogs``              Plots logs as SVG files.
 =========================== ===========================================================================
 
 
