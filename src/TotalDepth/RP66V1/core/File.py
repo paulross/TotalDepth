@@ -466,16 +466,17 @@ class FileRead:
         if not self.logical_record_segment_header.is_first:
             raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
 
-    def get_file_logical_data(self, vr_seek: int, lrsh_seek: int) -> FileLogicalData:
+    def get_file_logical_data(self, position: LogicalRecordPosition) -> FileLogicalData:
         """
-        Returns a FileLogicalData object from the Visible Record Position and Logical Record Segment Header position.
+        Returns a FileLogicalData object from the Logic Record position (Visible Record Position and Logical Record
+        Segment Header position).
         This allows random access to the file.
         """
-        # Hmm, seek() always succeeds and tell() returns the current position even if beyond EOF.
-        self.file.seek(vr_seek)
+        # Hmm, seek() always succeeds and tell() returns the current position even if > EOF.
+        self.file.seek(position.vr_position)
         # May raise
         self.visible_record.read(self.file)
-        self.file.seek(lrsh_seek)
+        self.file.seek(position.lrsh_position)
         # May raise
         self.logical_record_segment_header.read(self.file)
         if not self.logical_record_segment_header.is_first:

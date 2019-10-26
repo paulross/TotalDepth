@@ -180,7 +180,7 @@ class FrameArray:
     def __str__(self) -> str:
         return '\n'.join(
             [
-                f'FrameObject: {self.ident} {self.description}',
+                f'FrameArray: ID: {self.ident} {self.description}',
             ] + [f'  {str(c)}' for c in self.channels]
         )
 
@@ -207,12 +207,15 @@ class FrameArray:
 
     def init_arrays_partial(self, number_of_frames: int, channels: typing.Set[typing.Hashable]) -> None:
         """
-        Initialises empty Numpy arrays for each of the specified channels suitable to fill with <frames> number of frame data.
+        Initialises empty Numpy arrays for each of the specified channels suitable to fill with <frames> number of
+        frame data.
+        The channels parameter limits the initialisation to only those channels.
+        Unknown channels in that parameter are ignored.
         """
         if number_of_frames <= 0:
             raise ExceptionFrameArray(f'Number of frames must be > 0 not {number_of_frames}')
-        for channel in self.channels:
-            if channel.ident in channels:
+        for c, channel in enumerate(self.channels):
+            if c == 0 or channel.ident in channels:
                 channel.init_array(number_of_frames)
             else:
                 channel.init_array(0)
@@ -226,8 +229,8 @@ class FrameArray:
 
     def read_partial(self, ld: LogicalData, frame_number: int, channels: typing.Set[typing.Hashable]) -> None:
         """Reads the Logical Data into the numpy frame for the nominated channels."""
-        for channel in self.channels:
-            if channel.ident in channels:
+        for c, channel in enumerate(self.channels):
+            if c == 0 or channel.ident in channels:
                 channel.read(ld, frame_number)
             else:
                 channel.seek(ld)
@@ -282,10 +285,10 @@ class LogPass:
 
     This is a file format independent design. Different file formats use this in different ways:
 
-        LIS79 - While the format allows for two simultaneous recordings (IFLR types 0 and 1) this has never been seen
-            in the wild.
-        LAS (all versions) - The format does not allow for multiple simultaneous recordings.
-        RP66V1 - The format allows for multiple simultaneous recordings and this is common.
+    LIS79 - While the format allows for two simultaneous recordings (IFLR types 0 and 1) this has never been seen
+        in the wild.
+    LAS (all versions) - The format does not allow for multiple simultaneous recordings.
+    RP66V1 - The format allows for multiple simultaneous recordings and this is common.
 
     Subclass this depending on the source of the information: DLIS file, XML index etc.
     """

@@ -3,8 +3,9 @@
 
 .. TotalDepth Technical Notes.
 
+###############################
 TotalDepth Technical Notes
-=============================
+###############################
 
 This collect together various technical descriptions of how TotalDepth solves certain problems.
 

@@ -1,7 +1,8 @@
 .. TotalDepth API reference.
 
+**********************
 Glossary
-==========================
+**********************
 
 .. glossary::
 	:sorted:

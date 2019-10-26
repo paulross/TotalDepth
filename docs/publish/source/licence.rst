@@ -2,14 +2,15 @@
 
 .. _licence_text:
 
+*************************
 TotalDepth Licence
-====================
+*************************
 
 .. toctree::
    :maxdepth: 2
 
 OpenSource Licence
------------------------
+==========================
 
 TotalDepth is released under GPL 2.::
 
@@ -354,6 +355,6 @@ TotalDepth is released under GPL 2.::
     Public License instead of this License.
 
 Other Licences
------------------------
+=======================
 
 For other licences contact: apaulross@gmail.com

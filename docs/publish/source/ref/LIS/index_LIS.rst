@@ -1,8 +1,10 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
+
+******************************
 TotalDepth.LIS API Reference
-============================
+******************************
 
 Contents:
 

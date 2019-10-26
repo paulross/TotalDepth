@@ -1,11 +1,15 @@
 """
 Converts RP66V1 files to LAS files.
 
-References: http://www.cwls.org/las/
-Version 2: http://www.cwls.org/wp-content/uploads/2017/02/Las2_Update_Feb2017.pdf
+References:
 
-Example reference in this source code:
-[LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
+* General: http://www.cwls.org/las/
+* LAS Version 2: http://www.cwls.org/wp-content/uploads/2017/02/Las2_Update_Feb2017.pdf
+
+Example reference to the LAS documentation in this source code::
+
+    [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
+
 """
 import argparse
 import collections
@@ -107,10 +111,10 @@ class UnitValueDescription(typing.NamedTuple):
     description: str
 
 
-#: Mapping of DLIS EFLR Type and Object Name to LAS WELL INFORMATION section and Mnemonic
-#: The Object LONG-NAME is used as the LAS description.
-#: We prefer to take data from the ORIGIN EFLR as it is more clearly specified [RP66V1 5.2 Origin Logical Record (OLR)]
-#: whereas PARAMETER EFLRs are fairly free form.
+#: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic
+#: The Object ``LONG-NAME`` is used as the LAS description.
+#: We prefer to take data from the ORIGIN ``EFLR`` as it is more clearly specified ``[RP66V1 5.2 Origin Logical Record (OLR)]``
+#: whereas ``PARAMETER EFLR``s are fairly free form.
 DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING: typing.Dict[bytes, typing.Dict[bytes, str]] = {
     # [RP66V1 Section 5.8.2 Parameter Objects]
     b'PARAMETER': {
@@ -150,9 +154,11 @@ WELL_INFORMATION_FROM_ORIGIN: typing.Dict[bytes, str] = {
 
 def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) \
         -> typing.Dict[str, UnitValueDescription]:
-    """Extracts partial well information from the ORIGIN record. Example::
+    """Extracts partial well information from the ORIGIN record. Example:
 
-      Objects [1]:
+    .. code-block:: console
+
+        Objects [1]:
         OBNAME: O: 11 C: 0 I: b'DLIS_DEFINING_ORIGIN'
           CD: 001 00001 L: b'FILE-ID' C: 1 R: ASCII U: b'' V: [b'auto_las_survey']
           CD: 001 00001 L: b'FILE-SET-NAME' C: 1 R: IDENT U: b'' V: [b'']
@@ -194,7 +200,7 @@ def write_well_information_to_las(
     ) -> None:
     """Writes the well information section.
 
-    Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.4 ~W (Well Information)]
+    Reference: ``[LAS2.0 Las2_Update_Feb2017.pdf Section 5.4 ~W (Well Information)]``
     """
     # Tuple of (units, value, description)
     las_map: typing.Dict[str, UnitValueDescription] = extract_well_information_from_origin(logical_file)

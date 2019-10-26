@@ -3,9 +3,9 @@
 
 .. Description of LIS command line tools
 
-###############################
+***************************
 LIS Command Line Tools
-###############################
+***************************
 
 This describes the command line tools that are available for processing LIS files.
 
@@ -23,24 +23,18 @@ Tool Name                   Description
 =========================== ===========================================================================
 
 
-***************************************************
-Scanning LIS Files
-***************************************************
-
-These command line tools tif_scan_path LIS files without changing them.
-
-``tdlisscanphysrec``
-----------------------
+Scanning Physical Records in LIS Files with ``tdlisscanphysrec``
+===================================================================
 
 Scans a LIS79 file and reports the Physical Record structure.
 
 Arguments
-^^^^^^^^^
+-----------
 
 One argument that will be treated as a path to a LIS file.
 
 Options
-^^^^^^^^^
+-------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -55,7 +49,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Examples
-^^^^^^^^^
+-----------
 
 Example of scanning a non-TIF encoded file::
 
@@ -147,18 +141,19 @@ Heading         Description
 ``Next``        The file position of the next TIF marker as a hex integer.
 ==============  ============================================================================================================
 
-``tdlisscanlogirecord``
-------------------------
+
+Scanning Logical Records in LIS Files with ``tdlisscanlogirecord``
+====================================================================
 
 Scans a LIS79 file and reports the Logical Record structure.
 
 Arguments
-^^^^^^^^^
+-------------
 
 One argument that will be treated as a path to a LIS file.
 
 Options
-^^^^^^^^^
+--------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -176,7 +171,7 @@ Options
 
 
 Examples
-^^^^^^^^^
+---------------
 
 Example of scanning a LIS file::
 
@@ -202,18 +197,19 @@ Example of scanning a LIS file::
     CPU time =    0.064 (S)
     Bye, bye!
 
-``tdlisscanlogidata``
-----------------------
+
+Scanning Physical Record Structure in LIS Files with ``tdlisscanlogidata``
+===========================================================================
 
 Scans a LIS79 file and reports the Logical Record structure.
 
 Arguments
-^^^^^^^^^
+-----------------------
 
 One argument that will be treated as a path to a LIS file.
 
 Options
-^^^^^^^^^
+-----------------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -233,7 +229,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Examples
-^^^^^^^^^
+-----------------
 
 Example of scanning a LIS file::
 
@@ -304,22 +300,19 @@ To this::
     ...
 
 
-***************************************************
-Extracting Data from LIS
-***************************************************
 
-``tdlisdumpframeset``
-----------------------
+Extracting Data from LIS with ``tdlisdumpframeset``
+========================================================
 
 Reads a LIS file and writes out tab separated values of each frame.
 
 Arguments
-^^^^^^^^^
+--------------
 
 #. The path to the LIS file.
 
 Options
-^^^^^^^^^
+--------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -336,7 +329,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Examples
-^^^^^^^^^
+-------------------
 
 ::
 
@@ -390,19 +383,19 @@ Heading           Description
 
 .. _TotalDepth-LIScmdline-LisToHtml:
 
-``tdlistohtml``
-----------------------
+Convert LIS Files to HTML with ``tdlistohtml``
+===============================================
 
 Generates HTML from input LIS file or directory to an output destination.
 
 Arguments
-^^^^^^^^^
+------------------
 
 #. The path to the input LIS file or directory.
 #. The path to the output file or directory, any directories will be created as necessary.
 
 Options
-^^^^^^^^^
+------------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -426,7 +419,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Examples
-^^^^^^^^^
+---------------------
 
 Command to process a directory of LIS::
 
@@ -473,18 +466,18 @@ Then there is a couple of tables, the first summarises the X axis and the second
 
 .. image:: images/LisToHtml_LogPass_01.png
 
-``tdlistablehistogram``
--------------------------
+Analysing Table Data in LIS Files with ``tdlistablehistogram``
+==================================================================
 
 Provides a count of elements in LIS tables.
 
 Arguments
-^^^^^^^^^
+-------------
 
 #. A path to a LIS file or directory of LIS files.
 
 Options
-^^^^^^^^^
+------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -511,7 +504,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Examples
-^^^^^^^^^
+-----------------
 
 Count of all entries regardless of the table/row/column that they appear in::
 
@@ -587,80 +580,19 @@ Filtering by Logical Record type, table name, row name and column name (note quo
 The result is a dictionary that has the key as a quadruple ``(lr_type, table_name, row_name, column_name, cell_value)`` and
 the value as a count of the number of occurrences.
 
-***************************************************
-LIS Developer Tools
-***************************************************
 
-``tdlisdetif``
-----------------------
-
-Takes an input LIS79 file and writes out a new one without TIF markers.
-
-Arguments
-^^^^^^^^^
-
-#. The path to the input LIS file.
-#. The path to the output LIS file, any directories will be created as necessary.
-
-Options
-^^^^^^^^^
-
-+--------------------------------------+---------------------------------------------------------------------------------+
-| Option                               | Description                                                                     |
-+======================================+=================================================================================+
-| ``--version``                        | Show program's version number and exit                                          |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-h, --help``                       | Show this help message and exit.                                                |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-n, --nervous``                    | Nervous mode (do no harm). [default: False]                                     |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-l LOGLEVEL, --loglevel=LOGLEVEL`` | Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: 20]  |
-+--------------------------------------+---------------------------------------------------------------------------------+
-
-
-Examples
-^^^^^^^^^
-
-DeTIF with nervous mode just examines the file::
-
-    $ ``tdlisdetif`` -n RW.lis RW_No_TIF.lis 
-    Cmd: DeTif.py -n RW.lis RW_No_TIF.lis
-    stripTif(): Tell: 0x00000000 Len: 0x00000000 TIF: TIF  True >:  0x       0  0x       0  0x       0
-    stripTif(): Tell: 0x0000000c Len: 0x0000003e TIF: TIF  True >:  0x       0  0x       0  0x      4a
-    stripTif(): Tell: 0x00000056 Len: 0x00000400 TIF: TIF  True >:  0x       0  0x       0  0x     456
-    stripTif(): Tell: 0x00000462 Len: 0x00000400 TIF: TIF  True >:  0x       0  0x      4a  0x     862
-    stripTif(): Tell: 0x0000086e Len: 0x00000400 TIF: TIF  True >:  0x       0  0x     456  0x     c6e
-    stripTif(): Tell: 0x00000c7a Len: 0x00000400 TIF: TIF  True >:  0x       0  0x     862  0x    107a
-    stripTif(): Tell: 0x00001086 Len: 0x00000400 TIF: TIF  True >:  0x       0  0x     c6e  0x    1486
-    stripTif(): Tell: 0x00001492 Len: 0x00000400 TIF: TIF  True >:  0x       0  0x    107a  0x    1892
-    stripTif(): Tell: 0x0000189e Len: 0x00000400 TIF: TIF  True >:  0x       0  0x    1486  0x    1c9e
-    ...
-    stripTif(): Tell: 0x000d2b4e Len: 0x000000f6 TIF: TIF  True >:  0x       0  0x   d2748  0x   d2c44
-    stripTif(): Tell: 0x000d2c50 Len: 0x0000003e TIF: TIF  True >:  0x       0  0x   d2b42  0x   d2c8e
-      CPU time =    0.022 (S)
-    Exec. time =    0.022 (S)
-    Bye, bye!
-
-DeTIF with write::
-
-    $ ``tdlisdetif`` RW.lis RW_No_TIF.lis 
-    Cmd: DeTif.py RW.lis RW_No_TIF.lis
-      CPU time =    0.019 (S)
-    Exec. time =    0.019 (S)
-    Bye, bye!
-
-``tdlisindex``
-----------------------
+Indexing LIS Files with ``tdlisindex``
+===========================================
 
 This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`TotalDepth-tech-indexing` for more information about the design and performance of LIS indexing.
 
 Arguments
-^^^^^^^^^
+-----------------
 
 #. The path to a LIS file or a directory of LIS files.
 
 Options
-^^^^^^^^^
+-----------------
 
 +--------------------------------------+---------------------------------------------------------------------------------+
 | Option                               | Description                                                                     |
@@ -687,7 +619,7 @@ Options
 
 
 Examples
-^^^^^^^^^
+------------------
 
 Simple tif_scan_path of a single file::
 
@@ -760,7 +692,7 @@ Scan of a directory (recursively) indexing each file 11 times and writing out st
     Bye, bye!
 
 ``tdXlisrandomframesetread``
-------------------------------
+=================================
 
 For developers only. This is designed to measure the performance of loading and iterating across a frame-set.
 

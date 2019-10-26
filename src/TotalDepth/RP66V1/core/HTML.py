@@ -190,7 +190,6 @@ class HTMLFrameArraySummary(typing.NamedTuple):
 
 def _write_log_pass_content_in_html(
         rp66_file: File.FileRead,
-        visible_record_positions: LogicalFile.VisibleRecordPositions,
         logical_file: LogicalFile.LogicalFile,
         xhtml_stream: XmlWrite.XhtmlStream,
         # Used for anchor
@@ -211,7 +210,6 @@ def _write_log_pass_content_in_html(
         ret.append(
             _write_frame_array_in_html(
                 rp66_file,
-                visible_record_positions,
                 logical_file,
                 frame_array,
                 frame_slice,
@@ -269,7 +267,6 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
 
 def _write_frame_array_in_html(
         rp66_file: File.FileRead,
-        visible_record_positions: LogicalFile.VisibleRecordPositions,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
         frame_slice: typing.Union[Slice.Slice, Slice.Split],
@@ -284,7 +281,6 @@ def _write_frame_array_in_html(
     if len(iflrs):
         num_frames = LogicalFile.populate_frame_array(
             rp66_file,
-            visible_record_positions,
             logical_file,
             frame_array,
             frame_slice,
@@ -471,12 +467,10 @@ def html_write_body(
         if logical_file.has_log_pass:
             with XmlWrite.Element(xhtml_stream, 'a', {'id': f'{_anchor(lf, len(logical_file.eflrs))}'}):
                 pass
-            frame_array_summary = _write_log_pass_content_in_html(
-                    rp66_file, logical_file_sequence.visible_record_positions,
-                    logical_file, xhtml_stream,
-                    lf, len(logical_file.eflrs),
-                    frame_slice=frame_slice,
-            )
+            frame_array_summary = _write_log_pass_content_in_html(rp66_file, logical_file, xhtml_stream, lf,
+                                                                  len(logical_file.eflrs),
+                                                                  frame_slice=frame_slice,
+                                                                  )
             logical_file_summaries.append((HTMLLogicalFileSummary(tuple(eflr_types), frame_array_summary)))
         else:
             with XmlWrite.Element(xhtml_stream, 'p'):

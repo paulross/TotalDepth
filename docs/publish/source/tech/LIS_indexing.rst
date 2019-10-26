@@ -8,17 +8,16 @@
    
 .. _TotalDepth-tech-indexing:
 
-###############################
+***************************************************
 Indexing LIS Files
-###############################
+***************************************************
 
 Most petrophysical files are recorded in real time and the recording format is sequential, thus everything depends on what has gone before. This is not very satisfactory for the user who might well wish to access the data in a arbitrary manner - "give me these curves over this interval". The solution is to create an index to the original file so that it can be accessed *as if* it is a random access file.
 
 Here we describe how that indexing works and the performance it achieves for the user.
 
-***************************************************
 Introduction
-***************************************************
+================
 
 The LIS file format is a binary, self describing, sequential format with multiple layers of encoding and, in practice, no forward references. LIS files can be large and, generally speaking, the greater part of the file consists of frame data whose format is invariant within any particular :term:`Log Pass`.
 
@@ -40,9 +39,8 @@ Apart from the cost of design and coding a solution the cost/benefit of indexing
 
 A design that has low time/space requirements is regarded as a 'good' design.
 
-***************************************************
 Indexing Design
-***************************************************
+=============================
 
 TotalDepth's LIS indexer works on several levels:
 
@@ -59,7 +57,7 @@ TotalDepth's LIS indexer works on several levels:
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Indexing a LIS File
-=============================
+----------------------------
 
 The intentions is to find the start position of each Logical Record and a minimal amount of information of that Logical Record. The start position is the ``size_t`` value of the file index of, either, the start of the TIF marker for the first Physical Record in the Logical Record (if TIF encoded), or, the start of the first Physical Record in the Logical Record (if *not* TIF encoded).
 
@@ -84,14 +82,14 @@ As well as recording the file position of the Logical Record the indexer retriev
 +--------------------------------------+---------------------------------------------------------------------------------+
 
 Module
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Python module that performs file indexing is ``TotalDepth.LIS.core.FileIndexer``
 
 For reference documentation see: :ref:`TotalDepth.LIS.core.FileIndexer`.
 
 Example
-------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The LIS package has an Index.py module that will index any LIS file. Here is some (selected) output of a single file::
 
@@ -114,7 +112,7 @@ Note that the indexing of a Log Pass is separate since it covers an EFLR and zer
 
 
 Indexing a Log Pass
-=============================
+------------------------------
 
 A Log Pass is described by an EFLR and zero or more IFLRs. In LIS terms this means a DFSR and the associated binary IFLRs. This is a candidate for fairly agressive optimisation since:
 
@@ -151,9 +149,8 @@ The Python module that performs indexing within a Logical Record containing fram
 
 For reference documentation see: :ref:`TotalDepth.LIS.core.Type01Plan`.
 
-***************************************************
 Indexing Performance
-***************************************************
+==============================
 
 As mentioned above the cost of indexing can be measured with these independent measures:
 
@@ -176,7 +173,7 @@ Cost ms/Mb  Result
 ==========  ===================
 
 Index Time
-=============================
+-------------------------
 
 This is simply the actual time taken to create a file level index:
 
@@ -211,7 +208,7 @@ Again the advantage in having 8kb Physical Records is evident in the lower right
 .. _TotalDepth-tech-indexing.IndexSize:
 
 Multi-Processing
-==================================================
+----------------------------
 
 Most of TotalDepth software supports parallel processing. The LIS command line tool Index.py can create indexes in parallel. The following graph shows the file size plotted against total time to index when indexing around 300 LIS files with different numbers of simultaneous processes. The red line is the best fit for single process indexing that costs about 40 ms/Mb:
 
@@ -234,7 +231,7 @@ No multiprocessing  18.4                    Datum
 Moving to two processes gives an almost linear speedup, moving from two to four or eight processes gives only slight improvement presumably because the execution time becomes I/O bound.
 
 Index Size
-=============================
+-------------------------
 
 It is envisaged that the index will be persisted in some form. Once persisted then the LIS file would only be accessed via the index, any file write operation requires a suitable adjustment to the index.
 
@@ -246,7 +243,7 @@ Persistence techniques could be, for example:
 * Serialised in binary form and attached as a Logical Record to the LIS file it refers to.
 
 TotalDepth and SaaS
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There is a further imperative to understanding index size; if TotalDepth were to be used, as it was always intended, as Software as a Service (SaaS) where the bulk of the processing is with the data file on the client machine and the processing done on the server then part of the bootstrap process of any transaction is for the client to index the file and send the index to the server. In that case it is important to keep the index size small.
 
@@ -263,7 +260,7 @@ The relative size of the index shows a strong downward trend (blue line) for fil
 .. _TotalDepth-tech-indexing-perf_improve:
 
 Indexing Performance Improvements
-=================================
+-----------------------------------------
 
 As noted above there is a substantial improvement in indexing when large Physical Record sizes are used.
 
@@ -279,12 +276,12 @@ The performance improvements would not necessarily combine as they are mutually 
 See :ref:`TotalDepth-tech-perf_improve` for other performance improvements
 
 LIS Read Performance via an Index
-=====================================
+----------------------------------------
 
 This is described here :ref:`TotalDepth-tech-LIS_read_perf`
 
 Summary
-===================
+--------------------------
 
 Indexing is not free, it incurs an overhead, but this overhead is acceptable. The overhead is worst for small data sizes where the performance is high in any case. The overhead is low, and the benefit is very great for large or complex data sizes where the performance, without indexing, could be very poor indeed.
 

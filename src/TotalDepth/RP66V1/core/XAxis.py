@@ -6,6 +6,8 @@ import typing
 
 import numpy as np
 
+from TotalDepth.RP66V1.core import File
+
 
 class XAxisSpacingCounts(typing.NamedTuple):
     norm: int
@@ -96,14 +98,17 @@ class XAxisSummary(typing.NamedTuple):
 
 class IFLRReference(typing.NamedTuple):
     """POD class that represents the position of the IFLR in the file."""
-    lrsh_position: int
+    # FIXME: Introduce a random field to cause failure, need to fix logical_record_position
+    # lrsh_position: int
+    # temp: int
+    logical_record_position: File.LogicalRecordPosition
     frame_number: int
     x_axis: typing.Union[int, float]
 
 
 class XAxis:
     """This represents an X axis of a log pass for a particular object in that log pass.
-    It has an ident, long name and units. It accumulates, for every IFLR in the set, the LRSH position, frame number
+    It has an ident, long name and units. It accumulates, for every IFLR in the set, the VR position LRSH position, frame number
     and X axis value.
     """
     def __init__(self, ident: bytes, long_name: bytes, units: bytes):
@@ -113,10 +118,10 @@ class XAxis:
         self._data: typing.List[IFLRReference] = []
         self._summary: typing.Union[None, XAxisSummary] = None
 
-    def append(self, lrsh_position: int, frame_number: int, x_axis: typing.Union[int, float]) -> None:
+    def append(self, position: File.LogicalRecordPosition, frame_number: int, x_axis: typing.Union[int, float]) -> None:
         # TODO: Verify the data position, frame number increasing etc.
         self._summary = None
-        self._data.append(IFLRReference(lrsh_position, frame_number, x_axis))
+        self._data.append(IFLRReference(position, frame_number, x_axis))
 
     def __getitem__(self, item) -> IFLRReference:
         return self._data[item]

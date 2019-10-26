@@ -195,7 +195,7 @@ class LogicalFile:
                 frame_array.x_axis.units,
             )
         self.iflr_position_map[iflr.object_name].append(
-            file_logical_data.position.lrsh_position,
+            file_logical_data.position,
             iflr.frame_number,
             frame_array.x_axis.array.mean(),
         )
@@ -220,8 +220,8 @@ class VisibleRecordPositions(collections.UserList):
 
 
 class LogicalIndex:
-    def __init__(self, rp66_file: typing.Union[File.FileRead, None], path: str):
-        self.path = path
+    def __init__(self, rp66_file: typing.Union[File.FileRead, None], ident: str):
+        self.id = ident
         self.logical_files: typing.List[LogicalFile] = []
         self.storage_unit_label = None
         self.visible_record_positions: VisibleRecordPositions = VisibleRecordPositions()
@@ -299,31 +299,42 @@ def unpickle(path: str) -> LogicalIndex:
 
 def populate_frame_array(
         rp66_file: File.FileRead,
-        visible_record_positions: VisibleRecordPositions,
         logical_file: LogicalFile,
         frame_array: LogPass.FrameArray,
-        frame_slice: typing.Union[Slice.Slice, Slice.Split],
+        frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
         channels: typing.Union[typing.Set[typing.Hashable], None] = None,
 ) -> int:
-    """Populates a FrameArray with channel values."""
+    """Populates a FrameArray with channel values.
+
+    rp66_file is the Raw file.
+    logical_file is the LogicalFile in that raw file.
+    frame_array is the identified FrameArray in that LogPass of FrameArrays in that LogicalFile. This will be populated.
+    frame_slice Allows partial population in the X axis.
+    channels Allows partial population of specific channels.
+
+    This returns the number of frames populated.
+    """
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
-        num_frames = frame_slice.count(len(iflrs))
+        if frame_slice is not None:
+            range_gen = frame_slice.range(len(iflrs))
+            num_frames = frame_slice.count(len(iflrs))
+        else:
+            range_gen = range(len(iflrs))
+            num_frames = len(iflrs)
         if channels is not None:
             frame_array.init_arrays_partial(num_frames, channels)
         else:
             frame_array.init_arrays(num_frames)
-        range_gen = frame_slice.range(len(iflrs))
         logger.debug(f'populate_frame_array(): len(iflrs): {len(iflrs)} slice: {frame_slice}'
                      f' num_frames: {num_frames} range_gen: {range_gen}.')
         for array_index, frame_number in enumerate(range_gen):
             # logger.debug(f'Reading frame {frame_number} into frame {array_index}.')
             iflr_reference = iflrs[frame_number]
-            vr_position = visible_record_positions.visible_record_prior(iflr_reference.lrsh_position)
-            fld: File.FileLogicalData = rp66_file.get_file_logical_data(vr_position, iflr_reference.lrsh_position)
+            fld: File.FileLogicalData = rp66_file.get_file_logical_data(iflr_reference.logical_record_position)
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             if channels is not None:
-                frame_array.read_partial(iflr.logical_data, array_index, channels)
+                frame_array.read_partial(fld.logical_data, array_index, channels)
             else:
                 frame_array.read(fld.logical_data, array_index)
     else:

@@ -1,14 +1,15 @@
 .. include:: ../../../CONTRIBUTING.rst
 
+
 Release Checklist
-------------------------
+===========================
 
 In the following example the version we are moving to, in  ``Major.Minor.Patch`` format, is ``0.2.1``.
 
 Current version should be something like ``M.m.(p)rcX``, for example ``0.2.1rc0``.
 
 Increment version
-~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Change the version to ``M.m.p`` in these places:
 
@@ -27,7 +28,7 @@ Update the history:
 Update any Trove classifiers in *setup.py*, https://pypi.python.org/pypi?%3Aaction=list_classifiers
 
 Build and Test
-~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 Build and test for Python 3.6:
 
@@ -46,7 +47,7 @@ Build the docs HTML to test them, from an environment that has Sphinx:
     (Sphinx) $ make html
 
 Commit and Tag
-~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 Commit, tag and push:
 
@@ -59,7 +60,7 @@ Commit, tag and push:
     $ git push origin v0.2.1
 
 PyPi
-~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Prepare release to PyPi for Python 3.6:
 
@@ -85,12 +86,12 @@ Release to PyPi, https://pypi.python.org/pypi/TotalDepth:
     (TotalDepth_00) $ twine upload dist/*
 
 ReadTheDocs
-~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Build the documentation: https://readthedocs.org/projects/TotalDepth/builds/
 
 Prepare Next Release Candidate
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 Finally change the version to ``M.m.(p+1)rc0``, in this example ``0.2.2rc0`` in these places:
 

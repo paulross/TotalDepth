@@ -1,12 +1,12 @@
 .. highlight:: shell
 
-============
+************
 Installation
-============
+************
 
 
 Stable release
---------------
+==============
 
 To install TotalDepth, run this command in your terminal:
 
@@ -24,7 +24,7 @@ you through the process.
 
 
 From sources
-------------
+============
 
 If you are using a virtual environment in your :file:`{<PYTHONVENVS>}`, say :file:`{~/pyvenvs}`:
 
@@ -87,12 +87,12 @@ Install the test dependencies and run TotalDepth's tests:
     (TotalDepth) $ python setup.py test
 
 Developing with TotalDepth
-----------------------------
+===========================
 
 If you are developing with TotalDepth you need test coverage and documentation tools.
 
 Test Coverage
-^^^^^^^^^^^^^^^^
+-------------
 
 Install ``pytest-cov``:
 
@@ -108,7 +108,7 @@ The most meaningful invocation that elimates the top level tools is:
 
 
 Documentation
-^^^^^^^^^^^^^^^^
+-------------
 
 If you want to build the documentation you need to:
 

@@ -3,8 +3,9 @@
 
 .. TotalDepth API reference.
 
+******************************
 Utility Package Reference
-==========================
+******************************
 
 Contents:
 

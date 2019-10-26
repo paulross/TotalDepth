@@ -3,9 +3,9 @@
 
 .. Description of command line tools at TotalDepth root level.
 
-###############################
+*****************************
 TotalDepth Command Line Tools
-###############################
+*****************************
 
 This describes the command line tools that are available for processing any TotalDepth file.
 
@@ -19,14 +19,12 @@ Tool Name                   Description
 ``tdplotlogs``              Plots logs from LIS and LAS data.
 =========================== ===========================================================================
 
-***************************************************
-Analysing a Directory of Files
-***************************************************
+
 
 .. _TotalDepth-cmdline-archive:
 
-tdarchive
-===================
+Analysing a Directory of Files with ``tdarchive``
+=================================================
 
 Scans a directory of files and provides an analysis by file type.
 
@@ -87,14 +85,10 @@ todo::
 	
 	Put examples here.
 
-***************************************************
-Removing TIF Markers From Files
-***************************************************
-
 .. _TotalDepth-cmdline-detif:
 
-tddetif
-===================
+Removing TIF Markers From Files with ``tddetif``
+=================================================
 
 Scans a directory of files and removes TIF markers.
 TIF markers are 12 bytes of data inserted in various places.
@@ -145,16 +139,13 @@ todo::
 	
 	Put examples here.
 
-***************************************************
-Plotting Well Logs
-***************************************************
 
 These command line tools plot wireline data.
 
 .. _TotalDepth-cmdline-PlotLogs:
 
-tdplotlogs
-===================
+Plotting Well Logs with ``tdplotlogs``
+======================================
 
 Produces SVG plots from LIS and LAS files.
 

@@ -6,9 +6,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-###############################
 TotalDepth
-###############################
+===========================
 
 TotalDepth is an Open Source, cross platform, software collection that processes petrophysical data from the oil field such as wireline logs, seismic data and so on.
 
@@ -16,9 +15,8 @@ If you are new here then have a look at some :ref:`TotalDepth-examples`. For mor
 
 The `TotalDepth project <https://github.com/paulross/TotalDepth>`_ is currently at **Alpha** version |version|, release |release|. For the licence see :ref:`licence_text`.
 
-*******************************
 Contents
-*******************************
+===============
 
 .. toctree::
 	:maxdepth: 2
@@ -26,7 +24,6 @@ Contents
 	intro
 	examples/examples
 	installation
-	file_formats
 	cmd_line_tools/index_cmd_line_tools
 	usage
 	tech/index_tech
@@ -39,13 +36,12 @@ Contents
 	authors
 	contributing
 	history
-	readme
+	#readme
 
 For many year this project was hosted by `Sourceforge <https://sourceforge.net/projects/TotalDepth/>`_. Thank you Sourceforge!
 
-*******************************
 Indices and tables
-*******************************
+=========================
 
 * :ref:`genindex`
 * :ref:`modindex`

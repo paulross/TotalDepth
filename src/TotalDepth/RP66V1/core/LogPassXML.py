@@ -258,13 +258,14 @@ def log_pass_to_XML(log_pass: LogPass.LogPass,
                     iflr_data_map: typing.Dict[typing.Hashable, typing.Sequence[IFLRReference]],
                     xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML LogPass node suitable for RP66V1. Example::
-
+    .
         <LogPass count="4">
             <FrameArray C="0" I="600T" O="44" description="">
                 ...
             <FrameArray>
             ...
         </LogPass>
+
     """
     with XmlWrite.Element(xml_stream, 'LogPass', {'count': f'{len(log_pass)}'}):
         for frame_array in log_pass.frame_arrays:

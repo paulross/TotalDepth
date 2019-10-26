@@ -3,8 +3,9 @@
 
 .. TotalDepth API reference.
 
+#############################
 TotalDepth and Software Test
-======================================
+#############################
 
 Contents:
 

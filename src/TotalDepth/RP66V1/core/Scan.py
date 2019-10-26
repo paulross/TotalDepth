@@ -562,9 +562,9 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
             f'Min: {x_axis.summary.spacing.min} Max: {x_axis.summary.spacing.max}'
             f' Mean: {x_axis.summary.spacing.mean} Median: {x_axis.summary.spacing.median}\n'
         )
-        fout.write(f'   Normal: {x_axis.summary.spacing.counts.normal}\n')
-        fout.write(f'Duplicate: {x_axis.summary.spacing.counts.duplicate}\n')
-        fout.write(f'  Skipped: {x_axis.summary.spacing.counts.skipped}\n')
+        fout.write(f'   Normal: {x_axis.summary.spacing.counts.norm}\n')
+        fout.write(f'Duplicate: {x_axis.summary.spacing.counts.dupe}\n')
+        fout.write(f'  Skipped: {x_axis.summary.spacing.counts.skip}\n')
         fout.write(f'     Back: {x_axis.summary.spacing.counts.back}\n')
 
     fout.write(f'Spacing histogram\n')
@@ -574,7 +574,6 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
 
 def _scan_log_pass_content(
         rp66_file: File.FileRead,
-        visible_record_positions: LogicalFile.VisibleRecordPositions,
         logical_file: LogicalFile.LogicalFile,
         fout: typing.TextIO,
         *,
@@ -588,7 +587,6 @@ def _scan_log_pass_content(
             fout.write('\n')
             num_frames = LogicalFile.populate_frame_array(
                 rp66_file,
-                visible_record_positions,
                 logical_file,
                 frame_array,
                 frame_slice,
@@ -674,8 +672,6 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                 # Now the LogPass(s)
                 if logical_file.has_log_pass:
                     with _output_section_header_trailer('Log Pass', '-', os=fout):
-                        _scan_log_pass_content(
-                            rp66v1_file, logical_file_sequence.visible_record_positions,
-                            logical_file, fout, frame_slice=frame_slice)
+                        _scan_log_pass_content(rp66v1_file, logical_file, fout, frame_slice=frame_slice)
                 else:
                     fout.write('NO Log Pass for this Logical Record\n')
