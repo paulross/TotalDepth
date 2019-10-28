@@ -3,7 +3,7 @@
 .. _licence_text:
 
 *************************
-TotalDepth Licence
+Licence
 *************************
 
 .. toctree::

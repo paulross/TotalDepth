@@ -1,5 +1,5 @@
-Physical Record Handler
-========================
+TotalDepth.LIS.core.PhysRec (Physical Record Handler)
+=====================================================
 
 .. toctree::
    :maxdepth: 2

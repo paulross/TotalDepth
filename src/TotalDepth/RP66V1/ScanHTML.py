@@ -477,7 +477,7 @@ def main() -> int:
         prog=sys.argv[0],
     )
     parser.add_argument('path_in', type=str, help='Path to the input file.')
-    parser.add_argument('path_out', type=str, default='', nargs='?', help='Path to the output tif_scan_path to write.')
+    parser.add_argument('path_out', type=str, help='Path to the output file or directory (which will be created).')
     # parser.add_argument(
     #     '--version', action='version', version='%(prog)s Version: ' + __version__,
     #     help='Show version and exit.'

@@ -1,7 +1,11 @@
 """
-Implements the Logical Record Syntax. References:
-[RP66V1 Section 3 Logical Record Syntax]
-In particular: [RP66V1 Appendix A logical Record Types]
+Implements the Logical Record Syntax.
+
+References:
+    [RP66V1 Section 3 Logical Record Syntax]
+
+In particular:
+    [RP66V1 Appendix A logical Record Types]
 """
 import collections
 import typing

@@ -1,9 +1,11 @@
 """
-Implements the Explicitly Formatted Logical Record [RP66V1 Section 3 Logical Record Syntax]
+Implements the Explicitly Formatted Logical Record (EFFLR) [RP66V1 Section 3 Logical Record Syntax]
 
 References:
-RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
-Specifically section 3: http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
+    RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
+
+Specifically section 3:
+    http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
 """
 # import collections
 import enum
@@ -20,6 +22,7 @@ logger = logging.getLogger(__file__)
 
 
 class ExceptionEFLR(ExceptionTotalDepthRP66V1):
+    """General Exception class for EFLR errors."""
     pass
 
 
@@ -52,6 +55,7 @@ class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
 
 
 class Set:
+    """Class that represents a component set. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, ld: LogicalData):
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_set_group:
@@ -66,6 +70,7 @@ class Set:
 
 
 class AttributeBase:
+    """Class that represents a component attribute. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, component_descriptor: ComponentDescriptor):
         if not component_descriptor.is_attribute_group:
             raise ExceptionEFLRAttribute(
@@ -106,6 +111,7 @@ class AttributeBase:
 
 
 class TemplateAttribute(AttributeBase):
+    """Class that represents a component template. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, component_descriptor: ComponentDescriptor, ld: LogicalData):
         super().__init__(component_descriptor)
         if self.component_descriptor.has_attribute_L:
@@ -121,6 +127,7 @@ class TemplateAttribute(AttributeBase):
 
 
 class Attribute(AttributeBase):
+    """Class that represents a component attribute. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self,
                  component_descriptor: ComponentDescriptor,
                  ld: LogicalData,
@@ -150,6 +157,7 @@ class Attribute(AttributeBase):
 
 
 class Template:
+    """Class that represents a component template. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
@@ -192,6 +200,7 @@ class Template:
 
 
 class Object:
+    """Class that represents a component object. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, ld: LogicalData, template: Template):
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_object:
@@ -332,6 +341,7 @@ class DuplicateObjectStrategy(enum.Enum):
 
 
 class ExplicitlyFormattedLogicalRecord:
+    """Represents a RP66V1 Explicitly Formatted Logical Record (EFLR). Effectively this is a table."""
     DUPE_OBJECT_STRATEGY = DuplicateObjectStrategy.REPLACE
     DUPE_OBJECT_LOGGER = logger.debug
 
@@ -415,6 +425,7 @@ class ExplicitlyFormattedLogicalRecord:
         return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>'
 
     def str_long(self) -> str:
+        """Returns a long string representing the table."""
         ret = [
             str(self),
             f'  Template [{len(self.template)}]:'
@@ -426,6 +437,7 @@ class ExplicitlyFormattedLogicalRecord:
         return '\n'.join(ret)
 
     def table_as_strings(self, stringify_function: typing.Callable, sort: bool) -> typing.List[typing.List[str]]:
+        """Returns a list of strings representing the table."""
         ret = [
             ['ObjectName IDENT', 'O', 'C'] + self.template.header_as_strings(stringify_function),
         ]
@@ -441,9 +453,11 @@ class ExplicitlyFormattedLogicalRecord:
         return ret
 
     def is_key_value(self) -> bool:
+        """True if this is a key/value table."""
         return len(self.objects) == 1
 
     def key_values(self, stringify_function: typing.Callable, sort: bool) -> typing.List[typing.List[str]]:
+        """Returns a list of stringified key values. Will raise ExceptionEFLR if not a key/value table."""
         if self.is_key_value():
             ret = [['KEY', 'VALUE']]
             # key_values = zip(

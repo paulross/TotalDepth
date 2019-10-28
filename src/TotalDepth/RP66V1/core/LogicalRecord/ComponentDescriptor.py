@@ -2,35 +2,53 @@
 Implements the Component Descriptor [RP66V1 Section 3.2.2.1 Component Descriptor]
 
 References:
-RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
-Specifically section 3: http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
 
+    RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
+
+Specifically section 3:
+
+    http://w3.energistics.org/rp66/v1/rp66v1_sec3.html
 """
 import collections
+import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
 
 
 class ExceptionComponentDescriptor(ExceptionTotalDepthRP66V1):
+    """General Exception class for Component Descriptor errors."""
     pass
 
 
 class ExceptionComponentDescriptorInit(ExceptionComponentDescriptor):
+    """Exception class for Component Descriptor __init__ errors."""
     pass
 
 
 class ExceptionComponentDescriptorAccessError(ExceptionComponentDescriptor):
+    """Exception class for Component Descriptor data access errors."""
     pass
 
 
-RoleType = collections.namedtuple('RoleType', 'role, type')
-CharacteristicRepCodeGlobalDefault = collections.namedtuple(
-    'CharacteristicRepCodeGlobalDefault', 'characteristic, rep_code, global_default'
-)
+class RoleType(typing.NamedTuple):
+    """Contains the role and type such as ``('ABSATR', 'Absent Attribute')``"""
+    role:  str
+    type:  str
+
+
+class CharacteristicRepCodeGlobalDefault(typing.NamedTuple):
+    """Contains the characteristic, rep_code and global_default such as ``('Name', 'IDENT', b'')``"""
+    characteristic: str
+    rep_code: typing.Union[str, None]
+    global_default: typing.Any
 
 
 class ComponentDescriptor:
+    """Component Descriptor that extracts the necessary attributes from an integer.
+
+    See: [RP66V1 Section 3.2.2.1 Component Descriptor]
+    """
     ROLE_MASK = 0xe0
     ROLE_ABSATR = 0x00
     ROLE_ATTRIB = 0x20
@@ -119,49 +137,60 @@ class ComponentDescriptor:
 
     @property
     def role(self) -> str:
+        """The Component Descriptor role."""
         return self.ROLE_MAP[self._bits_1_3].role
 
     @property
     def type(self) -> str:
+        """The Component Descriptor type."""
         return self.ROLE_MAP[self._bits_1_3].type
 
     #
     # ------------- Roles --------------
     @property
     def is_attribute_group(self) -> bool:
+        """Is an attribute, absent attribute or invariant attribute."""
         return self._bits_1_3 < self.ROLE_OBJECT
 
     @property
     def is_set_group(self) -> bool:
+        """Is a set, redundant set or replacement set."""
         return self._bits_1_3 > self.ROLE_reserved
 
     # Specific roles
     @property
     def is_absent_attribute(self) -> bool:
+        """Is an absent attribute."""
         return self._bits_1_3 == self.ROLE_ABSATR
 
     @property
     def is_attribute(self) -> bool:
+        """Is an attribute."""
         return self._bits_1_3 == self.ROLE_ATTRIB
 
     @property
     def is_invariant_attribute(self) -> bool:
+        """Is an invariant attribute."""
         return self._bits_1_3 == self.ROLE_INVATR
 
     @property
     def is_object(self) -> bool:
+        """Is an object."""
         return self._bits_1_3 == self.ROLE_OBJECT
 
     @property
     def is_redundant_set(self) -> bool:
+        """Is a redundant set."""
         return self._bits_1_3 == self.ROLE_RDSET
 
     @property
     def is_replacement_set(self) -> bool:
+        """Is a replacement set."""
         return self._bits_1_3 == self.ROLE_RSET
 
     @property
     def is_set(self) -> bool:
+        """Is a set."""
         return self._bits_1_3 == self.ROLE_SET
 
     #
@@ -171,48 +200,61 @@ class ComponentDescriptor:
     # ------------- Characteristics and Component Format --------------
     @property
     def has_set_T(self) -> int:
+        """Has a type, must be in the set group otherwise an ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_set_group:
             raise ExceptionComponentDescriptorAccessError('Accessing SET property T when not a SET type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_T
 
     @property
     def has_set_N(self) -> int:
+        """Has a name, must be in the set group otherwise an ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_set_group:
             raise ExceptionComponentDescriptorAccessError('Accessing SET property N when not a SET type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_N
 
     @property
     def has_object_N(self) -> int:
+        """Has a name, must be an object otherwise an ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_object:
             raise ExceptionComponentDescriptorAccessError('Accessing OBJECT property N when not a OBJECT type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_OBJECT_N
 
     @property
     def has_attribute_L(self) -> int:
+        """Has a label, must be in the attribute group otherwise an ExceptionComponentDescriptorAccessError will be
+        raised."""
         if not self.is_attribute_group:
             raise ExceptionComponentDescriptorAccessError('Accessing ATTRIBUTE property L when not a ATTRIBUTE type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_L
 
     @property
     def has_attribute_C(self) -> int:
+        """Has a count, must be in the attribute group otherwise an ExceptionComponentDescriptorAccessError will be
+        raised."""
         if not self.is_attribute_group:
             raise ExceptionComponentDescriptorAccessError('Accessing ATTRIBUTE property C when not a ATTRIBUTE type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_C
 
     @property
     def has_attribute_R(self) -> int:
+        """Has a Representation Code, must be in the attribute group otherwise an
+        ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_attribute_group:
             raise ExceptionComponentDescriptorAccessError('Accessing ATTRIBUTE property R when not a ATTRIBUTE type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_R
 
     @property
     def has_attribute_U(self) -> int:
+        """Has units, must be in the attribute group otherwise an
+        ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_attribute_group:
             raise ExceptionComponentDescriptorAccessError('Accessing ATTRIBUTE property U when not a ATTRIBUTE type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_U
 
     @property
     def has_attribute_V(self) -> int:
+        """Has a value, must be in the attribute group otherwise an
+        ExceptionComponentDescriptorAccessError will be raised."""
         if not self.is_attribute_group:
             raise ExceptionComponentDescriptorAccessError('Accessing ATTRIBUTE property V when not a ATTRIBUTE type.')
         return self._bits_4_8 & self.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_V

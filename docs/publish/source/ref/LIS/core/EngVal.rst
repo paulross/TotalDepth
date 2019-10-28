@@ -1,5 +1,5 @@
-EngVal
-=======
+TotalDepth.LIS.core.EngVal
+==========================
 
 .. automodule:: TotalDepth.LIS.core.EngVal
    :members:

@@ -19,7 +19,7 @@ Contents
 ===============
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 3
 	
 	intro
 	examples/examples
@@ -30,15 +30,12 @@ Contents
 	testing/index_test
 	ref/index_ref
 	TODO
-	glossary
 	licence
-	
-	authors
 	contributing
+	glossary
 	history
-	#readme
 
-For many year this project was hosted by `Sourceforge <https://sourceforge.net/projects/TotalDepth/>`_. Thank you Sourceforge!
+For many years this project was hosted by `Sourceforge <https://sourceforge.net/projects/TotalDepth/>`_. Thank you Sourceforge!
 
 Indices and tables
 =========================

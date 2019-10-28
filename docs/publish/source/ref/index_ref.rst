@@ -8,7 +8,7 @@ API Reference
 Contents:
 
 .. toctree::
-	:maxdepth: 3
+	:maxdepth: 2
 	
 	LAS/index_LAS
 	LIS/index_LIS

@@ -1,4 +1,4 @@
-LIS File
+TotalDepth.LIS.core.File
 ========================
 
 .. toctree::

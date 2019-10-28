@@ -93,10 +93,10 @@ def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.Logica
     """Takes a LogicalIndex and writes the index to an XML stream."""
     with XmlWrite.XmlStream(output_stream) as xml_stream:
         with XmlWrite.Element(xml_stream, 'RP66V1FileIndex', {
-            'path': logical_file_sequence.path,
-            'size': f'{os.path.getsize(logical_file_sequence.path):d}',
+            'path': logical_file_sequence.id,
+            'size': f'{os.path.getsize(logical_file_sequence.id):d}',
             'schema_version': XML_SCHEMA_VERSION,
-            'utc_file_mtime': str(datetime.datetime.utcfromtimestamp(os.stat(logical_file_sequence.path).st_mtime)),
+            'utc_file_mtime': str(datetime.datetime.utcfromtimestamp(os.stat(logical_file_sequence.id).st_mtime)),
             'utc_now': str(datetime.datetime.utcnow()),
             'creator': f'{__name__}',
         }):

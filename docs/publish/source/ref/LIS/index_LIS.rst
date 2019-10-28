@@ -11,20 +11,17 @@ Contents:
 .. toctree::
 	:maxdepth: 2
 	
-	core/RepCode
-	core/Units
 	core/EngVal
-	core/Mnem
-	
-	core/RawStream
 	core/File
-	core/TifMarker
-	core/PhysRec
-	core/LogiRec
-	
 	core/FileIndexer
-	core/LogPass
 	core/FrameSet
-
+	core/LogiRec
+	core/LogPass
+	core/Mnem
+	core/PhysRec
+	core/RawStream
+	core/RepCode
 	core/Rle
+	core/TifMarker
 	core/Type01Plan
+	core/Units

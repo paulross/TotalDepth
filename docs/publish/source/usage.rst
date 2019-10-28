@@ -1,6 +1,6 @@
-===========================
-Usage In a Python Project
-===========================
+
+Importing TotalDepth into your Python Project
+=============================================
 
 .. toctree::
 	:maxdepth: 2

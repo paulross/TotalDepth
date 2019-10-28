@@ -66,7 +66,7 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: boo
     ret = {}
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
-            bin_file_type = binary_file_type_from_path(path_in)
+            bin_file_type = binary_file_type_from_path(file_in_out.filePathIn)
             if bin_file_type == 'RP66V1':
                 ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
     else:

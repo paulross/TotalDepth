@@ -1,5 +1,5 @@
-Mnem
-=======
+TotalDepth.LIS.core.Mnem
+========================
 
 .. automodule:: TotalDepth.LIS.core.Mnem
     :member-order: bysource

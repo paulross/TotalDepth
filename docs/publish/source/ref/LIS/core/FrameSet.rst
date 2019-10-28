@@ -3,9 +3,9 @@
 
 .. Description of LIS FrameSet module
 
-###############################
+
 The LIS Frame Set
-###############################
+=================
 
 .. toctree::
    :maxdepth: 2

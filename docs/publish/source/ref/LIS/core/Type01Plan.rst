@@ -3,8 +3,8 @@
 
 .. _TotalDepth.LIS.core.Type01Plan:
 
-Type01Plan
-===========================
+TotalDepth.LIS.core.Type01Plan
+===============================
 
 .. toctree::
    :maxdepth: 2

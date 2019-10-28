@@ -71,7 +71,7 @@ LIS Log HTML Summaries
 The program ``LisToHtml.py`` takes LIS file(s) and generates an `HTML summary <../_static/LISExampleHTML/index.html>`_ for each one.
 
 How This HTML was Made
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 The ``LisToHtml.py`` command line tool was used with the command::
 

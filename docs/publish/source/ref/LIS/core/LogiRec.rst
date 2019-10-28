@@ -1,5 +1,5 @@
-Logical Record Handler
-========================
+TotalDepth.LIS.core.LogiRec
+===========================
 
 .. toctree::
    :maxdepth: 2

@@ -1,8 +1,9 @@
 """
-Handles encryption in Logical Record Segments [RP66V1 Section 2.2.2.1]
+Handles encryption in Logical Record Segments [RP66V1 Section 2.2.2.1], which is to say we do very little.
 
 References:
-RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
+
+    RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html
 
 TODO: Ensure this is consistent across the storage unit?
 """

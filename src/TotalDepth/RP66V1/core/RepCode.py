@@ -1,38 +1,42 @@
 """
-Python implementation the Representation Codes [RP66V1 Appendix B]
+Python implementation of the RP66V1 Representation Codes ('Rep Codes') [RP66V1 Appendix B]
 
-References: [RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html]
-Specifically: [RP66V1 Appendix B: http://w3.energistics.org/rp66/v1/rp66v1_appb.html]
+References:
+    [RP66V1: http://w3.energistics.org/rp66/v1/rp66v1.html]
 
-From: http://w3.energistics.org/rp66/v1/rp66v1_appb.html
-Code	Name	Size in Bytes	Descirption (sic)
-1	    FSHORT	2	            Low precision floating point
-2	    FSINGL	4	            IEEE single precision floating point
-3	    FSING1	8	            Validated single precision floating point
-4	    FSING2	12	            Two-way validated single precision floating point
-5	    ISINGL	4	            IBM single precision floating point
-6	    VSINGL	4	            VAX single precision floating point
-7	    FDOUBL	8	            IEEE double precision floating point
-8	    FDOUB1	16	            Validated double precision floating point
-9	    FDOUB2	24	            Two-way validated double precision floating point
-10	    CSINGL	8	            Single precision complex
-11	    CDOUBL	16	            Double precision complex
-12	    SSHORT	1	            Short signed integer
-13	    SNORM	2	            Normal signed integer
-14	    SLONG	4	            Long signed integer
-15	    USHORT	1	            Short unsigned integer
-16	    UNORM	2	            Normal unsigned integer
-17	    ULONG	4	            Long unsigned integer
-18	    UVARI	1, 2, or 4	    Variable-length unsigned integer
-19	    IDENT	V	            Variable-length identifier
-20	    ASCII	V	            Variable-length ASCII character string
-21	    DTIME	8	            Date and time
-22	    ORIGIN	V	            Origin reference
-23	    OBNAME	V	            Object name
-24	    OBJREF	V	            Object reference
-25	    ATTREF	V	            Attribute reference
-26	    STATUS	1	            Boolean status
-27	    UNITS	V	            Units expression
+Specifically:
+    [RP66V1 Appendix B: http://w3.energistics.org/rp66/v1/rp66v1_appb.html]
+
+From: http://w3.energistics.org/rp66/v1/rp66v1_appb.html ::
+
+    Code	Name	Size in Bytes	Descirption (sic)
+    1	    FSHORT	2	            Low precision floating point
+    2	    FSINGL	4	            IEEE single precision floating point
+    3	    FSING1	8	            Validated single precision floating point
+    4	    FSING2	12	            Two-way validated single precision floating point
+    5	    ISINGL	4	            IBM single precision floating point
+    6	    VSINGL	4	            VAX single precision floating point
+    7	    FDOUBL	8	            IEEE double precision floating point
+    8	    FDOUB1	16	            Validated double precision floating point
+    9	    FDOUB2	24	            Two-way validated double precision floating point
+    10	    CSINGL	8	            Single precision complex
+    11	    CDOUBL	16	            Double precision complex
+    12	    SSHORT	1	            Short signed integer
+    13	    SNORM	2	            Normal signed integer
+    14	    SLONG	4	            Long signed integer
+    15	    USHORT	1	            Short unsigned integer
+    16	    UNORM	2	            Normal unsigned integer
+    17	    ULONG	4	            Long unsigned integer
+    18	    UVARI	1, 2, or 4	    Variable-length unsigned integer
+    19	    IDENT	V	            Variable-length identifier
+    20	    ASCII	V	            Variable-length ASCII character string
+    21	    DTIME	8	            Date and time
+    22	    ORIGIN	V	            Origin reference
+    23	    OBNAME	V	            Object name
+    24	    OBJREF	V	            Object reference
+    25	    ATTREF	V	            Attribute reference
+    26	    STATUS	1	            Boolean status
+    27	    UNITS	V	            Units expression
 """
 import collections
 import datetime
@@ -53,11 +57,47 @@ logger = logging.getLogger(__file__)
 
 
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
+    """General exception for Representation Code errors."""
     pass
 
 # TODO: Have static NULL values e.g. IDENT_null = b'' ?
 
-REP_CODES_ALL = set(range(28))
+#: All known Representation Codes
+REP_CODES_ALL = set(range(1, 28))
+
+#: Map of all Representation Codes to name.
+REP_CODE_INT_TO_STR_ALL: typing.Dict[int, str] = {
+    1: 'FSHORT',
+    2: 'FSINGL',
+    3: 'FSING1',
+    4: 'FSING2',
+    5: 'ISINGL',
+    6: 'VSINGL',
+    7: 'FDOUBL',
+    8: 'FDOUB1',
+    9: 'FDOUB2',
+    10: 'CSINGL',
+    11: 'CDOUBL',
+    12: 'SSHORT',
+    13: 'SNORM',
+    14: 'SLONG',
+    15: 'USHORT',
+    16: 'UNORM',
+    17: 'ULONG',
+    18: 'UVARI',
+    19: 'IDENT',
+    20: 'ASCII',
+    21: 'DTIME',
+    22: 'ORIGIN',
+    23: 'OBNAME',
+    24: 'OBJREF',
+    25: 'ATTREF',
+    26: 'STATUS',
+    27: 'UNITS',
+}
+assert all(_ in REP_CODE_INT_TO_STR_ALL for _ in REP_CODES_ALL)
+
+#: Supported Representation Codes
 REP_CODES_SUPPORTED = {
     # 1, # - Not found in practice.
     2,
@@ -69,8 +109,8 @@ REP_CODES_SUPPORTED = {
     12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
     # 25,  # - Not found in practice.
     26, 27}
-REP_CODES_UNSUPPORTED = REP_CODES_ALL - REP_CODES_SUPPORTED
 
+#: Map of supported Representation Codes to name.
 REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
     # 1: 'FSHORT',
     2: 'FSINGL',
@@ -102,23 +142,32 @@ REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
 }
 assert set(REP_CODE_INT_TO_STR.keys()) == REP_CODES_SUPPORTED
 
+#: Map of supported Representation Code names to integer code.
 REP_CODE_STR_TO_INT = {v: k for k, v in REP_CODE_INT_TO_STR.items()}
 assert len(REP_CODE_INT_TO_STR) == len(REP_CODE_STR_TO_INT)
 assert set(REP_CODE_STR_TO_INT.values()) == REP_CODES_SUPPORTED, \
     f'{set(REP_CODE_STR_TO_INT.values())} != {REP_CODES_SUPPORTED}'
 
-# [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2] says:
-# 'If there is an Index Channel, then it must appear first in the Frame and it must be scalar.'
-# but does not specify which Representation Codes are scalar. This is out best estimate:
-# - Numeric values.
-# - Not compound values.
-# - Fixed length representations,
-# TODO: Verify these assumptions, what index Representation Codes are actually experienced in practice?
+#: Unsupported Representation Codes.
+REP_CODES_UNSUPPORTED = REP_CODES_ALL - REP_CODES_SUPPORTED
+#: Unsupported Representation Code names.
+REP_CODES_UNSUPPORTED_NAMES = [REP_CODE_INT_TO_STR_ALL[_] for _ in REP_CODES_UNSUPPORTED]
+
+
+#: [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2] says:
+#: 'If there is an Index Channel, then it must appear first in the Frame and it must be scalar.'
+#: but does not specify which Representation Codes are scalar. This is out best estimate:
+#:
+#: #. Numeric values.
+#: #. Not compound values.
+#: #. Fixed length representations,
+#:
+#: TODO: Verify these assumptions, what index Representation Codes are actually experienced in practice?
 REP_CODE_SCALAR_CODES = {1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17}
-# Longest Representation Code that is a scalar, FDOUBL.
+#: Longest Representation Code that is a scalar, FDOUBL.
 LENGTH_LARGEST_INDEX_CHANNEL_CODE = 8
 
-
+#: Map of Rep Code to length for fixed length RepCodes.
 REP_CODE_FIXED_LENGTHS = {
     1: 2,  # Low precision floating point
     2: 4,  # IEEE single precision floating point
@@ -151,6 +200,8 @@ REP_CODE_FIXED_LENGTHS = {
 
 
 def rep_code_fixed_length(rc: int) -> int:
+    """Returns the length in bytes of a fixed length Rep Code.
+    Will raise an ExceptionRepCode if the Rep Code is not of fixed length."""
     try:
         return REP_CODE_FIXED_LENGTHS[rc]
     except KeyError as err:
@@ -158,20 +209,21 @@ def rep_code_fixed_length(rc: int) -> int:
 
 
 def FSINGL(ld: LogicalData) -> float:
-    """Representation code 2, IEEE single precision floating point"""
+    """Representation code 2, IEEE single precision floating point."""
     by = ld.chunk(4)
     value = struct.unpack('>f', by)
     return value[0]
 
 
 def FDOUBL(ld: LogicalData) -> float:
-    """Representation code 7, IEEE double precision floating point"""
+    """Representation code 7, IEEE double precision floating point."""
     by = ld.chunk(8)
     value = struct.unpack('>d', by)
     return value[0]
 
 
 def _pascal_string(ld: LogicalData) -> bytes:
+    """Reads a Pascal like string from the LogicalData."""
     siz: int = ld.read()
     return ld.chunk(siz)
 
@@ -329,17 +381,26 @@ class DateTime:
 
     @staticmethod
     def strftime_format() -> str:
+        """Returns a string format for the dat and time."""
         return '%y-%m-%d %H:%M:%S.%f'
 
     @property
     def tz_abbreviation(self) -> str:
+        """The time zone abbreviation such as 'STD', 'DST', 'GMT' or empty string if unknown."""
+        try:
+            return self.TZ_ABBREVIATION[self.tz][0]
+        except KeyError:
+            return ''
+
+    @property
+    def tz_description(self) -> str:
+        """The time zone description such as 'Greenwich Mean Time' or empty string if unknown."""
         try:
             return self.TZ_ABBREVIATION[self.tz][0]
         except KeyError:
             return ''
 
     def __str__(self) -> str:
-        # TODO: Timezone
         return f'{self.year}-{self.month:02d}-{self.day:02d}' \
             f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d} {self.tz_abbreviation}'
 
@@ -347,6 +408,7 @@ class DateTime:
         return f'<{self.__class__} {str(self)}>'
 
     def as_datetime(self) -> datetime.datetime:
+        """Returns a (naive) Python datetime for the date and time."""
         return datetime.datetime(
             self.year, self.month, self.day, self.hour, self.minute, self.second, microsecond=self.millisecond*1000
         )
@@ -361,6 +423,7 @@ def DTIME(ld: LogicalData) -> DateTime:
 
 
 def ORIGIN(ld: LogicalData) -> int:
+    """An ORIGIN is an alias for UVARI."""
     return UVARI(ld)
 
 
@@ -369,11 +432,13 @@ def ORIGIN_len(by: typing.Union[bytes, bytearray], index: int) -> int:
     return UVARI_len(by, index)
 
 
-# This has three fields:
-# O - Origin Reference as a ORIGIN type (UVARI).
-# C - Copy number as a USHORT type.
-# I - Identifier as an IDENT type.
 class ObjectName(typing.NamedTuple):
+    """This has three fields:
+
+    0. O - Origin Reference as a ORIGIN type (UVARI).
+    1. C - Copy number as a USHORT type.
+    2. I - Identifier as an IDENT type.
+    """
     O: int
     C: int
     I: bytes
@@ -434,11 +499,12 @@ def OBNAME_len(by: typing.Union[bytes, bytearray], index: int) -> int:
     return 0
 
 
-# This has three fields:
-# T - Object Type as a IDENT.
-# N - Object Name as a OBNAME.
 class ObjectReference(collections.namedtuple('ObjectReference', 'T, N')):
+    """This has three fields:
 
+    0. T - Object Type as a IDENT.
+    1. N - Object Name as a OBNAME.
+    """
     def __str__(self):
         return f'OBREF: O: {self.T} C: {self.N}'
 
@@ -461,22 +527,23 @@ def STATUS(ld: LogicalData) -> int:
     return USHORT(ld)
 
 
-# [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
-# Syntactically, Representation Code UNITS is similar to Representation Codes IDENT and ASCII.
-# However, upper case and lower case are considered distinct (e.g., "A" and "a" for Ampere and annum, respectively),
-# and permissible characters are restricted to the following ASCII codes:
-# lower case letters [a, b, c, ..., z]
-# upper case letters [A, B, C, ..., Z]
-# digits [0, 1, 2, ..., 9]
-# blank [ ]
-# hyphen or minus sign [-] dot or period [.]
-# slash [/]
-# parentheses [(, )]
-# In particular this allows bytes.decode('ascii')
-
-# Found in actuality
+#: And commonly found in actuality
 UNITS_ALLOWABLE_CHARACTERS_EXTENDED: str = '%'
 
+#: [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+#: Syntactically, Representation Code UNITS is similar to Representation Codes IDENT and ASCII.
+#: However, upper case and lower case are considered distinct (e.g., "A" and "a" for Ampere and annum, respectively),
+#: and permissible characters are restricted to the following ASCII codes:
+#:
+#: * lower case letters ``[a, b, c, ..., z]``
+#: * upper case letters ``[A, B, C, ..., Z]``
+#: * digits ``[0, 1, 2, ..., 9]``
+#: * blank ``[ ]``
+#: * hyphen or minus sign ``[-]`` dot or period ``[.]``
+#: * slash ``[/]``
+#: * parentheses ``[(, )]``
+#:
+#: In particular this allows bytes.decode('ascii')
 UNITS_ALLOWABLE_CHARACTERS: typing.Set[int] = set(
     bytes(
         string.ascii_lowercase
@@ -489,10 +556,12 @@ UNITS_ALLOWABLE_CHARACTERS: typing.Set[int] = set(
         + UNITS_ALLOWABLE_CHARACTERS_EXTENDED
         , 'ascii')
 )
+#: UNITS_ALLOWABLE_CHARACTERS as a string.
 UNITS_ALLOWABLE_CHARACTERS_AS_STRING: str = ''.join(sorted(chr(v) for v in UNITS_ALLOWABLE_CHARACTERS))
 
 
 def UNITS(ld: LogicalData) -> bytes:
+    """Read UNITS from the LogicalData."""
     ret: bytes = _pascal_string(ld)
     # [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
     bad_chars = set(ret) - UNITS_ALLOWABLE_CHARACTERS
@@ -507,8 +576,8 @@ def UNITS(ld: LogicalData) -> bytes:
     return ret
 
 
-# Map of Representation code name to functions that take a LogicalData object.
-# HAs the range 1 to 27 inclusive.
+#: Map of Representation code name to functions that take a LogicalData object.
+#: Has the range 1 to 27 inclusive with some Rep Codes unsupported.
 REP_CODE_MAP = {
     # 1: FSHORT,
     2: FSINGL,
@@ -542,6 +611,7 @@ assert set(REP_CODE_MAP.keys()) == REP_CODES_SUPPORTED
 
 
 def code_read(rep_code: int, ld: LogicalData):
+    """Read the Rep Code value from the LogicalData."""
     try:
         return REP_CODE_MAP[rep_code](ld)
     except KeyError as err:
@@ -549,7 +619,7 @@ def code_read(rep_code: int, ld: LogicalData):
 
 # Numpy related stuff
 
-# Numpy dtypes, numeric only
+#: Numpy dtypes, numeric Rep Codes only.
 REP_CODE_NUMPY_TYPE_MAP = {
     2: np.float32,
 
@@ -567,6 +637,8 @@ assert set(REP_CODE_NUMPY_TYPE_MAP.keys()) - REP_CODES_SUPPORTED == set()
 
 
 def numpy_dtype(rep_code: int):
+    """Returns the numpy dtype corresponding to the Rep Code.
+    Will raise ExceptionRepCode for unsupported Rep code."""
     try:
         return REP_CODE_NUMPY_TYPE_MAP[rep_code]
     except KeyError as err:
@@ -579,7 +651,7 @@ class NumericCategory(enum.Enum):
     INTEGER = 1
     FLOAT = 2
 
-# Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
+#: Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
 REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
     # 1: FSHORT,
     2: NumericCategory.FLOAT,  # FSINGL,

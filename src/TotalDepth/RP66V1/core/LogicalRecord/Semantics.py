@@ -2,10 +2,12 @@
 The DLIS Semantics of Logical Records.
 
 References:
+
     [RP66V1 Chapter 4: Semantic Terminology and Rules]
     [RP66V1 Chapter 5: Semantics: Static and Frame Data]
 
 Links:
+
     http://w3.energistics.org/rp66/v1/rp66v1_sec4.html
     http://w3.energistics.org/rp66/v1/rp66v1_sec5.html
 
@@ -19,6 +21,7 @@ from TotalDepth.RP66V1.core.LogicalRecord.EFLR import AttributeBase
 
 
 class Restrictions:
+    """Imposes semantic restrictions."""
     # TODO: V also?
     KEYS = {'C', 'R', 'U'}
     ABSENT = 'absent'
@@ -50,35 +53,7 @@ class Restrictions:
         return True
 
 
-# RestrictionsComments: typing.Tuple[Restrictions, str] = collections.namedtuple(
-#     'RestrictionsComments', 'restrictions, comments'
-# )
-#
-# StaticAndFrameDataSemantics = collections.namedtuple(
-#     'StaticAndFrameDataSemantics', 'code, abbreviation, full_name, section, attributes'
-# )
-#
-# FHLR = {
-#     b'SEQUENCE-NUMBER': RestrictionsComments(
-#         Restrictions(C=1, R=(b'ASCII',), U=Restrictions.ABSENT),
-#         """1.The Sequence-Number Attribute is the ASCII representation of a positive integer that indicates the sequential position of the Logical File in a Storage Set.
-# The Value of the Sequence-Number Attribute must meet the following requirements:
-#
-# * The number of ASCII characters is fixed at 10 characters, right justified and padded to the left with blank characters (ASCII code 3210). That is, the character representing the least significant digit of the Sequence-Number is in byte 10.
-# * The Sequence-Number of any Logical File, expressed as an integer, must be greater than the Sequence-Number of the Logical File that immediately precedes it in the Storage Set.
-#   The Sequence-Number of the first Logical File in a Storage Set may be any positive integer."""
-#     ),
-#     b'ID': RestrictionsComments(
-#         Restrictions(C=1, R=(b'ASCII',), U=Restrictions.ABSENT),
-#         """2.The ID Attribute is a descriptive identification of the Logical File.
-#         The Value of the ID Attribute must meet the following requirement:
-#
-# * The number of ASCII characters is fixed at 65 characters (width of a standard printed page)."""
-#     ),
-# }
-
-
-# [RP66V1 Section 4.4]
+#: [RP66V1 Section 4.4]
 FREQUENTLY_USED_ATTRIBUTES = {
     # [RP66V1 Section 4.4.1]
     b'LONG-NAME': Restrictions(C=1, R=(b'OBNAME', b'ASCII',)),
@@ -91,7 +66,7 @@ FREQUENTLY_USED_ATTRIBUTES = {
 }
 
 
-# [RP66V1 Section 5]
+#: [RP66V1 Section 5]
 SEMANTICS: typing.Dict[bytes, typing.Dict[bytes, Restrictions]] = {
     # [RP66V1 Section 5.7 Figure 5-8]
     b'FRAME': {

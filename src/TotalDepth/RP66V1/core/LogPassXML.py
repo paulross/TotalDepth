@@ -54,7 +54,11 @@ def xml_integer_attribute_read(element: xml.etree.Element, attr: str) -> int:
 
 # FIXME: Move to TotalDepth.common.xml, fix exception.
 def xml_rle_read(element: xml.etree.Element) -> Rle.RLE:
-    """Read the RLE values under an element and return the RLE object. Example::
+    """Read the RLE values under an element and return the RLE object.
+
+    Example:
+
+    .. code-block:: xml
 
         <VisibleRecords count="237" rle_len="56">
             <RLE datum="0x50" repeat="6" stride="0x2000"/>
@@ -137,7 +141,9 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
 def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML Channel node suitable for RP66V1.
 
-    Example::
+    Example:
+
+    .. code-block:: xml
 
         <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
     """
@@ -158,7 +164,9 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
 def frame_channel_from_XML(channel_node: xml.etree.Element) -> LogPass.FrameChannel:
     """Initialise with a XML Channel node.
 
-    Example::
+    Example:
+
+    .. code-block:: xml
 
         <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
     """
@@ -179,7 +187,9 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
                        xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML FrameArray node suitable for RP66V1.
 
-    Example::
+    Example:
+
+    .. code-block:: xml
 
         <FrameArray C="0" I="0B" O="11" description="">
           <Channels channel_count="9">
@@ -221,7 +231,7 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
             rle = Rle.create_rle(v.frame_number for v in iflr_data)
             xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
             # IFLR file position
-            rle = Rle.create_rle(v.lrsh_position for v in iflr_data)
+            rle = Rle.create_rle(v.logical_record_position.lrsh_position for v in iflr_data)
             xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
             # Xaxis output
             rle = Rle.create_rle(v.x_axis for v in iflr_data)
@@ -257,15 +267,16 @@ def frame_array_from_XML(frame_array_node: xml.etree.Element) \
 def log_pass_to_XML(log_pass: LogPass.LogPass,
                     iflr_data_map: typing.Dict[typing.Hashable, typing.Sequence[IFLRReference]],
                     xml_stream: XmlWrite.XmlStream) -> None:
-    """Writes a XML LogPass node suitable for RP66V1. Example::
-    .
+    """Writes a XML LogPass node suitable for RP66V1. Example:
+
+    .. code-block:: xml
+
         <LogPass count="4">
             <FrameArray C="0" I="600T" O="44" description="">
                 ...
             <FrameArray>
             ...
         </LogPass>
-
     """
     with XmlWrite.Element(xml_stream, 'LogPass', {'count': f'{len(log_pass)}'}):
         for frame_array in log_pass.frame_arrays:

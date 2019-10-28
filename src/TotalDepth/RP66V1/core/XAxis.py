@@ -98,11 +98,8 @@ class XAxisSummary(typing.NamedTuple):
 
 class IFLRReference(typing.NamedTuple):
     """POD class that represents the position of the IFLR in the file."""
-    # FIXME: Introduce a random field to cause failure, need to fix logical_record_position
-    # lrsh_position: int
-    # temp: int
     logical_record_position: File.LogicalRecordPosition
-    frame_number: int
+    frame_number: int  # TODO: Omit this  as it is implicit in the XAxis class?
     x_axis: typing.Union[int, float]
 
 

@@ -425,7 +425,7 @@ def html_write_body(
     """Write out the <body> of the document."""
     with XmlWrite.Element(xhtml_stream, 'h1'):
         xhtml_stream.characters('RP66V1 File Data Summary')
-    html_write_file_info(logical_file_sequence.path, xhtml_stream)
+    html_write_file_info(logical_file_sequence.id, xhtml_stream)
     html_write_storage_unit_label(logical_file_sequence.storage_unit_label, xhtml_stream)
     html_write_table_of_contents(logical_file_sequence, xhtml_stream)
     logical_file_summaries: typing.List[HTMLLogicalFileSummary] = []

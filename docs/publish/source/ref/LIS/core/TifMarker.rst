@@ -1,5 +1,5 @@
-TIF Marker Handling
-====================
+TotalDepth.LIS.core.TifMarker (TIF Marker Handling)
+===================================================
 
 .. toctree::
    :maxdepth: 2

@@ -1,5 +1,5 @@
-Raw Stream Handler
-========================
+TotalDepth.LIS.core.RawStream (Raw Stream Handler)
+==================================================
 
 
 .. toctree::

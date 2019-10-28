@@ -285,10 +285,10 @@ class LogPass:
 
     This is a file format independent design. Different file formats use this in different ways:
 
-    LIS79 - While the format allows for two simultaneous recordings (IFLR types 0 and 1) this has never been seen
+    * LIS79 - While the format allows for two simultaneous recordings (IFLR types 0 and 1) this has never been seen
         in the wild.
-    LAS (all versions) - The format does not allow for multiple simultaneous recordings.
-    RP66V1 - The format allows for multiple simultaneous recordings and this is common.
+    * LAS (all versions) - The format does not allow for multiple simultaneous recordings.
+    * RP66V1 - The format allows for multiple simultaneous recordings and this is common.
 
     Subclass this depending on the source of the information: DLIS file, XML index etc.
     """

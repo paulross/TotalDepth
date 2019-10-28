@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
 # Paul Ross: apaulross@gmail.com
-"""Module for plotting areas of particular patterns wirth well log data.
+"""Module for plotting areas of particular patterns with well log data.
 
 Created on 1 Apr 2011
 
@@ -34,6 +34,22 @@ Frequency analysis shows that the characters used are '+', '/', A-Z, a-z, 0-9
 so this looks like base64 encoded. Length is always 32 chars (256 bits).
 Pattern size suggests 12*15=180 bits.
 
+"""
+
+__author__  = 'Paul Ross'
+__date__    = '2011-04-01'
+__version__ = '0.1.0'
+__rights__  = 'Copyright (c) Paul Ross'
+
+import time
+import sys
+import logging
+import base64
+from optparse import OptionParser
+
+
+# Orphan this valuable text, previously part of the module docstring, as Sphinx can't process it with Tex.
+"""
 Examples::
 
     >>> base64.b64decode(b'/+7/7v/u/+7/7gAA7/7v/u/+7/7v/gAA')
@@ -221,16 +237,6 @@ Full range (sorted)::
     zM7MzszOzM7MzszOzM7MzszOzM7MzszO
     zv4/PvnOx/I+/P9+/b7z3s/uvfb+fvu+
 """
-__author__  = 'Paul Ross'
-__date__    = '2011-04-01'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
-
-import time
-import sys
-import logging
-import base64
-from optparse import OptionParser
 
 #: A map of {pattern name : bytes, ...}
 PATTERN_MAP = {

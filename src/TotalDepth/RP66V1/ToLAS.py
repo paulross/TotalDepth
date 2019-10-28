@@ -24,7 +24,7 @@ import numpy as np
 
 import TotalDepth.RP66V1.core.XAxis
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import LogicalFile, File, RepCode, LogPass, stringify
+from TotalDepth.RP66V1.core import LogicalFile, File, RepCode, LogPass, stringify, XAxis
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
 from TotalDepth.common import data_table, Slice
 from TotalDepth.util.DirWalk import dirWalk
@@ -35,6 +35,9 @@ __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+
+
+LAS_PRODUCER_VERSION = '0.1.1'
 
 
 logger = logging.getLogger(__file__)
@@ -61,16 +64,16 @@ def _write_las_header(input_file: str,
     """Writes the LAS opening such as:
 
     ~Version Information Section
-    VERS.           2.0                     :CWLS Log ASCII Standard - VERSION 2.0
-    WRAP.           NO                      :One Line per depth step
-    PROD.           TotalDepth              :LAS Producer
-    PROG.           TotalDepth.RP66V1.ToLAS :LAS Program name and version
-    CREA.           2012-11-14 10:50        :LAS Creation date [YYYY-MMM-DD hh:mm]
-    DLIS_CREA.      2012-11-10 22:06        :DLIS Creation date and time [YYYY-MMM-DD hh:mm]
-    SOURCE.         SOME-FILE-NAME.dlis     :DLIS File Name
-    FILE-ID.        SOME-FILE-ID            :File Identification from the FILE-HEADER Logical Record
-    LOGICAL-FILE.   3                       :Logical File number in the DLIS file
-    FRAME-ARRAY.    60B                     :Identity of the Frame Array in the Logical File
+    VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
+    WRAP.           NO                            : One Line per depth step
+    PROD.           TotalDepth                    : LAS Producer
+    PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
+    CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
+    DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hh:mm]
+    SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
+    FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
+    LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+    FRAME-ARRAY.    60B                           : Identity of the Frame Array in the Logical File
 
     Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
     """
@@ -82,8 +85,8 @@ def _write_las_header(input_file: str,
     table: typing.List[typing.List[str]] = [
         ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
         ['WRAP.', 'NO', ': One Line per depth step'],
-        ['PROD.', 'TotalDepth', ':LAS Producer'],
-        ['PROG.', 'TotalDepth.RP66V1.ToLAS', ': LAS Program name and version'],
+        ['PROD.', 'TotalDepth', ': LAS Producer'],
+        ['PROG.', f'TotalDepth.RP66V1.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
         ['CREA.', f'{now.strftime(LAS_DATE_HM_FORMAT)}', f': LAS Creation date [{LAS_DATE_HM_FORMAT_TEXT}]'],
         [
             f'DLIS_CREA.',
@@ -111,10 +114,11 @@ class UnitValueDescription(typing.NamedTuple):
     description: str
 
 
-#: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic
+#: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic.
 #: The Object ``LONG-NAME`` is used as the LAS description.
 #: We prefer to take data from the ORIGIN ``EFLR`` as it is more clearly specified ``[RP66V1 5.2 Origin Logical Record (OLR)]``
-#: whereas ``PARAMETER EFLR``s are fairly free form.
+#: whereas ``PARAMETER EFLR`` s are fairly free form.
+#: See also ``[RP66V1 Section 5.8.2 Parameter Objects]``
 DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING: typing.Dict[bytes, typing.Dict[bytes, str]] = {
     # [RP66V1 Section 5.8.2 Parameter Objects]
     b'PARAMETER': {
@@ -345,7 +349,7 @@ def write_array_section_to_las(
         ostream: typing.TextIO,
     ) -> None:
     assert array_reduction in ARRAY_REDUCTIONS
-    iflrs = logical_file.iflr_position_map[frame_array.ident]
+    iflrs: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     num_input_frames = len(iflrs)
     # Write information about how the frames and channels were processed
     ostream.write(f'# Array processing information:\n')
@@ -380,12 +384,12 @@ def write_array_section_to_las(
     frame_array.init_arrays(1)
     for frame_number in frame_slice.range(num_input_frames):
         # print(iflrs[frame_number])
-        vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(
-            iflrs[frame_number].lrsh_position
-        )
-        fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, iflrs[frame_number].lrsh_position)
+        # vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(
+        #     iflrs[frame_number].logical_record_position
+        # )
+        fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(iflrs[frame_number].logical_record_position)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-        frame_array.read(iflr.logical_data, 0)
+        frame_array.read(fld.logical_data, 0)
         for c, channel in enumerate(frame_array.channels):
             if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
                 if c:
@@ -429,14 +433,14 @@ def write_array_section_to_las(
 
 def write_logical_sequence_to_las(
         rp66v1_file: File.FileRead,
-        logical_file_sequence: LogicalFile.LogicalIndex,
+        logical_index: LogicalFile.LogicalIndex,
         array_reduction: str,
         path_out: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
         ) -> typing.List[str]:
     ret = []
-    for lf, logical_file in enumerate(logical_file_sequence.logical_files):
+    for lf, logical_file in enumerate(logical_index.logical_files):
         # Now the LogPass
         if logical_file.has_log_pass:
             for frame_array in logical_file.log_pass.frame_arrays:
@@ -446,14 +450,14 @@ def write_logical_sequence_to_las(
                 with open(file_path_out, 'w') as ostream:
                     # Write each section
                     _write_las_header(
-                        os.path.basename(logical_file_sequence.path),
+                        os.path.basename(logical_index.id),
                         logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
                     )
                     write_well_information_to_las(logical_file, frame_array, ostream)
                     write_curve_section_to_las(frame_array, channels, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
                     write_array_section_to_las(
-                        rp66v1_file, logical_file_sequence, logical_file, frame_array, array_reduction, frame_slice,
+                        rp66v1_file, logical_index, logical_file, frame_array, array_reduction, frame_slice,
                         channels, ostream
                     )
                     ret.append(file_path_out)
@@ -462,7 +466,7 @@ def write_logical_sequence_to_las(
             os.makedirs(os.path.dirname(file_path_out), exist_ok=True)
             with open(file_path_out, 'w') as ostream:
                 _write_las_header(
-                    os.path.basename(logical_file_sequence.path),
+                    os.path.basename(logical_index.path),
                     logical_file, lf, '', ostream
                 )
                 write_well_information_to_las(logical_file, ostream)
@@ -543,22 +547,22 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
             with open(path_in, 'rb') as fobj:
                 rp66v1_file = File.FileRead(fobj)
                 logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
-                for logical_file in logical_index.logical_files:
-                    print(f'Logical file: {logical_file}')
+                for l, logical_file in enumerate(logical_index.logical_files):
+                    print(f'Logical file [{l:04d}]: {logical_file}')
                     # print(f'Logical file: {logical_file.file_header_logical_record.set.type}')
                     if logical_file.has_log_pass:
                         for frame_array in logical_file.log_pass.frame_arrays:
-                            print(f'Frame Array: {frame_array.ident.I}')
+                            print(f'  Frame Array: {frame_array.ident.I}')
                             if channels:
                                 channel_text = b','.join(c.ident.I for c in frame_array.channels)
-                                print(f'Channels: {channel_text}')
+                                print(f'  Channels: {channel_text}')
                             if frame_slices:
-                                print(f'X axis: {frame_array.x_axis}')
+                                print(f'  X axis: {frame_array.x_axis}')
                                 iflr_refs = logical_file.iflr_position_map[frame_array.ident]
                                 # print(f'TRACE: Frames: {len(iflr_refs)} from {iflr_refs[0]} to {iflr_refs[-1]}')
                                 x_spacing = (iflr_refs[-1].x_axis - iflr_refs[0].x_axis) / (len(iflr_refs)  -1)
                                 print(
-                                    f'Frames: {len(iflr_refs)}'
+                                    f'  Frames: {len(iflr_refs)}'
                                     f' from {iflr_refs[0].x_axis}'
                                     f' to {iflr_refs[-1].x_axis}'
                                     f' interval {x_spacing}'
@@ -567,7 +571,7 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
                             print()
                     else:
                         print('No log pass')
-                    print()
+                    # print()
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
         except Exception:

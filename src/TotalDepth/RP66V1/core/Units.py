@@ -9,82 +9,83 @@ References:
     [RP66V1 Appendix b, B.27 Code UNITS: Units Expression]
     ["Energistics Unit Symbol Grammar Specification" Section 2.2 Unit Symbol Construction Grammar]
 
-UnitSymbol ::= [ Multiplier ' ' ] FactorExpression .
 
-FactorExpression ::= OneOrMore |
-    ( '1' | OneOrMore | Division ) '/' (
+.. code-block:: console
 
-Division ::= '(' OneOrMore '/' Divisor ')'
+    UnitSymbol ::= [ Multiplier ' ' ] FactorExpression .
 
-OneOrMore ::= Factor | Factors .
+    FactorExpression ::= OneOrMore |
+        ( '1' | OneOrMore | Division ) '/' (
 
-Divisor ::= Factor | '(' Factors ')' .
+    Division ::= '(' OneOrMore '/' Divisor ')'
 
-Factors ::= Factor '.' Factor { '.' Factor
+    OneOrMore ::= Factor | Factors .
 
-Factor ::= UnitComponent [ Exponent ] .
+    Divisor ::= Factor | '(' Factors ')' .
 
-UnitComponent ::= PrefixedAtom | Atom | SpecialAtom [ Qualifier ] .
+    Factors ::= Factor '.' Factor { '.' Factor
 
-PrefixedAtom ::= ( SIPrefix | BinaryPrefix ) Atom .
+    Factor ::= UnitComponent [ Exponent ] .
 
-Atom ::= Letter { Letter } [ Qualifier ] .
+    UnitComponent ::= PrefixedAtom | Atom | SpecialAtom [ Qualifier ] .
 
-SpecialAtom ::= '%' | 'inH2O' | 'cmH2O' .
+    PrefixedAtom ::= ( SIPrefix | BinaryPrefix ) Atom .
 
-Qualifier ::= '[' [ AT ] QualPart { COMMA QualPart } ']' .
+    Atom ::= Letter { Letter } [ Qualifier ] .
 
-AT ::= '@' .
+    SpecialAtom ::= '%' | 'inH2O' | 'cmH2O' .
 
-COMMA ::= ',' .
+    Qualifier ::= '[' [ AT ] QualPart { COMMA QualPart } ']' .
 
-QualPart ::= LetterOrDigit { LetterOrDigit
+    AT ::= '@' .
 
-LetterOrDigit ::= Letter | Digit .
+    COMMA ::= ',' .
 
-Letter ::= E | LTTR .
+    QualPart ::= LetterOrDigit { LetterOrDigit
 
-LTTR ::=
-'A'|'B'|'C' |'D'| 'L' | 'M' | 'N' | 'O' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'l' | 'm' | 'n' | 'o' | 'w' | 'x' | 'y' | 'z' .
-'P' |
-'e' | 'p' |
-} .
-} .
-'F'|'G'|'H' 'Q' | 'R' | 'S'
-'f' | 'g' | 'h'
-'q' | 'r' | 's'
-| 'I' | 'J' | 'K' |
-| 'T' | 'U' | 'V' |
-| 'i' | 'j' | 'k' |
-| 't' | 'u' | 'v' |
+    LetterOrDigit ::= Letter | Digit .
 
-Exponent ::= GtOneDigit | '(' ( NonZeroInt '.' FractionalPart | '0' '.' FractionalPart ) ')' .
+    Letter ::= E | LTTR .
 
-Multiplier ::= '1' E PowerOfTen [ '/' GtOneInt ] | '1' '/' GtOneInt |
-                Number [ E PowerOfTen ][ '/' GtOneInt ] .
-E ::= 'E' .
+    LTTR ::= 'A'|'B'|'C' | 'D' | 'L' | 'M' | 'N' | 'O' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'l' | 'm' | 'n'
+        | 'o' | 'w' | 'x' | 'y' | 'z' . 'P' | 'e' | 'p' | } .
+        } .
+        'F'|'G'|'H' 'Q' | 'R' | 'S'
+        'f' | 'g' | 'h'
+        'q' | 'r' | 's'
+        | 'I' | 'J' | 'K' |
+        | 'T' | 'U' | 'V' |
+        | 'i' | 'j' | 'k' |
+        | 't' | 'u' | 'v' |
 
-PowerOfTen ::= [ '-' ] GtOneInt .
+    Exponent ::= GtOneDigit | '(' ( NonZeroInt '.' FractionalPart | '0' '.' FractionalPart ) ')' .
 
-Number ::= GtOneInt |
-           NonZeroInt '.' FractionalPart | '0' '.' FractionalPart .
+    Multiplier ::= '1' E PowerOfTen [ '/' GtOneInt ] | '1' '/' GtOneInt |
+        Number [ E PowerOfTen ][ '/' GtOneInt ] .
 
-GtOneInt ::= GtOneDigit | NonZeroDigit Digit { Digit } .
+    E ::= 'E' .
 
-FractionalPart ::= { Digit } NonZeroDigit .
+    PowerOfTen ::= [ '-' ] GtOneInt .
 
-NonZeroInt ::= NonZeroDigit { Digit } .
+    Number ::= GtOneInt |
+               NonZeroInt '.' FractionalPart | '0' '.' FractionalPart .
 
-Digit ::= '0' | NonZeroDigit .
+    GtOneInt ::= GtOneDigit | NonZeroDigit Digit { Digit } .
 
-GtOneDigit ::= '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
+    FractionalPart ::= { Digit } NonZeroDigit .
 
-NonZeroDigit ::= '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
+    NonZeroInt ::= NonZeroDigit { Digit } .
 
-SIPrefix ::= 'y' | 'z' | 'a' | 'f' | 'p' | 'n' | 'u' | 'm' | 'c' | 'd' |
-'da' | 'h' | 'k' | 'M' | 'G' | 'T' | 'P' | 'E' | 'Z' | 'Y' .
+    Digit ::= '0' | NonZeroDigit .
 
-BinaryPrefix ::= 'Ki' | 'Mi' | 'Gi' | 'Ti' | 'Pi' | 'Ei' | 'Zi' | 'Yi' .
+    GtOneDigit ::= '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
+
+    NonZeroDigit ::= '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
+
+    SIPrefix ::= 'y' | 'z' | 'a' | 'f' | 'p' | 'n' | 'u' | 'm' | 'c' | 'd' |
+    'da' | 'h' | 'k' | 'M' | 'G' | 'T' | 'P' | 'E' | 'Z' | 'Y' .
+
+    BinaryPrefix ::= 'Ki' | 'Mi' | 'Gi' | 'Ti' | 'Pi' | 'Ei' | 'Zi' | 'Yi' .
 
 """
 import typing
