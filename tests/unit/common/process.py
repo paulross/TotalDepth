@@ -96,14 +96,16 @@ def test_extract_json():
 
 def test_extract_json_as_table():
     istream = io.StringIO(EXAMPLE_PROCESS_LOG)
-    result = process.extract_json_as_table(istream)
-    # pprint.pprint(result)
-    # print('\n'.join(result))
-    expected = """#t(s)                RSS  PageFaults        User   Mean_CPU%   Inst_CPU% Timestamp
-0.2             28475392       10272         0.3      135.9%      135.9% 2019-10-14T17:44:46.955519
-1.2             55967744       18940         1.3      104.3%       96.9% 2019-10-14T17:44:47.960414
-2.2             41500672       19427         2.3      101.2%       97.4% 2019-10-14T17:44:48.963983
-3.3             56074240       23014         3.3      100.4%       98.8% 2019-10-14T17:44:50.012988
-4.3             46026752       23347         4.3      100.0%       98.4% 2019-10-14T17:44:51.019315
-5.3             56565760       25993         5.3       99.4%       96.9% 2019-10-14T17:44:52.024755"""
-    assert '\n'.join(result) == expected
+    json_result = process.extract_json(istream)
+    table, t_min, t_max, rss_min, rss_max = process.extract_json_as_table(json_result)
+    # pprint.pprint(table)
+    result = '\n'.join(' '.join(row) for row in table)
+    # print(result)
+    expected = """#t(s)                 RSS PageFaults/s         User    Mean_CPU%    Inst_CPU% Timestamp label
+0.2              28475392 43974.865437          0.3       135.9%       135.9% 2019-10-14T17:44:46.955519 # 
+1.2              55967744  8625.019915          1.3       104.3%        96.9% 2019-10-14T17:44:47.960414 # 
+2.2              41500672   485.321285          2.3       101.2%        97.4% 2019-10-14T17:44:48.963983 # 
+3.3              56074240  3419.228639          3.3       100.4%        98.8% 2019-10-14T17:44:50.012988 # 
+4.3              46026752   330.924416          4.3       100.0%        98.4% 2019-10-14T17:44:51.019315 # 
+5.3              56565760  2631.550734          5.3        99.4%        96.9% 2019-10-14T17:44:52.024755 # """
+    assert result == expected

@@ -240,10 +240,10 @@ def test_ASCII(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
-        (LogicalData(b'\x57\x14\x13\x15\x14\x0f\x02\x6c'), '1987-04-19 21:20:15.620'),
+        (LogicalData(b'\x57\x14\x13\x15\x14\x0f\x02\x6c'), '1987-04-19 21:20:15.620 DST'),
         # RP66V2 example from the printed standard. The website is in error as it uses all nulls.
         # http://w3.energistics.org/rp66/v2/rp66v2_sec2.html#11_4_2
-        (LogicalData(b'\x00\x01\x01\x00\x00\x00\x00\x00'), '1900-01-01 00:00:00.000'),
+        (LogicalData(b'\x00\x01\x01\x00\x00\x00\x00\x00'), '1900-01-01 00:00:00.000 STD'),
     )
 )
 def test_DTIME(ld, expected):
