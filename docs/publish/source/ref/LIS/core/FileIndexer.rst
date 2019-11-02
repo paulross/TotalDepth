@@ -3,8 +3,8 @@
 
 .. _TotalDepth.LIS.core.FileIndexer:
 
-LIS File Indexer
-================
+TotalDepth.LIS.core.FileIndexer
+===============================
 
 #Contents:
 

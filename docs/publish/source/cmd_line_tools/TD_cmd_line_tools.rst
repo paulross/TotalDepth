@@ -444,5 +444,5 @@ The links in the last column are to the SVG plots. Her is a screen shot of one:
 Sample Plots
 ^^^^^^^^^^^^^^^^^^^
 
-Here is an actual plot from a `LAS file <../copy_to_html/plots/Triple_Combo_46_LAS.svg>`_ and there are many more examples here: :ref:`TotalDepth-examples-plots`.
+Here is an actual plot from a `LAS file <../_static/plots/Triple_Combo_46_LAS.svg>`_ and there are many more examples here: :ref:`TotalDepth-examples-plots`.
 

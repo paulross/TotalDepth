@@ -4,7 +4,7 @@
 .. TotalDepth Technical Notes.
 
 ###############################
-TotalDepth Technical Notes
+Technical Notes
 ###############################
 
 This collect together various technical descriptions of how TotalDepth solves certain problems.
@@ -15,9 +15,8 @@ Contents:
     :maxdepth: 3
    
     LIS_indexing
-    
     performance
-    
     plotting
-    
     saas
+    process_monitoring
+    gnuplot

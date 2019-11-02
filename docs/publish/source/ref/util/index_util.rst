@@ -10,15 +10,21 @@ Utility Package Reference
 Contents:
 
 .. toctree::
-	:maxdepth: 2
-	
-	CmnCmdOpts
-	DictTree
-	DirWalk
-	ExecTimer
-	FileBuffer
-	Histogram
-	HtmlUtils
-	XmlWrite
-	
-	plot/index_plot
+    :maxdepth: 2
+
+    CmnCmdOpts
+    DictTree
+    DirWalk
+    ExecTimer
+    FileBuffer
+    FileStatus
+    Histogram
+    HtmlUtils
+    PatternSearch
+    RemoveDupeFiles
+    XmlWrite
+    archive
+    bin_file_type
+    gnuplot
+        
+    plot/index_plot

@@ -3,9 +3,8 @@
 
 .. Description of LIS LogPass module
 
-###############################
-The LIS Log Pass
-###############################
+TotalDepth.LIS.core.LogPass
+===========================
 
 This describes the LIS LogPass class that encapsulates a Log Pass. A log pass is the binary log data plus the record (DFSR) that describes the format of the binary data. Internally the binary data is converted to a FrameSet that wraps a numpy array.
 
@@ -13,21 +12,19 @@ The LogPass module is located in ``src/TotalDepth/LIS/core`` and can be imported
 
 	from TotalDepth.LIS.core import LogPass
 
-***************************************************
 LogPass API Reference
-***************************************************
+---------------------
 
 .. automodule:: TotalDepth.LIS.core.LogPass
     :members:
 
-***************************************************
 LogPass Usage
-***************************************************
+-------------------
 
 Typically a LogPass will be created directly or via a LIS FileIndexer. The latter technique is recommended as it is simpler.
 
 Direct usage
-===============
+^^^^^^^^^^^^^^^^^^^
 
 LogPass objects are used via a three step process and this reflects the sequential process of reading a LIS file:
 
@@ -36,7 +33,7 @@ LogPass objects are used via a three step process and this reflects the sequenti
 3. Populating the FrameSet with real values from the file (many times).
 
 Construction with a DFSR
-----------------------------------
+""""""""""""""""""""""""""
 
 A LogPass object needs to be constructed with an instance of a LogiRec.LrDFSRRead. The LogPass will take a reference to the DFSR so the caller need not. The caller can always access the DFSR with the ``.dfsr`` property.
 
@@ -44,13 +41,10 @@ Assuming myF is a LIS File object positioned at the start of the DFSR::
 
 	myLp = LogPass.LogPass(LogiRec.LrDFSRRead(myF), 'FileID')
 
-Resources
-^^^^^^^^^^^^^^^^^^
-
 At this stage no FrameSet is created so the resource usage is minimal.
 
 Add Binary Data Records
--------------------------------------------------------
+""""""""""""""""""""""""""
 
 The method ``addType01Data(tellLr, lrType, lrLen, xAxisVal)`` adds the position of an IFLR that contain frame data. This method takes these arguments:
 
@@ -64,9 +58,6 @@ xAxisVal    The value of the X Axis as a number of the first frame of the Logica
 =========   =============
 
 This call should be made for each relevant IFLR as they are encountered in sequence.
-
-Resources
-^^^^^^^^^^^^^^^^^^
 
 At this stage no FrameSet is created and the arguments are encoded into an RLE object so the resource usage is minimal.
 
@@ -98,13 +89,10 @@ Setting a frame set for frames [0:16:4] i.e. frame indexes (0,4,8,12) and channe
 
 	myLogPass.setFrameSet(myFile, theFrSl=slice(0,16,4), theChList=[0, 4, 7])
 
-Resources
-^^^^^^^^^^^^^^^^^^
-
 Any previous FrameSet will be freed and a new FrameSet of the appropriate dimension is created so the resource usage can be significant.
 
 Using a LIS Indexer
-=====================
+---------------------------
 
 A :ref:`TotalDepth.LIS.core.FileIndexer` [``TotalDepth.LIS.core.FileIndexer.FileIndex``] object will perform the necessary construction of a LogPass and the population with Logical Record positions with ``addType01Data()`` leaving the user just to call ``setFrameSet()``. Thus a FileIndex object imposes low resource usage until the user wishes to populate the frame set.
 
@@ -122,9 +110,9 @@ An indexer will index a LIS file that has multiple Log Passes (e.g. repeat secti
         # The FrameSet is fully populated here...
         # Do something with it...
 
-***************************************************
+
 Testing
-***************************************************
+--------------
 
 The unit tests are in ``test/TestLogPass.py``. This should take under a second to execute.
 

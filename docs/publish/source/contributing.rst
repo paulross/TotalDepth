@@ -98,7 +98,7 @@ Finally change the version to ``M.m.(p+1)rc0``, in this example ``0.2.2rc0`` in 
     * *setup.cfg*
     * *setup.py*
     * *src/TotalDepth/__init__.py*
-    * /docs/source/conf.py (two places).
+    * */docs/source/conf.py* (two places).
 
 In *src/TotalDepth/__init__.py* change ``VERSION = (0, 2, 2, 'rc0')``
 

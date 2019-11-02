@@ -13,6 +13,7 @@ logger = logging.getLogger(__file__)
 
 
 def add_gnuplot_to_argument_parser(parser: argparse.ArgumentParser) -> None:
+    """Adds ``--gnuplot=...`` to the argument parser."""
     v = version()
     logger.info(f'gnuplot version: "{v}"')
     print(f'gnuplot version: "{v}"')
@@ -38,10 +39,9 @@ def _num_columns(table: typing.Sequence[typing.Sequence[typing.Any]]) -> int:
     return num_colums_set.pop()
 
 
-def create_gnuplot_dat(
-        table: typing.Sequence[typing.Sequence[typing.Any]]) -> str:
+def create_gnuplot_dat(table: typing.Sequence[typing.Sequence[typing.Any]]) -> str:
     """
-    Returns a pretty formatted string of the data in the given table suitable for use as a gnuplot .dat file.
+    Returns a pretty formatted string of the data in the given table suitable for use as a gnuplot ``.dat`` file.
     """
     num_columns = _num_columns(table)
     column_widths = reduce(
@@ -89,6 +89,7 @@ def invoke_gnuplot(path: str, name: str, table: typing.Sequence[typing.Sequence[
 
 
 def write_test_file(path: str, typ: str) -> int:
+    """Writes out a Gnuplot test file."""
     test_stdin = '\n'.join(
         [
             f'set terminal {typ}',

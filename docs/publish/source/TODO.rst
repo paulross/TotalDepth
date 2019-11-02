@@ -3,87 +3,234 @@
 
 .. Summary of TODO stuff
 
-###############################
-A Bag Full of TODO's
-###############################
+**************************
+TODO's
+**************************
 
-This is just a gathering area for work items that should be done at some point.
+This is a gathering place for features that are would be nice to have in future releases.
+Priority numbers are 0 (not going to be done) and >0 which is an ever more important priority.
 
 TotalDepth is currently at **Alpha**, release version |release|.
 
-**************************
-Current Release
-**************************
 
-This lists known work (and area) that are known lacuna in the Alpha release.
+TotalDepth Improvements (General)
+=================================
 
-LIS Format Support
+
+.. list-table:: **TotalDepth Improvements (General)**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - TD.Cython
+      - Remove Cython as a dependency. Merge C++ replacement code.
+      - 1
+      - 
+    * - TD.SQL
+      - Extract data to database.
+      - 1
+      - 
+    * - TD.GEO
+      - Extract Latitude and Longitude as trustworthy metadata.
+      - 1
+      - 
+    * - TD.svfs
+      - Merge Sparse Virtual File System C/C++ code.
+      - 1
+      - 
+
+
+LAS Improvements
 ===========================
 
-General
---------------
+.. list-table:: **LAS Improvements**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - LAS.fast
+      - Merge the fast array parser with ~x50 performance.
+      - 2
+      - 
+    * - LAS.zip
+      - Read directly from .zip files.
+      - 1
+      - 
+    * - LAS.v3
+      - Support version 3.0. However this is barely used by the industry.
+      - 0
+      - 
+    * - LAS.merge_O_P
+      - Merge ``~O`` section int ``~P`` if correct format.
+      - 1
+      - 
+    * - LAS.consist
+      - Consistency checking of mutual data such as STRT/STOP/STEP.
+      - 1
+      - 
 
-* XNAM direct support for LIS-A
 
-LIS Index
---------------
-
-* Various forms of persistence: XML, Pickle, JSON (no).
-* Insert or append binary representation of the index to the LIS file.
-
-LIS FrameSet/LogPass
----------------------------
-
-* Provide a numpy view on each sub-channel.
-* X Axis quality i.e. duplicate, missing frames.
-* Change up log to down log (needs to rearrange multi-sampled channels).
-* Clearer view on what 'frame spacing' actually is.
-
-Representation Codes
------------------------
-
-* Check overflow/underflow on write.
-
-LAS Format Support
+LIS Improvements
 ===========================
 
-* Read directly from .zip files.
-* Version 3.0 support.
-* Merge ``~O`` section int ``~P`` if correct format.
-* Consistency checking of mutual data such as STRT/STOP/STEP
 
-Plotting
-====================
+.. list-table:: **LIS Improvements**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - LIS.HDT
+      - Expand/contract 'sub-channels' to actual channels and use the universal Frame Array.
+      - 2
+      - 
+    * - LIS.XNAM
+      - Full XNAM direct support for LIS-A.
+      - 2
+      - 
+    * - LIS.index_c
+      - Merge fast indexer in C for x100 performance.
+      - 2
+      - 
+    * - LIS.index_inline
+      - Insert or append binary representation of the index to the LIS file.
+      - 1
+      - 
+    * - LIS.rc_over
+      - Check Rep Code overflow/underflow on write.
+      - 1
+      - 
 
-* There is quite a lot of technical debt built up since we added LgFormat support, this area needs a review.
-* Header: Some mud parameters being dropped.
-* Benchmarks to characterise execution time and profiling.
+RP66V1 Improvements
+=====================
 
-**************************
-Future Releases
-**************************
+.. list-table:: **RP66V1 Improvements**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - RP66V1.index_0
+      - Low level index implemented in C/C++.
+      - 2
+      - 
+    * - RP66V1.index_1
+      - Mid level index implemented in C/C++.
+      - 1
+      - 
+    * - RP66V1.units
+      - Full conformance with RP66V1 standard, RP66V2 standard and accepted practice.
+      - 1
+      - 
+    * - RP66V1.plot
+      - Plot RP66V1 files. See Plot.spec.
+      - 1
+      - 
+    * - RP66V1.fail
+      - When a file deviates from the standard then the user can specify what deviations are acceptable.
+        Examples: UNITS Rep Code, multiple ORIGIN records.
+      - 1
+      - 
 
-This lists known work (and area) that are would be nice to have in future releases.
 
-Format Support
+Plotting Improvements
+=====================
+
+.. list-table:: **Plotting Improvements**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - Plot.spec
+      - There is quite a lot of technical debt built up since we added LgFormat support, this area needs a review.
+        Implement the XML design.
+      - 2
+      - 
+    * - Plot.head
+      - Header: Some mud parameters being dropped.
+      - 1
+      - 
+    * - Plot.perf
+      - Benchmarks to characterise execution time and profiling.
+      - 1
+      - 
+    * - Plot.cXML
+      - Integrate the existing XML writer written in C for x4 speedup.
+      - 1
+      - 
+    * - Plot.hover
+      - Display values when hovering over curves in SVG.
+      - 1
+      - 
+    * - Plot.PDF
+      - PDF output of plots. Probably use reportlab.
+      - 1
+      - 
+
+
+File Formats
 ==================
 
-Wireline Formats
-------------------
 
-* RP66v1
-* RP66v2
-* WellLogML?
-* ATLAS BIT?
+.. list-table:: **File Format Support**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - Format.RP66V2
+      - Unused by the industry.
+      - 0
+      - 
+    * - Format.WellLogML
+      - Unused by the industry.
+      - 0
+      - 
+    * - Format.ATLAS
+      - Legacy. No publicly available examples.
+      - 0
+      - 
+    * - Format.SEGY
+      - Other FOSS project specialise in this.
+      - 0
+      - 
+    * - Format.SEGD
+      - Used at all?
+      - 0
+      - 
 
-Seismic Formats
------------------------
+Frame Array Improvements
+=========================
 
-* SEG-Y
-* SEG-D?
-* Other SEG formats
-
-Miscellaneous Formats
---------------------------
-
-* Position
+.. list-table:: **Frame Array Improvements**
+    :widths: 20 60 10 10
+    :header-rows: 1
+    
+    * - ID
+      - Description
+      - Priority
+      - Status
+    * - Frame.common
+      - Common Frame Array code for all file formats.
+      - 1
+      - 
+    * - Frame.buffer
+      - Implement frame processing in C++ using the buffer protocol.
+        Also shared memory with multiprocessing.
+      - 1
+      - 

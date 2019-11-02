@@ -1,10 +1,10 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-TotalDepth.util.CmnCmdOpts (Common Command Line Options)
+TotalDepth.util.archive (Archive Management)
 ========================================================
 
-.. automodule:: TotalDepth.util.CmnCmdOpts
+.. automodule:: TotalDepth.util.archive
 	:member-order: bysource
 	:members:
 	:special-members:

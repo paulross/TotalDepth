@@ -10,7 +10,7 @@ import TotalDepth.RP66V1.core.XAxis
 from TotalDepth.RP66V1.core import LogicalFile, File, StorageUnitLabel, LogPass, RepCode, AbsentValue, XAxis
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core.stringify import stringify_object_by_type
-from TotalDepth.common import Slice
+from TotalDepth.common import Slice, process
 from TotalDepth.util import XmlWrite
 
 
@@ -482,7 +482,7 @@ def html_write_body(
     )
 
 
-def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
+def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_process: bool,
                                        *, frame_slice: Slice.Slice) -> HTMLBodySummary:
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
@@ -490,10 +490,15 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO,
     Returns the text to use as a link.
     """
     with open(path_in, 'rb') as fobj:
+        if label_process:
+            process.add_message_to_queue(os.path.basename(path_in))
+        logger.info(f'html_scan_RP66V1_file_data_content(): Creating File.FileRead()')
         rp66v1_file = File.FileRead(fobj)
         logger.info(f'html_scan_RP66V1_file_data_content(): Creating LogicalFile.LogicalIndex()')
         logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
         logger.info(f'html_scan_RP66V1_file_data_content(): Writing to HTML.')
+        if label_process:
+            process.add_message_to_queue('Writing HTML')
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
                 with XmlWrite.Element(xhtml_stream, 'meta', {

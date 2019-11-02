@@ -1,10 +1,10 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-TotalDepth.util.CmnCmdOpts (Common Command Line Options)
+TotalDepth.util.FileStatus
 ========================================================
 
-.. automodule:: TotalDepth.util.CmnCmdOpts
+.. automodule:: TotalDepth.util.FileStatus
 	:member-order: bysource
 	:members:
 	:special-members:

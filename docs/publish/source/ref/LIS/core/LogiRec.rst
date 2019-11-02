@@ -1,5 +1,5 @@
-TotalDepth.LIS.core.LogiRec
-===========================
+TotalDepth.LIS.core.LogiRec (Logical Records)
+=============================================
 
 .. toctree::
    :maxdepth: 2

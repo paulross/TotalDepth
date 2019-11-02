@@ -1,10 +1,10 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-TotalDepth.util.CmnCmdOpts (Common Command Line Options)
+TotalDepth.util.RemoveDupeFiles (Remove Duplicate Files)
 ========================================================
 
-.. automodule:: TotalDepth.util.CmnCmdOpts
+.. automodule:: TotalDepth.util.RemoveDupeFiles
 	:member-order: bysource
 	:members:
 	:special-members:

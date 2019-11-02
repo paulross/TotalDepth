@@ -34,13 +34,16 @@ import os
 import logging
 import time
 import multiprocessing
-import CmnCmdOpts
 import argparse
 import collections
 import string
 
+
+from TotalDepth.util import CmnCmdOpts
+
 DEFAULT_MIN_RUN_LENGTH = 2
 PRINT_WIDTH = 120
+
 
 def _retHistAll(theFile):
     hist = collections.defaultdict(int)
@@ -50,6 +53,7 @@ def _retHistAll(theFile):
             break
         hist[c] += 1
     return hist
+
 
 def _retHistMatch(thePatt, theFile, theS=sys.stdout, showTell=False):
     hist = collections.defaultdict(int)
@@ -71,6 +75,7 @@ def _retHistMatch(thePatt, theFile, theS=sys.stdout, showTell=False):
         else:
             pIdx = 0
     return hist
+
 
 def _retHistCharRuns(theCharS, theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     hist = collections.defaultdict(int)
@@ -94,6 +99,7 @@ def _retHistCharRuns(theCharS, theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_
                 tellStart = None
     return hist, histRun
 
+
 def _pprintHist(theH, theS=sys.stdout):
     """Pretty prints a histogram."""
     if len(theH) > 0:
@@ -112,6 +118,7 @@ def _pprintHist(theH, theS=sys.stdout):
             )
 
 def _pprintResult(h, hr, theS=sys.stdout):
+    """Pretty print the result."""
     theS.write('Found: {:d}\n'.format(sum(h.values())))
     theS.write(' Values '.center(PRINT_WIDTH, '='))
     theS.write('\n')
@@ -124,24 +131,31 @@ def _pprintResult(h, hr, theS=sys.stdout):
     theS.write(' END Run lengths '.center(PRINT_WIDTH, '='))
     theS.write('\n')
 
+
 def reportAll(theFile, theS=sys.stdout):
+    """Print a histogram of byte values."""
     theS.write(' All Bytes '.center(PRINT_WIDTH, '='))
     theS.write('\n')
     _pprintHist(_retHistAll(theFile))
     theS.write(' END All Bytes '.center(PRINT_WIDTH, '='))
     theS.write('\n')
 
+
 def report0x80(theFile, theS=sys.stdout, theMin=1, showTell=False):
+    """Print a for 0x80."""
     theS.write('Searching for 0x80...\n'.format())
     _pprintResult(*_retHistCharRuns(b'\x80', theFile, theS, 1, showTell))
+
 
 def reportSpaceRuns(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for space runs minimum length {:d}...\n'.format(theMin))
     _pprintResult(*_retHistCharRuns(b' ', theFile, theS, theMin, showTell))
 
+
 def reportASCIIHigh(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII > 127 minimum length {:d}...\n'.format(theMin))
     _pprintResult(*_retHistCharRuns(bytes(range(128,256)), theFile, theS, theMin, showTell))
+
 
 def reportASCII(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII letters {:d}...\n'.format(theMin))
@@ -150,13 +164,16 @@ def reportASCII(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTel
             string.ascii_letters + string.digits + string.punctuation + string.whitespace, 'ascii')
     _pprintResult(*_retHistCharRuns(charS, theFile, theS, theMin, showTell))
 
+
 def reportASCIILow(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII <= 127 minimum length {:d}...\n'.format(theMin))
     _pprintResult(*_retHistCharRuns(bytes(range(0,128)), theFile, theS, theMin, showTell))
 
+
 def reportASCIIUppercase(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII uppercase letters {:d}...\n'.format(theMin))
     _pprintResult(*_retHistCharRuns(bytes(string.ascii_uppercase, 'ascii'), theFile, theS, theMin, showTell))
+
 
 def reportIDENT(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     """IDENT rep code:
@@ -166,6 +183,7 @@ def reportIDENT(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTel
     theS.write('Searching for IDENT length >= {:d}...\n'.format(theMin))
     charS = bytes([0,] + list(range(33,97)) + list(range(123,127)))
     _pprintResult(*_retHistCharRuns(charS, theFile, theS, theMin, showTell))
+
 
 def reportSLB(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for incidence of 21 03 53 4C 42 00  i.e. !.SLB.\n')
@@ -179,6 +197,7 @@ def reportSLB(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=
     theS.write(' END Values '.center(PRINT_WIDTH, '='))
     theS.write('\n')
 
+
 def reportTOOL(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for incidence of 04 54 4F 4F 4C  i.e. .TOOL\n')
     h = _retHistMatch(b'\x04TOOL', theFile, theS, showTell)
@@ -187,6 +206,7 @@ def reportTOOL(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell
     _pprintHist(h, theS)
     theS.write(' END Values '.center(PRINT_WIDTH, '='))
     theS.write('\n')
+
 
 def main():
     print ('Cmd: %s' % ' '.join(sys.argv))
@@ -225,6 +245,7 @@ def main():
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0
+
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()

@@ -1,5 +1,5 @@
 """
-Logs process information, such as memory usage, to a log as JSON. Example wit ('memory_info', 'cpu_times')::
+Logs process information, such as memory usage, to a log as JSON. Example with ('memory_info', 'cpu_times')::
 
     (Thread-7  ) ProcessLoggingThread JSON: {"memory_info": {"rss": 145448960, "vms": 4542902272, "pfaults": 37618, "pageins": 0}, "cpu_times": {"user": 0.28422032, "system": 0.099182912, "children_user": 0.0, "children_system": 0.0}}
 
@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import queue
+import random
 import re
 import sys
 import threading
@@ -32,22 +33,27 @@ from TotalDepth.util import gnuplot
 logger = logging.getLogger(__file__)
 
 
+#: Unique string in the log line
 LOGGER_PREFIX = 'ProcessLoggingThread-JSON'
+#: Regex for the unique string in the log line
 RE_LOG_LINE = re.compile(rf'^.+?{LOGGER_PREFIX}\s?(.+)$')
-# Matches '2019-06-07 11:57:58.390921'
+#: Regex for timestam, matches '2019-06-07 11:57:58.390921'
 DATETIME_NOW_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 assert datetime.datetime.strptime(str(datetime.datetime.now()), DATETIME_NOW_FORMAT)
+#: The JSON key that is the timestamp
 KEY_TIMESTAMP = 'timestamp'
-# psutil.Process().as_dict() has the following keys:
+#: The JSON key that is the label
+KEY_LABEL = 'label'
+#: psutil.Process().as_dict() has the following keys:
 PSUTIL_PROCESS_AS_DICT_KEYS = [
     'cmdline', 'connections', 'cpu_percent', 'cpu_times', 'create_time', 'cwd', 'environ', 'exe', 'gids',
     'memory_full_info', 'memory_info', 'memory_percent', 'name', 'nice', 'num_ctx_switches', 'num_fds', 'num_threads',
     'open_files', 'pid', 'ppid', 'status', 'terminal', 'threads', 'uids', 'username'
 ]
-# Usage: GNUPLOT_PLT.format(name=dat_file_name)
+#: Usage: GNUPLOT_PLT.format(name=dat_file_name)
 GNUPLOT_PLT = """
 set grid
-set title "Memory and CPU Usage."
+set title "Memory and CPU Usage." font ",14"
 set xlabel "Elapsed Time (s)"
 # set mxtics 5
 # set xrange [0:3000]
@@ -56,14 +62,14 @@ set xlabel "Elapsed Time (s)"
 
 #set logscale y
 set ylabel "Memory Usage (Mb)"
-# set yrange [1:1e5]
+# set yrange [0:500]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
 #set logscale y2
-set y2label "CPU Usage (%)"
-# set y2range [1e-4:10]
+set y2label "CPU Usage (%), Page Faults (10,000/s)"
+# set y2range [0:200]
 set y2tics
 
 set pointsize 1
@@ -75,11 +81,13 @@ set output "{name}.svg" # choose the output device
 
 # set key off
 
+{labels}
+
 #set key title "Window Length"
 #  lw 2 pointsize 2
 
-plot "{name}.dat" using 1:($2 / 1024**2) axes x1y1 title "RSS (Mb), left axis" with lines lt 1 lw 1, \\
-    "{name}.dat" using 1:($3 / 1000) axes x1y2 title "Page Faults (1000/s), right axis" with lines lt 3 lw 1, \\
+plot "{name}.dat" using 1:($2 / 1024**2) axes x1y1 title "RSS (Mb), left axis" with lines lt 1 lw 2, \\
+    "{name}.dat" using 1:($3 / 10000) axes x1y2 title "Page Faults (1000/s), right axis" with lines lt 3 lw 1, \\
     "{name}.dat" using 1:5 axes x1y2 title "Mean CPU (%), right axis" with lines lt 2 lw 1, \\
     "{name}.dat" using 1:6 axes x1y2 title "Instantaneous CPU (%), right axis" with lines lt 7 lw 1
 
@@ -88,6 +96,7 @@ reset
 
 
 def parse_timestamp(s: str) -> datetime.datetime:
+    """Read a string such as '2019-06-07 11:57:58.390921' and return a datetime."""
     return datetime.datetime.strptime(s, DATETIME_NOW_FORMAT)
 
 
@@ -104,11 +113,13 @@ def extract_json(istream: typing.TextIO) -> typing.List[typing.Dict[str, typing.
     return ret
 
 
-def extract_labels_from_json(json_data) -> typing.List[typing.List[str]]:
-    return [v for v in json_data if 'label' in v]
+def extract_labels_from_json(json_data: typing.List[typing.Dict[str, typing.Any]]) -> typing.List[typing.Dict[str, typing.Any]]:
+    """Returns a list of dicts of JSON data where 'label' is a key'."""
+    return [v for v in json_data if KEY_LABEL in v]
 
 
-def extract_json_as_table(json_data) -> typing.List[typing.List[str]]:
+def extract_json_as_table(json_data) -> typing.Tuple[typing.List[typing.List[str]], float, float, float, float]:
+    """Create a table from JSON suitable for a Gnuplot ``.dat`` file."""
     ret = [
         [
             f'{"#t(s)":12}',
@@ -118,16 +129,20 @@ def extract_json_as_table(json_data) -> typing.List[typing.List[str]]:
             f'{"Mean_CPU%":>12}',
             f'{"Inst_CPU%":>12}',
             f'{"Timestamp"}',
+            f'{KEY_LABEL}',
         ]
     ]
     prev_cpu = 0.0
     prev_elapsed_time = 0.0
     prev_page_faults = 0
+    t_min = rss_min = sys.float_info.max
+    t_max = rss_max = sys.float_info.min
     for record in json_data:
         mean_cpu_user = record["cpu_times"]["user"] / record["elapsed_time"]
         inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu) / (record["elapsed_time"] - prev_elapsed_time)
         # record["memory_info"]["pfaults"] is the cumulative total.
         inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults) / (record["elapsed_time"] - prev_elapsed_time)
+        label = record[KEY_LABEL] if KEY_LABEL in record else ''
         ret.append(
             [
                 f'{record["elapsed_time"]:<12.1f}',
@@ -137,12 +152,17 @@ def extract_json_as_table(json_data) -> typing.List[typing.List[str]]:
                 f'{mean_cpu_user:12.1%}',
                 f'{inst_cpu_user:12.1%}',
                 f'{record["timestamp"].strftime("%Y-%m-%dT%H:%M:%S.%f")}',
+                f'# {label}'
             ]
         )
         prev_cpu = record["cpu_times"]["user"]
         prev_elapsed_time = record["elapsed_time"]
         prev_page_faults = record["memory_info"]["pfaults"]
-    return ret
+        t_min = min(record["elapsed_time"], t_min)
+        t_max = max(record["elapsed_time"], t_max)
+        rss_min = min(record["memory_info"]["rss"], rss_min)
+        rss_max = max(record["memory_info"]["rss"], rss_max)
+    return ret, t_min, t_max, rss_min, rss_max
 
 
 def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
@@ -154,34 +174,35 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
         return ret
     with open(log_path) as instream:
         json_data = extract_json(instream)
-    table = extract_json_as_table(json_data)
+    table, _t_min, _t_max, rss_min, rss_max = extract_json_as_table(json_data)
     log_name = os.path.basename(log_path)
     labels = extract_labels_from_json(json_data)
-    # TODO: Convert label entry into a gnuplot arrows and label pair
-    ret = gnuplot.invoke_gnuplot(gnuplot_dir, log_name, table, GNUPLOT_PLT.format(name=log_name))
+    label_lines = []
+    y_value = (0.5 * (rss_max - rss_min)) / 1024**2
+    for label_dict in labels:
+        t_value = label_dict['elapsed_time']
+        label_lines.append(f'set arrow from {t_value},{y_value} to {t_value},0 lt -1 lw 1')
+        label_lines.append(
+            f'set label "{label_dict[KEY_LABEL]}" at {t_value},{y_value * 1.025}'
+            f' left font ",10" rotate by 90 noenhanced front'
+        )
+    ret = gnuplot.invoke_gnuplot(
+        gnuplot_dir, log_name, table, GNUPLOT_PLT.format(name=log_name, labels='\n'.join(label_lines))
+    )
     return ret
-
-# TODO: Have a module level queue.Queue the can be used to pass messages to this thread.
-#   These are then written out and the process data can be associated with them.
-# TODO: The can be plotted by gnuplot as labels:
-#   # arrows and labels
-#   set arrow from 27.57,70 to 27.57,87 lt 1
-#   set label "Threshold\nt=27.6s" at 27.57,69 center font ",12"
-#   set arrow from 33.83,70 to 33.83,82 lt 1
-#   set label "Touchdown\nt=33.8s" at 33.83,69 center font ",12"
 
 
 # Message passing
 process_queue = queue.Queue()
 
 
-def add_message_to_queue(self, msg: str) -> None:
+def add_message_to_queue(msg: str) -> None:
     """Adds a message onto the queue."""
     process_queue.put(msg)
 
 
 class ProcessLoggingThread(threading.Thread):
-
+    """Thread that regularly logs out process parameters."""
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
         if name is None:
             name = 'ProcMon'
@@ -208,23 +229,32 @@ class ProcessLoggingThread(threading.Thread):
         ret.update(kwargs)
         return ret
 
-    def run(self):
+    def _write_to_log(self) -> None:
+        """Write process data to log flushing message queue if necessary."""
+        assert self._run
+        if process_queue.empty():
+            logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data())}')
+        else:
+            while not process_queue.empty():
+                msg = process_queue.get()
+                logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data(label=msg))}')
+
+    def run(self) -> None:
+        """thread.run(). Write to log then sleep."""
         while self._run:
-            if process_queue.empty():
-                logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data())}')
-            else:
-                while not process_queue.empty():
-                    msg = process_queue.get()
-                    logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data(label=msg))}')
+            self._write_to_log()
             time.sleep(self._interval)
 
     def join(self, *args, **kwargs):
+        """thread.join(). Write to log last time."""
+        self._write_to_log()
         self._run = False
         super().join(*args, **kwargs)
 
 
 @contextlib.contextmanager
 def log_process(*args, **kwargs):
+    """Context manager to log process data at regular intervals."""
     process_thread = ProcessLoggingThread(args=args, kwargs=kwargs)
     process_thread.start()
     try:
@@ -234,6 +264,7 @@ def log_process(*args, **kwargs):
 
 
 def add_process_logger_to_argument_parser(parser: argparse.ArgumentParser) -> None:
+    """Add a ``--log-process`` option to the argument parser."""
     parser.add_argument(
         '--log-process', default=0.0, type=float,
         help='Writes process data such as memory usage as a log INFO line every LOG_PROCESS seconds.'
@@ -242,6 +273,7 @@ def add_process_logger_to_argument_parser(parser: argparse.ArgumentParser) -> No
 
 
 def main() -> int:
+    """Main CLI entry point. For testing."""
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s - %(filename)s - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s',
@@ -249,11 +281,16 @@ def main() -> int:
     if len(sys.argv) == 3:
         invoke_gnuplot(sys.argv[1], sys.argv[2])
     else:
-        memory = []
-        with log_process(1.0):
+        with log_process(0.1):
             for i in range(8):
-                memory.append(' ' * (16 * 1024**2))
-                time.sleep(2)
+                size = random.randint(128, 128 + 256) * 1024 ** 2
+                add_message_to_queue(f'String of {size:,d} bytes')
+                s = ' ' * (size)
+                # time.sleep(.8)
+                time.sleep(0.5 + random.random())
+                del s
+                # time.sleep(.4)
+                time.sleep(0.25 + random.random() / 2)
     return 0
 
 

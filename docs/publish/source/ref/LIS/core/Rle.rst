@@ -3,7 +3,7 @@
 
 .. _TotalDepth.LIS.core.Rle:
 
-TotalDepth.LIS.core.Rle (Run Length Encoding Module)
+TotalDepth.LIS.core.Rle (Run Length Encoding)
 ====================================================
 
 .. toctree::

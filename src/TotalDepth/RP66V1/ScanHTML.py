@@ -2,10 +2,8 @@
 Scans a RP66V1 file an prints out the summary.
 """
 import argparse
-import collections
 import logging
 import os
-import pprint
 import sys
 import time
 import typing
@@ -13,8 +11,6 @@ import typing
 import colorama
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-# from TotalDepth.RP66V1.core.Scan import scan_RP66V1_file_visible_records, scan_RP66V1_file_logical_data, \
-#     scan_RP66V1_file_data_content, scan_RP66V1_file_EFLR_IFLR
 from TotalDepth.RP66V1.core import Scan, HTML
 from TotalDepth.common import process, Slice, td_logging
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
@@ -48,7 +44,7 @@ class HTMLResult(typing.NamedTuple):
     html_summary: typing.Union[HTML.HTMLBodySummary, None]
 
 
-def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
+def scan_a_single_file(path_in: str, path_out: str, label_process: bool, **kwargs) -> HTMLResult:
     # logger.debug(f'Scanning "{path_in}" to "{path_out}"')
     file_path_out = path_out + '.html'
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
@@ -63,10 +59,10 @@ def scan_a_single_file(path_in: str, path_out: str, **kwargs) -> HTMLResult:
                     logger.debug(f'Making directory: {out_dir}')
                     os.makedirs(out_dir, exist_ok=True)
                 with open(file_path_out, 'w') as fout:
-                    html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, fout, **kwargs)
+                    html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, fout, label_process, **kwargs)
                 len_scan_output = os.path.getsize(file_path_out)
             else:
-                html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, sys.stdout, **kwargs)
+                html_summary = HTML.html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, **kwargs)
                 len_scan_output = -1
             result = HTMLResult(
                 path_in,
@@ -329,7 +325,7 @@ def _write_top_level_index_table_body(index_file_path: str,
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
-                     recurse: bool,
+                     recurse: bool, label_process: bool,
                      **kwargs) -> typing.Dict[str, HTMLResult]:
     # Required as we are going to split them by os.sep
     # NOTE: normpath removes trailing os.sep which is what we want.
@@ -342,13 +338,14 @@ def scan_dir_or_file(path_in: str, path_out: str,
         index_map_global: typing.Dict[str, HTMLResult] = {}
         if not recurse:
             for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
-                # print(file_in_out)
                 result = scan_a_single_file(
-                    file_in_out.filePathIn, file_in_out.filePathOut, **kwargs
+                    file_in_out.filePathIn, file_in_out.filePathOut, label_process, **kwargs
                 )
                 ret[file_in_out.filePathIn] = result
                 if not result.exception and not result.ignored:
                     index_map_global[result.path_output] = result
+            if label_process:
+                process.add_message_to_queue('Writing Indexes.')
             _write_indexes(path_out, index_map_global)
         else:
             len_path_in = len(path_in.split(os.sep))
@@ -360,13 +357,15 @@ def scan_dir_or_file(path_in: str, path_out: str,
                     # Respect sub-directories in root
                     # root_rel_to_path_in.append(file)
                     file_path_out = os.path.join(dir_out, file)
-                    result = scan_a_single_file(file_path_in, file_path_out, **kwargs)
+                    result = scan_a_single_file(file_path_in, file_path_out, label_process, **kwargs)
                     ret[file_path_in] = result
                     if not result.exception and not result.ignored:
                         index_map_global[result.path_output] = result
+            if label_process:
+                process.add_message_to_queue('Writing Indexes.')
             _write_indexes(path_out, index_map_global)
     else:
-        ret[path_in] = scan_a_single_file(path_in, path_out, **kwargs)
+        ret[path_in] = scan_a_single_file(path_in, path_out, label_process, **kwargs)
     return ret
 
 
@@ -513,7 +512,7 @@ def main() -> int:
                 args.path_in,
                 args.path_out,
                 args.recurse,
-                # frame_spacing=args.frame_spacing,
+                label_process=True,
                 frame_slice=Slice.create_slice_or_split(args.frame_slice),
             )
     else:
@@ -521,9 +520,11 @@ def main() -> int:
             args.path_in,
             args.path_out,
             args.recurse,
-            # frame_spacing=args.frame_spacing,
+            label_process=False,
             frame_slice=Slice.create_slice_or_split(args.frame_slice),
         )
+    if args.log_process > 0.0:
+        process.add_message_to_queue('Processing HTML Complete.')
     clk_exec = time.perf_counter() - clk_start
     # print('Execution time = %8.3f (S)' % clk_exec)
     size_scan = size_input = 0

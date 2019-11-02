@@ -22,7 +22,7 @@ Software Technology
 
 For rapid development and performance TotalDepth is written in `Python <http://www.python.org>`_ with performance critical code written in C or C++.
 
-Petrophysical File Formats that TotalDepth can Process
+Petrophysical File Formats Supported by TotalDepth
 =========================================================
 
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
@@ -40,7 +40,7 @@ Petrophysical File Formats that TotalDepth can Process
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | WellLogML             | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
-| RP66v1 "DLIS"         | Full      | 0.4.0     |                                                                   |
+| RP66v1 "DLIS"         | Full      | 0.3.0     |                                                                   |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | RP66v2 "DLIS"         | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+

@@ -118,7 +118,7 @@ LgFormat XML Files
 =====================
 These appear to originate from some of Schlumberger's "free" software. 
 
-Here is an example LgFormat XML file for plotting `HDT logs <../copy_to_html/plots/HDT.xml>`_ .TotalDepth supplies an number of examples of these.
+Here is an example LgFormat XML file for plotting `HDT logs <../_static/plots/HDT.xml>`_ .TotalDepth supplies an number of examples of these.
 
 There are a number of problems [#]_ with the LgFormat which is why TotalDepth only supports a subset of it while we look for something better.
 

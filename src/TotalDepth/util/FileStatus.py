@@ -35,10 +35,13 @@ import hashlib
 import fnmatch
 from optparse import OptionParser
 
+
 class ExceptionFileStatus(Exception):
     pass
 
+
 class FileInfo(object):
+    """Obtains the status of a file, hash SLOC etc."""
     def __init__(self, thePath):
         self._path = thePath
         self._sloc = 0
@@ -56,11 +59,13 @@ class FileInfo(object):
             self._count += 1
         
     def writeHeader(self, theS=sys.stdout):
+        """Write the summary header."""
         theS.write('%8s  ' % 'SLOC')
         theS.write('%8s  ' % 'Size')
         theS.write('%s' % 'MD5')
-    
+
     def write(self, theS=sys.stdout, incHash=True):
+        """Write the summary."""
         theS.write('%8d  ' % self._sloc)
         theS.write('%8d  ' % self._size)
         if incHash:
@@ -68,14 +73,17 @@ class FileInfo(object):
     
     @property
     def sloc(self):
+        """SLOC"""
         return self._sloc
     
     @property
     def size(self):
+        """Size in bytes."""
         return self._size
     
     @property
     def count(self):
+        """Number of files, 0 or 1."""
         return self._count
     
     def __iadd__(self, other):
@@ -83,14 +91,17 @@ class FileInfo(object):
         self._size += other.size
         self._count += other.count
         return self
-        
+
+
 class FileInfoSet(object):
+    """Represents a set of files from a directory tree."""
     def __init__(self, thePath, glob=None, isRecursive=False, isTestOnly=False):
         # Map of (path : class FileInfo, ...}
         self._infoMap = {}
         self.processPath(thePath, glob, isRecursive, isTestOnly)
     
     def processPath(self, theP, glob=None, isRecursive=False, isTestOnly=False):
+        """Process a file or directory."""
         if os.path.isdir(theP):
             self.processDir(theP, glob, isRecursive, isTestOnly)
         elif os.path.isfile(theP):
@@ -114,6 +125,7 @@ class FileInfoSet(object):
                 self.processPath(p, glob, isRecursive, isTestOnly)
     
     def write(self, theS=sys.stdout):
+        """Write out the summary."""
         kS = sorted(self._infoMap.keys())
         fieldWidth = max([len(k) for k in kS])
         theS.write('%-*s  ' % (fieldWidth, 'File'))
@@ -130,6 +142,7 @@ class FileInfoSet(object):
         theS.write('\n')
         
 def main():
+    """Process a path and write out the file summary."""
     usage = """usage: %prog [options] dir
 Counts files and sizes."""
     print('Cmd: %s' % ' '.join(sys.argv))

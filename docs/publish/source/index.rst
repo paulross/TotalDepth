@@ -9,11 +9,11 @@
 TotalDepth
 ===========================
 
-TotalDepth is an Open Source, cross platform, software collection that processes petrophysical data from the oil field such as wireline logs, seismic data and so on.
+TotalDepth is an Open Source, cross platform, software collection that processes petrophysical data from the oil field such as wireline logs.
 
 If you are new here then have a look at some :ref:`TotalDepth-examples`. For more detail see :ref:`TotalDepth-intro`.
 
-The `TotalDepth project <https://github.com/paulross/TotalDepth>`_ is currently at **Alpha** version |version|, release |release|. For the licence see :ref:`licence_text`.
+The `TotalDepth project <https://github.com/paulross/TotalDepth>`_ is currently at **Alpha**, development version |version|, release version |release|. For the licence see :ref:`licence_text`.
 
 Contents
 ===============

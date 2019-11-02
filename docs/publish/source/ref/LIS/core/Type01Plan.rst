@@ -3,8 +3,8 @@
 
 .. _TotalDepth.LIS.core.Type01Plan:
 
-TotalDepth.LIS.core.Type01Plan
-===============================
+TotalDepth.LIS.core.Type01Plan (Binary Frame Data Random Access)
+================================================================
 
 .. toctree::
    :maxdepth: 2

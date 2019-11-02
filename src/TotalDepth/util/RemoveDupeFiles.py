@@ -47,6 +47,7 @@ def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
 
 
 def main() -> int:
+    """Main CLI entry point."""
     print(f'CMD:', ' '.join(sys.argv))
     parser = argparse.ArgumentParser(description="""Deletes duplicate files in the given tree.""")
     parser.add_argument('path', help='Path to the directory.')
