@@ -32,7 +32,9 @@ Reference
 ----------
 
 .. automodule:: TotalDepth.LIS.core.RepCode
-   :members:
+    :member-order: bysource
+    :members:
+    :special-members:
 
 ``pRepCode`` Module
 --------------------
@@ -50,7 +52,9 @@ Reference
 ^^^^^^^^^^^^^^^
 
 .. automodule:: TotalDepth.LIS.core.pRepCode
-   :members:
+    :member-order: bysource
+    :members:
+    :special-members:
 
 ``cRepCode`` Module
 ------------------------
@@ -69,7 +73,9 @@ Reference
 
 
 .. automodule:: TotalDepth.LIS.core.cRepCode
-   :members:
+    :member-order: bysource
+    :members:
+    :special-members:
 
 
 Testing

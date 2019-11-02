@@ -5,5 +5,6 @@ TotalDepth.util.plot.Track (Track Module)
 =============================================
 
 .. automodule:: TotalDepth.util.plot.Track
-	:member-order: bysource
-	:members:
+    :member-order: bysource
+    :members:
+    :special-members:

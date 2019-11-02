@@ -16,7 +16,9 @@ LogPass API Reference
 ---------------------
 
 .. automodule:: TotalDepth.LIS.core.LogPass
+    :member-order: bysource
     :members:
+    :special-members:
 
 LogPass Usage
 -------------------

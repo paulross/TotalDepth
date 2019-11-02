@@ -6,8 +6,9 @@ TotalDepth.util.plot.SVGWriter (SVG Writer Module)
 
 
 .. automodule:: TotalDepth.util.plot.SVGWriter
-	:members:
-	:special-members:
+    :member-order: bysource
+    :members:
+    :special-members:
 
 Examples
 -----------------

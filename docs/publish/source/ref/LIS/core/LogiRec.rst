@@ -8,4 +8,3 @@ TotalDepth.LIS.core.LogiRec (Logical Records)
     :member-order: bysource
     :members:
     :special-members:
-

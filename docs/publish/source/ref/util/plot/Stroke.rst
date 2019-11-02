@@ -5,6 +5,6 @@ TotalDepth.util.plot.Stroke (Plot Pen Stroke)
 ==================================================
 
 .. automodule:: TotalDepth.util.plot.Stroke
-	:member-order: bysource
-	:members:
-
+    :member-order: bysource
+    :members:
+    :special-members:

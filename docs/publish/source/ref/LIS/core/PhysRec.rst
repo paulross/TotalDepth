@@ -7,4 +7,4 @@ TotalDepth.LIS.core.PhysRec (Physical Record Handler)
 .. automodule:: TotalDepth.LIS.core.PhysRec
     :member-order: bysource
     :members:
-
+    :special-members:

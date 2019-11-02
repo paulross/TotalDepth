@@ -5,6 +5,6 @@ TotalDepth.util.plot.LogHeader (Plotting Well Log API headers)
 ================================================================
 
 .. automodule:: TotalDepth.util.plot.LogHeader
-	:member-order: bysource
-	:members:
-
+    :member-order: bysource
+    :members:
+    :special-members:

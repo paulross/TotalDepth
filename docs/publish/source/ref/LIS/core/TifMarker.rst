@@ -5,5 +5,6 @@ TotalDepth.LIS.core.TifMarker (TIF Marker Handling)
    :maxdepth: 2
 
 .. automodule:: TotalDepth.LIS.core.TifMarker
-   :members:
-
+    :member-order: bysource
+    :members:
+    :special-members:

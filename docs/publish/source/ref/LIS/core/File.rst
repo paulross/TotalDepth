@@ -7,4 +7,4 @@ TotalDepth.LIS.core.File
 .. automodule:: TotalDepth.LIS.core.File
     :member-order: bysource
     :members:
-
+    :special-members:

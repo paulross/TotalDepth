@@ -12,7 +12,9 @@ TotalDepth.LIS.core.FileIndexer
    :maxdepth: 2
 
 .. automodule:: TotalDepth.LIS.core.FileIndexer
-   :members:
+    :member-order: bysource
+    :members:
+    :special-members:
 
 Usage
 -----

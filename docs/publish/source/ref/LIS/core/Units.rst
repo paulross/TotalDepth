@@ -5,7 +5,9 @@ TotalDepth.LIS.core.Units (Unit Conversion)
    :maxdepth: 2
 
 .. automodule:: TotalDepth.LIS.core.Units
+    :member-order: bysource
     :members:
+    :special-members:
 
 
 Examples

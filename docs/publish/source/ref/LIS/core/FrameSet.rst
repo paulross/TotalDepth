@@ -16,15 +16,13 @@ The FrameSet module is located in ``src/TotalDepth/LIS/core`` and can be importe
 
 	from TotalDepth.LIS.core import FrameSet
 
-***************************************************
 FrameSet Internals
-***************************************************
+-------------------------
 
 The internal representation of the FrameSet uses only Python and numpy structures and types, it is thus ignorant of the LIS file format or data structures apart from that described below.
 
-***************************************************
 LIS Dependancies
-***************************************************
+---------------------
 
 In the current version of the code there are a number of dependencies on knowledge of the LIS file format (or at least TotalDepth's representation of that format):
 
@@ -38,18 +36,16 @@ In the current version of the code there are a number of dependencies on knowled
 
 These dependencies restrict the use of FrameSet to processing LIS data, if they were removed then FrameSet could be used for other file formats but there is no obvious use case for that as, apart from LIS, TotalDepth supports LAS (trivially simple frame sets) and will support RP66 at some point. The latter may trigger a refactoring of the FrameSet module.
 
-***************************************************
 FrameSet API Reference
-***************************************************
+=============================
 
 .. automodule:: TotalDepth.LIS.core.FrameSet
     :member-order: bysource
     :members:
+    :special-members:
 
 
-
-***************************************************
 FrameSet Usage
-***************************************************
+===================
 
-
+TODO:
