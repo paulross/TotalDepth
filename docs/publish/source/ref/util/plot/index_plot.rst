@@ -11,25 +11,18 @@ Contents:
 .. toctree::
 	:maxdepth: 2
 
-	Coord
-	Stroke
-	
-	SVGWriter
-	
-	PlotConstants
-
-	Track
-	XGrid
-	
-	XMLCfg
-	XMLMatches
-	
 	AREACfg
+	Coord
 	FILMCfg
 	FILMCfgXML
+	LogHeader
+	Plot
+	PlotConstants
 	PRESCfg
 	PRESCfgXML
-	
-	LogHeader
-	
-	Plot
+	Stroke
+	SVGWriter
+	Track
+	XGrid
+	XMLCfg
+	XMLMatches

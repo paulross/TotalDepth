@@ -17,7 +17,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
 # Paul Ross: apaulross@gmail.com
-"""Does...
+"""Used to find the dimensions of an API header drawn in SVG such as Inkscape.
+
+This is merely for development and discovery.
 
 Created on Dec 31, 2011
 

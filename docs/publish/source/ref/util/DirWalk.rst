@@ -1,8 +1,8 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-Directory Walking
-===================
+TotalDepth.util.DirWalk (Directory Walking)
+============================================
 
 .. automodule:: TotalDepth.util.DirWalk
 	:member-order: bysource

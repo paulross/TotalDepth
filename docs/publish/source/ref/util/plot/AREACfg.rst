@@ -1,8 +1,8 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-AREA Plotting Configuration
-===============================
+TotalDepth.util.plot.AREACfg (AREA Plotting Configuration)
+===========================================================
 
 .. automodule:: TotalDepth.util.plot.AREACfg
 	:member-order: bysource

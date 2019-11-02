@@ -1,9 +1,8 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-****************************
-SVG Writer Module
-****************************
+TotalDepth.util.plot.SVGWriter (SVG Writer Module)
+=======================================================
 
 
 .. automodule:: TotalDepth.util.plot.SVGWriter
@@ -11,7 +10,7 @@ SVG Writer Module
 	:special-members:
 
 Examples
-===================
+-----------------
 
 All these examples assume these imports::
 
@@ -21,7 +20,7 @@ All these examples assume these imports::
     from TotalDepth.util.plot import Coord
 
 Construction
---------------------------------
+^^^^^^^^^^^^^^^^^^^
 
 Writing to an in-memory file::
 
@@ -39,7 +38,7 @@ Writing to an in-memory file::
     <svg height="20.000mm" version="1.1" width="100.000mm" xmlns="http://www.w3.org/2000/svg"/>
 
 Writing Objects to SVG
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Writing a rectangles to a stream::
 

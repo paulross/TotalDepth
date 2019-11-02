@@ -1,8 +1,8 @@
 .. moduleauthor:: Paul Ross <apaulross@gmail.com>
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
-Histogram
-=======================
+TotalDepth.util.Histogram
+=================================
 
 .. automodule:: TotalDepth.util.Histogram
 	:member-order: bysource
