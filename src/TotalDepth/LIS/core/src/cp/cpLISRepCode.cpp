@@ -3,7 +3,6 @@
 //  TotalDepth
 //
 //  Created by Paul Ross on 13/01/2019.
-//  Copyright © 2019 Engineering UN. All rights reserved.
 //
 #include "Python.h"
 
@@ -49,7 +48,6 @@ static PyObject *to68(PyObject *module, PyObject *arg) {
     PyObject *ret = NULL;
     double value;
     uint32_t as_68;
-//    long as_68_l;
     assert(arg);
     assert(! PyErr_Occurred());
     /* Treat arg as a borrowed reference. */
@@ -73,9 +71,6 @@ static PyObject *to68(PyObject *module, PyObject *arg) {
                      __FUNCTION__, __FILE__, __LINE__);
         goto except;
     }
-//    fprintf(stdout, "to68(%f): becomes ", value);
-//    PyObject_Print(ret, stdout, 0);
-//    fprintf(stdout, "\n");
     assert(! PyErr_Occurred());
     assert(ret);
     goto finally;
@@ -122,16 +117,10 @@ static PyModuleDef cpRepCodemodule = {
 PyMODINIT_FUNC
 PyInit_cpRepCode(void)
 {
-    PyObject *m= PyModule_Create(&cpRepCodemodule);
+    PyObject *m = PyModule_Create(&cpRepCodemodule);
     if (m == NULL) {
         return NULL;
     }
-//    if (PyModule_AddIntConstant(m, "RC_49_SIZE", RC_49_SIZE)) {
-//        return NULL;
-//    }
-//    if (PyModule_AddIntConstant(m, "RC_68_SIZE", RC_68_SIZE)) {
-//        return NULL;
-//    }
     MODULE_ADD_INT_CONSTANT(m, RC_49_SIZE);
     MODULE_ADD_INT_CONSTANT(m, RC_68_SIZE);
     /* Possible other initialisations of globals or exceptions. */

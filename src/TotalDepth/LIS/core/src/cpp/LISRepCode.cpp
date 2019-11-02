@@ -3,7 +3,6 @@
 //  TotalDepth
 //
 //  Created by Paul Ross on 14/01/2019.
-//  Copyright © 2019 Engineering UN. All rights reserved.
 //
 
 #include "LISRepCode.h"

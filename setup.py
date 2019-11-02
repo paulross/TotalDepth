@@ -77,32 +77,27 @@ ext_modules = [
     Extension(
         "TotalDepth.LIS.core.cRepCode",
         sources=[
-            "src/TotalDepth/LIS/core/cRepCode.pyx",
+            "src/TotalDepth/LIS/core/src/cython/cRepCode.pyx",
         ]
     ),
     Extension(
         "TotalDepth.LIS.core.cFrameSet",
         sources=[
-            "src/TotalDepth/LIS/core/cFrameSet.pyx",
+            "src/TotalDepth/LIS/core/src/cython/cFrameSet.pyx",
         ]
+    ),
+    Extension(
+        "TotalDepth.LIS.core.cpRepCode",
+        sources=[
+            "src/TotalDepth/LIS/core/src/cp/cpLISRepCode.cpp",
+            "src/TotalDepth/LIS/core/src/cpp/LISRepCode.cpp",
+        ],
+        extra_compile_args=[
+            '-std=c++14',
+        ],
     ),
 ]
 
-# ext_modules.extend(
-#     [
-#         Extension(
-#             "TotalDepth.LIS.core.cpRepCode",
-#             sources=[
-#                 "src/TotalDepth/LIS/core/cpLISRepCode.cpp",
-#                 "src/TotalDepth/LIS/core/LISRepCode.cpp",
-#             ],
-#             extra_compile_args=[
-#                 # '-std=libc++',
-#                 '-std=c++14',
-#             ],
-#         ),
-#     ]
-# )
 
 print('TRACE:', ext_modules)
 
