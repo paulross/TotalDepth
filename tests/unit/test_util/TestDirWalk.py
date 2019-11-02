@@ -115,7 +115,7 @@ class TestDirWalk(unittest.TestCase):
     def test_06(self):
         """TestDirWalk.test_06(): Input only, *.py, recursion and biggest first."""
         # print()
-        for v in DirWalk.dirWalk('.', theOut=None, theFnMatch='*.py', recursive=True, bigFirst=True):
+        for v in DirWalk.dirWalk('.', theOut='', theFnMatch='*.py', recursive=True, bigFirst=True):
             pass
             # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 

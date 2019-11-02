@@ -86,7 +86,7 @@ class TestRleType01(unittest.TestCase):
             [
                 [0, 3, 6, 9, 12, 15, 18, 21]
              ],
-             [list(r) for r in myR.rangeList()]
+             [list(r) for r in myR.ranges()]
         )
         self.assertEqual(0, myR.first())
         self.assertEqual(21, myR.last())
@@ -181,7 +181,7 @@ class TestRleType01(unittest.TestCase):
         # Check property access
         print(str(myR))
         self.assertEqual(myR[0].datum, 0)
-        self.assertEqual(myR[0].stride, None)
+        self.assertEqual(myR[0].stride, 0)
         self.assertEqual(myR[0].repeat, 0)
         # self.assertEqual(myR[1].datum, 3)
         # self.assertEqual(myR[1].stride, 3)
@@ -321,7 +321,7 @@ class TestRleType01(unittest.TestCase):
                 [1536],
                 [1664, 1792, 1920]
              ],
-             [list(r) for r in myR.rangeList()]
+             [list(r) for r in myR.ranges()]
         )
         self.assertEqual(0, myR.first())
         self.assertEqual(1920, myR.last())

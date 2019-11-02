@@ -212,7 +212,7 @@ class TestCmnCmdOpts(unittest.TestCase):
         # print(myNs._get_kwargs())
         # print(myP.format_usage())
         # print(myP.format_help())
-        self.assertEqual("""usage: Program [-h] [--version] [-j JOBS] [-k] [-l LOGLEVEL] [-g] [-r] in out
+        self.assertEqual("""usage: Program [-h] [--version] [-j JOBS] [-k] [-l LOG_LEVEL] [-g] [-r] in out
 """, myP.format_usage())
 
 class Special(unittest.TestCase):

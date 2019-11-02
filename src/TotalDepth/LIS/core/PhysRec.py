@@ -738,8 +738,7 @@ class PhysRecWrite(PhysRecBase):
         ):
         """Constructor with:
         theFile - A file like object or string, if the latter it assumed to be a path.
-        theFileId - File identifier, this could be a path for example. If
-            None the RawStream will try and cope with it.
+        theFileId - File identifier, this could be a path for example. If None the RawStream will try and cope with it.
         keepGoing - If True we do our best to keep going.
         hasTif - Insert TIF markers or not.
         thePrLen - Max Physical Record length, defaults to the maximum possible length.
