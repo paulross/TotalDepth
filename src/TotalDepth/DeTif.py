@@ -167,7 +167,8 @@ def get_errors(tifs: typing.List[TifMarker], file_size: int) -> typing.List[str]
 
 def strip_tif(file_in: typing.BinaryIO, file_out: typing.BinaryIO) -> typing.Tuple[int, int]:
     """Read file_in then strip TIF markers and write to file_out.
-    The only error detected is negative """
+    The only error detected is negative reads.
+    Returns a tuple of (tif_markers_stripped, bytes_written)."""
     file_in.seek(0)
     file_out.seek(0)
     tif = _read_tifs(file_in)

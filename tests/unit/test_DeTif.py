@@ -78,7 +78,7 @@ def test_is_tif_start_error():
 )
 def test_strip_tif(file_in, expected_bytes_written, expected_tif_markers_stripped):
     file_out = io.BytesIO()
-    bytes_written, tif_markers_stripped = DeTif.strip_tif(file_in, file_out)
+    tif_markers_stripped, bytes_written = DeTif.strip_tif(file_in, file_out)
     assert bytes_written == expected_bytes_written
     assert tif_markers_stripped == expected_tif_markers_stripped
     assert len(file_out.getvalue()) == bytes_written

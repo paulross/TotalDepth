@@ -1,4 +1,5 @@
 import io
+import typing
 
 import pytest
 
@@ -81,10 +82,10 @@ def _eflr_frame() -> EFLR.ExplicitlyFormattedLogicalRecord:
     return EFLR.ExplicitlyFormattedLogicalRecord(4, ld)
 
 
-def _iflr(by: bytes) -> IFLR.IndirectlyFormattedLogicalRecord:
+def _iflr_and_logical_data_from_bytes(by: bytes) -> typing.Tuple[IFLR.IndirectlyFormattedLogicalRecord, File.LogicalData]:
     ld = File.LogicalData(by)
     iflr = IFLR.IndirectlyFormattedLogicalRecord(1, ld)
-    return iflr
+    return iflr, ld
 
 
 @pytest.mark.parametrize(
@@ -92,7 +93,7 @@ def _iflr(by: bytes) -> IFLR.IndirectlyFormattedLogicalRecord:
     ((1, by) for by in IFLR_BYTES)
 )
 def test_iflr_constructs(lr_type, by):
-    iflr = _iflr(by)
+    iflr, _logical_data = _iflr_and_logical_data_from_bytes(by)
     assert iflr is not None
     assert iflr.lr_type == lr_type
     assert iflr.object_name == FRAME_ARRAY_IDENT
@@ -103,7 +104,7 @@ def test_iflr_constructs(lr_type, by):
     enumerate(IFLR_BYTES)
 )
 def test_iflr_frame_numbers(iflr_index, by):
-    iflr = _iflr(by)
+    iflr, _logical_data = _iflr_and_logical_data_from_bytes(by)
     # +2 as the frame number starts at 1 in RP66V1 and this test data has omitted the first frame.
     assert iflr.frame_number == iflr_index + 2
 
@@ -150,8 +151,8 @@ def test_read_iflr():
     frame_array: LogPass.FrameArray = log_pass[FRAME_ARRAY_IDENT]
     frame_array.init_arrays(len(IFLR_BYTES))
     for f, by in enumerate(IFLR_BYTES):
-        iflr = _iflr(by)
-        frame_array.read(iflr.logical_data, f)
+        iflr, logical_data = _iflr_and_logical_data_from_bytes(by)
+        frame_array.read(logical_data, f)
     assert str(frame_array.channels[0].array) == """[[ 75197.]
  [154724.]
  [234606.]
@@ -236,8 +237,8 @@ def test_read_iflr_partial():
     }
     frame_array.init_arrays_partial(len(IFLR_BYTES), channels)
     for f, by in enumerate(IFLR_BYTES):
-        iflr = _iflr(by)
-        frame_array.read_partial(iflr.logical_data, f, channels)
+        iflr, logical_data = _iflr_and_logical_data_from_bytes(by)
+        frame_array.read_partial(logical_data, f, channels)
     assert str(frame_array.channels[0].array) == """[[ 75197.]
  [154724.]
  [234606.]
