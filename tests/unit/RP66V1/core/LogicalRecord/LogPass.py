@@ -1,8 +1,12 @@
-from TotalDepth.RP66V1.core.File import LogicalData
-from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
+import numpy as np
+
+
+from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core.LogicalRecord import EFLR
+from TotalDepth.RP66V1.core.LogicalRecord import IFLR
+from TotalDepth.RP66V1.core.LogicalRecord import Types
 from TotalDepth.RP66V1.core import LogPass
-from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
-from TotalDepth.RP66V1.core.RepCode import ObjectName
+from TotalDepth.RP66V1.core import RepCode
 
 
 BYTES_CHANNEL = b'\xf8\x07CHANNEL\x0259<\tLONG-NAME\x00\x14<\nPROPERTIES\x00\x14<\x13REPRESENTATION-CODE\x00\x0e<\x05UNITS\x00\x14<\tDIMENSION\x00\x0e<\x04AXIS\x00\x17<\rELEMENT-LIMIT\x00\x0e<\x06SOURCE\x00\x18<\tRELOG-NUM\x00\x0ep\x0b\x00\x04DEPT)\x01\x1aMWD Tool Measurement Depth\x00)\x01\x00\x00\x00\x02)\x01\x060.1 in)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03INC)\x01\x0bInclination\x00)\x01\x00\x00\x00\x02)\x01\x03deg)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03AZI)\x01\x07Azimuth\x00)\x01\x00\x00\x00\x02)\x01\x03deg)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x05MTTVD)\x01\x18MWD Tool Measurement TVD\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x04SECT)\x01\x07Section\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03RCN)\x01\x1eRectangular Co-ordinates North\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x03RCE)\x01\x1dRectangular Co-ordinates East\x00)\x01\x00\x00\x00\x02)\x01\x01m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x05DLSEV)\x01\x10Dog-leg Severity\x00)\x01\x00\x00\x00\x02)\x01\x07deg/30m)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00p\x0b\x00\x04TLTS)\x01\x17Tool Temperature Static\x00)\x01\x00\x00\x00\x02)\x01\x04degC)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x01\x00)\x01\x00\x00\x00\x00'
@@ -28,13 +32,13 @@ BYTES_IFLR = [
 
 
 def test_eflr_channel_ctor():
-    ld = LogicalData(BYTES_CHANNEL)
-    EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
+    ld = File.LogicalData(BYTES_CHANNEL)
+    EFLR.ExplicitlyFormattedLogicalRecord(Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
 
 
 def test_eflr_channel_attributes():
-    ld = LogicalData(BYTES_CHANNEL)
-    eflr = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
+    ld = File.LogicalData(BYTES_CHANNEL)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
     print(eflr)
     print(eflr.str_long())
     assert str(eflr) == "<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'59'>"
@@ -143,25 +147,33 @@ def test_eflr_channel_attributes():
 
 
 def test_eflr_channel_obnames():
-    ld = LogicalData(BYTES_CHANNEL)
-    channels = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
+    ld = File.LogicalData(BYTES_CHANNEL)
+    channels = EFLR.ExplicitlyFormattedLogicalRecord(
+        Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld
+    )
     channel_obnames = [obj.name for obj in channels.objects]
     # print(channel_obnames)
     assert channel_obnames == [
-        ObjectName(O=11, C=0, I=b'DEPT'), ObjectName(O=11, C=0, I=b'INC'), ObjectName(O=11, C=0, I=b'AZI'),
-        ObjectName(O=11, C=0, I=b'MTTVD'), ObjectName(O=11, C=0, I=b'SECT'), ObjectName(O=11, C=0, I=b'RCN'),
-        ObjectName(O=11, C=0, I=b'RCE'), ObjectName(O=11, C=0, I=b'DLSEV'), ObjectName(O=11, C=0, I=b'TLTS'),
+        RepCode.ObjectName(O=11, C=0, I=b'DEPT'), RepCode.ObjectName(O=11, C=0, I=b'INC'),
+        RepCode.ObjectName(O=11, C=0, I=b'AZI'), RepCode.ObjectName(O=11, C=0, I=b'MTTVD'),
+        RepCode.ObjectName(O=11, C=0, I=b'SECT'), RepCode.ObjectName(O=11, C=0, I=b'RCN'),
+        RepCode.ObjectName(O=11, C=0, I=b'RCE'), RepCode.ObjectName(O=11, C=0, I=b'DLSEV'),
+        RepCode.ObjectName(O=11, C=0, I=b'TLTS'),
     ]
 
 
 def test_eflr_frame_ctor():
-    ld = LogicalData(BYTES_FRAME)
-    EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld)
+    ld = File.LogicalData(BYTES_FRAME)
+    EFLR.ExplicitlyFormattedLogicalRecord(
+        Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld
+    )
 
 
 def test_eflr_frame_attributes():
-    ld = LogicalData(BYTES_FRAME)
-    frame = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld)
+    ld = File.LogicalData(BYTES_FRAME)
+    frame = EFLR.ExplicitlyFormattedLogicalRecord(
+        Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld
+    )
     assert len(frame.objects) == 1
     # print()
     # print(frame)
@@ -190,22 +202,26 @@ def test_eflr_frame_attributes():
 
 
 def test_eflr_frame_channels():
-    ld = LogicalData(BYTES_FRAME)
-    frame = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld)
+    ld = File.LogicalData(BYTES_FRAME)
+    frame = EFLR.ExplicitlyFormattedLogicalRecord(
+        Types.EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld
+    )
     obj = frame[0]
     channels = obj[b'CHANNELS'].value
     assert len(channels) == 9
     assert channels == [
-        ObjectName(O=11, C=0, I=b'DEPT'), ObjectName(O=11, C=0, I=b'INC'), ObjectName(O=11, C=0, I=b'AZI'),
-        ObjectName(O=11, C=0, I=b'MTTVD'), ObjectName(O=11, C=0, I=b'SECT'), ObjectName(O=11, C=0, I=b'RCN'),
-        ObjectName(O=11, C=0, I=b'RCE'), ObjectName(O=11, C=0, I=b'DLSEV'), ObjectName(O=11, C=0, I=b'TLTS')
+        RepCode.ObjectName(O=11, C=0, I=b'DEPT'), RepCode.ObjectName(O=11, C=0, I=b'INC'),
+        RepCode.ObjectName(O=11, C=0, I=b'AZI'), RepCode.ObjectName(O=11, C=0, I=b'MTTVD'),
+        RepCode.ObjectName(O=11, C=0, I=b'SECT'), RepCode.ObjectName(O=11, C=0, I=b'RCN'),
+        RepCode.ObjectName(O=11, C=0, I=b'RCE'), RepCode.ObjectName(O=11, C=0, I=b'DLSEV'),
+        RepCode.ObjectName(O=11, C=0, I=b'TLTS')
     ]
 
 
 def _create_log_pass():
-    ld = LogicalData(BYTES_CHANNEL)
+    ld = File.LogicalData(BYTES_CHANNEL)
     channels = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
-    ld = LogicalData(BYTES_FRAME)
+    ld = File.LogicalData(BYTES_FRAME)
     frame = EFLR.ExplicitlyFormattedLogicalRecord(4, ld)
     log_pass = LogPass.log_pass_from_RP66V1(frame, channels)
     return log_pass
@@ -222,9 +238,9 @@ def test_example_iflr_bytes():
 def test_example_iflr():
     print()
     for by in BYTES_IFLR:
-        ld = LogicalData(by)
+        ld = File.LogicalData(by)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
-        print(iflr)
+        # print(iflr)
 
 
 def test_log_pass_str():
@@ -246,27 +262,201 @@ def test_log_pass_str():
 
 def test_example_iflr_process():
     log_pass: LogPass.LogPass = _create_log_pass()
+    # ObjectName(O=11, C=0, I=b'0B')
+    frame_array: LogPass.FrameArray = log_pass[RepCode.ObjectName(11, 0, b'0B')]
+    frame_array.init_arrays(len(BYTES_IFLR))
     # print()
-    for by in BYTES_IFLR:
-        ld = LogicalData(by)
-        iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
-        result = log_pass.process_IFLR(iflr)
-        # print(result)
-
-
-def test_example_iflr_append():
-    log_pass: LogPass = _create_log_pass()
-    print()
-    result = []
-    for by in BYTES_IFLR:
-        ld = LogicalData(by)
-        iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
-        log_pass.append(iflr)
-    # print(result)
-    # depth = result[0]
-    # print(depth)
-    # print([depth[i] - depth[i-1] for i in range(1, len(BYTES_IFLR))])
-    # print(log_pass.object_name_map)
-    frame_obj = ObjectName(O=11, C=0, I=b'0B')
-    for r, channel_data in enumerate(result):
-        print(f'{str(log_pass[frame_obj][r].long_name):40}', ', '.join([f'{c:10.2f}' for c in channel_data]))
+    for frame_number, by in enumerate(BYTES_IFLR):
+        ld = File.LogicalData(by)
+        _iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
+        # frame_array.read_x_axis(ld, frame_number=0)
+        frame_array.read(ld, frame_number=frame_number)
+        # print(frame_array)
+    # print()
+    expected = [
+        # X axis
+        np.array(
+            [
+                [0.],
+                [75197.],
+                [154724.],
+                [234606.],
+                [311024.],
+                [381102.],
+                [386839.],
+                [428193.],
+                [447720.],
+                [466339.],
+                [489547.],
+                [500559.],
+                [523772.],
+                [538638.],
+                [542417.],
+                [550409.],
+            ]
+        ),
+        np.array(
+            [
+                [0.],
+                 [0.50002027],
+                 [0.50002027],
+                 [0.7500017],
+                 [0.50002027],
+                 [0.99998325],
+                 [0.9699998],
+                 [0.9699998],
+                 [0.69999975],
+                 [1.0600001],
+                 [0.9699998],
+                 [0.8800001],
+                 [0.78999996],
+                 [1.7599998],
+                 [2.2000003],
+                 [2.9],
+             ],
+        ),
+        np.array(
+            [
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [200.44],
+                [205.45],
+                [206.18],
+                [208.69],
+                [202.7],
+                [200.93],
+                [255.77002],
+                [243.87],
+                [241.15],
+                [240.7],
+            ]
+        ),
+        np.array(
+            [
+                [0.],
+                [190.99757],
+                [392.98987],
+                [595.8777],
+                [789.96594],
+                [967.95013],
+                [982.51935],
+                [1087.5443],
+                [1137.139],
+                [1184.4233],
+                [1243.3641],
+                [1271.3306],
+                [1330.2852],
+                [1368.0354],
+                [1377.6296],
+                [1397.9094],
+            ]
+        ),
+        np.array(
+            [
+                [0.],
+                [0.833423],
+                [2.596255],
+                [4.809544],
+                [6.92684],
+                [9.256786],
+                [9.268364],
+                [7.632412],
+                [6.981416],
+                [6.338459],
+                [5.399805],
+                [4.980779],
+                [4.457969],
+                [4.138596],
+                [3.98476],
+                [3.54544],
+            ]
+        ),
+        np.array(
+            [
+                [0.],
+                [0.833423],
+                [2.596255],
+                [4.809544],
+                [6.92684],
+                [9.256786],
+                [9.268364],
+                [7.632412],
+                [6.981416],
+                [6.338459],
+                [5.399805],
+                [4.980779],
+                [4.457969],
+                [4.138596],
+                [3.98476],
+                [3.54544],
+            ]
+        ),
+        np.array(
+            [
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [0.],
+                [-0.043073],
+                [-0.735641],
+                [-1.049728],
+                [-1.387169],
+                [-1.841496],
+                [-2.009587],
+                [-2.565323],
+                [-3.338264],
+                [-3.632012],
+                [-4.421124],
+            ]
+        ),
+        np.array(
+            [
+                [-9.9925000e+02],
+                [7.9068176e-02],
+                [0.0000000e+00],
+                [3.7815217e-02],
+                [3.7815217e-02],
+                [8.4224798e-02],
+                [3.9912241e+00],
+                [2.4064228e-02],
+                [1.6329297e-01],
+                [2.3032904e-01],
+                [7.0473805e-02],
+                [1.0141353e-01],
+                [3.9362201e-01],
+                [7.9411954e-01],
+                [1.4060384e+00],
+                [1.0347618e+00],
+            ]
+        ),
+        np.array(
+            [
+                [-999.25],
+                [-999.25],
+                [-999.25],
+                [-999.25],
+                [-999.25],
+                [-999.25],
+                [50.3937],
+                [56.4173],
+                [58.4252],
+                [58.4252],
+                [62.4409],
+                [62.4409],
+                [62.4409],
+                [62.4409],
+                [62.4409],
+                [58.4252],
+            ]
+        ),
+    ]
+    for c, channel in enumerate(frame_array.channels):
+        # print(channel.array)
+        # np.testing.assert_array_almost_equal(channel.array, expected[c])
+        assert str(channel.array) == str(expected[c])
