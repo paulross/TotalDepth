@@ -4,10 +4,14 @@
 """The setup script."""
 
 import os
+import sysconfig
 
 from setuptools import Extension, setup, find_packages
 
 # from Cython.Build import cythonize
+
+# Mac OS:
+# MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py develop
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -73,6 +77,8 @@ XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 #     module_list="src/TotalDepth/LIS/core/*.pyx",
 # )
 
+extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
+
 ext_modules = [
     Extension(
         "TotalDepth.LIS.core.cRepCode",
@@ -92,7 +98,8 @@ ext_modules = [
             "src/TotalDepth/LIS/core/src/cp/cpLISRepCode.cpp",
             "src/TotalDepth/LIS/core/src/cpp/LISRepCode.cpp",
         ],
-        extra_compile_args=[
+        extra_compile_args=extra_compile_args + [
+            "-Isrc/TotalDepth/LIS/core/src/cpp/",
             '-std=c++14',
         ],
     ),

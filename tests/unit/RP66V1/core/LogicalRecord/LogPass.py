@@ -1,6 +1,6 @@
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core.LogPass import LogPass
+from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core.LogicalRecord.Types import EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 
@@ -35,109 +35,111 @@ def test_eflr_channel_ctor():
 def test_eflr_channel_attributes():
     ld = LogicalData(BYTES_CHANNEL)
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'CHANNEL'], ld)
-    # print(eflr)
-    assert str(eflr) == """EFLR Set type: b'CHANNEL' name: b'59'
+    print(eflr)
+    print(eflr.str_long())
+    assert str(eflr) == "<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'59'>"
+    assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'59'>
   Template [9]:
-    CD: 001 11100 L: b'LONG-NAME' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11100 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11100 L: b'REPRESENTATION-CODE' C: 0 R: SLONG U: b'' V: None
-    CD: 001 11100 L: b'UNITS' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11100 L: b'DIMENSION' C: 0 R: SLONG U: b'' V: None
-    CD: 001 11100 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-    CD: 001 11100 L: b'ELEMENT-LIMIT' C: 0 R: SLONG U: b'' V: None
-    CD: 001 11100 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-    CD: 001 11100 L: b'RELOG-NUM' C: 0 R: SLONG U: b'' V: None
+    CD: 001 11100 L: b'LONG-NAME' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11100 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11100 L: b'REPRESENTATION-CODE' C: 0 R: 14 (SLONG) U: b'' V: None
+    CD: 001 11100 L: b'UNITS' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11100 L: b'DIMENSION' C: 0 R: 14 (SLONG) U: b'' V: None
+    CD: 001 11100 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 11100 L: b'ELEMENT-LIMIT' C: 0 R: 14 (SLONG) U: b'' V: None
+    CD: 001 11100 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+    CD: 001 11100 L: b'RELOG-NUM' C: 0 R: 14 (SLONG) U: b'' V: None
   Objects [9]:
     OBNAME: O: 11 C: 0 I: b'DEPT'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'MWD Tool Measurement Depth']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'0.1 in']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'MWD Tool Measurement Depth']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'0.1 in']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'INC'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Inclination']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'deg']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Inclination']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'deg']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'AZI'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Azimuth']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'deg']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Azimuth']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'deg']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'MTTVD'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'MWD Tool Measurement TVD']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'm']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'MWD Tool Measurement TVD']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'm']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'SECT'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Section']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'm']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Section']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'm']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'RCN'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Rectangular Co-ordinates North']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'm']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Rectangular Co-ordinates North']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'm']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'RCE'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Rectangular Co-ordinates East']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'm']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Rectangular Co-ordinates East']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'm']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'DLSEV'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Dog-leg Severity']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'deg/30m']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Dog-leg Severity']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'deg/30m']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]
     OBNAME: O: 11 C: 0 I: b'TLTS'
-      CD: 001 01001 L: b'LONG-NAME' C: 1 R: ASCII U: b'' V: [b'Tool Temperature Static']
-      CD: 000 00000 L: b'PROPERTIES' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: SLONG U: b'' V: [2]
-      CD: 001 01001 L: b'UNITS' C: 1 R: ASCII U: b'' V: [b'degC']
-      CD: 001 01001 L: b'DIMENSION' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'AXIS' C: 0 R: OBNAME U: b'' V: None
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: SLONG U: b'' V: [1]
-      CD: 000 00000 L: b'SOURCE' C: 0 R: OBJREF U: b'' V: None
-      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: SLONG U: b'' V: [0]"""
+      CD: 001 01001 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Tool Temperature Static']
+      CD: 000 00000 L: b'PROPERTIES' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 14 (SLONG) U: b'' V: [2]
+      CD: 001 01001 L: b'UNITS' C: 1 R: 20 (ASCII) U: b'' V: [b'degC']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 14 (SLONG) U: b'' V: [1]
+      CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      CD: 001 01001 L: b'RELOG-NUM' C: 1 R: 14 (SLONG) U: b'' V: [0]"""
 
 
 def test_eflr_channel_obnames():
@@ -161,27 +163,31 @@ def test_eflr_frame_attributes():
     ld = LogicalData(BYTES_FRAME)
     frame = EFLR.ExplicitlyFormattedLogicalRecord(EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME'], ld)
     assert len(frame.objects) == 1
-    # print(eflr)
-    assert str(frame) == """EFLR Set type: b'FRAME' name: b'60'
+    # print()
+    # print(frame)
+    assert str(frame) == "<ExplicitlyFormattedLogicalRecord EFLR Set type: b'FRAME' name: b'60'>"
+    # print(frame.str_long())
+    assert frame.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'FRAME' name: b'60'>
   Template [8]:
-    CD: 001 11100 L: b'DESCRIPTION' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11100 L: b'CHANNELS' C: 0 R: OBNAME U: b'' V: None
-    CD: 001 11100 L: b'INDEX-TYPE' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11100 L: b'DIRECTION' C: 0 R: ASCII U: b'' V: None
-    CD: 001 11110 L: b'SPACING' C: 0 R: FSINGL U: b'0.1 in' V: None
-    CD: 001 11100 L: b'ENCRYPTED' C: 0 R: SLONG U: b'' V: None
-    CD: 001 11110 L: b'INDEX-MIN' C: 0 R: FSINGL U: b'0.1 in' V: None
-    CD: 001 11110 L: b'INDEX-MAX' C: 0 R: FSINGL U: b'0.1 in' V: None
+    CD: 001 11100 L: b'DESCRIPTION' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11100 L: b'CHANNELS' C: 0 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 11100 L: b'INDEX-TYPE' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11100 L: b'DIRECTION' C: 0 R: 20 (ASCII) U: b'' V: None
+    CD: 001 11110 L: b'SPACING' C: 0 R: 2 (FSINGL) U: b'0.1 in' V: None
+    CD: 001 11100 L: b'ENCRYPTED' C: 0 R: 14 (SLONG) U: b'' V: None
+    CD: 001 11110 L: b'INDEX-MIN' C: 0 R: 2 (FSINGL) U: b'0.1 in' V: None
+    CD: 001 11110 L: b'INDEX-MAX' C: 0 R: 2 (FSINGL) U: b'0.1 in' V: None
   Objects [1]:
     OBNAME: O: 11 C: 0 I: b'0B'
-      CD: 000 00000 L: b'DESCRIPTION' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01001 L: b'CHANNELS' C: 9 R: OBNAME U: b'' V: [ObjectName(O=11, C=0, I=b'DEPT'), ObjectName(O=11, C=0, I=b'INC'), ObjectName(O=11, C=0, I=b'AZI'), ObjectName(O=11, C=0, I=b'MTTVD'), ObjectName(O=11, C=0, I=b'SECT'), ObjectName(O=11, C=0, I=b'RCN'), ObjectName(O=11, C=0, I=b'RCE'), ObjectName(O=11, C=0, I=b'DLSEV'), ObjectName(O=11, C=0, I=b'TLTS')]
-      CD: 001 01001 L: b'INDEX-TYPE' C: 1 R: ASCII U: b'' V: [b'BOREHOLE-DEPTH']
-      CD: 000 00000 L: b'DIRECTION' C: 0 R: ASCII U: b'' V: None
-      CD: 001 01011 L: b'SPACING' C: 1 R: FSINGL U: b'0.1 in' V: [0.0]
-      CD: 001 01001 L: b'ENCRYPTED' C: 1 R: SLONG U: b'' V: [0]
-      CD: 001 01011 L: b'INDEX-MIN' C: 1 R: FSINGL U: b'0.1 in' V: [0.0]
-      CD: 001 01011 L: b'INDEX-MAX' C: 1 R: FSINGL U: b'0.1 in' V: [836779.0]"""
+      CD: 000 00000 L: b'DESCRIPTION' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01001 L: b'CHANNELS' C: 9 R: 23 (OBNAME) U: b'' V: [ObjectName(O=11, C=0, I=b'DEPT'), ObjectName(O=11, C=0, I=b'INC'), ObjectName(O=11, C=0, I=b'AZI'), ObjectName(O=11, C=0, I=b'MTTVD'), ObjectName(O=11, C=0, I=b'SECT'), ObjectName(O=11, C=0, I=b'RCN'), ObjectName(O=11, C=0, I=b'RCE'), ObjectName(O=11, C=0, I=b'DLSEV'), ObjectName(O=11, C=0, I=b'TLTS')]
+      CD: 001 01001 L: b'INDEX-TYPE' C: 1 R: 20 (ASCII) U: b'' V: [b'BOREHOLE-DEPTH']
+      CD: 000 00000 L: b'DIRECTION' C: 0 R: 20 (ASCII) U: b'' V: None
+      CD: 001 01011 L: b'SPACING' C: 1 R: 2 (FSINGL) U: b'0.1 in' V: [0.0]
+      CD: 001 01001 L: b'ENCRYPTED' C: 1 R: 14 (SLONG) U: b'' V: [0]
+      CD: 001 01011 L: b'INDEX-MIN' C: 1 R: 2 (FSINGL) U: b'0.1 in' V: [0.0]
+      CD: 001 01011 L: b'INDEX-MAX' C: 1 R: 2 (FSINGL) U: b'0.1 in' V: [836779.0]"""
+
 
 def test_eflr_frame_channels():
     ld = LogicalData(BYTES_FRAME)
@@ -201,7 +207,8 @@ def _create_log_pass():
     channels = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     ld = LogicalData(BYTES_FRAME)
     frame = EFLR.ExplicitlyFormattedLogicalRecord(4, ld)
-    return LogPass(frame, channels)
+    log_pass = LogPass.log_pass_from_RP66V1(frame, channels)
+    return log_pass
 
 
 def test_logpass_ctor():
@@ -222,22 +229,23 @@ def test_example_iflr():
 
 def test_log_pass_str():
     log_pass: LogPass = _create_log_pass()
-    print()
-    print(log_pass)
-    assert str(log_pass) == """LogPass: FrameObject: OBNAME: O: 11 C: 0 I: b'0B' b''
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'DEPT'  R:   2 C:  1 b'0.1 in' [1] b'MWD Tool Measurement Depth'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'INC'   R:   2 C:  1 b'deg' [1] b'Inclination'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'AZI'   R:   2 C:  1 b'deg' [1] b'Azimuth'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'MTTVD' R:   2 C:  1 b'm' [1] b'MWD Tool Measurement TVD'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'SECT'  R:   2 C:  1 b'm' [1] b'Section'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'RCN'   R:   2 C:  1 b'm' [1] b'Rectangular Co-ordinates North'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'RCE'   R:   2 C:  1 b'm' [1] b'Rectangular Co-ordinates East'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'DLSEV' R:   2 C:  1 b'deg/30m' [1] b'Dog-leg Severity'
-  FrameChannel: OBNAME: O: 11 C: 0 I: b'TLTS'  R:   2 C:  1 b'degC' [1] b'Tool Temperature Static'"""
+    # print()
+    # print(log_pass)
+    assert str(log_pass) == """LogPass:
+  FrameArray: ID: OBNAME: O: 11 C: 0 I: b'0B' b''
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'DEPT'            Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'MWD Tool Measurement Depth'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'INC'             Rc:   2 Co:    1 Un: b'deg'       Di: [1] b'Inclination'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'AZI'             Rc:   2 Co:    1 Un: b'deg'       Di: [1] b'Azimuth'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'MTTVD'           Rc:   2 Co:    1 Un: b'm'         Di: [1] b'MWD Tool Measurement TVD'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'SECT'            Rc:   2 Co:    1 Un: b'm'         Di: [1] b'Section'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'RCN'             Rc:   2 Co:    1 Un: b'm'         Di: [1] b'Rectangular Co-ordinates North'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'RCE'             Rc:   2 Co:    1 Un: b'm'         Di: [1] b'Rectangular Co-ordinates East'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'DLSEV'           Rc:   2 Co:    1 Un: b'deg/30m'   Di: [1] b'Dog-leg Severity'
+    FrameChannel: OBNAME: O: 11 C: 0 I: b'TLTS'            Rc:   2 Co:    1 Un: b'degC'      Di: [1] b'Tool Temperature Static'"""
 
 
 def test_example_iflr_process():
-    log_pass: LogPass = _create_log_pass()
+    log_pass: LogPass.LogPass = _create_log_pass()
     # print()
     for by in BYTES_IFLR:
         ld = LogicalData(by)
@@ -253,7 +261,7 @@ def test_example_iflr_append():
     for by in BYTES_IFLR:
         ld = LogicalData(by)
         iflr = IFLR.IndirectlyFormattedLogicalRecord(0, ld)
-        log_pass.append(iflr, result)
+        log_pass.append(iflr)
     # print(result)
     # depth = result[0]
     # print(depth)
