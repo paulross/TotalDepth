@@ -89,7 +89,7 @@ Install the test dependencies and run TotalDepth's tests:
 Developing with TotalDepth
 ===========================
 
-If you are developing with TotalDepth you need test coverage and documentation tools.
+If you are developing with TotalDepth you need the test coverage and documentation tools.
 
 Test Coverage
 -------------
@@ -110,7 +110,7 @@ The most meaningful invocation that elimates the top level tools is:
 Documentation
 -------------
 
-If you want to build the documentation you need to:
+To build the documentation you need to:
 
 .. code-block:: console
 
