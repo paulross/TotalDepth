@@ -38,7 +38,6 @@ From: http://w3.energistics.org/rp66/v1/rp66v1_appb.html ::
     26	    STATUS	1	            Boolean status
     27	    UNITS	V	            Units expression
 """
-import collections
 import datetime
 import enum
 import logging
@@ -186,16 +185,16 @@ REP_CODE_FIXED_LENGTHS = {
     15: 1,  # Short unsigned integer
     16: 2,  # Normal unsigned integer
     17: 4,  #  Long unsigned integer
-    # 18	    UVARI	1, 2, or 4	    Variable-length unsigned integer
-    # 19	    IDENT	V	            Variable-length identifier
-    # 20	    ASCII	V	            Variable-length ASCII character string
+    # 18    UVARI   1, 2, or 4    Variable-length unsigned integer
+    # 19    IDENT   V               Variable-length identifier
+    # 20    ASCII   V               Variable-length ASCII character string
     21: 8,  # Date and time
-    # 22	    ORIGIN	V	            Origin reference
-    # 23	    OBNAME	V	            Object name
-    # 24	    OBJREF	V	            Object reference
-    # 25	    ATTREF	V	            Attribute reference
+    # 22    ORIGIN  V               Origin reference
+    # 23    OBNAME  V               Object name
+    # 24    OBJREF  V               Object reference
+    # 25    ATTREF  V               Attribute reference
     26: 1,  # Boolean status
-    # 27	    UNITS	V	            Units expression
+    # 27    UNITS   V               Units expression
 }
 
 
@@ -367,6 +366,8 @@ class DateTime:
         1: ('DST', 'Local Daylight Savings'),
         2: ('GMT', 'Greenwich Mean Time'),
     }
+    STRFTIME_FORMAT = '%y-%m-%d %H:%M:%S.%f'
+
     def __init__(self, ld: LogicalData):
         # TODO: Check ranges
         self.year: int = USHORT(ld) + 1900
@@ -378,11 +379,6 @@ class DateTime:
         self.minute: int = USHORT(ld)
         self.second: int = USHORT(ld)
         self.millisecond: int = UNORM(ld)
-
-    @staticmethod
-    def strftime_format() -> str:
-        """Returns a string format for the dat and time."""
-        return '%y-%m-%d %H:%M:%S.%f'
 
     @property
     def tz_abbreviation(self) -> str:
@@ -499,12 +495,15 @@ def OBNAME_len(by: typing.Union[bytes, bytearray], index: int) -> int:
     return 0
 
 
-class ObjectReference(collections.namedtuple('ObjectReference', 'T, N')):
-    """This has three fields:
+class ObjectReference(typing.NamedTuple):
+    """This has two fields:
 
     0. T - Object Type as a IDENT.
     1. N - Object Name as a OBNAME.
     """
+    T: IDENT
+    N: OBNAME
+
     def __str__(self):
         return f'OBREF: O: {self.T} C: {self.N}'
 

@@ -4,6 +4,17 @@ import pytest
 from TotalDepth.RP66V1.core import XAxis
 
 
+@pytest.mark.parametrize(
+    'norm, dupe, skip, back, expected',
+    (
+        (1, 2, 3, 4, 10),
+    )
+)
+def test_xaxis_spacing_counts_total(norm, dupe, skip, back, expected):
+    counts = XAxis.XAxisSpacingCounts(norm, dupe, skip, back)
+    assert counts.total == expected
+
+
 SPACING_COUNTS = (
     (np.array([1.0, 1.0, 1.0]), 1.0, XAxis.XAxisSpacingCounts(3, 0, 0, 0),),
     # Norm

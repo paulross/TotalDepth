@@ -124,6 +124,25 @@ def test_visible_record_read_next(fobj, position, length, version):
 
 
 @pytest.mark.parametrize(
+    'by, position, length, attributes, record_type',
+    (
+        (b'\x01\x00\xff\x01', 0, 256, 255, 1,),
+    )
+)
+def test_LRSH_ctor(by, position, length, attributes, record_type):
+    fobj = io.BytesIO(by)
+    lrsh = File.LogicalRecordSegmentHeader(fobj)
+    assert lrsh.position == position
+    assert lrsh.length == length
+    assert lrsh.attributes == attributes
+    assert lrsh.record_type == record_type
+
+
+
+
+
+
+@pytest.mark.parametrize(
     'by, length',
     (
         (b'\x01\x00\xff\x01', 4),
