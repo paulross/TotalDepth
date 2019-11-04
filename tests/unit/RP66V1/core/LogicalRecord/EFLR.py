@@ -477,32 +477,33 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
 def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
     ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
-    # print(eflr.str_long())
-    assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'> Template [5]:
-    CD: 001 10100 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: None
-    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
-    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [2]
-    CD: 001 10000 L: b'UNITS' C: 1 R: IDENT U: b'' V: None
-    CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+    print(eflr.str_long())
+    assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
   Objects [3]:
     OBNAME: O: 0 C: 0 I: b'TIME'
-      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
-      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
-      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [2]
-      CD: 001 00001 L: b'UNITS' C: 1 R: IDENT U: b'' V: [b'S']
-      CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
     OBNAME: O: 1 C: 0 I: b'PRESSURE'
-      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'2')]
-      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: UVARI U: b'' V: [1]
-      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [7]
-      CD: 001 00001 L: b'UNITS' C: 1 R: IDENT U: b'' V: [b'PSI']
-      CD: 001 10101 L: b'DIMENSION' C: 1 R: UVARI U: b'' V: [1]
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'2')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [7]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'PSI']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
     OBNAME: O: 1 C: 0 I: b'PAD-ARRAY'
-      CD: 001 00001 L: b'LONG-NAME' C: 1 R: OBNAME U: b'' V: [ObjectName(O=0, C=0, I=b'3')]
-      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 2 R: UVARI U: b'' V: [8, 20]
-      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: USHORT U: b'' V: [13]
-      CD: 000 00000 L: b'UNITS' C: 1 R: IDENT U: b'' V: None
-      CD: 001 01001 L: b'DIMENSION' C: 2 R: UVARI U: b'' V: [8, 10]"""
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'3')]
+      CD: 001 01001 L: b'ELEMENT-LIMIT' C: 2 R: 18 (UVARI) U: b'' V: [8, 20]
+      CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [13]
+      CD: 000 00000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+      CD: 001 01001 L: b'DIMENSION' C: 2 R: 18 (UVARI) U: b'' V: [8, 10]"""
 
 # EXPECTED_OBJECTS = [
 #     # Attributes have LCRUV
