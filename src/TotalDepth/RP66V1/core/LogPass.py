@@ -41,13 +41,12 @@ class ExceptionLogPassProcessIFLR(ExceptionLogPass):
     pass
 
 
-def default_np_type(_rep_code: int) -> typing.Type:
-    return np.float64
+DEFAULT_NP_TYPE = np.float64
 
 
 class FrameChannel:
     """
-    This represents a single channel in a frame. It is file independent and can be used depending on the
+    This represents a single channel in a frame. It is file format independent and can be used depending on the
     source of the information: LIS/LAS/RP66V1 file, XML index, Postgres database etc.
     """
     def __init__(self,
@@ -57,14 +56,15 @@ class FrameChannel:
                  units: bytes,
                  dimensions: typing.List[int],
                  # Function that takes an integer and returns a np.dtype for array creation.
-                 function_np_dtype: typing.Callable = default_np_type,
+                 # TODO: Replace this with the np.dtype directly
+                 np_dtype: np.dtype = DEFAULT_NP_TYPE,
                  ):
         self.ident: typing.Hashable = ident
         self.long_name: bytes = long_name
         self.rep_code: int = rep_code
         self.units: bytes = units
         self.dimensions: typing.List[int] = dimensions
-        self.function_np_dtype: typing.Callable = function_np_dtype
+        self.np_dtype: np.dtype = np_dtype
         self.rank: int = len(self.dimensions)
         self.count: int = reduce(lambda x, y: x * y, self.dimensions, 1)
         self.array: np.ndarray = self._init_array(0)
@@ -74,7 +74,7 @@ class FrameChannel:
             f' Un: {str(self.units):12} Di: {self.dimensions} {self.long_name}'
 
     def _init_array(self, number_of_frames: int) -> np.ndarray:
-        return np.empty((number_of_frames, *self.dimensions), dtype=self.function_np_dtype(self.rep_code))
+        return np.empty((number_of_frames, *self.dimensions), dtype=self.np_dtype)
 
     def init_array(self, number_of_frames: int) -> None:
         """
@@ -119,7 +119,10 @@ class FrameChannel:
         return itertools.product(*products)
 
     def read(self, ld: LogicalData, frame_number: int) -> None:
-        """Reads the Logical Data into the numpy frame at the specified frame number."""
+        """Reads the Logical Data into the numpy frame at the specified frame number.
+
+        This is currently RP66V1 specific. In future designs this can be sub-classed by format (LAS, LIS, RP66V1 etc.)
+        """
         # if len(self.array) == 0:
         #     raise ExceptionFrameChannel(f'FrameChannelDLIS.read() array is not initialised.')
         if frame_number >= len(self.array):
@@ -136,17 +139,6 @@ class FrameChannel:
         if len(self.array) != 0:
             raise ExceptionFrameChannel('seek() on empty array. This seems like a logical error.')
         ld.seek(RepCode.rep_code_fixed_length(self.rep_code) * self.count)
-
-
-def frame_channel_from_RP66V1(channel_object: EFLR.Object) -> FrameChannel:
-    return FrameChannel(
-        ident=channel_object.name,
-        long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
-        rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
-        units=channel_object[b'UNITS'].value[0] if channel_object[b'UNITS'].value is not None else b'',
-        dimensions=channel_object[b'DIMENSION'].value,
-        function_np_dtype=RepCode.numpy_dtype
-    )
 
 
 class FrameArray:
@@ -258,25 +250,6 @@ class FrameArray:
         self.x_axis.read(ld, frame_number)
 
 
-def frame_array_from_RP66V1(frame_object: EFLR.Object,
-                            channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> FrameArray:
-    # print('TRACE: frame_object.attr_label_map', frame_object.attr_label_map)
-    key = b'DESCRIPTION'
-    if key in frame_object.attr_label_map and frame_object[key].count == 1 and frame_object[key].value is not None:
-        description = frame_object[b'DESCRIPTION'].value[0]
-    else:
-        description = b''
-    frame_array = FrameArray(frame_object.name, description)
-    # TODO: Apply Semantic Restrictions?
-    # Hmm, [RP66V1 Section 5.7.1 Frame Objects] says that C=1 for DESCRIPTION but our example data shows C=0
-    for channel_obname in frame_object[b'CHANNELS'].value:
-        if channel_obname in channel_eflr.object_name_map:
-            frame_array.append(frame_channel_from_RP66V1(channel_eflr[channel_obname]))
-        else:
-            raise ExceptionFrameArrayInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
-    return frame_array
-
-
 class LogPass:
     """
     This represents the structure a single run of data acquisition such as 'Repeat Section' or 'Main Log'.
@@ -329,8 +302,44 @@ class LogPass:
         return self.frame_arrays[item]
 
 
+# ====================== Constructing from RP66V1 data ====================
+
+def frame_channel_from_RP66V1(channel_object: EFLR.Object) -> FrameChannel:
+    """Create a file format agnostic FrameChannel from an EFLR.Object (row) in a `CHANNEL` EFLR."""
+    return FrameChannel(
+        ident=channel_object.name,
+        long_name=channel_object[b'LONG-NAME'].value[0] if channel_object[b'LONG-NAME'].value is not None else b'',
+        rep_code=channel_object[b'REPRESENTATION-CODE'].value[0],
+        units=channel_object[b'UNITS'].value[0] if channel_object[b'UNITS'].value is not None else b'',
+        dimensions=channel_object[b'DIMENSION'].value,
+        # TODO: Replace this with the np.dtype directly
+        np_dtype=RepCode.numpy_dtype(channel_object[b'REPRESENTATION-CODE'].value[0])
+    )
+
+
+def frame_array_from_RP66V1(frame_object: EFLR.Object,
+                            channel_eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> FrameArray:
+    """Create a file format agnostic FrameArray from an EFLR.Object (row) in a `FRAME` EFLR and a `CHANNEL` EFLR."""
+    # print('TRACE: frame_object.attr_label_map', frame_object.attr_label_map)
+    key = b'DESCRIPTION'
+    if key in frame_object.attr_label_map and frame_object[key].count == 1 and frame_object[key].value is not None:
+        description = frame_object[b'DESCRIPTION'].value[0]
+    else:
+        description = b''
+    frame_array = FrameArray(frame_object.name, description)
+    # TODO: Apply Semantic Restrictions?
+    # Hmm, [RP66V1 Section 5.7.1 Frame Objects] says that C=1 for DESCRIPTION but our example data shows C=0
+    for channel_obname in frame_object[b'CHANNELS'].value:
+        if channel_obname in channel_eflr.object_name_map:
+            frame_array.append(frame_channel_from_RP66V1(channel_eflr[channel_obname]))
+        else:
+            raise ExceptionFrameArrayInit(f'Channel {channel_obname} not in CHANNEL EFLR.')
+    return frame_array
+
+
 def log_pass_from_RP66V1(frame: EFLR.ExplicitlyFormattedLogicalRecord,
                          channels: EFLR.ExplicitlyFormattedLogicalRecord) -> LogPass:
+    """Create a file format agnostic FrameArray from a `FRAME` type EFLR and a `CHANNEL` type EFLR."""
     if frame.set.type != b'FRAME':
         raise ExceptionLogPassInit(f"Expected frame set type to be b'FRAME' but got {frame.set.type}")
     if frame.lr_type != EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[b'FRAME']:
@@ -350,3 +359,5 @@ def log_pass_from_RP66V1(frame: EFLR.ExplicitlyFormattedLogicalRecord,
     for frame_object in frame.objects:
         log_pass.append(frame_array_from_RP66V1(frame_object, channels))
     return log_pass
+
+# ====================== END: Constructing from RP66V1 data ====================
