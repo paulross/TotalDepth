@@ -12,7 +12,6 @@ Contents:
     
     core/AbsentValue
     core/File
-    core/HTML
     core/Index
     core/LogPass
     core/LogPassXML

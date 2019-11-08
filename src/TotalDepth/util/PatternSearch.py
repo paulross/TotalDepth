@@ -30,7 +30,6 @@ __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2011 Paul Ross.'
 
 import sys
-import os
 import logging
 import time
 import multiprocessing
@@ -38,8 +37,7 @@ import argparse
 import collections
 import string
 
-
-from TotalDepth.util import CmnCmdOpts
+from TotalDepth.common import cmn_cmd_opts
 
 DEFAULT_MIN_RUN_LENGTH = 2
 PRINT_WIDTH = 120
@@ -210,7 +208,7 @@ def reportTOOL(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell
 
 def main():
     print ('Cmd: %s' % ' '.join(sys.argv))
-    op = CmnCmdOpts.retOptParser(
+    op = cmn_cmd_opts.retOptParser(
         desc='Searches for runs of data in binary files.',
         prog='PatternSearch ',
         version=__version__,

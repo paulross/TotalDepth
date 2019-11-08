@@ -44,7 +44,7 @@ from TotalDepth.util import DirWalk
 import unittest
 
 class TestGenBigFirst(unittest.TestCase):
-    """Tests genBigFirst"""
+    """Tests gen_big_first"""
     def setUp(self):
         """Set up."""
         pass
@@ -60,7 +60,7 @@ class TestGenBigFirst(unittest.TestCase):
     def test_01(self):
         """TestGenBigFirst.test_01(): Input only, defaults."""
         # print()
-        for v in DirWalk.genBigFirst('.'):
+        for v in DirWalk.gen_big_first('.'):
             pass
             # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 

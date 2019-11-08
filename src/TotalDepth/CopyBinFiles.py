@@ -115,7 +115,7 @@ def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], 
 def main() -> int:
     description = """Copies of moves particular file types from one tree to another."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    # TODO: Use CmnCmdOpts
+    # TODO: Use cmn_cmd_opts
     parser = argparse.ArgumentParser(
         description=description,
         prog=sys.argv[0],

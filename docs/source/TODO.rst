@@ -41,6 +41,14 @@ TotalDepth Improvements (General)
       - Merge Sparse Virtual File System C/C++ code.
       - 1
       - 
+    * - TD.test.slow
+      - Move slow LIS test to tests/integration/ or mark as @slow.
+      - 1
+      - 
+    * - TD.test.benchmark
+      - Move benchmarking tests to benchmark/.
+      - 1
+      - 
 
 
 LAS Improvements
@@ -108,6 +116,10 @@ LIS Improvements
       - Check Rep Code overflow/underflow on write.
       - 1
       - 
+    * - LIS.test.slow
+      - Move slow LIS test to tests/integration/ or mark as @slow.
+      - 1
+      - 
 
 RP66V1 Improvements
 =====================
@@ -139,6 +151,10 @@ RP66V1 Improvements
     * - RP66V1.fail
       - When a file deviates from the standard then the user can specify what deviations are acceptable.
         Examples: UNITS Rep Code, multiple ORIGIN records.
+      - 1
+      - 
+    * - RP66V1.test.benchmark
+      - Make benchmarking tests to benchmark/.
       - 1
       - 
 

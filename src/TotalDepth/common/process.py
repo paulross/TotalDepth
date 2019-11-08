@@ -35,15 +35,21 @@ logger = logging.getLogger(__file__)
 
 #: Unique string in the log line
 LOGGER_PREFIX = 'ProcessLoggingThread-JSON'
+LOGGER_PREFIX_START = f'{LOGGER_PREFIX}-START'
+LOGGER_PREFIX_STOP = f'{LOGGER_PREFIX}-STOP'
 #: Regex for the unique string in the log line
-RE_LOG_LINE = re.compile(rf'^.+?{LOGGER_PREFIX}\s?(.+)$')
+RE_LOG_LINE = re.compile(rf'^.+?{LOGGER_PREFIX}(-START|-STOP)?\s*(.+)$')
 #: Regex for timestam, matches '2019-06-07 11:57:58.390921'
 DATETIME_NOW_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 assert datetime.datetime.strptime(str(datetime.datetime.now()), DATETIME_NOW_FORMAT)
 #: The JSON key that is the timestamp
 KEY_TIMESTAMP = 'timestamp'
+#: The JSON key that is elapsed (wall clock) time in seconds. This is ``time.time() - self._process.create_time()``
+KEY_ELAPSED_TIME = 'elapsed_time'
 #: The JSON key that is the label
 KEY_LABEL = 'label'
+#: The JSON key that is the process ID
+KEY_PROCESS_ID = 'pid'
 #: psutil.Process().as_dict() has the following keys:
 PSUTIL_PROCESS_AS_DICT_KEYS = [
     'cmdline', 'connections', 'cpu_percent', 'cpu_times', 'create_time', 'cwd', 'environ', 'exe', 'gids',
@@ -106,7 +112,7 @@ def extract_json(istream: typing.TextIO) -> typing.List[typing.Dict[str, typing.
     for line in istream.readlines():
         m = RE_LOG_LINE.match(line)
         if m:
-            log_dict = json.loads(m.group(1))
+            log_dict = json.loads(m.group(2))
             if KEY_TIMESTAMP in log_dict:
                 log_dict[KEY_TIMESTAMP] = parse_timestamp(log_dict[KEY_TIMESTAMP])
             ret.append(log_dict)
@@ -118,7 +124,8 @@ def extract_labels_from_json(json_data: typing.List[typing.Dict[str, typing.Any]
     return [v for v in json_data if KEY_LABEL in v]
 
 
-def extract_json_as_table(json_data) -> typing.Tuple[typing.List[typing.List[str]], float, float, float, float]:
+def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) \
+        -> typing.Tuple[typing.List[typing.List[str]], float, float, float, float]:
     """Create a table from JSON suitable for a Gnuplot ``.dat`` file."""
     ret = [
         [
@@ -128,8 +135,9 @@ def extract_json_as_table(json_data) -> typing.Tuple[typing.List[typing.List[str
             f'{"User":>12}',
             f'{"Mean_CPU%":>12}',
             f'{"Inst_CPU%":>12}',
-            f'{"Timestamp"}',
-            f'{KEY_LABEL}',
+            f'{"Timestamp":<26}',
+            f'{"PID":>6}',
+            f'{"Label"}',
         ]
     ]
     prev_cpu = 0.0
@@ -138,28 +146,29 @@ def extract_json_as_table(json_data) -> typing.Tuple[typing.List[typing.List[str
     t_min = rss_min = sys.float_info.max
     t_max = rss_max = sys.float_info.min
     for record in json_data:
-        mean_cpu_user = record["cpu_times"]["user"] / record["elapsed_time"]
-        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu) / (record["elapsed_time"] - prev_elapsed_time)
+        mean_cpu_user = record["cpu_times"]["user"] / record[KEY_ELAPSED_TIME]
+        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time)
         # record["memory_info"]["pfaults"] is the cumulative total.
-        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults) / (record["elapsed_time"] - prev_elapsed_time)
+        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time)
         label = record[KEY_LABEL] if KEY_LABEL in record else ''
         ret.append(
             [
-                f'{record["elapsed_time"]:<12.1f}',
+                f'{record[KEY_ELAPSED_TIME]:<12.1f}',
                 f'{record["memory_info"]["rss"]:12d}',
                 f'{inst_page_faults:12f}',
                 f'{record["cpu_times"]["user"]:12.1f}',
                 f'{mean_cpu_user:12.1%}',
                 f'{inst_cpu_user:12.1%}',
-                f'{record["timestamp"].strftime("%Y-%m-%dT%H:%M:%S.%f")}',
+                f'{record["timestamp"].strftime("%Y-%m-%dT%H:%M:%S.%f"):26}',
+                f'{record[KEY_PROCESS_ID]:6d}',
                 f'# {label}'
             ]
         )
         prev_cpu = record["cpu_times"]["user"]
-        prev_elapsed_time = record["elapsed_time"]
+        prev_elapsed_time = record[KEY_ELAPSED_TIME]
         prev_page_faults = record["memory_info"]["pfaults"]
-        t_min = min(record["elapsed_time"], t_min)
-        t_max = max(record["elapsed_time"], t_max)
+        t_min = min(record[KEY_ELAPSED_TIME], t_min)
+        t_max = max(record[KEY_ELAPSED_TIME], t_max)
         rss_min = min(record["memory_info"]["rss"], rss_min)
         rss_max = max(record["memory_info"]["rss"], rss_max)
     return ret, t_min, t_max, rss_min, rss_max
@@ -180,7 +189,7 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
     label_lines = []
     y_value = (0.5 * (rss_max - rss_min)) / 1024**2
     for label_dict in labels:
-        t_value = label_dict['elapsed_time']
+        t_value = label_dict[KEY_ELAPSED_TIME]
         label_lines.append(f'set arrow from {t_value},{y_value} to {t_value},0 lt -1 lw 1')
         label_lines.append(
             f'set label "{label_dict[KEY_LABEL]}" at {t_value},{y_value * 1.025}'
@@ -222,32 +231,34 @@ class ProcessLoggingThread(threading.Thread):
                 k: getattr(self._process, k)()._asdict() for k in ('memory_info', 'cpu_times')
             }
         )
-        ret['elapsed_time'] =  time.time() - self._process.create_time()
+        ret[KEY_ELAPSED_TIME] = time.time() - self._process.create_time()
+        ret[KEY_PROCESS_ID] = self._process.pid
         # WARNING: This is super verbose and leaks information such as user, environment etc. into the log file.
         # ret.update(self._process.as_dict())
         # kwargs trump everything
         ret.update(kwargs)
         return ret
 
-    def _write_to_log(self) -> None:
+    def _write_to_log(self, prefix: str) -> None:
         """Write process data to log flushing message queue if necessary."""
         assert self._run
         if process_queue.empty():
-            logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data())}')
+            logger.info(f'{prefix} {json.dumps(self._get_process_data())}')
         else:
             while not process_queue.empty():
                 msg = process_queue.get()
-                logger.info(f'{LOGGER_PREFIX} {json.dumps(self._get_process_data(label=msg))}')
+                logger.info(f'{prefix} {json.dumps(self._get_process_data(label=msg))}')
 
     def run(self) -> None:
         """thread.run(). Write to log then sleep."""
+        self._write_to_log(LOGGER_PREFIX_START)
         while self._run:
-            self._write_to_log()
             time.sleep(self._interval)
+            self._write_to_log(LOGGER_PREFIX)
 
     def join(self, *args, **kwargs):
         """thread.join(). Write to log last time."""
-        self._write_to_log()
+        self._write_to_log(LOGGER_PREFIX_STOP)
         self._run = False
         super().join(*args, **kwargs)
 

@@ -13,7 +13,7 @@ logger = logging.getLogger(__file__)
 
 
 def add_gnuplot_to_argument_parser(parser: argparse.ArgumentParser) -> None:
-    """Adds ``--gnuplot=...`` to the argument parser."""
+    """Adds ``--gnuplot=<DIRECTORY_FOR_GNUPLOT_OUTPUT>`` to the argument parser as ``args.gnuplot``."""
     v = version()
     logger.info(f'gnuplot version: "{v}"')
     print(f'gnuplot version: "{v}"')

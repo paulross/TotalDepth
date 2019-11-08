@@ -1,7 +1,6 @@
 import pytest
 
-from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor, \
-    ExceptionComponentDescriptorInit, ExceptionComponentDescriptorAccessError
+from TotalDepth.RP66V1.core.LogicalRecord import ComponentDescriptor
 
 
 @pytest.mark.parametrize(
@@ -21,8 +20,8 @@ from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDe
     )
 )
 def test_ctor_raises(value, message):
-    with pytest.raises(ExceptionComponentDescriptorInit) as err:
-        ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorInit) as err:
+        ComponentDescriptor.ComponentDescriptor(value)
     assert err.value.args[0] == message
 
 
@@ -40,8 +39,14 @@ def test_ctor_raises(value, message):
     )
 )
 def test_role(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.role == result
+
+
+def test_component_descriptor_eq():
+    cd = ComponentDescriptor.ComponentDescriptor(0x00)
+    assert cd == cd
+    assert cd != 1
 
 
 @pytest.mark.parametrize(
@@ -58,7 +63,7 @@ def test_role(descriptor, result):
     )
 )
 def test_type(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.type == result
 
 
@@ -76,7 +81,7 @@ def test_type(descriptor, result):
     )
 )
 def test_is_attribute_group(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_attribute_group == result
 
 
@@ -94,7 +99,7 @@ def test_is_attribute_group(descriptor, result):
     )
 )
 def test_is_attribute(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_attribute == result
 
 
@@ -112,7 +117,7 @@ def test_is_attribute(descriptor, result):
     )
 )
 def test_is_absent_attribute(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_absent_attribute == result
 
 
@@ -130,7 +135,7 @@ def test_is_absent_attribute(descriptor, result):
     )
 )
 def test_is_invariant_attribute(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_invariant_attribute == result
 
 
@@ -148,7 +153,7 @@ def test_is_invariant_attribute(descriptor, result):
     )
 )
 def test_is_object(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_object == result
 
 
@@ -166,8 +171,44 @@ def test_is_object(descriptor, result):
     )
 )
 def test_is_set_group(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_set_group == result
+
+
+@pytest.mark.parametrize(
+    'descriptor, result',
+    (
+        (0x00, False),  # ABSATR
+        (0x20, False),  # ATTRIB
+        (0x40, False),  # INVATR
+        (0x70, False),  # OBJECT
+        # (0x80, False), reserved
+        (0xb0, True),  # RDSET
+        (0xd0, False),  # RSET
+        (0xf0, False),  # SET
+    )
+)
+def test_is_rdset(descriptor, result):
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
+    assert cd.is_redundant_set == result
+
+
+@pytest.mark.parametrize(
+    'descriptor, result',
+    (
+        (0x00, False),  # ABSATR
+        (0x20, False),  # ATTRIB
+        (0x40, False),  # INVATR
+        (0x70, False),  # OBJECT
+        # (0x80, False), reserved
+        (0xb0, False),  # RDSET
+        (0xd0, True),  # RSET
+        (0xf0, False),  # SET
+    )
+)
+def test_is_rset(descriptor, result):
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
+    assert cd.is_replacement_set == result
 
 
 @pytest.mark.parametrize(
@@ -184,7 +225,7 @@ def test_is_set_group(descriptor, result):
     )
 )
 def test_is_set(descriptor, result):
-    cd = ComponentDescriptor(descriptor)
+    cd = ComponentDescriptor.ComponentDescriptor(descriptor)
     assert cd.is_set == result
 
 
@@ -197,7 +238,7 @@ def test_is_set(descriptor, result):
     )
 )
 def test_has_set_T(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_set_T == result
 
 
@@ -215,8 +256,8 @@ def test_has_set_T(value, result):
     )
 )
 def test_has_set_T_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_set_T
     assert err.value.args[0] == message
 
@@ -230,7 +271,7 @@ def test_has_set_T_raises(value, message):
     )
 )
 def test_has_set_N(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_set_N == result
 
 
@@ -248,8 +289,8 @@ def test_has_set_N(value, result):
     )
 )
 def test_has_set_N_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_set_N
     assert err.value.args[0] == message
 
@@ -261,7 +302,7 @@ def test_has_set_N_raises(value, message):
     )
 )
 def test_has_object_N(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_object_N == result
 
 
@@ -279,8 +320,8 @@ def test_has_object_N(value, result):
     )
 )
 def test_has_object_N_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_object_N
     assert err.value.args[0] == message
 
@@ -301,7 +342,7 @@ def test_has_object_N_raises(value, message):
     )
 )
 def test_has_attribute_L(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_attribute_L == result
 
 
@@ -317,7 +358,7 @@ def test_has_attribute_L(value, result):
     )
 )
 def test_has_attribute_C(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_attribute_C == result
 
 
@@ -333,7 +374,7 @@ def test_has_attribute_C(value, result):
     )
 )
 def test_has_attribute_R(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_attribute_R == result
 
 
@@ -349,7 +390,7 @@ def test_has_attribute_R(value, result):
     )
 )
 def test_has_attribute_U(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_attribute_U == result
 
 
@@ -365,7 +406,7 @@ def test_has_attribute_U(value, result):
     )
 )
 def test_has_attribute_V(value, result):
-    cd = ComponentDescriptor(value)
+    cd = ComponentDescriptor.ComponentDescriptor(value)
     assert cd.has_attribute_V == result
 
 
@@ -383,8 +424,8 @@ def test_has_attribute_V(value, result):
     )
 )
 def test_has_attribute_L_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_attribute_L
     assert err.value.args[0] == message
 
@@ -403,8 +444,8 @@ def test_has_attribute_L_raises(value, message):
     )
 )
 def test_has_attribute_C_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_attribute_C
     assert err.value.args[0] == message
 
@@ -423,8 +464,8 @@ def test_has_attribute_C_raises(value, message):
     )
 )
 def test_has_attribute_R_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_attribute_R
     assert err.value.args[0] == message
 
@@ -443,8 +484,8 @@ def test_has_attribute_R_raises(value, message):
     )
 )
 def test_has_attribute_U_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_attribute_U
     assert err.value.args[0] == message
 
@@ -463,8 +504,8 @@ def test_has_attribute_U_raises(value, message):
     )
 )
 def test_has_attribute_V_raises(value, message):
-    cd = ComponentDescriptor(value)
-    with pytest.raises(ExceptionComponentDescriptorAccessError) as err:
+    cd = ComponentDescriptor.ComponentDescriptor(value)
+    with pytest.raises(ComponentDescriptor.ExceptionComponentDescriptorAccessError) as err:
         cd.has_attribute_V
     assert err.value.args[0] == message
 

@@ -9,11 +9,12 @@ Common Package Reference
 Contents:
 
 .. toctree::
-	:maxdepth: 2
-	
-	data_table
-	process
-	Rle
-	Slice
-	td_logging
-	xml
+    :maxdepth: 2
+    
+    cmn_cmd_opts
+    data_table
+    process
+    Rle
+    Slice
+    td_logging
+    xml

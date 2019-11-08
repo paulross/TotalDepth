@@ -12,7 +12,6 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    CmnCmdOpts
     DictTree
     DirWalk
     ExecTimer

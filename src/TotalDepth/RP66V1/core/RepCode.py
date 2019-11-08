@@ -570,7 +570,7 @@ def UNITS(ld: LogicalData) -> bytes:
             f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"' \
             f' is specified. See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
         # warnings.warn(msg)
-        logger.warn(msg)
+        logger.warning(msg)
         # raise ExceptionRepCode(msg)
     return ret
 

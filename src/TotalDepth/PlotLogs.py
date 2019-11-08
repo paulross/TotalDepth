@@ -55,7 +55,7 @@ from TotalDepth.util.plot import XMLMatches
 from TotalDepth.util import DictTree
 from TotalDepth.util import DirWalk
 from TotalDepth.util import XmlWrite
-from TotalDepth.util import CmnCmdOpts
+from TotalDepth.common import cmn_cmd_opts
 
 CSS_CONTENT_INDEX = """body {
 font-size:      12px;
@@ -702,7 +702,7 @@ def main():
     print ('Cmd: %s' % ' '.join(sys.argv))
     # TODO: Option to treat files with -f, --format as LAS, LIS, AUTO
     # TODO: Depth scale overrides -s, --scale ?
-    optParser = CmnCmdOpts.argParserInOut(
+    optParser = cmn_cmd_opts.path_in_out(
         'Generates SVG plot(s) from input LIS & LAS file/directory to an output file/directory.',
         prog=None,
         version=__version__,
@@ -736,7 +736,7 @@ def main():
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
         print(myFg.longStr(''.join(myOptNs.LgFormat).count('?')))
         return 1
-    if myOptNs.jobs == CmnCmdOpts.DEFAULT_OPT_MP_JOBS:
+    if myOptNs.jobs == cmn_cmd_opts.DEFAULT_OPT_MP_JOBS:
         myPlp = PlotLogPasses(
             myOptNs.pathIn,
             myOptNs.pathOut,

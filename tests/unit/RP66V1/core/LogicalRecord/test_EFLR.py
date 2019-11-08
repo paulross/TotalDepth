@@ -5,7 +5,7 @@ import pytest
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
-from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core import RepCode, stringify
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 
 
@@ -46,6 +46,10 @@ def test_Set_raises(ld, expected):
 def test_AttributeBase(cd, expected_label, expected_count, expected_rep_code, expected_units, expected_value):
     result = EFLR.AttributeBase(cd)
     assert result.label == expected_label
+    assert result.count == expected_count
+    assert result.rep_code == expected_rep_code
+    assert result.units == expected_units
+    assert result.value == expected_value
 
 
 @pytest.mark.parametrize(
@@ -61,6 +65,33 @@ def test_AttributeBase_raises(cd, expected):
     with pytest.raises(EFLR.ExceptionEFLRAttribute) as err:
         EFLR.AttributeBase(cd)
     assert err.value.args[0] == expected
+
+
+@pytest.mark.parametrize(
+    'cd_a, cd_b, expected',
+    (
+        (ComponentDescriptor(0x00), ComponentDescriptor(0x00), True),
+        (ComponentDescriptor(0x00), ComponentDescriptor(0x20), False),
+    )
+)
+def test_AttributeBase_eq(cd_a, cd_b, expected):
+    a = EFLR.AttributeBase(cd_a)
+    b = EFLR.AttributeBase(cd_b)
+    assert (a == b) == expected
+    assert a != 1
+
+
+@pytest.mark.parametrize(
+    'cd, expected',
+    (
+        (ComponentDescriptor(0x00), "CD: 000 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+        (ComponentDescriptor(0x20), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+        (ComponentDescriptor(0x40), "CD: 010 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+    )
+)
+def test_AttributeBase_str(cd, expected):
+    result = EFLR.AttributeBase(cd)
+    assert str(result) == expected
 
 
 @pytest.mark.parametrize(
@@ -94,6 +125,77 @@ def test_TemplateAttribute(cd, ld, expected_label, expected_count, expected_rep_
     assert result.rep_code == expected_rep_code
     assert result.units == expected_units
     assert result.value == expected_value
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'cd, ld, expected',
+    (
+        # All defaults
+        (ComponentDescriptor(0x20), LogicalData(b''), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+        # Label only
+        (
+            ComponentDescriptor(0x30), LogicalData(b'\x09LONG-NAME'),
+            "CD: 001 10000 L: b'LONG-NAME' C: 1 R: 19 (IDENT) U: b'' V: None"
+        ),
+        # Count only
+        (ComponentDescriptor(0x28), LogicalData(b'\x7f'), "CD: 001 01000 L: b'' C: 127 R: 19 (IDENT) U: b'' V: None"),
+        # RepCode only
+        (ComponentDescriptor(0x24), LogicalData(b'\x11'), "CD: 001 00100 L: b'' C: 1 R: 17 (ULONG) U: b'' V: None"),
+        # Units only
+        (
+            ComponentDescriptor(0x22), LogicalData(b'\x05METRE'),
+            "CD: 001 00010 L: b'' C: 1 R: 19 (IDENT) U: b'METRE' V: None"
+        ),
+        # Value only
+        (
+            ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'),
+            "CD: 001 00001 L: b'' C: 1 R: 19 (IDENT) U: b'' V: [b'VALUE']"
+        ),
+        # Label and RepCode
+        (
+            ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x11'),
+            "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 17 (ULONG) U: b'' V: None"
+        ),
+        # Label and bad RepCode
+        (
+            ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x00'),
+            "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 0 (UNKNOWN) U: b'' V: None"
+        ),
+        # All five Characteristics
+        (
+            ComponentDescriptor(0x3f),
+            LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
+            "CD: 001 11111 L: b'LONG-NAME' C: 2 R: 19 (IDENT) U: b'METRE' V: [b'VALUE1', b'VALUE2']"
+        ),
+    )
+)
+def test_TemplateAttribute_str(cd, ld, expected):
+    result = EFLR.TemplateAttribute(cd, ld)
+    assert str(result) == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'cd, ld, expected',
+    (
+        # V: None
+        (ComponentDescriptor(0x20), LogicalData(b''), "-"),
+        # Units only
+        (ComponentDescriptor(0x22), LogicalData(b'\x05METRE'), "- [METRE]"),
+        # Value only as list with one entry, no units
+        (ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'), "VALUE"),
+        # Value as list with >1 element
+        (
+            ComponentDescriptor(0x3f),
+            LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
+            "[VALUE1, VALUE2] [METRE]"
+        ),
+    )
+)
+def test_TemplateAttribute_stringify_value(cd, ld, expected):
+    result = EFLR.TemplateAttribute(cd, ld)
+    assert result.stringify_value(stringify.stringify_object_by_type) == expected
     assert ld.remain == 0
 
 
@@ -147,7 +249,12 @@ class DataForEFLR(typing.NamedTuple):
     object: LogicalData
     template: LogicalData
 
+    def rewind(self) -> None:
+        self.object.rewind()
+        self.template.rewind()
 
+
+# WARN: Mutable objects in this tuple. Must call
 OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
     DataForEFLR(
         # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
@@ -188,6 +295,7 @@ OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
 
 @pytest.mark.parametrize('eflr_data', OBJECT_DATA_FROM_STANDARD)
 def test_Object(eflr_data: DataForEFLR):
+    eflr_data.rewind()
     template = EFLR.Template()
     template.read(eflr_data.template)
     obj = EFLR.Object(eflr_data.object, template)
@@ -197,6 +305,7 @@ def test_Object(eflr_data: DataForEFLR):
 
 def test_Object_attr_label_map():
     template = EFLR.Template()
+    OBJECT_DATA_FROM_STANDARD[0].rewind()
     template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj.attr_label_map == {
@@ -210,6 +319,7 @@ def test_Object_attr_label_map():
 
 def test_Object_getitem_index():
     template = EFLR.Template()
+    OBJECT_DATA_FROM_STANDARD[0].rewind()
     template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[0].value == [ObjectName(O=0, C=0, I=b'1')]
@@ -217,9 +327,11 @@ def test_Object_getitem_index():
 
 def test_Object_getitem_label():
     template = EFLR.Template()
+    OBJECT_DATA_FROM_STANDARD[0].rewind()
     template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[b'LONG-NAME'].value == [ObjectName(O=0, C=0, I=b'1')]
+
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
 LOGICAL_DATA_FROM_STANDARD = LogicalData(
@@ -477,7 +589,7 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
 def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
     ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
-    print(eflr.str_long())
+    # print(eflr.str_long())
     assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
   Template [5]:
     CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None

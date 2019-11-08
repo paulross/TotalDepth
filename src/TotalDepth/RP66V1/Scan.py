@@ -203,7 +203,7 @@ def main() -> int:
     If these are combined then the input is scanned multiple times.
     """
     print('Cmd: %s' % ' '.join(sys.argv))
-    # TODO: Use CmnCmdOpts
+    # TODO: Use cmn_cmd_opts
     parser = argparse.ArgumentParser(
         description=description,
         epilog=__rights__,

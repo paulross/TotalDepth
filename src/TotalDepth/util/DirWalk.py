@@ -52,27 +52,22 @@ class ExceptionDirWalk(ExceptionTotalDepth):
     pass
 
 
-def genBigFirst(d):
+def gen_big_first(directory):
     """Generator that yields the biggest files (name not path) first.
     This is fairly simple in that it it only looks the current directory not
     only sub-directories. Useful for multiprocessing."""
-    # Map of {size : [name, ...], ...}
-    m = {}
-    for n in os.listdir(d):
-        p = os.path.join(d, n)
-        if os.path.isfile(p):
-            s = os.path.getsize(p)
-            try:
-                m[s].append(p)
-            except KeyError:
-                m[s] = [n,]
-    for s in sorted(m.keys(), reverse=True):
-        for p in m[s]:
-            yield p
+    size_paths = []
+    for name in os.listdir(directory):
+        path = os.path.join(directory, name)
+        if os.path.isfile(path):
+            size_paths.append((os.path.getsize(path), name))
+    # print(size_paths)
+    for size, name in sorted(size_paths):
+        yield name
 
 
-def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
-            recursive: bool=False, bigFirst: bool=False) -> typing.Sequence[FileInOut]:
+def dirWalk(theIn: str, theOut: str = '', theFnMatch: str = '',
+            recursive: bool = False, bigFirst: bool = False) -> typing.Sequence[FileInOut]:
     """Walks a directory tree generating file paths as FileInOut(in, out) objects.
 
     theIn - The input directory.
@@ -87,11 +82,12 @@ def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
 
     bigFirst - If True then the largest files in  directory are given first. If False it is alphabetical.
     """
+    # print(f'theIn="{theIn}" theOut="{theOut}"')
     if not os.path.isdir(theIn):
         raise ExceptionDirWalk('{:s} is not a directory.'.format(theIn))
     if bigFirst:
         # First files
-        for fn in genBigFirst(theIn):
+        for fn in gen_big_first(theIn):
             fp = os.path.join(theIn, fn)
             if not theFnMatch or fnmatch.fnmatch(fp, theFnMatch):
                 out_file = ''
@@ -104,7 +100,7 @@ def dirWalk(theIn: str, theOut: str='', theFnMatch: str='',
                 fp = os.path.join(theIn, n)
                 if os.path.isdir(fp):
                     out_path = ''
-                    if not theOut:
+                    if theOut:
                         out_path = os.path.join(theOut, n)
                     for aFp in dirWalk(fp, out_path, theFnMatch, recursive, bigFirst):
                         yield aFp
