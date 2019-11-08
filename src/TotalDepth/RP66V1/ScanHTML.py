@@ -4,6 +4,7 @@ Scans a RP66V1 file an writes out the summary in HTML.
 import logging
 import multiprocessing
 import os
+import pprint
 import sys
 import time
 import typing
@@ -666,14 +667,17 @@ INDEX_FILE = 'index.html'
 
 def _write_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
     assert os.path.isdir(path_out), f'{path_out} is not a directory'
+    # pprint.pprint(index)
     # print('TRACE: _write_indexes():')
     # pprint.pprint(index)
+    logging.info(f'_write_indexes(): to "{path_out}"')
     _write_low_level_indexes(path_out, index)
     _write_top_level_index(path_out, index)
 
 
 def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult]) -> None:
     assert os.path.isdir(path_out)
+    logging.info(f'_write_low_level_indexes(): to "{path_out}"')
     # Write low level indexes
     for root, dirs, files in os.walk(path_out):
         files_to_link_to = []
@@ -683,6 +687,7 @@ def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult])
                 files_to_link_to.append(file)
         if len(files_to_link_to):
             with open(os.path.join(root, INDEX_FILE), 'w') as fout:
+                logging.info(f'_write_low_level_indexes(): to "{os.path.join(root, INDEX_FILE)}"')
                 with XmlWrite.XhtmlStream(fout) as xhtml_stream:
                     with XmlWrite.Element(xhtml_stream, 'head'):
                         with XmlWrite.Element(xhtml_stream, 'meta', {
@@ -708,14 +713,15 @@ def _write_low_level_indexes(path_out: str, index: typing.Dict[str, HTMLResult])
                             for file in files_to_link_to:
                                 branch = [FileNameLinkHref(file, file, file)]
                                 html_summary = index[os.path.join(root, file)].html_summary
-                                for lf, logical_file_result in enumerate(html_summary.logical_files):
-                                    branch.append(lf)
-                                    for frame_array_result in logical_file_result.frame_arrays:
-                                        # HTMLFrameArraySummary
-                                        branch.append(frame_array_result.ident)
-                                        dict_tree.add(branch, frame_array_result)
+                                if html_summary is not None:
+                                    for lf, logical_file_result in enumerate(html_summary.logical_files):
+                                        branch.append(lf)
+                                        for frame_array_result in logical_file_result.frame_arrays:
+                                            # HTMLFrameArraySummary
+                                            branch.append(frame_array_result.ident)
+                                            dict_tree.add(branch, frame_array_result)
+                                            branch.pop()
                                         branch.pop()
-                                    branch.pop()
                             _write_low_level_index_table_body(xhtml_stream, dict_tree)
 
 
@@ -774,12 +780,8 @@ def _write_top_level_index(path_out: str, index_map: typing.Dict[str, HTMLResult
     for k in index_map:
         branch = k.split(os.sep)
         dict_tree.add(branch, index_map[k])
-
-    # logger.info('DictTree:')
-    # logger.info(dict_tree.indentedStr())
-    logger.info(f'_write_top_level_index(): {path_out}')
-
     index_file_path = os.path.join(path_out, INDEX_FILE)
+    logging.info(f'_write_top_level_index(): to "{index_file_path}"')
     with open(index_file_path, 'w') as fout:
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
