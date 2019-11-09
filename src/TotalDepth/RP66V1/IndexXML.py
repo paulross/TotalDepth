@@ -8,13 +8,13 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core import File, LogPass
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core import LogicalRecord
-from TotalDepth.RP66V1.core import LogPassXML
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.RP66V1.core.Index import ExceptionIndex
+from TotalDepth.RP66V1.core.XAxis import IFLRReference
 from TotalDepth.common import process
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import Rle
@@ -33,6 +33,18 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 class ExceptionRP66V1IndexXMLRead(ExceptionIndex):
     pass
 
+class ExceptionIndexXML(ExceptionTotalDepthRP66V1):
+    pass
+
+
+class ExceptionIndexXMLRead(ExceptionIndexXML):
+    pass
+
+
+class ExceptionLogPassXML(LogPass.ExceptionLogPass):
+    pass
+
+
 logger = logging.getLogger(__file__)
 
 XML_SCHEMA_VERSION = '0.1.0'
@@ -43,8 +55,275 @@ XML_TIMESTAMP_FORMAT_NO_TZ = '%Y-%m-%d %H:%M:%S.%f'
 # '2019-05-14 17:33:01.147341+0000'
 
 
+def xml_single_element(element: xml.etree.Element, xpath: str) -> xml.etree.Element:
+    """Selects a single XML element in the Xpath."""
+    elems = list(element.iterfind(xpath))
+    if len(elems) != 1:
+        raise ExceptionIndexXMLRead(f'Expected single element at Xpath {xpath} but found {len(elems)}')
+    return elems[0]
+
+
+def xml_rle_write(rle: Rle.RLE, element_name: str, xml_stream: XmlWrite.XmlStream, hex_output: bool) -> None:
+    with XmlWrite.Element(xml_stream, element_name, {'count': f'{rle.num_values():d}', 'rle_len': f'{len(rle):d}',}):
+        for rle_item in rle.rle_items:
+            attrs = {
+                'datum': f'0x{rle_item.datum:x}' if hex_output else f'{rle_item.datum}',
+                'stride': f'0x{rle_item.stride:x}' if hex_output else f'{rle_item.stride}',
+                'repeat': f'{rle_item.repeat:d}',
+            }
+            with XmlWrite.Element(xml_stream, 'RLE', attrs):
+                pass
+
+
+def xml_integer_attribute_read(element: xml.etree.Element, attr: str) -> int:
+    attribute = element.attrib[attr]
+    if attribute.startswith('0x'):
+        return int(attribute, 16)
+    return int(attribute)
+
+
+def xml_rle_read(element: xml.etree.Element) -> Rle.RLE:
+    """Read the RLE values under an element and return the RLE object.
+
+    Example:
+
+    .. code-block:: xml
+
+        <VisibleRecords count="237" rle_len="56">
+            <RLE datum="0x50" repeat="6" stride="0x2000"/>
+            <RLE datum="0xe048" repeat="3" stride="0x2000"/>
+            <RLE datum="0x16044" repeat="3" stride="0x2000"/>
+        </VisibleRecords>
+
+    May raise an ExceptionIndexXMLRead or other exceptions.
+    """
+    def _rle_convert_datum_or_stride(attr: str) -> typing.Union[int, float]:
+        if attr.startswith('0x'):
+            return int(attr, 16)
+        if '.' in attr:
+            return float(attr)
+        return int(attr)
+
+    ret = Rle.RLE()
+    # print('TRACE:', element, element.attrib)
+    for element_rle in element.iterfind('./RLE'):
+        rle_item = Rle.RLEItem(_rle_convert_datum_or_stride(element_rle.attrib['datum']))
+        rle_item.repeat = _rle_convert_datum_or_stride(element_rle.attrib['repeat'])
+        rle_item.stride = _rle_convert_datum_or_stride(element_rle.attrib['stride'])
+        ret.rle_items.append(rle_item)
+    # Sanity check on element.attrib['count'] and element.attrib['rle_len']
+    count: int = int(element.attrib['count'])
+    if count != ret.num_values():
+        raise ExceptionIndexXMLRead(f'Expected {count} RLE items but got {ret.num_values()}')
+    rle_len: int = int(element.attrib['rle_len'])
+    if rle_len != len(ret):
+        raise ExceptionIndexXMLRead(f'Expected {rle_len} RLE items but got {len(ret)}')
+    return ret
+
+
+def xml_object_name_attributes(object_name: RepCode.ObjectName) -> typing.Dict[str, str]:
+    return {
+        'O': f'{object_name.O}',
+        'C': f'{object_name.C}',
+        'I': f'{object_name.I.decode("ascii")}',
+    }
+
+
+def xml_object_name(node: xml.etree.Element) -> RepCode.ObjectName:
+    return RepCode.ObjectName(node.attrib['O'], node.attrib['C'], node.attrib['I'].encode('ascii'))
+
+
+def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
+    """Write a value to the XML stream with specific type as an attribute.
+    This writes either a <Value> or an <ObjectName> element."""
+    if isinstance(value, RepCode.ObjectName):
+        with XmlWrite.Element(xml_stream, 'ObjectName', xml_object_name_attributes(value)):
+            pass
+    else:
+        if isinstance(value, bytes):
+            typ = 'bytes'
+            # print('TRACE: xml_write_value()', value)
+            _value = value.decode('latin-1')#, errors='ignore')
+        elif isinstance(value, float):
+            typ = 'float'
+            _value = str(value)
+        elif isinstance(value, int):
+            typ = 'int'
+            _value = str(value)
+        elif isinstance(value, RepCode.DateTime):
+            typ = 'TotalDepth.RP66V1.core.RepCode.DateTime'
+            _value = str(value)
+        elif isinstance(value, str):
+            typ = 'str'
+            _value = value
+        else:
+            typ = 'unknown'
+            _value = str(value)
+        with XmlWrite.Element(xml_stream, 'Value', {'type': typ, 'value': _value}):
+            # xml_stream.characters(_value)
+            pass
+
+
+def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
+    """Writes a XML Channel node suitable for RP66V1.
+
+    Example:
+
+    .. code-block:: xml
+
+        <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+    """
+    channel_attrs = {
+        'O': f'{channel.ident.O}',
+        'C': f'{channel.ident.C}',
+        'I': f'{channel.ident.I.decode("ascii")}',
+        'long_name': f'{channel.long_name.decode("ascii")}',
+        'rep_code': f'{channel.rep_code:d}',
+        'units': f'{channel.units.decode("ascii")}',
+        'dimensions': ','.join(f'{v:d}' for v in channel.dimensions),
+        'count': f'{channel.count:d}',
+    }
+    with XmlWrite.Element(xml_stream, 'Channel', channel_attrs):
+        pass
+
+
+def frame_channel_from_XML(channel_node: xml.etree.Element) -> LogPass.FrameChannel:
+    """Initialise with a XML Channel node.
+
+    Example:
+
+    .. code-block:: xml
+
+        <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
+    """
+    if channel_node.tag != 'Channel':
+        raise ValueError(f'Got element tag of "{channel_node.tag}" but expected "Channel"')
+    return LogPass.FrameChannel(
+        ident=channel_node.attrib['I'].encode('ascii'),
+        long_name=channel_node.attrib['long_name'].encode('ascii'),
+        rep_code=int(channel_node.attrib['rep_code']),
+        units=channel_node.attrib['units'].encode('ascii'),
+        dimensions=[int(v) for v in channel_node.attrib['dimensions'].split(',')],
+        function_np_dtype=RepCode.numpy_dtype
+    )
+
+
+def frame_array_to_XML(frame_array: LogPass.FrameArray,
+                       iflr_data: typing.Sequence[IFLRReference],
+                       xml_stream: XmlWrite.XmlStream) -> None:
+    """Writes a XML FrameArray node suitable for RP66V1.
+
+    Example:
+
+    .. code-block:: xml
+
+        <FrameArray C="0" I="0B" O="11" description="">
+          <Channels channel_count="9">
+            <Channel C="0" I="DEPT" O="11" count="1" dimensions="1" long_name="MWD Tool Measurement Depth" rep_code="2" units="0.1 in"/>
+            <Channel C="0" I="INC" O="11" count="1" dimensions="1" long_name="Inclination" rep_code="2" units="deg"/>
+            <Channel C="0" I="AZI" O="11" count="1" dimensions="1" long_name="Azimuth" rep_code="2" units="deg"/>
+            ...
+          </Channels>
+          <IFLR count="83">
+              <FrameNumbers count="83" rle_len="1">
+                <RLE datum="1" repeat="82" stride="1"/>
+              </FrameNumbers>
+              <LRSH count="83" rle_len="2">
+                <RLE datum="0x14ac" repeat="61" stride="0x30"/>
+                <RLE datum="0x2050" repeat="20" stride="0x30"/>
+              </LRSH>
+              <Xaxis count="83" rle_len="42">
+                <RLE datum="0.0" repeat="1" stride="75197.0"/>
+                <RLE datum="154724.0" repeat="1" stride="79882.0"/>
+              </Xaxis>
+          </IFLR>
+        </FrameArray>
+    """
+    frame_array_attrs = {
+        'O': f'{frame_array.ident.O}',
+        'C': f'{frame_array.ident.C}',
+        'I': f'{frame_array.ident.I.decode("ascii")}',
+        'description': frame_array.description.decode('ascii'),
+        'x_axis' : frame_array.channels[0].ident.I.decode("ascii"),
+        'x_units' : frame_array.channels[0].units.decode("ascii"),
+    }
+
+    with XmlWrite.Element(xml_stream, 'FrameArray', frame_array_attrs):
+        with XmlWrite.Element(xml_stream, 'Channels', {'count': f'{len(frame_array)}'}):
+            for channel in frame_array.channels:
+                    frame_channel_to_XML(channel, xml_stream)
+        with XmlWrite.Element(xml_stream, 'IFLR', {'count' : f'{len(iflr_data)}'}):
+            # Frame number output
+            rle = Rle.create_rle(v.frame_number for v in iflr_data)
+            xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
+            # IFLR file position
+            rle = Rle.create_rle(v.logical_record_position.lrsh_position for v in iflr_data)
+            xml_rle_write(rle, 'LRSH', xml_stream, hex_output=True)
+            # Xaxis output
+            rle = Rle.create_rle(v.x_axis for v in iflr_data)
+            xml_rle_write(rle, 'Xaxis', xml_stream, hex_output=False)
+
+
+def iflr_data_from_xml(frame_array_node: xml.etree.Element) -> typing.Iterator[IFLRReference]:
+    """Returns a sequence of IFLRReference objects from XML."""
+    iflr_node = xml_single_element(frame_array_node, './IFLR')
+    rle_lrsh = xml_rle_read(xml_single_element(iflr_node, './LRSH'))
+    rle_frames = xml_rle_read(xml_single_element(iflr_node, './FrameNumbers'))
+    rle_xaxis = xml_rle_read(xml_single_element(iflr_node, './Xaxis'))
+    if len({int(iflr_node.attrib['count']), rle_lrsh.num_values(), rle_frames.num_values(), rle_xaxis.num_values()}) != 1:
+        raise LogPass.ExceptionFrameArrayInit('Mismatched counts of LRSH, FrameNumbers and Xaxis')
+    return (IFLRReference(*v) for v in zip(rle_lrsh.values(), rle_frames.values(), rle_xaxis.values()))
+
+
+def frame_array_from_XML(frame_array_node: xml.etree.Element) \
+        -> typing.Tuple[LogPass.FrameArray, typing.Iterator[IFLRReference]]:
+    """Initialise a FrameArray from a XML Channel node. For an example of the XML see frame_array_to_XML."""
+    if frame_array_node.tag != 'FrameArray':
+        raise ValueError(f'Got element tag of "{frame_array_node.tag}" but expected "FrameArray"')
+    ret = LogPass.FrameArray(
+        ident=xml_object_name(frame_array_node),
+        description=frame_array_node.attrib['description'].encode('ascii')
+    )
+    # TODO: Check Channel count
+    for channnel_node in frame_array_node.iterfind('./Channels/Channel'):
+        ret.append(frame_channel_from_XML(channnel_node))
+    return ret, iflr_data_from_xml(frame_array_node)
+
+
+def log_pass_to_XML(log_pass: LogPass.LogPass,
+                    iflr_data_map: typing.Dict[typing.Hashable, typing.Sequence[IFLRReference]],
+                    xml_stream: XmlWrite.XmlStream) -> None:
+    """Writes a XML LogPass node suitable for RP66V1. Example:
+
+    .. code-block:: xml
+
+        <LogPass count="4">
+            <FrameArray C="0" I="600T" O="44" description="">
+                ...
+            <FrameArray>
+            ...
+        </LogPass>
+    """
+    with XmlWrite.Element(xml_stream, 'LogPass', {'count': f'{len(log_pass)}'}):
+        for frame_array in log_pass.frame_arrays:
+            if frame_array.ident not in iflr_data_map:
+                raise ExceptionLogPassXML(f'Missing ident {frame_array.ident} in keys {list(iflr_data_map.keys())}')
+            frame_array_to_XML(frame_array, iflr_data_map[frame_array.ident], xml_stream)
+
+
+def log_pass_from_XML(log_pass_node: xml.etree.Element) \
+        -> typing.Tuple[LogPass.LogPass, typing.Dict[typing.Hashable, typing.Iterator[typing.Tuple[int, int, typing.Any]]]]:
+    log_pass = LogPass.LogPass()
+    iflr_map = {}
+    for frame_array_node in log_pass_node.iterfind('./FrameArray'):
+        frame_array, iflr_data = frame_array_from_XML(frame_array_node)
+        iflr_map[frame_array.ident] = iflr_data
+        log_pass.append(frame_array)
+    return log_pass, iflr_map
+
+
 def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.XmlStream) -> None:
-    with XmlWrite.Element(xml_stream, 'Object', LogPassXML.xml_object_name_attributes(obj.name)):
+    with XmlWrite.Element(xml_stream, 'Object', xml_object_name_attributes(obj.name)):
         for attr in obj.attrs:
             attr_atributes = {
                 'label': attr.label.decode('ascii'),
@@ -65,7 +344,7 @@ def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.
             with XmlWrite.Element(xml_stream, 'Attribute', attr_atributes):
                 if attr.value is not None:
                     for v in attr.value:
-                        LogPassXML.xml_write_value(xml_stream, v)
+                        xml_write_value(xml_stream, v)
                 # else:
                 #     with XmlWrite.Element(xml_stream, 'Values', {'count': '0'}):
                 #         pass
@@ -91,7 +370,7 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
                     for obj in eflr.objects:
                         _write_xml_eflr_object(obj, xml_stream)
         if logical_file.log_pass is not None:
-            LogPassXML.log_pass_to_XML(logical_file.log_pass, logical_file.iflr_position_map, xml_stream)
+            log_pass_to_XML(logical_file.log_pass, logical_file.iflr_position_map, xml_stream)
 
 
 def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.LogicalIndex,
@@ -121,7 +400,7 @@ def write_logical_file_sequence_to_xml(logical_file_sequence: LogicalFile.Logica
                     write_logical_file_to_xml(lf, logical_file, xml_stream, private)
             # Visible records at the end
             rle_visible_records = Rle.create_rle(logical_file_sequence.visible_record_positions)
-            LogPassXML.xml_rle_write(rle_visible_records, 'VisibleRecords', xml_stream, hex_output=True)
+            xml_rle_write(rle_visible_records, 'VisibleRecords', xml_stream, hex_output=True)
 
 
 def read_logical_file_from_xml(logical_file_node: xml.etree.Element,
@@ -184,20 +463,20 @@ def read_logical_file_from_xml(logical_file_node: xml.etree.Element,
             'Second EFLR in a Logical File must be a ORIGIN [RP66V1 2.2.3 Logical File (LF)]'
         )
     fld = rp66v1_file.get_file_logical_data(
-        LogPassXML.xml_integer_attribute_read(eflr_nodes[0], 'vr_position'),
-        LogPassXML.xml_integer_attribute_read(eflr_nodes[0], 'lrsh_position'),
+        xml_integer_attribute_read(eflr_nodes[0], 'vr_position'),
+        xml_integer_attribute_read(eflr_nodes[0], 'lrsh_position'),
     )
     logical_file = LogicalFile.LogicalFile(fld, LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord(fld.lr_type, fld.logical_data))
     for eflr_node in eflr_nodes[1:]:
         fld = rp66v1_file.get_file_logical_data(
-            LogPassXML.xml_integer_attribute_read(eflr_node, 'vr_position'),
-            LogPassXML.xml_integer_attribute_read(eflr_node, 'lrsh_position'),
+            xml_integer_attribute_read(eflr_node, 'vr_position'),
+            xml_integer_attribute_read(eflr_node, 'lrsh_position'),
         )
         eflr = LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
         logical_file.add_eflr(fld, eflr)
     for frame_array_node in logical_file_node.iterfind('./LogPass/FrameArray'):
-        frame_array_object_name = LogPassXML.xml_object_name(frame_array_node)
-        iflr_data = LogPassXML.iflr_data_from_xml(frame_array_node)
+        frame_array_object_name = xml_object_name(frame_array_node)
+        iflr_data = iflr_data_from_xml(frame_array_node)
         if frame_array_object_name in logical_file.iflr_position_map:
             raise ExceptionRP66V1IndexXMLRead(f'Duplicate Frame Array entry {frame_array_object_name}')
         logical_file.iflr_position_map[frame_array_object_name] = list(iflr_data)
@@ -210,20 +489,20 @@ def read_storage_unit_label_from_xml(root: xml.etree.Element) -> StorageUnitLabe
     # <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1"
     #     storage_set_identifier="Default Storage Set                                         "
     #     storage_unit_structure="RECORD"/>
-    sul_element = LogPassXML.xml_single_element(root, './StorageUnitLabel')
+    sul_element = xml_single_element(root, './StorageUnitLabel')
     dlis_version = bytes(sul_element.attrib['dlis_version'], 'ascii')
     exp = b'V1.00'
     if dlis_version != exp:
-        raise LogPassXML.ExceptionIndexXMLRead(f'Found DLIS version {dlis_version} but expected {exp}')
+        raise ExceptionIndexXMLRead(f'Found DLIS version {dlis_version} but expected {exp}')
     sequence_number = int(sul_element.attrib['sequence_number'])
     if sequence_number <= 0:
         # Reference [RP66V1 2.3.2 Storage Unit Label (SUL), Comment 1]
-        raise LogPassXML.ExceptionIndexXMLRead(f'Sequence number must be >0 not {sequence_number}')
+        raise ExceptionIndexXMLRead(f'Sequence number must be >0 not {sequence_number}')
     maximum_record_length = int(sul_element.attrib['maximum_record_length'])
     storage_unit_structure = bytes(sul_element.attrib['storage_unit_structure'], 'ascii')
     exp = b'RECORD'
     if storage_unit_structure != exp:
-        raise LogPassXML.ExceptionIndexXMLRead(
+        raise ExceptionIndexXMLRead(
             f'Found Storage Unit Structure {storage_unit_structure} but expected {exp}'
         )
     storage_set_identifier = bytes(sul_element.attrib['storage_set_identifier'], 'ascii')
@@ -277,7 +556,7 @@ def read_logical_index_from_xml(index_path: str, archive_root: str) -> LogicalFi
     logical_index = LogicalFile.LogicalIndex(None, original_file_path)
     logical_index.storage_unit_label = read_storage_unit_label_from_xml(root)
     # Logical Files
-    logical_files_node = LogPassXML.xml_single_element(root, './LogicalFiles')
+    logical_files_node = xml_single_element(root, './LogicalFiles')
     logical_file_count = int(logical_files_node.attrib['count'])
     with open(original_file_path, 'rb') as fobj:
         rp66v1file = File.FileRead(fobj)
@@ -289,7 +568,7 @@ def read_logical_index_from_xml(index_path: str, archive_root: str) -> LogicalFi
         )
     # Read the Visible Record section and construct a RLE for them. This is for IFLRs that only have their
     # LRSH position, EFLRs record their Visible Record position along with their LRSH position.
-    rle_vr = LogPassXML.xml_rle_read(LogPassXML.xml_single_element(root, './VisibleRecords'))
+    rle_vr = xml_rle_read(xml_single_element(root, './VisibleRecords'))
     logical_index.visible_record_positions = LogicalFile.VisibleRecordPositions(rle_vr.values())
     return logical_index
 

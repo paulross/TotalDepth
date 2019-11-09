@@ -3,7 +3,8 @@ import typing
 
 import pytest
 
-from TotalDepth.RP66V1.core import File, LogPass, LogPassXML, RepCode
+import TotalDepth.RP66V1.IndexXML
+from TotalDepth.RP66V1.core import File, LogPass, RepCode
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.util import XmlWrite
 
@@ -278,7 +279,7 @@ def test_log_pass_write_XML():
     iflr_map = {
         RepCode.ObjectName(O=11, C=0, I=b'0B'): [],
     }
-    LogPassXML.log_pass_to_XML(log_pass, iflr_map, xml_stream)
+    TotalDepth.RP66V1.IndexXML.log_pass_to_XML(log_pass, iflr_map, xml_stream)
     # print(ostream.getvalue())
     expected = """
 <LogPass count="1">

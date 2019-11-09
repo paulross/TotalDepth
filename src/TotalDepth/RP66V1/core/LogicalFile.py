@@ -316,22 +316,25 @@ def populate_frame_array(
     """
     iflrs = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
+        # Set partial frames
         if frame_slice is not None:
             range_gen = frame_slice.range(len(iflrs))
             num_frames = frame_slice.count(len(iflrs))
         else:
             range_gen = range(len(iflrs))
             num_frames = len(iflrs)
+        # Set partial channels
         if channels is not None:
             frame_array.init_arrays_partial(num_frames, channels)
         else:
             frame_array.init_arrays(num_frames)
+        # Now populate
         logger.debug(f'populate_frame_array(): len(iflrs): {len(iflrs)} slice: {frame_slice}'
                      f' num_frames: {num_frames} range_gen: {range_gen}.')
         for array_index, frame_number in enumerate(range_gen):
-            # logger.debug(f'Reading frame {frame_number} into frame {array_index}.')
             iflr_reference = iflrs[frame_number]
             fld: File.FileLogicalData = rp66_file.get_file_logical_data(iflr_reference.logical_record_position)
+            # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             if channels is not None:
                 frame_array.read_partial(fld.logical_data, array_index, channels)
