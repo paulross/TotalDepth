@@ -10,7 +10,7 @@ import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import File, LogicalFile
-from TotalDepth.common import process, td_logging, data_table
+from TotalDepth.common import process, data_table, cmn_cmd_opts
 from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
@@ -80,22 +80,18 @@ def main() -> int:
     description = """usage: %(prog)s [options] file
 Scans a RP66V1 file or directory and saves the index as a pickled file."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
-    parser.add_argument('path_in', type=str, help='Path to the input.')
-    parser.add_argument('path_out', type=str, help='Path to the directory of pickled indexes.')
-    parser.add_argument('-r', '--recurse', action='store_true', help='Process recursively. [default: %(default)s]')
-    parser.add_argument('--read-back', action='store_true', help='Read and time the output. [default: %(default)s]')
-    td_logging.add_logging_option(parser)
-    process.add_process_logger_to_argument_parser(parser)
-    parser.add_argument(
-        "-v", "--verbose", action='count', default=0,
-        help="Increase verbosity, additive [default: %(default)s]",
+    parser = cmn_cmd_opts.path_in_out(
+        description, prog='TotalDepth.DeTif.main', version=__version__, epilog=__rights__
     )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    # cmn_cmd_opts.add_multiprocessing(parser)
+    parser.add_argument('--read-back', action='store_true', help='Read and time the output. [default: %(default)s]')
+    process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
     print('args:', args)
     # return 0
-    td_logging.set_logging_from_argparse(args)
+    cmn_cmd_opts.set_log_level(args)
     # return 0
     # Your code here
     clk_start = time.perf_counter()

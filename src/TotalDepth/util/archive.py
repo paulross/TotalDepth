@@ -18,10 +18,13 @@ import typing
 import zipfile
 
 import TotalDepth.util.bin_file_type
-from TotalDepth.common import td_logging
+from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util import DirWalk
 
 logger = logging.getLogger(__file__)
+
+__version__ = '0.1.0'
+__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 class FileBase:
@@ -425,12 +428,15 @@ def expand_and_delete_archives(target_dir: str, nervous: bool) -> typing.Tuple[i
 
 
 def main() -> int:
-    print(f'CMD:', ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description="""Summary analysis an archive of Log data.
+    description = """Summary analysis an archive of Log data.
 If a single path is given then the directory will be analysed or, if --expand-and-delete is given then
 all archives will be expanded and deleted. If two paths are given then the selected file types given by --file-types
-will be copied across.""")
-    parser.add_argument('path', help='Path to the archive.')
+will be copied across."""
+    print(f'CMD:', ' '.join(sys.argv))
+    parser = cmn_cmd_opts.path_in_out(
+        description, prog='TotalDepth.util.archive.main', version=__version__, epilog=__rights__
+    )
+    cmn_cmd_opts.add_log_level(parser, level=20)
     file_types = ', '.join(sorted(TotalDepth.util.bin_file_type.BINARY_FILE_TYPES_SUPPORTED))
     parser.add_argument(
         '--file-type', default=[], action='append',
@@ -445,22 +451,11 @@ will be copied across.""")
     parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but report.', action='store_true')
     parser.add_argument('-o', '--over-write', help='Over write existing files, otherwise warns.', action='store_true')
     # parser.add_argument('copy-to', help='Location to copy the files to.', nargs='?')
-    parser.add_argument(
-        'path_out', type=str,
-        help='Path to the output directory to write the files to.'
-             'The results are undefined if path_out conflicts with path_in',
-        # default='',
-        nargs='?')
-    td_logging.add_logging_option(parser)
-    parser.add_argument(
-        "-v", "--verbose", action='count', default=0,
-        help="Increase verbosity, additive [default: %(default)s]",
-    )
     args = parser.parse_args()
     # print(args)
     # print(args.path_out)
     # return 0
-    td_logging.set_logging_from_argparse(args)
+    cmn_cmd_opts.set_log_level(args)
     t_start = time.perf_counter()
     FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
     num_files = 0
@@ -468,7 +463,7 @@ will be copied across.""")
     if args.path_out:
         print('Copying tree.')
         copy_dict, byte_count = copy_tree(
-            args.path, args.path_out, args.recurse, args.file_type, args.nervous, args.over_write
+            args.path_in, args.path_out, args.recurse, args.file_type, args.nervous, args.over_write
         )
         print(f'File types copied [{sum(copy_dict.values())}]:')
         pprint.pprint(copy_dict)
@@ -476,7 +471,7 @@ will be copied across.""")
     else:
         if args.expand_and_delete:
             print('Expanding and deleting archive.')
-            num_files, byte_count = expand_and_delete_archives(args.path, args.nervous)
+            num_files, byte_count = expand_and_delete_archives(args.path_in, args.nervous)
         else:
             print('Analysing archive.')
             files: typing.List[FileBase] = explore_tree(args.path, args.recurse)

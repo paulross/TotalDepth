@@ -1,7 +1,6 @@
 """
 Scans a directory and removes duplicate files based on their SHA.
 """
-import argparse
 import hashlib
 import logging
 import os
@@ -9,10 +8,12 @@ import sys
 import time
 import typing
 
-from TotalDepth.common import td_logging
-
+from TotalDepth.common import cmn_cmd_opts
 
 logger = logging.getLogger(__file__)
+
+__version__ = '0.1.0'
+__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
@@ -49,15 +50,19 @@ def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
 def main() -> int:
     """Main CLI entry point."""
     print(f'CMD:', ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description="""Deletes duplicate files in the given tree.""")
-    parser.add_argument('path', help='Path to the directory.')
+
+    parser = cmn_cmd_opts.path_in(
+        """Deletes duplicate files in the given tree.""",
+        prog='TotalDepth.RP66V1.ScanHTML.main', version=__version__, epilog=__rights__
+    )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    cmn_cmd_opts.add_multiprocessing(parser)
     parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but report.', action='store_true')
-    td_logging.add_logging_option(parser, 20)
     args = parser.parse_args()
     # print(args)
-    td_logging.set_logging_from_argparse(args)
+    cmn_cmd_opts.set_log_level(args)
     t_start = time.perf_counter()
-    num_files, byte_count = remove_dupes(args.path, args.nervous)
+    num_files, byte_count = remove_dupes(args.path_in, args.nervous)
     t_exec = time.perf_counter() - t_start
     print(f'Execution time: {t_exec:.3f} (s)')
     print(f' Removed Files: {num_files:8,d} rate {num_files / t_exec:,.1f} (files/s)')

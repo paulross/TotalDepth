@@ -9,10 +9,11 @@ import sys
 import time
 import typing
 
-from TotalDepth.common import td_logging
+from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util.DirWalk import dirWalk
 
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__version__ = '0.1.0'
 
 
 logger = logging.getLogger(__file__)
@@ -224,32 +225,20 @@ def main() -> int:
     description = """usage: %(prog)s [options] file
 Scans a file for TIF markers or can copy a directory of files with TIF markers removed."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
-    parser.add_argument('path_in', type=str, help='Path to the input file (or file/directory if stripping).')
-    parser.add_argument(
-        'path_out', type=str,
-        help='Path to the output file or directory, if absent the TIF markers for the input file are just listed.'
-             'The results are undefined if path_out conflicts with path_in',
-        # default='',
-        nargs='?')
-    parser.add_argument(
-        '-r', '--recurse', action='store_true',
-        help='Process files recursively. [default: %(default)s]',
+    parser = cmn_cmd_opts.path_in_out(
+        description, prog='TotalDepth.DeTif.main', version=__version__, epilog=__rights__
     )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    # cmn_cmd_opts.add_multiprocessing(parser)
     parser.add_argument(
         '-n', '--nervous', action='store_true',
         help='Nervous mode, don\'t do anything but report what would be done. [default: %(default)s]',
-    )
-    td_logging.add_logging_option(parser, 30)
-    parser.add_argument(
-        "-v", "--verbose", action='count', default=0,
-        help="Increase verbosity, additive [default: %(default)s]",
     )
     parser.add_argument('-o', '--over-write', help='Over write existing files, otherwise warns.', action='store_true')
     args = parser.parse_args()
     # print('args:', args)
     # return 0
-    td_logging.set_logging_from_argparse(args)
+    cmn_cmd_opts.set_log_level(args)
     clk_start = time.perf_counter()
     # Your code here
     if args.path_out is None:
