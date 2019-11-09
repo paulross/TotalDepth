@@ -349,7 +349,10 @@ class ExplicitlyFormattedLogicalRecord:
         self.lr_type: int = lr_type
         self.set: Set = Set(ld)
         self.template: Template = Template()
+        # This object list contains all objects not including duplicates.
         self.objects: typing.List[Object] = []
+        # This is the final object name map after de-duplication depending on the de-duplication strategy.
+        self.object_name_map: typing.Dict[ObjectName, int] = {}
         temp_object_name_map: typing.Dict[ObjectName, int] = {}
         dupes_to_remove: typing.List[int] = []
         if ld:
@@ -365,7 +368,7 @@ class ExplicitlyFormattedLogicalRecord:
         for i in reversed(dupes_to_remove):
             self.DUPE_OBJECT_LOGGER(f'Cleaning table by removing overwritten object:\n{self.objects[i]}')
             del self.objects[i]
-        self.object_name_map: typing.Dict[ObjectName, int] = {}
+        assert len(self.object_name_map) == 0
         for i, obj in enumerate(self.objects):
             self.object_name_map[obj.name] = i
 

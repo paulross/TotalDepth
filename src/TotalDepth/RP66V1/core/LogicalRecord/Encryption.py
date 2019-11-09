@@ -20,5 +20,6 @@ class LogicalRecordSegmentEncryptionPacket:
         self.bytes = ld.chunk(ld.remain)
 
     def __str__(self):
-        return f'EncryptionPacket: size: 0x{self.size:4x}' \
-            f' producer: {self.producer_code:5d} code: {self.encryption_information} data length: {len(self.bytes)}'
+        return f'EncryptionPacket: size: 0x{self.size:04x}' \
+            f' producer: {self.producer_code}' \
+            f' code length: {len(self.encryption_information)} data length: {len(self.bytes)}'

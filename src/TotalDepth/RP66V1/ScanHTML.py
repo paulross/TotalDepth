@@ -1014,7 +1014,7 @@ def plot_gnuplot(data: typing.Dict[str, HTMLResult], gnuplot_dir: str) -> None:
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
-def main() -> int:
+def main() -> int: # pragma: no cover
     description = """Scans a RP66V1 file or directory and writes HTML version of the data."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out(
@@ -1105,5 +1105,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

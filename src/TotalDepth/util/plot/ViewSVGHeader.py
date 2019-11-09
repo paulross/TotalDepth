@@ -49,7 +49,7 @@ Rect = collections.namedtuple('Rect', 'x y w h desc title')
 Static = collections.namedtuple('Static', 'x y w h text')
 
 
-class ViewSVG(object):
+class ViewSVG(object):  # pragma: no cover
     """Class documentation."""
     NS_SVG = '{http://www.w3.org/2000/svg}'
     def __init__(self, fp):
@@ -146,7 +146,7 @@ class ViewSVG(object):
         return ''.join([r.text for r in e.findall(self._tagsInSVGNs(*args))])
     
 
-def main():
+def main():  # pragma: no cover
     usage = """usage: %prog [options] in out
 Generates plot(s) from input LIS file or directory to and output destination."""
     print ('Cmd: %s' % ' '.join(sys.argv))
@@ -189,6 +189,6 @@ Generates plot(s) from input LIS file or directory to and output destination."""
     print('Bye, bye!')
     return 0
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
+
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

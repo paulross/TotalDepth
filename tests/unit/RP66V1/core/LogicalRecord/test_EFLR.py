@@ -218,31 +218,68 @@ def test_TemplateAttribute_stringify_value(cd, ld, expected):
 #         )
 #     )
 
+# Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
+TEMPLATE_BYTES = (
+    # Template
+    # ATTRIB: LR
+    b'\x34\x09LONG-NAME\x17'
+    # ATTRIB: LRV
+    b'\x35\x0dELEMENT-LIMIT\x12\x01'
+    # ATTRIB: LRV
+    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+    # ATTRIB: L
+    b'\x30\x05UNITS'
+    # ATTRIB: LRV
+    b'\x35\x09DIMENSION\x12\x01'
+    # Object to terminate the template
+    b'\x70'
+)
+
 @pytest.mark.parametrize(
     'ld',
-    # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
     (
-        LogicalData(
-            # Template
-            # ATTRIB: LR
-            b'\x34\x09LONG-NAME\x17'
-            # ATTRIB: LRV
-            b'\x35\x0dELEMENT-LIMIT\x12\x01'
-            # ATTRIB: LRV
-            b'\x35\x13REPRESENTATION-CODE\x0f\x02'
-            # ATTRIB: L
-            b'\x30\x05UNITS'
-            # ATTRIB: LRV
-            b'\x35\x09DIMENSION\x12\x01'
-            # Object to terminate the template
-            b'\x70'
-        ),
+        LogicalData(TEMPLATE_BYTES),
     )
 )
 def test_Template(ld):
     template = EFLR.Template()
     template.read(ld)
     assert ld.remain == 1  # Object byte terminates template
+    assert len(template.attrs) == 5
+    expected = {
+        b'LONG-NAME': 0,
+        b'ELEMENT-LIMIT': 1,
+        b'REPRESENTATION-CODE': 2,
+        b'UNITS': 3,
+        b'DIMENSION': 4,
+    }
+    assert template.attr_label_map == expected
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LogicalData(TEMPLATE_BYTES),
+    )
+)
+def test_Template_eq(ld):
+    template = EFLR.Template()
+    template.read(ld)
+    assert template == template
+    assert template != 1
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LogicalData(TEMPLATE_BYTES),
+    )
+)
+def test_Template_header_as_strings(ld):
+    template = EFLR.Template()
+    template.read(ld)
+    expected = ['LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION']
+    assert template.header_as_strings(stringify.stringify_object_by_type) == expected
 
 
 class DataForEFLR(typing.NamedTuple):
@@ -617,7 +654,86 @@ def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
       CD: 000 00000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
       CD: 001 01001 L: b'DIMENSION' C: 2 R: 18 (UVARI) U: b'' V: [8, 10]"""
 
-# EXPECTED_OBJECTS = [
-#     # Attributes have LCRUV
-#     [b'LONG-NAME', 1, RepCode.REP_CODE_STR_TO_INT['OBNAME'], b'', [RepCode.ObjectName(0, 0, b'1')]],
-# ]
+
+# Example from [RP66V1 Section 3.2.3.2 Figure 3-8] but with a duplicate object.
+LOGICAL_DATA_WITH_EXACT_DUPLICATE = LogicalData(
+    # Set: TN
+    b'\xf8\x07CHANNEL\x01\x30'
+
+    # Template
+    # ATTRIB: LR
+    b'\x34\x09LONG-NAME\x17'
+    # ATTRIB: LRV
+    b'\x35\x0dELEMENT-LIMIT\x12\x01'
+    # ATTRIB: LRV
+    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+    # ATTRIB: L
+    b'\x30\x05UNITS'
+    # ATTRIB: LRV
+    b'\x35\x09DIMENSION\x12\x01'
+
+    # Object #1
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+
+    # Object #2, TODO: an crafted duplicate that has the same name
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+)
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_dupe_exact_default(ld):
+    ld.rewind()
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    # print(eflr.str_long())
+    assert eflr.str_long() == """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+  Objects [1]:
+    OBNAME: O: 0 C: 0 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]"""
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_dupe_exact_raise(ld):
+    ld.rewind()
+    EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = EFLR.DuplicateObjectStrategy.RAISE
+    with pytest.raises(EFLR.ExceptionEFLRSetDuplicateObjectNames) as err:
+        EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert err.value.args == (
+        "Duplicate Object OBNAME: O: 0 C: 0 I: b'TIME' already seen in the EFLR Set type: b'CHANNEL' name: b'0'.",
+    )

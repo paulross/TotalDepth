@@ -1,0 +1,7 @@
+[run]
+omit =
+    src/TotalDepth/util/archive.py
+    src/TotalDepth/util/PatternSearch.py
+    src/TotalDepth/util/RemoveDupeFiles.py
+    src/TotalDepth/util/plot/ViewSVGHeader.py
+

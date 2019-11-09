@@ -5,9 +5,7 @@ Indirectly Formatted Logical Records
 import logging
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.File import LogicalData
-from TotalDepth.RP66V1.core.RepCode import OBNAME, ObjectName, UVARI
-from TotalDepth.util.bin_file_type import format_bytes
+from TotalDepth.RP66V1.core import File, RepCode
 
 
 class ExceptionIFLR(ExceptionTotalDepthRP66V1):
@@ -26,12 +24,12 @@ class IndirectlyFormattedLogicalRecord:
     Reference: [RP66V1 Section 5.6.1 Frames] "The Frame Number is an integer (Representation Code UVARI) specifying the
     numerical order of the Frame in the Frame Type, counting sequentially from one."
     """
-    def __init__(self, lr_type: int, ld: LogicalData):
+    def __init__(self, lr_type: int, ld: File.LogicalData):
         self.lr_type: int = lr_type
         # [RP66V1 Section 3.3 Indirectly Formatted Logical Record]
-        self.object_name: ObjectName = OBNAME(ld)
+        self.object_name: RepCode.ObjectName = RepCode.OBNAME(ld)
         # [RP66V1 Section 5.6.1 Frames]
-        self.frame_number = UVARI(ld)
+        self.frame_number = RepCode.UVARI(ld)
         self.preamble_length = ld.index
         self.remain = ld.remain
         # Frame numbers start from 1 but there are many observed cases of IFLRs that have a 0 frame number and zero
@@ -43,6 +41,6 @@ class IndirectlyFormattedLogicalRecord:
             )
 
     def __str__(self):
-        return f'<IndirectlyFormattedLogicalRecord {str(self.object_name.I):10}' \
-            f' frame: {self.frame_number:8,d}' \
-            f' free data[{self.remain:4,d}]>'
+        return f'<IndirectlyFormattedLogicalRecord {str(self.object_name)}' \
+            f' frame: {self.frame_number:,d}' \
+            f' free data: {self.remain:,d}>'

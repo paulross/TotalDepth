@@ -6,6 +6,7 @@ import sys
 import time
 import typing
 
+import TotalDepth.RP66V1.IndexXML
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import Index
 from TotalDepth.util import gnuplot
@@ -36,7 +37,7 @@ def read_a_single_index(xml_path_in: str, archive_root: str) -> IndexResult:
     logger.info(f'Reading XML index: {xml_path_in}')
     try:
         t_start = time.perf_counter()
-        logical_index = Index.read_logical_index_from_xml(xml_path_in, archive_root)
+        logical_index = TotalDepth.RP66V1.IndexXML.read_logical_index_from_xml(xml_path_in, archive_root)
         result = IndexResult(
             os.path.getsize(logical_index.path),
             os.path.getsize(xml_path_in),

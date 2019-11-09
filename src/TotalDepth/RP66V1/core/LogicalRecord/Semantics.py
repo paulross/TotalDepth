@@ -105,15 +105,3 @@ def eflr_passes_restrictions(eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> boo
             if not object_passes_restrictions(eflr.set.type, obj):
                 return False
     return True
-
-
-
-# foo = LabelRestrictions('FOO', Restrictions(C=1, R='ASCII'), '')
-# print(foo)
-# print(foo.restrictions.__dict__)
-#
-# foo = LabelRestrictions('FOO', Restrictions(C=1, R='ASCII', U='absent'), '')
-# print(foo)
-# print(foo.restrictions.__dict__)
-
-# bar = LabelRestrictions('FOO', Restrictions(C=1, R='ASCII', X='asd'))
