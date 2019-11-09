@@ -752,7 +752,7 @@ def main() -> int:
     Scans a RP66V1 file or directory and writes out the index(es) in XML."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out(
-        description, prog='TotalDepth.RP66V1.ScanHTML.main', version=__version__, epilog=__rights__
+        description, prog='TotalDepth.RP66V1.IndexXML.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
     cmn_cmd_opts.add_multiprocessing(parser)

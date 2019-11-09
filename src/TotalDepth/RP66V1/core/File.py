@@ -172,7 +172,7 @@ class LogicalRecordSegmentHeader:
 
     def read(self, fobj: typing.BinaryIO) -> None:
         """Read a new Logical Record Segment Header.
-        This may throw a ExceptionVisibleRecord."""
+        This may throw a ExceptionVisibleRecord or ExceptionLogicalRecordSegmentHeaderEOF."""
         self.position, self.length, self.attributes, self.record_type = self._read(fobj)
 
     def __format__(self, format_spec) -> str:

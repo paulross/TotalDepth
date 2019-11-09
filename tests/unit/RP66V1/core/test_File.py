@@ -124,6 +124,19 @@ def test_visible_record_read_next(fobj, position, length, version):
 
 
 @pytest.mark.parametrize(
+    'fobj, position, length, version',
+    (
+        (None, 0, 0, 0),
+        (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
+    )
+)
+def test_visible_record_eq(fobj, position, length, version):
+    vr = File.VisibleRecord(fobj)
+    assert vr == vr
+    assert vr != 1
+
+
+@pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
         (b'\x01\x00\xff\x01', 0, 256, 255, 1,),
@@ -136,6 +149,40 @@ def test_LRSH_ctor(by, position, length, attributes, record_type):
     assert lrsh.length == length
     assert lrsh.attributes == attributes
     assert lrsh.record_type == record_type
+
+
+@pytest.mark.parametrize(
+    'by, position, length, attributes, record_type',
+    (
+        (b'\x01\x00\xff\x01', 0, 256, 255, 1,),
+    )
+)
+def test_LRSH_ctor_then_read(by, position, length, attributes, record_type):
+    fobj = io.BytesIO(by)
+    lrsh = File.LogicalRecordSegmentHeader(fobj)
+    fobj = io.BytesIO(by)
+    lrsh.read(fobj)
+    assert lrsh.position == position
+    assert lrsh.length == length
+    assert lrsh.attributes == attributes
+    assert lrsh.record_type == record_type
+
+
+# Length is first two bytes big endian
+# Attributes one byte
+# Record type one byte
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        (b'\x01\x00\xff\x01', "EFLR-encrypted-checksum-trailing length-padding",),
+        (b'\x01\x00\x00\x01', "IFLR-first-last",),
+    )
+)
+def test_LRSH_attribute_str(by, expected):
+    fobj = io.BytesIO(by)
+    lrsh = File.LogicalRecordSegmentHeader(fobj)
+    assert lrsh.attribute_str() == expected
+
 
 
 
