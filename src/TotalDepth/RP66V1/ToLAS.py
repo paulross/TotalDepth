@@ -11,7 +11,6 @@ Example reference to the LAS documentation in this source code::
     [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
 
 """
-import argparse
 import collections
 import datetime
 import logging
@@ -61,8 +60,9 @@ class LASWriteResult(typing.NamedTuple):
     ignored: bool
 
 
-LAS_DATE_HM_FORMAT = '%Y-%m-%d %H:%M'
-LAS_DATE_HM_FORMAT_TEXT = 'YYYY-mm-dd HH:MM'
+# TODO: Add microseconds
+LAS_DATETIME_FORMAT_UTC = '%Y-%m-%d %H:%M:%S.%f UTC'
+LAS_DATE_FORMAT_TEXT = 'YYYY-mm-dd HH:MM:SS.us UTC'
 
 
 def _write_las_header(input_file: str,
@@ -86,7 +86,7 @@ def _write_las_header(input_file: str,
 
     Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     date_time = logical_file.defining_origin[b'CREATION-TIME'].value[0]
     dt = date_time.as_datetime()
     fhlr: EFLR.ExplicitlyFormattedLogicalRecord = logical_file.file_header_logical_record
@@ -96,10 +96,10 @@ def _write_las_header(input_file: str,
         ['WRAP.', 'NO', ': One Line per depth step'],
         ['PROD.', 'TotalDepth', ': LAS Producer'],
         ['PROG.', f'TotalDepth.RP66V1.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
-        ['CREA.', f'{now.strftime(LAS_DATE_HM_FORMAT)}', f': LAS Creation date [{LAS_DATE_HM_FORMAT_TEXT}]'],
+        ['CREA.', f'{now.strftime(LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{LAS_DATE_FORMAT_TEXT}]'],
         [
             f'DLIS_CREA.',
-            f'{dt.strftime(LAS_DATE_HM_FORMAT)}', f': DLIS Creation date and time [{LAS_DATE_HM_FORMAT_TEXT}]'
+            f'{dt.strftime(LAS_DATETIME_FORMAT_UTC)}', f': DLIS Creation date and time [{LAS_DATE_FORMAT_TEXT}]'
         ],
         ['SOURCE.', f'{os.path.basename(input_file)}', ': DLIS File Name'],
         ['FILE-ID.', f'{file_id}', ': File Identification Number'],
@@ -310,10 +310,12 @@ def las_file_name(path_out: str, logicial_file_index: int, frame_array_ident: by
     return file_path_out
 
 
+#: Possible methods to reduce an array to a single value.
 ARRAY_REDUCTIONS = {'first', 'mean', 'median', 'min', 'max'}
 
 
 def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
+    """Take a numpy array and apply a method to it to get a single value."""
     if method not in ARRAY_REDUCTIONS:
         raise ValueError(f'{method} is not in {ARRAY_REDUCTIONS}')
     if method == 'first':
@@ -326,15 +328,14 @@ def write_curve_section_to_las(
         channels: typing.Set[str],
         ostream: typing.TextIO,
     ) -> None:
+    """Write the ``~Curve Information Section`` to the LAS file."""
     ostream.write('~Curve Information Section\n')
     table = [
         ['#MNEM.UNIT', 'Curve Description'],
         ['#---------', '-----------------'],
     ]
-    # print('TRACE:', channels)
     for c, channel in enumerate(frame_array.channels):
         if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
-            # print('TRACE: channel', channel)
             desc = ' '.join([
                 f': {channel.long_name.decode("ascii")}',
                 f'Rep Code: {RepCode.REP_CODE_INT_TO_STR[channel.rep_code]}',
@@ -357,6 +358,7 @@ def write_array_section_to_las(
         channels: typing.Set[str],
         ostream: typing.TextIO,
     ) -> None:
+    """Write the ``~Array Section`` to the LAS file."""
     assert array_reduction in ARRAY_REDUCTIONS
     iflrs: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     num_input_frames = len(iflrs)
@@ -369,10 +371,11 @@ def write_array_section_to_las(
         ostream.write(f'# Requested Channels this LAS file [{len(channels):4d}]: {",".join(channels)}\n')
     else:
         ostream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
+    ostream.write(f'# Where a channel has multiple values the reduction method is by "{array_reduction}" value.\n')
     ostream.write(f'# Number of original frames: {num_input_frames}\n')
     ostream.write(
         f'# Requested frame slicing: {frame_slice.long_str(num_input_frames)}'
-        f' total: {frame_slice.count(num_input_frames)}\n'
+        f' total number of frames presented here: {frame_slice.count(num_input_frames)}\n'
     )
     ostream.write('~A')
     for c, channel in enumerate(frame_array.channels):
@@ -447,6 +450,7 @@ def write_logical_sequence_to_las(
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
         ) -> typing.List[str]:
+    assert array_reduction in ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
         # Now the LogPass
@@ -491,6 +495,7 @@ def single_rp66v1_file_to_las(
         channels: typing.Set[str],
 ) -> LASWriteResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
+    assert array_reduction in ARRAY_REDUCTIONS
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         logger.info(f'Converting RP66V1 {path_in} to LAS {os.path.splitext(path_out)[0]}*')
@@ -632,7 +637,7 @@ def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, c
 
 GNUPLOT_PLT = """set logscale x
 set grid
-set title "XML Index of RP66V1 Files with IndexFile.py."
+set title "Converting RP66V1 Files to LAS with TotalDepth.RP66V1.ToLAS.main"
 set xlabel "RP66V1 File Size (bytes)"
 # set mxtics 5
 # set xrange [0:3000]
@@ -640,14 +645,14 @@ set xlabel "RP66V1 File Size (bytes)"
 # set format x ""
 
 set logscale y
-set ylabel "XML Index Rate (ms/Mb), XML Compression Ratio"
+set ylabel "Conversion Rate (ms/Mb), Ratio RP66V1 / LAS size"
 # set yrange [1:1e5]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
 # set logscale y2
-# set y2label "Ratio index size / original size"
+# set y2label "Ratio LAS size / original RP66V1 size"
 # set y2range [1e-4:10]
 # set y2tics
 
@@ -683,9 +688,9 @@ set output "{name}.svg" # choose the output device
 
 # Fields: size_input, size_index, time, exception, ignored, path
 
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "LAS Conversion Rate (ms/Mb)" lt 1 w points,\
 	rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
-    "{name}.dat" using 1:($1/$2) axes x1y1 title "Original Size / XML Index size" lt 3 w points, \
+    "{name}.dat" using 1:($1/$2) axes x1y1 title "RP66V1 / LAS size" lt 3 w points, \
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y1 lt 3 lw 2
 
 # Plot size ratio:
@@ -718,7 +723,7 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
-Scans a RP66V1 file and writes it out as LAS files."""
+Reads RP66V1 file(s) and writes them out as LAS files."""
     print('Cmd: %s' % ' '.join(sys.argv))
 
     parser = cmn_cmd_opts.path_in_out(
@@ -732,7 +737,7 @@ Scans a RP66V1 file and writes it out as LAS files."""
     parser.add_argument(
         '--array_reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
-        default='mean',
+        default='first',
         choices=list(sorted(ARRAY_REDUCTIONS)),
         )
     parser.add_argument(
