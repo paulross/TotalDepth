@@ -4,7 +4,6 @@ Scans a RP66V1 file an writes out the summary in HTML.
 import logging
 import multiprocessing
 import os
-import pprint
 import sys
 import time
 import typing
@@ -12,13 +11,21 @@ import typing
 import colorama
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import StorageUnitLabel, stringify, File, LogicalFile, LogPass, RepCode, XAxis, AbsentValue
+from TotalDepth.RP66V1.core import AbsentValue
+from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core import LogPass
+from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core import StorageUnitLabel
+from TotalDepth.RP66V1.core import XAxis
+from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
-from TotalDepth.common import process, Slice, cmn_cmd_opts
-from TotalDepth.util import gnuplot, XmlWrite, DictTree
+from TotalDepth.common import Slice
+from TotalDepth.common import cmn_cmd_opts
+from TotalDepth.common import process
 from TotalDepth.util import DirWalk
 from TotalDepth.util import bin_file_type
-
+from TotalDepth.util import gnuplot, XmlWrite, DictTree
 
 colorama.init(autoreset=True)
 
@@ -848,6 +855,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
                              frame_slice: typing.Union[Slice.Slice, Slice.Split]) -> typing.Dict[str, HTMLResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
+    assert os.path.isdir(dir_in)
     if jobs < 1:
         jobs = multiprocessing.cpu_count()
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
@@ -979,7 +987,8 @@ plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate 
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
 
 # Plot size ratio:
-#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, #     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, 
+#     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
 
 reset
 """

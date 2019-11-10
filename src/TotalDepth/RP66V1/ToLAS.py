@@ -15,6 +15,7 @@ import argparse
 import collections
 import datetime
 import logging
+import multiprocessing
 import os
 import sys
 import time
@@ -24,11 +25,18 @@ import numpy as np
 
 import TotalDepth.RP66V1.core.XAxis
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import LogicalFile, File, RepCode, LogPass, stringify, XAxis
-from TotalDepth.RP66V1.core.LogicalRecord import IFLR, EFLR
-from TotalDepth.common import data_table, Slice
+from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core import LogPass
+from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core import XAxis
+from TotalDepth.RP66V1.core import stringify
+from TotalDepth.RP66V1.core.LogicalRecord import EFLR
+from TotalDepth.RP66V1.core.LogicalRecord import IFLR
+from TotalDepth.common import Slice, cmn_cmd_opts, process
+from TotalDepth.common import data_table
 from TotalDepth.util.DirWalk import dirWalk
-from TotalDepth.util.bin_file_type import binary_file_type_from_path
+from TotalDepth.util import bin_file_type, DirWalk
 from TotalDepth.util import gnuplot
 
 __author__  = 'Paul Ross'
@@ -44,6 +52,7 @@ logger = logging.getLogger(__file__)
 
 
 class LASWriteResult(typing.NamedTuple):
+    path_input: str
     size_input: int
     size_output: int
     las_count: int
@@ -404,7 +413,6 @@ def write_array_section_to_las(
         ostream.write('\n')
 
 
-
     # # TODO: Could init_arrays(1), read one IFLR, write it out and repeat.
     # frame_array.init_arrays(num_input_frames)
     # for f, (lrsh_position, iflr_frame_number, x_axis) in enumerate(iflrs):
@@ -483,8 +491,8 @@ def single_rp66v1_file_to_las(
         channels: typing.Set[str],
 ) -> LASWriteResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
-    bin_file_type = binary_file_type_from_path(path_in)
-    if bin_file_type == 'RP66V1':
+    binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
+    if binary_file_type == 'RP66V1':
         logger.info(f'Converting RP66V1 {path_in} to LAS {os.path.splitext(path_out)[0]}*')
         try:
             with open(path_in, 'rb') as fobj:
@@ -497,6 +505,7 @@ def single_rp66v1_file_to_las(
                 )
                 output_size = sum(os.path.getsize(f) for f in las_files_written)
                 result = LASWriteResult(
+                    path_in,
                     os.path.getsize(path_in),
                     output_size,
                     len(las_files_written),
@@ -508,12 +517,44 @@ def single_rp66v1_file_to_las(
                 return result
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            return LASWriteResult(os.path.getsize(path_in), 0, 0, 0.0, True, False)
+            return LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            return LASWriteResult(os.path.getsize(path_in), 0, 0, 0.0, True, False)
-    logger.debug(f'Ignoring file type "{bin_file_type}" at {path_in}')
-    return LASWriteResult(0, 0, 0, 0.0, False, True)
+            return LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
+    logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
+    return LASWriteResult(path_in, 0, 0, 0, 0.0, False, True)
+
+
+def convert_rp66v1_dir_or_file_to_las_multiprocessing(
+        dir_in: str,
+        dir_out: str,
+        recurse: bool,
+        array_reduction: str,
+        frame_slice: Slice.Slice,
+        channels: typing.Set[str],
+        jobs: int
+) -> typing.Dict[str, LASWriteResult]:
+    """Multiprocessing code to LAS.
+    Returns a dict of {path_in : LASWriteResult, ...}"""
+    assert os.path.isdir(dir_in)
+    if jobs < 1:
+        jobs = multiprocessing.cpu_count()
+    logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
+    pool = multiprocessing.Pool(processes=jobs)
+    tasks = [
+        (t.filePathIn, array_reduction, t.filePathOut, frame_slice, channels) for t in DirWalk.dirWalk(
+            dir_in, dir_out, theFnMatch='', recursive=recurse, bigFirst=True
+        )
+    ]
+    # print('tasks:')
+    # pprint.pprint(tasks, width=200)
+    # return {}
+    results = [
+        r.get() for r in [
+            pool.apply_async(single_rp66v1_file_to_las, t) for t in tasks
+        ]
+    ]
+    return {r.path_input: r for r in results}
 
 
 def convert_rp66v1_dir_or_file_to_las(
@@ -540,8 +581,8 @@ def convert_rp66v1_dir_or_file_to_las(
 
 
 def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, channels) -> None:
-    bin_file_type = binary_file_type_from_path(path_in)
-    if bin_file_type == 'RP66V1':
+    binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
+    if binary_file_type == 'RP66V1':
         logger.info(f'Reading RP66V1 {path_in}')
         try:
             with open(path_in, 'rb') as fobj:
@@ -576,6 +617,8 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
+    else:
+        logger.error(f'Path {path_in} is not a RP66V1 file.')
 
 
 def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, channels: str) -> None:
@@ -658,12 +701,12 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
-        list(LASWriteResult._fields) + ['Path']
+        list(LASWriteResult._fields[1:]) + ['Path']
     ]
     table[0][0] = f'# {table[0][0]}'
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
-            table.append(list(data[k]) + [k])
+            table.append(list(data[k][1:]) + [k])
     name = 'IndexFile'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:
@@ -675,64 +718,33 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
 
 def main() -> int:
     description = """usage: %(prog)s [options] file
-Scans a RP66V1 file and dumps data."""
+Scans a RP66V1 file and writes it out as LAS files."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    parser = argparse.ArgumentParser(description=description, epilog=__rights__, prog=sys.argv[0])
-    parser.add_argument('path_in', type=str, help='Path to the input.')
-    parser.add_argument(
-        'path_out', type=str,
-        help='Path to the output.'
-             'The results are undefined if path_out conflicts with path_in',
-        default='',
-        nargs='?')
-    parser.add_argument(
-        '-r', '--recurse', action='store_true',
-        help='Process files recursively. [default: %(default)s]',
+
+    parser = cmn_cmd_opts.path_in_out(
+        description, prog='TotalDepth.RP66V1.ToLAS.main', version=__version__, epilog=__rights__
     )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    cmn_cmd_opts.add_multiprocessing(parser)
+    Slice.add_frame_slice_to_argument_parser(parser)
+    process.add_process_logger_to_argument_parser(parser)
+    gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument(
         '--array_reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='mean',
         choices=list(sorted(ARRAY_REDUCTIONS)),
         )
-    # Add --frame-slice
-    Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
     parser.add_argument(
         '--channels', type=str,
         help='Comma separated list of channels to write out (X axis is always included).'
              ' Use \'?\' to see what channels exist without writing anything. [default: %(default)s]',
         default='',
         )
-    log_level_help_mapping = ', '.join(
-        ['{:d}<->{:s}'.format(level, logging._levelToName[level]) for level in sorted(logging._levelToName.keys())]
-    )
-    log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
-    parser.add_argument(
-            "-l", "--log-level",
-            # type=int,
-            # dest="loglevel",
-            default=30,
-            help=log_level_help
-        )
-    parser.add_argument(
-        "-v", "--verbose", action='count', default=0,
-        help="Increase verbosity, additive [default: %(default)s]",
-    )
-    gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
-    print('args:', args)
+    cmn_cmd_opts.set_log_level(args)
+    # print('args:', args)
     # return 0
-
-    # Extract log level
-    if args.log_level in logging._nameToLevel:
-        log_level = logging._nameToLevel[args.log_level]
-    else:
-        log_level = int(args.log_level)
-    # Initialise logging etc.
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s %(levelname)-8s %(message)s',
-                        #datefmt='%y-%m-%d % %H:%M:%S',
-                        stream=sys.stdout)
     # Your code here
     clk_start = time.perf_counter()
     result: typing.Dict[str, LASWriteResult] = {}
@@ -743,14 +755,25 @@ Scans a RP66V1 file and dumps data."""
         for ch in args.channels.strip().split(','):
             if ch.strip() != '':
                 channel_set.add(ch.strip())
-        result = convert_rp66v1_dir_or_file_to_las(
-            args.path_in,
-            args.path_out,
-            args.recurse,
-            args.array_reduction,
-            Slice.create_slice_or_split(args.frame_slice),
-            channel_set,
-        )
+        if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
+            result = convert_rp66v1_dir_or_file_to_las_multiprocessing(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+                args.array_reduction,
+                Slice.create_slice_or_split(args.frame_slice),
+                channel_set,
+                args.jobs,
+            )
+        else:
+            result = convert_rp66v1_dir_or_file_to_las(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+                args.array_reduction,
+                Slice.create_slice_or_split(args.frame_slice),
+                channel_set,
+            )
     clk_exec = time.perf_counter() - clk_start
     # Report output
     if result:
