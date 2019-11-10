@@ -866,7 +866,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
         ]
     ]
     _write_indexes(dir_out, {r.path_output : r for r in results})
-    return {r.path_input : r for r in results}
+    return {r.path_input: r for r in results}
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
@@ -1014,7 +1014,7 @@ def plot_gnuplot(data: typing.Dict[str, HTMLResult], gnuplot_dir: str) -> None:
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
-def main() -> int: # pragma: no cover
+def main() -> int:  # pragma: no cover
     description = """Scans a RP66V1 file or directory and writes HTML version of the data."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out(
