@@ -7,6 +7,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
 from TotalDepth.RP66V1.core import LogPass, File, RepCode, XAxis
+from TotalDepth.RP66V1.core.LogicalRecord.Duplicates import DuplicateObjectStrategy
 from TotalDepth.common import Slice
 
 logger = logging.getLogger(__file__)
@@ -62,7 +63,16 @@ class LogicalFile:
     TODO: Check the FHLR references the ORIGIN record. [RP66V1 Section 5.1 File Header Logical Record (FHLR)]:
     "The Origin Subfield of the Name of the File-Header Object must reference the Defining Origin (see §5.2.1)."
     Is this done in practice?
+
+    TODO: Handle multiple ORIGIN records. This is actually allowed in the standard: "A Logical File must have at least
+        one OLR (Origin) Logical Record immediately following the File Header Logical Record".
+
+    TODO: Handle multiple CHANNEL records in a Logical File.
     """
+    DUPE_EFLR_CHANNEL_STRATEGY = DuplicateObjectStrategy.REPLACE
+    DUPE_EFLR_CHANNEL_LOGGER = logger.warning
+    ALLOWABLE_ORIGIN_SET_TYPES = (b'ORIGIN', b'WELL-REFERENCE')
+
     def __init__(self, file_logical_data: File.FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
         if fhlr.lr_type != 0:
             raise ExceptionLogicalFileCtor(
@@ -76,12 +86,13 @@ class LogicalFile:
         self.eflrs: typing.List[PositionEFLR] = [
             PositionEFLR(file_logical_data.position, fhlr)
         ]
+        # Multiple origins are allowed by the standard, this references the last one.
+        self.origin_index: int = -1
         # For interpreting IFLRs
         self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.log_pass: typing.Union[None, LogPass.LogPass] = None
         self.iflr_position_map: typing.Dict[RepCode.ObjectName, XAxis.XAxis] = {}
-
 
     def _check_fld_matches_eflr(self, file_logical_data: File.FileLogicalData,
                                 eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
@@ -98,7 +109,7 @@ class LogicalFile:
             raise ExceptionLogicalFileAdd(
                 f'Logical File requires second EFLR code 1 not {str(olr.lr_type)}'
             )
-        if olr.set.type not in (b'ORIGIN', b'WELL-REFERENCE'):
+        if olr.set.type not in self.ALLOWABLE_ORIGIN_SET_TYPES:
             raise ExceptionLogicalFileAdd(
                 f'Logical File requires second EFLR type b\'ORIGIN\' or b\'WELL-REFERENCE\' not {str(olr.set.type)}'
             )
@@ -117,6 +128,7 @@ class LogicalFile:
         """Returns the ORIGIN EFLR."""
         if len(self.eflrs) < 2:
             raise ExceptionLogicalFileMissingData('Have not yet seen an ORIGIN record.')
+        assert self.eflrs[1].eflr.set.type in self.ALLOWABLE_ORIGIN_SET_TYPES
         return self.eflrs[1].eflr
 
     @property
@@ -134,6 +146,7 @@ class LogicalFile:
 
     @property
     def has_log_pass(self) -> bool:
+        """Return True if a log pass has been created from a CHANNEL and a FRAME record."""
         return self.log_pass is not None
 
     @staticmethod
@@ -142,6 +155,10 @@ class LogicalFile:
         return eflr.set.type == b'FILE-HEADER'
 
     def add_eflr(self, file_logical_data: File.FileLogicalData, eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+        """Adds an EFLR in sequence from the file.
+
+        Will raise a ``ExceptionLogicalFileAdd`` if the EFLR is a ``FILE-HEADER`` as that signals the next Logical File.
+        """
         if self.is_next(eflr):
             raise ExceptionLogicalFileAdd(f'Can not add EFLR code {eflr.lr_type}, type {eflr.set.type}')
         self._check_fld_matches_eflr(file_logical_data, eflr)
@@ -149,9 +166,9 @@ class LogicalFile:
             self._add_origin_eflr(file_logical_data, eflr)
         else:
             if eflr.set.type in (b'FILE-HEADER', b'ORIGIN', b'WELL-REFERENCE'):
-                raise ExceptionLogicalFileAdd(
-                    f'Logical File encountered multiple EFLRs {str(eflr.set.type)}'
-                )
+                msg = f'Logical File encountered multiple EFLRs {str(eflr.set.type)} LR type: {eflr.lr_type}'
+                # raise ExceptionLogicalFileAdd(msg)
+                logger.warning(msg)
             self.eflrs.append(PositionEFLR(file_logical_data.position, eflr))
             # Extract specific EFLRs for interpreting IFLRs
             if eflr.set.type == b'CHANNEL':
@@ -162,6 +179,7 @@ class LogicalFile:
                 if self.eflr_frame is not None or self.log_pass is not None:
                     raise ExceptionLogicalFileAdd(f'Multiple FRAME EFLRs in a Logical File.')
                 self.eflr_frame = eflr
+            # If the data is now there then construct a LogPass
             if self.eflr_channels is not None and self.eflr_frame is not None:
                 assert self.log_pass is None
                 self.log_pass = LogPass.log_pass_from_RP66V1(self.eflr_frame, self.eflr_channels)

@@ -154,6 +154,32 @@ class LogicalRecordSegmentHeader:
     # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
 
     def __init__(self, fobj: typing.BinaryIO):
+        """Constructor.
+        position: The file position of the start of the LRSH.
+
+        length: The *Logical Record Segment Length* is a two-byte, unsigned integer (Representation Code UNORM) that
+            specifies the length, in bytes, of the Logical Record Segment. The Logical Record Segment Length is required
+            to be even. The even length ensures that 2-byte checksums can be computed, when present, and permits some
+            operating systems to handle DLIS data more efficiently without degrading performance with other systems.
+            There is no limitation on a Logical Record length. Logical Record Segments must contain at least sixteen
+            (16) bytes. This requirement facilitates mapping the Logical Format to those Physical Formats that require a
+            minimum physical record length.
+
+        attributes: The *Logical Record Segment Attributes* consist of a one-byte bit string that specifies the
+            Attributes of the Logical Record Segment. Its structure is defined in Figure 2-3. Since its structure is
+            defined explicitly in Figure 2-3, no Representation Code is assigned to it.
+
+        record_type: The *Logical Record Type* is a one-byte, unsigned integer (Representation Code USHORT) that
+            specifies the Type of the Logical Record. Its value indicates the general semantic content of the Logical
+            Record. The same value must be used in all Segments of a Logical Record. Logical Record Types are specified
+            in Appendix A.
+
+            IFLRs: Numeric codes 0-127 are reserved for Public IFLRs. Codes 128-255 are reserved for Private IFLRs.
+            0 is Frame Data, 1 is unformatted data.
+
+            EFLRs: Numeric codes 0-127 are reserved for Public EFLRs. Codes 128-255 are reserved for Private EFLRs.
+            0 is FILE-HEADER, 1 is ORIGIN and so on.
+        """
         self.position, self.length, self.attributes, self.record_type = self._read(fobj)
 
     def _read(self, fobj: typing.BinaryIO) -> typing.Tuple[int, int, int, int]:
@@ -306,9 +332,8 @@ class LogicalRecordPosition:
 
 
 class LogicalData:
-    """Class that holds data bytes and can successively read them."""
+    """Class that holds data bytes and can successively read them maintaining an index of what has been read."""
     def __init__(self, by: bytes):
-        # TODO: Performance, make this a list of bytes like a rope???
         self.bytes: bytes = by
         self.index: int = 0
         self._sha1: typing.Union[hashlib.sha1, None] = None
@@ -331,6 +356,8 @@ class LogicalData:
         self.index += length
 
     def view_remaining(self, length: int) -> bytes:
+        """Read only method to return a slice of length from the current index.
+        Usage ``ld.view_remaining(ld.remain)`` to see all the remaining data."""
         if length < 0:
             raise IndexError(f'view_remaining length {length} must be >= 0')
         return self.bytes[self.remain:self.remain+length]
@@ -348,29 +375,36 @@ class LogicalData:
 
     @property
     def remain(self) -> int:
+        """The number of bytes remaining."""
         if len(self.bytes) > self.index:
             return len(self.bytes) - self.index
         return 0
 
     @property
     def sha1(self) -> hashlib.sha1:
+        """Lazy SHA1 evaluation of the complete binary data."""
         if self._sha1 is None:
             self._sha1 = hashlib.sha1(self.bytes)
         return self._sha1
 
     def rewind(self) -> None:
+        """Reset the index to 0."""
         self.index = 0
 
     def __bool__(self):
+        """True if there is some data remaining."""
         return self.remain > 0
 
     def __len__(self):
+        """Total length of the binary data."""
         return len(self.bytes)
 
-    def __getitem__(self, item):
-        return self.bytes[item]
+    def __getitem__(self, index):
+        """Return a byte and the given index."""
+        return self.bytes[index]
 
     def __str__(self) -> str:
+        """String representation."""
         return f'<LogicalData Len: 0x{len(self.bytes):0x} Idx: 0x{self.index:0x} Bytes: {format_bytes(self.bytes[:16])}>'
 
 

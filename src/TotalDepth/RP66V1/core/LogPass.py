@@ -212,12 +212,18 @@ class FrameArray:
             else:
                 channel.init_array(0)
 
+    def _handle_remaining(self, ld: LogicalData, frame_number: int) -> None:
+        """What to do if there is unread data."""
+        if ld.remain != 0:
+            msg = f'Not all logical data consumed, frame {frame_number} remaining {ld.remain} bytes: {ld.view_remaining(ld.remain)}'
+            logger.warning(msg)
+            # raise ExceptionFrameArray(msg)
+
     def read(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the Logical Data into the numpy frame."""
         for channel in self.channels:
             channel.read(ld, frame_number)
-        if ld.remain != 0:
-            raise ExceptionFrameArray(f'Not all logical data consumed, remaining {ld.remain} bytes')
+        self._handle_remaining(ld, frame_number)
 
     def read_partial(self, ld: LogicalData, frame_number: int, channels: typing.Set[typing.Hashable]) -> None:
         """Reads the Logical Data into the numpy frame for the nominated channels."""
@@ -226,8 +232,7 @@ class FrameArray:
                 channel.read(ld, frame_number)
             else:
                 channel.seek(ld)
-        if ld.remain != 0:
-            raise ExceptionFrameArray(f'Not all logical data consumed, remaining {ld.remain} bytes')
+        self._handle_remaining(ld, frame_number)
 
     @property
     def x_axis(self) -> FrameChannel:

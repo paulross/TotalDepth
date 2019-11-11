@@ -2,6 +2,7 @@ import typing
 
 import pytest
 
+import TotalDepth.RP66V1.core.LogicalRecord.Duplicates
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
@@ -731,7 +732,7 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_exact_default(ld):
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_exact_raise(ld):
     ld.rewind()
-    EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = EFLR.DuplicateObjectStrategy.RAISE
+    EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.RAISE
     with pytest.raises(EFLR.ExceptionEFLRSetDuplicateObjectNames) as err:
         EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     assert err.value.args == (
