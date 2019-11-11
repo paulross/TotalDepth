@@ -91,6 +91,21 @@ def test_FSINGL(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        # Examples from [RP66V2 Section 11.3.23]
+        (LogicalData(b'\x00\x00\x00\x00'), 0.0),
+        (LogicalData(b'\x0c\x44\x00\x80'), 153.0),
+        (LogicalData(b'\x0c\xc4\x00\x80'), -153.0),
+    )
+)
+def test_VSINGL(ld, expected):
+    result = RepCode.VSINGL(ld)
+    assert result == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         # Examples from [RP66V1 Appendix B Section B.7 NOTE: These are only 4 byte examples, RP66V2 has better examples]
         (LogicalData(b'\x40\x63\x20\x00\x00\x00\x00\x00'), 153.0),
         (LogicalData(b'\xc0\x63\x20\x00\x00\x00\x00\x00'), -153.0),

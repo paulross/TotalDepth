@@ -101,7 +101,8 @@ REP_CODES_SUPPORTED = {
     # 1, # - Not found in practice.
     2,
     # 3, 4, # - Not found in practice.
-    # 5, 6, # - Antiquated types, rarely if ever found.
+    # 5, # - Antiquated types, rarely if ever found.
+    6,
     7,
     # 8, 9, # - Not found in practice.
     # 10, 11, # - Not found in practice.
@@ -116,7 +117,7 @@ REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
     # 3: 'FSING1',
     # 4: 'FSING2',
     # 5: 'ISINGL',
-    # 6: 'VSINGL',
+    6: 'VSINGL',
     7: 'FDOUBL',
     # 8: 'FDOUB1',
     # 9: 'FDOUB2',
@@ -212,6 +213,22 @@ def FSINGL(ld: LogicalData) -> float:
     by = ld.chunk(4)
     value = struct.unpack('>f', by)
     return value[0]
+
+
+def VSINGL(ld: LogicalData) -> float:
+    """Representation code 6, VAX single precision floating point."""
+    by = ld.chunk(4)
+    s = (by[1] & 0x80)
+    m = ((by[0] & 0x7f) << 16) | (by[3] << 8) | by[2]
+    e = ((by[1] & 0x7f) << 1) | ((by[0] & 0x80) >> 7)
+    if e == 0 and s == 0:
+        # m is arbitrary
+        return 0.0
+    m = float(m) / (1 << 23)
+    value = (0.5 + m) * 2**(e - 128)
+    if s:
+        return -value
+    return value
 
 
 def FDOUBL(ld: LogicalData) -> float:
@@ -583,7 +600,7 @@ REP_CODE_MAP = {
     # 3: FSING1,
     # 4: FSING2,
     # 5: ISINGL,
-    # 6: VSINGL,
+    6: VSINGL,
     7: FDOUBL,
     # 8: FDOUB1,
     # 9: FDOUB2,
@@ -622,6 +639,7 @@ def code_read(rep_code: int, ld: LogicalData):
 REP_CODE_NUMPY_TYPE_MAP = {
     2: np.float32,
 
+    6: np.float32,
     7: np.float64,
 
     12: np.int8,
@@ -657,7 +675,7 @@ REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
     # 3: NumericCategory.NONE,  # FSING1,
     # 4: NumericCategory.NONE,  # FSING2,
     # 5: NumericCategory.FLOAT,  # ISINGL,
-    # 6: NumericCategory.FLOAT,  # VSINGL,
+    6: NumericCategory.FLOAT,  # VSINGL,
     7: NumericCategory.FLOAT,  # FDOUBL,
     # 8: NumericCategory.NONE,  # FDOUB1,
     # 9: NumericCategory.NONE,  # FDOUB2,
