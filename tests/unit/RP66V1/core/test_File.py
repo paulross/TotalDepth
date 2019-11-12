@@ -42,34 +42,6 @@ def test_read_two_bytes_big_endian_raises(by):
 
 
 @pytest.mark.parametrize(
-    'by, length, expected',
-    (
-        (b'\x00\x01\x02\x03', 0, b''),
-        (b'\x00\x01\x02\x03', 1, b'\x00'),
-        (b'\x00\x01\x02\x03', 2, b'\x00\x01'),
-        (b'\x00\x01\x02\x03', 3, b'\x00\x01\x02'),
-        (b'\x00\x01\x02\x03', 4, b'\x00\x01\x02\x03'),
-    )
-)
-def test_read_n_bytes(by, length, expected):
-    fobj = io.BytesIO(by)
-    assert File.read_n_bytes(fobj, length) == expected
-
-
-@pytest.mark.parametrize(
-    'by, length',
-    (
-        (b'\x00\x01\x02\x03', 5),
-    )
-)
-def test_read_n_bytes_raises(by, length):
-    fobj = io.BytesIO(by)
-    with pytest.raises(File.ExceptionEOF) as err:
-        File.read_n_bytes(fobj, length)
-    assert err.value.args[0] == 'Premature EOF.'
-
-
-@pytest.mark.parametrize(
     'fobj, position, length, version',
     (
         (None, 0, 0, 0),

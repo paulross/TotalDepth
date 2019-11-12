@@ -71,12 +71,6 @@ def read_two_bytes_big_endian(fobj: typing.BinaryIO) -> int:
     return by[0] << 8 | by[1]
 
 
-def read_n_bytes(fobj: typing.BinaryIO, length: int) -> bytes:
-    by: bytes = fobj.read(length)
-    if len(by) != length:
-        raise ExceptionEOF('Premature EOF.')
-    return by
-
 # ---------------- END: Low Level File Read Functions ------------------
 
 
@@ -523,31 +517,6 @@ class FileRead:
         file_logical_data.seal()
         return file_logical_data
 
-    # def _move_to_next_visible_and_logical_record_segment(self, vr_position: int, lrsh_position: int) -> None:
-    #     """Sets the file up to read a LRSH within a Visible Record. It is up to the caller to make sure that
-    #     the values of vr_position and Logical Record Segment Header position are valid, usually as they have
-    #     been created by one of the iteration methods of this class."""
-    #     assert vr_position > 0
-    #     assert lrsh_position > 0
-    #     assert vr_position < lrsh_position
-    #     self.file.seek(vr_position)
-    #     self.visible_record.read_next(self.file)
-    #     self.file.seek(lrsh_position)
-    #     self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
-    #     if not self.logical_record_segment_header.is_first:
-    #         raise ExceptionFileRead('TODO: Error message')
-
-    # def iter_logical_record_segments(self) -> typing.Sequence[LogicalRecordSegmentHeader]:
-    #     """Iterate across the file yielding the Logical Record Segments as LogicalRecordSegmentHeader objects."""
-    #     self._set_file_and_read_first_logical_record()
-    #     try:
-    #         while True:
-    #             # Caller could possibly mess with this so make a copy.
-    #             yield copy.copy(self.logical_record_segment_header)
-    #             self._seek_and_read_next_logical_record_segment()
-    #     except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
-    #         pass
-
     def iter_visible_records(self) -> typing.Sequence[VisibleRecord]:
         """
         Iterate across the file yielding the Visible Records as VisibleRecord objects.
@@ -617,25 +586,6 @@ class FileRead:
             logger.debug(f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x}')
         return by
 
-    # def _read_partial_logical_data(self, size: int) -> bytes:
-    #     """
-    #     Reads from the current file position the requested number of bytes.
-    #     The number of bytes returned will be <= size.
-    #     This leaves self.file in an indeterminate position, caller must handle this.
-    #     """
-    #     if size >= self.logical_record_segment_header.logical_data_length:
-    #         return self._read_full_logical_data()
-    #     tell: int = self.file.tell()
-    #     assert tell == self.logical_record_segment_header.position + self.logical_record_segment_header.HEAD_LENGTH
-    #     # Partial read. If there is padding we must figure out how much we can read.
-    #     if self.logical_record_segment_header.must_strip_padding:
-    #         self.file.seek(self.logical_record_segment_header.logical_data_length - 1)
-    #         pad_len = read_one_byte(self.file)
-    #         self.file.seek(tell, io.SEEK_SET)
-    #         if self.logical_record_segment_header.length - pad_len < size:
-    #             return self._read_full_logical_data()
-    #     return self.file.read(size)
-
     def iter_logical_records(self) -> typing.Sequence[FileLogicalData]:
         """Iterate across the file from the beginning yielding FileLogicalData objects."""
         self._set_file_and_read_first_logical_record_segment_header()
@@ -655,72 +605,3 @@ class FileRead:
                     )
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
-
-    # def iter_logical_records_minimal(self, lr_codes: typing.Set[int]) -> typing.Sequence[FileLogicalData]:
-    #     """Iterate across the file from the beginning yielding FileLogicalData objects which contain the minimal
-    #     record information.
-    #
-    #     For EFLRs this is the Set Type, Representation Code IDENT [RP66V1 Section 3 Figure 3-3].
-    #     For IFLRs this is the Data Descriptor Referenced, Representation Code OBNAME plus the number of bytes that
-    #     make up the index channel. References:
-    #         [RP66V1 Section 3.3 Indirectly Formatted Logical Record]
-    #         [RP66V1 Section 3.3.1 IFLR: Specific Structure]
-    #         [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2]
-    #
-    #     The rest of the data is seek()'d over leaving the file at the next initial LRSH.
-    #     """
-    #     # TODO: Remove asserts for production
-    #     self._set_file_and_read_first_logical_record_segment_header()
-    #     try:
-    #         while True:
-    #             file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
-    #             # TODO: What if the self.logical_record_segment_header.logical_data_length is < the required EFLR/IFLR data?
-    #             # Hmm, so a crude policy would be to do a 'raw' read of the minimal EFLR/IFLR which does not respect the
-    #             # Visible Record and Logical Record Segment boundaries. Then if the read data exceeds the logical
-    #             # segment length then rewind the file and read the logical record segment and try again.
-    #             if file_logical_data.lr_type in lr_codes:
-    #                 file_logical_data.add_bytes(self._read_full_logical_data())
-    #                 while not self.logical_record_segment_header.is_last:
-    #                     self._seek_and_read_next_logical_record_segment_header()
-    #                     file_logical_data.add_bytes(self._read_full_logical_data())
-    #             else:
-    #                 tell_logical_data_start = self.file.tell()
-    #                 if file_logical_data.lr_is_eflr:
-    #                     # logger.info(
-    #                     #     f'iter_logical_records_minimal(): EFLR first read {self.logical_record_segment_header.logical_data_length}')
-    #                     by: bytes = read_OBNAME(self.file)
-    #                 else:
-    #                     # logger.info(
-    #                     #     f'iter_logical_records_minimal(): IFLR first read {self.logical_record_segment_header.logical_data_length}')
-    #                     by: bytes = read_IFLR_obname_frame_and_first_channel(self.file)
-    #                 len_required_bytes = len(by)
-    #                 # Explain that this assumes we are not going to encroach on the pad bytes.
-    #                 if self.logical_record_segment_header.logical_data_length < len_required_bytes:
-    #                     # Rewind
-    #                     self.file.seek(tell_logical_data_start)
-    #                     by = self._read_full_logical_data()
-    #                 file_logical_data.add_bytes(by)
-    #                 while not self.logical_record_segment_header.is_last:
-    #                     # Loop for each subsequent segment
-    #                     # See if we have enough data
-    #                     required_bytes: int = len_required_bytes - len(file_logical_data)
-    #                     if required_bytes > 0:
-    #                         # Must read complete Logical Segment
-    #                         # We can't do a partial read as we  padding, it is possible that
-    #                         if self.logical_record_segment_header.logical_data_length <= required_bytes \
-    #                                 or self.logical_record_segment_header.must_strip_padding:
-    #                             file_logical_data.add_bytes(self._read_full_logical_data())
-    #                         else:
-    #                             # Only read partial Logical Segment
-    #                             by = self.file.read(required_bytes)
-    #                             file_logical_data.add_bytes(by)
-    #                     self._seek_and_read_next_logical_record_segment_header()
-    #                 # Could have over-read and this will give problems with the EFLR where it will try and read the
-    #                 # template beyond the OBNAME.
-    #                 # file_logical_data.truncate(len_required_bytes)
-    #             file_logical_data.seal()
-    #             yield file_logical_data
-    #             self._seek_and_read_next_logical_record_segment_header()
-    #             assert self.logical_record_segment_header.is_first
-    #     except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
-    #         pass
