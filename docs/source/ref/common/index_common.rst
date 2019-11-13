@@ -16,5 +16,4 @@ Contents:
     process
     Rle
     Slice
-    td_logging
     xml

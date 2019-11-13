@@ -9,15 +9,452 @@ RP66V1 Command Line Tools
 
 This describes the command line tools that are available for processing RP66V1 files. They are:
 
-=========================== ===================================================================================
+=========================== =====================================================================================
 Tool Name                   Description
-=========================== ===================================================================================
-``tdrp66v1scan``            Scans a RP66V1 file at various levels of structure.
-``tdrp66v1scanhtml``        Scans a RP66V1 file(s) and writes out a summary in HTML.
-``tdrp66v1tolas``           Converts a RP66V1 file to a set of LAS files.
-``tdrp66v1indexpickle``     Indexes a RP66V1 file and writes the indexes for future use as Python pickle files.
-``tdrp66v1indexxml``        Indexes a RP66V1 file and writes the indexes as XML files.
-=========================== ===================================================================================
+=========================== =====================================================================================
+``tdrp66v1scanhtml``        Scans RP66V1 file(s) and writes out a summary in HTML.
+``tdrp66v1tolas``           Converts RP66V1 file(s) to a set of LAS files.
+``tdrp66v1indexpickle``     Indexes RP66V1 file(s) and writes the indexes for future use as Python pickle files.
+``tdrp66v1indexxml``        Indexes RP66V1 file(s) and writes the indexes as XML files.
+``tdrp66v1scan``            Scans RP66V1 file at various levels of structure.
+=========================== =====================================================================================
+
+
+Creating HTML Pages from RP66V1 Files with ``tdrp66v1scanhtml``
+===================================================================
+
+This takes a RP66V1 file or directory of them and writes out an HTML summary of each Logical File.
+The summary includes each non-encrypted EFLR and Log Pass.
+The frames in the log pass can be sub-sampled by using ``--frame-slice`` which speeds things up when processing large files.
+
+Arguments
+-----------
+
+The first argument is the path to a RP66V1 file or directory.
+The second argument is the path to write the output to.
+
+Options
+-------
+
+
+  -h, --help            show this help message and exit
+  -r, --recurse         Process files recursively. [default: False]
+  -e, --encrypted       Output encrypted Logical Records as well. [default:
+                        False]
+  -k, --keep-going      Keep going as far as sensible. [default: False]
+  --frame-slice FRAME_SLICE
+                        Do not process all frames but split or slice the
+                        frames. Split is of the form "1/N" so a maximum of N
+                        frames will be processed. N must be +ve, non-zero
+                        integer. Example: "1/64" - process a maximum of 64
+                        frames. Slice the frames is of the form
+                        start,stop,step as a comma separated list. Values can
+                        be absent or "None". Examples: ",," - every frame,
+                        ",,2" - every other frame, ",10," - frames 0 to 9,
+                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
+                        frame from 40 to the end. Results will be truncated by
+                        frame array length. [default: ",,"]
+  -l LOG_LEVEL, --log-level LOG_LEVEL
+                        Log Level as an integer or symbol. (0<->NOTSET,
+                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
+                        50<->CRITICAL) [default: 20]
+  --log-process LOG_PROCESS
+                        Writes process data such as memory usage as a log INFO
+                        line every LOG_PROCESS seconds. If 0.0 no process data
+                        is logged. [default: 0.0]
+  -v, --verbose         Increase verbosity, additive [default: 0]
+  --gnuplot GNUPLOT     Directory to write the gnuplot data.
+
+
+
+Here is an example of `the HTML summary of a single RP66V1 file <../_static/RP66V1/example.html>`_ .
+
+
+
+Converting RP66V1 Files to LAS Files with ``tdrp66v1tolas``
+===================================================================
+
+This takes a RP66V1 file or directory of them and writes out a set of LAS files.
+A single LAS file is written for each Log Pass in each Logical Record.
+
+The frames in the log pass can be sub-sampled by using ``--frame-slice`` which speeds things up when processing large files.
+The ``--channels`` option can be used to limit channels.
+
+Where a channel has multiple values, and LAS con only record a single value, then the ``--array-reduction`` flag can be used to specify how the single value is computed.
+The allowable values are ``{first,max,mean,median,min}`` and the default is ``mean``.
+
+LAS File Naming Convention
+--------------------------
+
+One RP66V1 file produces one or more LAS files.
+LAS file names are of the form::
+
+    {RP66V1_File_no_extension}_{logical_file_number}_{frame_array_name}
+
+Processing a Single RP66V1 File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given the path out the LAS files will be named ``{path_out}_{logical_file_number}_{frame_array_name}.las``
+
+For example ``tdrp66v1tolas foo.dlis bar/baz`` might create::
+
+    :file:`bar/baz_0_2000T.las`
+    :file:`bar/baz_0_800T.las`
+    :file:`bar/baz_1_2000T.las`
+    :file:`bar/baz_1_800T.las`
+
+and so on.
+
+Processing a Directory of RP66V1 Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given the path out the LAS files will be named ``{path_out}/{RP66V1_File_no_extension}_{logical_file_number}_{frame_array_name}.las``
+
+For example ``tdrp66v1tolas foo/ bar/baz`` might create::
+
+    :file:`bar/baz/bit_0_2000T.las`
+    :file:`bar/baz/bit_0_800T.las`
+    :file:`bar/baz/bit_1_2000T.las`
+    :file:`bar/baz/bit_1_800T.las`
+
+and so on.
+
+The output directory structure will mirror the input directory structure.
+
+Arguments
+-----------
+
+The first argument is the path to a RP66V1 file or directory.
+The second argument is the path to write the output to.
+
+Options
+-------
+
+  -h, --help            show this help message and exit
+  -r, --recurse         Process files recursively. [default: False]
+  --array_reduction
+                        Method to reduce multidimensional channel data to a
+                        single value. One of {first,max,mean,median,min} [default: mean]
+  --frame-slice FRAME_SLICE
+                        Do not process all frames but split or slice the
+                        frames. Split is of the form "1/N" so a maximum of N
+                        frames will be processed. N must be +ve, non-zero
+                        integer. Example: "1/64" - process a maximum of 64
+                        frames. Slice the frames is of the form
+                        start,stop,step as a comma separated list. Values can
+                        be absent or "None". Examples: ",," - every frame,
+                        ",,2" - every other frame, ",10," - frames 0 to 9,
+                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
+                        frame from 40 to the end. Results will be truncated by
+                        frame array length. Use '?' to see what frames are
+                        available [default: ",,"]
+  --channels CHANNELS   Comma separated list of channels to write out (X axis
+                        is always included). Use '?' to see what channels
+                        exist without writing anything. [default: ]
+  -l LOG_LEVEL, --log-level LOG_LEVEL
+                        Log Level as an integer or symbol. (0<->NOTSET,
+                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
+                        50<->CRITICAL) [default: 30]
+  -v, --verbose         Increase verbosity, additive [default: 0]
+  --gnuplot GNUPLOT     Directory to write the gnuplot data.
+
+
+Examples
+-----------
+
+
+Finding out what Channels and Frames Exist:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use ``--channels=?`` and/or ``--frame-slice=?`` to see what channels and frames exist in the RP66V1 file.
+
+.. code-block:: console
+
+    $ tdrp66v1tolas --channels=? --frame-slice=? example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498
+    Logical file [0000]: <TotalDepth.RP66V1.core.LogicalFile.LogicalFile object at 0x109fd50f0>
+      Frame Array: b'2000T'
+      Channels: b'TIME,TDEP,TENS_SL,DEPT_SL'
+      X axis: FrameChannel: OBNAME: O: 2 C: 4 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'1 second River Time'
+      Frames: 921 from 16677259.0 to 17597260.0 interval 1000.0010869565217 [b'ms']
+
+      Frame Array: b'800T'
+      Channels: b'TIME,TDEP,ETIM,LMVL,UMVL,CFLA,OCD,RCMD,RCPP,CMRT,RCNU,DCFL,DFS,DZER,RHMD,HMRT,RHV,RLSW,MNU,S1CY,S2CY,RSCU,RSTS,UCFL,CARC,CMDV,CMPP,CNU,HMDV,HV,LSWI,SCUR,SSTA,RCMP,RHPP,RRPP,CMPR,HPPR,RPPV,SMSC,CMCU,HMCU,CMLP'
+      X axis: FrameChannel: OBNAME: O: 2 C: 5 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'400 milli-second time channel'
+      Frames: 2301 from 16677259.0 to 17597260.0 interval 400.0004347826087 [b'ms']
+
+
+Processing a Single File
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+    $ tdrp66v1tolas example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498
+      Input    Output LAS Count  Time  Ratio  ms/Mb Exception                                                         Path
+    ------- --------- --------- ----- ------ ------ --------- ------------------------------------------------------------
+    540,372 1,812,131         2 1.816 335.3% 3524.1     False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
+    Execution time =    1.819 (S)
+    Out of  1 processed 1 files of total size 540,372 input bytes
+    Wrote 1,812,131 output bytes, ratio: 335.349% at 3529.3 ms/Mb
+    $ ll example_data/LAS/
+    total 4600
+    -rw-r--r--  1 engun  staff    94317 28 Oct 10:19 206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
+    -rw-r--r--  1 engun  staff  1717814 28 Oct 10:20 206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+
+The LAS files look like this:
+
+.. code-block:: console
+
+    $ head -n20 example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
+    ~Version Information Section
+    VERS.          2.0                                     : CWLS Log ASCII Standard - VERSION 2.0
+    WRAP.          NO                                      : One Line per depth step
+    PROD.          TotalDepth                              : LAS Producer
+    PROG.          TotalDepth.RP66V1.ToLAS 0.1.1           : LAS Program name and version
+    CREA.          2019-10-28 10:30                        : LAS Creation date [YYYY-mm-dd HH:MM]
+    DLIS_CREA.     2011-08-20 22:48                        : DLIS Creation date and time [YYYY-mm-dd HH:MM]
+    SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
+    FILE-ID.       MSCT_197LTP                             : File Identification Number
+    LOGICAL-FILE.  0                                       : Logical File number in the DLIS file
+    FRAME-ARRAY.   2000T                                   : Identity of the Frame Array in the Logical File
+    ~Well Information Section
+    #MNEM.UNIT  DATA                         DESCRIPTION
+    #----.----  ----                         -----------
+    STRT.ms     16677259.0                   : Start X
+    STOP.ms     17597260.0                   : Stop X, frames: 921
+    STEP.ms     1000.0010869565217           : Step (average)
+    NULL.                                    :
+    COMP.       Faroe Petroleum              :
+    WELL.       206/05a-3                    :
+    
+    $ head -n20 example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+    ~Version Information Section
+    VERS.          2.0                                     : CWLS Log ASCII Standard - VERSION 2.0
+    WRAP.          NO                                      : One Line per depth step
+    PROD.          TotalDepth                              : LAS Producer
+    PROG.          TotalDepth.RP66V1.ToLAS 0.1.1           : LAS Program name and version
+    CREA.          2019-10-28 10:30                        : LAS Creation date [YYYY-mm-dd HH:MM]
+    DLIS_CREA.     2011-08-20 22:48                        : DLIS Creation date and time [YYYY-mm-dd HH:MM]
+    SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
+    FILE-ID.       MSCT_197LTP                             : File Identification Number
+    LOGICAL-FILE.  0                                       : Logical File number in the DLIS file
+    FRAME-ARRAY.   800T                                    : Identity of the Frame Array in the Logical File
+    ~Well Information Section
+    #MNEM.UNIT  DATA                         DESCRIPTION
+    #----.----  ----                         -----------
+    STRT.ms     16677259.0                   : Start X
+    STOP.ms     17597260.0                   : Stop X, frames: 2,301
+    STEP.ms     400.0004347826087            : Step (average)
+    NULL.                                    :
+    COMP.       Faroe Petroleum              :
+    WELL.       206/05a-3                    :
+
+
+Processing a Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
+
+.. code-block:: console
+
+    $ tdrp66v1tolas -r example_data/ tmp/LAS
+      Input    Output LAS Count  Time  Ratio  ms/Mb Exception                                                         Path
+    ------- --------- --------- ----- ------ ------ --------- ------------------------------------------------------------
+    540,372 1,812,131         2 1.874 335.3% 3636.8     False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
+    Execution time =    1.884 (S)
+    Out of  6 processed 1 files of total size 540,372 input bytes
+    Wrote 1,812,131 output bytes, ratio: 335.349% at 3655.1 ms/Mb
+    $ find tmp/LAS -name '*.las'
+    tmp/LAS/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+    tmp/LAS/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
+
+
+
+Indexing RP66V1 Files with ``tdrp66v1indexpickle``
+===================================================================
+
+``tdrp66v1indexpickle`` reads a RP66V1 file and dumps the index to a pickle file.
+
+Arguments
+-----------
+
+The first argument is the path to a RP66V1 file or directory.
+The second argument is the path to write the output to.
+
+Options
+-------
+
+  -h, --help            show this help message and exit
+  -r, --recurse         Process recursively. [default: False]
+  --read-back           Read and time the output. [default: False]
+  -l LOG_LEVEL, --log-level LOG_LEVEL
+                        Log Level as an integer or symbol. (0<->NOTSET,
+                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
+                        50<->CRITICAL) [default: 30]
+  --log-process LOG_PROCESS
+                        Writes process data such as memory usage as a log INFO
+                        line every LOG_PROCESS seconds. If 0.0 no process data
+                        is logged. [default: 0.0]
+  -v, --verbose         Increase verbosity, additive [default: 0]
+  --gnuplot GNUPLOT     Directory to write the gnuplot data.
+
+Examples
+-----------
+
+Processing a Single File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+    $ tdrp66v1indexpickle --read-back example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/pickle/206_05a-_3_DWL_DWL_WIRE_258276498
+    Common path prefix: example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
+    Size (b) | Index (b) | Ratio (%) | Index (s) | Index (ms/Mb) | Read (s) | Read (ms/Mb) | Except | Path
+    -------- | --------- | --------- | --------- | ------------- | -------- | ------------ | ------ | ----
+     540,372 | 1,018,327 |  188.449% |     0.330 |         639.9 |    0.041 |        78.96 |  False |
+    Execution time =    0.379 (S)
+    Out of  1 processed 1 files of total size 540,372 input bytes
+    Wrote 1,018,327 output bytes, ratio: 188.449% at 651.0 ms/Mb
+    $ ll example_data/pickle/
+    total 1992
+    -rw-r--r--  1 engun  staff  1018327 28 Oct 12:11 206_05a-_3_DWL_DWL_WIRE_258276498.pkl
+
+
+Processing a Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
+
+
+Indexing RP66V1 Files with ``tdrp66v1indexxml``
+===================================================================
+
+``tdrp66v1indexxml`` reads a RP66V1 file and dumps the index to an XML file.
+
+Arguments
+-----------
+
+The first argument is the path to a RP66V1 file or directory.
+The second argument is the path to write the output to.
+
+Options
+-------
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r, --recurse         Process files recursively. [default: False]
+  -p, --private         Also write out private EFLRs. [default: False]
+  -l LOG_LEVEL, --log-level LOG_LEVEL
+                        Log Level as an integer or symbol. (0<->NOTSET,
+                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
+                        50<->CRITICAL) [default: 20]
+  --log-process LOG_PROCESS
+                        Writes process data such as memory usage as a log INFO
+                        line every LOG_PROCESS seconds. If 0.0 no process data
+                        is logged. [default: 0.0]
+  -v, --verbose         Increase verbosity, additive [default: 0]
+  --gnuplot GNUPLOT     Directory to write the gnuplot data.
+
+Examples
+-----------
+
+Processing a Single File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+    $ tdrp66v1indexxml example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498
+    2019-10-28 11:58:55,498 - 74153 - MainThread - INFO     - IndexXML.py      - index_dir_or_file(): "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" to "example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498" recurse: False
+    2019-10-28 11:58:55,499 - 74153 - MainThread - INFO     - IndexXML.py      - Making directory: example_data/XML
+    2019-10-28 11:58:55,499 - 74153 - MainThread - INFO     - IndexXML.py      - Indexing example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS to example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498
+    2019-10-28 11:58:55,939 - 74153 - MainThread - INFO     - IndexXML.py      - Length of XML: 428622
+             Size In         Size Out     Time  Ratio %    ms/Mb Fail? Path
+    ---------------- ---------------- -------- -------- -------- ----- ----
+             540,372          428,622    0.440  79.320%    854.6 False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
+    Execution time =    0.443 (S)
+    Out of  1 processed 1 files of total size 540,372 input bytes
+    Wrote 428,622 output bytes, ratio:  79.320% at 860.4 ms/Mb
+
+The XML looks something like this:
+
+.. code-block:: xml
+
+    <?xml version='1.0' encoding="utf-8"?>
+    <RP66V1FileIndex creator="TotalDepth.RP66V1.core.Index" path="example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" schema_version="0.1.0" size="540372" utc_file_mtime="2019-06-22 09:10:59.512253" utc_now="2019-10-28 11:58:55.799047">
+      <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="Default Storage Set                                         " storage_unit_structure="RECORD"/>
+      <LogicalFiles count="1">
+        <LogicalFile has_log_pass="True" index="0">
+          <EFLR lr_type="0" lrsh_position="0x54" object_count="1" set_name="" set_type="FILE-HEADER" vr_position="0x50">
+            <Object C="0" I="5" O="2">
+              <Attribute count="1" label="SEQUENCE-NUMBER" rc="20" rc_ascii="ASCII" units="">
+                <Value type="bytes" value="       197"/>
+              </Attribute>
+              <Attribute count="1" label="ID" rc="20" rc_ascii="ASCII" units="">
+                <Value type="bytes" value="MSCT_197LTP                                                      "/>
+              </Attribute>
+            </Object>
+          </EFLR>
+          <!-- More EFLRs ... -->
+          <LogPass count="2">
+            <FrameArray C="0" I="2000T" O="2" description="" x_axis="TIME" x_units="ms">
+              <Channels count="4">
+                <Channel C="4" I="TIME" O="2" count="1" dimensions="1" long_name="1 second River Time" rep_code="2" units="ms"/>
+                <Channel C="4" I="TDEP" O="2" count="1" dimensions="1" long_name="1 second River Depth" rep_code="2" units="0.1 in"/>
+                <Channel C="0" I="TENS_SL" O="2" count="1" dimensions="1" long_name="Cable Tension" rep_code="2" units="lbf"/>
+                <Channel C="0" I="DEPT_SL" O="2" count="1" dimensions="1" long_name="Station logging depth" rep_code="2" units="0.1 in"/>
+              </Channels>
+              <IFLR count="921">
+                <FrameNumbers count="921" rle_len="1">
+                  <RLE datum="1" repeat="920" stride="1"/>
+                </FrameNumbers>
+                <LRSH count="921" rle_len="400">
+                  <RLE datum="0x13254" repeat="1" stride="0x190"/>
+                  <!-- ... -->
+                  <RLE datum="0x83ba4" repeat="1" stride="0x198"/>
+                </LRSH>
+                <Xaxis count="921" rle_len="2">
+                  <RLE datum="16677259.0" repeat="99" stride="1000.0"/>
+                  <RLE datum="16777260.0" repeat="820" stride="1000.0"/>
+                </Xaxis>
+              </IFLR>
+            </FrameArray>
+            <FrameArray C="0" I="800T" O="2" description="" x_axis="TIME" x_units="ms">
+              <Channels count="43">
+                <Channel C="5" I="TIME" O="2" count="1" dimensions="1" long_name="400 milli-second time channel" rep_code="2" units="ms"/>
+                <Channel C="5" I="TDEP" O="2" count="1" dimensions="1" long_name="MSCT depth channel" rep_code="2" units="0.1 in"/>
+                <Channel C="1" I="ETIM" O="2" count="1" dimensions="1" long_name="Elapsed Logging Time" rep_code="2" units="s"/>
+                <!-- ... -->
+                <Channel C="0" I="HMCU" O="2" count="1" dimensions="1" long_name="Hydrailic Motor Current" rep_code="2" units="mA"/>
+                <Channel C="0" I="CMLP" O="2" count="1" dimensions="1" long_name="Coring Motor Linear Position" rep_code="2" units="in"/>
+              </Channels>
+              <IFLR count="2301">
+                <FrameNumbers count="2301" rle_len="1">
+                  <RLE datum="1" repeat="2300" stride="1"/>
+                </FrameNumbers>
+                <LRSH count="2301" rle_len="937">
+                  <RLE datum="0x13274" repeat="1" stride="0xb8"/>
+                  <!-- ... -->
+                  <RLE datum="0x83d5c" repeat="1" stride="0xbc"/>
+                </LRSH>
+                <Xaxis count="2301" rle_len="2">
+                  <RLE datum="16677259.0" repeat="249" stride="400.0"/>
+                  <RLE datum="16777260.0" repeat="2050" stride="400.0"/>
+                </Xaxis>
+              </IFLR>
+            </FrameArray>
+          </LogPass>
+        </LogicalFile>
+      </LogicalFiles>
+      <VisibleRecords count="66" rle_len="15">
+        <RLE datum="0x50" repeat="3" stride="0x2000"/>
+        <!-- ... -->
+        <RLE datum="0x81f70" repeat="0" stride="0x0"/>
+      </VisibleRecords>
+    </RP66V1FileIndex>
+
+
+Processing a Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
 
 
 Scanning RP66V1 Files with ``tdrp66v1scan``
@@ -837,439 +1274,3 @@ For example:
     Processed 1 files and 540,372 bytes, 1456.5 ms/Mb
 
 
-
-Creating HTML Pages from RP66V1 Files with ``tdrp66v1scanhtml``
-===================================================================
-
-This takes a RP66V1 file or directory of them and writes out an HTML summary of each Logical File.
-The summary includes each non-encrypted EFLR and Log Pass.
-The frames in the log pass can be sub-sampled by using ``--frame-slice`` which speeds things up when processing large files.
-
-Arguments
------------
-
-The first argument is the path to a RP66V1 file or directory.
-The second argument is the path to write the output to.
-
-Options
--------
-
-
-  -h, --help            show this help message and exit
-  -r, --recurse         Process files recursively. [default: False]
-  -e, --encrypted       Output encrypted Logical Records as well. [default:
-                        False]
-  -k, --keep-going      Keep going as far as sensible. [default: False]
-  --frame-slice FRAME_SLICE
-                        Do not process all frames but split or slice the
-                        frames. Split is of the form "1/N" so a maximum of N
-                        frames will be processed. N must be +ve, non-zero
-                        integer. Example: "1/64" - process a maximum of 64
-                        frames. Slice the frames is of the form
-                        start,stop,step as a comma separated list. Values can
-                        be absent or "None". Examples: ",," - every frame,
-                        ",,2" - every other frame, ",10," - frames 0 to 9,
-                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
-                        frame from 40 to the end. Results will be truncated by
-                        frame array length. [default: ",,"]
-  -l LOG_LEVEL, --log-level LOG_LEVEL
-                        Log Level as an integer or symbol. (0<->NOTSET,
-                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
-                        50<->CRITICAL) [default: 20]
-  --log-process LOG_PROCESS
-                        Writes process data such as memory usage as a log INFO
-                        line every LOG_PROCESS seconds. If 0.0 no process data
-                        is logged. [default: 0.0]
-  -v, --verbose         Increase verbosity, additive [default: 0]
-  --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
-
-
-Here is an example of `the HTML summary of a single RP66V1 file <../_static/RP66V1/example.html>`_ .
-
-
-
-Converting RP66V1 Files to LAS Files with ``tdrp66v1tolas``
-===================================================================
-
-This takes a RP66V1 file or directory of them and writes out a set of LAS files.
-A single LAS file is written for each Log Pass in each Logical Record.
-
-The frames in the log pass can be sub-sampled by using ``--frame-slice`` which speeds things up when processing large files.
-The ``--channels`` option can be used to limit channels.
-
-Where a channel has multiple values, and LAS con only record a single value, then the ``--array-reduction`` flag can be used to specify how the single value is computed.
-The allowable values are ``{first,max,mean,median,min}`` and the default is ``mean``.
-
-LAS File Naming Convention
---------------------------
-
-One RP66V1 file produces one or more LAS files.
-LAS file names are of the form::
-
-    {RP66V1_File_no_extension}_{logical_file_number}_{frame_array_name}
-
-Processing a Single RP66V1 File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Given the path out the LAS files will be named ``{path_out}_{logical_file_number}_{frame_array_name}.las``
-
-For example ``tdrp66v1tolas foo.dlis bar/baz`` might create::
-
-    :file:`bar/baz_0_2000T.las`
-    :file:`bar/baz_0_800T.las`
-    :file:`bar/baz_1_2000T.las`
-    :file:`bar/baz_1_800T.las`
-
-and so on.
-
-Processing a Directory of RP66V1 Files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Given the path out the LAS files will be named ``{path_out}/{RP66V1_File_no_extension}_{logical_file_number}_{frame_array_name}.las``
-
-For example ``tdrp66v1tolas foo/ bar/baz`` might create::
-
-    :file:`bar/baz/bit_0_2000T.las`
-    :file:`bar/baz/bit_0_800T.las`
-    :file:`bar/baz/bit_1_2000T.las`
-    :file:`bar/baz/bit_1_800T.las`
-
-and so on.
-
-The output directory structure will mirror the input directory structure.
-
-Arguments
------------
-
-The first argument is the path to a RP66V1 file or directory.
-The second argument is the path to write the output to.
-
-Options
--------
-
-  -h, --help            show this help message and exit
-  -r, --recurse         Process files recursively. [default: False]
-  --array_reduction
-                        Method to reduce multidimensional channel data to a
-                        single value. One of {first,max,mean,median,min} [default: mean]
-  --frame-slice FRAME_SLICE
-                        Do not process all frames but split or slice the
-                        frames. Split is of the form "1/N" so a maximum of N
-                        frames will be processed. N must be +ve, non-zero
-                        integer. Example: "1/64" - process a maximum of 64
-                        frames. Slice the frames is of the form
-                        start,stop,step as a comma separated list. Values can
-                        be absent or "None". Examples: ",," - every frame,
-                        ",,2" - every other frame, ",10," - frames 0 to 9,
-                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
-                        frame from 40 to the end. Results will be truncated by
-                        frame array length. Use '?' to see what frames are
-                        available [default: ",,"]
-  --channels CHANNELS   Comma separated list of channels to write out (X axis
-                        is always included). Use '?' to see what channels
-                        exist without writing anything. [default: ]
-  -l LOG_LEVEL, --log-level LOG_LEVEL
-                        Log Level as an integer or symbol. (0<->NOTSET,
-                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
-                        50<->CRITICAL) [default: 30]
-  -v, --verbose         Increase verbosity, additive [default: 0]
-  --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
-
-Examples
------------
-
-
-Finding out what Channels and Frames Exist:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use ``--channels=?`` and/or ``--frame-slice=?`` to see what channels and frames exist in the RP66V1 file.
-
-.. code-block:: console
-
-    $ tdrp66v1tolas --channels=? --frame-slice=? example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498
-    Logical file [0000]: <TotalDepth.RP66V1.core.LogicalFile.LogicalFile object at 0x109fd50f0>
-      Frame Array: b'2000T'
-      Channels: b'TIME,TDEP,TENS_SL,DEPT_SL'
-      X axis: FrameChannel: OBNAME: O: 2 C: 4 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'1 second River Time'
-      Frames: 921 from 16677259.0 to 17597260.0 interval 1000.0010869565217 [b'ms']
-
-      Frame Array: b'800T'
-      Channels: b'TIME,TDEP,ETIM,LMVL,UMVL,CFLA,OCD,RCMD,RCPP,CMRT,RCNU,DCFL,DFS,DZER,RHMD,HMRT,RHV,RLSW,MNU,S1CY,S2CY,RSCU,RSTS,UCFL,CARC,CMDV,CMPP,CNU,HMDV,HV,LSWI,SCUR,SSTA,RCMP,RHPP,RRPP,CMPR,HPPR,RPPV,SMSC,CMCU,HMCU,CMLP'
-      X axis: FrameChannel: OBNAME: O: 2 C: 5 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'400 milli-second time channel'
-      Frames: 2301 from 16677259.0 to 17597260.0 interval 400.0004347826087 [b'ms']
-
-
-Processing a Single File
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: console
-
-    $ tdrp66v1tolas example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498
-      Input    Output LAS Count  Time  Ratio  ms/Mb Exception                                                         Path
-    ------- --------- --------- ----- ------ ------ --------- ------------------------------------------------------------
-    540,372 1,812,131         2 1.816 335.3% 3524.1     False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
-    Execution time =    1.819 (S)
-    Out of  1 processed 1 files of total size 540,372 input bytes
-    Wrote 1,812,131 output bytes, ratio: 335.349% at 3529.3 ms/Mb
-    $ ll example_data/LAS/
-    total 4600
-    -rw-r--r--  1 engun  staff    94317 28 Oct 10:19 206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
-    -rw-r--r--  1 engun  staff  1717814 28 Oct 10:20 206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
-
-The LAS files look like this:
-
-.. code-block:: console
-
-    $ head -n20 example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
-    ~Version Information Section
-    VERS.          2.0                                     : CWLS Log ASCII Standard - VERSION 2.0
-    WRAP.          NO                                      : One Line per depth step
-    PROD.          TotalDepth                              : LAS Producer
-    PROG.          TotalDepth.RP66V1.ToLAS 0.1.1           : LAS Program name and version
-    CREA.          2019-10-28 10:30                        : LAS Creation date [YYYY-mm-dd HH:MM]
-    DLIS_CREA.     2011-08-20 22:48                        : DLIS Creation date and time [YYYY-mm-dd HH:MM]
-    SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
-    FILE-ID.       MSCT_197LTP                             : File Identification Number
-    LOGICAL-FILE.  0                                       : Logical File number in the DLIS file
-    FRAME-ARRAY.   2000T                                   : Identity of the Frame Array in the Logical File
-    ~Well Information Section
-    #MNEM.UNIT  DATA                         DESCRIPTION
-    #----.----  ----                         -----------
-    STRT.ms     16677259.0                   : Start X
-    STOP.ms     17597260.0                   : Stop X, frames: 921
-    STEP.ms     1000.0010869565217           : Step (average)
-    NULL.                                    :
-    COMP.       Faroe Petroleum              :
-    WELL.       206/05a-3                    :
-    
-    $ head -n20 example_data/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
-    ~Version Information Section
-    VERS.          2.0                                     : CWLS Log ASCII Standard - VERSION 2.0
-    WRAP.          NO                                      : One Line per depth step
-    PROD.          TotalDepth                              : LAS Producer
-    PROG.          TotalDepth.RP66V1.ToLAS 0.1.1           : LAS Program name and version
-    CREA.          2019-10-28 10:30                        : LAS Creation date [YYYY-mm-dd HH:MM]
-    DLIS_CREA.     2011-08-20 22:48                        : DLIS Creation date and time [YYYY-mm-dd HH:MM]
-    SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
-    FILE-ID.       MSCT_197LTP                             : File Identification Number
-    LOGICAL-FILE.  0                                       : Logical File number in the DLIS file
-    FRAME-ARRAY.   800T                                    : Identity of the Frame Array in the Logical File
-    ~Well Information Section
-    #MNEM.UNIT  DATA                         DESCRIPTION
-    #----.----  ----                         -----------
-    STRT.ms     16677259.0                   : Start X
-    STOP.ms     17597260.0                   : Stop X, frames: 2,301
-    STEP.ms     400.0004347826087            : Step (average)
-    NULL.                                    :
-    COMP.       Faroe Petroleum              :
-    WELL.       206/05a-3                    :
-
-
-Processing a Directory
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
-
-.. code-block:: console
-
-    $ tdrp66v1tolas -r example_data/ tmp/LAS
-      Input    Output LAS Count  Time  Ratio  ms/Mb Exception                                                         Path
-    ------- --------- --------- ----- ------ ------ --------- ------------------------------------------------------------
-    540,372 1,812,131         2 1.874 335.3% 3636.8     False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
-    Execution time =    1.884 (S)
-    Out of  6 processed 1 files of total size 540,372 input bytes
-    Wrote 1,812,131 output bytes, ratio: 335.349% at 3655.1 ms/Mb
-    $ find tmp/LAS -name '*.las'
-    tmp/LAS/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
-    tmp/LAS/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
-
-
-
-Indexing RP66V1 Files with ``tdrp66v1indexpickle``
-===================================================================
-
-``tdrp66v1indexpickle`` reads a RP66V1 file and dumps the index to a pickle file.
-
-Arguments
------------
-
-The first argument is the path to a RP66V1 file or directory.
-The second argument is the path to write the output to.
-
-Options
--------
-
-  -h, --help            show this help message and exit
-  -r, --recurse         Process recursively. [default: False]
-  --read-back           Read and time the output. [default: False]
-  -l LOG_LEVEL, --log-level LOG_LEVEL
-                        Log Level as an integer or symbol. (0<->NOTSET,
-                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
-                        50<->CRITICAL) [default: 30]
-  --log-process LOG_PROCESS
-                        Writes process data such as memory usage as a log INFO
-                        line every LOG_PROCESS seconds. If 0.0 no process data
-                        is logged. [default: 0.0]
-  -v, --verbose         Increase verbosity, additive [default: 0]
-  --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
-Examples
------------
-
-Processing a Single File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: console
-
-    $ tdrp66v1indexpickle --read-back example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/pickle/206_05a-_3_DWL_DWL_WIRE_258276498
-    Common path prefix: example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
-    Size (b) | Index (b) | Ratio (%) | Index (s) | Index (ms/Mb) | Read (s) | Read (ms/Mb) | Except | Path
-    -------- | --------- | --------- | --------- | ------------- | -------- | ------------ | ------ | ----
-     540,372 | 1,018,327 |  188.449% |     0.330 |         639.9 |    0.041 |        78.96 |  False |
-    Execution time =    0.379 (S)
-    Out of  1 processed 1 files of total size 540,372 input bytes
-    Wrote 1,018,327 output bytes, ratio: 188.449% at 651.0 ms/Mb
-    $ ll example_data/pickle/
-    total 1992
-    -rw-r--r--  1 engun  staff  1018327 28 Oct 12:11 206_05a-_3_DWL_DWL_WIRE_258276498.pkl
-
-
-Processing a Directory
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
-
-
-Indexing RP66V1 Files with ``tdrp66v1indexxml``
-===================================================================
-
-``tdrp66v1indexxml`` reads a RP66V1 file and dumps the index to an XML file.
-
-Arguments
------------
-
-The first argument is the path to a RP66V1 file or directory.
-The second argument is the path to write the output to.
-
-Options
--------
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -r, --recurse         Process files recursively. [default: False]
-  -p, --private         Also write out private EFLRs. [default: False]
-  -l LOG_LEVEL, --log-level LOG_LEVEL
-                        Log Level as an integer or symbol. (0<->NOTSET,
-                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
-                        50<->CRITICAL) [default: 20]
-  --log-process LOG_PROCESS
-                        Writes process data such as memory usage as a log INFO
-                        line every LOG_PROCESS seconds. If 0.0 no process data
-                        is logged. [default: 0.0]
-  -v, --verbose         Increase verbosity, additive [default: 0]
-  --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
-Examples
------------
-
-Processing a Single File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: console
-
-    $ tdrp66v1indexxml example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498
-    2019-10-28 11:58:55,498 - 74153 - MainThread - INFO     - IndexXML.py      - index_dir_or_file(): "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" to "example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498" recurse: False
-    2019-10-28 11:58:55,499 - 74153 - MainThread - INFO     - IndexXML.py      - Making directory: example_data/XML
-    2019-10-28 11:58:55,499 - 74153 - MainThread - INFO     - IndexXML.py      - Indexing example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS to example_data/XML/206_05a-_3_DWL_DWL_WIRE_258276498
-    2019-10-28 11:58:55,939 - 74153 - MainThread - INFO     - IndexXML.py      - Length of XML: 428622
-             Size In         Size Out     Time  Ratio %    ms/Mb Fail? Path
-    ---------------- ---------------- -------- -------- -------- ----- ----
-             540,372          428,622    0.440  79.320%    854.6 False "example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS"
-    Execution time =    0.443 (S)
-    Out of  1 processed 1 files of total size 540,372 input bytes
-    Wrote 428,622 output bytes, ratio:  79.320% at 860.4 ms/Mb
-
-The XML looks something like this:
-
-.. code-block:: xml
-
-    <?xml version='1.0' encoding="utf-8"?>
-    <RP66V1FileIndex creator="TotalDepth.RP66V1.core.Index" path="example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" schema_version="0.1.0" size="540372" utc_file_mtime="2019-06-22 09:10:59.512253" utc_now="2019-10-28 11:58:55.799047">
-      <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="Default Storage Set                                         " storage_unit_structure="RECORD"/>
-      <LogicalFiles count="1">
-        <LogicalFile has_log_pass="True" index="0">
-          <EFLR lr_type="0" lrsh_position="0x54" object_count="1" set_name="" set_type="FILE-HEADER" vr_position="0x50">
-            <Object C="0" I="5" O="2">
-              <Attribute count="1" label="SEQUENCE-NUMBER" rc="20" rc_ascii="ASCII" units="">
-                <Value type="bytes" value="       197"/>
-              </Attribute>
-              <Attribute count="1" label="ID" rc="20" rc_ascii="ASCII" units="">
-                <Value type="bytes" value="MSCT_197LTP                                                      "/>
-              </Attribute>
-            </Object>
-          </EFLR>
-          <!-- More EFLRs ... -->
-          <LogPass count="2">
-            <FrameArray C="0" I="2000T" O="2" description="" x_axis="TIME" x_units="ms">
-              <Channels count="4">
-                <Channel C="4" I="TIME" O="2" count="1" dimensions="1" long_name="1 second River Time" rep_code="2" units="ms"/>
-                <Channel C="4" I="TDEP" O="2" count="1" dimensions="1" long_name="1 second River Depth" rep_code="2" units="0.1 in"/>
-                <Channel C="0" I="TENS_SL" O="2" count="1" dimensions="1" long_name="Cable Tension" rep_code="2" units="lbf"/>
-                <Channel C="0" I="DEPT_SL" O="2" count="1" dimensions="1" long_name="Station logging depth" rep_code="2" units="0.1 in"/>
-              </Channels>
-              <IFLR count="921">
-                <FrameNumbers count="921" rle_len="1">
-                  <RLE datum="1" repeat="920" stride="1"/>
-                </FrameNumbers>
-                <LRSH count="921" rle_len="400">
-                  <RLE datum="0x13254" repeat="1" stride="0x190"/>
-                  <!-- ... -->
-                  <RLE datum="0x83ba4" repeat="1" stride="0x198"/>
-                </LRSH>
-                <Xaxis count="921" rle_len="2">
-                  <RLE datum="16677259.0" repeat="99" stride="1000.0"/>
-                  <RLE datum="16777260.0" repeat="820" stride="1000.0"/>
-                </Xaxis>
-              </IFLR>
-            </FrameArray>
-            <FrameArray C="0" I="800T" O="2" description="" x_axis="TIME" x_units="ms">
-              <Channels count="43">
-                <Channel C="5" I="TIME" O="2" count="1" dimensions="1" long_name="400 milli-second time channel" rep_code="2" units="ms"/>
-                <Channel C="5" I="TDEP" O="2" count="1" dimensions="1" long_name="MSCT depth channel" rep_code="2" units="0.1 in"/>
-                <Channel C="1" I="ETIM" O="2" count="1" dimensions="1" long_name="Elapsed Logging Time" rep_code="2" units="s"/>
-                <!-- ... -->
-                <Channel C="0" I="HMCU" O="2" count="1" dimensions="1" long_name="Hydrailic Motor Current" rep_code="2" units="mA"/>
-                <Channel C="0" I="CMLP" O="2" count="1" dimensions="1" long_name="Coring Motor Linear Position" rep_code="2" units="in"/>
-              </Channels>
-              <IFLR count="2301">
-                <FrameNumbers count="2301" rle_len="1">
-                  <RLE datum="1" repeat="2300" stride="1"/>
-                </FrameNumbers>
-                <LRSH count="2301" rle_len="937">
-                  <RLE datum="0x13274" repeat="1" stride="0xb8"/>
-                  <!-- ... -->
-                  <RLE datum="0x83d5c" repeat="1" stride="0xbc"/>
-                </LRSH>
-                <Xaxis count="2301" rle_len="2">
-                  <RLE datum="16677259.0" repeat="249" stride="400.0"/>
-                  <RLE datum="16777260.0" repeat="2050" stride="400.0"/>
-                </Xaxis>
-              </IFLR>
-            </FrameArray>
-          </LogPass>
-        </LogicalFile>
-      </LogicalFiles>
-      <VisibleRecords count="66" rle_len="15">
-        <RLE datum="0x50" repeat="3" stride="0x2000"/>
-        <!-- ... -->
-        <RLE datum="0x81f70" repeat="0" stride="0x0"/>
-      </VisibleRecords>
-    </RP66V1FileIndex>
-
-
-Processing a Directory
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use the ``-r`` option to process recursively. The output directory will mirror the input directory.

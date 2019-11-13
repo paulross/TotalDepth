@@ -14,10 +14,8 @@ Contents:
     core/File
     core/Index
     core/LogPass
-    core/LogPassXML
     core/LogicalFile
     core/RepCode
-    core/Scan
     core/StorageUnitLabel
     core/Units
     core/XAxis

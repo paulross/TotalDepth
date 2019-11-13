@@ -24,6 +24,7 @@ Contents
 	intro
 	examples/examples
 	installation
+	howto/index_howto
 	cmd_line_tools/index_cmd_line_tools
 	usage
 	tech/index_tech

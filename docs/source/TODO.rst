@@ -133,11 +133,15 @@ RP66V1 Improvements
       - Priority
       - Status
     * - RP66V1.index_0
-      - Low level index implemented in C/C++.
+      - Add the multi-level index code implemented in C/C++ that is much faster and smaller. See 2019-11-12.
       - 2
       - 
     * - RP66V1.index_1
       - Mid level index implemented in C/C++.
+      - 1
+      - 
+    * - RP66V1.RepCode
+      - Add in the code that does Representation Code conversion in C/C++.
       - 1
       - 
     * - RP66V1.units

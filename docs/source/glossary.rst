@@ -203,11 +203,15 @@ Glossary
 		
 	RP66V1.Encryption Packet
 		An optional sequence of bytes that follows the Logical Record Segment Header and precedes the Logical Record Segment Body and that contains information used to decrypt the Logical Record. The first two bytes of the Encryption Packet specify its length, and the next two bytes specify the Producer’s Company Code. The remaining bytes are meaningful only to the Producer.
+
+	RP66V1.EFLR
+		See :term:`RP66V1.Explicitly Formatted Logical Record`
 		
-	RP66V1.Explicitly Formatted Logical Record (EFLR)
+	RP66V1.Explicitly Formatted Logical Record
 		One of two kinds of Logical Record defined under DLIS.
 		The Body of an EFLR is a sequence of Components that combine to describe a single Set of Objects.
 		An EFLR is self-describing and can be interpreted without the use or knowledge of any other Logical Records.
+		More simply put, an Explicitly Formatted Logical Record is a table of rows and columns which contain :term:`RP66V1.Attribute` (s).
 
 	RP66V1.Format Version
 		A two-byte field immediately following the Visible Record Length in Visible Records on Record Storage Units (e.g., standard 9-track tapes).
@@ -219,9 +223,6 @@ Glossary
 		A Frame is made of a Frame Number, followed by a set of Channel sample values, one sample per Channel, all sampled at the same index value.
 		One of the Channels may serve as an index. When this is the case, it is always the first Channel in the Frame.
 		When there is no Channel index, then the Frame Number serves as an index.
-
-
-
 
 	RP66V1.Frame Data
 		Information recorded in Frames is called Frame Data. This consists of Channel samples, one sample per Channel per Frame.

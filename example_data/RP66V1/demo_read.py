@@ -55,7 +55,7 @@ def demo_eflr_contents():
                         print(f'    Row: {row.name.I}')
                         for attr in row.attrs:
                             # attr is a TotalDepth.RP66V1.core.LogicalRecord.EFLR.Attribute
-                            print(f'        {attr.label}={attr.value}')
+                            print(f'        {attr.label}={attr.value} ({attr.units})')
 
 
 def demo_numpy_access():

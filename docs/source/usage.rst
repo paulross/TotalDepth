@@ -3,7 +3,7 @@ Importing TotalDepth into your Python Project
 =============================================
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 3
 	
 	usage/lis
 	usage/las

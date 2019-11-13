@@ -17,10 +17,7 @@ TotalDepth is open and cross-platform, and produces results straight to the bows
 
 TotalDepth is currently at **Alpha** version |version|, release |release|. For the licence see :ref:`licence_text`.
 
-Software Technology
-===================
-
-For rapid development and performance TotalDepth is written in `Python <http://www.python.org>`_ with performance critical code written in C or C++.
+TotalDepth is written in `Python <http://www.python.org>`_ with performance critical code written in C or C++.
 
 Petrophysical File Formats Supported by TotalDepth
 =========================================================
@@ -40,7 +37,8 @@ Petrophysical File Formats Supported by TotalDepth
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | WellLogML             | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
-| RP66v1 "DLIS"         | Full      | 0.3.0     |                                                                   |
+| RP66v1 "DLIS"         | Full      | 0.3.0     | Version 0.3.0 is written in Python, version 0.4.0 is much faster  |
+|                       |           |           | as perfomance critical code is written in C/C++                   |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | RP66v2 "DLIS"         | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
