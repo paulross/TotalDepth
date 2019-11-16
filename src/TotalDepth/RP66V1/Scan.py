@@ -441,6 +441,84 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                 else:
                     fout.write('NO Log Pass for this Logical Record\n')
 
+
+def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
+    """Scans the file reporting Visible Records, optionally Logical Record Segments as well."""
+    # verbose = kwargs.get('verbose', 0)
+    # if not verbose:
+    #     fout.write(
+    #         colorama.Fore.YELLOW
+    #         + 'Use -v to see individual records, RLE of LRSH positions and length distribution of LRS.\n'
+    #     )
+    with _output_section_header_trailer('File as Raw Test Data', '*', os=fout):
+        rp66_file = File.FileRead(fobj)
+        count_vr = 0
+        count_lrsh = 0
+        count_lrsh_first = 0
+        fout.write(f'{rp66_file.sul.as_bytes()}  # Storage Unit Label\n')
+
+        for visible_record in rp66_file.iter_visible_records():
+            fout.write(
+                f'{visible_record.as_bytes()}'
+                f'  # Visible record [{count_vr}]'
+                f' at 0x{visible_record.position:x}'
+                f' length 0x{visible_record.length:x}'
+                f' version 0x{visible_record.version:x}\n'
+            )
+            for lrsh, by in rp66_file.iter_LRSHs_for_visible_record_and_logical_data_fragment(visible_record):
+                record_type = 'E' if lrsh.is_eflr else 'I'
+                fout.write(
+                    f'    {lrsh.as_bytes()}'
+                    f'  # LRSH [{count_lrsh_first}/{count_lrsh}] 0x{lrsh.position:x} {record_type} len: {lrsh.length}'
+                    f' first: {lrsh.is_first} last: {lrsh.is_last}\n'
+                )
+                # fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
+                WIDTH = 40
+                # str_list = []
+                # for i in range(0, len(by), WIDTH):
+                #     str_list.append(f'{by[i:i+WIDTH]}')
+                str_list = [f'{by[i:i+WIDTH]}' for i in range(0, len(by), WIDTH)]
+                if len(str_list) > 1:
+                    fout.write(f'        # Logical data length {len(by)} 0x{len(by):x}\n')
+                    FW = max(len(s) for s in str_list)
+                    for i, s in enumerate(str_list):
+                        fout.write(
+                            f'        {s:{FW}}  # Chunk from {i * WIDTH}\n'
+                        )
+                else:
+                    fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
+                if lrsh.is_first:
+                    count_lrsh_first += 1
+                elif lrsh.is_last:
+                    pass
+                else:
+                    pass
+                count_lrsh += 1
+            count_vr += 1
+        # with _output_section_header_trailer('Summary of Visible Records', '=', os=fout):
+        #     fout.write(f'Visible records: {count_vr:,d}\n')
+        #     with _output_section_header_trailer('RLE Visible Record Position', '-', os=fout):
+        #         _write_position_rle(rle_visible_record_positions, fout)
+        # if lrsh_dump:
+        #     with _output_section_header_trailer('Summary of LRSH', '=', os=fout):
+        #         fout.write(f'LRSH: total={count_lrsh:,d} is_first={count_lrsh_first}\n')
+        #         fout.write(f'LRSH: record types and counts (first segments only) [{len(count_lrsh_type)}]:\n')
+        #         for record_type in sorted(count_lrsh_type.keys()):
+        #             fout.write(f'{record_type:3d} : {count_lrsh_type[record_type]:8,d}\n')
+        #         fout.write(
+        #             f'LRSH: record lengths and counts (all segments)'
+        #             f' [{len(count_lrsh_length)}]'
+        #         )
+        #         if len(count_lrsh_length):
+        #             fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
+        #         fout.write(f'\n')
+        #         if verbose:
+        #             for length in sorted(count_lrsh_length.keys()):
+        #                 fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
+        #             with _output_section_header_trailer('RLE LRSH Position', '-', os=fout):
+        #                 _write_position_rle(rle_lrsh_positions, fout)
+
+
 # TODO: IndexFile and ScanFile are very similar, combine.
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_output, time, exception, ignored')
 
@@ -691,6 +769,11 @@ def main() -> int:
         help="Increase verbosity, additive [default: %(default)s]",
     )
     gnuplot.add_gnuplot_to_argument_parser(parser)
+    parser.add_argument(
+        '-T', '--test-data', action='store_true',
+        help='Dump the file as annotated bytes, useful for creating test data. [default: %(default)s]',
+    )
+
     args = parser.parse_args()
     print('args:', args)
 
@@ -760,6 +843,15 @@ def main() -> int:
             rp66v1_path=args.path_in,
             frame_slice=Slice.create_slice_or_split(args.frame_slice),
             eflr_as_table=args.eflr_as_table,
+        )
+    if args.test_data:
+        result = scan_dir_or_file(
+            args.path_in,
+            args.path_out,
+            dump_RP66V1_test_data,
+            args.recurse,
+            output_extension,
+            verbose=args.verbose,
         )
     clk_exec = time.perf_counter() - clk_start
     size_scan = size_input = 0

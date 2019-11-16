@@ -4,7 +4,7 @@
 .. TotalDepth API reference.
 
 #############################
-TotalDepth and Software Test
+Testing TotalDepth
 #############################
 
 Contents:
@@ -14,3 +14,4 @@ Contents:
 	
 	unit_tests
 	test_plot
+	test_set

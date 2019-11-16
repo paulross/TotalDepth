@@ -58,6 +58,28 @@ def demo_eflr_contents():
                             print(f'        {attr.label}={attr.value} ({attr.units})')
 
 
+def demo_numpy_describe():
+    with open(path_in, 'rb') as fobj:
+        rp66v1_file = File.FileRead(fobj)
+        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+        for logical_file in logical_index.logical_files:
+            if logical_file.has_log_pass:
+                for frame_array in logical_file.log_pass:
+                    print(frame_array)
+                    frame_count = LogicalFile.populate_frame_array(
+                        rp66v1_file, logical_file, frame_array
+                    )
+                    print(
+                        f'Loaded {frame_count} frames and {len(frame_array)} channels'
+                        f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
+                    )
+                    for channel in frame_array.channels:
+                        print(channel)
+                        # channel.array is a numpy array
+                        np.info(channel.array)
+                        print()
+
+
 def demo_numpy_access():
     with open(path_in, 'rb') as fobj:
         rp66v1_file = File.FileRead(fobj)
@@ -111,7 +133,8 @@ def main() -> int:
     # demo_file()
     # demo_logical_files()
     # demo_eflr()
-    demo_eflr_contents()
+    # demo_eflr_contents()
+    demo_numpy_describe()
     # demo_numpy_access()
     # demo_numpy_access_partial()
     return 0

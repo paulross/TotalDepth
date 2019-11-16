@@ -15,7 +15,7 @@ Conventional, proprietary, software for petrophysical data tends to be expensive
 
 TotalDepth is open and cross-platform, and produces results straight to the bowser. TotalDepth supports such technologies such as HTML5, AJAX, Software as a Service (SaaS) and Cloud Computing.
 
-TotalDepth is currently at **Alpha** version |version|, release |release|. For the licence see :ref:`licence_text`.
+TotalDepth is currently at **Alpha**, development version |version|, release version |release|. For the licence see :ref:`licence_text`.
 
 TotalDepth is written in `Python <http://www.python.org>`_ with performance critical code written in C or C++.
 
@@ -33,7 +33,7 @@ Petrophysical File Formats Supported by TotalDepth
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | LAS version 2.0       | Full      | 0.1.0     |                                                                   |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
-| LAS version 3.0       | None      |           | No evidence that this is used by the industry.                    |
+| LAS version 3.0       | None      |           | Little evidence that this is used by the industry.                |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | WellLogML             | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+

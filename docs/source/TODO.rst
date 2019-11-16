@@ -10,7 +10,10 @@ TODO's
 This is a gathering place for features that are would be nice to have in future releases.
 Priority numbers are 0 (not going to be done) and >0 which is an ever more important priority.
 
-TotalDepth is currently at **Alpha**, release version |release|.
+
+If you find a bug or need a feature then raise an `issue with TotalDepth <https://github.com/paulross/TotalDepth/issues>`_.
+
+TotalDepth is currently at **Alpha**, development version |version|, release version |release|.
 
 
 TotalDepth Improvements (General)
@@ -132,6 +135,10 @@ RP66V1 Improvements
       - Description
       - Priority
       - Status
+    * - RP66V1.test.benchmark
+      - Write benchmarking tests in :file:`benchmark/` .
+      - 2
+      - 
     * - RP66V1.index_0
       - Add the multi-level index code implemented in C/C++ that is much faster and smaller. See 2019-11-12.
       - 2
@@ -145,7 +152,10 @@ RP66V1 Improvements
       - 1
       - 
     * - RP66V1.units
-      - Full conformance with RP66V1 standard, RP66V2 standard and accepted practice.
+      - Conformance of unit conversion with the RP66V1 and, possibly, RP66V2 standard.
+        
+        NOTE: The RP66V2 standard is expanded on RP66V1 but barely used.
+        Many producers deviate from these standards in any case.
       - 1
       - 
     * - RP66V1.plot
@@ -154,11 +164,7 @@ RP66V1 Improvements
       - 
     * - RP66V1.fail
       - When a file deviates from the standard then the user can specify what deviations are acceptable.
-        Examples: UNITS Rep Code, multiple ORIGIN records.
-      - 1
-      - 
-    * - RP66V1.test.benchmark
-      - Make benchmarking tests to benchmark/.
+        Examples: UNITS Rep Code, multiple ORIGIN and CHANNEL records.
       - 1
       - 
 

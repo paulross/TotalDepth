@@ -15,8 +15,8 @@ Important Concepts
 
 The internal representation of a RP66V1 files is as follows:
 
-* The physical file consists of a Storage Unit Label followed by any number of Logical Files. Logical Files are independent from each other.
-* Each Logical File consists of a number of Explicitly Formatted Logical Records (EFLRs) and optionally a single *Log Pass*.
+* A physical file (typically a file on disk) consists of a Storage Unit Label followed by any number of *Logical Files*.
+* *Logical Files* consist of any number of :term:`Explicitly Formatted Logical Record` (EFLRs) and, optionally, a single *Log Pass*. Logical Files are independent from each other.
 * The *Log Pass* represents a single data collection run (example: "Repeat Section") and contains one or more *Frame Arrays*.
 * A *Frame Array* is a number of frames of channel data.
 
@@ -67,7 +67,10 @@ Reading :term:`RP66V1.EFLR` Tables
 
 An :term:`RP66V1.Explicitly Formatted Logical Record` is a table of data organised in rows and columns.
 
-As an example::
+As an example:
+
+
+.. code-block:: python
 
     from TotalDepth.RP66V1.core import File
     from TotalDepth.RP66V1.core import LogicalFile
@@ -154,7 +157,12 @@ Property     Type      Description
 ============ ========= =======================================================================
 
 
-The following code accesses the contents of every ``EQUIPMENT`` EFLR::
+The following code accesses the contents of every ``EQUIPMENT`` EFLR:
+
+.. code-block:: python
+
+    from TotalDepth.RP66V1.core import File
+    from TotalDepth.RP66V1.core import LogicalFile
 
     with open(path_in, 'rb') as fobj:
         rp66v1_file = File.FileRead(fobj)
@@ -209,12 +217,109 @@ Will produce something like this (output truncated):
             ...
 
 
-
-
 Reading the Frame Data and accessing the numpy Arrays
 --------------------------------------------------------
 
-Reading the data into numpy arrays::
+Here is an example of accessing the numpy arrays, ``np.describe()`` to describe each array:
+
+.. code-block:: python
+
+    import numpy as np
+
+    from TotalDepth.RP66V1.core import File
+    from TotalDepth.RP66V1.core import LogicalFile
+
+    with open(path_in, 'rb') as fobj:
+        rp66v1_file = File.FileRead(fobj)
+        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+        for logical_file in logical_index.logical_files:
+            if logical_file.has_log_pass:
+                for frame_array in logical_file.log_pass:
+                    frame_count = LogicalFile.populate_frame_array(
+                        rp66v1_file, logical_file, frame_array
+                    )
+                    print(
+                        f'Loaded {frame_count} frames and {len(frame_array)} channels'
+                        f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
+                    )
+                    print()
+                    for channel in frame_array.channels:
+                        # channel.array is a numpy array
+                        np.info(channel.array)
+                        print()
+
+The output will be:
+
+.. code-block:: console
+
+    Loaded 921 frames and 4 channels from OBNAME: O: 2 C: 0 I: b'2000T' using 14736 bytes.
+    
+    FrameChannel: OBNAME: O: 2 C: 4 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'1 second River Time'
+    class:  ndarray
+    shape:  (921, 1)
+    strides:  (4, 4)
+    itemsize:  4
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7faa710b6000
+    byteorder:  little
+    byteswap:  False
+    type: float32
+    
+    FrameChannel: OBNAME: O: 2 C: 4 I: b'TDEP'            Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'1 second River Depth'
+    class:  ndarray
+    shape:  (921, 1)
+    strides:  (4, 4)
+    itemsize:  4
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7faa710b7000
+    byteorder:  little
+    byteswap:  False
+    type: float32
+    
+    FrameChannel: OBNAME: O: 2 C: 0 I: b'TENS_SL'         Rc:   2 Co:    1 Un: b'lbf'       Di: [1] b'Cable Tension'
+    class:  ndarray
+    shape:  (921, 1)
+    strides:  (4, 4)
+    itemsize:  4
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7fae6c8c2600
+    byteorder:  little
+    byteswap:  False
+    type: float32
+    
+    FrameChannel: OBNAME: O: 2 C: 0 I: b'DEPT_SL'         Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'Station logging depth'
+    class:  ndarray
+    shape:  (921, 1)
+    strides:  (4, 4)
+    itemsize:  4
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7fae6c8c3600
+    byteorder:  little
+    byteswap:  False
+    type: float32
+    ...
+
+
+Making Calculations on the ``numpy`` Data
+-----------------------------------------------
+
+
+Very similar to the above we can make some calculations using standard ``numpy`` calls:
+
+.. code-block:: python
+
+    import numpy as np
+
+    from TotalDepth.RP66V1.core import File
+    from TotalDepth.RP66V1.core import LogicalFile
 
     with open(path_in, 'rb') as fobj:
         rp66v1_file = File.FileRead(fobj)
@@ -279,7 +384,7 @@ Limiting the Amount of Data Read
 The RP66V1 Frame Array can be very large so to make it more manageable the :py:func:`TotalDepth.RP66V1.core.LogicalFile.populate_frame_array` can take the following, optional, arguments:
 
 * `channels`: A sequence of channel identifiers. Only these channels will be populated into the numpy arrays in the Frame Array. The other channels will have a zero length numpy array. Channel 0, the X axis, will always be populated.
-* To control the number of frames that are populated use either:
+* `frame_slice` to reduce the number of frames that are populated. You can use either of these classes:
 
     * :py:class:`TotalDepth.common.Slice.Slice` which takes optional start, stop, step values that default to ``(0, len(data), 1)``. For example if there are 128 frames available then ``Slice(64, None, 2)`` would populate every other frame from frame 64 to the end.
     * :py:class:`TotalDepth.common.Slice.Split` which takes single integer, this is maximum number of frames to be populated and they will be evenly spaced throughout the Frame Array. For example if there are 128 available frames that ``Split(8)`` would populate the numpy arrays with every 16th frame.

@@ -68,7 +68,7 @@ This took around six seconds to compute. More detail on the ``PlotLogs.py`` is h
 LIS Log HTML Summaries
 ======================
 
-The program ``LisToHtml.py`` takes LIS file(s) and generates an `HTML summary <../_static/LISExampleHTML/index.html>`_ for each one.
+The program ``LisToHtml.py`` takes LIS file(s) and generates an `LIS HTML summary <../_static/LISExampleHTML/index.html>`_ for each one.
 
 How This HTML was Made
 ----------------------
@@ -86,6 +86,14 @@ The following options have been set:
 * Recursive search of input directory: ``-r``
 
 More detail on the ``LisToHtml.py`` is here: :ref:`TotalDepth-LIScmdline-LisToHtml`
+
+
+RP66V1 Log HTML Summaries
+==========================
+
+The program ``ScanHtml.py`` takes RP66V1 file(s) and generates an `RP66V1 HTML summary <../_static/RP66V1/example.html>`_ for each one.
+
+
 
 .. rubric:: Footnotes
 

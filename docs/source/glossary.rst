@@ -5,7 +5,8 @@ Glossary
 **********************
 
 .. note::
-	Terms here starting with "RP66V1." are taken directly from the `RP66V1 glossary <http://w3.energistics.org/rp66/v1/rp66v1_defs.html>`_ and reproduced here for the convenience of the reader.
+	Terms here starting with "RP66V1." are taken directly from the `RP66V1 glossary <http://w3.energistics.org/rp66/v1/rp66v1_defs.html>`_.
+	They are lightly edited, corrected and enhanced before being reproduced here for the convenience of the reader.
 
 .. glossary::
 	:sorted:
@@ -67,11 +68,11 @@ Glossary
 		See :term:`Explicitly Formatted Logical Record`.
 		
 	Explicitly Formatted Logical Record
-		This is an internally complete, self-describing record.
+		This is an internally complete, self-describing record. See also :term:`RP66V1.Explicitly Formatted Logical Record`
 		
 	IFLR
 	Indirectly Formatted Logical Record
-		This is a Logical Record whose format is only completely described by another EFLR. The EFLR that describes an IFLR might be identified formally; for example by a specific reference to an EFLR (as in RP66) or informally; by some heuristic (as in LIS) such as "the immediately prior Logical Record that is type 64 i.e. a :term:`Data Format Specification Record` ".
+		This is a Logical Record whose format is only completely described by another EFLR. The EFLR that describes an IFLR might be identified formally; for example by a specific reference to an EFLR (as in RP66) or informally; by some heuristic (as in LIS) such as "the immediately prior Logical Record that is type 64 i.e. a :term:`Data Format Specification Record`. See also :term:`RP66V1.Indirectly Formatted Logical Record`
 
 	DFSR
 		See :term:`Data Format Specification Record`
@@ -95,9 +96,15 @@ Glossary
 	Log Pass
 		A TotalDepth term that describes a continuous body of logging data recorded simultaneously and independent of any other recording.
 		Examples might be  "Repeat Section" or "Main Log".
-		In the :term:`LIS` format this is defined by a single Logical Record, the :term:`DFSR`, plus multiple type 0 or type 1 Logical Records that the DFSR describes. A Log Pass contains one or more :term:`Frame Array` s
-		The number of Frame Arrays within a Log Pass depends on the log format.
-		:term:`LAS` supports a single Frame Array within a Log Pass. :term:`LIS` can support up to two Frame Arrays within a Log Pass but in practice does not. :term:`RP66V1` supports any number of Frame Arrays within a Log Pass and often does.
+		A Log Pass contains one or more :term:`Frame Array` (s).
+		The number of allowable Frame Arrays within a Log Pass depends on the log format:
+		
+		:term:`LAS` can only support a single Frame Array within a Log Pass.
+		
+		In the :term:`LIS` format the Log Pass is defined by a single :term:`DFSR` Logical Record. This can describe up to two Log Passes (type 0 or type 1) Logical Records.
+		In practice only type 0 exists so LIS has just one Frame Array per Log Pass. 
+		
+		:term:`RP66V1` supports any number of Frame Arrays within a Log Pass and usually does.
 
 	Frame Set
 	Frame Array
@@ -130,7 +137,7 @@ Glossary
 		
 		.. warning::
 
-			Unfortunately RP66V1 does not allow this to be set *per frame* (i.e. per :term:`IFLR`) but only *per channel*.
+			Unfortunately RP66V1 does not allow this to be set *per frame* (i.e. per :term:`RP66V1.IFLR`) but only *per channel*.
 			So data providers use a fixed and undeclared value such as -999 for integers and -999.25 for floats.
 			This allows per-frame *and* per-channel absent values which means that RP66V1 files from all providers should be treated with some care in this area.
 			
@@ -211,7 +218,7 @@ Glossary
 		One of two kinds of Logical Record defined under DLIS.
 		The Body of an EFLR is a sequence of Components that combine to describe a single Set of Objects.
 		An EFLR is self-describing and can be interpreted without the use or knowledge of any other Logical Records.
-		More simply put, an Explicitly Formatted Logical Record is a table of rows and columns which contain :term:`RP66V1.Attribute` (s).
+		More simply put, an Explicitly Formatted Logical Record is a table of rows and columns. Each row/column contains a  :term:`RP66V1.Attribute`.
 
 	RP66V1.Format Version
 		A two-byte field immediately following the Visible Record Length in Visible Records on Record Storage Units (e.g., standard 9-track tapes).
@@ -246,7 +253,10 @@ Glossary
 	RP66V1.Indirectly Formatted Data
 		That part of the Body of an Indirectly Formatted Logical Record (IFLR) that follows the Data Descriptor Reference.
 
-	RP66V1.Indirectly Formatted Logical Record (IFLR)
+	RP66V1.IFLR
+		See :term:`RP66V1.Indirectly Formatted Logical Record`
+		
+	RP66V1.Indirectly Formatted Logical Record
 		One of two kinds of Logical Record defined under DLIS. The Body of an IFLR consists of a Data Descriptor Reference, followed by an arbitrary number of bytes of Indirectly Formatted Data. This data is not self-descriptive. Instead, its format is determined from information contained in the Object named by the Data Descriptor Reference and possibly related Objects. For example, the format of a Frame Data IFLR is specified by a Frame Object and by one or more Channel Objects referenced by the Frame Object.
 
 	RP66V1.Invisible Envelope

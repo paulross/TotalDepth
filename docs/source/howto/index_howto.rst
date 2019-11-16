@@ -10,5 +10,10 @@ HOWTOs: What TotalDepth can do for you
 This describes how TotalDepth can help you with various tasks when dealing with petrophysical data.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
+    
+    lis_archive
+    archive
+    to_las
+    numpy
    

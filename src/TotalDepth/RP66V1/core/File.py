@@ -71,6 +71,14 @@ def read_two_bytes_big_endian(fobj: typing.BinaryIO) -> int:
     return by[0] << 8 | by[1]
 
 
+def two_bytes_big_endian(value: int) -> bytes:
+    return bytes([(value >> 8) & 0xff, value & 0xff])
+
+
+def write_two_bytes_big_endian(value: int, fobj: typing.BinaryIO) -> None:
+    fobj.write(two_bytes_big_endian(value))
+
+
 # ---------------- END: Low Level File Read Functions ------------------
 
 
@@ -115,6 +123,10 @@ class VisibleRecord:
                 f'Visible Record length {length} but maximum is {self.MAX_LENGTH}'
             )
         return position, length, version
+
+    def as_bytes(self) -> bytes:
+        """The Visible Record represented in raw bytes."""
+        return two_bytes_big_endian(self.length) + two_bytes_big_endian(self.version)
 
     @property
     def next_position(self) -> int:
@@ -194,6 +206,10 @@ class LogicalRecordSegmentHeader:
         """Read a new Logical Record Segment Header.
         This may throw a ExceptionVisibleRecord or ExceptionLogicalRecordSegmentHeaderEOF."""
         self.position, self.length, self.attributes, self.record_type = self._read(fobj)
+
+    def as_bytes(self) -> bytes:
+        """The LRSH represented in raw bytes."""
+        return two_bytes_big_endian(self.length) + bytes([self.attributes, self.record_type])
 
     def __format__(self, format_spec) -> str:
         return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
@@ -280,6 +296,8 @@ class LogicalRecordSegmentHeader:
 
 
 class LogicalRecordPosition:
+    """Class that contains the file position of the Logical Record Segment Header and the immediately prior Visible
+    Record."""
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         # Check VisibleRecord
         if vr.position < StorageUnitLabel.SIZE:
@@ -468,6 +486,7 @@ class FileLogicalData:
 
 
 class FileRead:
+    """RP66V1 file reader."""
     def __init__(self, file: typing.BinaryIO):
         self.file = file
         self.file.seek(0)
@@ -549,6 +568,28 @@ class FileRead:
                 if next_position == self.visible_record.next_position:
                     break
                 self.file.seek(next_position)
+        except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
+            pass
+
+    def iter_LRSHs_for_visible_record_and_logical_data_fragment(
+            self, vr_given: VisibleRecord) -> typing.Sequence[typing.Tuple[LogicalRecordSegmentHeader, bytes]]:
+        """
+        Iterate across the Visible Record yielding the Logical Record Segments and the Logical Data fragment as
+        (LogicalRecordSegmentHeader, bytes) objects.
+        This leaves the file positioned at the next Visible Record or EOF.
+        """
+        self.file.seek(vr_given.position)
+        self.visible_record.read(self.file)
+        assert self.visible_record == vr_given
+        try:
+            while True:
+                self.logical_record_segment_header.read(self.file)
+                lrsh = copy.copy(self.logical_record_segment_header)
+                by = self.file.read(self.logical_record_segment_header.length - LogicalRecordSegmentHeader.HEAD_LENGTH)
+                yield lrsh, by
+                next_position = self.logical_record_segment_header.next_position
+                if next_position == self.visible_record.next_position:
+                    break
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
