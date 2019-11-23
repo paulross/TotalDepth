@@ -8,6 +8,7 @@ from TotalDepth.RP66V1.core import stringify
     (
         (None, '-',),
         (b'123', '123',),
+        (b'\xb0', '°',),
         (1, '1',),
         ([1, 2], '[1, 2]',),
         ([1,], '1',),

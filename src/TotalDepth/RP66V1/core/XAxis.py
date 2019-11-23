@@ -43,6 +43,17 @@ class XAxisSpacingSummary(typing.NamedTuple):
             )
         return '\n'.join(ret)
 
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            if self.min != other.min or self.max != other.max or self.mean != other.mean or self.median != other.median \
+                    or self.std != other.std or self.counts != other.counts:
+                return False
+            for i in range(2):
+                if not (self.histogram[i] == other.histogram[i]).all():
+                    return False
+            return True
+        return NotImplemented
+
 
 SPACING_DEFINITIONS = """'backward' if space < -0.5 median
 'duplicate' if -0.5 median <= space < 0.5 median
@@ -98,7 +109,7 @@ class XAxisSummary(typing.NamedTuple):
 
 class IFLRReference(typing.NamedTuple):
     """POD class that represents the position of the IFLR in the file."""
-    logical_record_position: File.LogicalRecordPosition
+    logical_record_position: File.LogicalRecordPositionBase
     frame_number: int  # TODO: Omit this  as it is implicit in the XAxis class?
     x_axis: typing.Union[int, float]
 
@@ -115,7 +126,8 @@ class XAxis:
         self._data: typing.List[IFLRReference] = []
         self._summary: typing.Union[None, XAxisSummary] = None
 
-    def append(self, position: File.LogicalRecordPosition, frame_number: int, x_axis: typing.Union[int, float]) -> None:
+    def append(self, position: File.LogicalRecordPositionBase, frame_number: int, x_axis: typing.Union[int, float]) -> None:
+        """Add a IFLRReference to the XAxis."""
         # TODO: Verify the data position, frame number increasing etc.
         self._summary = None
         self._data.append(IFLRReference(position, frame_number, x_axis))
@@ -128,21 +140,13 @@ class XAxis:
 
     @property
     def summary(self) -> XAxisSummary:
+        """Lazily compute the summary."""
         if self._summary is None:
-            self._compute_summary()
+            x_array: np.ndarray = np.empty(len(self._data), dtype=np.float64)
+            for i in range(len(self._data)):
+                x_array[i] = self._data[i].x_axis
+            self._summary = XAxisSummary(x_array.min(), x_array.max(), len(x_array), compute_spacing(x_array))
         return self._summary
-
-    @property
-    def is_increasing(self) -> bool:
-        if len(self._data) < 2:
-            raise AttributeError('Can not tell direction with < 2 points on the X axis.')
-        return self._data[0].x_axis < self._data[-1].x_axis
-
-    def _compute_summary(self) -> None:
-        x_array: np.ndarray = np.empty(len(self._data), dtype=np.float64)
-        for i in range(len(self._data)):
-            x_array[i] = self._data[i].x_axis
-        self._summary = XAxisSummary(x_array.min(), x_array.max(), len(x_array), compute_spacing(x_array))
 
     # TODO: Add an API that can turn an X axis value into the nearest frame number. Needs to cope with decreasing data.
 

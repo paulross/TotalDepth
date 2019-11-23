@@ -40,7 +40,7 @@ class ExceptionFileStatus(Exception):
     pass
 
 
-class FileInfo(object):
+class FileInfo:
     """Obtains the status of a file, hash SLOC etc."""
     def __init__(self, thePath):
         self._path = thePath
@@ -52,9 +52,8 @@ class FileInfo(object):
             if not os.path.isfile(thePath):
                 raise ExceptionFileStatus('Not a file path: %s' % thePath)
             self._size = os.path.getsize(self._path)
-            self._sloc = 1
             for aLine in open(self._path).readlines():
-                self._hash.update(aLine.encode('ascii'))
+                self._hash.update(aLine.encode('utf8'))
                 self._sloc += 1
             self._count += 1
         
@@ -93,7 +92,7 @@ class FileInfo(object):
         return self
 
 
-class FileInfoSet(object):
+class FileInfoSet:
     """Represents a set of files from a directory tree."""
     def __init__(self, thePath, glob=None, isRecursive=False, isTestOnly=False):
         # Map of (path : class FileInfo, ...}
@@ -140,14 +139,15 @@ class FileInfoSet(object):
         theS.write('%-*s  ' % (fieldWidth, '%s [%d]' % ('Total', myTotal.count)))
         myTotal.write(theS, incHash=False)
         theS.write('\n')
-        
+
+
 def main():
     """Process a path and write out the file summary."""
     usage = """usage: %prog [options] dir
 Counts files and sizes."""
     print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-g", "--glob", type="string", dest="glob", default="*.py *.pyx", 
+    optParser.add_option("-g", "--glob", type="string", dest="glob", default="*.py *.pyx *.h *.c *.cpp",
                       help="Space separated list of file match patterns. [default: %default]")
     optParser.add_option(
             "-l", "--loglevel",
@@ -161,7 +161,7 @@ Counts files and sizes."""
     optParser.add_option("-t", action="store_true", dest="test_only", default=False, 
                       help="Report modules beginning with 'Test' only. [default: %default]")
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     #print opts
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -180,10 +180,11 @@ Counts files and sizes."""
         isTestOnly=opts.test_only
     )
     myFis.write()
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0
+
 
 if __name__ == '__main__':
     #multiprocessing.freeze_support()

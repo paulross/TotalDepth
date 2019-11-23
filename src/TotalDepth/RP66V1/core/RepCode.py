@@ -707,6 +707,6 @@ for r in REP_CODE_NUMPY_TYPE_MAP.keys():
         assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.INTEGER
     elif np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.floating):
         assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.FLOAT
-    else:
+    else: # pragma: no cover
         assert 0
 del r

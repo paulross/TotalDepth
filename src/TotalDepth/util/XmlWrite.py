@@ -355,10 +355,6 @@ class Element(object):
     
     def __exit__(self, excType, excValue, tb):
         """Context manager support."""
-        if False and excType is not None:
-            print('excType=  ', excType)
-            print('excValue= ', excValue)
-            print('traceback=\n', '\n'.join(traceback.format_tb(tb)))
         # Close element on the stream
         self._stream.endElement(self._name)
         #return True

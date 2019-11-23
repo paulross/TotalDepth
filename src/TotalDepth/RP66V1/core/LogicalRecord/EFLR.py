@@ -69,7 +69,7 @@ class Set:
         return f'EFLR Set type: {self.type} name: {self.name}'
 
     def __eq__(self, other) -> bool:
-        if other.__class__ == Object:
+        if other.__class__ == self.__class__:
             return self.type == other.type and self.name == other.name
         return NotImplemented
 
@@ -398,13 +398,14 @@ class ExplicitlyFormattedLogicalRecord:
             self.objects.append(obj)
         elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE_IF_DIFFERENT:
             # If equal then ignore
-            if obj == self[obj.name]:
+            prev_obj = self.objects[temp_object_name_map[obj.name]]
+            if obj == prev_obj:
                 self.DUPE_OBJECT_LOGGER(f'Ignoring duplicate Object {obj.name} already seen in the {self.set}.')
             else:
                 # Not equal so report and replace
                 self.DUPE_OBJECT_LOGGER(f'Replacing different Object {obj.name} already seen in the {self.set}.')
                 self.DUPE_OBJECT_LOGGER('WAS:')
-                self.DUPE_OBJECT_LOGGER(str(self[obj.name]))
+                self.DUPE_OBJECT_LOGGER(str(prev_obj))
                 self.DUPE_OBJECT_LOGGER('NOW:')
                 self.DUPE_OBJECT_LOGGER(str(obj))
                 # Mark the old one to be removed
@@ -412,7 +413,7 @@ class ExplicitlyFormattedLogicalRecord:
                 # Update the map with the new one and add the new one to the list of objects.
                 temp_object_name_map[obj.name] = len(self.objects)
                 self.objects.append(obj)
-        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE_LATER_COPY:
+        elif self.DUPE_OBJECT_STRATEGY == DuplicateObjectStrategy.REPLACE_LATER_COPY:  # pragma: no cover
             # If later copy then  use  it regardless of content.
             if obj.name.C > self[obj.name].name.C:
                 self.DUPE_OBJECT_LOGGER(
@@ -430,7 +431,7 @@ class ExplicitlyFormattedLogicalRecord:
                     f'Ignoring Object {obj.name} already seen in the {self.set}'
                     f' as C: {obj.name.C} > {self[obj.name].name.C}.'
                 )
-        else:
+        else:  # pragma: no cover
             assert 0, f'Unsupported DuplicateObjectStrategy {self.DUPE_OBJECT_STRATEGY}'
 
     def __len__(self) -> int:
@@ -446,7 +447,7 @@ class ExplicitlyFormattedLogicalRecord:
         return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>'
 
     def __eq__(self, other) -> bool:
-        if other.__class__ == Object:
+        if other.__class__ == self.__class__:
             if self.lr_type == other.lr_type and self.set == other.set \
                     and self.object_name_map == other.object_name_map:
                 # Check all the objects are equal

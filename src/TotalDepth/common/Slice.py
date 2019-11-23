@@ -95,6 +95,7 @@ def create_slice_or_split(slice_string: str) -> typing.Union[Slice, Split]:
         return int(a_string)
 
     if '/' in slice_string:
+        # Return a Split
         parts = [convert(p.strip()) for p in slice_string.split('/')]
         if len(parts) != 2:
             raise ValueError(f'Wrong number of parts for a Split in "{slice_string}"')
@@ -104,18 +105,19 @@ def create_slice_or_split(slice_string: str) -> typing.Union[Slice, Split]:
             raise ValueError(f'A Split must end with and integer >= 1 not {parts[1]} in "{slice_string}"')
         return Split(parts[1])
     else:
+        # Return a Slice
         parts = [convert(p.strip()) for p in slice_string.split(',')]
+        assert len(parts) > 0
         if len(parts) > 3:
             raise ValueError(f'Too many parts in "{slice_string}"')
-        if len(parts) == 0:
-            return Slice()
         if len(parts) == 1:
             return Slice(stop=parts[0])
         # 2 or 3 parts
         return Slice(*parts)
 
 
-def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser, help_prefix: str='', use_what: bool = False) -> None:
+def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
+                                       help_prefix: str='', use_what: bool = False) -> None: # pragma: no cover
     help_list = []
     if help_prefix:
         help_list.append(f'{help_prefix}')

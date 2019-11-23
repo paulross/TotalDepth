@@ -444,12 +444,6 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
 
 def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """Scans the file reporting Visible Records, optionally Logical Record Segments as well."""
-    # verbose = kwargs.get('verbose', 0)
-    # if not verbose:
-    #     fout.write(
-    #         colorama.Fore.YELLOW
-    #         + 'Use -v to see individual records, RLE of LRSH positions and length distribution of LRS.\n'
-    #     )
     with _output_section_header_trailer('File as Raw Test Data', '*', os=fout):
         rp66_file = File.FileRead(fobj)
         count_vr = 0
@@ -473,7 +467,7 @@ def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) 
                     f' first: {lrsh.is_first} last: {lrsh.is_last}\n'
                 )
                 # fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
-                WIDTH = 40
+                WIDTH = 20
                 # str_list = []
                 # for i in range(0, len(by), WIDTH):
                 #     str_list.append(f'{by[i:i+WIDTH]}')

@@ -1,7 +1,50 @@
 [run]
 omit =
+    # Utility command line tools
+    src/TotalDepth/CopyBinFiles.py
+    src/TotalDepth/DeTif.py
+    src/TotalDepth/PlotLogs.py
+
+    # util/ command line tools
     src/TotalDepth/util/archive.py
     src/TotalDepth/util/PatternSearch.py
     src/TotalDepth/util/RemoveDupeFiles.py
     src/TotalDepth/util/plot/ViewSVGHeader.py
+    src/TotalDepth/util/plot/AREACfg.py
+    src/TotalDepth/util/gnuplot.py
+    src/TotalDepth/util/FileStatus.py
+
+    # We do not exercise RP66V1 Logical Record Semantics just yet
+    src/TotalDepth/RP66V1/core/LogicalRecord/Semantics.py
+
+    # Items in common that support processes
+    src/TotalDepth/common/cmn_cmd_opts.py
+    src/TotalDepth/common/process.py
+
+    # RP66V1 command line tools
+    src/TotalDepth/RP66V1/IndexPickle.py
+    src/TotalDepth/RP66V1/IndexXML.py
+    src/TotalDepth/RP66V1/ToLAS.py
+    src/TotalDepth/RP66V1/__init__.py
+    src/TotalDepth/RP66V1/ScanHTML.py
+    src/TotalDepth/RP66V1/Scan.py
+    src/TotalDepth/RP66V1/SearchFF01.py
+    src/TotalDepth/RP66V1/IndexXMLRead.py
+
+    # LAS command line tools
+    src/TotalDepth/LAS/ReadLASFiles.py
+
+    # LIS command line tools
+    src/TotalDepth/LIS/DumpFrameSet.py
+    src/TotalDepth/LIS/Index.py
+    src/TotalDepth/LIS/LisToHtml.py
+    src/TotalDepth/LIS/PlotLogPasses.py
+    src/TotalDepth/LIS/ProcLISPath.py
+    src/TotalDepth/LIS/RandomFrameSetRead.py
+    src/TotalDepth/LIS/ScanLogiData.py
+    src/TotalDepth/LIS/ScanLogiRec.py
+    src/TotalDepth/LIS/ScanPhysRec.py
+    src/TotalDepth/LIS/TableHistogram.py
+    # Slightly special case of the synthetic LIS file generator command line tool.
+    src/TotalDepth/LIS/core/GenLisFiles.py
 

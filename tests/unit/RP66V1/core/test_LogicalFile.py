@@ -1,8 +1,10 @@
-
+import io
 
 import pytest
 
+from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogicalFile
+from tests.unit.RP66V1.core import test_data
 
 
 def test_visible_record_positions_simple():
@@ -39,3 +41,17 @@ def test_visible_record_positions_prior_raises(data, lrsh_position, expected):
     assert err.value.args[0] == expected
 
 
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        (test_data.SMALL_FILE, 1,),
+        (test_data.MINIMAL_FILE, 1,),
+        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS, 1,),
+        (test_data.BASIC_FILE, 1,),
+    )
+)
+def test_logical_index_number_of_logical_files(by, expected):
+    fobj = io.BytesIO(by)
+    file_read = File.FileRead(fobj)
+    index = LogicalFile.LogicalIndex(file_read, 'ident')
+    assert len(index) == expected

@@ -1,3 +1,4 @@
+import contextlib
 import typing
 
 import pytest
@@ -22,6 +23,19 @@ def test_Set(ld, expected_type, expected_name):
     assert result.type == expected_type
     assert result.name == expected_name
     assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected_type, expected_name',
+    (
+        (LogicalData(b'\xf0\x07CHANNEL'), b'CHANNEL', b''),
+        (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), b'CHANNEL', b'0'),
+    )
+)
+def test_Set_eq(ld, expected_type, expected_name):
+    result = EFLR.Set(ld)
+    assert result == result
+    assert result != 1
 
 
 @pytest.mark.parametrize(
@@ -192,6 +206,8 @@ def test_TemplateAttribute_str(cd, ld, expected):
             LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
             "[VALUE1, VALUE2] [METRE]"
         ),
+        # Units only with b'\xb0' (degree symbol)
+        (ComponentDescriptor(0x22), LogicalData(b'\x01\xb0'), "- [°]"),
     )
 )
 def test_TemplateAttribute_stringify_value(cd, ld, expected):
@@ -292,7 +308,7 @@ class DataForEFLR(typing.NamedTuple):
         self.template.rewind()
 
 
-# WARN: Mutable objects in this tuple. Must call
+# WARN: Mutable objects in this tuple. Must call .rewind() before use.
 OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
     DataForEFLR(
         # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
@@ -372,7 +388,7 @@ def test_Object_getitem_label():
 
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
-LOGICAL_DATA_FROM_STANDARD = LogicalData(
+LOGICAL_BYTES_FROM_STANDARD = (
     # Set: TN
     b'\xf8\x07CHANNEL\x01\x30'
 
@@ -433,26 +449,53 @@ LOGICAL_DATA_FROM_STANDARD = LogicalData(
     b'\x29\x02\x08\x0a'
 )
 
+# Example from [RP66V1 Section 3.2.3.2 Figure 3-8]
+LOGICAL_BYTES_FROM_STANDARD_SINGLE_OBJECT = (
+    # Set: TN
+    b'\xf8\x07CHANNEL\x01\x30'
+
+    # Template
+    # ATTRIB: LR
+    b'\x34\x09LONG-NAME\x17'
+    # ATTRIB: LRV
+    b'\x35\x0dELEMENT-LIMIT\x12\x01'
+    # ATTRIB: LRV
+    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+    # ATTRIB: L
+    b'\x30\x05UNITS'
+    # ATTRIB: LRV
+    b'\x35\x09DIMENSION\x12\x01'
+
+    # Object #1
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+)
 
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_FROM_STANDARD,
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
-    ld.rewind()
     EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
 
 
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_FROM_STANDARD,
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_set(ld):
-    ld.rewind()
     eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
     assert eflr.set.type == b'CHANNEL'
     assert eflr.set.name == b'0'
@@ -461,7 +504,7 @@ def test_ExplicitlyFormattedLogicalRecord_set(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_FROM_STANDARD,
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_template(ld):
@@ -490,7 +533,7 @@ def test_ExplicitlyFormattedLogicalRecord_template(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_FROM_STANDARD,
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_objects(ld):
@@ -621,7 +664,7 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_FROM_STANDARD,
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
@@ -698,6 +741,103 @@ LOGICAL_DATA_WITH_EXACT_DUPLICATE = LogicalData(
     b'\x21\x01S'
 )
 
+
+# Example from [RP66V1 Section 3.2.3.2 Figure 3-8] but with a duplicate object.
+LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE = LogicalData(
+    # Set: TN
+    b'\xf8\x07CHANNEL\x01\x30'
+
+    # Template
+    # ATTRIB: LR
+    b'\x34\x09LONG-NAME\x17'
+    # ATTRIB: LRV
+    b'\x35\x0dELEMENT-LIMIT\x12\x01'
+    # ATTRIB: LRV
+    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+    # ATTRIB: L
+    b'\x30\x05UNITS'
+    # ATTRIB: LRV
+    b'\x35\x09DIMENSION\x12\x01'
+
+    # Object #1
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+
+    # Object #2, TODO: an crafted object that has the same name but 'SECONDS' rather than 'S' as the units
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x07SECONDS'
+)
+
+# Example from [RP66V1 Section 3.2.3.2 Figure 3-8] but with a duplicate object.
+LOGICAL_DATA_WITH_LATER_COPY_DUPLICATE = LogicalData(
+    # Set: TN
+    b'\xf8\x07CHANNEL\x01\x30'
+
+    # Template
+    # ATTRIB: LR
+    b'\x34\x09LONG-NAME\x17'
+    # ATTRIB: LRV
+    b'\x35\x0dELEMENT-LIMIT\x12\x01'
+    # ATTRIB: LRV
+    b'\x35\x13REPRESENTATION-CODE\x0f\x02'
+    # ATTRIB: L
+    b'\x30\x05UNITS'
+    # ATTRIB: LRV
+    b'\x35\x09DIMENSION\x12\x01'
+
+    # Object #1
+    # Object: N
+    b'\x70\x00\x00\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+
+    # Object #2, TODO: an crafted duplicate that has the same name but a later copy of 1
+    # Object: N
+    b'\x70\x00\x01\x04TIME'
+    # Attribute: V
+    b'\x21\x00\x00\x01\x31'
+    # Attribute:
+    b'\x20'
+    # Attribute:
+    b'\x20'
+    # Attribute: V
+    b'\x21\x01S'
+)
+
+
+@contextlib.contextmanager
+def duplicate_object_strategy(strategy: TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy):
+    previous_strategy: TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy \
+        = EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY
+    try:
+        EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = strategy
+        yield
+    finally:
+        EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = previous_strategy
+
+
 @pytest.mark.parametrize(
     'ld',
     (
@@ -728,13 +868,254 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_exact_default(ld):
     'ld',
     (
         LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+        LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_dupe_exact_ignore(ld):
+    ld.rewind()
+    with duplicate_object_strategy(TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.IGNORE):
+        eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+        result = eflr.str_long()
+        # print(result)
+        expected = """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+  Objects [1]:
+    OBNAME: O: 0 C: 0 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]"""
+        for a, b in zip(result.split('\n'), expected.split('\n')):
+            assert a == b
+        assert result == expected
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_exact_raise(ld):
     ld.rewind()
-    EFLR.ExplicitlyFormattedLogicalRecord.DUPE_OBJECT_STRATEGY = TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.RAISE
-    with pytest.raises(EFLR.ExceptionEFLRSetDuplicateObjectNames) as err:
-        EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
-    assert err.value.args == (
-        "Duplicate Object OBNAME: O: 0 C: 0 I: b'TIME' already seen in the EFLR Set type: b'CHANNEL' name: b'0'.",
+    with duplicate_object_strategy(TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.RAISE):
+        with pytest.raises(EFLR.ExceptionEFLRSetDuplicateObjectNames) as err:
+            EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+        assert err.value.args == (
+            "Duplicate Object OBNAME: O: 0 C: 0 I: b'TIME' already seen in the EFLR Set type: b'CHANNEL' name: b'0'.",
+        )
+
+
+@pytest.mark.parametrize(
+    'ld, strategy',
+    (
+        (
+            LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+            TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE,
+        ),
+        (
+            LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+            TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_IF_DIFFERENT,
+        ),
     )
+)
+def test_ExplicitlyFormattedLogicalRecord_dupe_diff_replace(ld, strategy):
+    ld.rewind()
+    with duplicate_object_strategy(strategy):
+        eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+        result = eflr.str_long()
+        # print(result)
+        expected = """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+  Objects [1]:
+    OBNAME: O: 0 C: 0 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'SECONDS']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]"""
+        for a, b in zip(result.split('\n'), expected.split('\n')):
+            assert a == b
+        assert result == expected
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LOGICAL_DATA_WITH_LATER_COPY_DUPLICATE,
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_dupe_later_copy(ld):
+    """Hmm actually this should fail and only have one object there ???"""
+    ld.rewind()
+    with duplicate_object_strategy(TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_LATER_COPY):
+        eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+        result = eflr.str_long()
+        # print(result)
+        expected = """<ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b'0'>
+  Template [5]:
+    CD: 001 10100 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: None
+    CD: 001 10101 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    CD: 001 10101 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+    CD: 001 10000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
+    CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+  Objects [2]:
+    OBNAME: O: 0 C: 0 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+    OBNAME: O: 0 C: 1 I: b'TIME'
+      CD: 001 00001 L: b'LONG-NAME' C: 1 R: 23 (OBNAME) U: b'' V: [ObjectName(O=0, C=0, I=b'1')]
+      CD: 001 00000 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 00000 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+      CD: 001 00001 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: [b'S']
+      CD: 001 10101 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]"""
+        for a, b in zip(result.split('\n'), expected.split('\n')):
+            assert a == b
+        assert result == expected
+
+
+PARAMETER_TABLE_BYTES = (
+    # Logical data length 564 0x234
+    b'\xf8\tPARAMETER\x031340\x06VAL'  # Chunk from 0
+    b'UES0\x04AXIS0\tDIMENSION'  # Chunk from 20
+    b'0\tLONG-NAMEp)\x00\x07LOGMO'  # Chunk from 40
+    b'DE%\x13\x0eMEASURED_DEPTH\x00'  # Chunk from 60
+    b'\x00%\x14\x12Depth Logging Mo'  # Chunk from 80
+    b'dep)\x00\x07PBVSADP%\x13\x02NO\x00\x00'  # Chunk from 100
+    b'%\x14(Use alternate dep'  # Chunk from 120
+    b'th channel for playb'  # Chunk from 140
+    b"ackp)\x00\x02DO'\x02\x01m\x00\x00\x00\x00\x00\x00%"  # Chunk from 160
+    b'\x14\x19Depth Offset for P'  # Chunk from 180
+    b'laybackp)\x00\x02PP%\x13\x06NORM'  # Chunk from 200
+    b'AL\x00\x00%\x14\x13Playback Proc'  # Chunk from 220
+    b"essingp)\x00\x04SPEE'\x0e\x04ft/"  # Chunk from 240
+    b'h\x00\x00\x07\x08\x00\x00%\x14\x17Simulated '  # Chunk from 260
+    b'Logging Speedp)\x00\x03LCL'  # Chunk from 280
+    b"'\x0e\x01m\x00\x00\x12\xc0\x00\x00%\x14\x14Logging"  # Chunk from 300
+    b' Cable Lengthp)\x00\x03LCN'  # Chunk from 320
+    b'%\x13\x00\x00\x00%\x14\x19Logging Cabl'  # Chunk from 340
+    b'e Name (Type)p)\x00\x0eSIM'  # Chunk from 360
+    b'ULATE_DELAY%\x02\xc7\xc3O\x80\x00\x00%'  # Chunk from 380
+    b'\x14\x1aSimulate Acquisiti'  # Chunk from 400
+    b'on Delayp)\x00\x04ENVI%\x13\x06A'  # Chunk from 420
+    b'NALOG\x00\x00%\x14\x17Acquisitio'  # Chunk from 440
+    b'n Environmentp)\x00\x04VHO'  # Chunk from 460
+    b"L'\x02\x02m3?\xc9a\xce\x00\x00%\x14\x15Cumul"  # Chunk from 480
+    b'ated Hole Volumep)\x00\x04'  # Chunk from 500
+    b"VCEM'\x02\x02m3?\x01\x9c*\x00\x00%\x14\x17Cu"  # Chunk from 520
+    b'mulated Cement Volum'  # Chunk from 540
+    b'e  \x03'  # Chunk from 560
+)
+
+
+def test_ExplicitlyFormattedLogicalRecord_eq():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr_a = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    ld.rewind()
+    eflr_b = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert eflr_a == eflr_b
+    assert eflr_a != 1
+
+
+def test_ExplicitlyFormattedLogicalRecord_len():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    result = eflr.str_long()
+    # print(result)
+    assert len(eflr) == 3
+
+@pytest.mark.parametrize(
+    'sort_order, expected',
+    (
+        (
+            False,
+            [
+                ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION'],
+                ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
+                ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
+                ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
+            ],
+        ),
+        (
+            True,
+            [
+                ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION'],
+                ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
+                ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
+                ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
+            ],
+        ),
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_table_as_string(sort_order, expected):
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    result = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=sort_order)
+    # print(result)
+    assert result == expected
+
+
+def test_ExplicitlyFormattedLogicalRecord_table_shape():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert eflr.shape == (3, 5)
+
+
+def test_ExplicitlyFormattedLogicalRecord_reduced_object_map():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    result = EFLR.reduced_object_map(eflr)
+    # print(result)
+    assert result == {b'TIME': 0, b'PRESSURE': 1, b'PAD-ARRAY': 2}
+
+
+def test_ExplicitlyFormattedLogicalRecord_key_value():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD_SINGLE_OBJECT)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert eflr.is_key_value()
+
+
+def test_ExplicitlyFormattedLogicalRecord_key_value_raises():
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert not eflr.is_key_value()
+    with pytest.raises(EFLR.ExceptionEFLR) as err:
+        eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=True)
+    assert err.value.args[0] == 'Can not represent EFLR as key->value table.'
+
+
+@pytest.mark.parametrize(
+    'sort_order, expected',
+    (
+        (
+            True,
+            [['KEY', 'VALUE'], ['DIMENSION', '1'], ['ELEMENT-LIMIT', '1'], ['LONG-NAME', '1 (O: 0 C: 0)'],
+             ['REPRESENTATION-CODE', '2'], ['UNITS', 'S']],
+        ),
+        (
+            False,
+            [['KEY', 'VALUE'], ['LONG-NAME', '1 (O: 0 C: 0)'], ['ELEMENT-LIMIT', '1'], ['REPRESENTATION-CODE', '2'],
+             ['UNITS', 'S'], ['DIMENSION', '1']],
+        ),
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_key_values(sort_order, expected):
+    ld = LogicalData(LOGICAL_BYTES_FROM_STANDARD_SINGLE_OBJECT)
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    result = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=sort_order)
+    # print(result)
+    assert result == expected

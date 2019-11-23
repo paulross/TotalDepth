@@ -13,6 +13,8 @@ This describes how TotalDepth can help you with various tasks when dealing with 
     :maxdepth: 3
     
     lis_archive
+    las_archive
+    rp66v1_archive
     archive
     to_las
     numpy

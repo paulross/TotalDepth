@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from TotalDepth.RP66V1.core import XAxis
+from TotalDepth.RP66V1.core import XAxis, File
 
 
 @pytest.mark.parametrize(
@@ -52,3 +52,162 @@ def test_compute_spacing_counts_counts_negative(diff_array, exp_median, exp_coun
     assert exp_counts == counts
 
 
+@pytest.mark.parametrize(
+    'x_array, expected',
+    (
+        (
+            np.arange(1.0, 8.0, 1.0),
+            XAxis.XAxisSpacingSummary(min=1.0, max=1.0, mean=1.0, median=1.0, std=0.0,
+                                      counts=XAxis.XAxisSpacingCounts(norm=6, dupe=0, skip=0, back=0),
+                                      histogram=(np.array([6]), np.array([0.5, 1.5]))),
+        ),
+    )
+)
+def test_compute_spacing(x_array, expected):
+    result = XAxis.compute_spacing(x_array)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'x_array, expected',
+    (
+        (
+            np.arange(1.0, 8.0, 1.0),
+            XAxis.XAxisSpacingSummary(min=1.0, max=1.0, mean=1.0, median=1.0, std=0.0,
+                                      counts=XAxis.XAxisSpacingCounts(norm=6, dupe=0, skip=0, back=0),
+                                      histogram=(np.array([6]), np.array([0.5, 1.5]))),
+        ),
+    )
+)
+def test_compute_spacing_eq(x_array, expected):
+    result = XAxis.compute_spacing(x_array)
+    assert result == expected
+    assert result != 1
+
+
+@pytest.mark.parametrize(
+    'x_array, expected',
+    (
+        (
+            np.arange(1.0, 8.0, 1.0),
+            """     Value [ N]: Relative Frequency
+     0.500 [ 6]: ********************************************************************************""",
+        ),
+        (
+            np.array(
+                [1.0, 1.5, 3.0, 4.5, 5.0, 6.0, 7.0, 8.0]
+            ),
+            """     Value [ N]: Relative Frequency
+     0.500 [ 2]: *****************************************************
+     0.600 [ 0]: 
+     0.700 [ 0]: 
+     0.800 [ 0]: 
+     0.900 [ 0]: 
+     1.000 [ 3]: ********************************************************************************
+     1.100 [ 0]: 
+     1.200 [ 0]: 
+     1.300 [ 0]: 
+     1.400 [ 2]: *****************************************************""",
+        ),
+    )
+)
+def test_compute_spacing_histogram_str(x_array, expected):
+    x_axis = XAxis.compute_spacing(x_array)
+    result = x_axis.histogram_str()
+    # print(result)
+    assert result == expected
+
+
+def test_XAxis_ctor():
+    xaxis = XAxis.XAxis(ident=b'A', long_name=b'B', units=b'C')
+    assert xaxis.ident == b'A'
+    assert xaxis.long_name == b'B'
+    assert xaxis.units == b'C'
+
+
+@pytest.mark.parametrize(
+    'position_xvalues, exp_summary',
+    (
+        (
+            [
+                (0x0, 0x1, 1.0),
+            ],
+            XAxis.XAxisSummary(min=1.0, max=1.0, count=1, spacing=None),
+        ),
+        (
+            [
+                (0x0, 0x1, 1.0),
+                (0x2, 0x2, 2.0),
+            ],
+            XAxis.XAxisSummary(min=1.0, max=2.0, count=2,
+                               spacing=XAxis.XAxisSpacingSummary(min=1.0, max=1.0, mean=1.0, median=1.0,
+                                                                 std=0.0,
+                                                                 counts=XAxis.XAxisSpacingCounts(norm=1, dupe=0,
+                                                                                                 skip=0,
+                                                                                                 back=0),
+                                                                 histogram=(np.array([1]), np.array([0.5, 1.5]))))
+            ,
+        ),
+    )
+)
+def test_XAxis_append_summary(position_xvalues, exp_summary):
+    xaxis = XAxis.XAxis(ident=b'A', long_name=b'B', units=b'C')
+    x_values = []
+    for frame_number, (vr_postion, lrsh_position, x_value) in enumerate(position_xvalues):
+        xaxis.append(
+            File.LogicalRecordPositionBase(vr_postion, lrsh_position),
+            frame_number + 1,
+            x_value
+        )
+        x_values.append(x_value)
+    result = xaxis.summary
+    # print(result)
+    assert result.count == len(x_values)
+    assert result.min == min(x_values)
+    assert result.max == max(x_values)
+    array = np.array(x_values)
+    spacing_summary = XAxis.compute_spacing(array)
+    assert result.spacing == spacing_summary
+
+
+@pytest.mark.parametrize(
+    'position_xvalues, expected',
+    (
+        (
+            [
+                (0x0, 0x1, 1.0),
+            ],
+            [
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0x1),
+                                    frame_number=1, x_axis=1.0),
+            ],
+        ),
+        (
+            [
+                (0x0, 0x1, 1.0),
+                (0x2, 0x3, 2.0),
+            ],
+            [
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0x1),
+                                    frame_number=1, x_axis=1.0),
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x2, 0x3),
+                                    frame_number=2, x_axis=2.0),
+            ],
+        ),
+    )
+)
+def test_XAxis_getitem(position_xvalues, expected):
+    x_axis = XAxis.XAxis(ident=b'A', long_name=b'B', units=b'C')
+    x_values = []
+    for frame_number, (vr_postion, lrsh_position, x_value) in enumerate(position_xvalues):
+        x_axis.append(
+            File.LogicalRecordPositionBase(vr_postion, lrsh_position),
+            frame_number + 1,
+            x_value
+        )
+        x_values.append(x_value)
+    assert len(x_axis) == len(expected)
+    # print()
+    for i in range(len(x_axis)):
+        # print(x_axis[i])
+        assert x_axis[i] == expected[i]

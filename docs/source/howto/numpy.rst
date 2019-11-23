@@ -4,14 +4,14 @@
 .. Getting the frame data as a numpy array
 
 
-Getting the frame data as a numpy array
-===========================================
+Getting the Frame Data as a ``numpy`` Array
+===============================================
 
-LAS
+From LAS
 ^^^^^^^^^^^^^^
 
-LIS
+From LIS
 ^^^^^^^^^^^^^^
 
-RP66V1
+From RP66V1
 ^^^^^^^^^^^^^^
