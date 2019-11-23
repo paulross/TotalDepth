@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Unit tests for the LIS File module.
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '8 Nov 2010'
@@ -55,7 +56,9 @@ class TestFileLowLevel(BaseTestClasses.TestBaseFile):
     def test_00(self):
         """TestFileLowLevel.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
+
+@pytest.mark.slow
 class TestFileType0Base(BaseTestClasses.TestBaseFile):
     """Tests ..."""
     def setUp(self):
@@ -100,7 +103,9 @@ class TestFileType0Base(BaseTestClasses.TestBaseFile):
                 b = self._file.readLrBytes(bufSiz)
                 byteCntr += len(b)
         self.writeCostToStderr(tS, byteCntr, 'Words', byteCntr//4)
-    
+
+
+@pytest.mark.slow
 class TestFileType0(TestFileType0Base):
     """Tests ..."""
     def test_00(self):
@@ -220,7 +225,9 @@ class TestFileType0(TestFileType0Base):
     def test_18(self):
         """TestFileType0.test_18(): 8MB Type 0 data, 1024 byte reads."""
         self._ReadFileWithBufferSize(1024)
-    
+
+
+@pytest.mark.slow
 class TestFileType0_Profile(TestFileType0Base):
     """Special tests."""
     
@@ -228,9 +235,13 @@ class TestFileType0_Profile(TestFileType0Base):
         """TestFileType0_Profile.test_00(): 8MB Type 0 data,    4 byte reads."""
         self._ReadFileWithBufferSize(4)
         
+
+@pytest.mark.slow
 class Special(unittest.TestCase):
     pass
 
+
+@pytest.mark.slow
 class SpecialType0(TestFileType0Base):
     """Special tests."""
     def test_10_00(self):

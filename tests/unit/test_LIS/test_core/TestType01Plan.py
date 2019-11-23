@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Tests FramePlan for type 0/1 Logical Records.
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '6 Jan 2011'
@@ -762,6 +763,7 @@ class TestType01PlanGenEventsIndirect(unittest.TestCase):
         #pprint.pprint(actList)
         self.assertEqual(expList, actList)
 
+
 class TestType01Plan_PerfBase(BaseTestClasses.TestBase):
     """Tests ..."""
     def _timeEvents(self, theFrameSlice, theChRange):
@@ -781,6 +783,8 @@ class TestType01Plan_PerfBase(BaseTestClasses.TestBase):
             numEvents += 1
         self.writeCostToStderr(start, myReadSize, 'Events', numEvents)
 
+
+@pytest.mark.slow
 class TestType01Plan_Perf(TestType01Plan_PerfBase):
     """Tests ..."""
     def setUp(self):
@@ -938,6 +942,8 @@ class TestType01Plan_Perf(TestType01Plan_PerfBase):
         """TestType01Plan_Perf.test_40(): Frames: 1024 step 16, Ch: 8192 step 16."""
         self._timeEvents(slice(0, 1024, 16), range(0, 8192, 16))
 
+
+@pytest.mark.slow
 class TestType01Plan_Perf_Profile(TestType01Plan_PerfBase):
     """Tests ..."""
     def setUp(self):

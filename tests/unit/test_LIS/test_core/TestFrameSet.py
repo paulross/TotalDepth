@@ -18,6 +18,7 @@
 # 
 # Paul Ross: apaulross@gmail.com
 """Test FrameSet module."""
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '10 Jan 2011'
@@ -3805,6 +3806,8 @@ class TestFrameSetgenAll(BaseTestClasses.TestBaseLogPass):
             myRes,
         )
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet."""
     NUMBER_OF_CTOR = 1
@@ -3950,6 +3953,8 @@ class TestFrameSet_Perf_Ctor(BaseTestClasses.TestBaseLogPass):
             numBytes += myFs.nbytes
         self.writeCostToStderr(tS, lisLen*self.NUMBER_OF_CTOR, 'LIS MB', lisLen // (1024**2))
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Load(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data."""
     def setUp(self):
@@ -3999,6 +4004,8 @@ class TestFrameSet_Perf_Load(BaseTestClasses.TestBaseLogPass):
         #print()
         #print('TestFrameSet_Perf_Load.test_01() array:\n', myFs._frames)
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Read(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading."""
     def setUp(self):
@@ -4033,6 +4040,8 @@ class TestFrameSet_Perf_Read(BaseTestClasses.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using generators."""
     def setUp(self):
@@ -4130,6 +4139,8 @@ class TestFrameSet_Perf_Read_Gen(BaseTestClasses.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', (lisLen + 512*1024) // (1024**2))
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Read_GenAll(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using generators."""
     def setUp(self):
@@ -4181,6 +4192,8 @@ class TestFrameSet_Perf_Read_GenAll(BaseTestClasses.TestBaseLogPass):
             lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then reading using genChScPoints.
     genChScPoints() is used for plotting"""
@@ -4383,6 +4396,8 @@ class TestFrameSet_Perf_Read_GenPoints(BaseTestClasses.TestBaseLogPass):
                 lisLen += 4
         self.writeCostToStderr(tS, lisLen, 'LIS MB', (lisLen + 512*1024) // (1024**2))
 
+
+@pytest.mark.slow
 class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
     """Test the preformance of a FrameSet loading data then using accumulate()."""
     def setUp(self):

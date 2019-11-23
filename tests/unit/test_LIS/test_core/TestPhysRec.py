@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Unit tests for the LogicalData module.
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '8 Nov 2010'
@@ -1071,6 +1072,8 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
 #            pass
         self.assertTrue(self._pr.isEOF)
 
+
+@pytest.mark.slow
 class TestPhysRecWriteRead_PerfBase(BaseTestClasses.TestBase):
     """Writes a PR then times how long it takes to read it."""
     def _writeToFile(self, prLen, lrLen, lrNum):
@@ -1097,7 +1100,9 @@ class TestPhysRecWriteRead_PerfBase(BaseTestClasses.TestBase):
                 break
             lrCount += 1
         return lrCount
-    
+
+
+@pytest.mark.slow
 class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
     """Writes a PR then times how long it takes to read it."""
     def setUp(self):
@@ -1267,6 +1272,8 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         self.assertEqual(lrNum, lrCount)
         self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
 
+
+@pytest.mark.slow
 class Special_Perf(TestPhysRecWriteRead_PerfBase):
     """Special tests."""
     pass

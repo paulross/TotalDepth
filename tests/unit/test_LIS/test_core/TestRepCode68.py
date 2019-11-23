@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Tests RepCode
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '2 Nov 2010'
@@ -742,6 +743,8 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
 #                  '0x{:08x}->{:s}'.format(rcWord, math.frexp(pRepCode.from68(rcWord)))
 #            )
 
+
+@pytest.mark.slow
 class TestRepCodeFrom68Time(TestRepCode68Base):
     """Tests ..."""
     def setUp(self):
@@ -876,6 +879,8 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
         sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
+
+@pytest.mark.slow
 class TestRepCodeTo68Time(TestRepCode68Base):
     """Tests ..."""
     def setUp(self):

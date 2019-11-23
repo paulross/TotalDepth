@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Tests the LIS generator.
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '14 Feb 2011'
@@ -48,6 +49,8 @@ class TestLisGenBase(unittest.TestCase):
         self.assertTrue(v >= min, '{:s} not >= to {:s}'.format(str(v), str(min)))
         self.assertTrue(v <= max, '{:s} not <= to {:s}'.format(str(v), str(max)))
 
+
+@pytest.mark.slow
 class TestRandom(TestLisGenBase):
     """Tests ..."""
     RANDOM_TEST_COUNT = 8 * 1024
@@ -324,6 +327,8 @@ class TestTableGenRandomCONS(TestLisGenBase):
         self.assertEqual({b'MNEM', b'UNKN'}, myLr.colLabels())
         self.assertEqual(numRows, len(myLr.rowLabels()))
 
+
+@pytest.mark.slow
 class TestChVals(TestLisGenBase):
     """Tests channel value generation."""
     TESTS = 1024*8
@@ -517,6 +522,7 @@ class TestChVals(TestLisGenBase):
         )
     
 
+@pytest.mark.slow
 class TestChValsX(TestLisGenBase):
     """Tests channel value X axis generation."""
     def setUp(self):

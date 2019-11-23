@@ -19,6 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """Tests RepCode
 """
+import pytest
 
 __author__  = 'Paul Ross'
 __date__    = '2 Nov 2010'
@@ -260,6 +261,8 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read49(myFile), -153.0)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -491,6 +494,8 @@ class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read50(myFile), -153.0)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -701,6 +706,8 @@ class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read56(myFile), -89)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -902,6 +909,8 @@ class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read66(myFile), 153)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -1152,6 +1161,8 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read70(myFile), -153.25)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -1363,6 +1374,8 @@ class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read73(myFile), -153)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -1553,6 +1566,8 @@ class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read77(myFile), 153)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):
@@ -1792,6 +1807,8 @@ class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
         self.assertEqual(pRepCode.read79(myFile), -153)
         self.assertFalse(myFile.hasLd())
 
+
+@pytest.mark.slow
 class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
     def setUp(self):

@@ -20,6 +20,8 @@
 """Tests various classes for use by the preprocessor for keeping track of the
 location in a set of files.
 """
+import pytest
+
 __author__  = 'Paul Ross'
 __date__    = '10 Jan 2011'
 __version__ = '0.8.0'
@@ -1633,6 +1635,8 @@ class TestLogPass_UpIndirect(BaseTestClasses.TestBaseLogPass):
             list(self._logPass.genFrameSetHeadings())
         )
 
+
+@pytest.mark.slow
 class TestLogPass_PerfBase(BaseTestClasses.TestBaseFile):
     """Tests LogPass performance."""
 
@@ -1704,6 +1708,8 @@ class TestLogPass_PerfBase(BaseTestClasses.TestBaseFile):
         #print('len(myB)', len(myB), 'Frame length:', myDfsr.lisSize())
         self._lp = LogPass.LogPass(myDfsr)
 
+
+@pytest.mark.slow
 class TestLogPass_Perf(TestLogPass_PerfBase):
     """Tests LogPass performance."""
 
@@ -1893,6 +1899,8 @@ class TestLogPass_Perf(TestLogPass_PerfBase):
         """TestLogPass_Perf.test_60(): channel step 1024, 8000 frames step 1024."""
         self._runIterTestSomeFrames(1000, slice(0, 8000, 1024), list(range(0, 1025, 1024)))
 
+
+@pytest.mark.slow
 class TestLogPass_Type0_Base(BaseTestClasses.TestBaseLogPass):
     """Reading binary data."""
     
@@ -1940,6 +1948,8 @@ class TestLogPass_Type0_Base(BaseTestClasses.TestBaseLogPass):
                     retCount += 1
         return retCount
 
+
+@pytest.mark.slow
 class TestLogPass_Type0(TestLogPass_Type0_Base):
     """Reading binary data."""
     
@@ -2097,7 +2107,7 @@ class TestLogPass_Type0(TestLogPass_Type0_Base):
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
 
-
+@pytest.mark.slow
 class TestLogPass_Type0_8MB(TestLogPass_Type0_Base):
     def test_04_00(self):
         """TestLogPass_Type0.test_04_00(): lr,fr,ch,sa,bu=(1024,8,256,1,1)=8MB, create file."""
@@ -2146,6 +2156,8 @@ class TestLogPass_Type0_8MB(TestLogPass_Type0_Base):
         #sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
 
+
+@pytest.mark.slow
 class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
     def test_05_00(self):
         """TestLogPass_Type0_LargeBurst.test_05_00(): lr,fr,ch,sa,bu=(512,2,2,2,1024)=8MB, create file."""
@@ -2189,6 +2201,8 @@ class TestLogPass_Type0_LargeBurst(TestLogPass_Type0_Base):
         self.assertEqual(2049*1024, valCount)
         sys.stderr.write(' Time: {:8.3f} '.format(time.perf_counter()-tS))
 
+
+@pytest.mark.slow
 class TestLogPass_Type0_Profile(TestLogPass_Type0_Base):
     """Profile preocessing of Type 0 Logical Records."""
     def test_04_03(self):
