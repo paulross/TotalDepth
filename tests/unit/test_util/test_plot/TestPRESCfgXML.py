@@ -40,11 +40,15 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+import pytest
+
 from TotalDepth.LIS.core import Mnem
 from TotalDepth.util.plot import Stroke
 from TotalDepth.util.plot import FILMCfgXML
 from TotalDepth.util.plot import PRESCfgXML
 
+
+@pytest.mark.slow
 class TestCurveCfgXMLRead(unittest.TestCase):
 
     def setUp(self):
@@ -361,7 +365,9 @@ class TestCurveCfgXMLRead(unittest.TestCase):
             Stroke.Stroke(width=0.5, colour='rgb(0,0,0)', coding=(4, 4), opacity=1.0),
             myCcxr.codiStroke,
         )
-        
+
+
+@pytest.mark.slow
 class TestPresCfgXMLRead(unittest.TestCase):
     TEST_FILM_ID = 'Resistivity_3Track_Logrithmic.xml'
 

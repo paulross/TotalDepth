@@ -1755,6 +1755,8 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
         )
         self.assertEqual(expResult, myPts)
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
     """Tests plotting a LIS file."""
     def retPresBytes_TEST(self):
@@ -1906,6 +1908,8 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
      
+
+@pytest.mark.slow
 class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
     """Tests plotting a square wave with a low frequency (4 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 2
@@ -2026,6 +2030,8 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
     """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 3
@@ -2146,6 +2152,8 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
     """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 3.1
@@ -2610,6 +2618,8 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data."""
     TEST_SVG_FILE_MAP_ENTRY = 4
@@ -2650,6 +2660,8 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data on a 1:20 scale."""
     TEST_SVG_FILE_MAP_ENTRY = 4.1
@@ -2686,7 +2698,7 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2705,6 +2717,8 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data on a 1:40 scale."""
     TEST_SVG_FILE_MAP_ENTRY = 4.2
@@ -2759,7 +2773,9 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
             myTimerS.writeToStderr()
-            
+
+
+@pytest.mark.slow
 class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
     """Tests plotting a square wave with a low frequency (4 foot spacing) to illustrate super sampling."""
     TEST_SVG_FILE_MAP_ENTRY = 5
@@ -2920,6 +2936,8 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
     """Tests plotting a LIS file with colours."""
     TEST_SVG_FILE_MAP_ENTRY = 6
@@ -3071,6 +3089,8 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
     """Tests plotting a LIS file with numbered colours."""
     TEST_SVG_FILE_MAP_ENTRY = 7
@@ -3222,6 +3242,8 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
     """Tests plotting a LIS file with numbered complimentary colours."""
     TEST_SVG_FILE_MAP_ENTRY = 8
@@ -3373,6 +3395,8 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_Perf_00(TestPlotBase_00):
     """Tests plotting performance, 2000' of 10 curves."""
     TEST_SVG_FILE_MAP_ENTRY_MAP = {
@@ -3774,7 +3798,7 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s} FILM 1""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -3811,6 +3835,8 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
     """Tests plotting of 1000' of curves from "Triple_Combo" LgFormat XML file."""
     PLOT_START_IN_FEET = 5000.0
@@ -3968,6 +3994,8 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
             myTimerS.writeToStream(sys.stdout)
             sys.stdout.flush()
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
     """Example of a plot of HDT data extracted from real LIS file."""
     def _logicalRecords(self):
@@ -4096,6 +4124,8 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
             sys.stderr.flush()
             break
 
+
+@pytest.mark.slow
 class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
     """Tests plotting a LIS file."""
 
@@ -4139,6 +4169,8 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
                 timerS=myTimerS)
             myTimerS.writeToStderr()
 
+
+@pytest.mark.slow
 class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
     """Tests plotting of 200' of curves from "Triple_Combo" LgFormat XML file from LAS."""
 

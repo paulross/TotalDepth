@@ -34,14 +34,16 @@ import sys
 import os
 import time
 import logging
+import unittest
 #import io
+
+import pytest
 
 from TotalDepth.util import DirWalk
 
 ######################
 # Section: Unit tests.
 ######################
-import unittest
 
 class TestGenBigFirst(unittest.TestCase):
     """Tests gen_big_first"""
@@ -91,6 +93,7 @@ class TestDirWalk(unittest.TestCase):
             pass
             # print(v)
 
+    @pytest.mark.slow
     def test_03(self):
         """TestDirWalk.test_03(): Input only, *.py and recursion."""
         # print()
@@ -98,6 +101,7 @@ class TestDirWalk(unittest.TestCase):
             pass
             # print(v)
 
+    @pytest.mark.slow
     def test_04(self):
         """TestDirWalk.test_04(): Input and output, *.py and recursion."""
         # print()
@@ -105,6 +109,7 @@ class TestDirWalk(unittest.TestCase):
             pass
             # print(v)
 
+    @pytest.mark.slow
     def test_05(self):
         """TestDirWalk.test_05(): Input and output, *.py, recursion and biggest first."""
         # print()
@@ -112,6 +117,7 @@ class TestDirWalk(unittest.TestCase):
             pass
             # print('{:8d}: {!r:s}'.format(os.path.getsize(v.filePathIn), v))
 
+    @pytest.mark.slow
     def test_06(self):
         """TestDirWalk.test_06(): Input only, *.py, recursion and biggest first."""
         # print()
@@ -119,6 +125,7 @@ class TestDirWalk(unittest.TestCase):
             pass
             # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 
+    @pytest.mark.slow
     def test_10(self):
         """TestDirWalk.test_10(): Fails if input does not exist."""
         try:
