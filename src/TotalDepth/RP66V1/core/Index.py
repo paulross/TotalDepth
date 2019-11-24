@@ -26,6 +26,8 @@ class VisibleRecordIndexLRSHPosition(typing.NamedTuple):
     """Contains the Visible Record position and Logical Record Segment Header position and the Logical Data length."""
     vr_index: int
     lrsh_position: int
+    lrsh_attributes: File.LogicalRecordSegmentHeaderAttributes
+    lr_record_type: int
     logical_data_length: int
 
 

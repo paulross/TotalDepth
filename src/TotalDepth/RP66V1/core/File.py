@@ -165,112 +165,15 @@ class VisibleRecord:
         return f'VisibleRecord: position=0x{self.position:x} length=0x{self.length:04x} version=0x{self.version:04x}'
 
 
-class LogicalRecordSegmentHeader:
-    """RP66V1 Logical Record Segment Header. See See [RP66V1 2.2.2.1]"""
-    HEAD_LENGTH = 4
-    # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
+class LogicalRecordSegmentHeaderAttributes:
+    def __init__(self, attributes: int):
+        assert 0 <= attributes <= 0xff
+        self.attributes = attributes
 
-    def __init__(self, fobj: typing.BinaryIO):
-        """Constructor.
-        position: The file position of the start of the LRSH.
-
-        length: The *Logical Record Segment Length* is a two-byte, unsigned integer (Representation Code UNORM) that
-            specifies the length, in bytes, of the Logical Record Segment. The Logical Record Segment Length is required
-            to be even. The even length ensures that 2-byte checksums can be computed, when present, and permits some
-            operating systems to handle DLIS data more efficiently without degrading performance with other systems.
-            There is no limitation on a Logical Record length. Logical Record Segments must contain at least sixteen
-            (16) bytes. This requirement facilitates mapping the Logical Format to those Physical Formats that require a
-            minimum physical record length.
-
-        attributes: The *Logical Record Segment Attributes* consist of a one-byte bit string that specifies the
-            Attributes of the Logical Record Segment. Its structure is defined in Figure 2-3. Since its structure is
-            defined explicitly in Figure 2-3, no Representation Code is assigned to it.
-
-        record_type: The *Logical Record Type* is a one-byte, unsigned integer (Representation Code USHORT) that
-            specifies the Type of the Logical Record. Its value indicates the general semantic content of the Logical
-            Record. The same value must be used in all Segments of a Logical Record. Logical Record Types are specified
-            in Appendix A.
-
-            IFLRs: Numeric codes 0-127 are reserved for Public IFLRs. Codes 128-255 are reserved for Private IFLRs.
-            0 is Frame Data, 1 is unformatted data.
-
-            EFLRs: Numeric codes 0-127 are reserved for Public EFLRs. Codes 128-255 are reserved for Private EFLRs.
-            0 is FILE-HEADER, 1 is ORIGIN and so on.
-        """
-        self.position, self.length, self.attributes, self.record_type = self._read(fobj)
-
-    def _read(self, fobj: typing.BinaryIO) -> typing.Tuple[int, int, int, int]:
-        position = fobj.tell()
-        try:
-            length = read_two_bytes_big_endian(fobj)
-            # TODO: Raise on minimum length. Maybe make this a read/write property or descriptor
-            attributes = read_one_byte(fobj)
-            # TODO: Raise on attribute conflicts, for example:
-            # If encryption packet then encryption must be set
-            # Compare successors with previous - trailing length must be all or nothing, encryption all or nothing.
-            record_type = read_one_byte(fobj)
-        except ExceptionEOF:
-            raise ExceptionLogicalRecordSegmentHeaderEOF(f'LogicalRecordSegmentHeader EOF at 0x{position:x}')
-        return position, length, attributes, record_type
-
-    def read(self, fobj: typing.BinaryIO) -> None:
-        """Read a new Logical Record Segment Header.
-        This may throw a ExceptionVisibleRecord or ExceptionLogicalRecordSegmentHeaderEOF."""
-        self.position, self.length, self.attributes, self.record_type = self._read(fobj)
-
-    def as_bytes(self) -> bytes:
-        """The LRSH represented in raw bytes."""
-        return two_bytes_big_endian(self.length) + bytes([self.attributes, self.record_type])
-
-    # def __format__(self, format_spec) -> str:
-    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
-    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
-    #         self.position, self.length, self.attributes, self.record_type
-    #     )
-
-    # def __str__(self) -> str:
-    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
-    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
-    #         self.position, self.length, self.attributes, self.record_type
-    #     )
-
-    def __str__(self) -> str:
-        return '<LogicalRecordSegmentHeader: @ 0x{:x} len=0x{:x}' \
-               ' attr=0x{:x} type={:d}>'.format(
-            self.position, self.length, self.attributes, self.record_type
-        )
-
-    def attribute_str(self) -> str:
-        """Returns a long string of the important attributes."""
-        ret = [
-            'EFLR' if self.is_eflr else 'IFLR',
-        ]
-        if self.is_first:
-            ret.append('first')
-        if self.is_last:
-            ret.append('last')
-        if self.is_encrypted:
-            ret.append('encrypted')
-        if self.has_checksum:
-            ret.append('checksum')
-        if self.has_trailing_length:
-            ret.append('trailing length')
-        if self.has_pad_bytes:
-            ret.append('padding')
-        return '-'.join(ret)
-
-    def long_str(self) -> str:
-        return f'LRSH: @ 0x{self.position:x} len=0x{self.length:x} type={self.record_type:d} {self.attribute_str()}'
-
-    @property
-    def next_position(self) -> int:
-        """File position of the start of the next Logical Record Segment Header."""
-        return self.position + self.length
-
-    @property
-    def logical_data_position(self) -> int:
-        """File position of the start of the Logical Data."""
-        return self.position + self.HEAD_LENGTH
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return self.attributes == other.attributes
+        return NotImplemented
 
     # Attribute access
     @property
@@ -306,17 +209,180 @@ class LogicalRecordSegmentHeader:
         """Note: Pad bytes will not be visible if the record is encrypted."""
         return self.attributes & 0x01 != 0
 
+    def attribute_str(self) -> str:
+        """Returns a long string of the important attributes."""
+        ret = [
+            'EFLR' if self.is_eflr else 'IFLR',
+        ]
+        if self.is_first:
+            ret.append('first')
+        if self.is_last:
+            ret.append('last')
+        if self.is_encrypted:
+            ret.append('encrypted')
+        if self.has_checksum:
+            ret.append('checksum')
+        if self.has_trailing_length:
+            ret.append('trailing length')
+        if self.has_pad_bytes:
+            ret.append('padding')
+        return '-'.join(ret)
+
+
+
+class LogicalRecordSegmentHeader:
+    """RP66V1 Logical Record Segment Header. See See [RP66V1 2.2.2.1]"""
+    HEAD_LENGTH = 4
+    # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
+
+    def __init__(self, fobj: typing.BinaryIO):
+        """Constructor.
+        position: The file position of the start of the LRSH.
+
+        length: The *Logical Record Segment Length* is a two-byte, unsigned integer (Representation Code UNORM) that
+            specifies the length, in bytes, of the Logical Record Segment. The Logical Record Segment Length is required
+            to be even. The even length ensures that 2-byte checksums can be computed, when present, and permits some
+            operating systems to handle DLIS data more efficiently without degrading performance with other systems.
+            There is no limitation on a Logical Record length. Logical Record Segments must contain at least sixteen
+            (16) bytes. This requirement facilitates mapping the Logical Format to those Physical Formats that require a
+            minimum physical record length.
+
+        attributes: The *Logical Record Segment Attributes* consist of a one-byte bit string that specifies the
+            Attributes of the Logical Record Segment. Its structure is defined in Figure 2-3. Since its structure is
+            defined explicitly in Figure 2-3, no Representation Code is assigned to it.
+
+        record_type: The *Logical Record Type* is a one-byte, unsigned integer (Representation Code USHORT) that
+            specifies the Type of the Logical Record. Its value indicates the general semantic content of the Logical
+            Record. The same value must be used in all Segments of a Logical Record. Logical Record Types are specified
+            in Appendix A.
+
+            IFLRs: Numeric codes 0-127 are reserved for Public IFLRs. Codes 128-255 are reserved for Private IFLRs.
+            0 is Frame Data, 1 is unformatted data.
+
+            EFLRs: Numeric codes 0-127 are reserved for Public EFLRs. Codes 128-255 are reserved for Private EFLRs.
+            0 is FILE-HEADER, 1 is ORIGIN and so on.
+        """
+        self.position, self.length, self.attributes, self.record_type = self._read(fobj)
+
+    def _read(self, fobj: typing.BinaryIO) -> typing.Tuple[int, int, LogicalRecordSegmentHeaderAttributes, int]:
+        position = fobj.tell()
+        try:
+            length = read_two_bytes_big_endian(fobj)
+            # TODO: Raise on minimum length. Maybe make this a read/write property or descriptor
+            attributes = LogicalRecordSegmentHeaderAttributes(read_one_byte(fobj))
+            # TODO: Raise on attribute conflicts, for example:
+            # If encryption packet then encryption must be set
+            # Compare successors with previous - trailing length must be all or nothing, encryption all or nothing.
+            record_type = read_one_byte(fobj)
+        except ExceptionEOF:
+            raise ExceptionLogicalRecordSegmentHeaderEOF(f'LogicalRecordSegmentHeader EOF at 0x{position:x}')
+        return position, length, attributes, record_type
+
+    def read(self, fobj: typing.BinaryIO) -> None:
+        """Read a new Logical Record Segment Header.
+        This may throw a ExceptionVisibleRecord or ExceptionLogicalRecordSegmentHeaderEOF."""
+        self.position, self.length, self.attributes, self.record_type = self._read(fobj)
+
+    def as_bytes(self) -> bytes:
+        """The LRSH represented in raw bytes."""
+        return two_bytes_big_endian(self.length) + bytes([self.attributes.attributes, self.record_type])
+
+    # def __format__(self, format_spec) -> str:
+    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
+    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
+    #         self.position, self.length, self.attributes, self.record_type
+    #     )
+
+    # def __str__(self) -> str:
+    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
+    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
+    #         self.position, self.length, self.attributes, self.record_type
+    #     )
+
+    def __str__(self) -> str:
+        return '<LogicalRecordSegmentHeader: @ 0x{:x} len=0x{:x}' \
+               ' attr=0x{:x} type={:d}>'.format(
+            self.position, self.length, self.attributes.attributes, self.record_type
+        )
+
+    # def attribute_str(self) -> str:
+    #     """Returns a long string of the important attributes."""
+    #     ret = [
+    #         'EFLR' if self.is_eflr else 'IFLR',
+    #     ]
+    #     if self.is_first:
+    #         ret.append('first')
+    #     if self.is_last:
+    #         ret.append('last')
+    #     if self.is_encrypted:
+    #         ret.append('encrypted')
+    #     if self.has_checksum:
+    #         ret.append('checksum')
+    #     if self.has_trailing_length:
+    #         ret.append('trailing length')
+    #     if self.has_pad_bytes:
+    #         ret.append('padding')
+    #     return '-'.join(ret)
+
+    def long_str(self) -> str:
+        return f'LRSH: @ 0x{self.position:x} len=0x{self.length:x}' \
+            f' type={self.record_type:d} {self.attributes.attribute_str()}'
+
+    @property
+    def next_position(self) -> int:
+        """File position of the start of the next Logical Record Segment Header."""
+        return self.position + self.length
+
+    @property
+    def logical_data_position(self) -> int:
+        """File position of the start of the Logical Data."""
+        return self.position + self.HEAD_LENGTH
+
+    # # Attribute access
+    # @property
+    # def is_eflr(self) -> bool:
+    #     return self.attributes & 0x80 != 0
+    #
+    # @property
+    # def is_first(self) -> bool:
+    #     return self.attributes & 0x40 == 0
+    #
+    # @property
+    # def is_last(self) -> bool:
+    #     return self.attributes & 0x20 == 0
+    #
+    # @property
+    # def is_encrypted(self) -> bool:
+    #     return self.attributes & 0x10 != 0
+    #
+    # @property
+    # def has_encryption_packet(self) -> bool:
+    #     return self.attributes & 0x08 != 0
+    #
+    # @property
+    # def has_checksum(self) -> bool:
+    #     return self.attributes & 0x04 != 0
+    #
+    # @property
+    # def has_trailing_length(self) -> bool:
+    #     return self.attributes & 0x02 != 0
+    #
+    # @property
+    # def has_pad_bytes(self) -> bool:
+    #     """Note: Pad bytes will not be visible if the record is encrypted."""
+    #     return self.attributes & 0x01 != 0
+
     @property
     def must_strip_padding(self) -> bool:
-        return self.has_pad_bytes and not self.is_encrypted
+        return self.attributes.has_pad_bytes and not self.attributes.is_encrypted
 
     @property
     def logical_data_length(self):
         """Returns the length of the logical data, including padding but excluding the tail."""
         ret = self.length - self.HEAD_LENGTH
-        if self.has_checksum:
+        if self.attributes.has_checksum:
             ret -= 2
-        if self.has_trailing_length:
+        if self.attributes.has_trailing_length:
             ret -= 2
         return ret
 
@@ -371,7 +437,7 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
             )
-        if not lrsh.is_first:
+        if not lrsh.attributes.is_first:
             raise ValueError(
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
             )
@@ -466,8 +532,8 @@ class FileLogicalData:
         self.position = LogicalRecordPosition(vr, lrsh)
         # self.visible_records = [vr]
         self.lr_type: int = lrsh.record_type
-        self.lr_is_eflr: bool = lrsh.is_eflr
-        self.lr_is_encrypted: bool = lrsh.is_encrypted
+        self.lr_is_eflr: bool = lrsh.attributes.is_eflr
+        self.lr_is_encrypted: bool = lrsh.attributes.is_encrypted
         self._bytes: typing.Union[None, bytearray] = bytearray()
         self.logical_data: typing.Union[None, LogicalData] = None
         assert self._invariants()
@@ -543,7 +609,7 @@ class FileRead:
             raise ExceptionFileRead(f'FileRead can not construct SUL: {str(err)}')
         self.visible_record = VisibleRecord(self.file)
         self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
-        if not self.logical_record_segment_header.is_first:
+        if not self.logical_record_segment_header.attributes.is_first:
             raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
 
     def _set_file_and_read_first_visible_record(self) -> None:
@@ -553,7 +619,7 @@ class FileRead:
     def _set_file_and_read_first_logical_record_segment_header(self) -> None:
         self._set_file_and_read_first_visible_record()
         self.logical_record_segment_header.read(self.file)
-        assert self.logical_record_segment_header.is_first, \
+        assert self.logical_record_segment_header.attributes.is_first, \
             'Logical Record Segment Header is not first segment, this should have been caught by __init__'
 
     def iter_visible_records(self) -> typing.Sequence[VisibleRecord]:
@@ -655,13 +721,13 @@ class FileRead:
             while True:
                 file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
                 file_logical_data.add_bytes(self._read_full_logical_data())
-                while not self.logical_record_segment_header.is_last:
+                while not self.logical_record_segment_header.attributes.is_last:
                     self._seek_and_read_next_logical_record_segment_header()
                     file_logical_data.add_bytes(self._read_full_logical_data())
                 file_logical_data.seal()
                 yield file_logical_data
                 self._seek_and_read_next_logical_record_segment_header()
-                if not self.logical_record_segment_header.is_first:
+                if not self.logical_record_segment_header.attributes.is_first:
                     raise ExceptionLogicalRecordSegmentHeader(
                         'First Logical Record Segment Header is not marked as is_first.'
                     )
@@ -674,7 +740,7 @@ class FileRead:
             # print('TRACE:', visible_record)
             for lrsh in self.iter_LRSHs_for_visible_record(visible_record):
                 # print('TRACE:', lrsh)
-                if lrsh.is_first:
+                if lrsh.attributes.is_first:
                     yield LogicalRecordPosition(visible_record, lrsh)
 
     def get_file_logical_data(self, position: LogicalRecordPosition,
@@ -699,7 +765,7 @@ class FileRead:
         self.file.seek(position.lrsh_position)
         # May raise
         self.logical_record_segment_header.read(self.file)
-        if not self.logical_record_segment_header.is_first: # pragma: no cover
+        if not self.logical_record_segment_header.attributes.is_first: # pragma: no cover
             raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
         file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
         bytes_read = 0
@@ -719,7 +785,7 @@ class FileRead:
                     file_logical_data.add_bytes(by_slice)
                     bytes_read += len(by_slice)
                     logical_data_index += len(by)
-            if self.logical_record_segment_header.is_last:
+            if self.logical_record_segment_header.attributes.is_last:
                 break
             self._seek_and_read_next_logical_record_segment_header()
         file_logical_data.seal()

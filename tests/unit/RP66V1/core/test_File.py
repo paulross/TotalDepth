@@ -212,7 +212,7 @@ def test_visible_record_eq(fobj_a, fobj_b, expected):
 @pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
-        (b'\x01\x00\xff\x01', 0, 256, 255, 1,),
+        (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
     )
 )
 def test_LRSH_ctor(by, position, length, attributes, record_type):
@@ -263,8 +263,8 @@ def test_LRSH_positions(by, next_position, logical_data_position):
 def test_LRSH_is_first_last(by, is_first, is_last):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.is_first == is_first
-    assert lrsh.is_last == is_last
+    assert lrsh.attributes.is_first == is_first
+    assert lrsh.attributes.is_last == is_last
     assert fobj.read() == b''
 
 
@@ -280,8 +280,8 @@ def test_LRSH_is_first_last(by, is_first, is_last):
 def test_LRSH_logical_data_length(by, has_checksum, has_trailing_length, logical_data_length):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.has_checksum == has_checksum
-    assert lrsh.has_trailing_length == has_trailing_length
+    assert lrsh.attributes.has_checksum == has_checksum
+    assert lrsh.attributes.has_trailing_length == has_trailing_length
     assert lrsh.logical_data_length == logical_data_length
     assert fobj.read() == b''
 
@@ -298,8 +298,8 @@ def test_LRSH_logical_data_length(by, has_checksum, has_trailing_length, logical
 def test_LRSH_must_strip_padding(by, is_encrypted, has_pad_bytes, must_strip_padding):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.is_encrypted == is_encrypted
-    assert lrsh.has_pad_bytes == has_pad_bytes
+    assert lrsh.attributes.is_encrypted == is_encrypted
+    assert lrsh.attributes.has_pad_bytes == has_pad_bytes
     assert lrsh.must_strip_padding == must_strip_padding
     assert fobj.read() == b''
 
@@ -314,14 +314,14 @@ def test_LRSH_must_strip_padding(by, is_encrypted, has_pad_bytes, must_strip_pad
 def test_LRSH_has_encryption_packet(by, has_encryption_packet):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.has_encryption_packet== has_encryption_packet
+    assert lrsh.attributes.has_encryption_packet== has_encryption_packet
     assert fobj.read() == b''
 
 
 @pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
-        (b'\x01\x00\xff\x01', 0, 256, 255, 1,),
+        (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
     )
 )
 def test_LRSH_ctor_then_read(by, position, length, attributes, record_type):
@@ -357,7 +357,7 @@ def test_LRSH_ctor_as_bytes():
 def test_LRSH_attribute_str(by, expected):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.attribute_str() == expected
+    assert lrsh.attributes.attribute_str() == expected
     assert fobj.read() == b''
 
 
