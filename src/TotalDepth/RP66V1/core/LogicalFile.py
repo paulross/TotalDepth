@@ -1,3 +1,9 @@
+"""
+Represents a RP66V1 file as a 'logical' level.
+
+"""
+
+
 import bisect
 import collections
 import logging
@@ -5,8 +11,12 @@ import pickle
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core.LogicalRecord import EFLR, IFLR
-from TotalDepth.RP66V1.core import LogPass, File, RepCode, XAxis
+from TotalDepth.RP66V1.core.LogicalRecord import EFLR
+from TotalDepth.RP66V1.core.LogicalRecord import IFLR
+from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core import RepCode
+from TotalDepth.RP66V1.core import LogPass
+from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core.LogicalRecord.Duplicates import DuplicateObjectStrategy
 from TotalDepth.common import Slice
 
@@ -238,10 +248,12 @@ class VisibleRecordPositions(collections.UserList):
 
 
 class LogicalIndex:
+    """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
     def __init__(self, rp66_file: typing.Union[File.FileRead, None], ident: str):
         self.id = ident
         self.logical_files: typing.List[LogicalFile] = []
         self.storage_unit_label = None
+        # TODO: Defer this to the Index.VisibleLogicalSegmentIndex
         self.visible_record_positions: VisibleRecordPositions = VisibleRecordPositions()
         if rp66_file is not None:
             self.storage_unit_label = rp66_file.sul

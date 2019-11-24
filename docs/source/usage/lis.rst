@@ -1,4 +1,11 @@
-======================
+.. moduleauthor:: Paul Ross <apaulross@gmail.com>
+.. sectionauthor:: Paul Ross <apaulross@gmail.com>
+
+.. Processing LIS files with Python
+
+.. _total_depth.processing_lis_files:
+
+
 Processing LIS Files
 ======================
 

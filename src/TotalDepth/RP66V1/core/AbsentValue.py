@@ -10,7 +10,9 @@ import numpy as np
 
 from TotalDepth.RP66V1.core import RepCode
 
+#: Absent value as a float.
 ABSENT_VALUE_FLOAT: float = -999.25
+#: Absent value as an integer.
 ABSENT_VALUE_INT: int = -999
 
 

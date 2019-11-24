@@ -4,7 +4,7 @@
 .. Working with LAS archives
 
 
-Working with Archives of LAS Data
+Working with LAS Data
 ==================================
 
 TODO

@@ -1,12 +1,16 @@
+"""
+Handles low level RP66V1 operations.
+
+TODO: Replace this with the C/C++ implementation.
+"""
+
 import copy
 import hashlib
-import io
 import logging
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-# from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core.StorageUnitLabel import StorageUnitLabel, ExceptionStorageUnitLabel
+from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.util.bin_file_type import format_bytes
 
 
@@ -337,8 +341,10 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
     Record."""
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         # Check VisibleRecord
-        if vr.position < StorageUnitLabel.SIZE:
-            raise ValueError(f'VisibleRecord at 0x{lrsh.position:x} must be >= 0x{StorageUnitLabel.SIZE:x}')
+        if vr.position < StorageUnitLabel.StorageUnitLabel.SIZE:
+            raise ValueError(
+                f'VisibleRecord at 0x{lrsh.position:x} must be >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE:x}'
+            )
         assert vr.length >= LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
             f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x}'
             f' must be >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
@@ -347,9 +353,9 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
             )
         # Check LogicalRecordSegmentHeader
-        assert lrsh.position >= StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES, (
+        assert lrsh.position >= StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
-                f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:x}'
+                f' >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:x}'
             )
         assert lrsh.position <= vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
@@ -532,8 +538,8 @@ class FileRead:
             self.name = None
         # Read the Storage Unit Label, see [RP66V1] 2.3.2
         try:
-            self.sul = StorageUnitLabel(self.file.read(StorageUnitLabel.SIZE))
-        except ExceptionStorageUnitLabel as err:
+            self.sul = StorageUnitLabel.StorageUnitLabel(self.file.read(StorageUnitLabel.StorageUnitLabel.SIZE))
+        except StorageUnitLabel.ExceptionStorageUnitLabel as err:
             raise ExceptionFileRead(f'FileRead can not construct SUL: {str(err)}')
         self.visible_record = VisibleRecord(self.file)
         self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)

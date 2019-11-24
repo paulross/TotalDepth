@@ -7,6 +7,8 @@ In the taxonomy of indexes this is a 'mid level' index as it indexes:
 
 * Below: Internally it discovers and records Visible Records and Logical Record Segment Headers (where ``is_first()`` is ``True`` ).
 * Above: Externally it provides an API to a sequence of Logical Records and the data that makes up those Logical Records.
+
+TODO: Replace this with the C/C++ implementation.
 """
 import io
 import typing

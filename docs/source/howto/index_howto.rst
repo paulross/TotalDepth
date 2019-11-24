@@ -12,8 +12,8 @@ This describes how TotalDepth can help you with various tasks when dealing with 
 .. toctree::
     :maxdepth: 3
     
-    lis_archive
     las_archive
+    lis_archive
     rp66v1_archive
     archive
     to_las

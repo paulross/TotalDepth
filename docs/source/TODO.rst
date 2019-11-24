@@ -47,7 +47,7 @@ TotalDepth Improvements (General)
     * - TD.test.slow
       - Move slow LIS test to tests/integration/ or mark as @slow.
       - 1
-      - 
+      - DONE: v0.3.0
     * - TD.test.benchmark
       - Move benchmarking tests to benchmark/.
       - 1
@@ -66,7 +66,7 @@ LAS Improvements
       - Priority
       - Status
     * - LAS.fast
-      - Merge the fast array parser with ~x50 performance.
+      - Merge the fast array parser with ~50x performance.
       - 2
       - 
     * - LAS.zip
@@ -108,7 +108,7 @@ LIS Improvements
       - 2
       - 
     * - LIS.index_c
-      - Merge fast indexer in C for x100 performance.
+      - Merge fast indexer in C for 100x performance.
       - 2
       - 
     * - LIS.index_inline
@@ -194,7 +194,7 @@ Plotting Improvements
       - 1
       - 
     * - Plot.cXML
-      - Integrate the existing XML writer written in C for x4 speedup.
+      - Integrate the existing XML writer written in C for 4x speedup.
       - 1
       - 
     * - Plot.hover

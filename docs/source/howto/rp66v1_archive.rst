@@ -4,7 +4,7 @@
 .. Working with RP66V1 archives
 
 
-Working with Archives of RP66V1 Data
+Working with RP66V1 Data
 =======================================
 
 TODO

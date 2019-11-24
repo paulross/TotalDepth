@@ -17,6 +17,7 @@ Contents:
     LIS_indexing
     performance
     plotting
+    data_quality
     saas
     process_monitoring
     gnuplot

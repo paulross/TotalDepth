@@ -38,3 +38,11 @@ Other           Various     Various     Various files such as PDF, TIFF, miscell
 =============== =========== =========== =====================================================================================
 
 The layout of the test set is typical of an oilfield repository, typically by well, with a well having an unspecified directory structure and a mix of file types in each directory.
+
+The aim is that TotalDepth can process 97% of the files in this archive in the formats that TotalDepth supports.
+
+Synthetic Test Set
+----------------------------
+
+TotalDepth can generate arbitrary sized files in a number of formats and this test set is used for performance analysis.
+This test set is not distributed with TotalDepth but the means to create it is.

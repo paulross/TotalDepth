@@ -54,14 +54,14 @@ The JSON data looks like this example (but on one line):
 Command Line Tools
 --------------------
 
-Command line tools can add ``process`` capability with:
+Command line tools can add ``process`` capability with an argument parser created by :py:mod:`TotalDepth.common.cmn_cmd_opts` ``arg_parser()``:
 
 .. code-block:: python
 
     process.add_process_logger_to_argument_parser(parser)
 
-This makes the ``--log-process`` option available which takes a numeric value for the logging interval.
-The pattern is then:
+This makes the ``--log-process`` option available which takes a numeric value as a float in seconds (default zero which means no process logging) for the logging interval.
+Your code pattern is then:
 
 .. code-block:: python
 

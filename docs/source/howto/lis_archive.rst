@@ -4,7 +4,7 @@
 .. Working with LIS archives
 
 
-Working with Archives of LIS Data
+Working with LIS Data
 ==================================
 
 TODO
