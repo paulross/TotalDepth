@@ -31,10 +31,11 @@ __rights__  = 'Copyright (c) 2012 Paul Ross.'
 
 import collections
 
-class TestResult(collections.namedtuple('TestResult', 'testsRun errors failures')):
+
+class ResultOfTests(collections.namedtuple('ResultOfTests', 'testsRun errors failures')):
     #__slots__ = ()
     def __iadd__(self, other):
-        """+= implementation. other is None or TestResult(testsRun, errors, failures)."""
+        """+= implementation. other is None or ResultOfTests(testsRun, errors, failures)."""
         if other is not None:
             self = self._replace(
                 testsRun = self.testsRun + other.testsRun,

@@ -57,7 +57,7 @@ def test_tif_too_short_error():
     fobj = io.BytesIO(b'')
     with pytest.raises(DeTif.DeTifExceptionRead) as err:
         DeTif.tif_scan_file_object(fobj)
-    assert err.value.args[0] == 'Could not read TIF marker: unpack requires a buffer of 12 bytes'
+    assert err.value.args[0].startswith('Could not read TIF marker: ')
 
 
 def test_is_tif_start_error():
