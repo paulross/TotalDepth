@@ -308,7 +308,7 @@ class PresCfgXMLRead(PRESCfg.PresCfg, XMLCfg.LgXMLBase):
         except KeyError:
             raise ExceptionPresCfgXMLRead(
                 'PresCfgXMLRead.__init__():'
-                ' No root element for UniqueId="{:s}"'.format(theUniqueId))            
+                ' No root element for UniqueId="{}"'.format(theUniqueId))
         if root.tag != self.tagInNs('LgFormat'):
             raise ExceptionPresCfgXMLRead(
                 'PresCfgXMLRead.__init__():'

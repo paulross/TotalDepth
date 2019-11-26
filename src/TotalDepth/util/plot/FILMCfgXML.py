@@ -314,6 +314,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
 
     def rootNode(self, theUID):
         """Returns the XML root node corresponding to the Unique ID."""
+        # print('TRACE: self._xmlRoot.keys()', self._xmlRoot.keys())
         return self._xmlRoot[theUID]
 
     def retAllFILMDestS(self, curveDestID):

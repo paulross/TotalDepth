@@ -316,7 +316,7 @@ class PlotLogPasses(object):
         """
         self._fpIn = fpIn
         self._fpOut = fpOut
-        self._recursive = opts.recursive
+        self._recursive = opts.recurse
         self._keepGoing = opts.keepGoing
         if opts.LgFormat is None:
             self._lgFormatS = []
@@ -682,7 +682,7 @@ def plotLogPassesMP(dIn, dOut, opts):
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [
         (t.filePathIn, t.filePathOut, opts) \
-            for t in DirWalk.dirWalk(dIn, dOut, opts.glob, opts.recursive, bigFirst=True)
+            for t in DirWalk.dirWalk(dIn, dOut, opts.glob, opts.recurse, bigFirst=True)
     ]
     retResult = PlotLogInfo()
     myResults = [
@@ -702,61 +702,64 @@ def main():
     print ('Cmd: %s' % ' '.join(sys.argv))
     # TODO: Option to treat files with -f, --format as LAS, LIS, AUTO
     # TODO: Depth scale overrides -s, --scale ?
-    optParser = cmn_cmd_opts.path_in_out(
+    parser = cmn_cmd_opts.path_in_out(
         'Generates SVG plot(s) from input LIS & LAS file/directory to an output file/directory.',
         prog=None,
         version=__version__,
     )
-    optParser.add_argument("-A", "--API", action="store_true", dest="apiHeader", default=False, 
+    cmn_cmd_opts.add_log_level(parser)
+    cmn_cmd_opts.add_multiprocessing(parser)
+    parser.add_argument("-A", "--API", action="store_true", dest="apiHeader", default=False,
                       help="Put an API header on each plot. [default: False]")
-    optParser.add_argument("-x", "--xml", action="append", dest="LgFormat", default=[],
+    parser.add_argument("-x", "--xml", action="append", dest="LgFormat", default=[],
                       help="Use XML LgFormat UniqueId to use for plotting (additive)." \
                       +" Use -x? to see what LgFormats (UniqueID+Description) are available." \
                       +" Use -x?? to see what curves each format can plot. See also -X. [default: []]")
-    optParser.add_argument(
+    parser.add_argument(
             "-X", "--XML", type=int, dest="LgFormat_min", default=0,
             help="Use any LgFormat XML plots that use n or more outputs. If -x option present limited by those LgFormats [default: 0]" 
         )
-#    optParser.add_argument("-f", "--file-type", choices=['LAS', 'LIS', 'AUTO'],
-#            help="File format to assume for the input, AUTO will do it's best. [default: \"AUTO\"].")
-    optParser.add_argument("-s", "--scale", action="append", type=int, dest="scale", default=0,
+    parser.add_argument("-g", "--glob", action="store_true", dest="glob", default=None,
+                      help="File match pattern. Default: %(default)s.")
+    # parser.add_argument("-f", "--file-type", choices=['LAS', 'LIS', 'AUTO'],
+    #        help="File format to assume for the input, AUTO will do it's best. [default: \"AUTO\"].")
+    parser.add_argument("-s", "--scale", action="append", type=int, dest="scale", default=0,
             help="Scale of X axis to use (an integer). [default: 0].")
-    myOptNs = optParser.parse_args()
-    clkStart = time.clock()
-    timStart = time.time()
+    args = parser.parse_args()
     # Initialise logging etc.
-    logging.basicConfig(level=myOptNs.logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+    cmn_cmd_opts.set_log_level(args)
+    # print('args', args)
+    # return 0
+    start_clock = time.clock()
+    start_time = time.time()
     # Your code here
-    if '?' in ''.join(myOptNs.LgFormat):
+    if '?' in ''.join(args.LgFormat):
         # Handle -x? here and exit
         myFg = FILMCfgXML.FilmCfgXMLRead()
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
-        print(myFg.longStr(''.join(myOptNs.LgFormat).count('?')))
+        print(myFg.longStr(''.join(args.LgFormat).count('?')))
         return 1
-    if myOptNs.jobs == cmn_cmd_opts.DEFAULT_OPT_MP_JOBS:
+    if cmn_cmd_opts.multiprocessing_requested(args):
         myPlp = PlotLogPasses(
-            myOptNs.pathIn,
-            myOptNs.pathOut,
-            myOptNs,
+            args.path_in,
+            args.path_out,
+            args,
         )
         myResult = myPlp.plotLogInfo
     else:
         myResult = plotLogPassesMP(
-            myOptNs.pathIn,
-            myOptNs.pathOut,
-            myOptNs,
+            args.path_in,
+            args.path_out,
+            args,
         )
-    if os.path.isdir(myOptNs.pathOut):
-        myResult.writeHTML(os.path.join(myOptNs.pathOut, 'index.html'), myOptNs.pathIn)
+    if os.path.isdir(args.path_out):
+        myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in)
     print('plotLogInfo', str(myResult))
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
-    print('Exec. time = %8.3f (S)' % (time.time() - timStart))
+    print('  CPU time = %8.3f (S)' % (time.clock() - start_clock))
+    print('Exec. time = %8.3f (S)' % (time.time() - start_time))
     print('Bye, bye!')
     return 0
 
+
 if __name__ == '__main__':
-    multiprocessing.freeze_support()
     sys.exit(main())

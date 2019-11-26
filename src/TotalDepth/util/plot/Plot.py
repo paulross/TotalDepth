@@ -742,7 +742,7 @@ class Plot(object):
         }
         myViewPort = Coord.Box(width=myPlRo.widthDim, depth=myPlRo.depthDim)
         self._incTimers(timerS, 0, None)
-        with SVGWriter.SVGWriter(self._openOutFile(theFpOut), myViewPort, rootAttrs=myRootAttrs) as xS:
+        with SVGWriter.SVGWriter(theFpOut, myViewPort, rootAttrs=myRootAttrs) as xS:
             # Optionally plot API header
             if myLogHeader is not None:
                 assert(lrCONS is not None)

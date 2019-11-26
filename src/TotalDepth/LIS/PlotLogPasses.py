@@ -301,6 +301,8 @@ class PlotLogPasses(object):
             self._lgFormatS = []
         else:
             self._lgFormatS = lgFormatS
+
+        # FIXME: Use lgFormats
         self._apiHeader = apiHeader
         self.plotLogInfo = PlotLogInfo()
         self._processPath()
@@ -403,7 +405,9 @@ class PlotLogPasses(object):
                     theCurveS=myCurvIDs,
                     ptsPlotted=numPoints)
             else:
-                logging.info('PlotLogPasses._plotUsingLISLogicalRecords(): No data to plot for FILM ID {:s}'.format(aFilmId))
+                logging.info(
+                    'PlotLogPasses._plotUsingLISLogicalRecords(): No data to plot for FILM ID {}'.format(aFilmId)
+                )
     #=============================================================
     # End: Plotting using LIS Logical Records to specify the plot.
     #=============================================================
@@ -434,8 +438,8 @@ class PlotLogPasses(object):
             # Create a PRES like object from the UniqueId
             myRoot = myFilm.rootNode(aUniqueId)
             if myRoot is not None:
-                myPres = PRESCfgXML.PresCfgXMLRead(myRoot, myFilm)
-                myPlot = Plot.PlotReadXML(myFilm, myPres)
+                myPres = PRESCfgXML.PresCfgXMLRead(myFilm, aUniqueId)
+                myPlot = Plot.PlotReadXML(aUniqueId)
                 if myPlot.hasDataToPlotLIS(myLogPass, aUniqueId):
                     # Create output path and plot it
                     myOutFilePath = '{:s}_{:04d}_{:s}.svg'.format(theFpOut, theLpIdx, aUniqueId)
