@@ -19,15 +19,46 @@
 # Paul Ross: apaulross@gmail.com
 """TotalDepth - a suite of Petrophysical software."""
 
-__all__ = ['LAS', 'LIS', 'RP66', 'util',]
+__all__ = ['LAS', 'LIS', 'RP66V1', 'util',]
 
-__version__ = '0.2.2rc0'
+__version__ = '0.3.0rc0'
 
-VERSION = (0, 2, 2, 'rc0')
+VERSION = (0, 3, 0, 'rc0')
 
 RELEASE_NOTES = [
     """
 """,
+]
+
+entry_points_console_scripts_dict = {
+    # All TotalDepth scripts have a 'td' prefix.
+    # Experimental scripts have a 'tdX' prefix.
+    # General
+    'tdarchive': 'TotalDepth.util.archive:main',
+    'tdplotlogs': 'TotalDepth.PlotLogs:main',
+    'tddetif': 'TotalDepth.DeTif:main',
+    # LIS
+    'tdlisdumpframeset': 'TotalDepth.LIS.DumpFrameSet:main',
+    'tdlisindex': 'TotalDepth.LIS.Index:main',
+    'tdlistohtml': 'TotalDepth.LIS.LisToHtml:main',
+    'tdlisplotlogpasses': 'TotalDepth.LIS.PlotLogPasses:main',
+    # 'tdXlisrandomframesetread': 'TotalDepth.LIS.RandomFrameSetRead:main',
+    'tdlisscanlogidata': 'TotalDepth.LIS.ScanLogiData:main',
+    'tdlisscanlogirecord': 'TotalDepth.LIS.ScanLogiRec:main',
+    'tdlisscanphysrec': 'TotalDepth.LIS.ScanPhysRec:main',
+    'tdlistablehistogram': 'TotalDepth.LIS.TableHistogram:main',
+    # LAS
+    'tdlasreadlasfiles': 'TotalDepth.LAS.ReadLASFiles:main',
+    # RP66V1
+    'tdrp66v1scan': 'TotalDepth.RP66V1.Scan:main',
+    'tdrp66v1tolas': 'TotalDepth.RP66V1.ToLAS:main',
+    'tdrp66v1scanhtml': 'TotalDepth.RP66V1.ScanHTML:main',
+    'tdrp66v1indexpickle': 'TotalDepth.RP66V1.IndexPickle:main',
+    'tdrp66v1indexxml': 'TotalDepth.RP66V1.IndexXML:main',
+}
+
+ENTRY_POINTS_CONSOLE_SCRIPTS = [
+    f'{k}={v}' for k, v in entry_points_console_scripts_dict.items()
 ]
 
 class ExceptionTotalDepth(Exception):

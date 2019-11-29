@@ -109,12 +109,12 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
             if lrsh_dump:
                 for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
                     count_lrsh_length.update([lrsh.length])
-                    if lrsh.is_first:
+                    if lrsh.attributes.is_first:
                         rle_lrsh_positions.add(lrsh.position)
                         count_lrsh_first += 1
                         count_lrsh_type.update([lrsh.record_type])
                         output = colorama.Fore.GREEN + f' {lrsh}'
-                    elif lrsh.is_last:
+                    elif lrsh.attributes.is_last:
                         output = colorama.Fore.RED + f'  --{lrsh}'
                     else:
                         output = colorama.Fore.YELLOW + f'  ..{lrsh}'
@@ -402,44 +402,43 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
     """
     Scans all of every EFLR and IFLR in the file using a ScanFile object.
     """
-    rp66v1_file = File.FileRead(fobj)
-    logical_file_sequence = LogicalFile.LogicalIndex(rp66v1_file, rp66v1_path)
-    with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
-        fout.write(str(logical_file_sequence.storage_unit_label))
-        fout.write('\n')
-        logical_file: LogicalFile.LogicalFile
-        for lf, logical_file in enumerate(logical_file_sequence.logical_files):
-            with _output_section_header_trailer(f'Logical File [{lf}/{len(logical_file_sequence.logical_files)}]', '=', os=fout):
-                fout.write(str(logical_file))
-                fout.write('\n')
-                eflr_position: LogicalFile.PositionEFLR
-                for e, eflr_position in enumerate(logical_file.eflrs):
-                    header = f'EFLR [{e}/{len(logical_file.eflrs)}] at {str(eflr_position.lrsh_position)}'
-                    with _output_section_header_trailer(header, '-', os=fout):
-                        # fout.write(str(eflr_position.eflr))
-                        # fout.write('\n')
-                        if eflr_as_table:
-                            if eflr_position.eflr.is_key_value():
-                                eflr_str_table = eflr_position.eflr.key_values(
-                                    stringify_function=stringify.stringify_object_by_type,
-                                    sort=True
-                                )
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        with _output_section_header_trailer('RP66V1 File Data Summary', '*', os=fout):
+            fout.write(str(logical_index.storage_unit_label))
+            fout.write('\n')
+            logical_file: LogicalFile.LogicalFile
+            for lf, logical_file in enumerate(logical_index.logical_files):
+                with _output_section_header_trailer(f'Logical File [{lf}/{len(logical_index.logical_files)}]', '=', os=fout):
+                    fout.write(str(logical_file))
+                    fout.write('\n')
+                    eflr_position: LogicalFile.PositionEFLR
+                    for e, eflr_position in enumerate(logical_file.eflrs):
+                        header = f'EFLR [{e}/{len(logical_file.eflrs)}] at {str(eflr_position.lrsh_position)}'
+                        with _output_section_header_trailer(header, '-', os=fout):
+                            # fout.write(str(eflr_position.eflr))
+                            # fout.write('\n')
+                            if eflr_as_table:
+                                if eflr_position.eflr.is_key_value():
+                                    eflr_str_table = eflr_position.eflr.key_values(
+                                        stringify_function=stringify.stringify_object_by_type,
+                                        sort=True
+                                    )
+                                else:
+                                    eflr_str_table = eflr_position.eflr.table_as_strings(
+                                        stringify_function=stringify.stringify_object_by_type,
+                                        sort=True
+                                    )
+                                fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
+                                fout.write('\n')
                             else:
-                                eflr_str_table = eflr_position.eflr.table_as_strings(
-                                    stringify_function=stringify.stringify_object_by_type,
-                                    sort=True
-                                )
-                            fout.write('\n'.join(data_table.format_table(eflr_str_table, heading_underline='-')))
+                                fout.write(eflr_position.eflr.str_long())
                             fout.write('\n')
-                        else:
-                            fout.write(eflr_position.eflr.str_long())
-                        fout.write('\n')
-                # Now the LogPass(s)
-                if logical_file.has_log_pass:
-                    with _output_section_header_trailer('Log Pass', '-', os=fout):
-                        _scan_log_pass_content(rp66v1_file, logical_file, fout, frame_slice=frame_slice)
-                else:
-                    fout.write('NO Log Pass for this Logical Record\n')
+                    # Now the LogPass(s)
+                    if logical_file.has_log_pass:
+                        with _output_section_header_trailer('Log Pass', '-', os=fout):
+                            _scan_log_pass_content(rp66v1_file, logical_file, fout, frame_slice=frame_slice)
+                    else:
+                        fout.write('NO Log Pass for this Logical Record\n')
 
 
 def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:

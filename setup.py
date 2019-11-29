@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """The setup script."""
-
+import TotalDepth
 import os
 import sysconfig
 
@@ -123,32 +123,7 @@ setup(
         (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
     ],
     entry_points={
-        # All TotalDepth scripts have a 'td' prefix.
-        # Experimental scripts have a 'tdX' prefix.
-        'console_scripts': [
-            # General
-            'tdarchive=TotalDepth.util.archive:main',
-            'tdplotlogs=TotalDepth.PlotLogs:main',
-            'tddetif=TotalDepth.DeTif:main',
-            # LIS
-            'tdlisdumpframeset=TotalDepth.LIS.DumpFrameSet:main',
-            'tdlisindex=TotalDepth.LIS.Index:main',
-            'tdlistohtml=TotalDepth.LIS.LisToHtml:main',
-            'tdlisplotlogpasses=TotalDepth.LIS.PlotLogPasses:main',
-            # 'tdXlisrandomframesetread=TotalDepth.LIS.RandomFrameSetRead:main',
-            'tdlisscanlogidata=TotalDepth.LIS.ScanLogiData:main',
-            'tdlisscanlogirecord=TotalDepth.LIS.ScanLogiRec:main',
-            'tdlisscanphysrec=TotalDepth.LIS.ScanPhysRec:main',
-            'tdlistablehistogram=TotalDepth.LIS.TableHistogram:main',
-            # LAS
-            'tdlasreadlasfiles=TotalDepth.LAS.ReadLASFiles:main',
-            # RP66V1
-            'tdrp66v1scan=TotalDepth.RP66V1.Scan:main',
-            'tdrp66v1tolas=TotalDepth.RP66V1.ToLAS:main',
-            'tdrp66v1scanhtml=TotalDepth.RP66V1.ScanHTML:main',
-            'tdrp66v1indexpickle=TotalDepth.RP66V1.IndexPickle:main',
-            'tdrp66v1indexxml=TotalDepth.RP66V1.IndexXML:main',
-        ]
+        'console_scripts': TotalDepth.ENTRY_POINTS_CONSOLE_SCRIPTS,
     },
     include_package_data=True,
     license="GPLv2",

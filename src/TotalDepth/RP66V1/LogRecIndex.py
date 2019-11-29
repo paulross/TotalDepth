@@ -1,4 +1,6 @@
-"""Read RP66V1 files and saves the index a s pickle file."""
+"""
+Exercises the LogicalRecordIndex on real files.
+"""
 import logging
 import multiprocessing
 import os
@@ -8,21 +10,15 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import File
-from TotalDepth.RP66V1.core import LogicalFile
-from TotalDepth.common import cmn_cmd_opts
-from TotalDepth.common import data_table
-from TotalDepth.common import process
-from TotalDepth.util import gnuplot, DirWalk
-from TotalDepth.util.DirWalk import dirWalk
-from TotalDepth.util.bin_file_type import binary_file_type_from_path
-
+from TotalDepth.RP66V1.core import Index
+from TotalDepth.common import cmn_cmd_opts, process
+from TotalDepth.util import bin_file_type, DirWalk
+from TotalDepth.util import gnuplot
 
 __author__  = 'Paul Ross'
-__date__    = '2019-06-29'
+__date__    = '2019-11-30'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
 
 logger = logging.getLogger(__file__)
 
@@ -31,8 +27,9 @@ class IndexResult(typing.NamedTuple):
     path_in: str
     size_input: int
     size_index: int
+    index_time: float
     time_write: float
-    time_read: float
+    time_read_back: float
     exception: bool
     ignored: bool
 
@@ -51,9 +48,6 @@ def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
             dir_in, dir_out, theFnMatch='', recursive=recurse, bigFirst=True
         )
     ]
-    # print('tasks:')
-    # pprint.pprint(tasks, width=200)
-    # return {}
     results = [
         r.get() for r in [
             pool.apply_async(index_a_single_file, t) for t in tasks
@@ -63,57 +57,70 @@ def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
 
 
 def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexResult:
-    bin_file_type = binary_file_type_from_path(path_in)
-    if bin_file_type == 'RP66V1':
+    file_type = bin_file_type.binary_file_type_from_path(path_in)
+    if file_type == 'RP66V1':
         if path_out:
             out_dir = os.path.dirname(path_out)
             if not os.path.exists(out_dir):
                 logger.info(f'Making directory: {out_dir}')
                 os.makedirs(out_dir, exist_ok=True)
-        logger.info(f'Indexing {path_in} to pickle {path_out}')
+        logger.info(f'Indexing {path_in}')
         try:
             t_start = time.perf_counter()
-            with LogicalFile.LogicalIndex(path_in) as logical_index:
-                pickled_index = pickle.dumps(logical_index)
-                # logger.info(f'Length of pickled index: {len(pickled_index)}')
-                pickle_path = path_out + '.pkl'
-                with open(pickle_path, 'wb') as out_stream:
-                    out_stream.write(pickled_index)
-                write_time = time.perf_counter() - t_start
-                if read_back:
-                    t_start = time.perf_counter()
-                    _read_index = LogicalFile.unpickle(pickle_path)
-                    read_time = time.perf_counter() - t_start
+            # Index the file
+            with Index.LogicalRecordIndex(path_in) as logical_record_index:
+                index_time = time.perf_counter() - t_start
+                logger.info(
+                    f'Index length {len(logical_record_index)}'
+                    # f' sizeof {sys.getsizeof(logical_record_index.lr_pos_desc)}'
+                    # f' {sys.getsizeof(logical_record_index.lr_pos_desc) / len(logical_record_index):.1f} byte/LR'
+                )
+                t_start = time.perf_counter()
+                # Pickle the index
+                pickled_index = pickle.dumps(logical_record_index)
+                len_pickled_index = len(pickled_index)
+                if path_out:
+                    # If required, write the pickled index
+                    pickle_path = path_out + '.pkl'
+                    with open(pickle_path, 'wb') as out_stream:
+                        out_stream.write(pickled_index)
+                    write_time = time.perf_counter() - t_start
+                    if read_back:
+                        t_start = time.perf_counter()
+                        _read_index = Index.unpickle(pickle_path)
+                        read_back_time = time.perf_counter() - t_start
+                    else:
+                        read_back_time = 0.0
                 else:
-                    read_time = 0.0
-                result = IndexResult(path_in, os.path.getsize(path_in), len(pickled_index), write_time, read_time, False, False)
+                    write_time = read_back_time = 0.0
+                result = IndexResult(path_in, os.path.getsize(path_in), len_pickled_index,
+                                     index_time, write_time, read_back_time, False, False)
                 return result
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, True, False)
-    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, False, True)
+        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, True, False)
+    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, False, True)
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     if os.path.isdir(path_in):
-        for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
-            bin_file_type = binary_file_type_from_path(file_in_out.filePathIn)
-            if bin_file_type == 'RP66V1':
+        for file_in_out in DirWalk.dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
+            file_type = bin_file_type.binary_file_type_from_path(file_in_out.filePathIn)
+            if file_type == 'RP66V1':
                 ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
     else:
-        bin_file_type = binary_file_type_from_path(path_in)
+        file_type = bin_file_type.binary_file_type_from_path(path_in)
         if bin_file_type == 'RP66V1':
             ret[path_in] = index_a_single_file(path_in, path_out, read_back)
     return ret
 
-
 GNUPLOT_PLT = """set logscale x
 set grid
-set title "TotalDepth.RP66V1.IndexPickle.main."
+set title "TotalDepth.RP66V1.LogRecIndex.main."
 set xlabel "RP66V1 File Size (bytes)"
 # set mxtics 5
 # set xrange [0:3000]
@@ -154,9 +161,6 @@ fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
 compression_ratio(x) = 10**(e + f * log10(x))
 fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
 
-set terminal svg size 1000,700 # choose the file format
-set output "{name}.svg" # choose the output device
-
 # set key off
 
 #set key title "Window Length"
@@ -166,11 +170,22 @@ set output "{name}.svg" # choose the output device
 
 #plot "{name}.dat" using 1:3 axes x1y1 title "Scan Time (s)" lt 1 w points
 
+
+set terminal svg size 1000,700 # choose the file format
+
+set output "{name}_rate.svg" # choose the output device
+
 plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
     rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
-    "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
     "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
+
+set output "{name}_times.svg" # choose the output device
+unset y2label
+
+plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s), left axis" lt 1 w points, \\
+    "{name}.dat" using 1:4 axes x1y1 title "Write Time (s), left axis" lt 2 w points, \\
+    "{name}.dat" using 1:5 axes x1y1 title "Read Time (s), left axis" lt 3 w points
 
 # Plot size ratio:
 #    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, #     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
@@ -199,31 +214,33 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
-def main() -> int:  # pragma: no cover
+def main() -> int:
     description = """usage: %(prog)s [options] file
-Scans a RP66V1 file or directory and saves the index as a pickled file."""
+    Scans a RP66V1 file or directory and indexes the files with a LogicalRecordIndex."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out(
-        description, prog='TotalDepth.RP66V1.IndexPickle.main', version=__version__, epilog=__rights__
+        description, prog='TotalDepth.RP66V1.IndexXML.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
     cmn_cmd_opts.add_multiprocessing(parser)
-    parser.add_argument('--read-back', action='store_true', help='Read and time the output. [default: %(default)s]')
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
+    parser.add_argument(
+        '--read-back', action='store_true',
+        help='Read the pickled index and time it (requires path_out). [default: %(default)s]',
+    )
     args = parser.parse_args()
     # print('args:', args)
     # return 0
     cmn_cmd_opts.set_log_level(args)
     # Your code here
     clk_start = time.perf_counter()
-    if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
+    if os.path.isdir(args.path_in) and cmn_cmd_opts.multiprocessing_requested(args):
         result: typing.Dict[str, IndexResult] = index_dir_multiprocessing(
             args.path_in,
             args.path_out,
-            args.jobs,
-            args.recurse,
             args.read_back,
+            args.jobs,
         )
     else:
         if args.log_process > 0.0:
@@ -244,41 +261,45 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
     clk_exec = time.perf_counter() - clk_start
     size_index = size_input = 0
     files_processed = 0
+    if os.path.isdir(args.path_in):
+        len_path = len(args.path_in)
+        if not args.path_in.endswith(os.sep):
+            len_path += 1
+    else:
+        len_path = 0
     try:
-        path_prefix = os.path.commonpath(result.keys())
-        len_path_prefix = len(path_prefix)
-        table: typing.List[typing.List[str]] = [
-            [
-                'Size (b)', 'Index (b)', 'Ratio (%)', 'Index (s)', 'Index (ms/Mb)',
-                'Read (s)', 'Read (ms/Mb)', 'Except',
-                'Path',
-            ]
-        ]
+        header = (
+            f'{"Size In":>16}',
+            f'{"Size Out":>16}',
+            f'{"Time (ms)":>10}',
+            f'{"Ratio %":>8}',
+            f'{"ms/Mb":>8}',
+            f'{"Fail?":5}',
+            f'{"Write (ms)":>10}',
+            f'{"Read (ms)":>10}',
+            f'Path',
+        )
+        print(' '.join(header))
+        print(' '.join('-' * len(v) for v in header))
         for path in sorted(result.keys()):
             idx_result = result[path]
-            if not idx_result.ignored and idx_result.size_input > 0:
-                ms_mb_write = idx_result.time_write * 1000 / (idx_result.size_input / 1024 ** 2)
-                ms_mb_read = idx_result.time_read * 1000 / (idx_result.size_input / 1024 ** 2)
+            if idx_result.size_input > 0:
+                ms_mb = idx_result.index_time * 1000 / (idx_result.size_input / 1024 ** 2)
                 ratio = idx_result.size_index / idx_result.size_input
-                table.append(
-                    [
-                        f'{idx_result.size_input:,d}', f'{idx_result.size_index:,d}', f'{ratio:.3%}',
-                        f'{idx_result.time_write:.3f}', f'{ms_mb_write:.1f}',
-                        f'{idx_result.time_read:.3f}', f'{ms_mb_read:.2f}',
-                        f'{str(idx_result.exception):5}',
-                        f'{path[len_path_prefix+1:]}',
-                    ]
+                print(
+                    f'{idx_result.size_input:16,d} {idx_result.size_index:16,d}'
+                    f' {1000*idx_result.index_time:10.1f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
+                    f' {1000*idx_result.time_write:10.1f} {1000*idx_result.time_read_back:10.1f}'
+                    f' "{path[len_path:]}"'
                 )
                 size_input += result[path].size_input
                 size_index += result[path].size_index
                 files_processed += 1
-        print(f'Common path prefix: {path_prefix}')
-        print('\n'.join(data_table.format_table(table, pad=' | ', heading_underline='-')))
         if args.gnuplot:
             try:
                 plot_gnuplot(result, args.gnuplot)
-            except IOError:
-                logger.exception('Plotting with gnuplot failed.')
+            except Exception:
+                logger.exception('gunplot failed')
     except Exception as err:
         logger.exception(str(err))
     print('Execution time = %8.3f (S)' % clk_exec)
@@ -296,3 +317,4 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
 
 if __name__ == '__main__':
     sys.exit(main())
+

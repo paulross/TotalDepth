@@ -349,8 +349,6 @@ def write_curve_section_to_las(
 
 
 def write_array_section_to_las(
-        rp66v1_file: File.FileRead,
-        logical_file_sequence: LogicalFile.LogicalIndex,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
         array_reduction: str,
@@ -443,7 +441,6 @@ def write_array_section_to_las(
 
 
 def write_logical_sequence_to_las(
-        rp66v1_file: File.FileRead,
         logical_index: LogicalFile.LogicalIndex,
         array_reduction: str,
         path_out: str,
@@ -469,7 +466,7 @@ def write_logical_sequence_to_las(
                     write_curve_section_to_las(frame_array, channels, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
                     write_array_section_to_las(
-                        rp66v1_file, logical_index, logical_file, frame_array, array_reduction, frame_slice,
+                        logical_file, frame_array, array_reduction, frame_slice,
                         channels, ostream
                     )
                     ret.append(file_path_out)
@@ -500,13 +497,10 @@ def single_rp66v1_file_to_las(
     if binary_file_type == 'RP66V1':
         logger.info(f'Converting RP66V1 {path_in} to LAS {os.path.splitext(path_out)[0]}*')
         try:
-            with open(path_in, 'rb') as fobj:
-                t_start = time.perf_counter()
-                # index = RP66V1IndexXMLWrite(fobj, path_in)
-                rp66v1_file = File.FileRead(fobj)
-                logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+            t_start = time.perf_counter()
+            with LogicalFile.LogicalIndex(path_in) as logical_index:
                 las_files_written = write_logical_sequence_to_las(
-                    rp66v1_file, logical_index, array_reduction, path_out, frame_slice, channels,
+                    logical_index, array_reduction, path_out, frame_slice, channels,
                 )
                 output_size = sum(os.path.getsize(f) for f in las_files_written)
                 result = LASWriteResult(
@@ -590,9 +584,7 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
     if binary_file_type == 'RP66V1':
         logger.info(f'Reading RP66V1 {path_in}')
         try:
-            with open(path_in, 'rb') as fobj:
-                rp66v1_file = File.FileRead(fobj)
-                logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+            with LogicalFile.LogicalIndex(path_in) as logical_index:
                 for l, logical_file in enumerate(logical_index.logical_files):
                     print(f'Logical file [{l:04d}]: {logical_file}')
                     # print(f'Logical file: {logical_file.file_header_logical_record.set.type}')

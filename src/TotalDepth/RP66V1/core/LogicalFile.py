@@ -6,6 +6,7 @@ Represents a RP66V1 file as a 'logical' level.
 
 import bisect
 import collections
+import io
 import logging
 import pickle
 import typing
@@ -13,7 +14,7 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR
-from TotalDepth.RP66V1.core import File
+from TotalDepth.RP66V1.core import File, Index
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import XAxis
@@ -229,75 +230,64 @@ class LogicalFile:
         )
 
 
-class VisibleRecordPositions(collections.UserList):
-
-    def visible_record_prior(self, lrsh_position: int) -> int:
-        """Find rightmost value of visible record position less than the lrsh position.
-
-        See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
-        example function find_lt().
-        """
-        i = bisect.bisect_left(self.data, lrsh_position)
-        if i:
-            return self.data[i - 1]
-        if len(self) == 0:
-            msg = f'No Visible Record positions for LRSH position {lrsh_position}.'
-        else:
-            msg = f'Can not find Visible Record position prior to {lrsh_position}, earliest is {self[0]}.'
-        raise ValueError(msg)
+# class VisibleRecordPositions(collections.UserList):
+#
+#     def visible_record_prior(self, lrsh_position: int) -> int:
+#         """Find rightmost value of visible record position less than the lrsh position.
+#
+#         See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
+#         example function find_lt().
+#         """
+#         i = bisect.bisect_left(self.data, lrsh_position)
+#         if i:
+#             return self.data[i - 1]
+#         if len(self) == 0:
+#             msg = f'No Visible Record positions for LRSH position {lrsh_position}.'
+#         else:
+#             msg = f'Can not find Visible Record position prior to {lrsh_position}, earliest is {self[0]}.'
+#         raise ValueError(msg)
 
 
 class LogicalIndex:
     """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
-    def __init__(self, rp66_file: typing.Union[File.FileRead, None], ident: str):
-        self.id = ident
+    def __init__(self, path_or_file: typing.Union[str, io.BytesIO]):
         self.logical_files: typing.List[LogicalFile] = []
-        self.storage_unit_label = None
-        # TODO: Defer this to the Index.VisibleLogicalSegmentIndex
-        self.visible_record_positions: VisibleRecordPositions = VisibleRecordPositions()
-        if rp66_file is not None:
-            self.storage_unit_label = rp66_file.sul
-            # Capture all the Visible Records, this can not be done by looking at the Logical Records only
-            # as some Visible Records can be missed.
-            self.visible_record_positions = VisibleRecordPositions(
-                vr.position for vr in rp66_file.iter_visible_records()
-            )
-            # Now iterate across the file again for the Logical Records.
-            for file_logical_data in rp66_file.iter_logical_records():
-                assert file_logical_data.is_sealed()
-                if not file_logical_data.lr_is_encrypted:
-                    if file_logical_data.lr_is_eflr:
-                        # EFLRs
-                        eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
-                                                                     file_logical_data.logical_data)
-                        if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
-                            self.logical_files.append(LogicalFile(file_logical_data, eflr))
-                        else:
-                            self.logical_files[-1].add_eflr(file_logical_data, eflr)
-                    else:
-                        # IFLRs
-                        if len(self.logical_files) == 0:
-                            raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
-                        iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
-                                                                     file_logical_data.logical_data)
-                        if iflr.remain > 0:
-                            self.logical_files[-1].add_iflr(file_logical_data, iflr)
-                        # else:
-                        #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
+        self.logical_record_index = Index.LogicalRecordIndex(path_or_file)
 
     def __len__(self) -> int:
         return len(self.logical_files)
 
-    # def visible_record_prior(self, lrsh_position: int) -> int:
-    #     """Find rightmost value of visible record position less than the lrsh position.
-    #
-    #     See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
-    #     example function find_lt().
-    #     """
-    #     i = bisect.bisect_left(self.visible_record_positions, lrsh_position)
-    #     if i:
-    #         return self.visible_record_positions[i - 1]
-    #     raise ValueError
+    def __enter__(self):
+        self.logical_record_index._enter()
+        self.logical_files = []
+        for lr_index in range(len(self.logical_record_index)):
+            file_logical_data = self.logical_record_index.get_file_logical_data(lr_index, 0, -1)
+            assert file_logical_data.is_sealed()
+            if not file_logical_data.lr_is_encrypted:
+                if file_logical_data.lr_is_eflr:
+                    # EFLRs
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                 file_logical_data.logical_data)
+                    if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
+                        self.logical_files.append(LogicalFile(file_logical_data, eflr))
+                    else:
+                        self.logical_files[-1].add_eflr(file_logical_data, eflr)
+                else:
+                    # IFLRs
+                    if len(self.logical_files) == 0:
+                        raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
+                    iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                 file_logical_data.logical_data)
+                    if iflr.remain > 0:
+                        self.logical_files[-1].add_iflr(file_logical_data, iflr)
+                    # else:
+                    #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logical_record_index._exit()
+        self.logical_files = []
+        return False
 
 
 def unpickle(path: str) -> LogicalIndex:
@@ -305,30 +295,7 @@ def unpickle(path: str) -> LogicalIndex:
         return pickle.loads(in_stream.read())
 
 
-# class FileRandomAccess:
-#     def __init__(self, logical_file_sequence: LogicalIndex):
-#         self.logical_file_sequence = logical_file_sequence
-#         self.binary_file: typing.BinaryIO = None
-#         self.rp66v1_file: File.FileRead = None
-#
-#     def __enter__(self):
-#         if self.binary_file is not None:
-#             self.binary_file.close()
-#             self.binary_file = None
-#         self.binary_file = open(self.logical_file_sequence.path, 'rb')
-#         self.rp66v1_file = File.FileRead(self.binary_file)
-#         return self
-#
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         if self.binary_file is not None:
-#             self.binary_file.close()
-#             self.binary_file = None
-#         self.rp66v1_file = None
-#         return False
-
-
 def populate_frame_array(
-        rp66_file: File.FileRead,
         logical_file: LogicalFile,
         frame_array: LogPass.FrameArray,
         frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
@@ -363,7 +330,11 @@ def populate_frame_array(
                      f' num_frames: {num_frames} range_gen: {range_gen}.')
         for array_index, frame_number in enumerate(range_gen):
             iflr_reference = iflrs[frame_number]
-            fld: File.FileLogicalData = rp66_file.get_file_logical_data(iflr_reference.logical_record_position)
+            # FIXME: Get the data from the LogicalIndex
+            # FIXME: Change the IFLR reference to be the index into LogicalIndex Logical Records
+            fld: File.FileLogicalData = logical_file.get_file_logical_data_at_position(
+                iflr_reference.logical_record_position
+            )
             # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
             iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
             if channels is not None:

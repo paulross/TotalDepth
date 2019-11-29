@@ -130,14 +130,14 @@ def test_XAxis_ctor():
     (
         (
             [
-                (0x0, 0x1, 1.0),
+                (0x0, 0xff, 1.0),
             ],
             XAxis.XAxisSummary(min=1.0, max=1.0, count=1, spacing=None),
         ),
         (
             [
-                (0x0, 0x1, 1.0),
-                (0x2, 0x2, 2.0),
+                (0x0, 0xff, 1.0),
+                (0x1ff, 0x2ff, 2.0),
             ],
             XAxis.XAxisSummary(min=1.0, max=2.0, count=2,
                                spacing=XAxis.XAxisSpacingSummary(min=1.0, max=1.0, mean=1.0, median=1.0,
@@ -175,22 +175,22 @@ def test_XAxis_append_summary(position_xvalues, exp_summary):
     (
         (
             [
-                (0x0, 0x1, 1.0),
+                (0x0, 0xff, 1.0),
             ],
             [
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0x1),
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0xff),
                                     frame_number=1, x_axis=1.0),
             ],
         ),
         (
             [
-                (0x0, 0x1, 1.0),
-                (0x2, 0x3, 2.0),
+                (0x0, 0xff, 1.0),
+                (0x2, 0x2ff, 2.0),
             ],
             [
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0x1),
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0xff),
                                     frame_number=1, x_axis=1.0),
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x2, 0x3),
+                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x2, 0x2ff),
                                     frame_number=2, x_axis=2.0),
             ],
         ),

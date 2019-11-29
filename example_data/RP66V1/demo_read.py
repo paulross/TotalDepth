@@ -10,16 +10,8 @@ from TotalDepth.common import Slice
 path_in = '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS'
 
 
-def demo_file():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        print(rp66v1_file.sul)
-
-
 def demo_logical_files():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         print(logical_index)
         for logical_file in logical_index.logical_files:
             print(logical_file)
@@ -30,9 +22,7 @@ def demo_logical_files():
 
 
 def demo_eflr():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         # print(logical_index)
         for logical_file in logical_index.logical_files:
             # print(logical_file)
@@ -43,9 +33,7 @@ def demo_eflr():
 
 
 def demo_eflr_contents():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             for position, eflr in logical_file.eflrs:
                 # eflr is a TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord
@@ -59,9 +47,7 @@ def demo_eflr_contents():
 
 
 def demo_numpy_describe():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
@@ -81,9 +67,7 @@ def demo_numpy_describe():
 
 
 def demo_numpy_access():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
@@ -102,9 +86,7 @@ def demo_numpy_access():
 
 
 def demo_numpy_access_partial():
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:

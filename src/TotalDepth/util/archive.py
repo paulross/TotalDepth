@@ -443,7 +443,6 @@ will be copied across."""
         help=f'Binary type(s) of file to list, additive. Supported files are: {file_types}',
     )
     parser.add_argument('-b', '--bytes', help='Number of initial bytes to show.', type=int, default=0)
-    parser.add_argument('-r', '--recurse', help='Recurse into the path.', action='store_true')
     parser.add_argument(
         '--expand-and-delete', help='Expand and delete archive files, implies --recurse.', action='store_true'
     )

@@ -3,25 +3,177 @@
 
 .. Description of LIS command line tools
 
+.. _cmd_line_tools_lis:
+
 ***************************
 LIS Command Line Tools
 ***************************
 
 This describes the command line tools that are available for processing LIS files.
 
-=========================== ===========================================================================
-Tool Name                   Description
-=========================== ===========================================================================
-``tdlisdumpframeset``       Writes out the frame values as a CSV file.
-``tdlisindex``              Indexes a LIS file.
-``tdlisplotlogpasses``      Plots the log data as SVG pages.
-``tdlisscanlogidata``       Scans the logical data.
-``tdlisscanlogirecord``     Scans all Logical records.
-``tdlisscanphysrec``        Scans all the Physical Records.
-``tdlistablehistogram``     Analyses the contents of table Logical Records.
-``tdlistohtml``             Generates a HTML page about the LIS file.
-=========================== ===========================================================================
+.. list-table:: **LIS Command Line Tools**
+    :widths: 20 60
+    :header-rows: 1
+    
+    * - Tool Name
+      - Description
+    * - ``tdlistohtml``
+      - Generates a HTML page(s) about LIS file(s). :ref:`Link <cmd_line_tools_lis_tdlistohtml>`
+    * - ``tdlisplotlogpasses``
+      - Plots LIS log data as SVG pages. :ref:`Link <cmd_line_tools_lis_tdlisplotlogpasses>`
+    * - ``tdlisdumpframeset``
+      - Writes out the frame data as a CSV file. :ref:`Link <cmd_line_tools_lis_tdlisdumpframeset>`
+    * - ``tdlisindex``
+      - Indexes a LIS file. :ref:`Link <cmd_line_tools_lis_tdlisindex>`
+    * - ``tdlistablehistogram``
+      - Analyses the contents of table Logical Records. :ref:`Link <cmd_line_tools_lis_tdlistablehistogram>`
+    * - ``tdlisscanphysrec``
+      - Scans all the Physical Records. :ref:`Link <cmd_line_tools_lis_tdlisscanphysrec>`
+    * - ``tdlisscanlogidata``
+      - Scans the logical data. :ref:`Link <cmd_line_tools_lis_tdlisscanlogidata>`
+    * - ``tdlisscanlogirecord``
+      - Scans all Logical records. :ref:`Link <cmd_line_tools_lis_tdlisscanlogirecord>`
 
+
+.. _cmd_line_tools_lis_tdlistohtml:
+
+Summarise LIS Files in HTML with ``tdlistohtml``
+=================================================
+
+Generates HTML from input LIS file or directory to an output destination.
+
+Arguments
+------------------
+
+#. The path to the input LIS file or directory.
+#. The path to the output file or directory, any directories will be created as necessary.
+
+Options
+------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
+| ``--version``                        | Show program's version number and exit                                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-g, --glob``                       | File pattern match. [default none]                                              |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-j JOBS, --jobs=JOBS``             | Max processes when multiprocessing. Zero uses number of native CPUs [8].        |
+|                                      | -1 disables multiprocessing. [default: -1]                                      |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-k, --keep-going``                 | Keep going as far as sensible. [default: False]                                 |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l LOGLEVEL, --loglevel=LOGLEVEL`` | Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: 20]  |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-v, --verbose``                    | Verbose output, this outputs a representation of table data and DFSRs.          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-r, --recursive``                  | Process input recursively. [default: False]                                     |
++--------------------------------------+---------------------------------------------------------------------------------+
+
+Examples
+---------------------
+
+Command to process a directory of LIS::
+
+    $ ``tdlistohtml`` Simple/ LIS_plot/Simple_00/
+
+Output::
+
+    Cmd: ``tdlistohtml`` Simple/ LIS_plot/Simple_00/
+    plotLogInfo:
+    FileInfo: "Simple/LIS.lis" -> "LIS_plot/Simple_00/LIS.lis.html" 17 (kb) LR count=4 t=0.070
+    FileInfo: "Simple/RW.lis" -> "LIS_plot/Simple_00/RW.lis.html" 843 (kb) LR count=12 t=3.206
+    FileInfo: "Simple/RW_No_TIF.lis" -> "LIS_plot/Simple_00/RW_No_TIF.lis.html" 833 (kb) LR count=12 t=3.200
+      CPU time =    6.568 (S)
+    Exec. time =    6.568 (S)
+    Bye, bye!
+
+For each file the output lists:
+
+* Input file.
+* Output HTML file.
+* File size.
+* Count of Logical Records.
+* Execution time.
+
+In the output directory there will be an index.html file, for example:
+
+.. image:: images/LisToHtml_index.png
+
+The columns are:
+
+* The name of the LIS file.
+* The size of the LIS file.
+* Count of Logical Records.
+* Execution time.
+* Processing rate.
+
+In the linked HTML file is a summary of the content of the LIS file.
+
+The Log Pass merits several entries, the first summarises the frame shape and the shape of each channel, for example:
+
+.. image:: images/LisToHtml_LogPass_00.png
+
+Then there is a couple of tables, the first summarises the X axis and the second summarises each channel (min, max mean etc.), for example:
+
+.. image:: images/LisToHtml_LogPass_01.png
+
+
+:ref:`Link <cmd_line_tools_lis_tdlisplotlogpasses>`
+
+Plots LIS log data as SVG pages.
+===================================
+
+TODO: 
+
+Generates HTML from input LIS file or directory to an output destination.
+
+Arguments
+------------------
+
+#. The path to the input LIS file or directory.
+#. The path to the output file or directory, any directories will be created as necessary.
+
+Options
+------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
+| ``--version``                        | Show program's version number and exit                                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-g, --glob``                       | File pattern match. [default none]                                              |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-j JOBS, --jobs=JOBS``             | Max processes when multiprocessing. Zero uses number of native CPUs [8].        |
+|                                      | -1 disables multiprocessing. [default: -1]                                      |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-k, --keep-going``                 | Keep going as far as sensible. [default: False]                                 |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l LOGLEVEL, --loglevel=LOGLEVEL`` | Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: 20]  |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-v, --verbose``                    | Verbose output, this outputs a representation of table data and DFSRs.          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-r, --recursive``                  | Process input recursively. [default: False]                                     |
++--------------------------------------+---------------------------------------------------------------------------------+
+
+Examples
+---------------------
+
+Command to process a directory of LIS::
+
+    $ ``tdlistohtml`` Simple LIS_plot/Simple_00
+
+Output::
+
+
+
+
+
+.. _cmd_line_tools_lis_tdlisscanphysrec:
 
 Scanning Physical Records in LIS Files with ``tdlisscanphysrec``
 ===================================================================
@@ -142,6 +294,8 @@ Heading         Description
 ==============  ============================================================================================================
 
 
+.. _cmd_line_tools_lis_tdlisscanlogirecord:
+
 Scanning Logical Records in LIS Files with ``tdlisscanlogirecord``
 ====================================================================
 
@@ -198,7 +352,9 @@ Example of scanning a LIS file::
     Bye, bye!
 
 
-Scanning Physical Record Structure in LIS Files with ``tdlisscanlogidata``
+.. _cmd_line_tools_lis_tdlisscanlogidata:
+
+Scanning Logical Data in LIS Files with ``tdlisscanlogidata``
 ===========================================================================
 
 Scans a LIS79 file and reports the Logical Record structure.
@@ -301,6 +457,8 @@ To this::
 
 
 
+.. _cmd_line_tools_lis_tdlisdumpframeset:
+
 Extracting Data from LIS with ``tdlisdumpframeset``
 ========================================================
 
@@ -381,90 +539,7 @@ Heading           Description
 ================  ============================================================================================================
 
 
-.. _TotalDepth-LIScmdline-LisToHtml:
-
-Convert LIS Files to HTML with ``tdlistohtml``
-===============================================
-
-Generates HTML from input LIS file or directory to an output destination.
-
-Arguments
-------------------
-
-#. The path to the input LIS file or directory.
-#. The path to the output file or directory, any directories will be created as necessary.
-
-Options
-------------------
-
-+--------------------------------------+---------------------------------------------------------------------------------+
-| Option                               | Description                                                                     |
-+======================================+=================================================================================+
-| ``--version``                        | Show program's version number and exit                                          |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-h, --help``                       | Show this help message and exit.                                                |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-g, --glob``                       | File pattern match. [default none]                                              |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-j JOBS, --jobs=JOBS``             | Max processes when multiprocessing. Zero uses number of native CPUs [8].        |
-|                                      | -1 disables multiprocessing. [default: -1]                                      |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-k, --keep-going``                 | Keep going as far as sensible. [default: False]                                 |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-l LOGLEVEL, --loglevel=LOGLEVEL`` | Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: 20]  |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-v, --verbose``                    | Verbose output, this outputs a representation of table data and DFSRs.          |
-+--------------------------------------+---------------------------------------------------------------------------------+
-| ``-r, --recursive``                  | Process input recursively. [default: False]                                     |
-+--------------------------------------+---------------------------------------------------------------------------------+
-
-Examples
----------------------
-
-Command to process a directory of LIS::
-
-    $ ``tdlistohtml`` Simple LIS_plot/Simple_00
-
-Output::
-
-    Cmd: ``tdlistohtml`` Simple LIS_plot/Simple_00
-    plotLogInfo:
-    FileInfo: "Simple/LIS.lis" -> "LIS_plot/Simple_00/LIS.lis.html" 17 (kb) LR count=4 t=0.070
-    FileInfo: "Simple/RW.lis" -> "LIS_plot/Simple_00/RW.lis.html" 843 (kb) LR count=12 t=3.206
-    FileInfo: "Simple/RW_No_TIF.lis" -> "LIS_plot/Simple_00/RW_No_TIF.lis.html" 833 (kb) LR count=12 t=3.200
-      CPU time =    6.568 (S)
-    Exec. time =    6.568 (S)
-    Bye, bye!
-
-For each file the output lists:
-
-* Input file.
-* Output HTML file.
-* File size.
-* Count of Logical Records.
-* Execution time.
-
-In the output directory there will be an index.html file, for example:
-
-.. image:: images/LisToHtml_index.png
-
-The columns are:
-
-* The name of the LIS file.
-* The size of the LIS file.
-* Count of Logical Records.
-* Execution time.
-* Processing rate.
-
-In the linked HTML file is a summary of the content of the LIS file.
-
-The Log Pass merits several entries, the first summarises the frame shape and the shape of each channel, for example:
-
-.. image:: images/LisToHtml_LogPass_00.png
-
-Then there is a couple of tables, the first summarises the X axis and the second summarises each channel (min, max mean etc.), for example:
-
-.. image:: images/LisToHtml_LogPass_01.png
+.. _cmd_line_tools_lis_tdlistablehistogram:
 
 Analysing Table Data in LIS Files with ``tdlistablehistogram``
 ==================================================================
@@ -581,6 +656,8 @@ The result is a dictionary that has the key as a quadruple ``(lr_type, table_nam
 the value as a count of the number of occurrences.
 
 
+.. _cmd_line_tools_lis_tdlisindex:
+
 Indexing LIS Files with ``tdlisindex``
 ===========================================
 
@@ -694,5 +771,7 @@ Scan of a directory (recursively) indexing each file 11 times and writing out st
 ``tdXlisrandomframesetread``
 =================================
 
-For developers only. This is designed to measure the performance of loading and iterating across a frame-set.
+For developers only.
+This may not be present in some distributions.
+This is designed to measure the performance of loading and iterating across a frame-set.
 

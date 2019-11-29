@@ -212,7 +212,6 @@ class HTMLFrameArraySummary(typing.NamedTuple):
 
 
 def _write_log_pass_content_in_html(
-        rp66_file: File.FileRead,
         logical_file: LogicalFile.LogicalFile,
         xhtml_stream: XmlWrite.XhtmlStream,
         # Used for anchor
@@ -234,7 +233,6 @@ def _write_log_pass_content_in_html(
             )
         ret.append(
             _write_frame_array_in_html(
-                rp66_file,
                 logical_file,
                 frame_array,
                 frame_slice,
@@ -293,7 +291,6 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
 
 
 def _write_frame_array_in_html(
-        rp66_file: File.FileRead,
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
         frame_slice: typing.Union[Slice.Slice, Slice.Split],
@@ -307,7 +304,6 @@ def _write_frame_array_in_html(
     iflrs: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
         num_frames = LogicalFile.populate_frame_array(
-            rp66_file,
             logical_file,
             frame_array,
             frame_slice,
@@ -462,7 +458,6 @@ class HTMLResult(typing.NamedTuple):
 
 
 def html_write_body(
-        rp66_file: File.FileRead,
         logical_file_sequence: LogicalFile.LogicalIndex,
         frame_slice: Slice.Slice,
         xhtml_stream: XmlWrite.XhtmlStream,
@@ -512,7 +507,7 @@ def html_write_body(
         if logical_file.has_log_pass:
             with XmlWrite.Element(xhtml_stream, 'a', {'id': f'{_anchor(lf, len(logical_file.eflrs))}'}):
                 pass
-            frame_array_summary = _write_log_pass_content_in_html(rp66_file, logical_file, xhtml_stream, lf,
+            frame_array_summary = _write_log_pass_content_in_html(logical_file, xhtml_stream, lf,
                                                                   len(logical_file.eflrs),
                                                                   frame_slice=frame_slice,
                                                                   )
@@ -534,18 +529,16 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
     Returns the text to use as a link.
     """
-    with open(path_in, 'rb') as fobj:
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         if label_process:
             process.add_message_to_queue(os.path.basename(path_in))
         logger.info(
             f'html_scan_RP66V1_file_data_content(): Creating File.FileRead() from "{os.path.basename(path_in)}"'
         )
-        rp66v1_file = File.FileRead(fobj)
         logger.info(
             f'html_scan_RP66V1_file_data_content(): Creating LogicalFile.LogicalIndex()'
             f' from "{os.path.basename(path_in)}"'
         )
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
         logger.info(f'html_scan_RP66V1_file_data_content(): Writing HTML')
         if label_process:
             process.add_message_to_queue('Writing HTML')
@@ -562,7 +555,7 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                ret = html_write_body(rp66v1_file, logical_index, frame_slice, xhtml_stream)
+                ret = html_write_body(logical_index, frame_slice, xhtml_stream)
     logger.info(f'html_scan_RP66V1_file_data_content(): Done "{os.path.basename(path_in)}"')
     return ret
 

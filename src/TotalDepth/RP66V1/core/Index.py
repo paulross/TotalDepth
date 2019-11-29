@@ -11,6 +11,8 @@ In the taxonomy of indexes this is a 'mid level' index as it indexes:
 TODO: Replace this with the C/C++ implementation.
 """
 import io
+import pickle
+import sys
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
@@ -22,88 +24,83 @@ class ExceptionIndex(ExceptionTotalDepthRP66V1):
     pass
 
 
-class VisibleRecordIndexLRSHPosition(typing.NamedTuple):
-    """Contains the Visible Record position and Logical Record Segment Header position and the Logical Data length."""
-    vr_index: int
-    lrsh_position: int
-    lrsh_attributes: File.LogicalRecordSegmentHeaderAttributes
-    lr_record_type: int
-    logical_data_length: int
-
-
-class VisibleLogicalSegmentIndex:
+class LogicalRecordIndex:
     """This maintains an index of visible record and Logical Record Segment Header (LRSH) positions where the LRSH is
-    the first in the Logical Record."""
-    def __init__(self, file_or_path: typing.Union[str, io.BytesIO]):
-        self.visible_record_positions: typing.List[int] = []
-        self.lrsh_positions: typing.List[VisibleRecordIndexLRSHPosition] = []
-        if isinstance(file_or_path, str):
-            self.path = file_or_path
-            self.file = None
-            self.must_close = True
-        elif isinstance(file_or_path, io.BytesIO):
-            try:
-                self.path = file_or_path.name
-            except AttributeError:
-                self.path = None
-            self.file = file_or_path
-            self.must_close = False
-        else:
-            raise TypeError(f'file_or_path must be a binary file or a string not {type(file_or_path)}')
+    the first in the Logical Record.
 
-    def __len__(self):
-        return len(self.lrsh_positions)
+    The index is a list of File.LRPosDesc objects that contain:
+
+        - ``.position`` A LogicalRecordPosition which has the absolute file position of the Visible Record and LRSH.
+            This will be of interest to indexers that mean to ``use get_file_logical_data()`` as this is a required
+            argument.
+        - ``.description`` A LogicalDataDescription which provides some basic information about the Logical Data such as
+            attributes Logical Record type and the Logical Data length. This will be of interest to indexers to offer
+            up to their callers.
+    """
+    def __init__(self, path_or_file: typing.Union[str, io.BytesIO]):
+        self.lr_pos_desc: typing.List[File.LRPosDesc] = []
+        self.rp66v1_file: File.FileRead = File.FileRead(path_or_file)
+        self.path = self.rp66v1_file.path
+
+    def __len__(self) -> int:
+        return len(self.lr_pos_desc)
+
+    def __getitem__(self, item) -> File.LRPosDesc:
+        return self.lr_pos_desc[item]
 
     def _enter(self):
-        # TODO: This needs error checking
-        visible_record_index = lrsh_first_position = logical_data_length = None
-        for visible_record in self.rp66v1_file.iter_visible_records():
-            self.visible_record_positions.append(visible_record.position)
-            for lrsh in self.rp66v1_file.iter_LRSHs_for_visible_record(visible_record):
-                # print('TRACE:', lrsh)
-                if lrsh.is_first:
-                    lrsh_first_position = lrsh.position
-                    visible_record_index = len(self.visible_record_positions) - 1
-                    logical_data_length = 0
-                logical_data_length += lrsh.logical_data_length
-                if lrsh.is_last:
-                    self.lrsh_positions.append(
-                        VisibleRecordIndexLRSHPosition(visible_record_index, lrsh_first_position, logical_data_length)
-                    )
-                    visible_record_index = lrsh_first_position = logical_data_length = None
+        """Populate the internal representation from a File.FileRead."""
+        # Initialise the File.FileRead
+        self.rp66v1_file._enter()
+        # Initialise self and scan the File.FileRead
+        self.lr_pos_desc = list(self.rp66v1_file.iter_logical_record_positions())
 
     def __enter__(self):
-        # Initialise the File.FileRead
-        # Initialise self and scan the File.FileRead
+        self._enter()
         return self
 
     def _exit(self):
-        pass
+        self.rp66v1_file._exit()
+        self.lr_pos_desc = []
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # Close the File.FileRead
+        self._exit()
         return False
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['rp66v1_file']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.rp66v1_file = File.FileRead(self.path)
+
+    @property
+    def sul(self) -> File.StorageUnitLabel:
+        """The file's Storage Unit Label."""
+        return self.rp66v1_file.sul
 
     def get_file_logical_data(self, index: int, offset: int = 0, length: int = -1) -> File.FileLogicalData:
         """
-        Returns a FileLogicalData object from the Logical Record position (Visible Record Position and Logical Record
-        Segment Header position).
+        Returns a FileLogicalData object from the Logical Record position in the index (Visible Record Position and
+        Logical Record Segment Header position).
+
         This allows random access to any Logical Record in the file.
         The caller can construct a more sophisticated index such as a sequence of Logical Files which contain Logical
         Records that can be EFLRs or IFLRs and interpreted accordingly.
+
+        If offset or length are use then the result will be the partial data from that offset and length.
 
         :param: index The index of the Logical Record.
         :param: offset An integer offset into the Logical Record data, default 0.
         :param: length An integer length the Logical Record data, default of -1 is all.
         """
-        # TODO: Raise instead of an assert
-        assert index >= 0 and index < len(self.lrsh_positions)
-        assert 0 <= self.lrsh_positions[index].vr_index < len(self.visible_record_positions)
-        # Set up the file to the Logical Record
-        vr_position = self.visible_record_positions[self.lrsh_positions[index].vr_index]
-        lrsh_position = self.lrsh_positions[index].lrsh_position
-        # TODO: Change the design of the LogicalRecordPosition or abandon it in favor of a pair
+        position: File.LogicalRecordPosition = self.lr_pos_desc[index].position
+        return self.rp66v1_file.get_file_logical_data(position, offset, length)
 
-        return self.file.get_file_logical_data(position, offset, length)
 
+def unpickle(path: str) -> LogicalRecordIndex:
+    with open(path, 'rb') as in_stream:
+        return pickle.loads(in_stream.read())
 

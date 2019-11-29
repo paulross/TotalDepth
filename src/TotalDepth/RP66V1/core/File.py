@@ -6,6 +6,7 @@ TODO: Replace this with the C/C++ implementation.
 
 import copy
 import hashlib
+import io
 import logging
 import typing
 
@@ -47,6 +48,10 @@ class ExceptionLogicalRecordSegmentHeader(ExceptionFile):
 
 
 class ExceptionLogicalRecordSegmentHeaderEOF(ExceptionLogicalRecordSegmentHeader):
+    pass
+
+
+class ExceptionLogicalRecordSegmentHeaderSequence(ExceptionLogicalRecordSegmentHeader):
     pass
 
 
@@ -175,6 +180,9 @@ class LogicalRecordSegmentHeaderAttributes:
             return self.attributes == other.attributes
         return NotImplemented
 
+    def __str__(self) -> str:
+        return f'LRSH attr: 0x{self.attributes:02x}'
+
     # Attribute access
     @property
     def is_eflr(self) -> bool:
@@ -228,6 +236,8 @@ class LogicalRecordSegmentHeaderAttributes:
             ret.append('padding')
         return '-'.join(ret)
 
+    def copy(self):
+        return LogicalRecordSegmentHeaderAttributes(self.attributes)
 
 
 class LogicalRecordSegmentHeader:
@@ -388,8 +398,9 @@ class LogicalRecordSegmentHeader:
 
 
 class LogicalRecordPositionBase:
-    """Simple base class with no error checking."""
+    """Simple base class with little error checking."""
     def __init__(self, vr_position: int, lrsh_position: int):
+        assert vr_position + VisibleRecord.NUMBER_OF_BYTES <= lrsh_position
         self.vr_position: int = vr_position
         self.lrsh_position: int = lrsh_position
 
@@ -437,11 +448,41 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
             )
-        if not lrsh.attributes.is_first:
-            raise ValueError(
-                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
-            )
+        # if not lrsh.attributes.is_first:
+        #     raise ValueError(
+        #         f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
+        #     )
         super().__init__(vr.position, lrsh.position)
+
+
+class LogicalDataDescription(typing.NamedTuple):
+    """At this level this describes the raw Logical Data that can be converted into a Logical Record."""
+    attributes: LogicalRecordSegmentHeaderAttributes
+    lr_type: int
+    ld_length: int
+
+    def __str__(self) -> str:
+        return f'LogicalDataDescription {str(self.attributes)} type: {self.lr_type} len: {self.ld_length}'
+
+
+class LRPosDesc(typing.NamedTuple):
+    """This contains the position and description of a Logical Record suitable for an indexer.
+
+    It contains:
+
+        - LogicalRecordPosition: This is the absolute file position of the Visible Record and LRSH.
+            This will be of interest to indexers that mean to ``use get_file_logical_data()`` as this is a required
+            argument.
+        - LogicalDataDescription: This provides some basic information about the Logical Data such as attributes
+            Logical Record type and the Logical Data length. This will be of interest to indexers to offer up to their
+            callers.
+
+    """
+    position: LogicalRecordPosition
+    description: LogicalDataDescription
+
+    def __str__(self) -> str:
+        return f'LRPosDesc pos: {str(self.position)} desc: {self.description}'
 
 
 class LogicalData:
@@ -595,13 +636,29 @@ class FileLogicalData:
 
 class FileRead:
     """RP66V1 file reader."""
-    def __init__(self, file: typing.BinaryIO):
-        self.file = file
-        self.file.seek(0)
-        try:
-            self.name = file.name
-        except AttributeError:
-            self.name = None
+    def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
+        if isinstance(path_or_file, str):
+            self.file = None
+            self.path = path_or_file
+        elif isinstance(path_or_file, io.BytesIO):
+            self.file = path_or_file
+            try:
+                self.path = path_or_file.name
+            except AttributeError:
+                self.path = '<unknown>'
+        else:
+            raise TypeError(f'path_or_file must be a str or a binary file not {type(path_or_file)}')
+        self.must_close = self.file is None
+        self.sul = None
+        self.visible_record = None
+        self.logical_record_segment_header = None
+
+    def _enter(self):
+        if self.file is None:
+            self.file = open(self.path, 'rb')
+            self.must_close = True
+        else:
+            self.file.seek(0)
         # Read the Storage Unit Label, see [RP66V1] 2.3.2
         try:
             self.sul = StorageUnitLabel.StorageUnitLabel(self.file.read(StorageUnitLabel.StorageUnitLabel.SIZE))
@@ -611,6 +668,21 @@ class FileRead:
         self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
         if not self.logical_record_segment_header.attributes.is_first:
             raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
+
+    def __enter__(self):
+        self._enter()
+        return self
+
+    def _exit(self):
+        assert self.file is not None
+        if self.must_close:
+            self.file.close()
+        else:
+            self.file.seek(0)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._exit()
+        return False
 
     def _set_file_and_read_first_visible_record(self) -> None:
         self.file.seek(self.sul.SIZE)
@@ -649,6 +721,7 @@ class FileRead:
         try:
             while True:
                 self.logical_record_segment_header.read(self.file)
+                # Caller could possibly mess with this so make a copy.
                 yield copy.copy(self.logical_record_segment_header)
                 next_position = self.logical_record_segment_header.next_position
                 if next_position == self.visible_record.next_position:
@@ -734,16 +807,49 @@ class FileRead:
         except (ExceptionVisibleRecordEOF, ExceptionLogicalRecordSegmentHeaderEOF):
             pass
 
-    def iter_logical_record_positions(self) -> typing.Sequence[LogicalRecordPosition]:
-        """Iterate across the file from the beginning yielding LogicalRecordPosition objects."""
-        for visible_record in self.iter_visible_records():
-            # print('TRACE:', visible_record)
-            for lrsh in self.iter_LRSHs_for_visible_record(visible_record):
-                # print('TRACE:', lrsh)
-                if lrsh.attributes.is_first:
-                    yield LogicalRecordPosition(visible_record, lrsh)
+    def iter_logical_record_positions(self) -> typing.Sequence[LRPosDesc]:
+        """Iterate across the file from the beginning yielding a LRPosDesc which contains:
 
-    def get_file_logical_data(self, position: LogicalRecordPosition,
+        - LogicalRecordPosition: This is the absolute file position of the Visible Record and LRSH.
+            This will be of interest to indexers that mean to ``use get_file_logical_data()`` as this is a required
+            argument.
+        - LogicalDataDescription: This provides some basic information about the Logical Data such as attributes
+            Logical Record type and the Logical Data length. This will be of interest to indexers to offer up to their
+            callers.
+        """
+        # Set this as if there was a previous LRSH that was the last of the sequence.
+        previous_lrsh_is_last: bool = True
+        vr_first = lrsh_first = logical_data_length = None
+        for visible_record in self.iter_visible_records():
+            for lrsh in self.iter_LRSHs_for_visible_record(visible_record):
+                if lrsh.attributes.is_first and not previous_lrsh_is_last:
+                    raise ExceptionLogicalRecordSegmentHeaderSequence(
+                        f'Current LRSH is first but previous is not last @ 0x{lrsh.position:x}'
+                    )
+                if previous_lrsh_is_last and not lrsh.attributes.is_first:
+                    raise ExceptionLogicalRecordSegmentHeaderSequence(
+                        f'Previous LRSH is last but current is not first @ 0x{lrsh.position:x}'
+                    )
+                if lrsh.attributes.is_first:
+                    vr_first = visible_record
+                    lrsh_first = lrsh
+                    logical_data_length = 0
+                assert logical_data_length is not None, f'Missing initial LRSH @ 0x{lrsh.position:x}'
+                logical_data_length += lrsh.logical_data_length
+                # TODO: Check that (some of) attributes and lrsh.record_type are consistent across all LRSHs?
+                if lrsh.attributes.is_last:
+                    assert lrsh_first is not None
+                    assert logical_data_length is not None
+                    yield LRPosDesc(
+                        LogicalRecordPosition(vr_first, lrsh_first),
+                        LogicalDataDescription(lrsh_first.attributes, lrsh_first.record_type, logical_data_length)
+                    )
+                    vr_first = lrsh_first = logical_data_length = None
+                    previous_lrsh_is_last = True
+                else:
+                    previous_lrsh_is_last = lrsh.attributes.is_last
+
+    def get_file_logical_data(self, position: LogicalRecordPositionBase,
                               offset: int = 0, length: int = -1) -> FileLogicalData:
         """
         Returns a FileLogicalData object from the Logic Record position (Visible Record Position and Logical Record
@@ -765,8 +871,8 @@ class FileRead:
         self.file.seek(position.lrsh_position)
         # May raise
         self.logical_record_segment_header.read(self.file)
-        if not self.logical_record_segment_header.attributes.is_first: # pragma: no cover
-            raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
+        # if not self.logical_record_segment_header.attributes.is_first: # pragma: no cover
+        #     raise ExceptionFileRead('Logical Record Segment Header is not first segment.')
         file_logical_data = FileLogicalData(self.visible_record, self.logical_record_segment_header)
         bytes_read = 0
         logical_data_index = 0

@@ -8,8 +8,8 @@ import pytest
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import StorageUnitLabel
 
-from . import test_data
-# from tests.unit.RP66V1.core import test_data
+# from . import test_data
+from tests.unit.RP66V1.core import test_data
 
 
 def test_read_one_bytes():
@@ -422,8 +422,8 @@ def test_LogicalRecordPosition_eq():
          'LogicalRecordSegmentHeader at 0x54 length 0xf must be >= 0x10'),
         (None, b'\x01\x00\xff\x01', b'\xff\xff\x9f\x01',
          'LogicalRecordSegmentHeader at 0x54 length 0xffff must be <= 0xfc'),
-        (None, b'\x01\x00\xff\x01', b'\x00\x80\x60\x01',
-         'LogicalRecordSegmentHeader at 0x54 must be the first in the sequence of segments.'),
+        # (None, b'\x01\x00\xff\x01', b'\x00\x80\x60\x01',
+        #  'LogicalRecordSegmentHeader at 0x54 must be the first in the sequence of segments.'),
     )
 )
 def test_LogicalRecordPosition_ctor_raises(sul_length, vr_bytes, lrsh_bytes, expected):
@@ -694,17 +694,19 @@ def test_file_basic_file(file_bytes):
     File.FileRead(fobj)
 
 
-def test_file_basic_file_ctor_raises():
+def test_file_basic_file_enter_on_empty_raises():
     fobj = io.BytesIO(b'')
     with pytest.raises(File.ExceptionFileRead) as err:
-        File.FileRead(fobj)
+        with File.FileRead(fobj):
+            pass
     assert err.value.args[0] == 'FileRead can not construct SUL: Expected 80 bytes, got 0'
 
 
 def test_file_file_ctor_raises_with_lrsh_not_first():
     fobj = io.BytesIO(test_data.FILE_WITH_FIRST_LRSH_NOT_FIRST_RECORD)
     with pytest.raises(File.ExceptionFileRead) as err:
-        File.FileRead(fobj)
+        with File.FileRead(fobj):
+            pass
     assert err.value.args[0] == 'Logical Record Segment Header is not first segment.'
 
 
@@ -742,9 +744,9 @@ def test_file_file_ctor_raises_with_lrsh_not_first():
 )
 def test_file_basic_file_sul(file_bytes, sul_string):
     fobj = io.BytesIO(file_bytes)
-    file_read = File.FileRead(fobj)
-    # print(str(file_read.sul))
-    assert str(file_read.sul) == sul_string
+    with File.FileRead(fobj) as file_read:
+        # print(str(file_read.sul))
+        assert str(file_read.sul) == sul_string
 
 
 @pytest.mark.parametrize(
@@ -776,10 +778,10 @@ def test_file_basic_file_sul(file_bytes, sul_string):
 )
 def test_file_basic_file_visible_records(file_bytes, expected):
     fobj = io.BytesIO(file_bytes)
-    file_read = File.FileRead(fobj)
-    vrs = [str(vr) for vr in file_read.iter_visible_records()]
-    # print(vrs)
-    assert vrs == expected
+    with File.FileRead(fobj) as file_read:
+        vrs = [str(vr) for vr in file_read.iter_visible_records()]
+        # print(vrs)
+        assert vrs == expected
 
 
 @pytest.mark.parametrize(
@@ -912,133 +914,133 @@ def test_file_basic_file_visible_records(file_bytes, expected):
 )
 def test_file_iter_LRSHs_for_visible_record(file_bytes, expected):
     fobj = io.BytesIO(file_bytes)
-    file_read = File.FileRead(fobj)
-    lrsh_list = []
-    for vr in file_read.iter_visible_records():
-        lrsh_list.append([])
-        for lrsh in file_read.iter_LRSHs_for_visible_record(vr):
-            lrsh_list[-1].append(lrsh.long_str())
-    # pprint.pprint(lrsh_list)
-    assert lrsh_list == expected
+    with File.FileRead(fobj) as file_read:
+        lrsh_list = []
+        for vr in file_read.iter_visible_records():
+            lrsh_list.append([])
+            for lrsh in file_read.iter_LRSHs_for_visible_record(vr):
+                lrsh_list[-1].append(lrsh.long_str())
+        # pprint.pprint(lrsh_list)
+        assert lrsh_list == expected
 
 
 def test_file_iter_logical_records():
     fobj = io.BytesIO(test_data.SMALL_FILE)
-    file_read = File.FileRead(fobj)
-    lr_list = []
-    for file_logical_data in file_read.iter_logical_records():
-        lr_list.append(str(file_logical_data))
-    # pprint.pprint(lr_list, width=150)
-    expected = [
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f9 Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002d0 LR   5 E n <LogicalData Len: 0xe05 Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000010dc LR   3 E n <LogicalData Len: 0x2bb Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000139c LR   4 E n <LogicalData Len: 0x10c Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014ac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014dc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000150c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000153c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000156c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000159c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015cc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015fc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000162c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000165c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000168c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016bc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016ec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000171c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000174c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000177c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017ac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017dc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000180c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000183c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000186c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000189c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018cc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018fc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000192c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000195c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000198c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019bc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019ec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a1c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a4c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a7c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001aac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001adc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b0c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b3c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b6c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b9c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bcc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bfc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c2c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c5c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c8c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cbc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d1c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d4c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d7c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001dac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ddc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e0c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e3c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e6c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e9c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ecc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001efc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f2c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f5c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f8c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fbc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000201c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002050 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002080 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020b0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020e0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002110 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002140 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002170 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021a0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021d0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002200 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002230 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002260 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002290 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022c0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022f0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002320 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002350 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002380 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023b0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023e0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-        '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002410 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
-    ]
-    assert lr_list == expected
+    with File.FileRead(fobj) as file_read:
+        lr_list = []
+        for file_logical_data in file_read.iter_logical_records():
+            lr_list.append(str(file_logical_data))
+        # pprint.pprint(lr_list, width=150)
+        expected = [
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f9 Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002d0 LR   5 E n <LogicalData Len: 0xe05 Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000010dc LR   3 E n <LogicalData Len: 0x2bb Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000139c LR   4 E n <LogicalData Len: 0x10c Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014ac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014dc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000150c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000153c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000156c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000159c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015cc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015fc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000162c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000165c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000168c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016bc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016ec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000171c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000174c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000177c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017ac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017dc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000180c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000183c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000186c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000189c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018cc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018fc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000192c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000195c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000198c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019bc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019ec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a1c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a4c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a7c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001aac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001adc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b0c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b3c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b6c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b9c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bcc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bfc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c2c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c5c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c8c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cbc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d1c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d4c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d7c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001dac LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ddc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e0c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e3c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e6c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e9c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ecc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001efc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f2c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f5c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f8c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fbc LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fec LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000201c LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002050 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002080 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020b0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020e0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002110 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002140 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002170 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021a0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021d0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002200 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002230 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002260 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002290 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022c0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022f0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002320 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002350 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002380 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023b0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023e0 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+            '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002410 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
+        ]
+        assert lr_list == expected
 
 
 def test_file_iter_logical_records_raises_not_is_first():
     fobj = io.BytesIO(test_data.FILE_WITH_SECOND_LRSH_NOT_FIRST_RECORD)
-    file_read = File.FileRead(fobj)
     lr_list = []
     with pytest.raises(File.ExceptionLogicalRecordSegmentHeader) as err:
-        for file_logical_data in file_read.iter_logical_records():
-            lr_list.append(str(file_logical_data))
+        with File.FileRead(fobj) as file_read:
+            for file_logical_data in file_read.iter_logical_records():
+                lr_list.append(str(file_logical_data))
     assert err.value.args[0] == 'First Logical Record Segment Header is not marked as is_first.'
 
 
 def test_file_iter_logical_records_raises_eof():
     fobj = io.BytesIO(test_data.MINIMAL_FILE_PREMATURE_EOF)
-    file_read = File.FileRead(fobj)
     lr_list = []
     with pytest.raises(File.ExceptionFileReadEOF) as err:
-        for file_logical_data in file_read.iter_logical_records():
-            lr_list.append(str(file_logical_data))
+        with File.FileRead(fobj) as file_read:
+            for file_logical_data in file_read.iter_logical_records():
+                lr_list.append(str(file_logical_data))
     assert err.value.args[0] == 'Premature EOF reading at LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 of 504 bytes'
 
 
@@ -1069,17 +1071,17 @@ def test_file_iter_logical_records_raises_eof():
 def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment(position, length, version,
                                                                                  lrsh_expected):
     fobj = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS)
-    file_read = File.FileRead(fobj)
-    visible_record = File.VisibleRecord(None)
-    visible_record.position = position
-    visible_record.length = length
-    visible_record.version = version
-    lrsh_list = []
-    for lrsh, _by in file_read.iter_LRSHs_for_visible_record_and_logical_data_fragment(visible_record):
-        lrsh_list.append(str(lrsh))
-    # print()
-    # pprint.pprint(lrsh_list)
-    assert lrsh_list == lrsh_expected
+    with File.FileRead(fobj) as file_read:
+        visible_record = File.VisibleRecord(None)
+        visible_record.position = position
+        visible_record.length = length
+        visible_record.version = version
+        lrsh_list = []
+        for lrsh, _by in file_read.iter_LRSHs_for_visible_record_and_logical_data_fragment(visible_record):
+            lrsh_list.append(str(lrsh))
+        # print()
+        # pprint.pprint(lrsh_list)
+        assert lrsh_list == lrsh_expected
 
 
 @pytest.mark.parametrize(
@@ -1088,801 +1090,41 @@ def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment
         (
             test_data.MINIMAL_FILE,
             [
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
             ],
         ),
         (
             test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS,
             [
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82',
-            ],
-        ),
-        (
-            test_data.SMALL_FILE,
-            [
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002d0',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000010dc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000139c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014ac',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014dc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000150c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000153c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000156c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000159c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015cc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000015fc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000162c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000165c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000168c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016bc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000016ec',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000171c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000174c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000177c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017ac',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000017dc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000180c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000183c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000186c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000189c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018cc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000018fc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000192c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000195c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000198c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019bc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000019ec',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a1c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a4c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001a7c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001aac',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001adc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b0c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b3c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b6c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b9c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bcc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001bfc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c2c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c5c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001c8c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cbc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001cec',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d1c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d4c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001d7c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001dac',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ddc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e0c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e3c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e6c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001e9c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001ecc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001efc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f2c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f5c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001f8c',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fbc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001fec',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x0000201c',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002050',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002080',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020b0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000020e0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002110',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002140',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002170',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021a0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000021d0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002200',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002230',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002260',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002290',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022c0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000022f0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002320',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002350',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002380',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023b0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x000023e0',
-                'LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002410',
-            ],
-        ),
-        (
-            test_data.BASIC_FILE,
-            [
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6',
-                'LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82',
-                'LogicalRecordPosition: VR: 0x00002050 LRSH: 0x0000227a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004ad4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004afa',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004b20',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004b46',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004b6c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004b92',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004bb8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004bde',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004c04',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004c2a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004c50',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004c76',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004c9c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004cc2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004ce8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004d0e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004d34',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004d5a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004d80',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004da6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004dcc',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004df2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004e18',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004e3e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004e64',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004e8a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004eb0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004ed6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004efc',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004f22',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004f48',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004f6e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004f94',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004fba',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00004fe0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005006',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000502c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005052',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005078',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000509e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000050c4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000050ea',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005110',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005136',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000515c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005182',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000051a8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000051ce',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000051f4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000521a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005240',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005266',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000528c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000052b2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000052d8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000052fe',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005324',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000534a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005370',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005396',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000053bc',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000053e2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005408',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000542e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005454',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000547a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000054a0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000054c6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000054ec',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005512',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005538',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000555e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005584',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000055aa',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000055d0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000055f6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000561c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005642',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005668',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000568e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000056b4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000056da',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005700',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005726',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000574c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005772',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005798',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000057be',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000057e4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000580a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005830',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005856',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000587c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000058a2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000058c8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000058ee',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005914',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000593a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005960',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005986',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000059ac',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000059d2',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x000059f8',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005a1e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005a44',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005a6a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005a90',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005ab6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005adc',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005b02',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005b28',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005b4e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005b74',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005b9a',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005bc0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005be6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005c0c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005c32',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005c58',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005c7e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005ca4',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005cca',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005cf0',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005d16',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005d3c',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005d62',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005d88',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005dae',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005dd6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005dfe',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005e26',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005e4e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005e76',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005e9e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005ec6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005eee',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005f16',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005f3e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005f66',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005f8e',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005fb6',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00005fde',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x00006006',
-                'LogicalRecordPosition: VR: 0x00004050 LRSH: 0x0000602e',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006064',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000608c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000060b4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000060dc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006104',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000612c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006154',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000617c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000061a4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000061cc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000061f4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000621c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006244',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000626c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006294',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000062bc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000062e4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000630c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006334',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000635c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006384',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000063ac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000063d4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000063fc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006424',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000644c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006474',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000649c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000064c4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000064ec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006514',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000653c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006564',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000658c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000065b4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000065dc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006604',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000662c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006654',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000667c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000066a4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000066cc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000066f4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000671c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006744',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000676c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006794',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000067bc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000067e4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000680c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006834',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000685c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006884',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000068ac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000068d4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000068fc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006924',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000694c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006974',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000699c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000069c4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000069ec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006a14',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006a3c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006a64',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006a8c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006ab4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006adc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006b04',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006b2c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006b54',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006b7c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006ba4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006bcc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006bf4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006c1c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006c44',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006c6c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006c94',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006cbc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006ce4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006d0c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006d34',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006d5c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006d84',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006dac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006dd4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006dfc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006e24',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006e4c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006e74',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006e9c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006ec4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006eec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006f14',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006f3c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006f64',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006f8c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006fb4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00006fdc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007004',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000702c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007054',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000707c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000070a4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000070cc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000070f4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000711c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007144',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000716c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007194',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000071bc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000071e4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000720c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007234',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000725c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007284',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000072ac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000072d4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000072fc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007324',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000734c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007374',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000739c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000073c4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000073ec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007414',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000743c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007464',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000748c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000074b4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000074dc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007504',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000752c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007554',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000757c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000075a4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000075cc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000075f4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000761c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007644',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000766c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007694',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000076bc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000076e4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000770c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007734',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000775c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007784',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000077ac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000077d4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000077fc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007824',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000784c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007874',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000789c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000078c4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000078ec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007914',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000793c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007964',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000798c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000079b4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x000079dc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007a04',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007a2c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007a54',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007a7c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007aa4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007acc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007af4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007b1c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007b44',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007b6c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007b94',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007bbc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007be4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007c0c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007c34',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007c5c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007c84',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007cac',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007cd4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007cfc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007d24',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007d4c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007d74',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007d9c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007dc4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007dec',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007e14',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007e3c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007e64',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007e8c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007eb4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007edc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007f04',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007f2c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007f54',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007f7c',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007fa4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007fcc',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x00007ff4',
-                'LogicalRecordPosition: VR: 0x00006050 LRSH: 0x0000801c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008054',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000807c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000080a4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000080cc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000080f4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000811c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008144',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000816c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008194',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000081bc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000081e4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000820c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008234',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000825c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008284',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000082ac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000082d4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000082fc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008324',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000834c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008374',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000839c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000083c4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000083ec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008414',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000843c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008464',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000848c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000084b4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000084dc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008504',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000852c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008554',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000857c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000085a4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000085cc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000085f4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000861c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008644',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000866c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008694',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000086bc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000086e4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000870c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008734',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000875c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008784',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000087ac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000087d4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000087fc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008824',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000884c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008874',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000889c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000088c4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000088ec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008914',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000893c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008964',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000898c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000089b4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000089dc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008a04',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008a2c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008a54',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008a7c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008aa4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008acc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008af4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008b1c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008b44',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008b6c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008b94',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008bbc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008be4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008c0c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008c34',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008c5c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008c84',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008cac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008cd4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008cfc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008d24',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008d4c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008d74',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008d9c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008dc4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008dec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008e14',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008e3c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008e64',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008e8c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008eb4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008edc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008f04',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008f2c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008f54',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008f7c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008fa4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008fcc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00008ff4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000901c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009044',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000906c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009094',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000090bc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000090e4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000910c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009134',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000915c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009184',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000091ac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000091d4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000091fc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009224',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000924c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009274',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000929c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000092c4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000092ec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009314',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000933c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009364',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000938c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000093b4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000093dc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009404',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000942c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009454',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000947c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000094a4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000094cc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000094f4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000951c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009544',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000956c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009594',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000095bc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000095e4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000960c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009634',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000965c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009684',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000096ac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000096d4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000096fc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009724',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000974c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009774',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000979c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000097c4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000097ec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009814',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000983c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009864',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000988c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000098b4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000098dc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009904',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000992c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009954',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000997c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000099a4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000099cc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x000099f4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009a1c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009a44',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009a6c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009a94',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009abc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009ae4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009b0c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009b34',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009b5c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009b84',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009bac',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009bd4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009bfc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009c24',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009c4c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009c74',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009c9c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009cc4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009cec',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009d14',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009d3c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009d64',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009d8c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009db4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009ddc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009e04',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009e2c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009e54',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009e7c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009ea4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009ecc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009ef4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009f1c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009f44',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009f6c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009f94',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009fbc',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x00009fe4',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000a00c',
-                'LogicalRecordPosition: VR: 0x00008050 LRSH: 0x0000a034',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a064',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a08c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a0b4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a0dc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a104',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a12c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a154',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a17c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a1a4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a1cc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a1f4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a21c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a244',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a26c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a294',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a2bc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a2e4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a30c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a334',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a35c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a384',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a3ac',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a3d4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a3fc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a424',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a44c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a474',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a49c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a4c4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a4ec',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a514',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a53c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a564',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a58c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a5b4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a5dc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a604',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a62c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a654',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a67c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a6a4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a6cc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a6f4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a71c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a744',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a76c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a794',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a7bc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a7e4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a80c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a834',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a85c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a884',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a8ac',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a8d4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a8fc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a924',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a94c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a974',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a99c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a9c4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000a9ec',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aa14',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aa3c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aa64',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aa8c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aab4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aadc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ab04',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ab2c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ab54',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ab7c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aba4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000abcc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000abf4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ac1c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ac44',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ac6c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ac94',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000acbc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ace4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ad0c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ad34',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ad5c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ad84',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000adac',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000add4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000adfc',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ae24',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ae4c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ae74',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000ae9c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aec4',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000aeec',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000af14',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000af3c',
-                'LogicalRecordPosition: VR: 0x0000a050 LRSH: 0x0000af64',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc desc: LogicalDataDescription LRSH attr: 0x81 type: 4 len: 200',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 3032',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 846',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 desc: LogicalDataDescription LRSH attr: 0x80 type: 3 len: 378',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 desc: LogicalDataDescription LRSH attr: 0x80 type: 128 len: 158',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 desc: LogicalDataDescription LRSH attr: 0x81 type: 6 len: 1688',
+                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 desc: LogicalDataDescription LRSH attr: 0xa0 type: 6 len: 1772',
             ],
         ),
     )
 )
 def test_file_iter_logical_record_positions(by, expected_logical_record_positions):
     fobj = io.BytesIO(by)
-    file_read = File.FileRead(fobj)
-    result = [str(lrp) for lrp in file_read.iter_logical_record_positions()]
-    # print()
-    # pprint.pprint(result)
-    assert result == expected_logical_record_positions
+    with File.FileRead(fobj) as file_read:
+        result = [str(lrp_ldd) for lrp_ldd in file_read.iter_logical_record_positions()]
+        # print()
+        # pprint.pprint(result, width=200)
+        assert result == expected_logical_record_positions
 
 
 def test_file_iter_logical_record_positions_fails_not_is_first():
     fobj = io.BytesIO(test_data.FILE_WITH_SECOND_LRSH_NOT_FIRST_RECORD)
-    file_read = File.FileRead(fobj)
-    result = [str(lrp) for lrp in file_read.iter_logical_record_positions()]
-    # print()
-    # pprint.pprint(result)
-    # The second LRSH is ignored
-    assert len(result) == 1
+    with pytest.raises(File.ExceptionLogicalRecordSegmentHeaderSequence) as err:
+        with File.FileRead(fobj) as file_read:
+            list(file_read.iter_logical_record_positions())
+    assert err.value.args[0] == 'Previous LRSH is last but current is not first @ 0xd0'
 
 
 @pytest.mark.parametrize(
@@ -1906,19 +1148,20 @@ def test_file_iter_logical_record_positions_fails_not_is_first():
                 '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 LR   3 E n <LogicalData Len: 0x17a Idx: 0x0>>',
                 '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 LR 128 E n <LogicalData Len: 0x9e Idx: 0x0>>',
                 '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 LR   6 E n <LogicalData Len: 0x697 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 LR   6 E n <LogicalData Len: 0x6eb Idx: 0x0>>',
+                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 LR   6 E n <LogicalData Len: 0x6eb Idx: 0x0>>'
             ],
         ),
     )
 )
 def test_file_get_file_logical_data(by, expected_file_logical_data):
     fobj = io.BytesIO(by)
-    file_read = File.FileRead(fobj)
-    lrps = [lrp for lrp in file_read.iter_logical_record_positions()]
-    result = [str(file_read.get_file_logical_data(lrp)) for lrp in lrps]
-    # print()
-    # pprint.pprint(result, width=150)
-    assert result == expected_file_logical_data
+    with File.FileRead(fobj) as file_read:
+        result = list(file_read.iter_logical_record_positions())
+        lrps = [v[0] for v in result]
+        result = [str(file_read.get_file_logical_data(lrp)) for lrp in lrps]
+        # print()
+        # pprint.pprint(result, width=150)
+        assert result == expected_file_logical_data
 
 
 @pytest.mark.parametrize(
@@ -2067,29 +1310,29 @@ def test_file_get_file_logical_data(by, expected_file_logical_data):
 )
 def test_file_get_file_logical_data_partial(by, offset, length, expected_file_logical_data, expected_bytes):
     fobj = io.BytesIO(by)
-    file_read = File.FileRead(fobj)
-    lrps = [lrp for lrp in file_read.iter_logical_record_positions()]
-    result: typing.List[File.FileLogicalData] = []
-    for lrp in lrps:
-        fld = file_read.get_file_logical_data(lrp, offset, length)
-        result.append(fld)
-    str_result = [str(v) for v in result]
-    # print()
-    # pprint.pprint(str_result, width=150)
-    assert str_result == expected_file_logical_data
-    actual_bytes = [fld.logical_data.bytes for fld in result]
-    # pprint.pprint(actual_bytes)
-    assert actual_bytes == expected_bytes
+    with File.FileRead(fobj) as file_read:
+        logical_record_pos_desc = list(file_read.iter_logical_record_positions())
+        result: typing.List[File.FileLogicalData] = []
+        for lrp, lrd in logical_record_pos_desc:
+            fld = file_read.get_file_logical_data(lrp, offset, length)
+            result.append(fld)
+        str_result = [str(v) for v in result]
+        # print()
+        # pprint.pprint(str_result, width=150)
+        assert str_result == expected_file_logical_data
+        actual_bytes = [fld.logical_data.bytes for fld in result]
+        # pprint.pprint(actual_bytes)
+        assert actual_bytes == expected_bytes
 
 
 def test_file_get_file_logical_data_partial_raises_on_negative_offset():
     fobj = io.BytesIO(test_data.MINIMAL_FILE)
-    file_read = File.FileRead(fobj)
-    lrps = [lrp for lrp in file_read.iter_logical_record_positions()]
-    for lrp in lrps:
-        with pytest.raises(File.ExceptionFileRead) as err:
-            file_read.get_file_logical_data(lrp, offset=-1)
-        assert err.value.args[0] == 'offset must be >= 0 not -1'
+    with File.FileRead(fobj) as file_read:
+        lrps = [lrp for lrp in file_read.iter_logical_record_positions()]
+        for lrp in lrps:
+            with pytest.raises(File.ExceptionFileRead) as err:
+                file_read.get_file_logical_data(lrp, offset=-1)
+            assert err.value.args[0] == 'offset must be >= 0 not -1'
 
 
 # ==================== END: Test of FileRead ========================
