@@ -640,7 +640,7 @@ class FileRead:
         if isinstance(path_or_file, str):
             self.file = None
             self.path = path_or_file
-        elif isinstance(path_or_file, io.BytesIO):
+        elif isinstance(path_or_file, (io.BytesIO, io.BufferedIOBase)):
             self.file = path_or_file
             try:
                 self.path = path_or_file.name

@@ -65,6 +65,40 @@ def test_tdlistohtml(tmpdir, args):
     subprocess.check_call(['tdlistohtml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+#======================== RP66V1 ==================
+RP66V1_DATA_DIR = [
+    os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data')
+]
+
+RP66V1_FILES = [
+    os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS')
+]
+
+
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-V'],
+        ['-VR'],
+    )
+)
+def test_tdrp66v1scan_file(args):
+    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_FILES[0],])
+
+
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+    )
+)
+def test_tdrp66v1scan_dir(args):
+    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_DATA_DIR,])
+
+
 @pytest.mark.parametrize(
     'args',
     (
@@ -78,6 +112,7 @@ def test_tdrp66v1scanhtml(tmpdir, args):
 
 
 
+#======================== END: RP66V1 ==================
 
 def test(tmpdir):
     print(tmpdir)

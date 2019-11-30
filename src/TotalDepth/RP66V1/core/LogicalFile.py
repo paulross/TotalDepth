@@ -250,12 +250,17 @@ class LogicalFile:
 
 class LogicalIndex:
     """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
-    def __init__(self, path_or_file: typing.Union[str, io.BytesIO]):
+    def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
         self.logical_files: typing.List[LogicalFile] = []
         self.logical_record_index = Index.LogicalRecordIndex(path_or_file)
 
     def __len__(self) -> int:
         return len(self.logical_files)
+
+
+    @property
+    def storage_unit_label(self) -> File.StorageUnitLabel:
+        return self.logical_record_index.sul
 
     def __enter__(self):
         self.logical_record_index._enter()

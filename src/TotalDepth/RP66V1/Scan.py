@@ -92,61 +92,61 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
         )
     with _output_section_header_trailer('RP66V1 Visible and LRSH Records', '*', os=fout):
         lrsh_dump = kwargs['lrsh_dump']
-        rp66_file = File.FileRead(fobj)
-        vr_position = lr_position = 0
-        count_vr = 0
-        count_lrsh = 0
-        count_lrsh_first = 0
-        count_lrsh_type = collections.Counter()
-        count_lrsh_length = collections.Counter()
-        rle_visible_record_positions = Rle.RLE()
-        rle_lrsh_positions = Rle.RLE()
-        for visible_record in rp66_file.iter_visible_records():
-            vr_stride = visible_record.position - vr_position
-            rle_visible_record_positions.add(visible_record.position)
-            if verbose:
-                fout.write(f'{visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}\n')
-            if lrsh_dump:
-                for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
-                    count_lrsh_length.update([lrsh.length])
-                    if lrsh.attributes.is_first:
-                        rle_lrsh_positions.add(lrsh.position)
-                        count_lrsh_first += 1
-                        count_lrsh_type.update([lrsh.record_type])
-                        output = colorama.Fore.GREEN + f' {lrsh}'
-                    elif lrsh.attributes.is_last:
-                        output = colorama.Fore.RED + f'  --{lrsh}'
-                    else:
-                        output = colorama.Fore.YELLOW + f'  ..{lrsh}'
-                    if verbose:
-                        lr_stride = lrsh.position - lr_position
-                        fout.write(f'  {output} Stride: 0x{lr_stride:08x} {lr_stride:6,d}\n')
-                    lr_position = lrsh.position
-                    count_lrsh += 1
-            vr_position = visible_record.position
-            count_vr += 1
-        with _output_section_header_trailer('Summary of Visible Records', '=', os=fout):
-            fout.write(f'Visible records: {count_vr:,d}\n')
-            with _output_section_header_trailer('RLE Visible Record Position', '-', os=fout):
-                _write_position_rle(rle_visible_record_positions, fout)
-        if lrsh_dump:
-            with _output_section_header_trailer('Summary of LRSH', '=', os=fout):
-                fout.write(f'LRSH: total={count_lrsh:,d} is_first={count_lrsh_first}\n')
-                fout.write(f'LRSH: record types and counts (first segments only) [{len(count_lrsh_type)}]:\n')
-                for record_type in sorted(count_lrsh_type.keys()):
-                    fout.write(f'{record_type:3d} : {count_lrsh_type[record_type]:8,d}\n')
-                fout.write(
-                    f'LRSH: record lengths and counts (all segments)'
-                    f' [{len(count_lrsh_length)}]'
-                )
-                if len(count_lrsh_length):
-                    fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
-                fout.write(f'\n')
+        with File.FileRead(fobj) as rp66_file:
+            vr_position = lr_position = 0
+            count_vr = 0
+            count_lrsh = 0
+            count_lrsh_first = 0
+            count_lrsh_type = collections.Counter()
+            count_lrsh_length = collections.Counter()
+            rle_visible_record_positions = Rle.RLE()
+            rle_lrsh_positions = Rle.RLE()
+            for visible_record in rp66_file.iter_visible_records():
+                vr_stride = visible_record.position - vr_position
+                rle_visible_record_positions.add(visible_record.position)
                 if verbose:
-                    for length in sorted(count_lrsh_length.keys()):
-                        fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
-                    with _output_section_header_trailer('RLE LRSH Position', '-', os=fout):
-                        _write_position_rle(rle_lrsh_positions, fout)
+                    fout.write(f'{visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}\n')
+                if lrsh_dump:
+                    for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
+                        count_lrsh_length.update([lrsh.length])
+                        if lrsh.attributes.is_first:
+                            rle_lrsh_positions.add(lrsh.position)
+                            count_lrsh_first += 1
+                            count_lrsh_type.update([lrsh.record_type])
+                            output = colorama.Fore.GREEN + f' {lrsh}'
+                        elif lrsh.attributes.is_last:
+                            output = colorama.Fore.RED + f'  --{lrsh}'
+                        else:
+                            output = colorama.Fore.YELLOW + f'  ..{lrsh}'
+                        if verbose:
+                            lr_stride = lrsh.position - lr_position
+                            fout.write(f'  {output} Stride: 0x{lr_stride:08x} {lr_stride:6,d}\n')
+                        lr_position = lrsh.position
+                        count_lrsh += 1
+                vr_position = visible_record.position
+                count_vr += 1
+            with _output_section_header_trailer('Summary of Visible Records', '=', os=fout):
+                fout.write(f'Visible records: {count_vr:,d}\n')
+                with _output_section_header_trailer('RLE Visible Record Position', '-', os=fout):
+                    _write_position_rle(rle_visible_record_positions, fout)
+            if lrsh_dump:
+                with _output_section_header_trailer('Summary of LRSH', '=', os=fout):
+                    fout.write(f'LRSH: total={count_lrsh:,d} is_first={count_lrsh_first}\n')
+                    fout.write(f'LRSH: record types and counts (first segments only) [{len(count_lrsh_type)}]:\n')
+                    for record_type in sorted(count_lrsh_type.keys()):
+                        fout.write(f'{record_type:3d} : {count_lrsh_type[record_type]:8,d}\n')
+                    fout.write(
+                        f'LRSH: record lengths and counts (all segments)'
+                        f' [{len(count_lrsh_length)}]'
+                    )
+                    if len(count_lrsh_length):
+                        fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
+                    fout.write(f'\n')
+                    if verbose:
+                        for length in sorted(count_lrsh_length.keys()):
+                            fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
+                        with _output_section_header_trailer('RLE LRSH Position', '-', os=fout):
+                            _write_position_rle(rle_lrsh_positions, fout)
 
 
 def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
@@ -848,6 +848,7 @@ def main() -> int:
         )
     clk_exec = time.perf_counter() - clk_start
     size_scan = size_input = 0
+    failures = 0
     files_processed = 0
     for path in sorted(result.keys()):
         idx_result = result[path]
@@ -862,7 +863,8 @@ def main() -> int:
             size_input += result[path].size_input
             size_scan += result[path].size_output
             files_processed += 1
-
+        if idx_result.exception:
+            failures += 1
     if args.gnuplot:
         plot_gnuplot(result, args.gnuplot)
     if size_input > 0:
@@ -872,7 +874,7 @@ def main() -> int:
     print('Execution time = %8.3f (S)' % clk_exec)
     print(f'Processed {len(result):,d} files and {size_input:,d} bytes, {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
-    return 0
+    return failures
 
 
 if __name__ == '__main__':

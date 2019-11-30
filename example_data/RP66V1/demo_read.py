@@ -1,13 +1,13 @@
+import os
 import sys
 
 import numpy as np
 
-from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.common import Slice
 
 
-path_in = '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS'
+path_in = os.path.join('data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS')
 
 
 def demo_logical_files():
