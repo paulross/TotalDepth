@@ -70,11 +70,11 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
             # Index the file
             with Index.LogicalRecordIndex(path_in) as logical_record_index:
                 index_time = time.perf_counter() - t_start
-                logger.info(
-                    f'Index length {len(logical_record_index)}'
-                    # f' sizeof {sys.getsizeof(logical_record_index.lr_pos_desc)}'
-                    # f' {sys.getsizeof(logical_record_index.lr_pos_desc) / len(logical_record_index):.1f} byte/LR'
-                )
+                # logger.info(
+                #     f'Index length {len(logical_record_index)}'
+                #     # f' sizeof {sys.getsizeof(logical_record_index.lr_pos_desc)}'
+                #     # f' {sys.getsizeof(logical_record_index.lr_pos_desc) / len(logical_record_index):.1f} byte/LR'
+                # )
                 t_start = time.perf_counter()
                 # Pickle the index
                 pickled_index = pickle.dumps(logical_record_index)
@@ -239,8 +239,9 @@ def main() -> int:
         result: typing.Dict[str, IndexResult] = index_dir_multiprocessing(
             args.path_in,
             args.path_out,
-            args.read_back,
             args.jobs,
+            args.recurse,
+            args.read_back,
         )
     else:
         if args.log_process > 0.0:
