@@ -27,30 +27,37 @@ class ExceptionEFLR(ExceptionTotalDepthRP66V1):
 
 
 class ExceptionEFLRSet(ExceptionEFLR):
+    """Exception class for EFLR Set errors."""
     pass
 
 
 class ExceptionEFLRSetDuplicateObjectNames(ExceptionEFLRSet):
+    """Exception class for EFLR Set with duplicate object names."""
     pass
 
 
 class ExceptionEFLRAttribute(ExceptionEFLR):
+    """Exception class for EFLR Attribute errors."""
     pass
 
 
 class ExceptionEFLRTemplate(ExceptionEFLR):
+    """Exception class for EFLR Template errors."""
     pass
 
 
 class ExceptionEFLRTemplateDuplicateLabel(ExceptionEFLRTemplate):
+    """Exception class for EFLR Template with duplicate object names."""
     pass
 
 
 class ExceptionEFLRObject(ExceptionEFLR):
+    """Exception class for EFLR Object errors."""
     pass
 
 
 class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
+    """Exception class for EFLR Object with duplicate labels."""
     pass
 
 
@@ -66,9 +73,11 @@ class Set:
             self.name = RepCode.IDENT(ld)
 
     def __str__(self) -> str:
+        """String representation."""
         return f'EFLR Set type: {self.type} name: {self.name}'
 
     def __eq__(self, other) -> bool:
+        """Equality operator."""
         if other.__class__ == self.__class__:
             return self.type == other.type and self.name == other.name
         return NotImplemented
@@ -89,11 +98,13 @@ class AttributeBase:
         self.value = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_MAP['V'].global_default
 
     def __eq__(self, other):
+        """Equality operator."""
         if isinstance(other, AttributeBase):
             return self.__dict__ == other.__dict__
         return NotImplemented
 
     def __str__(self) -> str:
+        """String representation."""
         # print('TRACE: rep_code', self.rep_code)
         try:
             rep_code_str = RepCode.REP_CODE_INT_TO_STR[self.rep_code]
@@ -103,6 +114,7 @@ class AttributeBase:
             f' R: {self.rep_code:d} ({rep_code_str}) U: {self.units} V: {self.value}'
 
     def stringify_value(self, stringify_function: typing.Callable) -> str:
+        """Return the value as a string."""
         value_as_string = stringify_function(self.value)
         if self.units == ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_ATTRIBUTE_MAP['U'].global_default:
             return value_as_string
@@ -168,6 +180,7 @@ class Template:
         self.attr_label_map: typing.Dict[bytes, int] = {}
 
     def read(self, ld: LogicalData):
+        """Populate the template with the Logical Data."""
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
@@ -187,25 +200,33 @@ class Template:
                 break
 
     def __len__(self) -> int:
+        """Return the number of columns described by this Template."""
         return len(self.attrs)
 
     def __getitem__(self, item) -> TemplateAttribute:
+        """Get a TemplateAttribute by name or integer index."""
+        if item in self.attr_label_map:
+            return self.attrs[self.attr_label_map[item]]
         return self.attrs[item]
 
     def __eq__(self, other) -> bool:
+        """Equality operator."""
         if other.__class__ == Template:
             return self.attrs == other.attrs
         return NotImplemented
 
     def __str__(self) -> str:
+        """String representation."""
         return '\n'.join(str(a) for a in self.attrs)
 
     def header_as_strings(self, stringify_function: typing.Callable) -> typing.List[str]:
+        """Return the TemplateAttributes as strings."""
         return [stringify_function(attr.label) for attr in self.attrs]
 
 
 class Object:
-    """Class that represents a component object. See [RP66V1 3.2.2.1 Component Descriptor]"""
+    """Class that represents a component object. See [RP66V1 3.2.2.1 Component Descriptor].
+    Essentially this is one row in the table as a list of Atributes."""
     def __init__(self, ld: LogicalData, template: Template):
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_object:
@@ -252,19 +273,23 @@ class Object:
             self.attr_label_map[label] = a
 
     def __len__(self) -> int:
+        """Return the number of attributes (columns) for this row."""
         return len(self.attrs)
 
     def __getitem__(self, item) -> typing.Union[AttributeBase, None]:
+        """Get an Attribute (column) by name or integer index."""
         if item in self.attr_label_map:
             return self.attrs[self.attr_label_map[item]]
         return self.attrs[item]
 
     def __eq__(self, other) -> bool:
+        """Equality operator."""
         if other.__class__ == Object:
             return self.name == other.name and self.attrs == other.attrs and self.attr_label_map == other.attr_label_map
         return NotImplemented
 
     def __str__(self) -> str:
+        """String representation."""
         strs = [
             str(self.name)
         ]
@@ -274,6 +299,7 @@ class Object:
         return '\n'.join(strs)
 
     def values_as_strings(self, stringify_function: typing.Callable) -> typing.List[str]:
+        """Return the Attribute values as strings."""
         ret = [attr.stringify_value(stringify_function) for attr in self.attrs]
         return ret
 
@@ -316,14 +342,14 @@ class Object:
 """
 
 
-#: From [RP66V1 Appendix A: Logical Record Types] Figure A-2. Numeric Codes for Public EFLR Types"""
 class PublicEFLRType(typing.NamedTuple):
+    """From [RP66V1 Appendix A: Logical Record Types] Figure A-2. Numeric Codes for Public EFLR Types."""
     code: int
     type: bytes
     description: str
     allowable_set_types: typing.Set[bytes]
 
-#: From [RP66V1 Appendix A: Logical Record Types] Figure A-2. Numeric Codes for Public EFLR Types"""
+#: From [RP66V1 Appendix A: Logical Record Types] Figure A-2. Numeric Codes for Public EFLR Types
 PUBLIC_EFLR_TYPES: typing.Dict[int, PublicEFLRType] = {
     0: PublicEFLRType(0, b'FHLR', 'File header', {b'FILE-HEADER'}),
     1: PublicEFLRType(1, b'OLR', 'Origin', {b'ORIGIN', b'WELL-REFERENCE'}),
@@ -345,8 +371,11 @@ PUBLIC_EFLR_TYPES: typing.Dict[int, PublicEFLRType] = {
 
 
 class ExplicitlyFormattedLogicalRecord:
-    """Represents a RP66V1 Explicitly Formatted Logical Record (EFLR). Effectively this is a table."""
+    """Represents a RP66V1 Explicitly Formatted Logical Record (EFLR).
+    Effectively this is a table containing a list of rows, each row is represented by an Object."""
+    #: The strategy for dealing with duplicate objects.
     DUPE_OBJECT_STRATEGY = DuplicateObjectStrategy.REPLACE
+    #: What level to log duplicate object operations.
     DUPE_OBJECT_LOGGER = logger.warning
 
     def __init__(self, lr_type: int, ld: LogicalData):
@@ -435,18 +464,22 @@ class ExplicitlyFormattedLogicalRecord:
             assert 0, f'Unsupported DuplicateObjectStrategy {self.DUPE_OBJECT_STRATEGY}'
 
     def __len__(self) -> int:
+        """Returns the number of rows in the table."""
         assert len(self.objects) == len(self.object_name_map)
         return len(self.objects)
 
     def __getitem__(self, item) -> Object:
+        """Get an Object (row) by name or integer index."""
         if item in self.object_name_map:
             return self.objects[self.object_name_map[item]]
         return self.objects[item]
 
     def __str__(self) -> str:
+        """Short string representation."""
         return f'<ExplicitlyFormattedLogicalRecord {str(self.set)}>'
 
     def __eq__(self, other) -> bool:
+        """Equality operator."""
         if other.__class__ == self.__class__:
             if self.lr_type == other.lr_type and self.set == other.set \
                     and self.object_name_map == other.object_name_map:

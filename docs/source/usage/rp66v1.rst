@@ -9,35 +9,76 @@
 Processing RP66V1 Files
 =======================
 
+This describes how you can programatically access the contents of an RP66V1 file with TotalDepth with worked examples.
+First, here is how TotalDepth represents the structure of a RP66V1 file.
 
-Important Concepts
+RP66V1 File Structure
 ------------------------------
 
-The internal representation of a RP66V1 files is as follows:
+A physical RP66V1 file (typically a file on disk) consists of a :term:`RP66V1.Storage Unit Label` followed of any number of :term:`RP66V1.Explicitly Formatted Logical Record` (EFLRs) and any number of :term:`RP66V1.Indirectly Formatted Logical Record` (IFLRs) in any order.
 
-* A physical file (typically a file on disk) consists of a Storage Unit Label followed by any number of *Logical Files*.
-* *Logical Files* consist of any number of :term:`Explicitly Formatted Logical Record` (EFLRs) and, optionally, a single *Log Pass*. Logical Files are independent from each other.
-* The *Log Pass* represents a single data collection run (example: "Repeat Section") and contains one or more *Frame Arrays*.
-* A *Frame Array* is a number of frames of channel data.
+At this level the file conceptually looks like this:
+
+.. code-block:: console
+
+    Physical File
+    |-> Storage Unit Label
+    |-> EFLR
+    |-> EFLR
+    |-> IFLR
+    |-> EFLR
+    |-> IFLR
+    |-> EFLR
+        ...
+
+
+The EFLRs and IFLRs are organised into one or more any number of *Logical Files*.
+Specifically a Logical File starts with an ``FILE-HEADER`` EFLR followed by an ``ORIGIN`` or ``WELL-REFERENCE`` EFLR.
+
+A Logical FIle might represent all the data recorded in, say, a "Repeat Section" and Logical Files are independent from each other [#]_.
+
+The conceptual model for the Logical File delimited RP66V1 file is something like this:
+
+.. code-block:: console
+
+    Physical File
+    |-> Storage Unit Label
+    |-> Logical File[0] "Repeat Section"
+        |-> EFLR type FILE-HEADER
+        |-> EFLR type ORIGIN
+        |-> EFLR
+        |-> EFLR
+        |-> IFLR
+        |-> EFLR
+        |-> IFLR
+        ...
+    |-> Logical File[1] "Main Log"
+        ...
+
+The collection of IFLRs for any Logical File can be further organised into a single *Log Pass*.
 
 Log Pass
 ^^^^^^^^^^^^^^
 
 A :term:`Log Pass` represents a typical, independent, logging recording. A "Repeat Section" plus a "Main Log" are two, distinct, independent Log Passes.
+The *Log Pass* is defined by two EFLRs, a ``CHANNEL`` that describes all the available measurements for that Logical File and a ``FRAME`` that describes the sets of these channels that go into a recording, the index and the spacing.
+The *Log Pass* represents a single data collection run (example: "Repeat Section") and contains one or more *Frame Arrays*.
 
 
 Frame Array
 ^^^^^^^^^^^^^^
 
-A :term:`Frame Array` is the logging data converted to the platforms internal types (usually C doubles) and stored in memory as a table where each row represents a particular depth (or time) and each column is the output of a specific channel. Each row is often referred to as a :term:`Frame`
+A :term:`Frame Array` contains a number of frames of channel data converted to the platforms internal types (usually C doubles) and stored in memory as a table.
+In this table each row represents a particular value on the X axis (typically depth or time) and each column is the output of a specific channel. Each row is often referred to as a :term:`Frame`
+There can be multiple values for any channel in a frame.
 
 
-Conceptual Model
-^^^^^^^^^^^^^^^^^^^^^^
+Conceptual Model Presented by TotalDepth
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An example of a RP66V1 file might be one that contains two Logical Files representing, say, the "Repeat Section" and "Main Log". Each of these has a number of EFLRs and a Log Pass that contains two Frame Arrays, one is sampled every inch in depth and the other every six inches. The two Frame Arrays might have different channels.
+By example here is a RP66V1 file might be one that contains two Logical Files representing, say, the "Repeat Section" and "Main Log". Each of these has a number of EFLRs and a Log Pass that contains two Frame Arrays, one is sampled every inch in depth and the other every six inches. The two Frame Arrays might have different channels.
 
-A conceptual model of this physical RP66V1 file might be:
+This model of the physical RP66V1 file will be something like:
 
 .. code-block:: console
 
@@ -45,106 +86,352 @@ A conceptual model of this physical RP66V1 file might be:
     |-> Storage Unit Label
     |-> Logical File[0] "Repeat Section"
     |   |-> EFLRs
+    |   |-> ...
     |   |-> Log Pass
     |       |-> Frame Array at 1 inch spacing with channels A, B, C
     |       |-> Frame Array at 6 inch spacing with channels B, D, E
     |-> Logical File[1] "Main Log"
         |-> EFLRs
+    |   |-> ...
         |-> Log Pass
     |       |-> Frame Array at 1 inch spacing with channels A, B, C, X
     |       |-> Frame Array at 6 inch spacing with channels B, D, E, F
 
 
+This model is exposed with the class :py:class:`TotalDepth.RP66V1.core.LogicalFile.LogicalIndex` which allows random access to all parts of the file.
 
-The following examples show how to iterate through a RP66V1 file and access the tables and frame data.
+The following examples show how to iterate through a RP66V1 file with the ``LogicalIndex`` and access the tables and frame data.
 The code snippets here are all in :file:`example_data/RP66V1/demo_read.py`
 
 .. warning:: At this version, |version|, these APIs are provisional, not final.
 
 
-Reading :term:`RP66V1.EFLR` Tables
---------------------------------------
+Basic Pattern for Reading RP66V1 Files with TotalDepth
+------------------------------------------------------------
 
-An :term:`RP66V1.Explicitly Formatted Logical Record` is a table of data organised in rows and columns.
+All these examples take the following pattern where a ``LogicalIndex`` is created as a context manager.
 
-As an example:
-
+This can be done with a file path as a string:
 
 .. code-block:: python
 
-    from TotalDepth.RP66V1.core import File
+    from TotalDepth.RP66V1.core import LogicalFile
+
+    with LogicalFile.LogicalIndex(path) as logical_index:
+        # Do something
+
+Or an open, binary, file:
+
+.. code-block:: python
+
+    from TotalDepth.RP66V1.core import LogicalFile
+
+    with open(path, 'rb') as fobj:
+        with LogicalFile.LogicalIndex(fobj) as logical_index:
+            # Do something
+
+Example Data
+^^^^^^^^^^^^^^^^^^^^^^
+
+There are some example RP66V1 files in :file:`example_data/RP66V1/data` and there is some example RP66V1 binary data in the module :py:mod:`tests.unit.RP66V1.core.test_data`.
+
+To use the former the path, for example:
+
+.. code-block:: python
+
     from TotalDepth.RP66V1.core import LogicalFile
     
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
-        for logical_file in logical_index.logical_files:
-            for position, eflr in logical_file.eflrs:
-                # This is quite verbose...
-                print(eflr.str_long())
+    path = os.path.join('example_data', 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS')
+    with LogicalFile.LogicalIndex(path) as logical_index:
+        # Do something
 
-Produces this output (only the first two EFLRs are shown):
+
+To use the latter import the modul and create a file object from the bytes in the module, for example:
+
+.. code-block:: python
+
+    from TotalDepth.RP66V1.core import LogicalFile
+    from tests.unit.RP66V1.core import test_data
+
+    file_object = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(file_object) as logical_index:
+        # Do something
+
+
+Inspecting the Logical File
+------------------------------
+
+Once a :py:class:`TotalDepth.RP66V1.core.LogicalFile.LogicalIndex` has been created the
+:py:class:`TotalDepth.RP66V1.core.LogicalFile.LogicalFile` object can be accessed, for example:
+
+.. code-block:: python
+
+    from TotalDepth.RP66V1.core import LogicalFile
+    from tests.unit.RP66V1.core import test_data
+
+    file_object = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(file_object) as logical_index:
+        for l, logical_file in enumerate(logical_index.logical_files):
+            print(f'LogicalFile [{l}]: {logical_file}')
+
+
+Produces the single Logical File in ``BASIC_FILE``:
 
 .. code-block:: console
 
-    ExplicitlyFormattedLogicalRecord EFLR Set type: b'FILE-HEADER' name: b''>
+    LogicalFile [0]: <TotalDepth.RP66V1.core.LogicalFile.LogicalFile object at 0x11ca5ec50>
+
+The Logical File object has some useful properties:
+
+=================================== ======================================================
+Property                            Description
+=================================== ======================================================
+``file_header_logical_record``      The ``FILE-HEADER`` EFLR that defines the Logical
+                                    File.
+                                    
+                                    See: [RP66V1 Section 5.1 File Header Logical Record
+                                    (FHLR)].
+``origin_logical_record``           The ``ORIGIN`` EFLR that defines the origin of the
+                                    Logical Record.
+                                    
+                                    See [RP66V1 Section 5.2 Origin Logical Record (OLR)].
+``defining_origin``                 Returns the Defining Origin of the Logical File.
+                                    This is the first row of the ``ORIGIN`` Logical
+                                    Record.
+                                    
+                                    From [RP66V1 Section 5.2.1 Origin Objects]:
+                                    *"The first Object in the first ORIGIN Set is the
+                                    Defining Origin for the Logical File in which it is
+                                    contained, and the corresponding Logical File is
+                                    called the Origin's Parent File.
+                                    It is intended that no two Logical Files will ever
+                                    have Defining Origins with all Attribute Values
+                                    identical.""*
+``channel``                         The CHANNEL EFLR or None.
+``frame``                           The FRAME EFLR or None.
+``has_log_pass``                    True if this Logical File has both a CHANNEL and a
+                                    FRAME EFLR.
+=================================== ======================================================
+
+An :term:`RP66V1.Explicitly Formatted Logical Record` (EFLR) is implemented as the class
+:py:class:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord` and that has a method
+:py:meth:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord.str_long()` that provides
+verbose information about the table. Here is an example of accessing all of the above properties for the ``BASIC_FILE``:
+
+.. code-block:: python
+
+    from TotalDepth.RP66V1.core import LogicalFile
+    from tests.unit.RP66V1.core import test_data
+
+    file_object = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(file_object) as logical_index:
+        for l, logical_file in enumerate(logical_index.logical_files):
+            print(f'***** logical_file.file_header_logical_record.str_long():')
+            print(logical_file.file_header_logical_record.str_long())
+            print()
+            print(f'***** logical_file.origin_logical_record.str_long():')
+            print(logical_file.origin_logical_record.str_long())
+            print()
+            print(f'***** logical_file.defining_origin:')
+            print(logical_file.defining_origin)
+            print()
+            if logical_file.channel is not None:
+                print(f'***** logical_file.channel.str_long():')
+                print(logical_file.channel.str_long())
+                print()
+            if logical_file.frame is not None:
+                print(f'***** logical_file.frame.str_long():')
+                print(logical_file.frame.str_long())
+                print()
+            print(f'***** logical_file.has_log_pass:')
+            print(logical_file.has_log_pass)
+            print()
+
+Gives:
+
+.. code-block:: console
+
+    ***** logical_file.file_header_logical_record.str_long():
+    <ExplicitlyFormattedLogicalRecord EFLR Set type: b'FILE-HEADER' name: b''>
       Template [2]:
         CD: 001 10100 L: b'SEQUENCE-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: None
         CD: 001 10100 L: b'ID' C: 1 R: 20 (ASCII) U: b'' V: None
       Objects [1]:
-        OBNAME: O: 2 C: 0 I: b'5'
-          CD: 001 00001 L: b'SEQUENCE-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: [b'       197']
-          CD: 001 00001 L: b'ID' C: 1 R: 20 (ASCII) U: b'' V: [b'MSCT_197LTP                                                      ']
+        OBNAME: O: 2 C: 0 I: b'1'
+          CD: 001 00001 L: b'SEQUENCE-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: [b'0000000001']
+          CD: 001 00001 L: b'ID' C: 1 R: 20 (ASCII) U: b'' V: [b'HES INSITE.1                                                     ']
+
+    ***** logical_file.origin_logical_record.str_long():
     <ExplicitlyFormattedLogicalRecord EFLR Set type: b'ORIGIN' name: b''>
       Template [20]:
-        CD: 001 11100 L: b'FILE-ID' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'FILE-SET-NAME' C: 1 R: 19 (IDENT) U: b'' V: None
-        CD: 001 11100 L: b'FILE-SET-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: None
-        CD: 001 11100 L: b'FILE-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: None
-        CD: 001 11100 L: b'FILE-TYPE' C: 1 R: 19 (IDENT) U: b'' V: None
-        CD: 001 11100 L: b'PRODUCT' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'VERSION' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'PROGRAMS' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'CREATION-TIME' C: 1 R: 21 (DTIME) U: b'' V: None
-        CD: 001 11100 L: b'ORDER-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11000 L: b'DESCENT-NUMBER' C: 1 R: 19 (IDENT) U: b'' V: None
-        CD: 001 11000 L: b'RUN-NUMBER' C: 1 R: 19 (IDENT) U: b'' V: None
-        CD: 001 11100 L: b'WELL-ID' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'WELL-NAME' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'FIELD-NAME' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'PRODUCER-CODE' C: 1 R: 16 (UNORM) U: b'' V: None
-        CD: 001 11100 L: b'PRODUCER-NAME' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'COMPANY' C: 1 R: 20 (ASCII) U: b'' V: None
-        CD: 001 11100 L: b'NAME-SPACE-NAME' C: 1 R: 19 (IDENT) U: b'' V: None
-        CD: 001 11100 L: b'NAME-SPACE-VERSION' C: 1 R: 18 (UVARI) U: b'' V: None
+        CD: 001 11000 L: b'FILE-ID' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'FILE-SET-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'FILE-SET-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'FILE-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'FILE-TYPE' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'PRODUCT' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'VERSION' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'PROGRAMS' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'CREATION-TIME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'ORDER-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'DESCENT-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'RUN-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'WELL-ID' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'WELL-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'FIELD-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'PRODUCER-CODE' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'PRODUCER-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'COMPANY' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'NAME-SPACE-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11000 L: b'NAME-SPACE-VERSION' C: 0 R: 19 (IDENT) U: b'' V: None
       Objects [1]:
-        OBNAME: O: 2 C: 0 I: b'DLIS_DEFINING_ORIGIN'
-          CD: 001 00001 L: b'FILE-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'MSCT_197LTP                                                      ']
-          CD: 001 00001 L: b'FILE-SET-NAME' C: 1 R: 19 (IDENT) U: b'' V: [b'FAROE_PETROLEUM/206_05A-3']
-          CD: 001 00001 L: b'FILE-SET-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [41]
-          CD: 001 00001 L: b'FILE-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [167]
-          CD: 001 00001 L: b'FILE-TYPE' C: 1 R: 19 (IDENT) U: b'' V: [b'STATION LOG']
-          CD: 001 00001 L: b'PRODUCT' C: 1 R: 20 (ASCII) U: b'' V: [b'OP']
-          CD: 001 00001 L: b'VERSION' C: 1 R: 20 (ASCII) U: b'' V: [b'19C0-187']
-          CD: 001 01001 L: b'PROGRAMS' C: 4 R: 20 (ASCII) U: b'' V: [b'MSCT: Mechanical Sidewall Coring Tool', b'SGTP: Scintillation Gamma-Ray - P', b'LEHQT: Logging Equipment Head - QT', b'WELLCAD: WellCAD file generator']
-          CD: 001 00001 L: b'CREATION-TIME' C: 1 R: 21 (DTIME) U: b'' V: [<<class 'TotalDepth.RP66V1.core.RepCode.DateTime'> 2011-08-20 22:48:50.000 DST>]
-          CD: 001 00001 L: b'ORDER-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: [b'BSAX-00003                                                                                                                     ']
-          CD: 001 00001 L: b'DESCENT-NUMBER' C: 1 R: 19 (IDENT) U: b'' V: [b'-1']
-          CD: 001 00001 L: b'RUN-NUMBER' C: 1 R: 19 (IDENT) U: b'' V: [b'1']
-          CD: 001 00001 L: b'WELL-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'                                                                                                                               ']
-          CD: 001 00001 L: b'WELL-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'206/05a-3                                                                                                                      ']
-          CD: 001 00001 L: b'FIELD-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Fulla                                                                                                                          ']
-          CD: 001 00001 L: b'PRODUCER-CODE' C: 1 R: 16 (UNORM) U: b'' V: [440]
-          CD: 001 00001 L: b'PRODUCER-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Schlumberger']
-          CD: 001 00001 L: b'COMPANY' C: 1 R: 20 (ASCII) U: b'' V: [b'Faroe Petroleum                                                                                                                ']
-          CD: 001 00001 L: b'NAME-SPACE-NAME' C: 1 R: 19 (IDENT) U: b'' V: [b'SLB']
-          CD: 000 00000 L: b'NAME-SPACE-VERSION' C: 1 R: 18 (UVARI) U: b'' V: None
+        OBNAME: O: 2 C: 0 I: b'0'
+          CD: 001 01101 L: b'FILE-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'HES INSITE.1']
+          CD: 001 01101 L: b'FILE-SET-NAME' C: 1 R: 19 (IDENT) U: b'' V: [b'BURU ENERGY LIMITED/VALHALLA NORTH 1']
+          CD: 001 01101 L: b'FILE-SET-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [257346645]
+          CD: 001 01101 L: b'FILE-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01101 L: b'FILE-TYPE' C: 1 R: 19 (IDENT) U: b'' V: [b'PLAYBACK']
+          CD: 001 01101 L: b'PRODUCT' C: 1 R: 20 (ASCII) U: b'' V: [b'HES INSITE']
+          CD: 001 01101 L: b'VERSION' C: 1 R: 20 (ASCII) U: b'' V: [b'R5.1.4']
+          CD: 000 00000 L: b'PROGRAMS' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01101 L: b'CREATION-TIME' C: 1 R: 21 (DTIME) U: b'' V: [<<class 'TotalDepth.RP66V1.core.RepCode.DateTime'> 2012-03-07 10:00:49.000 STD>]
+          CD: 001 01101 L: b'ORDER-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: [b'9262611']
+          CD: 000 00000 L: b'DESCENT-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 000 00000 L: b'RUN-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01101 L: b'WELL-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'N/A']
+          CD: 001 01101 L: b'WELL-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'VALHALLA NORTH 1']
+          CD: 001 01101 L: b'FIELD-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'VALHALLA']
+          CD: 001 01101 L: b'PRODUCER-CODE' C: 1 R: 16 (UNORM) U: b'' V: [280]
+          CD: 001 01101 L: b'PRODUCER-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Halliburton']
+          CD: 001 01101 L: b'COMPANY' C: 1 R: 20 (ASCII) U: b'' V: [b'BURU ENERGY LIMITED']
+          CD: 000 00000 L: b'NAME-SPACE-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 000 00000 L: b'NAME-SPACE-VERSION' C: 0 R: 19 (IDENT) U: b'' V: None
+
+    ***** logical_file.defining_origin:
+    OBNAME: O: 2 C: 0 I: b'0'
+      CD: 001 01101 L: b'FILE-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'HES INSITE.1']
+      CD: 001 01101 L: b'FILE-SET-NAME' C: 1 R: 19 (IDENT) U: b'' V: [b'BURU ENERGY LIMITED/VALHALLA NORTH 1']
+      CD: 001 01101 L: b'FILE-SET-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [257346645]
+      CD: 001 01101 L: b'FILE-NUMBER' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 001 01101 L: b'FILE-TYPE' C: 1 R: 19 (IDENT) U: b'' V: [b'PLAYBACK']
+      CD: 001 01101 L: b'PRODUCT' C: 1 R: 20 (ASCII) U: b'' V: [b'HES INSITE']
+      CD: 001 01101 L: b'VERSION' C: 1 R: 20 (ASCII) U: b'' V: [b'R5.1.4']
+      CD: 000 00000 L: b'PROGRAMS' C: 0 R: 19 (IDENT) U: b'' V: None
+      CD: 001 01101 L: b'CREATION-TIME' C: 1 R: 21 (DTIME) U: b'' V: [<<class 'TotalDepth.RP66V1.core.RepCode.DateTime'> 2012-03-07 10:00:49.000 STD>]
+      CD: 001 01101 L: b'ORDER-NUMBER' C: 1 R: 20 (ASCII) U: b'' V: [b'9262611']
+      CD: 000 00000 L: b'DESCENT-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+      CD: 000 00000 L: b'RUN-NUMBER' C: 0 R: 19 (IDENT) U: b'' V: None
+      CD: 001 01101 L: b'WELL-ID' C: 1 R: 20 (ASCII) U: b'' V: [b'N/A']
+      CD: 001 01101 L: b'WELL-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'VALHALLA NORTH 1']
+      CD: 001 01101 L: b'FIELD-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'VALHALLA']
+      CD: 001 01101 L: b'PRODUCER-CODE' C: 1 R: 16 (UNORM) U: b'' V: [280]
+      CD: 001 01101 L: b'PRODUCER-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'Halliburton']
+      CD: 001 01101 L: b'COMPANY' C: 1 R: 20 (ASCII) U: b'' V: [b'BURU ENERGY LIMITED']
+      CD: 000 00000 L: b'NAME-SPACE-NAME' C: 0 R: 19 (IDENT) U: b'' V: None
+      CD: 000 00000 L: b'NAME-SPACE-VERSION' C: 0 R: 19 (IDENT) U: b'' V: None
+
+    ***** logical_file.channel.str_long():
+    <ExplicitlyFormattedLogicalRecord EFLR Set type: b'CHANNEL' name: b''>
+      Template [8]:
+        CD: 001 11100 L: b'LONG-NAME' C: 0 R: 20 (ASCII) U: b'' V: None
+        CD: 001 11100 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11100 L: b'REPRESENTATION-CODE' C: 0 R: 15 (USHORT) U: b'' V: None
+        CD: 001 11100 L: b'DIMENSION' C: 0 R: 18 (UVARI) U: b'' V: None
+        CD: 001 11100 L: b'ELEMENT-LIMIT' C: 0 R: 18 (UVARI) U: b'' V: None
+        CD: 001 11100 L: b'UNITS' C: 0 R: 27 (UNITS) U: b'' V: None
+        CD: 001 11100 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+        CD: 001 11100 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+      Objects [5]:
+        OBNAME: O: 2 C: 0 I: b'DEPT'
+          CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'DEPT/Depth']
+          CD: 000 00000 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [7]
+          CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'UNITS' C: 1 R: 27 (UNITS) U: b'' V: [b'm']
+          CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+          CD: 000 00000 L: b'SOURCE' C: 0 R: 24 (OBJREF) U: b'' V: None
+        OBNAME: O: 2 C: 0 I: b'TENS'
+          CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'TENS/Tension']
+          CD: 000 00000 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+          CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'UNITS' C: 1 R: 27 (UNITS) U: b'' V: [b'lbs']
+          CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+          CD: 001 01001 L: b'SOURCE' C: 1 R: 24 (OBJREF) U: b'' V: [ObjectReference(T=b'TOOL', N=ObjectName(O=2, C=0, I=b'DEP'))]
+        OBNAME: O: 2 C: 0 I: b'ETIM'
+          CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'ETIM/Elapsed Time']
+          CD: 000 00000 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [7]
+          CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'UNITS' C: 1 R: 27 (UNITS) U: b'' V: [b'min']
+          CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+          CD: 001 01001 L: b'SOURCE' C: 1 R: 24 (OBJREF) U: b'' V: [ObjectReference(T=b'TOOL', N=ObjectName(O=2, C=0, I=b'DEP'))]
+        OBNAME: O: 2 C: 0 I: b'DHTN'
+          CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'DHTN/CH Tension']
+          CD: 000 00000 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+          CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'UNITS' C: 1 R: 27 (UNITS) U: b'' V: [b'lbs']
+          CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+          CD: 001 01001 L: b'SOURCE' C: 1 R: 24 (OBJREF) U: b'' V: [ObjectReference(T=b'TOOL', N=ObjectName(O=2, C=0, I=b'RWCH'))]
+        OBNAME: O: 2 C: 0 I: b'GR'
+          CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'GR/Gamma API']
+          CD: 000 00000 L: b'PROPERTIES' C: 0 R: 19 (IDENT) U: b'' V: None
+          CD: 001 01001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [2]
+          CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'ELEMENT-LIMIT' C: 1 R: 18 (UVARI) U: b'' V: [1]
+          CD: 001 01001 L: b'UNITS' C: 1 R: 27 (UNITS) U: b'' V: [b'api']
+          CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+          CD: 001 01001 L: b'SOURCE' C: 1 R: 24 (OBJREF) U: b'' V: [ObjectReference(T=b'TOOL', N=ObjectName(O=2, C=0, I=b'D4TG'))]
+
+    ***** logical_file.frame.str_long():
+    <ExplicitlyFormattedLogicalRecord EFLR Set type: b'FRAME' name: b''>
+      Template [8]:
+        CD: 001 11100 L: b'DESCRIPTION' C: 0 R: 20 (ASCII) U: b'' V: None
+        CD: 001 11100 L: b'CHANNELS' C: 0 R: 23 (OBNAME) U: b'' V: None
+        CD: 001 11100 L: b'INDEX-TYPE' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11100 L: b'DIRECTION' C: 0 R: 19 (IDENT) U: b'' V: None
+        CD: 001 11100 L: b'SPACING' C: 0 R: 7 (FDOUBL) U: b'' V: None
+        CD: 001 11100 L: b'ENCRYPTED' C: 0 R: 15 (USHORT) U: b'' V: None
+        CD: 001 11100 L: b'INDEX-MIN' C: 0 R: 7 (FDOUBL) U: b'' V: None
+        CD: 001 11100 L: b'INDEX-MAX' C: 0 R: 7 (FDOUBL) U: b'' V: None
+      Objects [1]:
+        OBNAME: O: 2 C: 0 I: b'50'
+          CD: 000 00000 L: b'DESCRIPTION' C: 0 R: 20 (ASCII) U: b'' V: None
+          CD: 001 01001 L: b'CHANNELS' C: 5 R: 23 (OBNAME) U: b'' V: [ObjectName(O=2, C=0, I=b'DEPT'), ObjectName(O=2, C=0, I=b'TENS'), ObjectName(O=2, C=0, I=b'ETIM'), ObjectName(O=2, C=0, I=b'DHTN'), ObjectName(O=2, C=0, I=b'GR')]
+          CD: 001 01001 L: b'INDEX-TYPE' C: 1 R: 19 (IDENT) U: b'' V: [b'BOREHOLE-DEPTH']
+          CD: 001 01001 L: b'DIRECTION' C: 1 R: 19 (IDENT) U: b'' V: [b'INCREASING']
+          CD: 001 01111 L: b'SPACING' C: 1 R: 7 (FDOUBL) U: b'm' V: [0.1]
+          CD: 000 00000 L: b'ENCRYPTED' C: 0 R: 15 (USHORT) U: b'' V: None
+          CD: 000 00000 L: b'INDEX-MIN' C: 0 R: 7 (FDOUBL) U: b'' V: None
+          CD: 000 00000 L: b'INDEX-MAX' C: 0 R: 7 (FDOUBL) U: b'' V: None
+
+    ***** logical_file.has_log_pass:
+    True
+
+
+More about :term:`RP66V1.EFLR` Tables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+An :term:`RP66V1.Explicitly Formatted Logical Record` is a table of data organised in rows and columns.
+
+
+
 
 
 Reading :term:`EFLR` Contents
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each value in a row/column is known as an ``Attribute`` which has the following properties:
+Each value in a row/column is known as an :term:`RP66V1.Attribute`
+
+An Attribute is implemented by implemented by
+:py:class:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.Attribute`
+
+An Atribute has the following properties:
 
 ============ ========= =======================================================================
 Property     Type      Description
@@ -153,72 +440,265 @@ Property     Type      Description
 ``count``    ``int``   The number of the values the Attribute has.
 ``rep_code`` ``int``   The Representation Code of the values of the Attribute.
 ``units``    ``bytes`` The units of the value.
-``value``    ``list``  The value itself.
+``value``    ``list``  The value itself as a list of instances of the Representation Code.
 ============ ========= =======================================================================
 
 
-The following code accesses the contents of every ``EQUIPMENT`` EFLR:
+These Attributes are iterable, for example the following code accesses the contents of every ``PARAMETER`` EFLR:
 
 .. code-block:: python
 
-    from TotalDepth.RP66V1.core import File
     from TotalDepth.RP66V1.core import LogicalFile
+    from tests.unit.RP66V1.core import test_data
 
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, path_in)
+    file_object = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(file_object) as logical_index:
         for logical_file in logical_index.logical_files:
             for position, eflr in logical_file.eflrs:
                 # eflr is a TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord
-                if eflr.set.type == b'EQUIPMENT':
+                if eflr.set.type == b'PARAMETER':
+                    print(eflr)
                     for row in eflr.objects:
                         # row is a TotalDepth.RP66V1.core.LogicalRecord.EFLR.Object
                         print(f'    Row: {row.name.I}')
                         for attr in row.attrs:
                             # attr is a TotalDepth.RP66V1.core.LogicalRecord.EFLR.Attribute
-                            print(f'        {attr.label}={attr.value} ({attr.units})')
-
+                            print(f'        Attr: {attr.label} = {attr.value} ({attr.units})')
 
 Will produce something like this (output truncated):
 
 .. code-block:: console
 
+    <ExplicitlyFormattedLogicalRecord EFLR Set type: b'PARAMETER' name: b''>
+        Row: b'LOC'
+            Attr: b'LONG-NAME' = [b'LOCATION'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b"LATITUDE: 18DEG 01' 32.8'' S"] (b'')
+        Row: b'SVCO'
+            Attr: b'LONG-NAME' = [b'SERVICECONAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'Halliburton'] (b'')
+        Row: b'IQVR'
+            Attr: b'LONG-NAME' = [b'WLIQ VERSION'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'R3.2.0'] (b'')
+        Row: b'STAT'
+            Attr: b'LONG-NAME' = [b'STATE NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'WA'] (b'')
+        Row: b'COUN'
+            Attr: b'LONG-NAME' = [b'COUNTRY NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'AUSTRALIA'] (b'')
+        Row: b'SON'
+            Attr: b'LONG-NAME' = [b'JOB NUMBER'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'9262611'] (b'')
+        Row: b'SECT'
+            Attr: b'LONG-NAME' = [b'SECTION'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'N/A'] (b'')
+        Row: b'TOWN'
+            Attr: b'LONG-NAME' = [b'TOWNSHIP'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'N/A'] (b'')
+        Row: b'RANG'
+            Attr: b'LONG-NAME' = [b'RANGE'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'N/A'] (b'')
+        Row: b'APIN'
+            Attr: b'LONG-NAME' = [b'API S/N'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'N/A'] (b'')
+        Row: b'CN'
+            Attr: b'LONG-NAME' = [b'CUSTOMER NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'BURU ENERGY LIMITED'] (b'')
+        Row: b'WN'
+            Attr: b'LONG-NAME' = [b'WELL NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'VALHALLA NORTH 1'] (b'')
+        Row: b'FN'
+            Attr: b'LONG-NAME' = [b'FIELD NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'VALHALLA'] (b'')
+        Row: b'RIG'
+            Attr: b'LONG-NAME' = [b'RIG NAME'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'ENSIGN RIG #32'] (b'')
+        Row: b'PDAT'
+            Attr: b'LONG-NAME' = [b'PERMANENT DATUM'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'MSL'] (b'')
+        Row: b'LMF'
+            Attr: b'LONG-NAME' = [b'LOG MEAS FROM'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'RT'] (b'')
+        Row: b'DMF'
+            Attr: b'LONG-NAME' = [b'DRILL MEAS FROM'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'RT'] (b'')
+        Row: b'FL1'
+            Attr: b'LONG-NAME' = [b'LOCATIONLINE1'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b"LATITUDE: 18DEG 01' 32.8'' S"] (b'')
+        Row: b'FL2'
+            Attr: b'LONG-NAME' = [b'LOCATIONLINE2'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b"LONGITUDE: 124DEG 43' 47.1'' E"] (b'')
+        Row: b'FL3'
+            Attr: b'LONG-NAME' = [b'LOCATIONLINE3'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'EASTING: 683112'] (b'')
+        Row: b'FL4'
+            Attr: b'LONG-NAME' = [b'LOCATIONLINE4'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'NORTHING: 8006107'] (b'')
+        Row: b'FL5'
+            Attr: b'LONG-NAME' = [b'LOCATIONLINE5'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'GDA ZONE 51'] (b'')
+        Row: b'DATE'
+            Attr: b'LONG-NAME' = [b'DATE'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'06-Mar-2012'] (b'')
+        Row: b'LCC'
+            Attr: b'LONG-NAME' = [b'PRODUCER-CODE'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [b'280'] (b'')
+        Row: b'EDF'
+            Attr: b'LONG-NAME' = [b'DF ELEV'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [114.9000015258789] (b'm')
+        Row: b'EPD'
+            Attr: b'LONG-NAME' = [b'ELEVATION'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [0.0] (b'm')
+        Row: b'EGL'
+            Attr: b'LONG-NAME' = [b'GL ELEV'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [109.0] (b'm')
+        Row: b'GVFD'
+            Attr: b'LONG-NAME' = [b'GRAVITY FIELD'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [1.0] (b'g')
+        Row: b'EKB'
+            Attr: b'LONG-NAME' = [b'KB ELEV'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [114.9000015258789] (b'm')
+        Row: b'TVDS'
+            Attr: b'LONG-NAME' = [b'TVDSS CORRECTN'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [5.90000057220459] (b'm')
+        Row: b'APD'
+            Attr: b'LONG-NAME' = [b'DEPTH ABOVE PD'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [5.90000057220459] (b'm')
+        Row: b'DDEV'
+            Attr: b'LONG-NAME' = [b'MAX INC'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [1.8200000524520874] (b'deg')
+        Row: b'DDEG'
+            Attr: b'LONG-NAME' = [b'MAX INC DEPTH'] (b'')
+            Attr: b'DIMENSION' = [1] (b'')
+            Attr: b'AXIS' = None (b'')
+            Attr: b'ZONES' = None (b'')
+            Attr: b'VALUES' = [2225.169921875] (b'm')
+        ...
 
-        Row: b'MSCT/MCFU_1/EQUIPMENT'
-            b'LENGTH'=[125.0] (b'in')
-            b'TRADEMARK-NAME'=[b'MCFU_1-AA'] (b'')
-            b'PRESSURE'=[20000.0] (b'psi')
-            b'STATUS'=[1] (b'')
-            b'SERIAL-NUMBER'=[b'119.'] (b'')
-            b'TEMPERATURE'=[350.0] (b'degF')
-            b'VOLUME'=[1.5700000524520874] (b'ft3')
-            b'MINIMUM-DIAMETER'=[5.25] (b'in')
-            b'WEIGHT'=[144.0] (b'lbm')
-        Row: b'MSCT/MCMU/EQUIPMENT'
-            b'LENGTH'=[164.5] (b'in')
-            b'TRADEMARK-NAME'=[b'MCMU-AA'] (b'')
-            b'PRESSURE'=[20000.0] (b'psi')
-            b'STATUS'=[1] (b'')
-            b'SERIAL-NUMBER'=[b'65.'] (b'')
-            b'TEMPERATURE'=[350.0] (b'degF')
-            b'VOLUME'=[2.059999942779541] (b'ft3')
-            b'MINIMUM-DIAMETER'=[5.25] (b'in')
-            b'WEIGHT'=[580.0] (b'lbm')
-        Row: b'MSCT/CORE_BIT/EQUIPMENT'
-            b'LENGTH'=[1.0] (b'in')
-            b'TRADEMARK-NAME'=[b'BIT-AA'] (b'')
-            b'PRESSURE'=[20000.0] (b'psi')
-            b'STATUS'=[1] (b'')
-            b'SERIAL-NUMBER'=[b'0.'] (b'')
-            b'TEMPERATURE'=[350.0] (b'degF')
-            b'VOLUME'=[0.0] (b'ft3')
-            b'MINIMUM-DIAMETER'=[1.0] (b'in')
-            b'WEIGHT'=[1.0] (b'lbm')
-            ...
+Or the Attributes can be extracted by identity or integer index, for example:
+
+.. code-block:: python
+
+    file_object = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(file_object) as logical_index:
+        for logical_file in logical_index.logical_files:
+            for position, eflr in logical_file.eflrs:
+                if eflr.set.type == b'PARAMETER':
+                    print(eflr[0])
+                    print()
+                    print(eflr[0][0])
+
+Gives:
+
+.. code-block:: console
+
+    OBNAME: O: 2 C: 0 I: b'LOC'
+      CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'LOCATION']
+      CD: 001 01001 L: b'DIMENSION' C: 1 R: 18 (UVARI) U: b'' V: [1]
+      CD: 000 00000 L: b'AXIS' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 000 00000 L: b'ZONES' C: 0 R: 23 (OBNAME) U: b'' V: None
+      CD: 001 01101 L: b'VALUES' C: 1 R: 20 (ASCII) U: b'' V: [b"LATITUDE: 18DEG 01' 32.8'' S"]
+
+    CD: 001 01101 L: b'LONG-NAME' C: 1 R: 20 (ASCII) U: b'' V: [b'LOCATION']
 
 
 Reading the Frame Data and accessing the numpy Arrays
---------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here is an example of accessing the numpy arrays, ``np.describe()`` to describe each array:
 
@@ -309,7 +789,7 @@ The output will be:
 
 
 Making Calculations on the ``numpy`` Data
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Very similar to the above we can make some calculations using standard ``numpy`` calls:
@@ -379,7 +859,7 @@ Would give this output:
 
 
 Limiting the Amount of Data Read
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The RP66V1 Frame Array can be very large so to make it more manageable the :py:func:`TotalDepth.RP66V1.core.LogicalFile.populate_frame_array` can take the following, optional, arguments:
 
@@ -438,4 +918,9 @@ Gives:
     Min:   852606.000 Max:   893135.188
     OBNAME: O: 2 C: 1 I: b'ETIM' b'Elapsed Logging Time' b's'
     Min:        0.000 Max:      896.001
+
+
+.. rubric:: Footnotes
+
+.. [#] RP66V1 provides a method of collecting together physical files by using the :term:`RP66V1.Storage Unit Label` where the fields :term:`RP66V1.Storage Set Identifier` and :term:`RP66V1.Storage Unit Sequence Number` provide a means of linking physical files. In practice this has not been seen but if this is your use case then the class :py:class:`TotalDepth.RP66V1.core.pFile.FileRead` can minimally read the Storage Unit Label and its fields.
 

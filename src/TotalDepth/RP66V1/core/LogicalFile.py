@@ -100,8 +100,8 @@ class LogicalFile:
         # Multiple origins are allowed by the standard, this references the last one.
         self.origin_index: int = -1
         # For interpreting IFLRs
-        self.eflr_channels: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
-        self.eflr_frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
+        self.channel: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
+        self.frame: typing.Union[None, EFLR.ExplicitlyFormattedLogicalRecord] = None
         self.log_pass: typing.Union[None, LogPass.LogPass] = None
         self.iflr_position_map: typing.Dict[RepCode.ObjectName, XAxis.XAxis] = {}
 
@@ -114,8 +114,8 @@ class LogicalFile:
 
     def _add_origin_eflr(self, file_logical_data: File.FileLogicalData, olr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         # assert self.origin_logical_record is None
-        assert self.eflr_channels is None
-        assert self.eflr_frame is None
+        assert self.channel is None
+        assert self.frame is None
         if olr.lr_type != 1:
             raise ExceptionLogicalFileAdd(
                 f'Logical File requires second EFLR code 1 not {str(olr.lr_type)}'
@@ -130,13 +130,13 @@ class LogicalFile:
 
     @property
     def file_header_logical_record(self) -> EFLR.ExplicitlyFormattedLogicalRecord:
-        """Returns the FILE-HEADER EFLR."""
+        """Returns the FILE-HEADER EFLR see [RP66V1 Section 5.1 File Header Logical Record (FHLR)]."""
         assert len(self.eflrs) > 0
         return self.eflrs[0].eflr
 
     @property
     def origin_logical_record(self) -> EFLR.ExplicitlyFormattedLogicalRecord:
-        """Returns the ORIGIN EFLR."""
+        """Returns the ORIGIN EFLR see [RP66V1 Section 5.2 Origin Logical Record (OLR)]."""
         if len(self.eflrs) < 2:
             raise ExceptionLogicalFileMissingData('Have not yet seen an ORIGIN record.')
         assert self.eflrs[1].eflr.set.type in self.ALLOWABLE_ORIGIN_SET_TYPES
@@ -183,19 +183,17 @@ class LogicalFile:
             self.eflrs.append(PositionEFLR(file_logical_data.position, eflr))
             # Extract specific EFLRs for interpreting IFLRs
             if eflr.set.type == b'CHANNEL':
-                if self.eflr_channels is not None or self.log_pass is not None:
+                if self.channel is not None or self.log_pass is not None:
                     raise ExceptionLogicalFileAdd(f'Multiple CHANNEL EFLRs in a Logical File.')
-                self.eflr_channels = eflr
+                self.channel = eflr
             elif eflr.set.type == b'FRAME':
-                if self.eflr_frame is not None or self.log_pass is not None:
+                if self.frame is not None or self.log_pass is not None:
                     raise ExceptionLogicalFileAdd(f'Multiple FRAME EFLRs in a Logical File.')
-                self.eflr_frame = eflr
+                self.frame = eflr
             # If the data is now there then construct a LogPass
-            if self.eflr_channels is not None and self.eflr_frame is not None:
-                assert self.log_pass is None
-                self.log_pass = LogPass.log_pass_from_RP66V1(self.eflr_frame, self.eflr_channels)
-                self.eflr_channels = None
-                self.eflr_frame = None
+            if self.channel is not None and self.frame is not None:
+                if self.log_pass is None:
+                    self.log_pass = LogPass.log_pass_from_RP66V1(self.frame, self.channel)
 
     def _check_fld_iflr(self, file_logical_data: File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
         # TODO: Check file_logical_data and against iflr.
@@ -230,24 +228,6 @@ class LogicalFile:
         )
 
 
-# class VisibleRecordPositions(collections.UserList):
-#
-#     def visible_record_prior(self, lrsh_position: int) -> int:
-#         """Find rightmost value of visible record position less than the lrsh position.
-#
-#         See: python-3.7.2rc1-docs-html/library/bisect.html#module-bisect "Searching Sorted Lists",
-#         example function find_lt().
-#         """
-#         i = bisect.bisect_left(self.data, lrsh_position)
-#         if i:
-#             return self.data[i - 1]
-#         if len(self) == 0:
-#             msg = f'No Visible Record positions for LRSH position {lrsh_position}.'
-#         else:
-#             msg = f'Can not find Visible Record position prior to {lrsh_position}, earliest is {self[0]}.'
-#         raise ValueError(msg)
-
-
 class LogicalIndex:
     """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
     def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
@@ -255,14 +235,17 @@ class LogicalIndex:
         self.logical_record_index = Index.LogicalRecordIndex(path_or_file)
 
     def __len__(self) -> int:
+        """Returns the number of Logical Files."""
         return len(self.logical_files)
 
 
     @property
     def storage_unit_label(self) -> File.StorageUnitLabel:
+        """The Storage Unit Label. This comes from the LogicalRecordIndex."""
         return self.logical_record_index.sul
 
     def __enter__(self):
+        """Context manager support."""
         self.logical_record_index._enter()
         self.logical_files = []
         for lr_index in range(len(self.logical_record_index)):
@@ -290,9 +273,64 @@ class LogicalIndex:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager support."""
         self.logical_record_index._exit()
         self.logical_files = []
         return False
+
+    def populate_frame_array(
+            self,
+            logical_file_index: int,
+            frame_array: LogPass.FrameArray,
+            frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
+            channels: typing.Union[typing.Set[typing.Hashable], None] = None,
+    ) -> int:
+        """Populates a FrameArray with channel values.
+
+        logical_file_index is the index of the LogicalFile in this LogicalIndex.
+
+        frame_array is the identified FrameArray in that LogPass of FrameArrays in that LogicalFile.
+        This will be populated.
+
+        frame_slice Allows partial population in the X axis.
+
+        channels Allows partial population of specific channels.
+
+        This returns the number of frames populated.
+        """
+        logical_file = self.logical_files[logical_file_index]
+        iflrs: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+        if len(iflrs):
+            # Set partial frames
+            if frame_slice is not None:
+                range_gen = frame_slice.range(len(iflrs))
+                num_frames = frame_slice.count(len(iflrs))
+            else:
+                range_gen = range(len(iflrs))
+                num_frames = len(iflrs)
+            # Set partial channels
+            if channels is not None:
+                frame_array.init_arrays_partial(num_frames, channels)
+            else:
+                frame_array.init_arrays(num_frames)
+            # Now populate
+            logger.debug(f'populate_frame_array(): len(iflrs): {len(iflrs)} slice: {frame_slice}'
+                         f' num_frames: {num_frames} range_gen: {range_gen}.')
+            for array_index, frame_number in enumerate(range_gen):
+                iflr_reference = iflrs[frame_number]
+                fld: File.FileLogicalData = self.logical_record_index.get_file_logical_data_at_position(
+                    iflr_reference.logical_record_position
+                )
+                # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
+                iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+                if channels is not None:
+                    frame_array.read_partial(fld.logical_data, array_index, channels)
+                else:
+                    frame_array.read(fld.logical_data, array_index)
+        else:
+            num_frames = 0
+            frame_array.init_arrays(num_frames)
+        return num_frames
 
 
 def unpickle(path: str) -> LogicalIndex:
@@ -300,53 +338,3 @@ def unpickle(path: str) -> LogicalIndex:
         return pickle.loads(in_stream.read())
 
 
-def populate_frame_array(
-        logical_file: LogicalFile,
-        frame_array: LogPass.FrameArray,
-        frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
-        channels: typing.Union[typing.Set[typing.Hashable], None] = None,
-) -> int:
-    """Populates a FrameArray with channel values.
-
-    rp66_file is the Raw file.
-    logical_file is the LogicalFile in that raw file.
-    frame_array is the identified FrameArray in that LogPass of FrameArrays in that LogicalFile. This will be populated.
-    frame_slice Allows partial population in the X axis.
-    channels Allows partial population of specific channels.
-
-    This returns the number of frames populated.
-    """
-    iflrs = logical_file.iflr_position_map[frame_array.ident]
-    if len(iflrs):
-        # Set partial frames
-        if frame_slice is not None:
-            range_gen = frame_slice.range(len(iflrs))
-            num_frames = frame_slice.count(len(iflrs))
-        else:
-            range_gen = range(len(iflrs))
-            num_frames = len(iflrs)
-        # Set partial channels
-        if channels is not None:
-            frame_array.init_arrays_partial(num_frames, channels)
-        else:
-            frame_array.init_arrays(num_frames)
-        # Now populate
-        logger.debug(f'populate_frame_array(): len(iflrs): {len(iflrs)} slice: {frame_slice}'
-                     f' num_frames: {num_frames} range_gen: {range_gen}.')
-        for array_index, frame_number in enumerate(range_gen):
-            iflr_reference = iflrs[frame_number]
-            # FIXME: Get the data from the LogicalIndex
-            # FIXME: Change the IFLR reference to be the index into LogicalIndex Logical Records
-            fld: File.FileLogicalData = logical_file.get_file_logical_data_at_position(
-                iflr_reference.logical_record_position
-            )
-            # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
-            iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-            if channels is not None:
-                frame_array.read_partial(fld.logical_data, array_index, channels)
-            else:
-                frame_array.read(fld.logical_data, array_index)
-    else:
-        num_frames = 0
-        frame_array.init_arrays(num_frames)
-    return num_frames

@@ -72,7 +72,7 @@ Glossary
 		
 	IFLR
 	Indirectly Formatted Logical Record
-		This is a Logical Record whose format is only completely described by another EFLR. The EFLR that describes an IFLR might be identified formally; for example by a specific reference to an EFLR (as in RP66) or informally; by some heuristic (as in LIS) such as "the immediately prior Logical Record that is type 64 i.e. a :term:`Data Format Specification Record`. See also :term:`RP66V1.Indirectly Formatted Logical Record`
+		This is a Logical Record whose format is described by another EFLR. The EFLR that describes an IFLR might be identified formally; for example by a specific reference to an EFLR (as in RP66) or informally; by some heuristic (as in LIS) such as "the immediately prior Logical Record that is type 64 i.e. a :term:`Data Format Specification Record`. See also :term:`RP66V1.Indirectly Formatted Logical Record`
 
 	DFSR
 		See :term:`Data Format Specification Record`

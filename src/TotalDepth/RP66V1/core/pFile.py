@@ -664,6 +664,8 @@ class FileRead:
             self.sul = StorageUnitLabel.StorageUnitLabel(self.file.read(StorageUnitLabel.StorageUnitLabel.SIZE))
         except StorageUnitLabel.ExceptionStorageUnitLabel as err:
             raise ExceptionFileRead(f'FileRead can not construct SUL: {str(err)}')
+        # TODO: It is acceptable that a file just has a SUL, no Visible or Logical records (we have one example).
+        #   We need to handle that rare case.
         self.visible_record = VisibleRecord(self.file)
         self.logical_record_segment_header = LogicalRecordSegmentHeader(self.file)
         if not self.logical_record_segment_header.attributes.is_first:

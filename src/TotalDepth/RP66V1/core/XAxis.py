@@ -133,9 +133,11 @@ class XAxis:
         self._data.append(IFLRReference(position, frame_number, x_axis))
 
     def __getitem__(self, item) -> IFLRReference:
+        """Return the IFLRReference for the index."""
         return self._data[item]
 
     def __len__(self) -> int:
+        """Return the number of IFLRs."""
         return len(self._data)
 
     @property

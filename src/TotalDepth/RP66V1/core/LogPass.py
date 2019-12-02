@@ -94,6 +94,10 @@ class FrameChannel:
     def sizeof_array(self) -> int:
         return self.array.size * self.array.itemsize
 
+    @property
+    def shape(self):
+        return self.array.shape
+
     def numpy_indexes(self, frame_number: int) -> itertools.product:
         """
         Returns a generator of numpy indexes for a particular frame.
@@ -187,6 +191,10 @@ class FrameArray:
     @property
     def sizeof_array(self) -> int:
         return sum(ch.sizeof_array for ch in self.channels)
+
+    @property
+    def shape(self):
+        return [a.shape for a in self.channels]
 
     def init_arrays(self, number_of_frames: int) -> None:
         """

@@ -4,7 +4,7 @@
 TotalDepth.RP66V1.core.File
 ===============================
 
-.. automodule:: TotalDepth.RP66V1.core.File
+.. automodule:: TotalDepth.RP66V1.core.pFile
 	:member-order: bysource
 	:members:
 	:special-members:

@@ -41,6 +41,7 @@ def test_entry_point_help_help(entry_point):
     subprocess.check_call([entry_point, '--help'])
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
@@ -53,6 +54,7 @@ def test_tddetif(tmpdir, args):
     subprocess.check_call(['tddetif',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
@@ -75,6 +77,7 @@ RP66V1_FILES = [
 ]
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
@@ -87,6 +90,7 @@ def test_tdrp66v1scan_file(args):
     subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_FILES[0],])
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
@@ -99,6 +103,7 @@ def test_tdrp66v1scan_dir(args):
     subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_DATA_DIR,])
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (

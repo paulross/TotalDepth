@@ -99,6 +99,23 @@ class LogicalRecordIndex:
         position: File.LogicalRecordPosition = self.lr_pos_desc[index].position
         return self.rp66v1_file.get_file_logical_data(position, offset, length)
 
+    def get_file_logical_data_at_position(self, position: File.LogicalRecordPositionBase,
+                                          offset: int = 0, length: int = -1):
+        """
+        Returns a FileLogicalData object from the Logical Record position.
+
+        This allows random access to any Logical Record in the file.
+        The caller can construct a more sophisticated index such as a sequence of Logical Files which contain Logical
+        Records that can be EFLRs or IFLRs and interpreted accordingly.
+
+        If offset or length are use then the result will be the partial data from that offset and length.
+
+        :param: position The Logical Record position in the file.
+        :param: offset An integer offset into the Logical Record data, default 0.
+        :param: length An integer length the Logical Record data, default of -1 is all.
+        """
+        return self.rp66v1_file.get_file_logical_data(position, offset, length)
+
 
 def unpickle(path: str) -> LogicalRecordIndex:
     with open(path, 'rb') as in_stream:

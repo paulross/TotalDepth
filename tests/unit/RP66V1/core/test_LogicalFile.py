@@ -1,43 +1,12 @@
 import io
+import pprint
 
+import numpy as np
 import pytest
 
-from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import LogicalFile, RepCode
+from TotalDepth.common import Slice
 from tests.unit.RP66V1.core import test_data
-
-
-# def test_visible_record_positions_simple():
-#     vrp = LogicalFile.VisibleRecordPositions()
-#     vrp.append(50)
-#     vrp.append(100)
-#     # print(vrp)
-#     assert vrp == [50, 100]
-#
-#
-# @pytest.mark.parametrize(
-#     'data, lrsh_position, expected',
-#     (
-#         ([0], 1, 0),
-#         ([0], 7, 0),
-#     )
-# )
-# def test_visible_record_positions_prior(data, lrsh_position, expected):
-#     vrp = LogicalFile.VisibleRecordPositions(data)
-#     assert vrp.visible_record_prior(lrsh_position) == expected
-#
-#
-# @pytest.mark.parametrize(
-#     'data, lrsh_position, expected',
-#     (
-#         ([], 0, 'No Visible Record positions for LRSH position 0.'),
-#         ([0], 0, 'Can not find Visible Record position prior to 0, earliest is 0.'),
-#     )
-# )
-# def test_visible_record_positions_prior_raises(data, lrsh_position, expected):
-#     vrp = LogicalFile.VisibleRecordPositions(data)
-#     with pytest.raises(ValueError) as err:
-#         vrp.visible_record_prior(lrsh_position)
-#     assert err.value.args[0] == expected
 
 
 @pytest.mark.parametrize(
@@ -71,3 +40,138 @@ def test_logical_index_number_of_logical_files(bytes_name, expected):
     fobj = io.BytesIO(by)
     with LogicalFile.LogicalIndex(fobj) as log_index:
         assert len(log_index) == expected
+
+
+def test_logical_index_has_log_pass():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.channel is not None
+        assert logical_file.frame is not None
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+
+
+def test_logical_index_logical_file_iflr_position_map():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        # pprint.pprint(logical_file.iflr_position_map)
+        expected_key = RepCode.ObjectName(O=2, C=0, I=b'50')
+        assert list(logical_file.iflr_position_map.keys()) == [expected_key]
+
+
+def test_logical_index_logical_file_iflr_position_map_x_axis_summary():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        # pprint.pprint(logical_file.iflr_position_map)
+        expected_key = RepCode.ObjectName(O=2, C=0, I=b'50')
+        assert list(logical_file.iflr_position_map.keys()) == [expected_key]
+        x_axis = logical_file.iflr_position_map[expected_key]
+        assert len(x_axis) == 649
+        assert x_axis.summary.min == 2889.4
+        assert x_axis.summary.max == 2954.199999999941
+        assert x_axis.summary.count == 649
+
+
+def test_logical_index_logical_file_iflr_position_map_x_axis_summary_spacing():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        # pprint.pprint(logical_file.iflr_position_map)
+        expected_key = RepCode.ObjectName(O=2, C=0, I=b'50')
+        assert list(logical_file.iflr_position_map.keys()) == [expected_key]
+        x_axis = logical_file.iflr_position_map[expected_key]
+        assert x_axis.summary.spacing.min == 0.09999999999990905
+        assert x_axis.summary.spacing.max == 0.09999999999990905
+        assert x_axis.summary.spacing.mean == 0.09999999999990905
+        assert x_axis.summary.spacing.median == 0.09999999999990905
+        assert x_axis.summary.spacing.std == 0.0
+        # assert x_axis.summary.spacing.histogram == (np.array([648]), np.array([-0.4,  0.6]))
+
+
+def test_logical_index_logical_file_iflr_position_map_x_axis_summary_spacing_counts():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        # pprint.pprint(logical_file.iflr_position_map)
+        expected_key = RepCode.ObjectName(O=2, C=0, I=b'50')
+        assert list(logical_file.iflr_position_map.keys()) == [expected_key]
+        x_axis = logical_file.iflr_position_map[expected_key]
+        assert x_axis.summary.spacing.counts.norm == 648
+        assert x_axis.summary.spacing.counts.dupe == 0
+        assert x_axis.summary.spacing.counts.skip == 0
+        assert x_axis.summary.spacing.counts.back == 0
+
+
+def test_logical_index_populate_frame_array():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+        frame_array = logical_file.log_pass[0]
+        frame_count = logical_index.populate_frame_array(0, frame_array)
+        assert frame_count == 649
+        assert len(frame_array) == 5
+        assert frame_array.shape == [(649, 1), (649, 1), (649, 1), (649, 1), (649, 1)]
+        names = [c.ident.I for c in frame_array.channels]
+        assert names == [b'DEPT', b'TENS', b'ETIM', b'DHTN', b'GR']
+
+
+def test_logical_index_populate_frame_array_channels():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+        frame_array = logical_file.log_pass[0]
+        channels = [frame_array.channels[i].ident for i in (1, 4)]
+        frame_count = logical_index.populate_frame_array(0, frame_array, channels=channels)
+        assert frame_count == 649
+        assert len(frame_array) == 5
+        assert frame_array.shape == [(649, 1), (649, 1), (0, 1), (0, 1), (649, 1)]
+        names = [c.ident.I for c in frame_array.channels]
+        assert names == [b'DEPT', b'TENS', b'ETIM', b'DHTN', b'GR']
+        assert frame_array[0].array.shape == (649, 1)
+        assert frame_array[1].array.shape == (649, 1)
+        assert frame_array[2].array.shape == (0, 1)
+        assert frame_array[3].array.shape == (0, 1)
+        assert frame_array[4].array.shape == (649, 1)
+
+
+def test_logical_index_populate_frame_array_partial_slice():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+        frame_array = logical_file.log_pass[0]
+        frame_slice = Slice.Slice(8, 64, 2)
+        frame_count = logical_index.populate_frame_array(0, frame_array, frame_slice)
+        assert frame_count == 28
+
+
+def test_logical_index_populate_frame_array_partial_split():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+        frame_array = logical_file.log_pass[0]
+        frame_slice = Slice.Split(64)
+        frame_count = logical_index.populate_frame_array(0, frame_array, frame_slice)
+        assert frame_count == 64
+
+
+

@@ -479,6 +479,7 @@ LOGICAL_BYTES_FROM_STANDARD_SINGLE_OBJECT = (
     b'\x21\x01S'
 )
 
+
 @pytest.mark.parametrize(
     'ld',
     (
