@@ -198,9 +198,9 @@ class RLEType01(RLE):
         
     def xAxisLastFrame(self):
         """Returns the last X-axis value of the last frame loaded or None if nothing loaded."""
-        if len(self.rle_items) > 0:
-            return self.rle_items[-1].xAxisLast() \
-                   + (self.rle_items[-1].numFrames - 1) * self.frameSpacing()
+        frame_spacing = self.frameSpacing()
+        if len(self.rle_items) > 0 and frame_spacing is not None:
+            return self.rle_items[-1].xAxisLast() + (self.rle_items[-1].numFrames - 1) * frame_spacing
         
     def _numFramesInLast(self):
         """Returns the number of frames in the last entry or None if nothing loaded.
@@ -213,5 +213,6 @@ class RLEType01(RLE):
         Returned value is -ve for decreasing X (up logs), +ve for increasing X
         (down and time logs)."""
         totalFrames = self.totalFrames()
-        if len(self.rle_items) > 0 and totalFrames > 1:
-            return (self.xAxisLast() - self.xAxisFirst()) / (totalFrames - self._numFramesInLast())
+        divisor = totalFrames - self._numFramesInLast()
+        if len(self.rle_items) > 0 and totalFrames > 1 and divisor != 0:
+            return (self.xAxisLast() - self.xAxisFirst()) / divisor
