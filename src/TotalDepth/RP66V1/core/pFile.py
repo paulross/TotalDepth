@@ -43,6 +43,10 @@ class ExceptionVisibleRecordEOF(ExceptionVisibleRecord):
     pass
 
 
+class ExceptionLogicalRecordSegmentHeaderAttributes(ExceptionFile):
+    pass
+
+
 class ExceptionLogicalRecordSegmentHeader(ExceptionFile):
     pass
 
@@ -172,8 +176,12 @@ class VisibleRecord:
 
 class LogicalRecordSegmentHeaderAttributes:
     def __init__(self, attributes: int):
-        assert 0 <= attributes <= 0xff
-        self.attributes = attributes
+        if 0 <= attributes <= 0xff:
+            self.attributes = attributes
+        else:
+            raise ExceptionLogicalRecordSegmentHeaderAttributes(
+                f'Attributes must be in the range of an unsigned char not 0x{attributes:x}'
+            )
 
     def __eq__(self, other):
         if self.__class__ == other.__class__:
@@ -236,9 +244,6 @@ class LogicalRecordSegmentHeaderAttributes:
             ret.append('padding')
         return '-'.join(ret)
 
-    def copy(self):
-        return LogicalRecordSegmentHeaderAttributes(self.attributes)
-
 
 class LogicalRecordSegmentHeader:
     """RP66V1 Logical Record Segment Header. See See [RP66V1 2.2.2.1]"""
@@ -297,42 +302,11 @@ class LogicalRecordSegmentHeader:
         """The LRSH represented in raw bytes."""
         return two_bytes_big_endian(self.length) + bytes([self.attributes.attributes, self.record_type])
 
-    # def __format__(self, format_spec) -> str:
-    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
-    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
-    #         self.position, self.length, self.attributes, self.record_type
-    #     )
-
-    # def __str__(self) -> str:
-    #     return '<LogicalRecordSegmentHeader: position=0x{:08x} length=0x{:04x}' \
-    #            ' attributes=0x{:02x} LR type={:3d}>'.format(
-    #         self.position, self.length, self.attributes, self.record_type
-    #     )
-
     def __str__(self) -> str:
         return '<LogicalRecordSegmentHeader: @ 0x{:x} len=0x{:x}' \
                ' attr=0x{:x} type={:d}>'.format(
             self.position, self.length, self.attributes.attributes, self.record_type
         )
-
-    # def attribute_str(self) -> str:
-    #     """Returns a long string of the important attributes."""
-    #     ret = [
-    #         'EFLR' if self.is_eflr else 'IFLR',
-    #     ]
-    #     if self.is_first:
-    #         ret.append('first')
-    #     if self.is_last:
-    #         ret.append('last')
-    #     if self.is_encrypted:
-    #         ret.append('encrypted')
-    #     if self.has_checksum:
-    #         ret.append('checksum')
-    #     if self.has_trailing_length:
-    #         ret.append('trailing length')
-    #     if self.has_pad_bytes:
-    #         ret.append('padding')
-    #     return '-'.join(ret)
 
     def long_str(self) -> str:
         return f'LRSH: @ 0x{self.position:x} len=0x{self.length:x}' \
@@ -348,39 +322,6 @@ class LogicalRecordSegmentHeader:
         """File position of the start of the Logical Data."""
         return self.position + self.HEAD_LENGTH
 
-    # # Attribute access
-    # @property
-    # def is_eflr(self) -> bool:
-    #     return self.attributes & 0x80 != 0
-    #
-    # @property
-    # def is_first(self) -> bool:
-    #     return self.attributes & 0x40 == 0
-    #
-    # @property
-    # def is_last(self) -> bool:
-    #     return self.attributes & 0x20 == 0
-    #
-    # @property
-    # def is_encrypted(self) -> bool:
-    #     return self.attributes & 0x10 != 0
-    #
-    # @property
-    # def has_encryption_packet(self) -> bool:
-    #     return self.attributes & 0x08 != 0
-    #
-    # @property
-    # def has_checksum(self) -> bool:
-    #     return self.attributes & 0x04 != 0
-    #
-    # @property
-    # def has_trailing_length(self) -> bool:
-    #     return self.attributes & 0x02 != 0
-    #
-    # @property
-    # def has_pad_bytes(self) -> bool:
-    #     """Note: Pad bytes will not be visible if the record is encrypted."""
-    #     return self.attributes & 0x01 != 0
 
     @property
     def must_strip_padding(self) -> bool:
@@ -448,10 +389,6 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
             )
-        # if not lrsh.attributes.is_first:
-        #     raise ValueError(
-        #         f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be the first in the sequence of segments.'
-        #     )
         super().__init__(vr.position, lrsh.position)
 
 
@@ -587,15 +524,6 @@ class FileLogicalData:
         assert self._invariants()
         self._bytes.extend(by)
 
-    # def truncate(self, index: int) -> None:
-    #     assert self._invariants()
-    #     # TODO: Specialise the exceptions?
-    #     if self._bytes is None:
-    #         raise ValueError('FileLogicalData: Can not truncate after seal()')
-    #     if index > len(self._bytes):
-    #         raise IndexError(f'FileLogicalData: Can not truncate to index {index} when length of bytes is {len(self._bytes)}')
-    #     self._bytes = self._bytes[:index]
-
     def seal(self):
         """All of the Logical Record has been read into this class so seal it to prevent any more data being added.
         This also creates a LogicalData object that encapsulates the logical data."""
@@ -628,9 +556,6 @@ class FileLogicalData:
             return f'<FileLogicalData {position} LR {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted}' \
                 f' PARTIAL READ: len 0x{len(self._bytes):04x}' \
                 f' Bytes: {format_bytes(bytes(self._bytes[:DUMP_BYTE_LEN]))}>'
-        # return f'<FileLogicalData {position} LR type {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted}' \
-        #     f' len 0x{len(self.logical_data):04x} Idx 0x{self.logical_data.index:04x}' \
-        #     f'  {format_bytes(self.logical_data.bytes[:DUMP_BYTE_LEN])}>'
         return f'<FileLogicalData {position} LR {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted} {self.logical_data}>'
 
 
@@ -647,7 +572,7 @@ class FileRead:
             except AttributeError:
                 self.path = '<unknown>'
         else:
-            raise TypeError(f'path_or_file must be a str or a binary file not {type(path_or_file)}')
+            raise ExceptionFileRead(f'path_or_file must be a str or a binary file not {type(path_or_file)}')
         self.must_close = self.file is None
         self.sul = None
         self.visible_record = None

@@ -322,7 +322,7 @@ class LogicalIndex:
                     iflr_reference.logical_record_position
                 )
                 # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
-                iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
+                _iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
                 if channels is not None:
                     frame_array.read_partial(fld.logical_data, array_index, channels)
                 else:
@@ -331,10 +331,3 @@ class LogicalIndex:
             num_frames = 0
             frame_array.init_arrays(num_frames)
         return num_frames
-
-
-def unpickle(path: str) -> LogicalIndex:
-    with open(path, 'rb') as in_stream:
-        return pickle.loads(in_stream.read())
-
-

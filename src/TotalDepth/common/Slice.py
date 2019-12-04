@@ -117,7 +117,7 @@ def create_slice_or_split(slice_string: str) -> typing.Union[Slice, Split]:
 
 
 def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
-                                       help_prefix: str='', use_what: bool = False) -> None: # pragma: no cover
+                                       help_prefix: str='', use_what: bool = False) -> None:
     help_list = []
     if help_prefix:
         help_list.append(f'{help_prefix}')

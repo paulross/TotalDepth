@@ -23,6 +23,11 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 logger = logging.getLogger(__file__)
 
 
+def unpickle(path: str) -> Index.LogicalRecordIndex:
+    with open(path, 'rb') as in_stream:
+        return pickle.loads(in_stream.read())
+
+
 class IndexResult(typing.NamedTuple):
     path_in: str
     size_input: int
@@ -87,7 +92,7 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
                     write_time = time.perf_counter() - t_start
                     if read_back:
                         t_start = time.perf_counter()
-                        _read_index = Index.unpickle(pickle_path)
+                        _read_index = unpickle(pickle_path)
                         read_back_time = time.perf_counter() - t_start
                     else:
                         read_back_time = 0.0
@@ -114,7 +119,7 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: boo
                 ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
     else:
         file_type = bin_file_type.binary_file_type_from_path(path_in)
-        if bin_file_type == 'RP66V1':
+        if file_type == 'RP66V1':
             ret[path_in] = index_a_single_file(path_in, path_out, read_back)
     return ret
 
@@ -318,4 +323,3 @@ def main() -> int:
 
 if __name__ == '__main__':
     sys.exit(main())
-

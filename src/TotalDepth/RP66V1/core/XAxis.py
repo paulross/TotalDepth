@@ -48,7 +48,7 @@ class XAxisSpacingSummary(typing.NamedTuple):
             if self.min != other.min or self.max != other.max or self.mean != other.mean or self.median != other.median \
                     or self.std != other.std or self.counts != other.counts:
                 return False
-            for i in range(2):
+            for i in range(2): # pragma: no coverage
                 if not (self.histogram[i] == other.histogram[i]).all():
                     return False
             return True

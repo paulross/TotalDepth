@@ -37,6 +37,12 @@ class IndexResult(typing.NamedTuple):
     ignored: bool
 
 
+def unpickle(path: str) -> LogicalFile.LogicalIndex:
+    """Un-pickles a Logical Index from the given path."""
+    with open(path, 'rb') as in_stream:
+        return pickle.loads(in_stream.read())
+
+
 def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
                               recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
     """Multiprocessing code to plot log passes.
@@ -82,7 +88,7 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
                 write_time = time.perf_counter() - t_start
                 if read_back:
                     t_start = time.perf_counter()
-                    _read_index = LogicalFile.unpickle(pickle_path)
+                    _read_index = unpickle(pickle_path)
                     read_time = time.perf_counter() - t_start
                 else:
                     read_time = 0.0
@@ -199,7 +205,7 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
-def main() -> int:  # pragma: no cover
+def main() -> int:
     description = """usage: %(prog)s [options] file
 Scans a RP66V1 file or directory and saves the index as a pickled file."""
     print('Cmd: %s' % ' '.join(sys.argv))

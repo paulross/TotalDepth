@@ -1,4 +1,5 @@
 import io
+import pickle
 
 import pytest
 
@@ -142,3 +143,23 @@ def test_logical_record_index_all_files(by, expected):
     fobj = io.BytesIO(by)
     with Index.LogicalRecordIndex(fobj) as lr_index:
         assert len(lr_index) == expected
+
+
+def test_logical_record_index_sul():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with Index.LogicalRecordIndex(fobj) as lr_index:
+        assert str(lr_index.sul) == r"""StorageUnitLabel:
+  Storage Unit Sequence Number: 1
+                  DLIS Version: b'V1.00'
+        Storage Unit Structure: b'RECORD'
+         Maximum Record Length: 8192
+        Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
+
+
+def test_logical_record_index_pickle():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with Index.LogicalRecordIndex(fobj) as lr_index:
+        pickled_index = pickle.dumps(lr_index)
+        assert len(pickled_index) == 53106
+        new_lr_index = pickle.loads(pickled_index)
+        assert len(new_lr_index) == 660

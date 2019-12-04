@@ -210,6 +210,168 @@ def test_visible_record_eq(fobj_a, fobj_b, expected):
 
 
 @pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, 'LRSH attr: 0x00'),
+        (255, 'LRSH attr: 0xff'),
+    )
+)
+def test_logical_record_segment_header_attributes_str(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert str(result) == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (-1, 'Attributes must be in the range of an unsigned char not 0x-1'),
+        (256, 'Attributes must be in the range of an unsigned char not 0x100'),
+    )
+)
+def test_logical_record_segment_header_attributes_ctor_raises(byt, expected):
+    with pytest.raises(File.ExceptionLogicalRecordSegmentHeaderAttributes) as err:
+        File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert err.value.args[0] == expected
+
+
+def test_logical_record_segment_header_attributes_eq():
+    a = File.LogicalRecordSegmentHeaderAttributes(0)
+    b = File.LogicalRecordSegmentHeaderAttributes(0)
+    assert a == b
+    assert a == a
+    assert b == a
+    assert b == b
+    assert a != 0
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x80, True),
+        (0x7f, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_is_eflr(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.is_eflr == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, True),
+        (0x40, False),
+        (0xbf, True),
+        (0xff, False),
+    )
+)
+def test_logical_record_segment_header_attributes_is_first(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.is_first == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, True),
+        (0x20, False),
+        (0xdf, True),
+        (0xff, False),
+    )
+)
+def test_logical_record_segment_header_attributes_is_last(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.is_last == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x10, True),
+        (0xef, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_is_encrypted(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.is_encrypted == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x08, True),
+        (0xf7, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_has_encryption_packet(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.has_encryption_packet == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x04, True),
+        (0xfb, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_has_checksum(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.has_checksum == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x02, True),
+        (0xfd, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_has_trailing_length(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.has_trailing_length == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, False),
+        (0x01, True),
+        (0xfe, False),
+        (0xff, True),
+    )
+)
+def test_logical_record_segment_header_attributes_has_pad_bytes(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.has_pad_bytes == expected
+
+
+@pytest.mark.parametrize(
+    'byt, expected',
+    (
+        (0, 'IFLR-first-last'),
+        (0x01, 'IFLR-first-last-padding'),
+        # TODO: Complete this?
+        (0xfe, 'EFLR-encrypted-checksum-trailing length'),
+        (0xff, 'EFLR-encrypted-checksum-trailing length-padding'),
+    )
+)
+def test_logical_record_segment_header_attributes_attribute_str(byt, expected):
+    result = File.LogicalRecordSegmentHeaderAttributes(byt)
+    assert result.attribute_str() == expected
+
+
+@pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
         (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
@@ -689,9 +851,25 @@ def test_FileLogicalData_str():
         test_data.SMALL_FILE,
     )
 )
-def test_file_basic_file(file_bytes):
+def test_file_basic_file_ctor_with_file_object(file_bytes):
     fobj = io.BytesIO(file_bytes)
     File.FileRead(fobj)
+
+
+@pytest.mark.parametrize(
+    'file_bytes',
+    (
+        test_data.BASIC_FILE,
+        test_data.MINIMAL_FILE,
+        test_data.SMALL_FILE,
+    )
+)
+def test_file_basic_file_ctor_with_path(tmpdir, file_bytes):
+    file_name = 'rp66v1file.dlis'
+    with open(tmpdir.join(file_name), 'wb') as temp_file:
+        temp_file.write(file_bytes)
+    with File.FileRead(tmpdir.join(file_name).strpath):
+        pass
 
 
 def test_file_basic_file_enter_on_empty_raises():
@@ -700,6 +878,13 @@ def test_file_basic_file_enter_on_empty_raises():
         with File.FileRead(fobj):
             pass
     assert err.value.args[0] == 'FileRead can not construct SUL: Expected 80 bytes, got 0'
+
+
+def test_file_ctor_raises():
+    with pytest.raises(File.ExceptionFileRead) as err:
+        with File.FileRead(1):
+            pass
+    assert err.value.args[0] == "path_or_file must be a str or a binary file not <class 'int'>"
 
 
 def test_file_file_ctor_raises_with_lrsh_not_first():
@@ -924,7 +1109,7 @@ def test_file_iter_LRSHs_for_visible_record(file_bytes, expected):
         assert lrsh_list == expected
 
 
-def test_file_iter_logical_records():
+def test_file_iter_logical_records_small_file():
     fobj = io.BytesIO(test_data.SMALL_FILE)
     with File.FileRead(fobj) as file_read:
         lr_list = []
@@ -1022,6 +1207,13 @@ def test_file_iter_logical_records():
             '<FileLogicalData LogicalRecordPosition: VR: 0x0000204c LRSH: 0x00002410 LR   0 I n <LogicalData Len: 0x2a Idx: 0x0>>',
         ]
         assert lr_list == expected
+
+
+def test_file_iter_logical_records_basic_file():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with File.FileRead(fobj) as file_read:
+        lr_list = list(file_read.iter_logical_records())
+        assert len(lr_list) == 660
 
 
 def test_file_iter_logical_records_raises_not_is_first():

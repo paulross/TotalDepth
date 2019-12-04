@@ -118,6 +118,22 @@ def test_compute_spacing_histogram_str(x_array, expected):
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    'array_a, array_b, expected',
+    (
+        (np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 3.0]), True),
+        (np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.5, 3.0]), False),
+    )
+)
+def test_x_axis_spacing_summary_eq(array_a, array_b, expected):
+    x_axis_a = XAxis.compute_spacing(array_a)
+    x_axis_b = XAxis.compute_spacing(array_b)
+    assert (x_axis_a == x_axis_b) == expected
+    assert (x_axis_b == x_axis_a) == expected
+    assert not x_axis_a == 1
+
+
+
 def test_XAxis_ctor():
     xaxis = XAxis.XAxis(ident=b'A', long_name=b'B', units=b'C')
     assert xaxis.ident == b'A'

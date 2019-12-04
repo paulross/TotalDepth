@@ -11,8 +11,6 @@ In the taxonomy of indexes this is a 'mid level' index as it indexes:
 TODO: Replace this with the C/C++ implementation.
 """
 import io
-import pickle
-import sys
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
@@ -34,8 +32,8 @@ class LogicalRecordIndex:
             This will be of interest to indexers that mean to ``use get_file_logical_data()`` as this is a required
             argument.
         - ``.description`` A LogicalDataDescription which provides some basic information about the Logical Data such as
-            attributes Logical Record type and the Logical Data length. This will be of interest to indexers to offer
-            up to their callers.
+            the LRSH attributes, Logical Record type and the Logical Data length. This will be of interest to indexers
+            to offer up to their callers.
     """
     def __init__(self, path_or_file: typing.Union[str, io.BytesIO]):
         self.lr_pos_desc: typing.List[File.LRPosDesc] = []
@@ -115,9 +113,3 @@ class LogicalRecordIndex:
         :param: length An integer length the Logical Record data, default of -1 is all.
         """
         return self.rp66v1_file.get_file_logical_data(position, offset, length)
-
-
-def unpickle(path: str) -> LogicalRecordIndex:
-    with open(path, 'rb') as in_stream:
-        return pickle.loads(in_stream.read())
-
