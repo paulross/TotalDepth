@@ -3,12 +3,10 @@ Extract summary data from archives of log files.
 
 This is a bit hacked together to help create a good archive of test data. It is definitely not production code.
 """
-import argparse
 import collections
 import datetime
 import functools
 import logging
-import math
 import os
 import pprint
 import shutil
@@ -19,6 +17,7 @@ import zipfile
 
 import TotalDepth.util.bin_file_type
 from TotalDepth.common import cmn_cmd_opts
+from TotalDepth.common import statistics
 from TotalDepth.util import DirWalk
 
 logger = logging.getLogger(__file__)
@@ -171,27 +170,14 @@ class ArchiveCount:
     def __init__(self):
         self.count: int = 0
         self.total_size: int = 0
-        self._size_hist: typing.Dict[int, int] = collections.defaultdict(int)
+        self._size_hist = statistics.LengthDict()
         self.size_min = sys.maxsize
         self.size_max = -sys.maxsize - 1
         self._date_hist: typing.Dict[typing.Tuple[int, int], int] = collections.defaultdict(int)
         self.extensions: typing.Set[str] = set()
 
-    def _reduce_size(self, size: int) -> int:
-        """Takes a file size in bytes and returns an integer measure of the size.
-        NOTE: argument can be zero.
-        Strategies could be:
-
-            - Power, either int(math.log2(size)), int(math.log10(size)), round up if desired.
-            - In kb, return size // 1024
-        """
-        if size > 0:
-            return int(math.log2(size))
-            # return int(math.log10(size))
-        return 0
-
     def add(self, size: int, mod_timestamp: datetime.datetime, ext: str) -> None:
-        self._size_hist[self._reduce_size(size)] += 1
+        self._size_hist.add(size)
         self.size_min = min(size, self.size_min)
         self.size_max = max(size, self.size_max)
         self._date_hist[(mod_timestamp.year, mod_timestamp.month)] += 1
@@ -199,13 +185,8 @@ class ArchiveCount:
         self.total_size += size
         self.extensions.add(ext)
 
-    @property
-    def size_hist(self):
-        if self.count:
-            for i in range(min(self._size_hist.keys()), 1 + max(self._size_hist.keys())):
-                if i not in self._size_hist:
-                    self._size_hist[i] = 0
-        return self._size_hist
+    def histogram_power_of_2(self, width: int = 40, bar_char: str = '+') -> typing.List[str]:
+        return self._size_hist.histogram_power_of_2(width, bar_char)
 
     @property
     def date_hist(self):
@@ -276,19 +257,8 @@ def analyse_archive(files: typing.List[FileBase],
             print(
                 f'      Bytes: {archive_count.total_size:,d} [{archive_count.total_size / summary.total_size:.3%}]'
                 f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
-            # print(archive_count.size_hist)
             if include_size_histogram:
-                max_count = max(archive_count.size_hist.values())
-                for k in sorted(archive_count.size_hist.keys()):
-                    proportion = archive_count.size_hist[k] / max_count
-                    bar_len = int(0.5 + 40 * proportion)
-                    bar = '+' * bar_len
-                    x_value = f'>2**{k}'
-                    print(f'{x_value:6} [{archive_count.size_hist[k]:6,d}] | {bar}')
-                    # print(f'{x_value:6} | {bar}')
-                # print(archive_count.date_hist.keys())
-                # print(f'Dates: from {min(archive_count.date_hist.keys())} to {max(archive_count.date_hist.keys())}')
-                # print(archive_count.date_hist)
+                print('\n'.join(archive_count.histogram_power_of_2()))
                 print()
 
 
