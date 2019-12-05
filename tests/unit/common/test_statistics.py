@@ -36,8 +36,8 @@ def test_length_dict_histogram_power_2():
     ld = statistics.LengthDict()
     for i in range(64):
         ld.add(i)
-    count_zero, hist = ld.histogram_power_of_2()
-    assert count_zero == 1
+    hist = ld.histogram_power_of_2()
+    assert ld.zero_count == 1
     expected = [
         '>=2**0  [     1] | +',
         '>=2**1  [     2] | +',
@@ -53,8 +53,8 @@ def test_length_dict_histogram_power_2_skip_a_value():
     ld = statistics.LengthDict()
     ld.add(2)
     ld.add(8)
-    count_zero, hist = ld.histogram_power_of_2()
-    assert count_zero == 0
+    hist = ld.histogram_power_of_2()
+    assert ld.zero_count == 0
     expected = [
         '>=2**1  [     1] | ++++++++++++++++++++',
         '>=2**2  [     0] | ',

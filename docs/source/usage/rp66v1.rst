@@ -181,7 +181,7 @@ Produces the single Logical File in ``BASIC_FILE``:
 
     LogicalFile [0]: <TotalDepth.RP66V1.core.LogicalFile.LogicalFile object at 0x11ca5ec50>
 
-The Logical File object has some useful properties:
+The Logical File object has at least these properties:
 
 =================================== ======================================================
 Property                            Description
@@ -213,10 +213,14 @@ Property                            Description
                                     FRAME EFLR.
 =================================== ======================================================
 
-An :term:`RP66V1.Explicitly Formatted Logical Record` (EFLR) is implemented as the class
-:py:class:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord` and that has a method
-:py:meth:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord.str_long()` that provides
-verbose information about the table. Here is an example of accessing all of the above properties for the ``BASIC_FILE``:
+Notes:
+
+* TotalDepth implements an EFLR as the class:
+    :py:class:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord`
+* That class has a method, used below, that provides verbose information about the table:
+    :py:meth:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.ExplicitlyFormattedLogicalRecord.str_long()` 
+
+Here is an example of accessing all of the above properties for the ``BASIC_FILE``:
 
 .. code-block:: python
 
@@ -415,12 +419,9 @@ Gives:
 
 
 More about :term:`RP66V1.EFLR` Tables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------
 
 An :term:`RP66V1.Explicitly Formatted Logical Record` is a table of data organised in rows and columns.
-
-
-
 
 
 Reading :term:`EFLR` Contents
@@ -428,10 +429,9 @@ Reading :term:`EFLR` Contents
 
 Each value in a row/column is known as an :term:`RP66V1.Attribute`
 
-An Attribute is implemented by implemented by
+This is implemented by
 :py:class:`TotalDepth.RP66V1.core.LogicalRecord.EFLR.Attribute`
-
-An Atribute has the following properties:
+which has the following properties:
 
 ============ ========= =======================================================================
 Property     Type      Description

@@ -612,7 +612,7 @@ class FileRead:
         return False
 
     def _set_file_and_read_first_visible_record(self) -> None:
-        self.file.seek(self.sul.SIZE)
+        self.file.seek(StorageUnitLabel.StorageUnitLabel.SIZE)
         self.visible_record.read(self.file)
 
     def _set_file_and_read_first_logical_record_segment_header(self) -> None:

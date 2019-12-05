@@ -72,8 +72,11 @@ RP66V1_DATA_DIR = [
     os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data')
 ]
 
+RP66V1_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', 'BASIC_FILE.dlis')
+
 RP66V1_FILES = [
-    os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS')
+    os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS'),
+    RP66V1_BASIC_FILE,
 ]
 
 
@@ -82,12 +85,45 @@ RP66V1_FILES = [
     'args',
     (
         [],
+        # Visible Records
         ['-V'],
-        ['-VR'],
+        ['-V', '-v'],
+        ['--VR'],
+        ['--VR', '-v'],
+        # Logical Record Segments
+        ['-L'],
+        ['-L', '-v'],
+        ['--LRSH'],
+        ['--LRSH', '-v'],
+        # Logical data
+        ['-D'],
+        ['-D', '-v'],
+        ['--LD'],
+        ['--LD', '-v'],
+        ['-D', '-v', '--dump-bytes=8'],
+        ['-D', '-v', '--dump-bytes=8', '--dump-raw-bytes'],
+        # Explicitly Formatted Logical Records
+        ['-E'],
+        ['-E', '-v'],
+        ['--EFLR'],
+        ['--EFLR', '-v'],
+        ['--EFLR', '--eflr-set-type=FRAME', '-v'],
+        # Indirectly Formatted Logical Records
+        ['-I'],
+        ['-I', '-v'],
+        ['--IFLR'],
+        ['--IFLR', '-v'],
+        # Logical Records
+        ['-R'],
+        ['-R', '-v'],
+        ['--LR'],
+        ['--LR', '-v'],
+        # Test data
+        ['-T'],
     )
 )
 def test_tdrp66v1scan_file(args):
-    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_FILES[0],])
+    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_BASIC_FILE,])
 
 
 @pytest.mark.slow

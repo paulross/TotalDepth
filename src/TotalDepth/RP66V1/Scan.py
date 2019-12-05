@@ -31,7 +31,7 @@ from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord import IFLR
-from TotalDepth.common import Rle
+from TotalDepth.common import Rle, statistics
 from TotalDepth.common import Slice
 from TotalDepth.common import data_table
 from TotalDepth.util import bin_file_type
@@ -97,8 +97,17 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
             count_vr = 0
             count_lrsh = 0
             count_lrsh_first = 0
-            count_lrsh_type = collections.Counter()
-            count_lrsh_length = collections.Counter()
+            count_lrsh_type = {
+                'EFLR': collections.Counter(),
+                'IFLR': collections.Counter(),
+            }
+            count_lrsh_length = statistics.LengthDict()
+            lrsh_first_last = {
+                (False, False): 0,
+                (False, True): 0,
+                (True, False): 0,
+                (True, True): 0,
+            }
             rle_visible_record_positions = Rle.RLE()
             rle_lrsh_positions = Rle.RLE()
             for visible_record in rp66_file.iter_visible_records():
@@ -108,11 +117,14 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
                     fout.write(f'{visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}\n')
                 if lrsh_dump:
                     for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
-                        count_lrsh_length.update([lrsh.length])
+                        count_lrsh_length.add(lrsh.length)
                         if lrsh.attributes.is_first:
                             rle_lrsh_positions.add(lrsh.position)
                             count_lrsh_first += 1
-                            count_lrsh_type.update([lrsh.record_type])
+                            if lrsh.attributes.is_eflr:
+                                count_lrsh_type['EFLR'].update([lrsh.record_type])
+                            else:
+                                count_lrsh_type['IFLR'].update([lrsh.record_type])
                             output = colorama.Fore.GREEN + f' {lrsh}'
                         elif lrsh.attributes.is_last:
                             output = colorama.Fore.RED + f'  --{lrsh}'
@@ -122,6 +134,7 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
                             lr_stride = lrsh.position - lr_position
                             fout.write(f'  {output} Stride: 0x{lr_stride:08x} {lr_stride:6,d}\n')
                         lr_position = lrsh.position
+                        lrsh_first_last[(lrsh.attributes.is_first, lrsh.attributes.is_last)] += 1
                         count_lrsh += 1
                 vr_position = visible_record.position
                 count_vr += 1
@@ -132,21 +145,31 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
             if lrsh_dump:
                 with _output_section_header_trailer('Summary of LRSH', '=', os=fout):
                     fout.write(f'LRSH: total={count_lrsh:,d} is_first={count_lrsh_first}\n')
-                    fout.write(f'LRSH: record types and counts (first segments only) [{len(count_lrsh_type)}]:\n')
-                    for record_type in sorted(count_lrsh_type.keys()):
-                        fout.write(f'{record_type:3d} : {count_lrsh_type[record_type]:8,d}\n')
-                    fout.write(
-                        f'LRSH: record lengths and counts (all segments)'
-                        f' [{len(count_lrsh_length)}]'
-                    )
-                    if len(count_lrsh_length):
-                        fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
-                    fout.write(f'\n')
+                    with _output_section_header_trailer('Summary of Logical Record Types', '-', os=fout):
+                        fout.write(f'LRSH: record types and counts (first segments only):\n')
+                        for flr_type in ('EFLR', 'IFLR'):
+                            fout.write(f'Count of Logical Record types for "{flr_type}" [{len(count_lrsh_type[flr_type])}]:\n')
+                            for record_type in sorted(count_lrsh_type[flr_type].keys()):
+                                fout.write(f'{record_type:3d} : {count_lrsh_type[flr_type][record_type]:8,d}\n')
+                    with _output_section_header_trailer('Summary of LRSH Lengths', '-', os=fout):
+                        fout.write(
+                            f'LRSH: record lengths and counts (all segments)'
+                            f' [{len(count_lrsh_length)}]'
+                        )
+                        if len(count_lrsh_length):
+                            fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
+                        fout.write(f'\n')
+                        fout.write('\n'.join(count_lrsh_length.histogram_power_of_2()))
+                        fout.write(f'\n')
+                    with _output_section_header_trailer('Summary of LRSH First/last', '-', os=fout):
+                        fout.write(f'{"(First, Last)":16} : {"Count":8}\n')
+                        for k in sorted(lrsh_first_last.keys()):
+                            fout.write(f'{str(k):16} : {lrsh_first_last[k]:8d}\n')
                     if verbose:
-                        for length in sorted(count_lrsh_length.keys()):
-                            fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
                         with _output_section_header_trailer('RLE LRSH Position', '-', os=fout):
                             _write_position_rle(rle_lrsh_positions, fout)
+                        for length in sorted(count_lrsh_length.keys()):
+                            fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
 
 
 def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
@@ -162,52 +185,52 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
     count_eflr_type_length_count = {}
     count_iflr_type_length_count = {}
     with _output_section_header_trailer('RP66V1 Logical Data Summary', '*', os=fout):
-        rp66_file = File.FileRead(fobj)
-        vr_position = 0
-        header = [
-            f'{"Visible R":10}',
-            f'{"LRSH":10}',
-            f'{"Typ":3}',
-            f'{" "}',
-            f'{"     "}',
-            f'{"Length":8}',
-        ]
-        underline = ['-' * len(h) for h in header]
-        if verbose:
-            fout.write(' '.join(header) + '\n')
-            fout.write(' '.join(underline) + '\n')
-        for logical_data in rp66_file.iter_logical_records():
-            if logical_data.lr_is_eflr:
-                if logical_data.lr_type not in count_eflr_type_length_count:
-                    count_eflr_type_length_count[logical_data.lr_type] = collections.Counter()
-                count_eflr_type_length_count[logical_data.lr_type].update([len(logical_data)])
-            else:
-                if logical_data.lr_type not in count_iflr_type_length_count:
-                    count_iflr_type_length_count[logical_data.lr_type] = collections.Counter()
-                count_iflr_type_length_count[logical_data.lr_type].update([len(logical_data)])
+        with File.FileRead(fobj) as rp66_file:
+            vr_position = 0
+            header = [
+                f'{"Visible R":10}',
+                f'{"LRSH":10}',
+                f'{"Typ":3}',
+                f'{" "}',
+                f'{"     "}',
+                f'{"Length":8}',
+            ]
+            underline = ['-' * len(h) for h in header]
             if verbose:
-                messages = [
-                    f'0x{logical_data.position.vr_position:08x}' if logical_data.position.vr_position != vr_position else ' ' * 10,
-                    f'0x{logical_data.position.lrsh_position:08x}',
-                    f'{logical_data.lr_type:3d}',
-                    f'{"E" if logical_data.lr_is_eflr else "I"}',
-                    f'{"Crypt" if logical_data.lr_is_encrypted else "Plain"}',
-                    f'{len(logical_data.logical_data):8,d}',
-                ]
-                if dump_bytes:
-                    if dump_bytes == -1:
-                        if dump_raw_bytes:
-                            messages.append(str(logical_data.logical_data.bytes))
+                fout.write(' '.join(header) + '\n')
+                fout.write(' '.join(underline) + '\n')
+            for logical_data in rp66_file.iter_logical_records():
+                if logical_data.lr_is_eflr:
+                    if logical_data.lr_type not in count_eflr_type_length_count:
+                        count_eflr_type_length_count[logical_data.lr_type] = collections.Counter()
+                    count_eflr_type_length_count[logical_data.lr_type].update([len(logical_data)])
+                else:
+                    if logical_data.lr_type not in count_iflr_type_length_count:
+                        count_iflr_type_length_count[logical_data.lr_type] = collections.Counter()
+                    count_iflr_type_length_count[logical_data.lr_type].update([len(logical_data)])
+                if verbose:
+                    messages = [
+                        f'0x{logical_data.position.vr_position:08x}' if logical_data.position.vr_position != vr_position else ' ' * 10,
+                        f'0x{logical_data.position.lrsh_position:08x}',
+                        f'{logical_data.lr_type:3d}',
+                        f'{"E" if logical_data.lr_is_eflr else "I"}',
+                        f'{"Crypt" if logical_data.lr_is_encrypted else "Plain"}',
+                        f'{len(logical_data.logical_data):8,d}',
+                    ]
+                    if dump_bytes:
+                        if dump_bytes == -1:
+                            if dump_raw_bytes:
+                                messages.append(str(logical_data.logical_data.bytes))
+                            else:
+                                messages.append(format_bytes(logical_data.logical_data.bytes))
                         else:
-                            messages.append(format_bytes(logical_data.logical_data.bytes))
-                    else:
-                        if dump_raw_bytes:
-                            messages.append(str(logical_data.logical_data.bytes[:dump_bytes]))
-                        else:
-                            messages.append(format_bytes(logical_data.logical_data.bytes[:dump_bytes]))
-                fout.write(' '.join(messages))
-                fout.write('\n')
-            vr_position = logical_data.position.vr_position
+                            if dump_raw_bytes:
+                                messages.append(str(logical_data.logical_data.bytes[:dump_bytes]))
+                            else:
+                                messages.append(format_bytes(logical_data.logical_data.bytes[:dump_bytes]))
+                    fout.write(' '.join(messages))
+                    fout.write('\n')
+                vr_position = logical_data.position.vr_position
         with _output_section_header_trailer('RP66V1 Logical Data EFLR Summary', '=', os=fout):
             count_total = sum(
                 [
@@ -257,63 +280,63 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
     # TODO: eflr_dump is never present
     dump_eflr = kwargs.get('eflr_dump', 0)
     eflr_set_type = kwargs.get('eflr_set_type', [])
-    dump_iflr = kwargs.get('iflr_dump', 0)
+    iflr_dump = kwargs.get('iflr_dump', 0)
     iflr_set_type = kwargs.get('iflr_set_type', [])
     # TODO: Use both of these
-    dump_bytes = kwargs.get('dump_bytes', 0)
-    dump_raw_bytes = kwargs.get('dump_raw_bytes', 0)
-    if not dump_bytes:
-        fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
+    # dump_bytes = kwargs.get('dump_bytes', 0)
+    # dump_raw_bytes = kwargs.get('dump_raw_bytes', 0)
+    # if not dump_bytes:
+    #     fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
     with _output_section_header_trailer('RP66V1 EFLR and IFLR Data Summary', '*', os=fout):
-        rp66_file = File.FileRead(fobj)
-        # TODO: use data_table.format_table
-        vr_position = 0
-        header = [
-            f'{"Visible R":10}',
-            f'{"LRSH":10}',
-            f'{"Typ":3}',
-            f'{" "}',
-            f'{"     "}',
-            f'{"Length":8}',
-        ]
-        underline = ['-' * len(h) for h in header]
-        if verbose:
-            fout.write(' '.join(header) + '\n')
-            fout.write(' '.join(underline) + '\n')
-        for file_logical_data in rp66_file.iter_logical_records():
-            if file_logical_data.lr_is_eflr:
-                if file_logical_data.lr_is_encrypted:
-                    if kwargs['encrypted']:
-                        if verbose:
-                            fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
-                        else:
-                            fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
-                        fout.write('\n')
-                else:
-                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                    if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
-                        lines = str(eflr).split('\n')
-                        for i, line in enumerate(lines):
-                            if i == 0:
-                                fout.write(colorama.Fore.MAGENTA + line + colorama.Style.RESET_ALL)
-                            else:
-                                fout.write(line)
-                            fout.write('\n')
-            else:
-                # IFLR
-                if dump_iflr:
+        with File.FileRead(fobj) as rp66_file:
+            # TODO: use data_table.format_table
+            vr_position = 0
+            header = [
+                f'{"Visible R":10}',
+                f'{"LRSH":10}',
+                f'{"Typ":3}',
+                f'{" "}',
+                f'{"     "}',
+                f'{"Length":8}',
+            ]
+            underline = ['-' * len(h) for h in header]
+            if verbose:
+                fout.write(' '.join(header) + '\n')
+                fout.write(' '.join(underline) + '\n')
+            for file_logical_data in rp66_file.iter_logical_records():
+                if file_logical_data.lr_is_eflr:
                     if file_logical_data.lr_is_encrypted:
                         if kwargs['encrypted']:
                             if verbose:
-                                fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                                fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
                             else:
-                                fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                                fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
                             fout.write('\n')
                     else:
-                        iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
-                        if len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
-                            fout.write(str(iflr))
-                            fout.write('\n')
+                        eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                        if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
+                            lines = str(eflr).split('\n')
+                            for i, line in enumerate(lines):
+                                if i == 0:
+                                    fout.write(colorama.Fore.MAGENTA + line + colorama.Style.RESET_ALL)
+                                else:
+                                    fout.write(line)
+                                fout.write('\n')
+                else:
+                    # IFLR
+                    if iflr_dump and verbose:
+                        if file_logical_data.lr_is_encrypted:
+                            if kwargs['encrypted']:
+                                if verbose:
+                                    fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                                else:
+                                    fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                                fout.write('\n')
+                        else:
+                            iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                            if len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
+                                fout.write(str(iflr))
+                                fout.write('\n')
 
 
 def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
@@ -337,28 +360,27 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
 
 
 def _scan_log_pass_content(
-        rp66_file: File.FileRead,
-        logical_file: LogicalFile.LogicalFile,
+        logical_index: LogicalFile.LogicalIndex,
+        logical_file_index: int,
         fout: typing.TextIO,
         *,
         frame_slice: Slice.Slice) -> None:
     """Scan the LogPass."""
-    assert logical_file.has_log_pass
-    lp: LogPass.LogPass = logical_file.log_pass
+    assert logical_index[logical_file_index].has_log_pass
+    lp: LogPass.LogPass = logical_index[logical_file_index].log_pass
     frame_array: LogPass.FrameArray
     for fa, frame_array in enumerate(lp.frame_arrays):
         with _output_section_header_trailer(f'Frame Array [{fa}/{len(lp.frame_arrays)}]', '^', os=fout):
             fout.write(str(frame_array))
             fout.write('\n')
-            num_frames = LogicalFile.populate_frame_array(
-                rp66_file,
-                logical_file,
+            num_frames = logical_index.populate_frame_array(
+                logical_file_index,
                 frame_array,
                 frame_slice,
                 None
             )
             if num_frames > 0:
-                x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+                x_axis: XAxis.XAxis = logical_index[logical_file_index].iflr_position_map[frame_array.ident]
                 _write_x_axis_summary(x_axis, fout)
                 if x_axis.summary.spacing is not None:
                     interval = f'{x_axis.summary.spacing.median:0.3f}'
@@ -436,7 +458,7 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
                     # Now the LogPass(s)
                     if logical_file.has_log_pass:
                         with _output_section_header_trailer('Log Pass', '-', os=fout):
-                            _scan_log_pass_content(rp66v1_file, logical_file, fout, frame_slice=frame_slice)
+                            _scan_log_pass_content(logical_index, lf, fout, frame_slice=frame_slice)
                     else:
                         fout.write('NO Log Pass for this Logical Record\n')
 
@@ -444,72 +466,49 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
 def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """Scans the file reporting Visible Records, optionally Logical Record Segments as well."""
     with _output_section_header_trailer('File as Raw Test Data', '*', os=fout):
-        rp66_file = File.FileRead(fobj)
-        count_vr = 0
-        count_lrsh = 0
-        count_lrsh_first = 0
-        fout.write(f'{rp66_file.sul.as_bytes()}  # Storage Unit Label\n')
-
-        for visible_record in rp66_file.iter_visible_records():
-            fout.write(
-                f'{visible_record.as_bytes()}'
-                f'  # Visible record [{count_vr}]'
-                f' at 0x{visible_record.position:x}'
-                f' length 0x{visible_record.length:x}'
-                f' version 0x{visible_record.version:x}\n'
-            )
-            for lrsh, by in rp66_file.iter_LRSHs_for_visible_record_and_logical_data_fragment(visible_record):
-                record_type = 'E' if lrsh.is_eflr else 'I'
+        with File.FileRead(fobj) as rp66_file:
+            count_vr = 0
+            count_lrsh = 0
+            count_lrsh_first = 0
+            fout.write(f'{rp66_file.sul.as_bytes()}  # Storage Unit Label\n')
+            for visible_record in rp66_file.iter_visible_records():
                 fout.write(
-                    f'    {lrsh.as_bytes()}'
-                    f'  # LRSH [{count_lrsh_first}/{count_lrsh}] 0x{lrsh.position:x} {record_type} len: {lrsh.length}'
-                    f' first: {lrsh.is_first} last: {lrsh.is_last}\n'
+                    f'{visible_record.as_bytes()}'
+                    f'  # Visible record [{count_vr}]'
+                    f' at 0x{visible_record.position:x}'
+                    f' length 0x{visible_record.length:x}'
+                    f' version 0x{visible_record.version:x}\n'
                 )
-                # fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
-                WIDTH = 20
-                # str_list = []
-                # for i in range(0, len(by), WIDTH):
-                #     str_list.append(f'{by[i:i+WIDTH]}')
-                str_list = [f'{by[i:i+WIDTH]}' for i in range(0, len(by), WIDTH)]
-                if len(str_list) > 1:
-                    fout.write(f'        # Logical data length {len(by)} 0x{len(by):x}\n')
-                    FW = max(len(s) for s in str_list)
-                    for i, s in enumerate(str_list):
-                        fout.write(
-                            f'        {s:{FW}}  # Chunk from {i * WIDTH}\n'
-                        )
-                else:
-                    fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
-                if lrsh.is_first:
-                    count_lrsh_first += 1
-                elif lrsh.is_last:
-                    pass
-                else:
-                    pass
-                count_lrsh += 1
-            count_vr += 1
-        # with _output_section_header_trailer('Summary of Visible Records', '=', os=fout):
-        #     fout.write(f'Visible records: {count_vr:,d}\n')
-        #     with _output_section_header_trailer('RLE Visible Record Position', '-', os=fout):
-        #         _write_position_rle(rle_visible_record_positions, fout)
-        # if lrsh_dump:
-        #     with _output_section_header_trailer('Summary of LRSH', '=', os=fout):
-        #         fout.write(f'LRSH: total={count_lrsh:,d} is_first={count_lrsh_first}\n')
-        #         fout.write(f'LRSH: record types and counts (first segments only) [{len(count_lrsh_type)}]:\n')
-        #         for record_type in sorted(count_lrsh_type.keys()):
-        #             fout.write(f'{record_type:3d} : {count_lrsh_type[record_type]:8,d}\n')
-        #         fout.write(
-        #             f'LRSH: record lengths and counts (all segments)'
-        #             f' [{len(count_lrsh_length)}]'
-        #         )
-        #         if len(count_lrsh_length):
-        #             fout.write(f' range: {min(count_lrsh_length.keys())}...{max(count_lrsh_length.keys())}')
-        #         fout.write(f'\n')
-        #         if verbose:
-        #             for length in sorted(count_lrsh_length.keys()):
-        #                 fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
-        #             with _output_section_header_trailer('RLE LRSH Position', '-', os=fout):
-        #                 _write_position_rle(rle_lrsh_positions, fout)
+                for lrsh, by in rp66_file.iter_LRSHs_for_visible_record_and_logical_data_fragment(visible_record):
+                    record_type = 'E' if lrsh.attributes.is_eflr else 'I'
+                    fout.write(
+                        f'    {lrsh.as_bytes()}'
+                        f'  # LRSH [{count_lrsh_first}/{count_lrsh}] 0x{lrsh.position:x} {record_type} len: {lrsh.length}'
+                        f' first: {lrsh.attributes.is_first} last: {lrsh.attributes.is_last}\n'
+                    )
+                    # fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
+                    WIDTH = 20
+                    # str_list = []
+                    # for i in range(0, len(by), WIDTH):
+                    #     str_list.append(f'{by[i:i+WIDTH]}')
+                    str_list = [f'{by[i:i+WIDTH]}' for i in range(0, len(by), WIDTH)]
+                    if len(str_list) > 1:
+                        fout.write(f'        # Logical data length {len(by)} 0x{len(by):x}\n')
+                        FW = max(len(s) for s in str_list)
+                        for i, s in enumerate(str_list):
+                            fout.write(
+                                f'        {s:{FW}}  # Chunk from {i * WIDTH}\n'
+                            )
+                    else:
+                        fout.write(f'        {by} # Logical data length {len(by)} 0x{len(by):x}\n')
+                    if lrsh.attributes.is_first:
+                        count_lrsh_first += 1
+                    elif lrsh.attributes.is_last:
+                        pass
+                    else:
+                        pass
+                    count_lrsh += 1
+                count_vr += 1
 
 
 # TODO: IndexFile and ScanFile are very similar, combine.

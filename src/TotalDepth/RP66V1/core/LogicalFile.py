@@ -232,24 +232,27 @@ class LogicalIndex:
     """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
     def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
         self.logical_files: typing.List[LogicalFile] = []
-        self.logical_record_index = Index.LogicalRecordIndex(path_or_file)
+        self._logical_record_index = Index.LogicalRecordIndex(path_or_file)
 
     def __len__(self) -> int:
         """Returns the number of Logical Files."""
         return len(self.logical_files)
 
+    def __getitem__(self, item) -> LogicalFile:
+        """Returns the Logical Files at position item."""
+        return self.logical_files[item]
 
     @property
     def storage_unit_label(self) -> File.StorageUnitLabel:
         """The Storage Unit Label. This comes from the LogicalRecordIndex."""
-        return self.logical_record_index.sul
+        return self._logical_record_index.sul
 
     def __enter__(self):
         """Context manager support."""
-        self.logical_record_index._enter()
+        self._logical_record_index._enter()
         self.logical_files = []
-        for lr_index in range(len(self.logical_record_index)):
-            file_logical_data = self.logical_record_index.get_file_logical_data(lr_index, 0, -1)
+        for lr_index in range(len(self._logical_record_index)):
+            file_logical_data = self._logical_record_index.get_file_logical_data(lr_index, 0, -1)
             assert file_logical_data.is_sealed()
             if not file_logical_data.lr_is_encrypted:
                 if file_logical_data.lr_is_eflr:
@@ -274,7 +277,7 @@ class LogicalIndex:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager support."""
-        self.logical_record_index._exit()
+        self._logical_record_index._exit()
         self.logical_files = []
         return False
 
@@ -318,7 +321,7 @@ class LogicalIndex:
                          f' num_frames: {num_frames} range_gen: {range_gen}.')
             for array_index, frame_number in enumerate(range_gen):
                 iflr_reference = iflrs[frame_number]
-                fld: File.FileLogicalData = self.logical_record_index.get_file_logical_data_at_position(
+                fld: File.FileLogicalData = self._logical_record_index.get_file_logical_data_at_position(
                     iflr_reference.logical_record_position
                 )
                 # Create an IFLR but we don't use it, just the remaining bytes in the Logical Data.
