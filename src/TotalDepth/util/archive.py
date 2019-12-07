@@ -185,7 +185,7 @@ class ArchiveCount:
         self.total_size += size
         self.extensions.add(ext)
 
-    def histogram_power_of_2(self, width: int = 40, bar_char: str = '+') -> typing.List[str]:
+    def histogram_power_of_2(self, width: int = 80, bar_char: str = '+') -> typing.List[str]:
         return self._size_hist.histogram_power_of_2(width, bar_char)
 
     @property
@@ -221,6 +221,7 @@ def analyse_archive(files: typing.List[FileBase],
                     num_bytes: int,
                     include_size_histogram: bool,
                     ) -> None:
+    """Take a list of FileBase and write out the analysis."""
     if len(files) == 0:
         return
     summary: ArchiveSummary = ArchiveSummary()
@@ -443,7 +444,7 @@ will be copied across."""
             num_files, byte_count = expand_and_delete_archives(args.path_in, args.nervous)
         else:
             print('Analysing archive.')
-            files: typing.List[FileBase] = explore_tree(args.path, args.recurse)
+            files: typing.List[FileBase] = explore_tree(args.path_in, args.recurse)
             analyse_archive(files, args.file_type, args.bytes, args.histogram)
             num_files = len(files)
             byte_count = sum(len(f.bytes) for f in files)

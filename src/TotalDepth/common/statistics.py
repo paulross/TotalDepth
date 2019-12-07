@@ -62,10 +62,11 @@ class LengthDict:
         if len(self._count):
             reduced = self.reduced_power_2()
             rng = range(min(reduced.keys()), max(reduced.keys()) + 1, 1)
+            max_count = max(reduced.values())
             # TODO: Calculate field widths based on max power of 2 and max count for any value in reduced.
             for r in rng:
                 if r in reduced:
-                    proportion = (reduced[r] / self.count)
+                    proportion = (reduced[r] / max_count)
                 else:
                     proportion = 0.0
                 bar = bar_char * int(0.5 + width * proportion)
