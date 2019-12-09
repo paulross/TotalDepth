@@ -48,7 +48,7 @@ def demo_numpy_describe_test_data():
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     print(frame_array)
-                    frame_count = logical_index.populate_frame_array(lf_index, frame_array)
+                    frame_count = logical_file.populate_frame_array(frame_array)
                     print(
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
@@ -213,9 +213,8 @@ def demo_numpy_access_partial():
 
 def main() -> int:
     # demo_logical_files_test_data()
-    # demo_numpy_describe_test_data()
-    demo_eflr_contents_test_data()
-
+    # demo_eflr_contents_test_data()
+    demo_numpy_describe_test_data()
     # demo_numpy_access_partial_test_data()
     # demo_logical_files()
     # demo_eflr()

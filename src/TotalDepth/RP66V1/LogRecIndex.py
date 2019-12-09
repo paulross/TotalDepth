@@ -73,22 +73,17 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
         try:
             t_start = time.perf_counter()
             # Index the file
+            # process.add_message_to_queue(f'Start {os.path.basename(path_in)}')
             with Index.LogicalRecordIndex(path_in) as logical_record_index:
                 index_time = time.perf_counter() - t_start
-                # logger.info(
-                #     f'Index length {len(logical_record_index)}'
-                #     # f' sizeof {sys.getsizeof(logical_record_index.lr_pos_desc)}'
-                #     # f' {sys.getsizeof(logical_record_index.lr_pos_desc) / len(logical_record_index):.1f} byte/LR'
-                # )
                 t_start = time.perf_counter()
+                # process.add_message_to_queue(f'Pickle {os.path.basename(path_in)}')
                 # Pickle the index
-                pickled_index = pickle.dumps(logical_record_index)
-                len_pickled_index = len(pickled_index)
                 if path_out:
-                    # If required, write the pickled index
                     pickle_path = path_out + '.pkl'
-                    with open(pickle_path, 'wb') as out_stream:
-                        out_stream.write(pickled_index)
+                    with open(pickle_path, 'wb') as pickle_file:
+                        pickle.dump(logical_record_index, pickle_file)
+                    len_pickled_index = os.path.getsize(pickle_path)
                     write_time = time.perf_counter() - t_start
                     if read_back:
                         t_start = time.perf_counter()
@@ -97,7 +92,10 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
                     else:
                         read_back_time = 0.0
                 else:
-                    write_time = read_back_time = 0.0
+                    pickled_index = pickle.dumps(logical_record_index)
+                    write_time = time.perf_counter() - t_start
+                    len_pickled_index = len(pickled_index)
+                    read_back_time = 0.0
                 result = IndexResult(path_in, os.path.getsize(path_in), len_pickled_index,
                                      index_time, write_time, read_back_time, False, False)
                 return result
@@ -180,20 +178,21 @@ set terminal svg size 1000,700 # choose the file format
 
 set output "{name}_rate.svg" # choose the output device
 
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+# plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
     rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
     "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
 
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points
+
 set output "{name}_times.svg" # choose the output device
+set ylabel "Index Time (s)"
 unset y2label
 
 plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s), left axis" lt 1 w points, \\
     "{name}.dat" using 1:4 axes x1y1 title "Write Time (s), left axis" lt 2 w points, \\
     "{name}.dat" using 1:5 axes x1y1 title "Read Time (s), left axis" lt 3 w points
-
-# Plot size ratio:
-#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, #     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
 
 reset
 """

@@ -1,3 +1,4 @@
+import copy
 import io
 import pprint
 
@@ -110,7 +111,7 @@ def test_logical_index_logical_file_iflr_position_map_x_axis_summary_spacing_cou
         assert x_axis.summary.spacing.counts.back == 0
 
 
-def test_logical_index_populate_frame_array():
+def test_logical_file_populate_frame_array():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
         assert len(logical_index) == 1
@@ -118,7 +119,7 @@ def test_logical_index_populate_frame_array():
         assert logical_file.has_log_pass
         assert len(logical_file.log_pass) == 1
         frame_array = logical_file.log_pass[0]
-        frame_count = logical_index.populate_frame_array(0, frame_array)
+        frame_count = logical_file.populate_frame_array(frame_array)
         assert frame_count == 649
         assert len(frame_array) == 5
         assert frame_array.shape == [(649, 1), (649, 1), (649, 1), (649, 1), (649, 1)]
@@ -126,7 +127,21 @@ def test_logical_index_populate_frame_array():
         assert names == [b'DEPT', b'TENS', b'ETIM', b'DHTN', b'GR']
 
 
-def test_logical_index_populate_frame_array_channels():
+def test_logical_file_populate_frame_array_raises_if_frame_array_not_member():
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
+        assert len(logical_index) == 1
+        logical_file = logical_index.logical_files[0]
+        assert logical_file.has_log_pass
+        assert len(logical_file.log_pass) == 1
+        frame_array = logical_file.log_pass[0]
+        frame_array_copy = copy.copy(frame_array)
+        with pytest.raises(LogicalFile.ExceptionLogicalFile) as err:
+            logical_file.populate_frame_array(frame_array_copy)
+        assert err.value.args[0] == 'populate_frame_array(): given FrameArray is not in Log Pass'
+
+
+def test_logical_file_populate_frame_array_channels():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
         assert len(logical_index) == 1
@@ -135,7 +150,7 @@ def test_logical_index_populate_frame_array_channels():
         assert len(logical_file.log_pass) == 1
         frame_array = logical_file.log_pass[0]
         channels = [frame_array.channels[i].ident for i in (1, 4)]
-        frame_count = logical_index.populate_frame_array(0, frame_array, channels=channels)
+        frame_count = logical_file.populate_frame_array(frame_array, channels=channels)
         assert frame_count == 649
         assert len(frame_array) == 5
         assert frame_array.shape == [(649, 1), (649, 1), (0, 1), (0, 1), (649, 1)]
@@ -148,7 +163,7 @@ def test_logical_index_populate_frame_array_channels():
         assert frame_array[4].array.shape == (649, 1)
 
 
-def test_logical_index_populate_frame_array_partial_slice():
+def test_logical_file_populate_frame_array_partial_slice():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
         assert len(logical_index) == 1
@@ -157,11 +172,11 @@ def test_logical_index_populate_frame_array_partial_slice():
         assert len(logical_file.log_pass) == 1
         frame_array = logical_file.log_pass[0]
         frame_slice = Slice.Slice(8, 64, 2)
-        frame_count = logical_index.populate_frame_array(0, frame_array, frame_slice)
+        frame_count = logical_file.populate_frame_array(frame_array, frame_slice)
         assert frame_count == 28
 
 
-def test_logical_index_populate_frame_array_partial_split():
+def test_logical_file_populate_frame_array_partial_split():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
         assert len(logical_index) == 1
@@ -170,8 +185,5 @@ def test_logical_index_populate_frame_array_partial_split():
         assert len(logical_file.log_pass) == 1
         frame_array = logical_file.log_pass[0]
         frame_slice = Slice.Split(64)
-        frame_count = logical_index.populate_frame_array(0, frame_array, frame_slice)
+        frame_count = logical_file.populate_frame_array(frame_array, frame_slice)
         assert frame_count == 64
-
-
-

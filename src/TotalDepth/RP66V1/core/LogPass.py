@@ -88,15 +88,26 @@ class FrameChannel:
 
     @property
     def len_array(self) -> int:
+        """The number of elements in the numpy array."""
         return self.array.size
 
     @property
     def sizeof_array(self) -> int:
+        """The size of each element of the array as represented by numpy."""
         return self.array.size * self.array.itemsize
 
     @property
-    def shape(self):
+    def shape(self) -> typing.Tuple[int, ...]:
+        """The shape of the array."""
         return self.array.shape
+
+    @property
+    def len_input_bytes(self) -> int:
+        """The number of RP66V1 bytes to read for one frame of this channel."""
+        try:
+            return self.count * RepCode.rep_code_fixed_length(self.rep_code)
+        except RepCode.ExceptionRepCode as err:
+            raise ExceptionFrameChannel(f'len_input_bytes() on variable length Rep Code {self.rep_code}') from err
 
     def numpy_indexes(self, frame_number: int) -> itertools.product:
         """
@@ -181,6 +192,7 @@ class FrameArray:
         )
 
     def __len__(self) -> int:
+        """The number of channels."""
         return len(self.channels)
 
     def __getitem__(self, item: typing.Union[int, RepCode.ObjectName]) -> FrameChannel:
@@ -190,10 +202,12 @@ class FrameArray:
 
     @property
     def sizeof_array(self) -> int:
+        """The total of the frame array as represented by numpy."""
         return sum(ch.sizeof_array for ch in self.channels)
 
     @property
-    def shape(self):
+    def shape(self) -> typing.List[typing.Tuple[int, ...]]:
+        """The shape of the frame array."""
         return [a.shape for a in self.channels]
 
     def init_arrays(self, number_of_frames: int) -> None:
@@ -247,6 +261,15 @@ class FrameArray:
         if len(self.channels) == 0:
             raise ExceptionFrameArray('Zero channels. Expected one channel as the X axis.')
         return self.channels[0]
+
+    @property
+    def x_axis_len_input_bytes(self) -> int:
+        """The number of RP66V1 bytes to read for one frame of the X axis.
+        This can be useful for partial reads of an IFLR from file if only the X axis is interesting, for example for
+        indexing.
+
+        Will raise an ExceptionFrameChannel if the X axis is  not represented by a fixed length Representation Code."""
+        return self.channels[0].len_input_bytes
 
     def init_x_axis_array(self, number_of_frames: int) -> None:
         """

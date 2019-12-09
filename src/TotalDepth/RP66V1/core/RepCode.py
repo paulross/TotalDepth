@@ -199,6 +199,11 @@ REP_CODE_FIXED_LENGTHS = {
 }
 
 
+def is_fixed_length(rc: int) -> bool:
+    """True if the Representation Code is fixed length."""
+    return rc in REP_CODE_FIXED_LENGTHS
+
+
 def rep_code_fixed_length(rc: int) -> int:
     """Returns the length in bytes of a fixed length Rep Code.
     Will raise an ExceptionRepCode if the Rep Code is not of fixed length."""

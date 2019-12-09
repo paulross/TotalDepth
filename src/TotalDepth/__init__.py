@@ -34,9 +34,12 @@ entry_points_console_scripts_dict = {
     # All TotalDepth scripts have a 'td' prefix.
     # Experimental scripts have a 'tdX' prefix.
     # General
-    'tdarchive': 'TotalDepth.util.archive:main',
     'tdplotlogs': 'TotalDepth.PlotLogs:main',
     'tddetif': 'TotalDepth.DeTif:main',
+    # General util/
+    'tdarchive': 'TotalDepth.util.archive:main',
+    # General common/
+    'tdprocess': 'TotalDepth.common.process:main',
     # LIS
     'tdlisdumpframeset': 'TotalDepth.LIS.DumpFrameSet:main',
     'tdlisindex': 'TotalDepth.LIS.Index:main',

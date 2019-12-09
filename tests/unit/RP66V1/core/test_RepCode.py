@@ -19,6 +19,43 @@ from TotalDepth.RP66V1.core.File import LogicalData
 @pytest.mark.parametrize(
     'rc, expected',
     (
+        (1, True,),  # Low precision floating point
+        (2, True,),  # IEEE single precision floating point
+        (3, True,),  # Validated single precision floating point
+        (4, True,),  # Two-way validated single precision floating point
+        (5, True,),  # IBM single precision floating point
+        (6, True,),  # VAX single precision floating point
+        (7, True,),  # IEEE double precision floating point
+        (8, True,),  # Validated double precision floating point
+        (9, True,),  # Two-way validated double precision floating point
+        (10, True,),  # Single precision complex
+        (11, True,),  # Double precision complex
+        (12, True,),  # Short signed integer
+        (13, True,),  # Normal signed integer
+        (14, True,),  # Long signed integer
+        (15, True,),  # Short unsigned integer
+        (16, True,),  # Normal unsigned integer
+        (17, True,),  # Long unsigned integer
+        (18, False), # UVARI	1, 2, or 4	    Variable-length unsigned integer
+        (19, False), # IDENT	V	            Variable-length identifier
+        (20, False), # ASCII	V	            Variable-length ASCII character string
+        (21, True,),  # Date and time
+        (22, False), # ORIGIN	V	            Origin reference
+        (23, False), # OBNAME	V	            Object name
+        (24, False), # OBJREF	V	            Object reference
+        (25, False), # ATTREF	V	            Attribute reference
+        (26, True,),  # Boolean status
+        (27, False), # UNITS	V	            Units expression
+    )
+)
+def test_rep_code_is_fixed_length(rc, expected):
+    result = RepCode.is_fixed_length(rc)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'rc, expected',
+    (
         (1, 2,),  # Low precision floating point
         (2, 4,),  # IEEE single precision floating point
         (3, 8,),  # Validated single precision floating point

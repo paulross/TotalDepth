@@ -84,7 +84,9 @@ class LogicalFile:
     DUPE_EFLR_CHANNEL_LOGGER = logger.warning
     ALLOWABLE_ORIGIN_SET_TYPES = (b'ORIGIN', b'WELL-REFERENCE')
 
-    def __init__(self, file_logical_data: File.FileLogicalData, fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
+    def __init__(self, logical_record_index: Index.LogicalRecordIndex,
+                 file_logical_data: File.FileLogicalData,
+                 fhlr: EFLR.ExplicitlyFormattedLogicalRecord):
         if fhlr.lr_type != 0:
             raise ExceptionLogicalFileCtor(
                 f'Logical File requires first EFLR code 0 not {str(fhlr.lr_type)}\n{fhlr}'
@@ -94,6 +96,9 @@ class LogicalFile:
                 f'Logical File requires first EFLR type b\'FILE-HEADER\' not {str(fhlr.set.type)}'
             )
         self._check_fld_matches_eflr(file_logical_data, fhlr)
+        # Take a reference to the low-level index which we need in conjunction with iflr_position_map to get random
+        # access to the IFLRs that belong to this Logical File.
+        self._logical_record_index= logical_record_index
         self.eflrs: typing.List[PositionEFLR] = [
             PositionEFLR(file_logical_data.position, fhlr)
         ]
@@ -227,82 +232,27 @@ class LogicalFile:
             frame_array.x_axis.array.mean(),
         )
 
-
-class LogicalIndex:
-    """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
-    def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
-        self.logical_files: typing.List[LogicalFile] = []
-        self._logical_record_index = Index.LogicalRecordIndex(path_or_file)
-
-    def __len__(self) -> int:
-        """Returns the number of Logical Files."""
-        return len(self.logical_files)
-
-    def __getitem__(self, item) -> LogicalFile:
-        """Returns the Logical Files at position item."""
-        return self.logical_files[item]
-
-    @property
-    def storage_unit_label(self) -> File.StorageUnitLabel:
-        """The Storage Unit Label. This comes from the LogicalRecordIndex."""
-        return self._logical_record_index.sul
-
-    def __enter__(self):
-        """Context manager support."""
-        self._logical_record_index._enter()
-        self.logical_files = []
-        for lr_index in range(len(self._logical_record_index)):
-            file_logical_data = self._logical_record_index.get_file_logical_data(lr_index, 0, -1)
-            assert file_logical_data.is_sealed()
-            if not file_logical_data.lr_is_encrypted:
-                if file_logical_data.lr_is_eflr:
-                    # EFLRs
-                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
-                                                                 file_logical_data.logical_data)
-                    if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
-                        self.logical_files.append(LogicalFile(file_logical_data, eflr))
-                    else:
-                        self.logical_files[-1].add_eflr(file_logical_data, eflr)
-                else:
-                    # IFLRs
-                    if len(self.logical_files) == 0:
-                        raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
-                    iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
-                                                                 file_logical_data.logical_data)
-                    if iflr.remain > 0:
-                        self.logical_files[-1].add_iflr(file_logical_data, iflr)
-                    # else:
-                    #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager support."""
-        self._logical_record_index._exit()
-        self.logical_files = []
-        return False
-
     def populate_frame_array(
             self,
-            logical_file_index: int,
             frame_array: LogPass.FrameArray,
             frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
             channels: typing.Union[typing.Set[typing.Hashable], None] = None,
     ) -> int:
         """Populates a FrameArray with channel values.
 
-        logical_file_index is the index of the LogicalFile in this LogicalIndex.
-
-        frame_array is the identified FrameArray in that LogPass of FrameArrays in that LogicalFile.
-        This will be populated.
+        frame_array must be a member of the LogPass in thisLogicalFile.
 
         frame_slice Allows partial population in the X axis.
 
         channels Allows partial population of specific channels.
 
-        This returns the number of frames populated.
+        The FrameArray will be populated and this returns the number of frames populated.
         """
-        logical_file = self.logical_files[logical_file_index]
-        iflrs: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+        if self.log_pass is None:
+            raise ExceptionLogicalFile(f'populate_frame_array(): when no Log Pass')
+        if not id(frame_array) in [id(v) for v in self.log_pass.frame_arrays]:
+            raise ExceptionLogicalFile(f'populate_frame_array(): given FrameArray is not in Log Pass')
+        iflrs: XAxis.XAxis = self.iflr_position_map[frame_array.ident]
         if len(iflrs):
             # Set partial frames
             if frame_slice is not None:
@@ -334,3 +284,63 @@ class LogicalIndex:
             num_frames = 0
             frame_array.init_arrays(num_frames)
         return num_frames
+
+
+class LogicalIndex:
+    """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
+    def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
+        self.logical_files: typing.List[LogicalFile] = []
+        self._logical_record_index = Index.LogicalRecordIndex(path_or_file)
+
+    def __len__(self) -> int:
+        """Returns the number of Logical Files."""
+        return len(self.logical_files)
+
+    def __getitem__(self, item) -> LogicalFile:
+        """Returns the Logical Files at position item."""
+        return self.logical_files[item]
+
+    @property
+    def id(self) -> str:
+        return str(self._logical_record_index.path)
+
+    @property
+    def storage_unit_label(self) -> File.StorageUnitLabel:
+        """The Storage Unit Label. This comes from the LogicalRecordIndex."""
+        return self._logical_record_index.sul
+
+    def __enter__(self):
+        """Context manager support."""
+        self._logical_record_index._enter()
+        self.logical_files = []
+        for lr_index in range(len(self._logical_record_index)):
+            # TODO: This is greedy and for IFLRs we could only read a partial amount for performance.
+            #  See FrameArray.x_axis_len_input_bytes
+            file_logical_data = self._logical_record_index.get_file_logical_data(lr_index, 0, -1)
+            assert file_logical_data.is_sealed()
+            if not file_logical_data.lr_is_encrypted:
+                if file_logical_data.lr_is_eflr:
+                    # EFLRs
+                    eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                 file_logical_data.logical_data)
+                    if len(self.logical_files) == 0 or self.logical_files[-1].is_next(eflr):
+                        self.logical_files.append(LogicalFile(self._logical_record_index, file_logical_data, eflr))
+                    else:
+                        self.logical_files[-1].add_eflr(file_logical_data, eflr)
+                else:
+                    # IFLRs
+                    if len(self.logical_files) == 0:
+                        raise ExceptionLogicalIndexCtor('IFLR when there are no Logical Files.')
+                    iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                 file_logical_data.logical_data)
+                    if iflr.remain > 0:
+                        self.logical_files[-1].add_iflr(file_logical_data, iflr)
+                    # else:
+                    #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager support."""
+        self._logical_record_index._exit()
+        self.logical_files = []
+        return False

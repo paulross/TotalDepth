@@ -241,13 +241,13 @@ class ProcessLoggingThread(threading.Thread):
 
     def _write_to_log(self, prefix: str) -> None:
         """Write process data to log flushing message queue if necessary."""
-        assert self._run
-        if process_queue.empty():
-            logger.info(f'{prefix} {json.dumps(self._get_process_data())}')
-        else:
-            while not process_queue.empty():
-                msg = process_queue.get()
-                logger.info(f'{prefix} {json.dumps(self._get_process_data(label=msg))}')
+        if self._run:
+            if process_queue.empty():
+                logger.info(f'{prefix} {json.dumps(self._get_process_data())}')
+            else:
+                while not process_queue.empty():
+                    msg = process_queue.get()
+                    logger.info(f'{prefix} {json.dumps(self._get_process_data(label=msg))}')
 
     def run(self) -> None:
         """thread.run(). Write to log then sleep."""

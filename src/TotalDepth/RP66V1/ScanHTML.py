@@ -231,6 +231,7 @@ def _write_log_pass_content_in_html(
             xhtml_stream.characters(
                 f'Frame Array: {stringify.stringify_object_by_type(frame_array.ident)} [{fa}/{len(lp.frame_arrays)}]'
             )
+        _write_x_axis_in_html(logical_file, frame_array, xhtml_stream)
         ret.append(
             _write_frame_array_in_html(
                 logical_file,
@@ -241,6 +242,13 @@ def _write_log_pass_content_in_html(
             )
        )
     return tuple(ret)
+
+
+def _write_x_axis_in_html(logical_file: LogicalFile.LogicalFile,
+                          frame_array: LogPass.FrameArray,
+                          xhtml_stream: XmlWrite.XhtmlStream) -> None:
+    x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+    _write_x_axis_summary(x_axis, xhtml_stream)
 
 
 def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStream) -> None:
@@ -303,7 +311,7 @@ def _write_frame_array_in_html(
     #     xhtml_stream.characters('Frame Data')
     iflrs: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
     if len(iflrs):
-        num_frames = LogicalFile.populate_frame_array(
+        num_frames = logical_file.populate_frame_array(
             logical_file,
             frame_array,
             frame_slice,
@@ -962,7 +970,7 @@ compression_ratio(x) = 10**(e + f * log10(x))
 fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
 
 set terminal svg size 1000,700 # choose the file format
-set output "{name}.svg" # choose the output device
+set output "{name}_rate.svg" # choose the output device
 
 # set key off
 
@@ -971,17 +979,22 @@ set output "{name}.svg" # choose the output device
 
 # Fields: size_input, size_index, time, exception, ignored, path
 
-#plot "{name}.dat" using 1:3 axes x1y1 title "Scan Time (s)" lt 1 w points
-
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+#plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
     rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
     "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
     "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
 
-# Plot size ratio:
-#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, 
-#     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points
+
+set output "{name}_times.svg" # choose the output device
+set ylabel "Index Time (s)"
+unset y2label
+
+plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s), left axis" lt 1 w points, \\
+    "{name}.dat" using 1:4 axes x1y1 title "Write Time (s), left axis" lt 2 w points, \\
+    "{name}.dat" using 1:5 axes x1y1 title "Read Time (s), left axis" lt 3 w points
 
 reset
 """
