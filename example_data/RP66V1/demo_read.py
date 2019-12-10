@@ -13,7 +13,7 @@ def demo_logical_files_test_data():
     file_object = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(file_object) as logical_index:
         # print(f'LogicalIndex: {logical_index} with {len(logical_index)} Logical Files')
-        for l, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             # print(f'LogicalFile [{l}]: {logical_file}')
             print(f'***** logical_file.file_header_logical_record.str_long():')
             print(logical_file.file_header_logical_record.str_long())
@@ -44,7 +44,7 @@ def demo_logical_files_test_data():
 def demo_numpy_describe_test_data():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
-        for lf_index, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     print(frame_array)
@@ -63,13 +63,13 @@ def demo_numpy_describe_test_data():
 def demo_numpy_access_partial_test_data():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(fobj) as logical_index:
-        for lf_index, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     # print(frame_array)
                     # print('TRACE:', [c.ident for c in frame_array.channels])
-                    frame_count = logical_index.populate_frame_array(
-                        lf_index, frame_array,
+                    frame_count = logical_file.populate_frame_array(
+                        frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
                         # frame_slice=Slice.Split(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
@@ -152,11 +152,11 @@ def demo_eflr_contents():
 
 def demo_numpy_describe():
     with LogicalFile.LogicalIndex(path_in) as logical_index:
-        for lf_index, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     print(frame_array)
-                    frame_count = logical_index.populate_frame_array(lf_index, frame_array)
+                    frame_count = logical_file.populate_frame_array(frame_array)
                     print(
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
@@ -170,11 +170,11 @@ def demo_numpy_describe():
 
 def demo_numpy_access():
     with LogicalFile.LogicalIndex(path_in) as logical_index:
-        for lf_index, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     print(frame_array)
-                    frame_count = logical_index.populate_frame_array(lf_index, frame_array)
+                    frame_count = logical_file.populate_frame_array(frame_array)
                     print(
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
@@ -187,13 +187,13 @@ def demo_numpy_access():
 
 def demo_numpy_access_partial():
     with LogicalFile.LogicalIndex(path_in) as logical_index:
-        for lf_index, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     # print(frame_array)
                     # print('TRACE:', [c.ident for c in frame_array.channels])
-                    frame_count = logical_index.populate_frame_array(
-                        lf_index, frame_array,
+                    frame_count = logical_file.populate_frame_array(
+                        frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
                         # frame_slice=Slice.Split(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
