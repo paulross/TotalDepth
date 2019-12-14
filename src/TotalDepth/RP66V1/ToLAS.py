@@ -208,7 +208,7 @@ def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) 
 
 def write_well_information_to_las(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: LogPass.FrameArray,
+        frame_array: typing.Union[LogPass.FrameArray, None],
         ostream: typing.TextIO,
     ) -> None:
     """Writes the well information section.
@@ -217,24 +217,23 @@ def write_well_information_to_las(
     """
     # Tuple of (units, value, description)
     las_map: typing.Dict[str, UnitValueDescription] = extract_well_information_from_origin(logical_file)
-    # Add the start/stop/step data
-    x_units: str = frame_array.x_axis.units.decode('ascii')
-    iflr_data: typing.List[TotalDepth.RP66V1.core.XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
-    if len(iflr_data):
+    if frame_array is not None:
+        # Add the start/stop/step data
+        x_units: str = frame_array.x_axis.units.decode('ascii')
+        iflr_data: typing.List[TotalDepth.RP66V1.core.XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
+        assert len(iflr_data)
         x_strt: float = iflr_data[0].x_axis
         x_stop: float = iflr_data[-1].x_axis
         las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
         las_map['STOP'] = UnitValueDescription(
             x_units, stringify.stringify_object_by_type(x_stop), f'Stop X, frames: {len(iflr_data):,d}'
         )
-    else:
-        las_map['STRT'] = UnitValueDescription(x_units, 'N/A', 'Start X')
-        las_map['STOP'] = UnitValueDescription(x_units, 'N/A', 'Stop X')
-    if len(iflr_data) > 1:
         x_step: float = (iflr_data[-1].x_axis - iflr_data[0].x_axis) / (len(iflr_data) - 1)
         las_map['STEP'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_step), 'Step (average)')
     else:
-        las_map['STEP'] = UnitValueDescription(x_units, 'N/A', 'Step (average)')
+        las_map['STRT'] = UnitValueDescription('N/A', 'N/A', 'Start X')
+        las_map['STOP'] = UnitValueDescription('N/A', 'N/A', 'Stop X')
+        las_map['STEP'] = UnitValueDescription('N/A', 'N/A', 'Step (average)')
     eflr: EFLR.ExplicitlyFormattedLogicalRecord
     for _lrsh_position, eflr in logical_file.eflrs:
         # print('TRACE: write_well_information_to_las():', eflr.set.type)
@@ -320,7 +319,7 @@ def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
         raise ValueError(f'{method} is not in {ARRAY_REDUCTIONS}')
     if method == 'first':
         return array.flatten()[0]
-    return getattr(array, method)()
+    return getattr(np, method)(array)
 
 
 def write_curve_section_to_las(
@@ -358,8 +357,12 @@ def write_array_section_to_las(
     ) -> None:
     """Write the ``~Array Section`` to the LAS file."""
     assert array_reduction in ARRAY_REDUCTIONS
-    iflrs: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
-    num_input_frames = len(iflrs)
+    # TODO: Could optimise memory by reading one frame at a time
+    if len(channels):
+        array_channels = [c.ident for c in frame_array.channels if c.ident.I.decode("ascii") in channels]
+        num_input_frames = logical_file.populate_frame_array(frame_array, frame_slice, array_channels)
+    else:
+        num_input_frames = logical_file.populate_frame_array(frame_array, frame_slice)
     # Write information about how the frames and channels were processed
     ostream.write(f'# Array processing information:\n')
     ostream.write(f'# Frame Array: ID: {frame_array.ident} description: {frame_array.description}\n')
@@ -391,20 +394,10 @@ def write_array_section_to_las(
         f' and {num_values:,d} values per frame'
         f', total: {num_input_frames * num_values:,d} input values.'
     )
-    frame_array.init_arrays(1)
     for frame_number in frame_slice.range(num_input_frames):
-        # print(iflrs[frame_number])
-        # vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(
-        #     iflrs[frame_number].logical_record_position
-        # )
-        fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(iflrs[frame_number].logical_record_position)
-        iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-        frame_array.read(fld.logical_data, 0)
-        for c, channel in enumerate(frame_array.channels):
-            if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
-                if c:
-                    ostream.write(' ')
-                value = array_reduce(channel.array[0], array_reduction)
+        for channel in frame_array.channels:
+            if len(channel.array):
+                value = array_reduce(channel.array[frame_number], array_reduction)
                 if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
                     ostream.write(f'{value:16.0f}')
                 elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
@@ -412,32 +405,8 @@ def write_array_section_to_las(
                 else:
                     ostream.write(str(value))
         ostream.write('\n')
-
-
-    # # TODO: Could init_arrays(1), read one IFLR, write it out and repeat.
-    # frame_array.init_arrays(num_input_frames)
-    # for f, (lrsh_position, iflr_frame_number, x_axis) in enumerate(iflrs):
-    #     # TODO: raise
-    #     assert f + 1 == iflr_frame_number
-    #     vr_position = logical_file_sequence.visible_record_positions.visible_record_prior(lrsh_position)
-    #     fld: File.FileLogicalData = rp66v1_file.get_file_logical_data(vr_position, lrsh_position)
-    #     iflr = IFLR.IndirectlyFormattedLogicalRecord(fld.lr_type, fld.logical_data)
-    #     frame_array.read(iflr.logical_data, f)
-    # for f in range(num_input_frames):
-    #     for c, channel in enumerate(frame_array.channels):
-    #         if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
-    #             if c:
-    #                 ostream.write(' ')
-    #             value = array_reduce(channel.array[f], array_reduction)
-    #             if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
-    #                 ostream.write(f'{value:16.0f}')
-    #             elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
-    #                 ostream.write(f'{value:16.3f}')
-    #             else:
-    #                 ostream.write(str(value))
-    #     ostream.write('\n')
-    # # Free up numpy memory
-    # frame_array.init_arrays(1)
+    # Garbage collect
+    frame_array.init_arrays(1)
 
 
 def write_logical_sequence_to_las(
@@ -475,10 +444,10 @@ def write_logical_sequence_to_las(
             os.makedirs(os.path.dirname(file_path_out), exist_ok=True)
             with open(file_path_out, 'w') as ostream:
                 _write_las_header(
-                    os.path.basename(logical_index.path),
+                    os.path.basename(logical_index.id),
                     logical_file, lf, '', ostream
                 )
-                write_well_information_to_las(logical_file, ostream)
+                write_well_information_to_las(logical_file, None, ostream)
                 write_parameter_section_to_las(logical_file, ostream)
                 ret.append(file_path_out)
     return ret
@@ -514,10 +483,10 @@ def single_rp66v1_file_to_las(
                 )
                 logger.info(f'{len(las_files_written)} LAS file written with total size: {output_size:,d} bytes')
                 return result
-        except ExceptionTotalDepthRP66V1:
+        except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
             return LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
             return LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
     logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
@@ -574,7 +543,7 @@ def convert_rp66v1_dir_or_file_to_las(
                 )
         else:
             ret[path_in] = single_rp66v1_file_to_las(path_in, array_reduction, path_out, frame_slice, channels)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         logger.critical('Keyboard interrupt, last file is probably incomplete or corrupt.')
     return ret
 
@@ -610,9 +579,9 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
                     else:
                         print('No log pass')
                     # print()
-        except ExceptionTotalDepthRP66V1:
+        except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
     else:
         logger.error(f'Path {path_in} is not a RP66V1 file.')
@@ -694,7 +663,7 @@ reset
 
 
 def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> None:
-    if len(data) < 2:
+    if len(data) < 2:  # pragma: no cover
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
@@ -706,10 +675,10 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
             table.append(list(data[k][1:]) + [k])
     name = 'IndexFile'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
     return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
@@ -727,7 +696,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument(
-        '--array_reduction', type=str,
+        '--array-reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='first',
         choices=list(sorted(ARRAY_REDUCTIONS)),
@@ -744,6 +713,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     # return 0
     # Your code here
     clk_start = time.perf_counter()
+    ret_val = 0
     result: typing.Dict[str, LASWriteResult] = {}
     if args.frame_slice.strip() == '?' or args.channels.strip() == '?':
         dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
@@ -800,13 +770,16 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                 size_input += result[path].size_input
                 size_index += result[path].size_output
                 files_processed += 1
+                if las_result.exception:
+                    ret_val = 1
         for row in data_table.format_table(table, pad=' ', heading_underline='-'):
             print(row)
         try:
             if args.gnuplot:
                 plot_gnuplot(result, args.gnuplot)
-        except Exception as err:
+        except Exception as err:  # pragma: no cover
             logger.exception(str(err))
+            ret_val = 2
         print('Execution time = %8.3f (S)' % clk_exec)
         if size_input > 0:
             ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
@@ -819,8 +792,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     else:
         print(f'Execution time: {clk_exec:.3f} (s)')
     print('Bye, bye!')
-    return 0
+    return ret_val
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

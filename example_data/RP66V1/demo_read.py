@@ -4,7 +4,7 @@ import sys
 
 import numpy as np
 
-from TotalDepth.RP66V1.core import LogicalFile, RepCode
+from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.common import Slice
 from tests.unit.RP66V1.core import test_data
 
@@ -214,14 +214,14 @@ def demo_numpy_access_partial():
 def main() -> int:
     # demo_logical_files_test_data()
     # demo_eflr_contents_test_data()
-    demo_numpy_describe_test_data()
+    # demo_numpy_describe_test_data()
     # demo_numpy_access_partial_test_data()
     # demo_logical_files()
     # demo_eflr()
     # demo_eflr_contents()
     # demo_numpy_describe()
     # demo_numpy_access()
-    # demo_numpy_access_partial()
+    demo_numpy_access_partial()
     return 0
 
 

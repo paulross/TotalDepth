@@ -973,7 +973,7 @@ def test_file_basic_file_visible_records(file_bytes, expected):
     'file_bytes, expected',
     (
         (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS,
+            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
             [
                 [
                     'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
@@ -1262,7 +1262,7 @@ def test_file_iter_logical_records_raises_eof():
 )
 def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment(position, length, version,
                                                                                  lrsh_expected):
-    fobj = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS)
+    fobj = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS)
     with File.FileRead(fobj) as file_read:
         visible_record = File.VisibleRecord(None)
         visible_record.position = position
@@ -1287,7 +1287,7 @@ def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment
             ],
         ),
         (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS,
+            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
             [
                 'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
                 'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
@@ -1330,7 +1330,7 @@ def test_file_iter_logical_record_positions_fails_not_is_first():
             ],
         ),
         (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS,
+            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
             [
                 '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
                 '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',

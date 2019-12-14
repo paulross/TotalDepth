@@ -55,14 +55,6 @@ XML_TIMESTAMP_FORMAT_NO_TZ = '%Y-%m-%d %H:%M:%S.%f'
 # '2019-05-14 17:33:01.147341+0000'
 
 
-def xml_single_element(element: xml.etree.Element, xpath: str) -> xml.etree.Element:
-    """Selects a single XML element in the Xpath."""
-    elems = list(element.iterfind(xpath))
-    if len(elems) != 1:
-        raise ExceptionIndexXMLRead(f'Expected single element at Xpath {xpath} but found {len(elems)}')
-    return elems[0]
-
-
 def xml_rle_write(rle: Rle.RLE, element_name: str, xml_stream: XmlWrite.XmlStream, hex_output: bool) -> None:
     with XmlWrite.Element(xml_stream, element_name, {'count': f'{rle.num_values():d}', 'rle_len': f'{len(rle):d}',}):
         for rle_item in rle.rle_items:
@@ -81,10 +73,6 @@ def xml_object_name_attributes(object_name: RepCode.ObjectName) -> typing.Dict[s
         'C': f'{object_name.C}',
         'I': f'{object_name.I.decode("ascii")}',
     }
-
-
-def xml_object_name(node: xml.etree.Element) -> RepCode.ObjectName:
-    return RepCode.ObjectName(node.attrib['O'], node.attrib['C'], node.attrib['I'].encode('ascii'))
 
 
 def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
@@ -107,14 +95,13 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
         elif isinstance(value, RepCode.DateTime):
             typ = 'TotalDepth.RP66V1.core.RepCode.DateTime'
             _value = str(value)
-        elif isinstance(value, str):
+        elif isinstance(value, str):  # pragma: no cover
             typ = 'str'
             _value = value
         else:
             typ = 'unknown'
             _value = str(value)
         with XmlWrite.Element(xml_stream, 'Value', {'type': typ, 'value': _value}):
-            # xml_stream.characters(_value)
             pass
 
 
@@ -140,26 +127,6 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
     with XmlWrite.Element(xml_stream, 'Channel', channel_attrs):
         pass
 
-
-def frame_channel_from_XML(channel_node: xml.etree.Element) -> LogPass.FrameChannel:
-    """Initialise with a XML Channel node.
-
-    Example:
-
-    .. code-block:: xml
-
-        <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
-    """
-    if channel_node.tag != 'Channel':
-        raise ValueError(f'Got element tag of "{channel_node.tag}" but expected "Channel"')
-    return LogPass.FrameChannel(
-        ident=channel_node.attrib['I'].encode('ascii'),
-        long_name=channel_node.attrib['long_name'].encode('ascii'),
-        rep_code=int(channel_node.attrib['rep_code']),
-        units=channel_node.attrib['units'].encode('ascii'),
-        dimensions=[int(v) for v in channel_node.attrib['dimensions'].split(',')],
-        function_np_dtype=RepCode.numpy_dtype
-    )
 
 
 def frame_array_to_XML(frame_array: LogPass.FrameArray,
@@ -234,7 +201,7 @@ def log_pass_to_XML(log_pass: LogPass.LogPass,
     """
     with XmlWrite.Element(xml_stream, 'LogPass', {'count': f'{len(log_pass)}'}):
         for frame_array in log_pass.frame_arrays:
-            if frame_array.ident not in iflr_data_map:
+            if frame_array.ident not in iflr_data_map:  # pragma: no cover
                 raise ExceptionLogPassXML(f'Missing ident {frame_array.ident} in keys {list(iflr_data_map.keys())}')
             frame_array_to_XML(frame_array, iflr_data_map[frame_array.ident], xml_stream)
 
@@ -250,21 +217,10 @@ def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.
                 'rc_ascii': f'{RepCode.REP_CODE_INT_TO_STR[attr.rep_code]}',
                 'units': attr.units.decode('ascii'),
             }
-            # with XmlWrite.Element(xml_stream, 'Attribute', attr_atributes):
-            #     if attr.value is not None:
-            #         with XmlWrite.Element(xml_stream, 'Values', {'count': f'{len(attr.value)}'}):
-            #             for v in attr.value:
-            #                 LogPassXML.xml_write_value(xml_stream, v)
-            #     else:
-            #         with XmlWrite.Element(xml_stream, 'Values', {'count': '0'}):
-            #             pass
             with XmlWrite.Element(xml_stream, 'Attribute', attr_atributes):
                 if attr.value is not None:
                     for v in attr.value:
                         xml_write_value(xml_stream, v)
-                # else:
-                #     with XmlWrite.Element(xml_stream, 'Values', {'count': '0'}):
-                #         pass
 
 
 def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream, private: bool) -> None:
@@ -362,10 +318,10 @@ def index_a_single_file(path_in: str, path_out: str, private: bool) -> IndexResu
                 )
                 logger.info(f'Length of XML: {index_size}')
                 return result
-        except ExceptionTotalDepthRP66V1:
+        except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
             return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, True, False)
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
             return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, True, False)
     logger.info(f'Ignoring file type "{bin_file_type}" at {path_in}')
@@ -434,20 +390,20 @@ set datafile missing "NaN"
 # set fit logfile
 
 # Curve fit, rate
-rate(x) = 10**(a + b * log10(x))
-fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+#rate(x) = 10**(a + b * log10(x))
+#fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
 
-rate2(x) = 10**(5.5 - 0.5 * log10(x))
+#rate2(x) = 10**(5.5 - 0.5 * log10(x))
 
 # Curve fit, size ratio
-size_ratio(x) = 10**(c + d * log10(x))
-fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+#size_ratio(x) = 10**(c + d * log10(x))
+#fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
 # By hand
 # size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
 
 # Curve fit, compression ratio
-compression_ratio(x) = 10**(e + f * log10(x))
-fit compression_ratio(x) "{name}.dat" using 1:($2/$1) via e,f
+#compression_ratio(x) = 10**(e + f * log10(x))
+#fit compression_ratio(x) "{name}.dat" using 1:($2/$1) via e,f
 
 set terminal svg size 1000,700 # choose the file format
 set output "{name}.svg" # choose the output device
@@ -459,10 +415,13 @@ set output "{name}.svg" # choose the output device
 
 # Fields: size_input, size_index, time, exception, ignored, path
 
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
+# plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
     rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
     "{name}.dat" using 1:($2/$1) axes x1y2 title "XML Index size / Original Size" lt 2 w points, \
     compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 2 lw 2
+
+plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "XML Index Rate (ms/Mb)" lt 1 w points,\
+    "{name}.dat" using 1:($2/$1) axes x1y2 title "XML Index size / Original Size" lt 2 w points
 
 # Plot size ratio:
 #    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, \
@@ -473,22 +432,22 @@ reset
 
 
 def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
-    if len(data) < 2:
+    if len(data) < 2:  # pragma: no cover
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
-        list(IndexResult._fields) + ['Path']
+        list(IndexResult._fields)[1:] + ['Path']
     ]
     table[0][0] = f'# {table[0][0]}'
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
-            table.append(list(data[k]) + [k])
-    name = 'IndexFile'
+            table.append(list(data[k][1:]) + [k])
+    name = 'IndexFileXML'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
     return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
@@ -517,6 +476,7 @@ def main() -> int:
     cmn_cmd_opts.set_log_level(args)
     # Your code here
     clk_start = time.perf_counter()
+    ret_val = 0
     if os.path.isdir(args.path_in) and cmn_cmd_opts.multiprocessing_requested(args):
         result: typing.Dict[str, IndexResult] = index_dir_multiprocessing(
             args.path_in,
@@ -571,22 +531,24 @@ def main() -> int:
         if args.gnuplot:
             try:
                 plot_gnuplot(result, args.gnuplot)
-            except Exception:
+            except Exception:  # pragma: no cover
                 logger.exception('gunplot failed')
-    except Exception as err:
+                ret_val = 1
+    except Exception as err:  # pragma: no cover
         logger.exception(str(err))
+        ret_val = 2
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
         ratio = size_index / size_input
-    else:
+    else:  # pragma: no cover
         ms_mb = 0.0
         ratio = 0.0
     print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
     print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
-    return 0
+    return ret_val
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

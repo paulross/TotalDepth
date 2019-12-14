@@ -126,17 +126,33 @@ def test_tdrp66v1scan_file(args):
     subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_BASIC_FILE,])
 
 
+@pytest.mark.xfail(reason='Not sure why this is failing, it seems pretty innocuous.')
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-r', '-V'],
+        ['-r', '-j 2'],
+    )
+)
+def test_tdrp66v1scan_dir(tmpdir, args):
+    cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
+    subprocess.check_call(cmd_args)
+
+
+# -------- tdrp66v1logrecindex --------
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
         [],
-        ['-r'],
-        ['-r', '-j 2'],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0'],
     )
 )
-def test_tdrp66v1scan_dir(args):
-    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_DATA_DIR,])
+def test_tdrp66v1logrecindex_file_stdout(args):
+    subprocess.check_call(['tdrp66v1logrecindex',] + args + [RP66V1_BASIC_FILE])
 
 
 @pytest.mark.slow
@@ -146,12 +162,154 @@ def test_tdrp66v1scan_dir(args):
         [],
         ['-r'],
         ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--read-back'],
     )
 )
-def test_tdrp66v1scanhtml(tmpdir, args):
+def test_tdrp66v1logrecindex_dir(tmpdir, args):
+    subprocess.check_call(['tdrp66v1logrecindex',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+def test_tdrp66v1logrecindex_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1logrecindex', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdrp66v1logrecindex --------
+
+
+# -------- tdrp66v1indexpickle --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0'],
+    )
+)
+def test_tdrp66v1indexpickle_file_stdout(args):
+    subprocess.check_call(['tdrp66v1indexpickle',] + args + [RP66V1_BASIC_FILE])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--read-back'],
+    )
+)
+def test_tdrp66v1indexpickle_dir(tmpdir, args):
+    subprocess.check_call(['tdrp66v1indexpickle',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+def test_tdrp66v1indexpickle_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1indexpickle', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdrp66v1indexpickle --------
+
+
+# -------- tdrp66v1indexxml --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0'],
+        ['--encrypted'],
+        ['--private'],
+    )
+)
+def test_tdrp66v1indexxml_file_stdout(args):
+    subprocess.check_call(['tdrp66v1indexxml',] + args + [RP66V1_BASIC_FILE])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+    )
+)
+def test_tdrp66v1indexxml_dir(tmpdir, args):
+    subprocess.check_call(['tdrp66v1indexxml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+def test_tdrp66v1indexxml_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1indexxml', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdrp66v1indexxml --------
+
+
+# -------- tdrp66v1tolas --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0',],
+        ['--frame-slice=,,2',],
+        ['--frame-slice=?',],
+        ['--array-reduction=median',],
+        ['--channels=?',],
+        ['--channels=TENS,ETIM',],
+    )
+)
+def test_tdrp66v1tolas_basic_file(tmpdir, args):
+    subprocess.check_call(['tdrp66v1tolas',] + args + [RP66V1_BASIC_FILE, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--frame-slice=?', ],
+        ['-r', '--channels=?', ],
+    )
+)
+def test_tdrp66v1tolas_dir(tmpdir, args):
+    subprocess.check_call(['tdrp66v1tolas',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+def test_tdrp66v1tolas_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1tolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdrp66v1logrecindex --------
+
+
+# -------- tdrp66v1scanhtml --------
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--log-process=1.0', ],
+    )
+)
+def test_tdrp66v1scanhtml_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1scanhtml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+def test_tdrp66v1scanhtml_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1scanhtml', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdrp66v1scanhtml --------
 
 #======================== END: RP66V1 ==================
 

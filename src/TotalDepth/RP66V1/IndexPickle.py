@@ -8,7 +8,6 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import data_table
@@ -31,6 +30,7 @@ class IndexResult(typing.NamedTuple):
     path_in: str
     size_input: int
     size_index: int
+    time_index: float
     time_write: float
     time_read: float
     exception: bool
@@ -81,25 +81,33 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
             t_start = time.perf_counter()
             with LogicalFile.LogicalIndex(path_in) as logical_index:
                 pickled_index = pickle.dumps(logical_index)
+                index_time = time.perf_counter() - t_start
                 # logger.info(f'Length of pickled index: {len(pickled_index)}')
-                pickle_path = path_out + '.pkl'
-                with open(pickle_path, 'wb') as out_stream:
-                    out_stream.write(pickled_index)
-                write_time = time.perf_counter() - t_start
-                if read_back:
+                if path_out:
+                    pickle_path = path_out + '.pkl'
                     t_start = time.perf_counter()
-                    _read_index = unpickle(pickle_path)
-                    read_time = time.perf_counter() - t_start
+                    with open(pickle_path, 'wb') as out_stream:
+                        out_stream.write(pickled_index)
+                    write_time = time.perf_counter() - t_start
+                    if read_back:
+                        t_start = time.perf_counter()
+                        _read_index = unpickle(pickle_path)
+                        read_time = time.perf_counter() - t_start
+                    else:
+                        read_time = 0.0
                 else:
-                    read_time = 0.0
-                result = IndexResult(path_in, os.path.getsize(path_in), len(pickled_index), write_time, read_time, False, False)
+                    write_time = read_time = 0.0
+                result = IndexResult(
+                    path_in, os.path.getsize(path_in), len(pickled_index),
+                    index_time, write_time, read_time, False, False
+                )
                 return result
-        except ExceptionTotalDepthRP66V1:
+        except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
-        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, True, False)
-    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, False, True)
+        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, True, False)  # pragma: no cover
+    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, False, True)  # pragma: no cover
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
@@ -145,20 +153,20 @@ set datafile missing "NaN"
 # set fit logfile
 
 # Curve fit, rate
-rate(x) = 10**(a + b * log10(x))
-fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+#rate(x) = 10**(a + b * log10(x))
+#fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
 
-rate2(x) = 10**(5.5 - 0.5 * log10(x))
+#rate2(x) = 10**(5.5 - 0.5 * log10(x))
 
 # Curve fit, size ratio
-size_ratio(x) = 10**(c + d * log10(x))
-fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+#size_ratio(x) = 10**(c + d * log10(x))
+#fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
 # By hand
 # size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
 
 # Curve fit, compression ratio
-compression_ratio(x) = 10**(e + f * log10(x))
-fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+# compression_ratio(x) = 10**(e + f * log10(x))
+# fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
 
 set terminal svg size 1000,700 # choose the file format
 set output "{name}_rate.svg" # choose the output device
@@ -197,7 +205,7 @@ reset
 
 
 def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
-    if len(data) < 2:
+    if len(data) < 2:  # pragma: no cover
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
@@ -209,10 +217,10 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
             table.append(list(data[k][1:]) + [k])
     name = 'IndexFile'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
     return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
@@ -234,6 +242,7 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
     cmn_cmd_opts.set_log_level(args)
     # Your code here
     clk_start = time.perf_counter()
+    ret_val = 0
     if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
         result: typing.Dict[str, IndexResult] = index_dir_multiprocessing(
             args.path_in,
@@ -266,20 +275,25 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
         len_path_prefix = len(path_prefix)
         table: typing.List[typing.List[str]] = [
             [
-                'Size (b)', 'Index (b)', 'Ratio (%)', 'Index (s)', 'Index (ms/Mb)',
-                'Read (s)', 'Read (ms/Mb)', 'Except',
+                'Size (b)', 'Index (b)', 'Ratio (%)',
+                'Index (s)', 'Index (ms/Mb)',
+                'Write (s)', 'Write (ms/Mb)',
+                'Read (s)', 'Read (ms/Mb)',
+                'Except',
                 'Path',
             ]
         ]
         for path in sorted(result.keys()):
             idx_result = result[path]
             if not idx_result.ignored and idx_result.size_input > 0:
+                ms_mb_index = idx_result.time_index * 1000 / (idx_result.size_input / 1024 ** 2)
                 ms_mb_write = idx_result.time_write * 1000 / (idx_result.size_input / 1024 ** 2)
                 ms_mb_read = idx_result.time_read * 1000 / (idx_result.size_input / 1024 ** 2)
                 ratio = idx_result.size_index / idx_result.size_input
                 table.append(
                     [
                         f'{idx_result.size_input:,d}', f'{idx_result.size_index:,d}', f'{ratio:.3%}',
+                        f'{idx_result.time_index:.3f}', f'{ms_mb_index:.1f}',
                         f'{idx_result.time_write:.3f}', f'{ms_mb_write:.1f}',
                         f'{idx_result.time_read:.3f}', f'{ms_mb_read:.2f}',
                         f'{str(idx_result.exception):5}',
@@ -289,27 +303,31 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
                 size_input += result[path].size_input
                 size_index += result[path].size_index
                 files_processed += 1
+                if idx_result.exception:  # pragma: no cover
+                    ret_val = 1
         print(f'Common path prefix: {path_prefix}')
         print('\n'.join(data_table.format_table(table, pad=' | ', heading_underline='-')))
         if args.gnuplot:
             try:
                 plot_gnuplot(result, args.gnuplot)
-            except IOError:
+            except IOError:  # pragma: no cover
                 logger.exception('Plotting with gnuplot failed.')
-    except Exception as err:
+                ret_val = 2
+    except Exception as err:  # pragma: no cover
         logger.exception(str(err))
+        ret_val = 3
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
         ratio = size_index / size_input
-    else:
+    else:  # pragma: no cover
         ms_mb = 0.0
         ratio = 0.0
     print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
     print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
-    return 0
+    return ret_val
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

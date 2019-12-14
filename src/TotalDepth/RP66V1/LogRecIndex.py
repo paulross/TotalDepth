@@ -99,12 +99,12 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
                 result = IndexResult(path_in, os.path.getsize(path_in), len_pickled_index,
                                      index_time, write_time, read_back_time, False, False)
                 return result
-        except ExceptionTotalDepthRP66V1:
+        except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
-        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, True, False)
-    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, False, True)
+        return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, True, False)  # pragma: no cover
+    return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, False, True)  # pragma: no cover
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
@@ -199,8 +199,8 @@ reset
 
 
 def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
-    if len(data) < 2:
-        raise ValueError(f'Can not plot data with only {len(data)} points.')
+    # if len(data) < 2:
+    #     raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
     table = [
         list(IndexResult._fields[1:]) + ['Path']
@@ -211,10 +211,10 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
             table.append(list(data[k][1:]) + [k])
     name = 'IndexFile'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
     return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
-    if return_code:
+    if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
@@ -272,6 +272,7 @@ def main() -> int:
             len_path += 1
     else:
         len_path = 0
+    ret_value = 0
     try:
         header = (
             f'{"Size In":>16}',
@@ -303,10 +304,12 @@ def main() -> int:
         if args.gnuplot:
             try:
                 plot_gnuplot(result, args.gnuplot)
-            except Exception:
+            except Exception:  # pragma: no cover
                 logger.exception('gunplot failed')
-    except Exception as err:
+                ret_value = 1
+    except Exception as err:  # pragma: no cover
         logger.exception(str(err))
+        ret_value = 2
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
@@ -317,8 +320,8 @@ def main() -> int:
     print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
     print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
-    return 0
+    return ret_value
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

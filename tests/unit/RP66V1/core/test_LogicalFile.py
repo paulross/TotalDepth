@@ -15,7 +15,7 @@ from tests.unit.RP66V1.core import test_data
     (
         (test_data.SMALL_FILE, 0,),
         (test_data.MINIMAL_FILE, 0,),
-        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS, 0,),
+        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 0,),
         (test_data.BASIC_FILE, 0,),
         (test_data.FILE_256kb, 0,),
     )

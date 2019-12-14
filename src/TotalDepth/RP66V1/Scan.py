@@ -367,17 +367,16 @@ def _scan_log_pass_content(
         frame_slice: Slice.Slice) -> None:
     """Scan the LogPass."""
     assert logical_index[logical_file_index].has_log_pass
-    lp: LogPass.LogPass = logical_index[logical_file_index].log_pass
+    logical_file = logical_index[logical_file_index]
+    lp: LogPass.LogPass = logical_file.log_pass
     frame_array: LogPass.FrameArray
     for fa, frame_array in enumerate(lp.frame_arrays):
         with _output_section_header_trailer(f'Frame Array [{fa}/{len(lp.frame_arrays)}]', '^', os=fout):
             fout.write(str(frame_array))
             fout.write('\n')
-            num_frames = logical_index.populate_frame_array(
-                logical_file_index,
+            num_frames = logical_file.populate_frame_array(
                 frame_array,
                 frame_slice,
-                None
             )
             if num_frames > 0:
                 x_axis: XAxis.XAxis = logical_index[logical_file_index].iflr_position_map[frame_array.ident]

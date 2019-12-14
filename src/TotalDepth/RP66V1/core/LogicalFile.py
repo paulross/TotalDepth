@@ -162,8 +162,16 @@ class LogicalFile:
 
     @property
     def has_log_pass(self) -> bool:
-        """Return True if a log pass has been created from a CHANNEL and a FRAME record."""
-        return self.log_pass is not None
+        """Return True if a log pass has been created from a CHANNEL and a FRAME record and some relevant IFLRs."""
+        if self.log_pass is None:
+            return False
+        frame_array_iflr_counts = []
+        for frame_array in self.log_pass.frame_arrays:
+            if frame_array.ident in self.iflr_position_map:
+                frame_array_iflr_counts.append(len(self.iflr_position_map[frame_array.ident]))
+            else:
+                frame_array_iflr_counts.append(0)
+        return sum(frame_array_iflr_counts) > 0
 
     @staticmethod
     def is_next(eflr: EFLR.ExplicitlyFormattedLogicalRecord) -> bool:
@@ -309,6 +317,11 @@ class LogicalIndex:
     def storage_unit_label(self) -> File.StorageUnitLabel:
         """The Storage Unit Label. This comes from the LogicalRecordIndex."""
         return self._logical_record_index.sul
+
+    @property
+    def visible_record_positions(self) -> typing.List[int]:
+        """A list of Visible Record positions. This is used by the XML index for example."""
+        return self._logical_record_index.visible_record_positions
 
     def __enter__(self):
         """Context manager support."""

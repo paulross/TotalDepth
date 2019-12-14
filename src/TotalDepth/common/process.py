@@ -285,13 +285,22 @@ def add_process_logger_to_argument_parser(parser: argparse.ArgumentParser) -> No
 
 def main() -> int:
     """Main CLI entry point. For testing."""
+    parser = argparse.ArgumentParser(
+        prog='process.py',
+        description="""Reads an annotated log of a process and writes a Gnuplot graph.""",
+    )
+    parser.add_argument('path_in', type=str, help='Input path.', nargs='?')
+    parser.add_argument('path_out', type=str, help='Output path.', nargs='?')
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s - %(filename)s - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s',
     )
-    if len(sys.argv) == 3:
-        invoke_gnuplot(sys.argv[1], sys.argv[2])
+    args = parser.parse_args()
+    if args.path_in and args.path_out:
+        logger.info(f'Extracting data from a log at {args.path_in} to {args.path_out}')
+        invoke_gnuplot(args.path_in, args.path_out)
     else:
+        logger.info('Demonstration of logging a process')
         with log_process(0.1):
             for i in range(8):
                 size = random.randint(128, 128 + 256) * 1024 ** 2

@@ -95,6 +95,9 @@ Unit Testing and ``coverage``
 
 Ned Batchelor's *excellent* coverage tool can be used with these unit tests::
 
+
+    $ pytest --cov=TotalDepth --cov-report html --runslow tests
+
 	$ coverage run test/TestMnem.py
 
 And the result is::

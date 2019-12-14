@@ -9,11 +9,12 @@
 Processing RP66V1 Files
 =======================
 
-This describes how you can programatically access the contents of an RP66V1 file with TotalDepth with worked examples.
+TotalDepth allows you to access the contents of an RP66V1 file at any level of detail. This section demonstrates worked examples of to do that in Python.
+
 First, here is how TotalDepth represents the structure of a RP66V1 file.
 
-RP66V1 File Structure
-------------------------------
+RP66V1 File Structure (Conceptual)
+-------------------------------------
 
 A physical RP66V1 file (typically a file on disk) consists of a :term:`RP66V1.Storage Unit Label` followed of any number of :term:`RP66V1.Explicitly Formatted Logical Record` (EFLRs) and any number of :term:`RP66V1.Indirectly Formatted Logical Record` (IFLRs) in any order.
 
@@ -35,7 +36,7 @@ At this level the file conceptually looks like this:
 The EFLRs and IFLRs are organised into one or more any number of *Logical Files*.
 Specifically a Logical File starts with an ``FILE-HEADER`` EFLR followed by an ``ORIGIN`` or ``WELL-REFERENCE`` EFLR.
 
-A Logical FIle might represent all the data recorded in, say, a "Repeat Section" and Logical Files are independent from each other [#]_.
+A Logical FIle might represent all the data recorded in, say, a "Repeat Section" and this would be distinct from the data recorded in a subsequent Logical File that represented a "Main Log". Logical Files are independent from each other [#]_.
 
 This conceptual model for the Logical File delimited RP66V1 file is something like this:
 
@@ -173,7 +174,7 @@ Once a :py:class:`TotalDepth.RP66V1.core.LogicalFile.LogicalIndex` has been crea
 
     file_object = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(file_object) as logical_index:
-        for l, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             print(f'LogicalFile [{l}]: {logical_file}')
 
 
@@ -232,7 +233,7 @@ Here is an example of accessing all of the above properties for the ``BASIC_FILE
 
     file_object = io.BytesIO(test_data.BASIC_FILE)
     with LogicalFile.LogicalIndex(file_object) as logical_index:
-        for l, logical_file in enumerate(logical_index.logical_files):
+        for logical_file in logical_index.logical_files:
             print(f'***** logical_file.file_header_logical_record.str_long():')
             print(logical_file.file_header_logical_record.str_long())
             print()
@@ -727,28 +728,25 @@ Reading the Frame Data and Accessing the ``numpy`` Arrays
 Here is an example of accessing the numpy arrays and using ``np.describe()`` to describe each array:
 
 .. code-block:: python
-    :emphasize-lines: 10-23
 
     import numpy as np
 
-    from TotalDepth.RP66V1.core import File
     from TotalDepth.RP66V1.core import LogicalFile
+    from tests.unit.RP66V1.core import test_data
 
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    fobj = io.BytesIO(test_data.BASIC_FILE)
+    with LogicalFile.LogicalIndex(fobj) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
-                    frame_count = LogicalFile.populate_frame_array(
-                        rp66v1_file, logical_file, frame_array
-                    )
+                    print(frame_array)
+                    frame_count = logical_file.populate_frame_array(frame_array)
                     print(
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
                     )
-                    print()
                     for channel in frame_array.channels:
+                        print(f'Channel: {channel}')
                         # channel.array is a numpy array
                         np.info(channel.array)
                         print()
@@ -757,86 +755,98 @@ The output will be:
 
 .. code-block:: console
 
-    Loaded 921 frames and 4 channels from OBNAME: O: 2 C: 0 I: b'2000T' using 14736 bytes.
+    FrameArray: ID: OBNAME: O: 2 C: 0 I: b'50' b''
+      FrameChannel: OBNAME: O: 2 C: 0 I: b'DEPT'            Rc:   7 Co:    1 Un: b'm'         Di: [1] b'DEPT/Depth'
+      FrameChannel: OBNAME: O: 2 C: 0 I: b'TENS'            Rc:   2 Co:    1 Un: b'lbs'       Di: [1] b'TENS/Tension'
+      FrameChannel: OBNAME: O: 2 C: 0 I: b'ETIM'            Rc:   7 Co:    1 Un: b'min'       Di: [1] b'ETIM/Elapsed Time'
+      FrameChannel: OBNAME: O: 2 C: 0 I: b'DHTN'            Rc:   2 Co:    1 Un: b'lbs'       Di: [1] b'DHTN/CH Tension'
+      FrameChannel: OBNAME: O: 2 C: 0 I: b'GR'              Rc:   2 Co:    1 Un: b'api'       Di: [1] b'GR/Gamma API'
+    Loaded 649 frames and 5 channels from OBNAME: O: 2 C: 0 I: b'50' using 18172 bytes.
     
-    FrameChannel: OBNAME: O: 2 C: 4 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'1 second River Time'
+    Channel: FrameChannel: OBNAME: O: 2 C: 0 I: b'DEPT'            Rc:   7 Co:    1 Un: b'm'         Di: [1] b'DEPT/Depth'
     class:  ndarray
-    shape:  (921, 1)
+    shape:  (649, 1)
+    strides:  (8, 8)
+    itemsize:  8
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7fb9e48f0000
+    byteorder:  little
+    byteswap:  False
+    type: float64
+    
+    Channel: FrameChannel: OBNAME: O: 2 C: 0 I: b'TENS'            Rc:   2 Co:    1 Un: b'lbs'       Di: [1] b'TENS/Tension'
+    class:  ndarray
+    shape:  (649, 1)
     strides:  (4, 4)
     itemsize:  4
     aligned:  True
     contiguous:  True
     fortran:  True
-    data pointer: 0x7faa710b6000
+    data pointer: 0x7fb9e48f1600
     byteorder:  little
     byteswap:  False
     type: float32
     
-    FrameChannel: OBNAME: O: 2 C: 4 I: b'TDEP'            Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'1 second River Depth'
+    Channel: FrameChannel: OBNAME: O: 2 C: 0 I: b'ETIM'            Rc:   7 Co:    1 Un: b'min'       Di: [1] b'ETIM/Elapsed Time'
     class:  ndarray
-    shape:  (921, 1)
+    shape:  (649, 1)
+    strides:  (8, 8)
+    itemsize:  8
+    aligned:  True
+    contiguous:  True
+    fortran:  True
+    data pointer: 0x7fb9e48f2200
+    byteorder:  little
+    byteswap:  False
+    type: float64
+    
+    Channel: FrameChannel: OBNAME: O: 2 C: 0 I: b'DHTN'            Rc:   2 Co:    1 Un: b'lbs'       Di: [1] b'DHTN/CH Tension'
+    class:  ndarray
+    shape:  (649, 1)
     strides:  (4, 4)
     itemsize:  4
     aligned:  True
     contiguous:  True
     fortran:  True
-    data pointer: 0x7faa710b7000
+    data pointer: 0x7fb9e48f3800
     byteorder:  little
     byteswap:  False
     type: float32
     
-    FrameChannel: OBNAME: O: 2 C: 0 I: b'TENS_SL'         Rc:   2 Co:    1 Un: b'lbf'       Di: [1] b'Cable Tension'
+    Channel: FrameChannel: OBNAME: O: 2 C: 0 I: b'GR'              Rc:   2 Co:    1 Un: b'api'       Di: [1] b'GR/Gamma API'
     class:  ndarray
-    shape:  (921, 1)
+    shape:  (649, 1)
     strides:  (4, 4)
     itemsize:  4
     aligned:  True
     contiguous:  True
     fortran:  True
-    data pointer: 0x7fae6c8c2600
+    data pointer: 0x7fb9e48f4400
     byteorder:  little
     byteswap:  False
     type: float32
-    
-    FrameChannel: OBNAME: O: 2 C: 0 I: b'DEPT_SL'         Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'Station logging depth'
-    class:  ndarray
-    shape:  (921, 1)
-    strides:  (4, 4)
-    itemsize:  4
-    aligned:  True
-    contiguous:  True
-    fortran:  True
-    data pointer: 0x7fae6c8c3600
-    byteorder:  little
-    byteswap:  False
-    type: float32
-    ...
 
 
 Making Calculations on the ``numpy`` Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Very similar to the above we can make some calculations using standard ``numpy`` calls:
+Very similar to the above we can make some calculations using standard ``numpy`` calls.
+In this case we use the example data where ``path_in = os.path.join('data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS')``:
 
 .. code-block:: python
-    :emphasize-lines: 10-23
+    :emphasize-lines: 15-16
 
-    import numpy as np
-
-    from TotalDepth.RP66V1.core import File
     from TotalDepth.RP66V1.core import LogicalFile
 
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
                     print(frame_array)
-                    frame_count = LogicalFile.populate_frame_array(
-                        rp66v1_file, logical_file, frame_array
-                    )
+                    frame_count = logical_file.populate_frame_array(frame_array)
                     print(
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
@@ -870,7 +880,9 @@ Would give this output:
       FrameChannel: OBNAME: O: 2 C: 5 I: b'TIME'            Rc:   2 Co:    1 Un: b'ms'        Di: [1] b'400 milli-second time channel'
       FrameChannel: OBNAME: O: 2 C: 5 I: b'TDEP'            Rc:   2 Co:    1 Un: b'0.1 in'    Di: [1] b'MSCT depth channel'
       FrameChannel: OBNAME: O: 2 C: 1 I: b'ETIM'            Rc:   2 Co:    1 Un: b's'         Di: [1] b'Elapsed Logging Time'
+      
       ... Lots more omitted
+      
       FrameChannel: OBNAME: O: 2 C: 0 I: b'CMLP'            Rc:   2 Co:    1 Un: b'in'        Di: [1] b'Coring Motor Linear Position'
     Loaded 2301 frames and 43 channels from OBNAME: O: 2 C: 0 I: b'800T' using 395772 bytes.
     OBNAME: O: 2 C: 5 I: b'TIME' b'400 milli-second time channel' b'ms'
@@ -879,7 +891,9 @@ Would give this output:
     Min:   852606.000 Max:   893304.000
     OBNAME: O: 2 C: 1 I: b'ETIM' b'Elapsed Logging Time' b's'
     Min:        0.000 Max:      920.001
+    
     ... Lots more omitted
+    
     OBNAME: O: 2 C: 0 I: b'CMLP' b'Coring Motor Linear Position' b'in'
     Min:       -0.927 Max:        2.891
 
@@ -887,7 +901,7 @@ Would give this output:
 Limiting the Amount of Data Read
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The RP66V1 Frame Array can be very large so to make it more manageable the :py:meth:`TotalDepth.RP66V1.core.LogicalFile.LogicalIndex.populate_frame_array` can take the following, optional, arguments:
+The RP66V1 Frame Array can be very large so to make it more manageable the :py:meth:`TotalDepth.RP66V1.core.LogicalFile.LogicalFile.populate_frame_array` can take the following, optional, arguments:
 
 * `channels`: A sequence of channel identifiers. Only these channels will be populated into the numpy arrays in the Frame Array. The other channels will have a zero length numpy array. Channel 0, the X axis, will always be populated.
 * `frame_slice` to reduce the number of frames that are populated. You can use either of these classes:
@@ -898,21 +912,19 @@ The RP66V1 Frame Array can be very large so to make it more manageable the :py:m
 For example, adding the two highlighted lines which populates every 64th frame and channels 1 and 2:
 
 .. code-block:: python
-    :emphasize-lines: 13,14
+    :emphasize-lines: 8-13
     
-    from TotalDepth.RP66V1.core import File
     from TotalDepth.RP66V1.core import LogicalFile
     from TotalDepth.common import Slice
 
-    with open(path_in, 'rb') as fobj:
-        rp66v1_file = File.FileRead(fobj)
-        logical_index = LogicalFile.LogicalIndex(rp66v1_file, ident=path_in)
+    with LogicalFile.LogicalIndex(path_in) as logical_index:
         for logical_file in logical_index.logical_files:
             if logical_file.has_log_pass:
                 for frame_array in logical_file.log_pass:
-                    frame_count = LogicalFile.populate_frame_array(
-                        rp66v1_file, logical_file, frame_array,
+                    frame_count = logical_file.populate_frame_array(
+                        frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
+                        # frame_slice=Slice.Split(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
                     )
                     print(

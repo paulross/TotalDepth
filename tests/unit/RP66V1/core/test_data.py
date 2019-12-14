@@ -1829,7 +1829,7 @@ def test_basic_file():
     assert len(BASIC_FILE) == 44916
 
 
-BASIC_FILE_WITH_TWO_VISIBLE_RECORDS = (
+BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS = (
 b'0001V1.00RECORD08192              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'  # Storage Unit Label
 b' \x00\xff\x01'  # Visible record [0] at 0x50 length 0x2000 version 0xff01
     b'\x00|\x80\x00'  # LRSH [0/0] 0x54 E len: 124 first: True last: True
@@ -2078,7 +2078,7 @@ b' \x00\xff\x01'  # Visible record [1] at 0x2050 length 0x2000 version 0xff01
 
 
 def test_basic_file_with_two_visible_records():
-    assert len(BASIC_FILE_WITH_TWO_VISIBLE_RECORDS) == 8826
+    assert len(BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS) == 8826
 
 # An early slice of BASIC_FILE
 MINIMAL_FILE = (

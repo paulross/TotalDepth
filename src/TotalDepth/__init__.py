@@ -56,6 +56,7 @@ entry_points_console_scripts_dict = {
     'tdrp66v1scan': 'TotalDepth.RP66V1.Scan:main',
     'tdrp66v1tolas': 'TotalDepth.RP66V1.ToLAS:main',
     'tdrp66v1scanhtml': 'TotalDepth.RP66V1.ScanHTML:main',
+    'tdrp66v1logrecindex': 'TotalDepth.RP66V1.LogRecIndex:main',
     'tdrp66v1indexpickle': 'TotalDepth.RP66V1.IndexPickle:main',
     'tdrp66v1indexxml': 'TotalDepth.RP66V1.IndexXML:main',
 }

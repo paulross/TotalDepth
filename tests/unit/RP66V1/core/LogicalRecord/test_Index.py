@@ -64,7 +64,7 @@ def test_logical_record_index_minimal_file_get_file_logical_data(index, offset, 
     )
 )
 def test_logical_record_index_basic_file_with_two_vrs(index, vr_position, lrsh_position, attributes, lr_type, ld_length):
-    file = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS)
+    file = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS)
     with Index.LogicalRecordIndex(file) as lr_index:
         assert len(lr_index) == 9
         assert lr_index[index].position.vr_position == vr_position
@@ -134,7 +134,7 @@ def test_logical_record_index_file_256kb_eflr_iflr_counts():
     (
         (test_data.SMALL_FILE, 88,),
         (test_data.MINIMAL_FILE, 2,),
-        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS, 9,),
+        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 9,),
         (test_data.BASIC_FILE, 660,),
         (test_data.FILE_256kb, 1883,),
     )
