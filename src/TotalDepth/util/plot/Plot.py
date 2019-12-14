@@ -949,10 +949,10 @@ class Plot(object):
         If theNewMsg is not None then a new timer is started.
         """
         if theTim is not None:
-            if theSize is not None or theTim.hasActiveTimer:
-                theTim.stopTimer(theSize)
+            if theSize is not None or theTim.has_active_timer:
+                theTim.stop(theSize)
             if theNewMsg is not None:
-                theTim.startNewTimer(theNewMsg)
+                theTim.add_timer(theNewMsg)
 
     def _retOutputChIDs(self, theFilmId):
         """Returns a list of output mnem that are needed for plotting. May raise KeyError."""

@@ -24,114 +24,93 @@
 import time
 import logging
 import sys
+import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 
 __author__  = 'Paul Ross'
 __date__    = '2011-06-20'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__  = 'Copyright 2011-2020 (c) Paul Ross'
+
 
 class ExceptionExecTimer(ExceptionTotalDepthLIS):
     """Specialisation of exception for this module."""
     pass
 
-class ExecEvent(object):
+
+class Timer:
     """Records the timing of a single event."""
-    def __init__(self, desc):
-        self._tStart = time.perf_counter()
-        self._desc = desc
-        self._bytes = 0
-        self._tStop = None
+    def __init__(self, description: str):
+        self.perf_counter: float = time.perf_counter()
+        self.time: float = time.time()
+        self.description = description
+        self.work_done = 0
+        self.stopped: bool = False
         
-    def stop(self, bytes=0):
-        """Stop the timer."""
-        self._tStop = time.perf_counter()
-        self._bytes = bytes
+    def stop(self, work_done: int = 0) -> None:
+        """Stop the timer and record how much work was done."""
+        self.perf_counter = time.perf_counter() - self.perf_counter
+        self.time = time.time() - self.time
+        self.work_done = work_done
+        self.stopped = True
     
     @property
-    def hasCompleted(self):
-        """True if the timer has been stopped."""
-        return self._tStop is not None
-        
+    def elapsed_perf_counter(self) -> float:
+        """Executions time in seconds as seen by a wall clock."""
+        if self.stopped:
+            return self.perf_counter
+        return time.perf_counter() - self.perf_counter
+
     @property
-    def tExec(self):
-        """Executions time in seconds."""
-        if self._tStop is not None:
-            return self._tStop - self._tStart
+    def elapsed_wall_clock(self) -> float:
+        """Executions time in seconds as seen by a wall clock."""
+        if self.stopped:
+            return self.time
+        return time.time() - self.time
 
-    def __str__(self):
-        if self.hasCompleted:
-            return '{:s} Time: {:g} (s)'.format(self._desc, self.tExec)
-        return self._desc
-    
-    def lenDesc(self):
-        """Length of the task description string."""
-        return len(self._desc)
-        
-    def writeToStderr(self, descWidth=0):
-        """Write self to sys.stderr."""
-        self.writeToStream(theS=sys.stderr, descWidth=descWidth)
-        
-    def writeToStream(self, theS, descWidth=0):
-        """Write self to provided stream."""
-        myDesc = '{:{width}s}'.format(self._desc, width=descWidth)
-        if self._tStop is not None:
-            theS.write(' {:s} Size: {:8.3f} (MB)'.format(myDesc, self._bytes/(1024*1024)))
-#            theS.write(' {:s}: {:d}'.format(self._desc, workCount))
-            theS.write(' Time: {:8.3f} (s)'.format(self.tExec))
-#            theS.write(' Rate: {:.3f} (MB/s)'.format(self._bytes/(1024*1024*self.tExec)))
-            if self._bytes != 0:
-                theS.write(' Cost: {:10.3f} (ms/MB)'.format((self.tExec*1024)/(self._bytes/(1024*1024))))
-            else:
-                theS.write(' Cost: {:>10s} (ms/MB)'.format('N/A'))
-            theS.write(' ')
-        else:
-            theS.write(' {:s} still running '.format(myDesc))
+    def __str__(self) -> str:
+        return f'Timer: perf {self.elapsed_perf_counter:.3f} wall {self.elapsed_wall_clock:.3f} rate {self.ms_mb:8.1f} ms/Mb'
 
-class ExecTimerList(object):
+    @property
+    def ms_mb(self) -> float:
+        """Return the work rate in ms/MB."""
+        if self.work_done:
+            return self.elapsed_perf_counter * 1000.0 / (self.work_done / 1024**2)
+        return 0.0
+
+
+class TimerList:
     """Maintains a list of execution time objects"""
     def __init__(self):
         """Constructor"""
-        self._timerS = []
+        self.timer_list: typing.List[Timer] = []
         
-    def __len__(self):
+    def __len__(self) -> int:
         """Number of task timers."""
-        return len(self._timerS)
+        return len(self.timer_list)
+
+    def __getitem__(self, item) -> Timer:
+        return self.timer_list[item]
     
-    def startNewTimer(self, theDesc):
+    def add_timer(self, description: str) -> None:
         """Load a new task timer starting right now."""
-        self._timerS.append(ExecEvent(theDesc))
+        self.timer_list.append(Timer(description))
     
     @property
-    def timer(self):
+    def timer(self) -> Timer:
         """The current timer."""
-        return self._timerS[-1]
+        return self.timer_list[-1]
     
     @property
-    def hasActiveTimer(self):
+    def has_active_timer(self):
         """True if there is a running timer, False if there are either no timers
         or the latest timer is halted.""" 
-        return len(self._timerS) > 0 and not self._timerS[-1].hasCompleted
+        return len(self.timer_list) > 0 and not self.timer_list[-1].stopped
     
-    def stopTimer(self, bytes=0):
+    def stop(self, work_done=0) -> None:
         """Stop current timer."""
-        self._timerS[-1].stop(bytes)
+        return self.timer_list[-1].stop(work_done)
     
     def __str__(self):
-        return '\n'.join([str(e) for e in self._timerS])
-
-    def writeToStderr(self):
-        """Write self to sys.stderr."""
-        self.writeToStream(theS=sys.stderr)
-        sys.stderr.write(' ')
-        
-    def writeToStream(self, theS):
-        """Write self to provided stream."""
-        theS.write(' ExecTimerList [{:d}]:\n'.format(len(self)))
-        descWidth = max([t.lenDesc() for t in self._timerS])
-        for i, e in enumerate(self._timerS):
-            e.writeToStream(theS, descWidth=descWidth)
-            theS.write('\n')
-            # if i != len(self._timerS)-1:
-            #     theS.write('\n')
+        return '\n'.join([str(e) for e in self.timer_list])
