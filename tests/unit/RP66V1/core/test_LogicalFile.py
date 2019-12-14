@@ -31,7 +31,7 @@ def test_logical_index_number_of_logical_files_no_with(by, expected):
     (
         ('SMALL_FILE', 1,),
         ('MINIMAL_FILE', 1,),
-        ('BASIC_FILE_WITH_TWO_VISIBLE_RECORDS', 1,),
+        ('BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS', 1,),
         ('BASIC_FILE', 1,),
         ('FILE_256kb', 1,),
     )
