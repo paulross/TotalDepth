@@ -170,6 +170,7 @@ def test_tdrp66v1logrecindex_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1logrecindex',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 def test_tdrp66v1logrecindex_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1logrecindex', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
 
@@ -205,6 +206,7 @@ def test_tdrp66v1indexpickle_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1indexpickle',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 def test_tdrp66v1indexpickle_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1indexpickle', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
 
@@ -241,6 +243,7 @@ def test_tdrp66v1indexxml_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1indexxml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 def test_tdrp66v1indexxml_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1indexxml', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
 
@@ -283,6 +286,7 @@ def test_tdrp66v1tolas_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1tolas',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 def test_tdrp66v1tolas_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1tolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
@@ -306,6 +310,7 @@ def test_tdrp66v1scanhtml_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1scanhtml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+@pytest.mark.slow
 def test_tdrp66v1scanhtml_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1scanhtml', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
