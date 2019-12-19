@@ -231,7 +231,6 @@ def _write_log_pass_content_in_html(
             xhtml_stream.characters(
                 f'Frame Array: {stringify.stringify_object_by_type(frame_array.ident)} [{fa}/{len(lp.frame_arrays)}]'
             )
-        _write_x_axis_in_html(logical_file, frame_array, xhtml_stream)
         ret.append(
             _write_frame_array_in_html(
                 logical_file,
@@ -244,11 +243,11 @@ def _write_log_pass_content_in_html(
     return tuple(ret)
 
 
-def _write_x_axis_in_html(logical_file: LogicalFile.LogicalFile,
-                          frame_array: LogPass.FrameArray,
-                          xhtml_stream: XmlWrite.XhtmlStream) -> None:
-    x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
-    _write_x_axis_summary(x_axis, xhtml_stream)
+# def _write_x_axis_in_html(logical_file: LogicalFile.LogicalFile,
+#                           frame_array: LogPass.FrameArray,
+#                           xhtml_stream: XmlWrite.XhtmlStream) -> None:
+#     x_axis: XAxis.XAxis = logical_file.iflr_position_map[frame_array.ident]
+#     _write_x_axis_summary(x_axis, xhtml_stream)
 
 
 def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStream) -> None:

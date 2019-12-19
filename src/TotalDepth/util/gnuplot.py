@@ -33,6 +33,10 @@ def version() -> bytes:
 # TODO: Use TotalDepth.common.data_table
 
 def _num_columns(table: typing.Sequence[typing.Sequence[typing.Any]]) -> int:
+    """
+    Returns the number of columns of the table.
+    Will raise a ValueError if the table is uneven.
+    """
     num_colums_set = set(len(r) for r in table)
     if len(num_colums_set) != 1:
         raise ValueError(f'Not rectangular: {num_colums_set}.')

@@ -958,6 +958,11 @@ Gives:
     Min:        0.000 Max:      896.001
 
 
+Adding Computed Channels
+------------------------------
+
+:todo: Comolete this.
+
 .. rubric:: Footnotes
 
 .. [#] RP66V1 provides a method of collecting together physical files by using the :term:`RP66V1.Storage Unit Label` where the fields :term:`RP66V1.Storage Set Identifier` and :term:`RP66V1.Storage Unit Sequence Number` provide a means of linking physical files. In practice this has not been seen but if this is your use case then the class :py:class:`TotalDepth.RP66V1.core.pFile.FileRead` can minimally read the Storage Unit Label and its fields.

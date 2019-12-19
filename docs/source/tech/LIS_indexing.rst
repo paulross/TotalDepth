@@ -6,7 +6,7 @@
 .. toctree::
     :maxdepth: 2
    
-.. _TotalDepth-tech-indexing:
+.. _TotalDepth-tech-LIS_indexing:
 
 ***************************************************
 Indexing LIS Files

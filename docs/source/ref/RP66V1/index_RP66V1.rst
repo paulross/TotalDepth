@@ -31,6 +31,7 @@ Contents:
     IndexPickle
     IndexXML
     IndexXMLRead
+    LogRecIndex
     Scan
     ScanHTML
     SearchFF01

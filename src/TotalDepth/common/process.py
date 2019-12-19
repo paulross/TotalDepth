@@ -93,7 +93,7 @@ set output "{name}.svg" # choose the output device
 #  lw 2 pointsize 2
 
 plot "{name}.dat" using 1:($2 / 1024**2) axes x1y1 title "RSS (Mb), left axis" with lines lt 1 lw 2, \\
-    "{name}.dat" using 1:($3 / 10000) axes x1y2 title "Page Faults (1000/s), right axis" with lines lt 3 lw 1, \\
+    "{name}.dat" using 1:($3 / 10000) axes x1y2 title "Page Faults (10,000/s), right axis" with lines lt 3 lw 1, \\
     "{name}.dat" using 1:5 axes x1y2 title "Mean CPU (%), right axis" with lines lt 2 lw 1, \\
     "{name}.dat" using 1:6 axes x1y2 title "Instantaneous CPU (%), right axis" with lines lt 7 lw 1
 

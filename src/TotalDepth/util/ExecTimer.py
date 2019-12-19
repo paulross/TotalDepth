@@ -54,7 +54,13 @@ class Timer:
         self.time = time.time() - self.time
         self.work_done = work_done
         self.stopped = True
-    
+
+    def add_work_done(self, work_done: int) -> None:
+        """Adds work done."""
+        if work_done < 0:
+            raise ValueError(f'Timer.add_work_done() work_done must be >= 0 not {work_done}')
+        self.work_done += work_done
+
     @property
     def elapsed_perf_counter(self) -> float:
         """Executions time in seconds as seen by a wall clock."""
@@ -78,6 +84,16 @@ class Timer:
         if self.work_done:
             return self.elapsed_perf_counter * 1000.0 / (self.work_done / 1024**2)
         return 0.0
+
+    @property
+    def long_str(self) -> str:
+        return '\n'.join(
+            [
+                f' Execution time: {self.elapsed_perf_counter:10.3f} (s)',
+                f'Wall clock time: {self.elapsed_wall_clock:10.3f} (s)',
+                f'      Work rate: {self.ms_mb:10.1f} (ms/Mb)',
+            ]
+        )
 
 
 class TimerList:

@@ -77,6 +77,10 @@ benchmarks/TotalDepth/LIS/core/binary_files/
 # Binary test data
 data/
 
+# Binary Pickle files
+*.pkl
+
+# Stuff  we don't want to make public
 private/
 
 # Sphinx documentation

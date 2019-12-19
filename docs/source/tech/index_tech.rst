@@ -15,6 +15,7 @@ Contents:
     :maxdepth: 3
    
     LIS_indexing
+    RP66V1_indexing
     performance
     plotting
     data_quality

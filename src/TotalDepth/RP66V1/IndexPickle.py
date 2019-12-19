@@ -135,70 +135,55 @@ set xlabel "RP66V1 File Size (bytes)"
 # set format x ""
 
 set logscale y
-set ylabel "Index Rate (ms/Mb), Index Compression Ratio"
+# set ylabel "Index Rate (ms/Mb), Index Compression Ratio"
 # set yrange [1:1e5]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
-set logscale y2
-set y2label "Scan time (s), Ratio original size / index size"
+#set logscale y2
+#set y2label "Scan time (s), Ratio original size / index size"
 # set y2range [1e-4:10]
-set y2tics
+#set y2tics
 
 set pointsize 1
 set datafile separator whitespace#"	"
 set datafile missing "NaN"
 
-# set fit logfile
+set fit logfile
 
-# Curve fit, rate
-#rate(x) = 10**(a + b * log10(x))
-#fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+# Curve fit, time vs size, for index/write/re-read
+time_fit_index(x) = 10**(a * log10(x) + b)
+fit time_fit_index(x) "{name}.dat" using 1:3 via a,b
 
-#rate2(x) = 10**(5.5 - 0.5 * log10(x))
+time_fit_write(x) = 10**(c * log10(x) + d)
+fit time_fit_write(x) "{name}.dat" using 1:4 via c,d
 
-# Curve fit, size ratio
-#size_ratio(x) = 10**(c + d * log10(x))
-#fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
-# By hand
-# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
+time_fit_reread(x) = 10**(e * log10(x) + f)
+fit time_fit_reread(x) "{name}.dat" using 1:5 via e,f
 
-# Curve fit, compression ratio
-# compression_ratio(x) = 10**(e + f * log10(x))
-# fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+size_fit(x) = 10**((g * log10(x)) + h)
+fit size_fit(x) "{name}.dat" using 1:2 via g,h
+
+set key top left
 
 set terminal svg size 1000,700 # choose the file format
-set output "{name}_rate.svg" # choose the output device
+set output "{name}_size.svg" # choose the output device
+set ylabel "Index Size (s)"
 
-# set key off
-
-#set key title "Window Length"
-#  lw 2 pointsize 2
-
-# Fields: size_input, size_index, time, exception, ignored, path
-
-#plot "{name}.dat" using 1:3 axes x1y1 title "Scan Time (s)" lt 1 w points
-
-#plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
-    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
-    "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
-    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
-    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
-
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
-    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points
+plot "{name}.dat" using 1:2 axes x1y1 title "Index Size" lt 1 w points, \
+    size_fit(x) title sprintf("Fit: 10**(%.3g + %.3g * log10(x))", h,g) axes x1y1 lt 1 lw 1.5, \
+    "{name}.dat" using 1:1 title "Unity" axes x1y1 lt 2 lw 0.25 dt 1 w lines# smooth bezier
 
 set output "{name}_times.svg" # choose the output device
 set ylabel "Index Time (s)"
-unset y2label
 
-plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s), left axis" lt 1 w points, \\
-    "{name}.dat" using 1:4 axes x1y1 title "Write Time (s), left axis" lt 2 w points, \\
-    "{name}.dat" using 1:5 axes x1y1 title "Read Time (s), left axis" lt 3 w points
-
-# Plot size ratio:
-#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, #     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s)" lt 1 w points, \
+    time_fit_index(x) title sprintf("Index Time Fit: 10**(%.3g + %.3g * log10(x))", b, a) lt 1 lw 1.5, \
+    "{name}.dat" using 1:4 axes x1y1 title "Write Time (s)" lt 2 w points, \
+    time_fit_write(x) title sprintf("Write Time Fit: 10**(%.3g + %.3g * log10(x))", d,c) lt 2 lw 1.5, \
+    "{name}.dat" using 1:5 axes x1y1 title "Read Time (s)" lt 3 lc 4 w points, \
+    time_fit_reread(x) title sprintf("Read Time Fit: 10**(%.3g + %.3g * log10(x))", f,e) lt 3 lc 4 lw 1.5
 
 reset
 """
@@ -215,7 +200,7 @@ def plot_gnuplot(data: typing.Dict[str, IndexResult], gnuplot_dir: str) -> None:
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
             table.append(list(data[k][1:]) + [k])
-    name = 'IndexFile'
+    name = os.path.basename(__file__)
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')

@@ -55,10 +55,19 @@ class FrameChannel:
                  rep_code: int,
                  units: bytes,
                  dimensions: typing.List[int],
-                 # Function that takes an integer and returns a np.dtype for array creation.
-                 # TODO: Replace this with the np.dtype directly
                  np_dtype: np.dtype = DEFAULT_NP_TYPE,
                  ):
+        """
+        Constructor.
+
+        :param ident: Some hashable identity.
+        :param long_name: A description of the channel
+        :param rep_code: Integer representation code that this channel is encoded in.
+        :param units: Units of  Measure.
+        :param dimensions: A list of dimensions of each value. [1] is a single value per frame. [4, 1024] is a 100*2
+            matrix such as sonic waveform of 1024 samples with 4 waveforms per frame.
+        :param np_dtype: The numpy dtype to use.
+        """
         self.ident: typing.Hashable = ident
         self.long_name: bytes = long_name
         self.rep_code: int = rep_code
