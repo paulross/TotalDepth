@@ -397,9 +397,11 @@ def write_array_section_to_las(
         f', total: {num_writable_frames * num_values:,d} input values.'
     )
     for frame_number in frame_slice.gen_indices(num_writable_frames):
-        for channel in frame_array.channels:
+        for c, channel in enumerate(frame_array.channels):
             if len(channel.array):
                 value = array_reduce(channel.array[frame_number], array_reduction)
+                if c > 0:
+                    ostream.write(' ')
                 if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
                     ostream.write(f'{value:16.0f}')
                 elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
@@ -717,7 +719,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     clk_start = time.perf_counter()
     ret_val = 0
     result: typing.Dict[str, LASWriteResult] = {}
-    if args.frame_slice.strip() == '?' or args.channels.strip() == '?':
+    if os.path.isfile(args.path_in) and (args.frame_slice.strip() == '?' or args.channels.strip() == '?'):
         dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
     else:
         channel_set = set()
@@ -735,14 +737,25 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                 args.jobs,
             )
         else:
-            result = convert_rp66v1_dir_or_file_to_las(
-                args.path_in,
-                args.path_out,
-                args.recurse,
-                args.array_reduction,
-                Slice.create_slice_or_sample(args.frame_slice),
-                channel_set,
-            )
+            if args.log_process > 0.0:
+                with process.log_process(args.log_process):
+                    result = convert_rp66v1_dir_or_file_to_las(
+                        args.path_in,
+                        args.path_out,
+                        args.recurse,
+                        args.array_reduction,
+                        Slice.create_slice_or_sample(args.frame_slice),
+                        channel_set,
+                    )
+            else:
+                result = convert_rp66v1_dir_or_file_to_las(
+                    args.path_in,
+                    args.path_out,
+                    args.recurse,
+                    args.array_reduction,
+                    Slice.create_slice_or_sample(args.frame_slice),
+                    channel_set,
+                )
     clk_exec = time.perf_counter() - clk_start
     # Report output
     if result:
