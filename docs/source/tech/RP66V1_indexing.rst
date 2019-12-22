@@ -15,6 +15,7 @@ This describes how RP66V1 binary files are indexed to provide random access to a
 This also describes the performance of TotalDepth indexing a test set of around 100+ files that ranged in size from 80kb to 4GB totalling 17GB.
 The average file size was about 150Mb.
 These tests were run on a 2.7 GHz Intel Core i7 machine with 4 cores and hyper-threading.
+This data refers to version 0.3.0 and may not be relavent to the current version, |version|.
 
 
 Low-Level Index

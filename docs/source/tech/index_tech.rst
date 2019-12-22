@@ -14,9 +14,11 @@ Contents:
 .. toctree::
     :maxdepth: 3
    
-    LIS_indexing
-    RP66V1_indexing
     performance
+    LIS_indexing
+    LIS_processing
+    RP66V1_indexing
+    RP66V1_processing
     plotting
     data_quality
     saas

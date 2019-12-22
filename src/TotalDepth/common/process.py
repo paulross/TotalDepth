@@ -130,6 +130,7 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[int, typing.Any]]) 
             typing.Dict[str, float],
             typing.Dict[str, float],
             typing.Dict[str, float],
+            typing.Dict[str, float],
         ]:
     """Create a table from JSON suitable for a Gnuplot ``.dat`` file."""
     HEADER = [
@@ -199,20 +200,23 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
     with open(log_path) as instream:
         json_data = extract_json(instream)
     table, _t_min, _t_max, rss_min, rss_max = extract_json_as_table(json_data)
-    log_name = os.path.basename(log_path)
-    labels = extract_labels_from_json(json_data)
-    label_lines = []
-    y_value = (0.5 * (rss_max - rss_min)) / 1024**2
-    for label_dict in labels:
-        t_value = label_dict[KEY_ELAPSED_TIME]
-        label_lines.append(f'set arrow from {t_value},{y_value} to {t_value},0 lt -1 lw 1')
-        label_lines.append(
-            f'set label "{label_dict[KEY_LABEL]}" at {t_value},{y_value * 1.025}'
-            f' left font ",10" rotate by 90 noenhanced front'
+    for pid in table:
+        log_name = f'{os.path.basename(log_path)}_{pid}'
+        labels = extract_labels_from_json(json_data)
+        label_lines = []
+        y_value = (0.5 * (rss_max[pid] - rss_min[pid])) / 1024**2
+        for label_dict in labels:
+            t_value = label_dict[KEY_ELAPSED_TIME]
+            label_lines.append(f'set arrow from {t_value},{y_value} to {t_value},0 lt -1 lw 1')
+            label_lines.append(
+                f'set label "{label_dict[KEY_LABEL]}" at {t_value},{y_value * 1.025}'
+                f' left font ",10" rotate by 90 noenhanced front'
+            )
+        ret = gnuplot.invoke_gnuplot(
+            gnuplot_dir, log_name, table[pid], GNUPLOT_PLT.format(name=log_name, labels='\n'.join(label_lines))
         )
-    ret = gnuplot.invoke_gnuplot(
-        gnuplot_dir, log_name, table, GNUPLOT_PLT.format(name=log_name, labels='\n'.join(label_lines))
-    )
+        if ret:
+            break
     return ret
 
 
