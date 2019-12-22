@@ -131,8 +131,8 @@ def test_extract_json_as_table():
     json_result = process.extract_json(istream)
     table, t_min, t_max, rss_min, rss_max = process.extract_json_as_table(json_result)
     # pprint.pprint(table)
-    result = '\n'.join(' '.join(row) for row in table)
-    print(result)
+    result = '\n'.join(' '.join(row) for row in table[24098])
+    # print(result)
     expected = """#t(s)                 RSS PageFaults/s         User    Mean_CPU%    Inst_CPU% Timestamp                     PID Label
 0.2              28475392 43974.865437          0.3       135.9%       135.9% 2019-10-14T17:44:46.955519  24098 # 
 1.2              55967744  8625.019915          1.3       104.3%        96.9% 2019-10-14T17:44:47.960414  24098 # 

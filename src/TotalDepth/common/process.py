@@ -124,11 +124,15 @@ def extract_labels_from_json(json_data: typing.List[typing.Dict[str, typing.Any]
     return [v for v in json_data if KEY_LABEL in v]
 
 
-def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) \
-        -> typing.Tuple[typing.List[typing.List[str]], float, float, float, float]:
+def extract_json_as_table(json_data: typing.List[typing.Dict[int, typing.Any]]) \
+        -> typing.Tuple[
+            typing.Dict[str, typing.List[typing.List[str]]],
+            typing.Dict[str, float],
+            typing.Dict[str, float],
+            typing.Dict[str, float],
+        ]:
     """Create a table from JSON suitable for a Gnuplot ``.dat`` file."""
-    ret = [
-        [
+    HEADER = [
             f'{"#t(s)":12}',
             f'{"RSS":>12}',
             f'{"PageFaults/s":>12}',
@@ -139,19 +143,30 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) 
             f'{"PID":>6}',
             f'{"Label"}',
         ]
-    ]
-    prev_cpu = 0.0
-    prev_elapsed_time = 0.0
-    prev_page_faults = 0
-    t_min = rss_min = sys.float_info.max
-    t_max = rss_max = sys.float_info.min
+    ret = {}
+    prev_cpu = {}
+    prev_elapsed_time = {}
+    prev_page_faults = {}
+    t_min = {}
+    t_max = {}
+    rss_min = {}
+    rss_max = {}
     for record in json_data:
+        if record[KEY_PROCESS_ID] not in ret:
+            ret[record[KEY_PROCESS_ID]] = [HEADER[:]]
+            prev_cpu[record[KEY_PROCESS_ID]] = 0.0
+            prev_elapsed_time[record[KEY_PROCESS_ID]] = 0.0
+            prev_page_faults[record[KEY_PROCESS_ID]] = 0
+            t_min[record[KEY_PROCESS_ID]] = sys.float_info.max
+            t_max[record[KEY_PROCESS_ID]] = sys.float_info.min
+            rss_min[record[KEY_PROCESS_ID]] = sys.float_info.max
+            rss_max[record[KEY_PROCESS_ID]] = sys.float_info.min
         mean_cpu_user = record["cpu_times"]["user"] / record[KEY_ELAPSED_TIME]
-        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time)
+        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu[record[KEY_PROCESS_ID]]) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         # record["memory_info"]["pfaults"] is the cumulative total.
-        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time)
+        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults[record[KEY_PROCESS_ID]]) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         label = record[KEY_LABEL] if KEY_LABEL in record else ''
-        ret.append(
+        ret[record[KEY_PROCESS_ID]].append(
             [
                 f'{record[KEY_ELAPSED_TIME]:<12.1f}',
                 f'{record["memory_info"]["rss"]:12d}',
@@ -164,13 +179,13 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) 
                 f'# {label}'
             ]
         )
-        prev_cpu = record["cpu_times"]["user"]
-        prev_elapsed_time = record[KEY_ELAPSED_TIME]
-        prev_page_faults = record["memory_info"]["pfaults"]
-        t_min = min(record[KEY_ELAPSED_TIME], t_min)
-        t_max = max(record[KEY_ELAPSED_TIME], t_max)
-        rss_min = min(record["memory_info"]["rss"], rss_min)
-        rss_max = max(record["memory_info"]["rss"], rss_max)
+        prev_cpu[record[KEY_PROCESS_ID]] = record["cpu_times"]["user"]
+        prev_elapsed_time[record[KEY_PROCESS_ID]] = record[KEY_ELAPSED_TIME]
+        prev_page_faults[record[KEY_PROCESS_ID]] = record["memory_info"]["pfaults"]
+        t_min[record[KEY_PROCESS_ID]] = min(record[KEY_ELAPSED_TIME], t_min[record[KEY_PROCESS_ID]])
+        t_max[record[KEY_PROCESS_ID]] = max(record[KEY_ELAPSED_TIME], t_max[record[KEY_PROCESS_ID]])
+        rss_min[record[KEY_PROCESS_ID]] = min(record["memory_info"]["rss"], rss_min[record[KEY_PROCESS_ID]])
+        rss_max[record[KEY_PROCESS_ID]] = max(record["memory_info"]["rss"], rss_max[record[KEY_PROCESS_ID]])
     return ret, t_min, t_max, rss_min, rss_max
 
 
