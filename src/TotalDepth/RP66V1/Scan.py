@@ -832,7 +832,7 @@ def main() -> int:
             args.recurse,
             output_extension,
             rp66v1_path=args.path_in,
-            frame_slice=Slice.create_slice_or_split(args.frame_slice),
+            frame_slice=Slice.create_slice_or_sample(args.frame_slice),
             eflr_as_table=args.eflr_as_table,
         )
     if args.test_data:

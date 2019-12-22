@@ -15,6 +15,11 @@ EXAMPLE_DATA_DIRECTORY = os.path.join(
 )
 
 
+EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(
+    os.path.dirname(TotalDepth.__file__), os.path.pardir, os.path.pardir, 'example_data', 'LIS',
+)
+
+
 def test_example_data_directory_exists():
     assert os.path.isdir(EXAMPLE_DATA_DIRECTORY)
 
@@ -64,7 +69,7 @@ def test_tddetif(tmpdir, args):
     )
 )
 def test_tdlistohtml(tmpdir, args):
-    subprocess.check_call(['tdlistohtml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdlistohtml',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
 
 
 #======================== RP66V1 ==================
@@ -118,6 +123,8 @@ RP66V1_FILES = [
         ['-R', '-v'],
         ['--LR'],
         ['--LR', '-v'],
+        ['--LR', '--frame-slice=64'],
+        ['--LR', '--frame-slice=,,64'],
         # Test data
         ['-T'],
     )
@@ -259,6 +266,7 @@ def test_tdrp66v1indexxml_gnuplot(tmpdir):
         ['-v'],
         ['-v', '-k'],
         ['--log-process=1.0',],
+        ['--frame-slice=64',],
         ['--frame-slice=,,2',],
         ['--frame-slice=?',],
         ['--array-reduction=median',],
@@ -304,6 +312,8 @@ def test_tdrp66v1tolas_gnuplot(tmpdir):
         ['-r', '-j 2'],
         ['-r', '-j 0'],
         ['-r', '--log-process=1.0', ],
+        ['-r', '--frame-slice=64', ],
+        ['-r', '--frame-slice=,,2', ],
     )
 )
 def test_tdrp66v1scanhtml_dir(tmpdir, args):

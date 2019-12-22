@@ -225,6 +225,7 @@ def write_well_information_to_las(
         x_strt: float = iflr_data[0].x_axis
         x_stop: float = iflr_data[-1].x_axis
         las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
+        # FIXME: Compute correct STOP and STEP with frame slicing.
         las_map['STOP'] = UnitValueDescription(
             x_units, stringify.stringify_object_by_type(x_stop), f'Stop X, frames: {len(iflr_data):,d}'
         )
@@ -358,11 +359,12 @@ def write_array_section_to_las(
     """Write the ``~Array Section`` to the LAS file."""
     assert array_reduction in ARRAY_REDUCTIONS
     # TODO: Could optimise memory by reading one frame at a time
+    num_available_frames = logical_file.num_frames(frame_array)
     if len(channels):
         array_channels = [c.ident for c in frame_array.channels if c.ident.I.decode("ascii") in channels]
-        num_input_frames = logical_file.populate_frame_array(frame_array, frame_slice, array_channels)
+        num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice, array_channels)
     else:
-        num_input_frames = logical_file.populate_frame_array(frame_array, frame_slice)
+        num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice)
     # Write information about how the frames and channels were processed
     ostream.write(f'# Array processing information:\n')
     ostream.write(f'# Frame Array: ID: {frame_array.ident} description: {frame_array.description}\n')
@@ -373,10 +375,10 @@ def write_array_section_to_las(
     else:
         ostream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
     ostream.write(f'# Where a channel has multiple values the reduction method is by "{array_reduction}" value.\n')
-    ostream.write(f'# Number of original frames: {num_input_frames}\n')
+    ostream.write(f'# Number of original frames: {num_available_frames}\n')
     ostream.write(
-        f'# Requested frame slicing: {frame_slice.long_str(num_input_frames)}'
-        f' total number of frames presented here: {frame_slice.count(num_input_frames)}\n'
+        f'# Requested frame slicing: {frame_slice.long_str(num_available_frames)}'
+        f', total number of frames presented here: {frame_slice.count(num_available_frames)}\n'
     )
     ostream.write('~A')
     for c, channel in enumerate(frame_array.channels):
@@ -389,12 +391,12 @@ def write_array_section_to_las(
     ostream.write('\n')
     num_values = sum(c.count for c in frame_array.channels)
     logger.info(
-        f'Writing array section with {num_input_frames:,d} frames'
+        f'Writing array section with {num_writable_frames:,d} frames'
         f', {len(frame_array):,d} channels'
         f' and {num_values:,d} values per frame'
-        f', total: {num_input_frames * num_values:,d} input values.'
+        f', total: {num_writable_frames * num_values:,d} input values.'
     )
-    for frame_number in frame_slice.range(num_input_frames):
+    for frame_number in frame_slice.gen_indices(num_writable_frames):
         for channel in frame_array.channels:
             if len(channel.array):
                 value = array_reduce(channel.array[frame_number], array_reduction)
@@ -728,7 +730,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                 args.path_out,
                 args.recurse,
                 args.array_reduction,
-                Slice.create_slice_or_split(args.frame_slice),
+                Slice.create_slice_or_sample(args.frame_slice),
                 channel_set,
                 args.jobs,
             )
@@ -738,7 +740,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                 args.path_out,
                 args.recurse,
                 args.array_reduction,
-                Slice.create_slice_or_split(args.frame_slice),
+                Slice.create_slice_or_sample(args.frame_slice),
                 channel_set,
             )
     clk_exec = time.perf_counter() - clk_start

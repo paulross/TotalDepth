@@ -44,7 +44,7 @@ Options
   -k, --keep-going      Keep going as far as sensible. [default: False]
   --frame-slice FRAME_SLICE
                         Do not process all frames but split or slice the
-                        frames. Split is of the form "1/N" so a maximum of N
+                        frames. Sample is of the form "1/N" so a maximum of N
                         frames will be processed. N must be +ve, non-zero
                         integer. Example: "1/64" - process a maximum of 64
                         frames. Slice the frames is of the form
@@ -137,7 +137,7 @@ Options
                         single value. One of {first,max,mean,median,min} [default: mean]
   --frame-slice FRAME_SLICE
                         Do not process all frames but split or slice the
-                        frames. Split is of the form "1/N" so a maximum of N
+                        frames. Sample is of the form "1/N" so a maximum of N
                         frames will be processed. N must be +ve, non-zero
                         integer. Example: "1/64" - process a maximum of 64
                         frames. Slice the frames is of the form
@@ -510,7 +510,7 @@ Options
   -k, --keep-going      Keep going as far as sensible. [default: False]
   --frame-slice FRAME_SLICE
                         NOTE: Requires -R, --LR. Do not process all frames but
-                        split or slice the frames. Split is of the form "1/N"
+                        split or slice the frames. Sample is of the form "1/N"
                         so a maximum of N frames will be processed. N must be
                         +ve, non-zero integer. Example: "1/64" - process a
                         maximum of 64 frames. Slice the frames is of the form

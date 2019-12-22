@@ -67,6 +67,10 @@ class ExceptionFileReadEOF(ExceptionFileRead):
     pass
 
 
+class ExceptionFileReadPositionsInconsistent(ExceptionFileRead):
+    pass
+
+
 # ---------------- Low Level File Read Functions ------------------
 
 
@@ -823,3 +827,32 @@ class FileRead:
             self._seek_and_read_next_logical_record_segment_header()
         file_logical_data.seal()
         return file_logical_data
+
+    def validate_positions(self) -> None:
+        """Iterate through the Visible Records and Logical Record Segment Headers and raise a
+        ExceptionFileReadPositionsInconsistent on the first inconsistent position."""
+        next_visible_record_position = next_lrsh_position = 0
+        for index_visible_record, visible_record in enumerate(self.iter_visible_records()):
+            if index_visible_record == 0:
+                if visible_record.position != 80:
+                    raise ExceptionFileReadPositionsInconsistent(
+                        f'First Visible Record expected at 80 but found at {visible_record.position}'
+                    )
+            else:
+                if visible_record.position != next_visible_record_position:
+                    raise ExceptionFileReadPositionsInconsistent(
+                        f'Visible Record expected at {next_visible_record_position} but found at {visible_record.position}'
+                    )
+            next_visible_record_position = visible_record.next_position
+            for index_lrsh, lrsh in enumerate(self.iter_LRSHs_for_visible_record(visible_record)):
+                if index_visible_record == 0 and index_lrsh == 0:
+                    if lrsh.position != 84:
+                        raise ExceptionFileReadPositionsInconsistent(
+                            f'First LRSH expected at 84 but found at {lrsh.position}'
+                        )
+                else:
+                    if lrsh.position != next_lrsh_position:
+                        raise ExceptionFileReadPositionsInconsistent(
+                            f'LRSH expected at {next_lrsh_position} but found at {lrsh.position}'
+                        )
+                next_lrsh_position = lrsh.next_position

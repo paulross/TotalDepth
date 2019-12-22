@@ -71,7 +71,7 @@ def demo_numpy_access_partial_test_data():
                     frame_count = logical_file.populate_frame_array(
                         frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
-                        # frame_slice=Slice.Split(64),
+                        # frame_slice=Slice.Sample(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
                     )
                     print(
@@ -195,7 +195,7 @@ def demo_numpy_access_partial():
                     frame_count = logical_file.populate_frame_array(
                         frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
-                        # frame_slice=Slice.Split(64),
+                        # frame_slice=Slice.Sample(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
                     )
                     print(

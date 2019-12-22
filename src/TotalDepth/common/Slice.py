@@ -1,6 +1,20 @@
 import argparse
 import typing
 
+# from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
+#
+#
+# class ExceptionSlice(ExceptionTotalDepthRP66V1):
+#     """Specialisation of an exception for SLice objects."""
+#     pass
+#
+#
+# class ExceptionSample(ExceptionTotalDepthRP66V1):
+#     """Specialisation of an exception for Sample objects."""
+#     pass
+
+# TODO: Given a range of values return the STOP and STEP values for the ToLAS.py
+
 
 class Slice:
     """Class that wraps a builtin slice object for integers and provides some useful APIs.
@@ -20,15 +34,15 @@ class Slice:
 
     def count(self, length: int) -> int:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
-        return len(self.range(length))
+        return len(list(self.gen_indices(length)))
 
-    def range(self, length: int) -> range:
-        """Returns a builtin range object for the sequence of the given length."""
-        return range(*self._slice.indices(length))
+    def gen_indices(self, length: int) -> range:
+        """Generates the indices for the sequence of the given length."""
+        yield from range(*self._slice.indices(length))
 
     def indices(self, length: int) -> typing.List[int]:
         """Returns a fully composed list of indices for the sequence of the given length."""
-        return list(self.range(length))
+        return list(self.gen_indices(length))
 
     def __eq__(self, other) -> bool:
         """Mostly used for testing."""
@@ -37,54 +51,62 @@ class Slice:
         return NotImplemented
 
     def long_str(self, length: int) -> str:
-        rng = self.range(length)
+        rng = range(*self._slice.indices(length))
         return f'<Slice on length={length} start={rng.start} stop={rng.stop} step={rng.step}>'
 
     def __str__(self) -> str:
         return f'<Slice.{str(self._slice)}>'
 
 
-class Split:
+class Sample:
     """This has the same API as Slice but takes a single integer and
     """
-    def __init__(self, fraction: int):
-        if fraction < 1:
-            raise ValueError(f'fraction must be an integer >= 1 not {fraction}')
-        self._fraction = fraction
+    def __init__(self, sample_size: int):
+        if sample_size < 1:
+            raise ValueError(f'A Sample must be an integer >= 1 not {sample_size}')
+        self._sample_size = sample_size
 
     def count(self, length: int) -> int:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
-        if length <= self._fraction:
+        if length <= self._sample_size:
             return length
-        return self._fraction
+        return self._sample_size
 
-    def range(self, length: int) -> range:
-        """Returns a builtin range object for the sequence of the given length."""
-        # return range(0, length, int(0.5 + length / self.count(length)))
-        step = length / self.count(length)
-        if int(step) != step:
-            step += 1
-        return range(0, length, int(step))
+    def gen_indices(self, length: int) -> range:
+        """Generates the indices for the sequence of the given length."""
+        if self._sample_size >= length:
+            yield from range(length)
+        else:
+            assert self._sample_size > 0
+            int_incr = length // self._sample_size
+            rem_incr = length % self._sample_size
+            index = remainder = 0
+            while index < length:
+                yield index
+                remainder += rem_incr
+                index += int_incr + remainder // self._sample_size
+                remainder %= self._sample_size
 
     def indices(self, length: int) -> typing.List[int]:
         """Returns a fully composed list of indices for the sequence of the given length."""
-        return list(self.range(length))
+        return list(self.gen_indices(length))
 
     def __eq__(self, other) -> bool:
         """Mostly used for testing."""
         if other.__class__ == self.__class__:
-            return other._fraction == self._fraction
+            return other._sample_size == self._sample_size
         return NotImplemented
 
     def long_str(self, length: int) -> str:
-        rng = self.range(length)
-        return f'<Split on length={length} start={rng.start} stop={rng.stop} step={rng.step}>'
+        """Long descriptive string."""
+        sample_size = min(self._sample_size, length)
+        return f'<Sample {sample_size} out of {length}>'
 
     def __str__(self) -> str:
-        return f'<Split fraction: {self._fraction}>'
+        return f'<Sample fraction: {self._sample_size}>'
 
 
-def create_slice_or_split(slice_string: str) -> typing.Union[Slice, Split]:
+def create_slice_or_sample(slice_string: str) -> typing.Union[Slice, Sample]:
     """Returns a Slice object from a string such as:
     '', 'None,72', 'None,72,14'
     """
@@ -94,26 +116,15 @@ def create_slice_or_split(slice_string: str) -> typing.Union[Slice, Split]:
         # May raise a ValueError
         return int(a_string)
 
-    if '/' in slice_string:
-        # Return a Split
-        parts = [convert(p.strip()) for p in slice_string.split('/')]
-        if len(parts) != 2:
-            raise ValueError(f'Wrong number of parts for a Split in "{slice_string}"')
-        if parts[0] is None or parts[0] != 1:
-            raise ValueError(f'A Split must start with 1 not {parts[0]} in "{slice_string}"')
-        if parts[1] is None or parts[1] < 1:
-            raise ValueError(f'A Split must end with and integer >= 1 not {parts[1]} in "{slice_string}"')
-        return Split(parts[1])
-    else:
+    if ',' in slice_string:
         # Return a Slice
         parts = [convert(p.strip()) for p in slice_string.split(',')]
-        assert len(parts) > 0
-        if len(parts) > 3:
-            raise ValueError(f'Too many parts in "{slice_string}"')
-        if len(parts) == 1:
-            return Slice(stop=parts[0])
+        if len(parts) != 3:
+            raise ValueError(f'Wrong number of parts for a Slice in "{slice_string}"')
         # 2 or 3 parts
         return Slice(*parts)
+    else:
+        return Sample(int(slice_string))
 
 
 def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
@@ -123,11 +134,11 @@ def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
         help_list.append(f'{help_prefix}')
     help_list.extend(
         [
-            'Do not process all frames but split or slice the frames.',
-            'Split is of the form "1/N" so a maximum of N frames will be processed.',
+            'Do not process all frames but sample or slice the frames.',
+            'SAMPLE: Sample is of the form "N" so a maximum of N frames, roughly regularly spaced, will be processed.',
             'N must be +ve, non-zero integer.',
-            'Example: "1/64" - process a maximum of 64 frames.',
-            'Slice the frames is of the form start,stop,step as a comma separated list.',
+            'Example: "64" - process a maximum of 64 frames.',
+            'SLICE: Slice the frames is of the form start,stop,step as a comma separated list.',
             'Values can be absent or  "None".',
             'Examples: ",," - every frame,',
             '",,2" - every other frame,',
@@ -139,5 +150,5 @@ def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
     )
     if use_what:
         help_list.append(' Use \'?\' to see what frames are available')
-    help_list.append(' [default: "%(default)s"]')
+    help_list.append(' [default: "%(default)s" i.e. all frames]')
     parser.add_argument('--frame-slice', default=',,', type=str, help=' '.join(help_list))

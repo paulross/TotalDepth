@@ -907,7 +907,7 @@ The RP66V1 Frame Array can be very large so to make it more manageable the :py:m
 * `frame_slice` to reduce the number of frames that are populated. You can use either of these classes:
 
     * :py:class:`TotalDepth.common.Slice.Slice` which takes optional start, stop, step values that default to ``(0, len(data), 1)``. For example if there are 128 frames available then ``Slice(64, None, 2)`` would populate every other frame from frame 64 to the end.
-    * :py:class:`TotalDepth.common.Slice.Split` which takes single integer, this is maximum number of frames to be populated and they will be evenly spaced throughout the Frame Array. For example if there are 128 available frames that ``Split(8)`` would populate each numpy array with every 16th frame producing 8 frames.
+    * :py:class:`TotalDepth.common.Slice.Sample` which takes single integer, this is maximum number of frames to be populated and they will be evenly spaced throughout the Frame Array. For example if there are 128 available frames that ``Sample(8)`` would populate each numpy array with every 16th frame producing 8 frames.
 
 For example, adding the two highlighted lines which populates every 64th frame and channels 1 and 2:
 
@@ -924,7 +924,7 @@ For example, adding the two highlighted lines which populates every 64th frame a
                     frame_count = logical_file.populate_frame_array(
                         frame_array,
                         frame_slice=Slice.Slice(0, None, 64),
-                        # frame_slice=Slice.Split(64),
+                        # frame_slice=Slice.Sample(64),
                         channels={frame_array.channels[1].ident, frame_array.channels[2].ident}
                     )
                     print(

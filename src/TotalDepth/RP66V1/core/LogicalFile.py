@@ -240,10 +240,14 @@ class LogicalFile:
             frame_array.x_axis.array.mean(),
         )
 
+    def num_frames(self, frame_array: LogPass.FrameArray) -> int:
+        """Return the number of frames in the FrameArray"""
+        return len(self.iflr_position_map[frame_array.ident])
+
     def populate_frame_array(
             self,
             frame_array: LogPass.FrameArray,
-            frame_slice: typing.Union[Slice.Slice, Slice.Split, None] = None,
+            frame_slice: typing.Union[Slice.Slice, Slice.Sample, None] = None,
             channels: typing.Union[typing.Set[typing.Hashable], None] = None,
     ) -> int:
         """Populates a FrameArray with channel values.
@@ -264,7 +268,7 @@ class LogicalFile:
         if len(iflrs):
             # Set partial frames
             if frame_slice is not None:
-                range_gen = frame_slice.range(len(iflrs))
+                range_gen = frame_slice.gen_indices(len(iflrs))
                 num_frames = frame_slice.count(len(iflrs))
             else:
                 range_gen = range(len(iflrs))

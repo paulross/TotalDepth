@@ -184,6 +184,6 @@ def test_logical_file_populate_frame_array_partial_split():
         assert logical_file.has_log_pass
         assert len(logical_file.log_pass) == 1
         frame_array = logical_file.log_pass[0]
-        frame_slice = Slice.Split(64)
+        frame_slice = Slice.Sample(64)
         frame_count = logical_file.populate_frame_array(frame_array, frame_slice)
         assert frame_count == 64

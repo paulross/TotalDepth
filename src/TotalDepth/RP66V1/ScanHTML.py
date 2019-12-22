@@ -300,7 +300,7 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
 def _write_frame_array_in_html(
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.FrameArray,
-        frame_slice: typing.Union[Slice.Slice, Slice.Split],
+        frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
 ) -> HTMLFrameArraySummary:
@@ -567,7 +567,7 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
 
 
 def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
-                       frame_slice: typing.Union[Slice.Slice, Slice.Split]) -> HTMLResult:
+                       frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> HTMLResult:
     """Scan a single file and write out an HTML summary."""
     file_path_out = path_out + '.html'
     logger.debug(f'Scanning "{path_in}" to "{file_path_out}"')
@@ -851,7 +851,7 @@ def _write_top_level_index_table_body(index_file_path: str,
 
 
 def scan_dir_multiprocessing(dir_in, dir_out, jobs,
-                             frame_slice: typing.Union[Slice.Slice, Slice.Split]) -> typing.Dict[str, HTMLResult]:
+                             frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -878,7 +878,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
 
 def scan_dir_or_file(path_in: str, path_out: str,
                      recursive: bool, label_process: bool,
-                     frame_slice: typing.Union[Slice.Slice, Slice.Split]) -> typing.Dict[str, HTMLResult]:
+                     frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
     """Scans a directory or file putting the results in path_out.
     Returns a dict of {path_in : HTMLResult, ...}
     """
@@ -1055,7 +1055,7 @@ def main() -> int:
                 args.path_out,
                 args.recurse,
                 label_process=True,
-                frame_slice=Slice.create_slice_or_split(args.frame_slice),
+                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
             )
     else:
         if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
@@ -1063,7 +1063,7 @@ def main() -> int:
                 args.path_in,
                 args.path_out,
                 args.jobs,
-                frame_slice=Slice.create_slice_or_split(args.frame_slice),
+                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
             )
         else:
             result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
@@ -1071,7 +1071,7 @@ def main() -> int:
                 args.path_out,
                 args.recurse,
                 label_process=False,
-                frame_slice=Slice.create_slice_or_split(args.frame_slice),
+                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
             )
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing HTML Complete.')
