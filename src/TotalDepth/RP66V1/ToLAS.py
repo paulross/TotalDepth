@@ -423,9 +423,11 @@ def write_logical_sequence_to_las(
     assert array_reduction in ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
+        process.add_message_to_queue(f'Logical file {lf}')
         # Now the LogPass
         if logical_file.has_log_pass:
             for frame_array in logical_file.log_pass.frame_arrays:
+                process.add_message_to_queue(f'Frame Array {frame_array.ident.I}')
                 file_path_out = las_file_name(path_out, lf, frame_array.ident.I)
                 os.makedirs(os.path.dirname(file_path_out), exist_ok=True)
                 logger.info(f'Starting LAS output file {file_path_out}')
@@ -546,6 +548,8 @@ def convert_rp66v1_dir_or_file_to_las(
                     file_in_out.filePathIn, array_reduction, file_in_out.filePathOut, frame_slice, channels,
                 )
         else:
+            if os.path.isdir(path_out):
+                path_out = os.path.join(path_out, os.path.basename(path_in))
             ret[path_in] = single_rp66v1_file_to_las(path_in, array_reduction, path_out, frame_slice, channels)
     except KeyboardInterrupt:  # pragma: no cover
         logger.critical('Keyboard interrupt, last file is probably incomplete or corrupt.')
