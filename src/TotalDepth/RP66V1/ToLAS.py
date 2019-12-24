@@ -12,6 +12,7 @@ Example reference to the LAS documentation in this source code::
 
 """
 import collections
+import contextlib
 import datetime
 import logging
 import multiprocessing
@@ -20,6 +21,7 @@ import sys
 import time
 import typing
 
+import colorama
 import numpy as np
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
@@ -34,6 +36,8 @@ from TotalDepth.common import data_table
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type, DirWalk
 from TotalDepth.util import gnuplot
+
+colorama.init(autoreset=True)
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -409,7 +413,7 @@ def write_array_section_to_las(
         f' and {num_values:,d} values per frame'
         f', total: {num_writable_frames * num_values:,d} input values.'
     )
-    for frame_number in num_writable_frames:
+    for frame_number in range(num_writable_frames):
         for c, channel in enumerate(frame_array.channels):
             if len(channel.array):
                 value = array_reduce(channel.array[frame_number], array_reduction)
@@ -580,43 +584,60 @@ def convert_rp66v1_dir_or_file_to_las(
     return ret
 
 
+STANDARD_TEXT_WIDTH = 132
+
+
+@contextlib.contextmanager
+def _output_section_header_trailer(header: str, fillchar: str,
+                                   width: int = STANDARD_TEXT_WIDTH,
+                                   os: typing.TextIO = sys.stdout):
+    """Top and tail output with a boundary."""
+    s = colorama.Fore.GREEN + f' {header} '.center(width, fillchar) + '\n'
+    os.write(s)
+    yield
+    s = colorama.Fore.GREEN + f' END {header} '.center(width, fillchar) + '\n'
+    os.write(s)
+
+
 def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, channels) -> None:
+    """Write a summary of frames and channels."""
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         logger.info(f'Reading RP66V1 {path_in}')
         try:
-            with LogicalFile.LogicalIndex(path_in) as logical_index:
-                for l, logical_file in enumerate(logical_index.logical_files):
-                    print(f'Logical file [{l:04d}]: {logical_file}')
-                    # print(f'Logical file: {logical_file.file_header_logical_record.set.type}')
-                    if logical_file.has_log_pass:
-                        for frame_array in logical_file.log_pass.frame_arrays:
-                            print(f'  Frame Array: {frame_array.ident.I}')
-                            if channels:
-                                channel_text = b','.join(c.ident.I for c in frame_array.channels)
-                                print(f'  Channels: {channel_text}')
-                            if frame_slices:
-                                print(f'  X axis: {frame_array.x_axis}')
-                                iflr_refs = logical_file.iflr_position_map[frame_array.ident]
-                                # print(f'TRACE: Frames: {len(iflr_refs)} from {iflr_refs[0]} to {iflr_refs[-1]}')
-                                x_spacing = (iflr_refs[-1].x_axis - iflr_refs[0].x_axis) / (len(iflr_refs)  -1)
-                                print(
-                                    f'  Frames: {len(iflr_refs)}'
-                                    f' from {iflr_refs[0].x_axis}'
-                                    f' to {iflr_refs[-1].x_axis}'
-                                    f' interval {x_spacing}'
-                                    f' [{frame_array.x_axis.units}]'
-                                )
-                            print()
-                    else:
-                        print('No log pass')
-                    # print()
+            with _output_section_header_trailer(f'File {path_in}', '=', os=sys.stdout):
+                with LogicalFile.LogicalIndex(path_in) as logical_index:
+                    for l, logical_file in enumerate(logical_index.logical_files):
+                        with _output_section_header_trailer(f'Logical file [{l:04d}]: {logical_file}', '-', os=sys.stdout):
+                            # print(f'Logical file: {logical_file.file_header_logical_record.set.type}')
+                            if logical_file.has_log_pass:
+                                for frame_array in logical_file.log_pass.frame_arrays:
+                                    print(f'  Frame Array: {frame_array.ident.I}')
+                                    if channels:
+                                        channel_text = b','.join(c.ident.I for c in frame_array.channels)
+                                        print(f'  Channels: {channel_text}')
+                                    if frame_slices:
+                                        print(f'  X axis: {frame_array.x_axis}')
+                                        iflr_refs = logical_file.iflr_position_map[frame_array.ident]
+                                        # print(f'TRACE: Frames: {len(iflr_refs)} from {iflr_refs[0]} to {iflr_refs[-1]}')
+                                        x_spacing = (iflr_refs[-1].x_axis - iflr_refs[0].x_axis) / (len(iflr_refs)  -1)
+                                        print(
+                                            f'  Frames: {len(iflr_refs)}'
+                                            f' from {iflr_refs[0].x_axis}'
+                                            f' to {iflr_refs[-1].x_axis}'
+                                            f' interval {x_spacing}'
+                                            f' [{frame_array.x_axis.units}]'
+                                        )
+                                    print()
+                            else:
+                                print('No log pass')
+                            # print()
         except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
         except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
-    else:
-        logger.error(f'Path {path_in} is not a RP66V1 file.')
+    # else:
+    #     logger.error(f'Path {path_in} is not a RP66V1 file.')
 
 
 def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, channels: str) -> None:
@@ -736,11 +757,13 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     parser.add_argument(
         '--channels', type=str,
         help='Comma separated list of channels to write out (X axis is always included).'
-             ' Use \'?\' to see what channels exist without writing anything. [default: %(default)s]',
+             ' Use \'?\' to see what channels exist without writing anything. [default: "%(default)s"]',
         default='',
         )
-    parser.add_argument('--field-width', type=int, help='Field width for array data.', default=16)
-    parser.add_argument('--float-format', type=str, help='Floating point format for array data.', default='.3f')
+    parser.add_argument('--field-width', type=int,
+                        help='Field width for array data [default: %(default)s].', default=16)
+    parser.add_argument('--float-format', type=str,
+                        help='Floating point format for array data [default: "%(default)s"].', default='.3f')
     args = parser.parse_args()
     cmn_cmd_opts.set_log_level(args)
     # print('args:', args)
@@ -749,7 +772,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     clk_start = time.perf_counter()
     ret_val = 0
     result: typing.Dict[str, LASWriteResult] = {}
-    if os.path.isfile(args.path_in) and (args.frame_slice.strip() == '?' or args.channels.strip() == '?'):
+    # if os.path.isfile(args.path_in) and (args.frame_slice.strip() == '?' or args.channels.strip() == '?'):
+    if args.frame_slice.strip() == '?' or args.channels.strip() == '?':
         dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
     else:
         channel_set = set()
@@ -764,6 +788,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                 args.array_reduction,
                 Slice.create_slice_or_sample(args.frame_slice),
                 channel_set,
+                args.field_width,
+                args.float_format,
                 args.jobs,
             )
         else:
@@ -776,6 +802,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                         args.array_reduction,
                         Slice.create_slice_or_sample(args.frame_slice),
                         channel_set,
+                        args.field_width,
+                        args.float_format,
                     )
             else:
                 result = convert_rp66v1_dir_or_file_to_las(
@@ -785,6 +813,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                     args.array_reduction,
                     Slice.create_slice_or_sample(args.frame_slice),
                     channel_set,
+                    args.field_width,
+                    args.float_format,
                 )
     clk_exec = time.perf_counter() - clk_start
     # Report output

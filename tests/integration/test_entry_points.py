@@ -272,6 +272,8 @@ def test_tdrp66v1indexxml_gnuplot(tmpdir):
         ['--array-reduction=median',],
         ['--channels=?',],
         ['--channels=TENS,ETIM',],
+        ['--field-width=32',],
+        ['--float-format=.6f',],
     )
 )
 def test_tdrp66v1tolas_basic_file(tmpdir, args):
