@@ -43,6 +43,66 @@ def test_slice_count(init, length, expected):
 @pytest.mark.parametrize(
     'init, length, expected',
     (
+        ((None, None, None), 7, 0),
+        ((None, 7, None), 7, 0),
+        ((None, 7, None), 42, 0),
+        ((None, None, None), 1, 0),
+        ((None, -1, None), 1, 0),
+        ((None, 8, 2), 8, 0),
+        ((2, 8, 2), 8, 2),
+        ((None, None, 64), 921, 0),
+        ((None, None, 64), 3181, 0),
+        ((None, None, 64), 3012, 0),
+    )
+)
+def test_slice_first(init, length, expected):
+    s = Slice.Slice(*init)
+    assert s.first(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        ((None, None, None), 7, 6),
+        ((None, 7, None), 7, 6),
+        ((None, 7, None), 42, 6),
+        ((None, None, None), 1, 0),
+        ((None, -1, None), 1, -1),
+        ((None, 8, 2), 8, 7),
+        ((2, 8, 2), 8, 7),
+        ((None, None, 64), 921, 895),
+        ((None, None, 64), 3181, 3135),
+        ((None, None, 64), 3012, 3007),
+    )
+)
+def test_slice_last(init, length, expected):
+    s = Slice.Slice(*init)
+    assert s.last(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        ((None, None, None), 7, 1),
+        ((None, 7, None), 7, 1),
+        ((None, 7, None), 42, 1),
+        ((None, None, None), 1, 1),
+        ((None, -1, None), 1, 1),
+        ((None, 8, 2), 8, 2),
+        ((2, 8, 2), 8, 2),
+        ((None, None, 64), 921, 64),
+        ((None, None, 64), 3181, 64),
+        ((None, None, 64), 3012, 64),
+    )
+)
+def test_slice_step(init, length, expected):
+    s = Slice.Slice(*init)
+    assert s.step(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
         ((None, None, None), 7, range(0, 7, 1)),
         ((None, 7, None), 7, range(0, 7, 1)),
         ((None, 7, None), 42, range(0, 7, 1)),
@@ -130,6 +190,54 @@ def test_sample_ctor_raises(init, error_message):
     with pytest.raises(ValueError) as err:
         Slice.Sample(init)
     assert err.value.args[0] == error_message
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        (1, 7, 0),
+        (2, 7, 0),
+        (8, 7, 0),
+        (64, 52, 0),
+        (64, 699, 0),
+        (64, 11211, 0),
+    )
+)
+def test_sample_first(init, length, expected):
+    s = Slice.Sample(init)
+    assert s.first(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        (1, 7, 6),
+        (2, 7, 5),
+        (8, 7, 6),
+        (64, 52, 51),
+        (64, 699, 635),
+        (64, 11211, 11147),
+    )
+)
+def test_sample_last(init, length, expected):
+    s = Slice.Sample(init)
+    assert s.last(length) == expected
+
+
+@pytest.mark.parametrize(
+    'init, length, expected',
+    (
+        (1, 7, 7),
+        (2, 7, 3),
+        (8, 7, 1),
+        (64, 52, 1),
+        (64, 699, 10),
+        (64, 11211, 175),
+    )
+)
+def test_sample_step(init, length, expected):
+    s = Slice.Sample(init)
+    assert s.step(length) == expected
 
 
 @pytest.mark.parametrize(

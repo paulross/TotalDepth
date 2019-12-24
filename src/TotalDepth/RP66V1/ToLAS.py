@@ -22,16 +22,13 @@ import typing
 
 import numpy as np
 
-import TotalDepth.RP66V1.core.XAxis
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
-from TotalDepth.RP66V1.core.LogicalRecord import IFLR
 from TotalDepth.common import Slice, cmn_cmd_opts, process
 from TotalDepth.common import data_table
 from TotalDepth.util.DirWalk import dirWalk
@@ -125,8 +122,9 @@ class UnitValueDescription(typing.NamedTuple):
 
 #: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic.
 #: The Object ``LONG-NAME`` is used as the LAS description.
-#: We prefer to take data from the ORIGIN ``EFLR`` as it is more clearly specified ``[RP66V1 5.2 Origin Logical Record (OLR)]``
-#: whereas ``PARAMETER EFLR`` s are fairly free form.
+#: We prefer to take data from the ORIGIN ``EFLR`` as it is more clearly specified
+#: ``[RP66V1 5.2 Origin Logical Record (OLR)]``
+#: whereas the ``PARAMETER EFLR`` tables are fairly free form.
 #: See also ``[RP66V1 Section 5.8.2 Parameter Objects]``
 DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING: typing.Dict[bytes, typing.Dict[bytes, str]] = {
     # [RP66V1 Section 5.8.2 Parameter Objects]
@@ -206,9 +204,43 @@ def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) 
     return las_map
 
 
+def _add_start_stop_step_to_dictionary(
+        logical_file: LogicalFile.LogicalFile,
+        frame_array: typing.Union[LogPass.FrameArray, None],
+        frame_slice: typing.Union[Slice.Slice, Slice.Sample],
+        las_map: typing.Dict[str, UnitValueDescription]
+):
+    """Adds the START, STOP STEP values for the  Frame Array."""
+    if frame_array is not None:
+        # Add the start/stop/step data
+        x_units: str = frame_array.x_axis.units.decode('ascii')
+        iflr_data: typing.List[XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
+        assert len(iflr_data)
+        num_frames_to_write = frame_slice.count(len(iflr_data))
+        x_strt: float = iflr_data[frame_slice.first(len(iflr_data))].x_axis
+        x_stop: float = iflr_data[frame_slice.last(len(iflr_data))].x_axis
+        las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
+        las_map['STOP'] = UnitValueDescription(
+            x_units, stringify.stringify_object_by_type(x_stop),
+            f'Stop X, frames: {num_frames_to_write} out of {len(iflr_data):,d} available.'
+        )
+        if num_frames_to_write > 1:
+            x_step: float = (x_stop - x_strt) / float(num_frames_to_write - 1)
+            las_map['STEP'] = UnitValueDescription(
+                x_units, stringify.stringify_object_by_type(x_step), 'Step (average)'
+            )
+        else:
+            las_map['STEP'] = UnitValueDescription('N/A', 'N/A', 'Step (average)')
+    else:
+        las_map['STRT'] = UnitValueDescription('N/A', 'N/A', 'Start X')
+        las_map['STOP'] = UnitValueDescription('N/A', 'N/A', 'Stop X')
+        las_map['STEP'] = UnitValueDescription('N/A', 'N/A', 'Step (average)')
+
+
 def write_well_information_to_las(
         logical_file: LogicalFile.LogicalFile,
         frame_array: typing.Union[LogPass.FrameArray, None],
+        frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         ostream: typing.TextIO,
     ) -> None:
     """Writes the well information section.
@@ -217,49 +249,28 @@ def write_well_information_to_las(
     """
     # Tuple of (units, value, description)
     las_map: typing.Dict[str, UnitValueDescription] = extract_well_information_from_origin(logical_file)
-    if frame_array is not None:
-        # Add the start/stop/step data
-        x_units: str = frame_array.x_axis.units.decode('ascii')
-        iflr_data: typing.List[TotalDepth.RP66V1.core.XAxis.IFLRReference] = logical_file.iflr_position_map[frame_array.ident]
-        assert len(iflr_data)
-        x_strt: float = iflr_data[0].x_axis
-        x_stop: float = iflr_data[-1].x_axis
-        las_map['STRT'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
-        # FIXME: Compute correct STOP and STEP with frame slicing.
-        las_map['STOP'] = UnitValueDescription(
-            x_units, stringify.stringify_object_by_type(x_stop), f'Stop X, frames: {len(iflr_data):,d}'
-        )
-        x_step: float = (iflr_data[-1].x_axis - iflr_data[0].x_axis) / (len(iflr_data) - 1)
-        las_map['STEP'] = UnitValueDescription(x_units, stringify.stringify_object_by_type(x_step), 'Step (average)')
-    else:
-        las_map['STRT'] = UnitValueDescription('N/A', 'N/A', 'Start X')
-        las_map['STOP'] = UnitValueDescription('N/A', 'N/A', 'Stop X')
-        las_map['STEP'] = UnitValueDescription('N/A', 'N/A', 'Step (average)')
+    _add_start_stop_step_to_dictionary(logical_file, frame_array, frame_slice, las_map)
     eflr: EFLR.ExplicitlyFormattedLogicalRecord
     for _lrsh_position, eflr in logical_file.eflrs:
-        # print('TRACE: write_well_information_to_las():', eflr.set.type)
         if eflr.set.type in DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING:
             bytes_index_map: typing.Dict[bytes, int] = EFLR.reduced_object_map(eflr)
-            # print('TRACE:', eflr.str_long())
-            # pprint.pprint(bytes_index_map)
             for row_key in DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING[eflr.set.type]:
                 if row_key in bytes_index_map:
                     obj = eflr[bytes_index_map[row_key]]
                     # ORIGIN is only key/value so does not have LONG-NAME
-                    # PARAMETER does have LONG-
+                    # PARAMETER does have LONG-NAME
                     units = obj[b'VALUES'].units.decode('ascii')
                     value = stringify.stringify_object_by_type(obj[b'VALUES'].value).strip()
                     descr = stringify.stringify_object_by_type(obj[b'LONG-NAME'].value).strip()
                     # NOTE: Overwriting is possible here.
                     las_map[row_key.decode('ascii')] = UnitValueDescription(units, value, descr)
-    # pprint.pprint(las_map)
     table = [
         ['#MNEM.UNIT', 'DATA', 'DESCRIPTION',],
         ['#----.----', '----', '-----------',],
     ]
     for k in WELL_INFORMATION_KEYS:
         if k in las_map:
-            row = [f'{k:4}.{las_map[k][0]:4}', f'{las_map[k][1]}', f': {las_map[k][2]}',]
+            row = [f'{k:4}.{las_map[k].unit:4}', f'{las_map[k].value}', f': {las_map[k].description}',]
         else:
             row = [f'{k:4}.{"":4}', '', ':']
         table.append(row)
@@ -354,9 +365,11 @@ def write_array_section_to_las(
         array_reduction: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
+        field_width: int,
+        float_format: str,
         ostream: typing.TextIO,
     ) -> None:
-    """Write the ``~Array Section`` to the LAS file."""
+    """Write the ``~Array Section`` to the LAS file, the actual log data"""
     assert array_reduction in ARRAY_REDUCTIONS
     # TODO: Could optimise memory by reading one frame at a time
     num_available_frames = logical_file.num_frames(frame_array)
@@ -378,16 +391,16 @@ def write_array_section_to_las(
     ostream.write(f'# Number of original frames: {num_available_frames}\n')
     ostream.write(
         f'# Requested frame slicing: {frame_slice.long_str(num_available_frames)}'
-        f', total number of frames presented here: {frame_slice.count(num_available_frames)}\n'
+        f', total number of frames presented here: {num_writable_frames}\n'
     )
     ostream.write('~A')
     for c, channel in enumerate(frame_array.channels):
         if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
             if c == 0:
-                ostream.write(f'{channel.ident.I.decode("ascii"):>14}')
+                ostream.write(f'{channel.ident.I.decode("ascii"):>{field_width-2}}')
             else:
                 ostream.write(' ')
-                ostream.write(f'{channel.ident.I.decode("ascii"):>16}')
+                ostream.write(f'{channel.ident.I.decode("ascii"):>{field_width}}')
     ostream.write('\n')
     num_values = sum(c.count for c in frame_array.channels)
     logger.info(
@@ -396,16 +409,16 @@ def write_array_section_to_las(
         f' and {num_values:,d} values per frame'
         f', total: {num_writable_frames * num_values:,d} input values.'
     )
-    for frame_number in frame_slice.gen_indices(num_writable_frames):
+    for frame_number in num_writable_frames:
         for c, channel in enumerate(frame_array.channels):
             if len(channel.array):
                 value = array_reduce(channel.array[frame_number], array_reduction)
                 if c > 0:
                     ostream.write(' ')
                 if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
-                    ostream.write(f'{value:16.0f}')
+                    ostream.write(f'{value:{field_width}.0f}')
                 elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
-                    ostream.write(f'{value:16.3f}')
+                    ostream.write(f'{value:{field_width}{float_format}}')
                 else:
                     ostream.write(str(value))
         ostream.write('\n')
@@ -413,13 +426,15 @@ def write_array_section_to_las(
     frame_array.init_arrays(1)
 
 
-def write_logical_sequence_to_las(
+def write_logical_index_to_las(
         logical_index: LogicalFile.LogicalIndex,
         array_reduction: str,
         path_out: str,
-        frame_slice: Slice.Slice,
+        frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         channels: typing.Set[str],
-        ) -> typing.List[str]:
+        field_width: int,
+        float_format: str,
+) -> typing.List[str]:
     assert array_reduction in ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
@@ -437,12 +452,12 @@ def write_logical_sequence_to_las(
                         os.path.basename(logical_index.id),
                         logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
                     )
-                    write_well_information_to_las(logical_file, frame_array, ostream)
+                    write_well_information_to_las(logical_file, frame_array, frame_slice, ostream)
                     write_curve_section_to_las(frame_array, channels, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
                     write_array_section_to_las(
                         logical_file, frame_array, array_reduction, frame_slice,
-                        channels, ostream
+                        channels, field_width, float_format, ostream
                     )
                     ret.append(file_path_out)
         else:
@@ -453,7 +468,7 @@ def write_logical_sequence_to_las(
                     os.path.basename(logical_index.id),
                     logical_file, lf, '', ostream
                 )
-                write_well_information_to_las(logical_file, None, ostream)
+                write_well_information_to_las(logical_file, None, frame_slice, ostream)
                 write_parameter_section_to_las(logical_file, ostream)
                 ret.append(file_path_out)
     return ret
@@ -465,6 +480,8 @@ def single_rp66v1_file_to_las(
         path_out: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
+        field_width: int,
+        float_format: str,
 ) -> LASWriteResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     assert array_reduction in ARRAY_REDUCTIONS
@@ -474,8 +491,8 @@ def single_rp66v1_file_to_las(
         try:
             t_start = time.perf_counter()
             with LogicalFile.LogicalIndex(path_in) as logical_index:
-                las_files_written = write_logical_sequence_to_las(
-                    logical_index, array_reduction, path_out, frame_slice, channels,
+                las_files_written = write_logical_index_to_las(
+                    logical_index, array_reduction, path_out, frame_slice, channels, field_width, float_format
                 )
                 output_size = sum(os.path.getsize(f) for f in las_files_written)
                 result = LASWriteResult(
@@ -506,6 +523,8 @@ def convert_rp66v1_dir_or_file_to_las_multiprocessing(
         array_reduction: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
+        field_width: int,
+        float_format: str,
         jobs: int
 ) -> typing.Dict[str, LASWriteResult]:
     """Multiprocessing code to LAS.
@@ -516,7 +535,8 @@ def convert_rp66v1_dir_or_file_to_las_multiprocessing(
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [
-        (t.filePathIn, array_reduction, t.filePathOut, frame_slice, channels) for t in DirWalk.dirWalk(
+        (t.filePathIn, array_reduction, t.filePathOut, frame_slice, channels, field_width, float_format)
+        for t in DirWalk.dirWalk(
             dir_in, dir_out, theFnMatch='', recursive=recurse, bigFirst=True
         )
     ]
@@ -538,6 +558,8 @@ def convert_rp66v1_dir_or_file_to_las(
         array_reduction: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],
+        field_width: int,
+        float_format: str,
 ) -> typing.Dict[str, LASWriteResult]:
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
@@ -546,11 +568,13 @@ def convert_rp66v1_dir_or_file_to_las(
             for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
                 ret[file_in_out.filePathIn] = single_rp66v1_file_to_las(
                     file_in_out.filePathIn, array_reduction, file_in_out.filePathOut, frame_slice, channels,
+                    field_width, float_format
                 )
         else:
             if os.path.isdir(path_out):
                 path_out = os.path.join(path_out, os.path.basename(path_in))
-            ret[path_in] = single_rp66v1_file_to_las(path_in, array_reduction, path_out, frame_slice, channels)
+            ret[path_in] = single_rp66v1_file_to_las(
+                path_in, array_reduction, path_out, frame_slice, channels, field_width, float_format)
     except KeyboardInterrupt:  # pragma: no cover
         logger.critical('Keyboard interrupt, last file is probably incomplete or corrupt.')
     return ret
@@ -700,7 +724,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
     cmn_cmd_opts.add_multiprocessing(parser)
-    Slice.add_frame_slice_to_argument_parser(parser)
+    Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument(
@@ -715,6 +739,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
              ' Use \'?\' to see what channels exist without writing anything. [default: %(default)s]',
         default='',
         )
+    parser.add_argument('--field-width', type=int, help='Field width for array data.', default=16)
+    parser.add_argument('--float-format', type=str, help='Floating point format for array data.', default='.3f')
     args = parser.parse_args()
     cmn_cmd_opts.set_log_level(args)
     # print('args:', args)
