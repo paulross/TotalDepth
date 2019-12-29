@@ -20,6 +20,10 @@ Tool Name                   Description
 =========================== =====================================================================================
 
 
+
+.. _cmd_line_tools_rp66v1_tdrp66v1scanhtml:
+
+
 Creating HTML Pages from RP66V1 Files with ``tdrp66v1scanhtml``
 ===================================================================
 
@@ -38,38 +42,43 @@ Options
 
 
   -h, --help            show this help message and exit
-  -r, --recurse         Process files recursively. [default: False]
-  -e, --encrypted       Output encrypted Logical Records as well. [default:
-                        False]
-  -k, --keep-going      Keep going as far as sensible. [default: False]
-  --frame-slice FRAME_SLICE
-                        Do not process all frames but split or slice the
-                        frames. Sample is of the form "1/N" so a maximum of N
-                        frames will be processed. N must be +ve, non-zero
-                        integer. Example: "1/64" - process a maximum of 64
-                        frames. Slice the frames is of the form
-                        start,stop,step as a comma separated list. Values can
-                        be absent or "None". Examples: ",," - every frame,
-                        ",,2" - every other frame, ",10," - frames 0 to 9,
-                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
-                        frame from 40 to the end. Results will be truncated by
-                        frame array length. [default: ",,"]
+  --version             show program's version number and exit
+  -k, --keep-going      Keep going as far as sensible. Default: False.
+  -v, --verbose         Increase verbosity, additive [default: 0]
+  -r, --recurse         Process the input recursively. Default: False.
   -l LOG_LEVEL, --log-level LOG_LEVEL
                         Log Level as an integer or symbol. (0<->NOTSET,
                         10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
                         50<->CRITICAL) [default: 20]
+  -j JOBS, --jobs JOBS  Max processes when multiprocessing.Zero uses number of
+                        native CPUs [8]. Negative value disables
+                        multiprocessing code. Default: -1.
+  -e, --encrypted       Output encrypted Logical Records as well. [default:
+                        False]
+  --frame-slice FRAME_SLICE
+                        Do not process all frames but sample or slice the
+                        frames. SAMPLE: Sample is of the form "N" so a maximum
+                        of N frames, roughly regularly spaced, will be
+                        processed. N must be +ve, non-zero integer. Example:
+                        "64" - process a maximum of 64 frames. SLICE: Slice
+                        the frames is of the form start,stop,step as a comma
+                        separated list. Values can be absent or "None".
+                        Examples: ",," - every frame, ",,2" - every other
+                        frame, ",10," - frames 0 to 9, "4,10,2" - frames 4, 6,
+                        8, "40,-1,4" - every fourth frame from 40 to the end.
+                        Results will be truncated by frame array length.
+                        [default: ",," i.e. all frames]
   --log-process LOG_PROCESS
                         Writes process data such as memory usage as a log INFO
                         line every LOG_PROCESS seconds. If 0.0 no process data
                         is logged. [default: 0.0]
-  -v, --verbose         Increase verbosity, additive [default: 0]
   --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
 
 
 Here is an example of `the HTML summary of a single RP66V1 file <../_static/RP66V1/example.html>`_ .
 
 
+.. _cmd_line_tools_rp66v1_tdrp66v1tolas:
 
 Converting RP66V1 Files to LAS Files with ``tdrp66v1tolas``
 ===================================================================
@@ -98,24 +107,26 @@ Given the path out the LAS files will be named ``{path_out}_{logical_file_number
 
 For example ``tdrp66v1tolas foo.dlis bar/baz`` might create::
 
-    :file:`bar/baz_0_2000T.las`
-    :file:`bar/baz_0_800T.las`
-    :file:`bar/baz_1_2000T.las`
-    :file:`bar/baz_1_800T.las`
+    bar/baz_0_2000T.las
+    bar/baz_0_800T.las
+    bar/baz_1_2000T.las
+    bar/baz_1_800T.las
 
 and so on.
 
 Processing a Directory of RP66V1 Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given the path out the LAS files will be named ``{path_out}/{RP66V1_File_no_extension}_{logical_file_number}_{frame_array_name}.las``
+Given the path out the LAS files will be named:
+
+    ``{path_out}/{RP66V1_File}_{logical_file_number}_{frame_array_name}.las``
 
 For example ``tdrp66v1tolas foo/ bar/baz`` might create::
 
-    :file:`bar/baz/bit_0_2000T.las`
-    :file:`bar/baz/bit_0_800T.las`
-    :file:`bar/baz/bit_1_2000T.las`
-    :file:`bar/baz/bit_1_800T.las`
+    bar/baz/bit_0_2000T.las
+    bar/baz/bit_0_800T.las
+    bar/baz/bit_1_2000T.las
+    bar/baz/bit_1_800T.las
 
 and so on.
 
@@ -130,33 +141,48 @@ The second argument is the path to write the output to.
 Options
 -------
 
-  -h, --help            show this help message and exit
-  -r, --recurse         Process files recursively. [default: False]
-  --array_reduction
-                        Method to reduce multidimensional channel data to a
-                        single value. One of {first,max,mean,median,min} [default: mean]
-  --frame-slice FRAME_SLICE
-                        Do not process all frames but split or slice the
-                        frames. Sample is of the form "1/N" so a maximum of N
-                        frames will be processed. N must be +ve, non-zero
-                        integer. Example: "1/64" - process a maximum of 64
-                        frames. Slice the frames is of the form
-                        start,stop,step as a comma separated list. Values can
-                        be absent or "None". Examples: ",," - every frame,
-                        ",,2" - every other frame, ",10," - frames 0 to 9,
-                        "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
-                        frame from 40 to the end. Results will be truncated by
-                        frame array length. Use '?' to see what frames are
-                        available [default: ",,"]
-  --channels CHANNELS   Comma separated list of channels to write out (X axis
-                        is always included). Use '?' to see what channels
-                        exist without writing anything. [default: ]
-  -l LOG_LEVEL, --log-level LOG_LEVEL
+    -h, --help            show this help message and exit
+    --version             show program's version number and exit
+    -k, --keep-going      Keep going as far as sensible. Default: False.
+    -v, --verbose         Increase verbosity, additive [default: 0]
+    -r, --recurse         Process the input recursively. Default: False.
+    -l LOG_LEVEL, --log-level LOG_LEVEL
                         Log Level as an integer or symbol. (0<->NOTSET,
                         10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
-                        50<->CRITICAL) [default: 30]
-  -v, --verbose         Increase verbosity, additive [default: 0]
-  --gnuplot GNUPLOT     Directory to write the gnuplot data.
+                        50<->CRITICAL) [default: 20]
+    -j JOBS, --jobs JOBS  Max processes when multiprocessing.Zero uses number of
+                        native CPUs [8]. Negative value disables
+                        multiprocessing code. Default: -1.
+    --frame-slice FRAME_SLICE
+                        Do not process all frames but sample or slice the
+                        frames. SAMPLE: Sample is of the form "N" so a maximum
+                        of N frames, roughly regularly spaced, will be
+                        processed. N must be +ve, non-zero integer. Example:
+                        "64" - process a maximum of 64 frames. SLICE: Slice
+                        the frames is of the form start,stop,step as a comma
+                        separated list. Values can be absent or "None".
+                        Examples: ",," - every frame, ",,2" - every other
+                        frame, ",10," - frames 0 to 9, "4,10,2" - frames 4, 6,
+                        8, "40,-1,4" - every fourth frame from 40 to the end.
+                        Results will be truncated by frame array length. Use
+                        '?' to see what frames are available [default: ",,"
+                        i.e. all frames]
+    --log-process LOG_PROCESS
+                        Writes process data such as memory usage as a log INFO
+                        line every LOG_PROCESS seconds. If 0.0 no process data
+                        is logged. [default: 0.0]
+    --gnuplot GNUPLOT     Directory to write the gnuplot data.
+    --array-reduction ARRAY_REDUCTION
+                        Method to reduce multidimensional channel data to a
+                        single value. One of {first,max,mean,median,min} [default: first]
+    --channels CHANNELS   Comma separated list of channels to write out (X axis
+                        is always included). Use '?' to see what channels
+                        exist without writing anything. [default: ""]
+    --field-width FIELD_WIDTH
+                        Field width for array data [default: 16].
+    --float-format FLOAT_FORMAT
+                        Floating point format for array data [default: ".3f"].
+                        
 
 
 Examples
@@ -510,16 +536,17 @@ Options
   -k, --keep-going      Keep going as far as sensible. [default: False]
   --frame-slice FRAME_SLICE
                         NOTE: Requires -R, --LR. Do not process all frames but
-                        split or slice the frames. Sample is of the form "1/N"
-                        so a maximum of N frames will be processed. N must be
-                        +ve, non-zero integer. Example: "1/64" - process a
-                        maximum of 64 frames. Slice the frames is of the form
+                        sample or slice the frames. SAMPLE: Sample is of the
+                        form "N" so a maximum of N frames, roughly regularly
+                        spaced, will be processed. N must be +ve, non-zero
+                        integer. Example: "64" - process a maximum of 64
+                        frames. SLICE: Slice the frames is of the form
                         start,stop,step as a comma separated list. Values can
                         be absent or "None". Examples: ",," - every frame,
                         ",,2" - every other frame, ",10," - frames 0 to 9,
                         "4,10,2" - frames 4, 6, 8, "40,-1,4" - every fourth
                         frame from 40 to the end. Results will be truncated by
-                        frame array length. [default: ",,"]
+                        frame array length. [default: ",," i.e. all frames]
   --eflr-as-table       When with --LR and not --html then dump EFLRs as
                         tables, otherwise every EFLR object. [default: False]
   -l LOG_LEVEL, --log-level LOG_LEVEL
@@ -528,7 +555,8 @@ Options
                         50<->CRITICAL) [default: 30]
   -v, --verbose         Increase verbosity, additive [default: 0]
   --gnuplot GNUPLOT     Directory to write the gnuplot data.
-
+  -T, --test-data       Dump the file as annotated bytes, useful for creating
+                        test data. [default: False]
 
 Examples
 -----------

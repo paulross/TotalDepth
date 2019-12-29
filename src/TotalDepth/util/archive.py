@@ -1,7 +1,7 @@
 """
 Extract summary data from archives of log files.
 
-This is a bit hacked together to help create a good archive of test data. It is definitely not production code.
+This is a bit hacked together to help create a good archive of test data. It is not production code.
 """
 import collections
 import datetime

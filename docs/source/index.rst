@@ -13,7 +13,7 @@ TotalDepth is an Open Source, cross platform, software collection that processes
 
 If you are new here then have a look at some :ref:`TotalDepth-examples`. For more detail see :ref:`TotalDepth-intro`.
 
-The `TotalDepth project <https://github.com/paulross/TotalDepth>`_ is currently at **Alpha**, development version |version|, release version |release|. For the licence see here :ref:`licence_text`.
+The `TotalDepth project <https://github.com/paulross/TotalDepth>`_ is currently at **Beta**, development version |version|, release version |release|. For the licence see here :ref:`licence_text`.
 
 Contents
 ===============

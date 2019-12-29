@@ -96,14 +96,19 @@ class FrameChannel:
             self.array = self._init_array(number_of_frames)
 
     @property
-    def len_array(self) -> int:
+    def array_size(self) -> int:
         """The number of elements in the numpy array."""
         return self.array.size
 
     @property
     def sizeof_array(self) -> int:
-        """The size of each element of the array as represented by numpy."""
+        """The size of each element of the current array as represented by numpy."""
         return self.array.size * self.array.itemsize
+
+    @property
+    def sizeof_frame(self) -> int:
+        """The size of a single frame in bytes as represented by numpy."""
+        return self.array.itemsize * self.count
 
     @property
     def shape(self) -> typing.Tuple[int, ...]:
@@ -211,8 +216,18 @@ class FrameArray:
 
     @property
     def sizeof_array(self) -> int:
-        """The total of the frame array as represented by numpy."""
+        """The total of the current frame array as represented by numpy."""
         return sum(ch.sizeof_array for ch in self.channels)
+
+    @property
+    def sizeof_frame(self) -> int:
+        """The size of the internal representation of a frame as represented by numpy."""
+        return sum(ch.sizeof_frame for ch in self.channels)
+
+    @property
+    def len_input_bytes(self) -> int:
+        """The number of RP66V1 bytes to read for one frame."""
+        return sum(ch.len_input_bytes for ch in self.channels)
 
     @property
     def shape(self) -> typing.List[typing.Tuple[int, ...]]:
@@ -290,7 +305,7 @@ class FrameArray:
 
     def read_x_axis(self, ld: LogicalData, frame_number: int) -> None:
         """Reads the first channel of the Logical Data into the numpy frame."""
-        if self.x_axis.len_array == 0:
+        if self.x_axis.array_size == 0:
             self.x_axis.init_array(1)
         self.x_axis.read(ld, frame_number)
 

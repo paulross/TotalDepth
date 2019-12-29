@@ -81,9 +81,133 @@ Options
 Examples
 -----------------
 
-todo::
+Here is an example of scanning the ``example_data`` directory (the output is filleted for clarity)::
 	
-	Put examples here.
+	$ tdarchive example_data/ -r --histogram
+	CMD: /Users/engun/venvs/TotalDepth37_00/bin/tdarchive example_data/ -r --histogram
+	Analysing archive.
+	Common prefix:
+		   108,707 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-013.LIS_0001_HDT.svg
+			   667 .HTML      XML      example_data/LIS/Plot/index.html
+		   163,169 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-037.LIS_0001_1.svg
+			   690 .CSS       ASCII    example_data/LIS/Plot/index.css
+			...
+		   184,084 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-037.LIS
+			96,376 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-013.LIS
+			98,508 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-049.LIS
+			10,306 .PY        ASCII    example_data/RP66V1/demo_read.py
+		   462,795 .HTML      XML      example_data/RP66V1/HTML/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.HTML.html
+			 3,098 .HTML      XML      example_data/RP66V1/HTML/index.html
+			...
+		 1,018,327 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.pkl
+		   276,045 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.pkl
+			   520 .PKL                example_data/RP66V1/pickle/MINIMAL_FILE.dlis.pkl
+			53,137 .PKL                example_data/RP66V1/pickle/BASIC_FILE.dlis.pkl
+			   949 .PKL                example_data/RP66V1/pickle/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis.pkl
+			 7,731 .LAS       LAS2.0   example_data/RP66V1/LAS/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS_0_.las
+		 1,621,374 .LAS       LAS2.0   example_data/RP66V1/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+			...
+			44,916 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE.dlis
+		   540,372 .DLIS      RP66V1   example_data/RP66V1/data/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
+			   716 .DLIS      RP66V1   example_data/RP66V1/data/MINIMAL_FILE.dlis
+			 8,826 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis
+	Total number of files 75, total bytes 12,981,766
+	File extensions:
+	.CSS  :        5
+	.DLIS :        4
+	.HTML :       13
+	.LAS  :        6
+	.LIS  :        3
+	.PKL  :        5
+	.PY   :        1
+	.PYC  :        1
+	.SVG  :       36
+	.XML  :        1
+	Binary file types:
+	Binary type: ""
+	 Extensions: .PKL, .PYC
+		  Count: 6 [8.000%]
+		  Bytes: 1,354,629 [10.435%] from 520 to  1,018,327
+	>=2**9  [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**10 [     0] |
+	>=2**11 [     0] |
+	>=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++
+	>=2**13 [     0] |
+	>=2**14 [     0] |
+	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++
+	>=2**16 [     0] |
+	>=2**17 [     0] |
+	>=2**18 [     1] | ++++++++++++++++++++++++++++++++++++++++
+	>=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++
+
+	Binary type: "ASCII"
+	 Extensions: .CSS, .PY
+		  Count: 6 [8.000%]
+		  Bytes: 15,232 [0.117%] from 690 to  10,306
+	>=2**9  [     4] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**10 [     0] |
+	>=2**11 [     1] | ++++++++++++++++++++
+	>=2**12 [     0] |
+	>=2**13 [     1] | ++++++++++++++++++++
+
+	Binary type: "LAS2.0"
+	 Extensions: .LAS
+		  Count: 6 [8.000%]
+		  Bytes: 1,785,653 [13.755%] from 1,279 to  1,621,374
+	>=2**10 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**11 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**13 [     0] |
+	>=2**14 [     0] |
+	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**16 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**17 [     0] |
+	>=2**18 [     0] |
+	>=2**19 [     0] |
+	>=2**20 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	Binary type: "LIS"
+	 Extensions: .LIS
+		  Count: 3 [4.000%]
+		  Bytes: 378,968 [2.919%] from 96,376 to  184,084
+	>=2**16 [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**17 [     1] | ++++++++++++++++++++++++++++++++++++++++
+
+	Binary type: "RP66V1"
+	 Extensions: .DLIS
+		  Count: 4 [5.333%]
+		  Bytes: 594,830 [4.582%] from 716 to  540,372
+	>=2**9  [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**10 [     0] |
+	>=2**11 [     0] |
+	>=2**12 [     0] |
+	>=2**13 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**14 [     0] |
+	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**16 [     0] |
+	>=2**17 [     0] |
+	>=2**18 [     0] |
+	>=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	Binary type: "XML"
+	 Extensions: .HTML, .SVG, .XML
+		  Count: 50 [66.667%]
+		  Bytes: 8,852,454 [68.191%] from 667 to  961,863
+	>=2**9  [     1] | ++++
+	>=2**10 [     1] | ++++
+	>=2**11 [     2] | +++++++++
+	>=2**12 [     2] | +++++++++
+	>=2**13 [     0] |
+	>=2**14 [     0] |
+	>=2**15 [     3] | +++++++++++++
+	>=2**16 [    16] | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**17 [    18] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	>=2**18 [     5] | ++++++++++++++++++++++
+	>=2**19 [     2] | +++++++++
+
+	Execution time: 0.067 (s)
+			 Files: 75 rate 1,113.2 (files/s)
+			 Bytes: 1,350 rate 20,038.5 (bytes/s)
 
 .. _TotalDepth-cmdline-detif:
 

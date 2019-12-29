@@ -8,10 +8,13 @@ Getting the Frame Data as a ``numpy`` Array
 ===============================================
 
 From LAS
-^^^^^^^^^^^^^^
+------------------
 
 From LIS
-^^^^^^^^^^^^^^
+------------------
 
 From RP66V1
-^^^^^^^^^^^^^^
+------------------
+
+There is a tutorial here on writing code that allows you to access the numpy channel data directly: :ref:`total_depth.processing_rp66v1_files.reading_frames_as_numpy`.
+There is some example code in :file:`example_data/RP66V1/demo_read.py`

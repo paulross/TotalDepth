@@ -3,11 +3,11 @@
 
 .. Technical Note on LIS Indexing.
 
-.. _TotalDepth-tech-plotting:
-
 .. toctree::
     :maxdepth: 2
    
+.. _TotalDepth-tech-plotting:
+
 ###############################
 Plotting Wireline Data
 ###############################
@@ -105,6 +105,9 @@ In future releases TotalDepth might also support these Logical Records for plott
 * ``AREA``: Describes shading between curves on a plot.
 * ``PIP``: Describes integration marks on the plot such as integrated transit time, integrated hole volume etc.
 * ``VDL``: Describes presentation of waveform amplitude data.
+
+
+.. _TotalDepth-tech-plotting-external:
 
 *******************************************
 Wireline Files With External Plot Data

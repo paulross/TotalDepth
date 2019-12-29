@@ -338,6 +338,11 @@ def _write_frame_array_in_html(
                 f' Number of frames created: {num_frames}'
                 f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
             )
+        with XmlWrite.Element(xhtml_stream, 'p'):
+            xhtml_stream.characters(
+                f'RP66V1 Frame size {frame_array.len_input_bytes} (bytes/frame))'
+                f' represented internally as {frame_array.sizeof_frame} (bytes/frame).'
+            )
         frame_table = [
             ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
              'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],

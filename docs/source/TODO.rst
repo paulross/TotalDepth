@@ -7,6 +7,7 @@
 TODO's
 **************************
 
+TotalDepth is work-in-progress.
 This is a gathering place for features that are would be nice to have in future releases.
 Priority numbers are 0 (not going to be done) and >0 which is an ever more important priority.
 Work is the estimated amount of work from 1 upwards.

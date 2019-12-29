@@ -109,8 +109,8 @@ class VisibleRecord:
     (sic) - Place marker for error in the standard in this case
     """
     VERSION = 0xff01
-    NUMBER_OF_BYTES = 4
-    MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE + NUMBER_OF_BYTES
+    NUMBER_OF_HEADER_BYTES = 4
+    MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE + NUMBER_OF_HEADER_BYTES
     # [RP66V1] 2.3.6.5 Maximum Visible Record Length is 16,384
     MAX_LENGTH = 0x4000
 
@@ -345,7 +345,7 @@ class LogicalRecordSegmentHeader:
 class LogicalRecordPositionBase:
     """Simple base class with little error checking."""
     def __init__(self, vr_position: int, lrsh_position: int):
-        assert vr_position + VisibleRecord.NUMBER_OF_BYTES <= lrsh_position
+        assert vr_position + VisibleRecord.NUMBER_OF_HEADER_BYTES <= lrsh_position
         self.vr_position: int = vr_position
         self.lrsh_position: int = lrsh_position
 
@@ -375,9 +375,9 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
             )
         # Check LogicalRecordSegmentHeader
-        assert lrsh.position >= StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES, (
+        assert lrsh.position >= StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
-                f' >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_BYTES:x}'
+                f' >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
             )
         assert lrsh.position <= vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
@@ -388,10 +388,10 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
             )
-        if lrsh.length > vr.length - VisibleRecord.NUMBER_OF_BYTES:
+        if lrsh.length > vr.length - VisibleRecord.NUMBER_OF_HEADER_BYTES:
             raise ValueError(
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
-                f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_BYTES:x}'
+                f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
             )
         super().__init__(vr.position, lrsh.position)
 
@@ -856,3 +856,5 @@ class FileRead:
                             f'LRSH expected at {next_lrsh_position} but found at {lrsh.position}'
                         )
                 next_lrsh_position = lrsh.next_position
+                if next_lrsh_position == next_visible_record_position:
+                    next_lrsh_position += VisibleRecord.NUMBER_OF_HEADER_BYTES

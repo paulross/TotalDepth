@@ -10,4 +10,6 @@ Contents:
 .. toctree::
 	:maxdepth: 2
 	
+	ReadLASFiles
+	core/LASConstants
 	core/LASRead

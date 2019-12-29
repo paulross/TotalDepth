@@ -118,3 +118,7 @@ class LogicalRecordIndex:
         :param: length An integer length the Logical Record data, default of -1 is all.
         """
         return self.rp66v1_file.get_file_logical_data(position, offset, length)
+
+    def validate(self):
+        """Perform validation checks."""
+        self.rp66v1_file.validate_positions()

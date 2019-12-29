@@ -247,6 +247,7 @@ class ReadLASFiles(object):
         return '\n'.join(r)
 
 def main():
+    """Main entry point."""
     usage = """usage: %prog [options] dir
 Recursively reads LAS files in a directory reporting information about their contents."""
     print ('Cmd: %s' % ' '.join(sys.argv))

@@ -860,8 +860,8 @@ LGFORMAT_OUTP_UNIQUEID = {
     "VDIA"       : ['VDIA'],
 }
 
-# This is a map of LgFormat <ChannelName/> to correspondingly appropriate LAS menmonics
-# It's a best guess...
+#: This is a map of LgFormat <ChannelName/> to correspondingly appropriate LAS menmonics
+#: It's a best guess...
 LGFORMAT_LAS = {
     'BS'        : ['BIT',],
     'C1'        : ['C13', 'CAL1',],
@@ -878,7 +878,7 @@ LGFORMAT_LAS = {
     'URAN'      : ['GSUR', 'GRUR',],
 }
 
-# Reverse map to LAS mnemonics to LgFormat <ChannelName/> values.
+#: Reverse map to LAS mnemonics to LgFormat <ChannelName/> values.
 LAS_LGFORMAT = {}
 for __k in LGFORMAT_LAS:
     for __v in LGFORMAT_LAS[__k]:

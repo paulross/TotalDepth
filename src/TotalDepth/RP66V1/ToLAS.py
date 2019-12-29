@@ -52,6 +52,7 @@ logger = logging.getLogger(__file__)
 
 
 class LASWriteResult(typing.NamedTuple):
+    """Holds the result of processing a RP66V1 file to LAS."""
     path_input: str
     size_input: int
     size_output: int
@@ -61,8 +62,9 @@ class LASWriteResult(typing.NamedTuple):
     ignored: bool
 
 
-# TODO: Add microseconds
+#: Format for time as UTC
 LAS_DATETIME_FORMAT_UTC = '%Y-%m-%d %H:%M:%S.%f UTC'
+#: Format for time as text
 LAS_DATE_FORMAT_TEXT = 'YYYY-mm-dd HH:MM:SS.us UTC'
 
 
@@ -157,7 +159,7 @@ WELL_INFORMATION_KEYS: typing.Tuple[str, ...] = (
     'LATI', 'LONG', 'GDAT',
 )
 
-# [RP66V1 Section 5.2 Origin Logical Record (OLR)]
+#: [RP66V1 Section 5.2 Origin Logical Record (OLR)]
 WELL_INFORMATION_FROM_ORIGIN: typing.Dict[bytes, str] = {
     b'COMPANY': 'COMP',
     b'WELL-NAME': 'WELL',
@@ -289,6 +291,7 @@ def write_parameter_section_to_las(
         logical_file: LogicalFile.LogicalFile,
         ostream: typing.TextIO,
     ) -> None:
+    """Write the ``PARAMETER`` tables to LAS."""
     las_mnem_map: typing.Dict[str, UnitValueDescription] = collections.OrderedDict()
     for position_eflr in logical_file.eflrs:
         if position_eflr.eflr.set.type == b'PARAMETER':
@@ -439,6 +442,7 @@ def write_logical_index_to_las(
         field_width: int,
         float_format: str,
 ) -> typing.List[str]:
+    """Take a Logical Index for a Logical File within a RP66V1 file and write out a set of LAS 2.0 files."""
     assert array_reduction in ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
@@ -487,6 +491,7 @@ def single_rp66v1_file_to_las(
         field_width: int,
         float_format: str,
 ) -> LASWriteResult:
+    """Convert a single RP66V1 file to a set of LAS files."""
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     assert array_reduction in ARRAY_REDUCTIONS
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
@@ -565,6 +570,7 @@ def convert_rp66v1_dir_or_file_to_las(
         field_width: int,
         float_format: str,
 ) -> typing.Dict[str, LASWriteResult]:
+    """Convert a directory or file to a set of LAS files."""
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
     try:
@@ -641,6 +647,7 @@ def dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, c
 
 
 def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, channels: str) -> None:
+    """Dump available channels and frames."""
     assert frame_slice == '?' or channels == '?'
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, '', theFnMatch='', recursive=recurse, bigFirst=False):
@@ -716,6 +723,7 @@ reset
 
 
 def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> None:
+    """Plot performance with gnuplot."""
     if len(data) < 2:  # pragma: no cover
         raise ValueError(f'Can not plot data with only {len(data)} points.')
     # First row is header row, create it then comment out the first item.
@@ -736,6 +744,7 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
 
 
 def main() -> int:
+    """Main entry point."""
     description = """usage: %(prog)s [options] file
 Reads RP66V1 file(s) and writes them out as LAS files."""
     print('Cmd: %s' % ' '.join(sys.argv))

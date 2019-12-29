@@ -10,3 +10,9 @@ Working with Archives of Mixed Data
 
 I have an archive of files and I want to know what is in there.
 ----------------------------------------------------------------------
+
+Sometimes you are given an archive of data and would like to know what file formats, the file sizes and so on.
+There is a command line tool ``tdarchive`` [References :py:mod:`TotalDepth.util.archive`] that can give you a summary of the files there, their binary file types and their sizes.
+
+Read more here :ref:`TotalDepth-cmdline-archive`.
+

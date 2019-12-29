@@ -10,7 +10,7 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import Index
+from TotalDepth.RP66V1.core import Index, File
 from TotalDepth.common import cmn_cmd_opts, process
 from TotalDepth.util import bin_file_type, DirWalk, ExecTimer
 from TotalDepth.util import gnuplot
@@ -42,7 +42,7 @@ class IndexResult(typing.NamedTuple):
 
 
 def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
-                              recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
+                              recurse: bool, read_back: bool, validate: bool) -> typing.Dict[str, IndexResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : IndexResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -51,7 +51,7 @@ def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [
-        (t.filePathIn, t.filePathOut, read_back) for t in DirWalk.dirWalk(
+        (t.filePathIn, t.filePathOut, read_back, validate) for t in DirWalk.dirWalk(
             dir_in, dir_out, theFnMatch='', recursive=recurse, bigFirst=True
         )
     ]
@@ -63,7 +63,7 @@ def index_dir_multiprocessing(dir_in: str, dir_out: str, jobs: int,
     return {r.path_in: r for r in results}
 
 
-def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexResult:
+def index_a_single_file(path_in: str, path_out: str, read_back: bool, validate: bool) -> IndexResult:
     """Read a single file and return an IndexResult."""
     file_type = bin_file_type.binary_file_type_from_path(path_in)
     if file_type == 'RP66V1':
@@ -79,6 +79,12 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
             # process.add_message_to_queue(f'Start {os.path.basename(path_in)}')
             with Index.LogicalRecordIndex(path_in) as logical_record_index:
                 index_time = time.perf_counter() - t_start
+                if validate:
+                    try:
+                        logical_record_index.validate()
+                        logger.info(f'Validation OK for {path_in}')
+                    except File.ExceptionFileReadPositionsInconsistent() as err:
+                        logger.exception(f'Validation of {path_in} failed with {err}')
                 t_start = time.perf_counter()
                 # process.add_message_to_queue(f'Pickle {os.path.basename(path_in)}')
                 # Pickle the index
@@ -110,7 +116,8 @@ def index_a_single_file(path_in: str, path_out: str, read_back: bool) -> IndexRe
     return IndexResult(path_in, os.path.getsize(path_in), 0, 0.0, 0.0, 0.0, False, True)  # pragma: no cover
 
 
-def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: bool) -> typing.Dict[str, IndexResult]:
+def index_dir_or_file(path_in: str, path_out: str,
+                      recurse: bool, read_back: bool, validate: bool) -> typing.Dict[str, IndexResult]:
     """Index a directory or file and return the results."""
     logging.info(f'index_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recurse}')
     ret = {}
@@ -118,11 +125,13 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: boo
         for file_in_out in DirWalk.dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             file_type = bin_file_type.binary_file_type_from_path(file_in_out.filePathIn)
             if file_type == 'RP66V1':
-                ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
+                ret[file_in_out.filePathIn] = index_a_single_file(
+                    file_in_out.filePathIn, file_in_out.filePathOut, read_back, validate
+                )
     else:
         file_type = bin_file_type.binary_file_type_from_path(path_in)
         if file_type == 'RP66V1':
-            ret[path_in] = index_a_single_file(path_in, path_out, read_back)
+            ret[path_in] = index_a_single_file(path_in, path_out, read_back, validate)
     return ret
 
 GNUPLOT_PLT = """set logscale x
@@ -217,7 +226,7 @@ def main() -> int:
     Scans a RP66V1 file or directory and indexes the files with a LogicalRecordIndex."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out(
-        description, prog='TotalDepth.RP66V1.IndexXML.main', version=__version__, epilog=__rights__
+        description, prog='TotalDepth.RP66V1.LogRecIndex.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
     cmn_cmd_opts.add_multiprocessing(parser)
@@ -226,6 +235,10 @@ def main() -> int:
     parser.add_argument(
         '--read-back', action='store_true',
         help='Read the pickled index and time it (requires path_out). [default: %(default)s]',
+    )
+    parser.add_argument(
+        '--validate', action='store_true',
+        help='Perform validation checks on the index.. [default: %(default)s]',
     )
     args = parser.parse_args()
     # print('args:', args)
@@ -240,6 +253,7 @@ def main() -> int:
             args.jobs,
             args.recurse,
             args.read_back,
+            args.validate,
         )
     else:
         if args.log_process > 0.0:
@@ -249,6 +263,7 @@ def main() -> int:
                     args.path_out,
                     args.recurse,
                     args.read_back,
+                    args.validate,
                 )
         else:
             result: typing.Dict[str, IndexResult] = index_dir_or_file(
@@ -256,6 +271,7 @@ def main() -> int:
                 args.path_out,
                 args.recurse,
                 args.read_back,
+                args.validate,
             )
     size_index = size_input = 0
     files_processed = 0
