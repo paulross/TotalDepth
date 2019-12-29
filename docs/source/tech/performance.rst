@@ -6,7 +6,7 @@
 .. toctree::
     :maxdepth: 2
    
-.. _TotalDepth-tech-LIS_read_perf:
+.. _TotalDepth-tech-performance:
 
 ####################################
 Performance of TotalDepth
@@ -60,7 +60,7 @@ Plotting what has been read     4000            0.015            60
 The rest of this tech note describes the performance of reading LIS files in these ms/Mb terms.
 
 
-.. _TotalDepth-tech-perf_improve:
+.. _TotalDepth-tech-performance_improve:
 
 Performance Improvements
 =================================

@@ -285,11 +285,16 @@ class PlotLogPasses(object):
     """Takes an input path, output path and generates SVG file(s) from LIS."""
     def __init__(self, fpIn, fpOut, recursive=False, keepGoing=True, lgFormatS=None, apiHeader=False):
         """Constructor.
+
         fpIn and fpOut are file or directory paths. fpOut will be created if necessary.
+
         recursive is a flag to control directory recursion.
+
         keepGoing is a flag passed to the LIS File.FileRead object.
+
         lgFormatS is a list of strings the correspond to the LgFormat UniqueId XML attribute.
             If absent the LIS file FILM/PRES etc. tables are used.
+
         apiHeader is a flag to control whether a API header is extracted from CONS tables
             is to be plotted on the top of the log.
         """

@@ -10,8 +10,14 @@ Getting the Frame Data as a ``numpy`` Array
 From LAS
 ------------------
 
+.. todo::
+
+    Complete this.
+
 From LIS
 ------------------
+
+There is a tutorial here on writing code that allows you to access the numpy channel data directly: :ref:`total_depth.processing_lis_files.numpy_arrays`
 
 From RP66V1
 ------------------

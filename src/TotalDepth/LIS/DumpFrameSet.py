@@ -152,7 +152,3 @@ Reads a LIS file and writes out tab separated values of each frame."""
 if __name__ == '__main__':
     #multiprocessing.freeze_support()
     sys.exit(main())
-
-    
-    
-    

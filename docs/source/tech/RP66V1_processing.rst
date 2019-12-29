@@ -37,7 +37,9 @@ Here is the execution time for processing all frames by RP66V1 file size.
 
 
 
-todo:: Finish this.
+.. todo::
+
+    Finish this.
 
 Performance Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,7 +58,6 @@ For example
 .. _TotalDepth-tech-RP66V1_processing_perf_LAS:
 
 
-
 Converting RP66V1 to LAS
 ----------------------------------
 
@@ -64,19 +65,19 @@ Converting RP66V1 to LAS
 An Example File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An example file in  the tests archive is 2GB in size and contains this Log Pass:
+An example file in the tests archive is 2GB in size and contains this Log Pass, the size of the numpy frame to hold all  the data is also shown:
 
-=================== =========== =========== ================
-Frame Array         Channels    Frames      Spacing
-=================== =========== =========== ================
-1B (O: 35 C: 0)     12          653880      0.1 inch
-2B (O: 35 C: 0)     6           326940      0.2 inch
-10B (O: 35 C: 0)    19          65388       1 inch
-15B (O: 35 C: 0)    14          43592       1.5 inch
-20B (O: 35 C: 0)    83          32694       2 inch
-60B (O: 35 C: 0)    204         10899       6 inch
-120B (O: 35 C: 0)   6           5449        12 inch
-=================== =========== =========== ================
+=================== =========== =========== =============== ==============================
+Frame Array         Channels    Frames      Spacing         Size of Numpy array (bytes)
+=================== =========== =========== =============== ==============================
+1B (O: 35 C: 0)     12          653880      0.1 inch        31,386,240
+2B (O: 35 C: 0)     6           326940      0.2 inch        7,846,560
+10B (O: 35 C: 0)    19          65388       1 inch          10,200,528
+15B (O: 35 C: 0)    14          43592       1.5 inch        2,441,152
+20B (O: 35 C: 0)    83          32694       2 inch          10,462,080
+60B (O: 35 C: 0)    204         10899       6 inch          2,294,980,632
+120B (O: 35 C: 0)   6           5449        12 inch         11,028,776
+=================== =========== =========== =============== ==============================
 
 Processing this produces seven LAS files, each LAS file contains all the parameter data and data from a single Frame Array.
 Depending on the frame slice the following processing times and LAS sizes were observed.
@@ -101,11 +102,17 @@ Processing the Test Archive
 
 .. image:: images/tdrp66v1tolas_time_size_1.svg
     :align: center
+    :width: 300px
+    :target: images/tdrp66v1tolas_time_size_1.svg
 
+And this is the memory usage (click to enlarge):
 
 .. image:: images/tdrp66v1tolas_process_1.svg
     :align: center
+    :width: 300px
+    :target: images/tdrp66v1tolas_process_1.svg
 
+The peaks are caused by the multi-gigabyte Numpy arrays needed for some files.
 
 Performance Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -113,16 +120,23 @@ Performance Improvements
 
 .. image:: images/tdrp66v1tolas_time_size_64.svg
     :align: center
+    :width: 300px
+    :target: images/tdrp66v1tolas_time_size_64.svg
 
+And this is the memory usage (click to enlarge):
 
 .. image:: images/tdrp66v1tolas_process_64.svg
     :align: center
+    :width: 300px
+    :target: images/tdrp66v1tolas_process_64.svg
 
 
 Here is the time to process the test archive and the size of the finished LAS archive by slice, for  example 64 on the X-axis is write only every 64th frame:
 
 .. image:: images/tdrp66v1tolas_time_size_by_frame.svg
     :align: center
+    :width: 300px
+    :target: images/tdrp66v1tolas_time_size_by_frame.svg
 
 
 

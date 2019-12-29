@@ -130,6 +130,9 @@ To print the whole table there are some generators for this::
 
 Reference: :py:class:`TotalDepth.LIS.core.LogiRec.LrTable`
 
+
+.. _total_depth.processing_lis_files.numpy_arrays:
+
 ------------------------------
 Reading a LIS File Log Data
 ------------------------------

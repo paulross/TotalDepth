@@ -80,14 +80,20 @@ class ProcLISPathBase(object):
 def procLISPath(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, resultObj=None):
     """Multiprocessing code to process LIS files.
     dIn, dOut are directories.
+
     fnMatch is a glob string.
+
     recursive is a boolean to control recursion.
+
     keepGoing is passed to fileFn
+
     jobs is number of jobs; -1 single process, 0 number of available CPUs
+
     fileFn is the operational function that will take a tuple of:
         (fIn, fOut, keepGoing) and return a result that can be added to
         the resultObj or None.
         This should not raise.
+
     resultObj is accumulation of the results of fileFn or None, this it returned."""
     if jobs < 0:
         return procLISPathSP(dIn, dOut, fnMatch, recursive, keepGoing, fileFn, resultObj)
@@ -102,14 +108,20 @@ def procLISPathSP(dIn, dOut, fnMatch, recursive, keepGoing, fileFn, resultObj=No
 
 def procLISPathMP(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, resultObj=None):
     """Multiprocessing code to process LIS files.
+
     dIn, dOut are directories.
+
     fnMatch is a glob string.
+
     recursive is a boolean to control recursion.
+
     keepGoing is passed to fileFn
+
     fileFn is the operational function that will take a tuple of:
         (fIn, fOut, keepGoing) and return a result that can be added to
         the resultObj or None.
         This should not raise.
+
     resultObj is accumulation of the results of fileFn or None, this it returned."""
     if jobs < 1:
         jobs = multiprocessing.cpu_count()

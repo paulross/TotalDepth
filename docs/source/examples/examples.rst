@@ -85,7 +85,7 @@ The following options have been set:
 * Multiprocessing on with 4 simultaneous jobs: ``-j4``
 * Recursive search of input directory: ``-r``
 
-More detail on the ``LisToHtml.py`` is here: :ref:`TotalDepth-LIScmdline-LisToHtml`
+More detail on the ``LisToHtml.py`` is here: :ref:`cmd_line_tools_lis_tdlistohtml`
 
 
 RP66V1 Log HTML Summaries

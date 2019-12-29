@@ -25,3 +25,14 @@ Contents:
 	core/TifMarker
 	core/Type01Plan
 	core/Units
+	
+	DumpFrameSet
+	Index
+	LisToHtml
+	PlotLogPasses
+	ProcLISPath
+	RandomFrameSetRead
+	ScanLogiData
+	ScanLogiRec
+	ScanPhysRec
+	TableHistogram

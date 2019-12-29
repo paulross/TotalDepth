@@ -121,7 +121,7 @@ Then there is a couple of tables, the first summarises the X axis and the second
 .. image:: images/LisToHtml_LogPass_01.png
 
 
-:ref:`Link <cmd_line_tools_lis_tdlisplotlogpasses>`
+.. _cmd_line_tools_lis_tdlisplotlogpasses:
 
 Plots LIS log data as SVG pages.
 ===================================
@@ -169,9 +169,7 @@ Command to process a directory of LIS::
 
 Output::
 
-
-
-
+	x
 
 .. _cmd_line_tools_lis_tdlisscanphysrec:
 
@@ -661,7 +659,7 @@ the value as a count of the number of occurrences.
 Indexing LIS Files with ``tdlisindex``
 ===========================================
 
-This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`TotalDepth-tech-indexing` for more information about the design and performance of LIS indexing.
+This indexes a LIS file and prints out the result. It can also provide some performance measurements of the indexing operation. See :ref:`TotalDepth-tech-LIS_indexing` for more information about the design and performance of LIS indexing.
 
 Arguments
 -----------------
