@@ -59,6 +59,73 @@ def test_tddetif(tmpdir, args):
     subprocess.check_call(['tddetif',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
+# -------- tdarchive --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r', '-v'],
+        ['-r', '-v', '-k'],
+        ['-r', '-v', '-k'],
+        ['-r', '--expand-and-delete', '-n'],
+        ['-r', '--histogram'],
+        ['-r', '--bytes=20'],
+    )
+)
+def test_tdarchive_file_stdout(args):
+    subprocess.check_call(['tdarchive',] + args + [EXAMPLE_DATA_DIRECTORY])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r', '-v'],
+        ['-r', '-v', '-k'],
+        ['-r', '-v', '-k'],
+        ['-r', '--expand-and-delete', '-n'],
+        ['-r', '--histogram'],
+        ['-r', '--bytes=20'],
+    )
+)
+def test_tdarchive_dir(tmpdir, args):
+    subprocess.check_call(['tdarchive',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+# -------- END: tdarchive --------
+
+
+# -------- tdcopybinfiles --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['--file-types=?'],
+        ['--file-types=??'],
+    )
+)
+def test_tdcopybinfiles_no_paths(args):
+    subprocess.check_call(['tdcopybinfiles',] + args + ['', ''])
+
+
+# @pytest.mark.slow
+# @pytest.mark.parametrize(
+#     'args',
+#     (
+#         [],
+#     )
+# )
+# def test_tdcopybinfiles_dir(tmpdir, args):
+#     zip_in = tmpdir.mkdir('in').join('input.zip')
+#
+#     subprocess.check_call(['tdcopybinfiles',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+# -------- END: tdcopybinfiles --------
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',

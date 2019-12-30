@@ -38,6 +38,7 @@ entry_points_console_scripts_dict = {
     'tddetif': 'TotalDepth.DeTif:main',
     # General util/
     'tdarchive': 'TotalDepth.util.archive:main',
+    'tdcopybinfiles': 'TotalDepth.util.CopyBinFiles:main',
     # General common/
     'tdprocess': 'TotalDepth.common.process:main',
     # LIS
