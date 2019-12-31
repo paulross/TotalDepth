@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""The setup script."""
+"""The setup script.
+copyright 2010-2020, Paul Ross
+
+"""
 import os
 import sysconfig
 
 from setuptools import Extension, setup, find_packages
+
+COPYRIGHT = '2010-2020, Paul Ross'
 
 # from Cython.Build import cythonize
 
