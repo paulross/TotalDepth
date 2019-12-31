@@ -656,6 +656,33 @@ def dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, c
         dump_frames_and_or_channels_single_rp66v1_file(path_in, frame_slice == '?', channels == '?')
 
 
+_GNUPLOT_PLT = '\n'.join(
+    [
+        gnuplot.PLOT.format(title="Converting RP66V1 Files to LAS with TotalDepth.RP66V1.ToLAS.main"),
+        gnuplot.X_LOG.format(label="RP66V1 File Size (bytes)"),
+        gnuplot.Y_LOG.format(label="Conversion Time (s)"),
+        gnuplot.Y2_LOG.format(label="Total LAS size"),
+        """set terminal svg size 1000,700 # choose the file format
+set output "{name}.svg" # choose the output device
+
+# Curve fit, time
+conversion_time(x) = 10**(a + b * log10(x))
+fit conversion_time(x) "{name}.dat" using 1:4 via a, b
+
+# Curve fit, size
+las_size(x) = 10**(c + d * log10(x))
+fit las_size(x) "{name}.dat" using 1:2 via c,d
+
+plot "{name}.dat" using 1:4 axes x1y1 title "LAS Conversion Time (s)" lt 1 w points, \
+    conversion_time(x) title sprintf("Fit of time: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
+    "{name}.dat" using 1:2 axes x1y2 title "LAS size (bytes)" lt 3 w points, \
+    las_size(x) axes x1y2 title sprintf("Fit of size: 10**(%+.3g %+.3g * log10(x))", c, d) lt 3 lw 2
+
+reset
+""",
+    ]
+)
+
 GNUPLOT_PLT = """set logscale x
 set grid
 set title "Converting RP66V1 Files to LAS with TotalDepth.RP66V1.ToLAS.main"
@@ -666,16 +693,16 @@ set xlabel "RP66V1 File Size (bytes)"
 # set format x ""
 
 set logscale y
-set ylabel "Conversion Rate (ms/Mb), Ratio RP66V1 / LAS size"
+set ylabel "Conversion Time, Every 64th Frame (s)"
 # set yrange [1:1e5]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
-# set logscale y2
-# set y2label "Ratio LAS size / original RP66V1 size"
-# set y2range [1e-4:10]
-# set y2tics
+set logscale y2
+set y2label "LAS size, Every 64th Frame (bytes)"
+set y2range [1e5:1e9]
+set y2tics
 
 set pointsize 1
 set datafile separator whitespace#"	"
@@ -683,40 +710,23 @@ set datafile missing "NaN"
 
 # set fit logfile
 
-# Curve fit, rate
-rate(x) = 10**(a + b * log10(x))
-fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+# Curve fit, time
+conversion_time(x) = 10**(a + b * log10(x))
+fit conversion_time(x) "{name}.dat" using 1:4 via a, b
 
-rate2(x) = 10**(5.5 - 0.5 * log10(x))
-
-# Curve fit, size ratio
-size_ratio(x) = 10**(c + d * log10(x))
-fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
-# By hand
-# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
-
-# Curve fit, compression ratio
-compression_ratio(x) = 10**(e + f * log10(x))
-fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+# Curve fit, size
+las_size(x) = 10**(c + d * log10(x))
+fit las_size(x) "{name}.dat" using 1:2 via c,d
 
 set terminal svg size 1000,700 # choose the file format
 set output "{name}.svg" # choose the output device
 
 # set key off
 
-#set key title "Window Length"
-#  lw 2 pointsize 2
-
-# Fields: size_input, size_index, time, exception, ignored, path
-
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "LAS Conversion Rate (ms/Mb)" lt 1 w points,\
-	rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
-    "{name}.dat" using 1:($1/$2) axes x1y1 title "RP66V1 / LAS size" lt 3 w points, \
-    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y1 lt 3 lw 2
-
-# Plot size ratio:
-#    "{name}.dat" using 1:($2/$1) axes x1y2 title "Index size ratio" lt 3 w points, \
-#     size_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", c, d) axes x1y2 lt 3 lw 2
+plot "{name}.dat" using 1:4 axes x1y1 title "LAS Conversion Time (s)" lt 1 w points, \
+    conversion_time(x) title sprintf("Fit of time: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \
+    "{name}.dat" using 1:2 axes x1y2 title "LAS size (bytes)" lt 3 w points, \
+    las_size(x) axes x1y2 title sprintf("Fit of size: 10**(%+.3g %+.3g * log10(x))", c, d) lt 3 lw 2
 
 reset
 """
@@ -734,7 +744,7 @@ def plot_gnuplot(data: typing.Dict[str, LASWriteResult], gnuplot_dir: str) -> No
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
             table.append(list(data[k][1:]) + [k])
-    name = 'IndexFile'
+    name = 'RP66V1_ToLAS'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:  # pragma: no cover
         raise IOError(f'Can not plot gnuplot with return code {return_code}')

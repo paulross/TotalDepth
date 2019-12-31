@@ -16,3 +16,20 @@ There is a command line tool ``tdarchive`` [References :py:mod:`TotalDepth.util.
 
 Read more here :ref:`TotalDepth-cmdline-archive`.
 
+
+I have an archive and I want copy specific file types
+----------------------------------------------------------------------
+
+There is a command line tool ``tdcopybinfiles`` [References :py:mod:`TotalDepth.util.CopyBinFiles`] that can copy specific file types from  one directory to another. It can also recursively deflate archives such as ZIP files.
+
+Read more here :ref:`TotalDepth-cmdline-tdcopybinfiles`.
+
+
+I have an archive and I want report or remove duplicate files
+----------------------------------------------------------------------
+
+There is a command line tool ``tdremovedupefiles`` [References :py:mod:`TotalDepth.util.RemoveDupeFiles`] that can find  duplicate files based on  their checksum and, optionally, remove the duplicates.
+
+Read more here :ref:`TotalDepth-cmdline-tdremovedupefiles`.
+
+

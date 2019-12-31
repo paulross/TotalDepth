@@ -17,7 +17,9 @@ logger = logging.getLogger(__file__)
 
 
 def _recurse_copy_zip_archive(
-        instream: typing.BinaryIO, path_out: str, binary_file_types: typing.Set[str], nervous: bool) -> typing.List[str]:
+        instream: typing.BinaryIO,
+        path_out: str, binary_file_types: typing.Set[str], nervous: bool) -> typing.List[str]:
+    """Recursively extract ZIP archives."""
     logger.debug(f'_recurse_zip_archive(): path_out="{path_out}"')
     ret = []
     instream.seek(0)
@@ -71,7 +73,7 @@ def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], 
     """
     Copies binary files from path_in to path_out.
 
-    If move is True the file is moved, if False the file os copied.
+    If move is True the file is moved, if False the file is copied.
     Returns a list of destination paths.
     """
     logger.debug(f'copy_files(): "{path_in}" to "{path_out}" ')
@@ -113,12 +115,13 @@ def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], 
 
 
 def main() -> int:
+    """Main entry point. Copies of moves particular file types from one tree to another"""
     description = """Copies of moves particular file types from one tree to another."""
     print('Cmd: %s' % ' '.join(sys.argv))
     # TODO: Use cmn_cmd_opts
     parser = argparse.ArgumentParser(
         description=description,
-        prog=sys.argv[0],
+        prog='TotalDepth.RP66V1.util.CopyBinFiles.main',
     )
     parser.add_argument('path_in', type=str, help='Path to the input file.')
     parser.add_argument('path_out', type=str, help='Path to the output scan to write.')
@@ -181,5 +184,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

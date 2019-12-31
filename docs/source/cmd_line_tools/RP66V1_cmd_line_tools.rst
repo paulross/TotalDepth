@@ -223,8 +223,8 @@ Processing a Single File
     Wrote 1,812,131 output bytes, ratio: 335.349% at 3529.3 ms/Mb
     $ ll example_data/LAS/
     total 4600
-    -rw-r--r--  1 engun  staff    94317 28 Oct 10:19 206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
-    -rw-r--r--  1 engun  staff  1717814 28 Oct 10:20 206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+    -rw-r--r--  1 xxxxxxxx  staff    94317 28 Oct 10:19 206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las
+    -rw-r--r--  1 xxxxxxxx  staff  1717814 28 Oct 10:20 206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
 
 The LAS files look like this:
 
@@ -341,7 +341,7 @@ Processing a Single File
     Wrote 1,018,327 output bytes, ratio: 188.449% at 651.0 ms/Mb
     $ ll example_data/pickle/
     total 1992
-    -rw-r--r--  1 engun  staff  1018327 28 Oct 12:11 206_05a-_3_DWL_DWL_WIRE_258276498.pkl
+    -rw-r--r--  1 xxxxxxxx  staff  1018327 28 Oct 12:11 206_05a-_3_DWL_DWL_WIRE_258276498.pkl
 
 
 Processing a Directory
@@ -689,7 +689,7 @@ Example of scanning a RP66V1 file for Logical Record Segments, this gives just a
 .. code-block:: console
 
     $ tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
-    Cmd: /Users/engun/venvs/TotalDepth37_00/bin/tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
+    Cmd: tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
     gnuplot version: "b'gnuplot 5.2 patchlevel 6'"
     args: Namespace(EFLR=False, IFLR=False, LD=True, LR=False, LRSH=False, VR=False, dump_bytes=0, dump_raw_bytes=False, eflr_as_table=False, eflr_set_type=[], encrypted=False, frame_slice=',,', gnuplot=None, iflr_set_type=[], keep_going=False, log_level=30, path_in='example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS', path_out='', recurse=False, verbose=0)
     Use -v to see individual logical data.
@@ -712,11 +712,8 @@ Example of scanning a RP66V1 file for Logical Record Segments, this gives just a
            561:          1
            617:          1
            781:          1
-    $ tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS | less
-    (TotalDepth37_00)
-    engun@Pauls-MacBook-Pro  ~/Documents/workspace/TotalDepth (RP66v1)
     $ tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
-    Cmd: /Users/engun/venvs/TotalDepth37_00/bin/tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
+    Cmd: tdrp66v1scan --LD example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
     gnuplot version: "b'gnuplot 5.2 patchlevel 6'"
     args: Namespace(EFLR=False, IFLR=False, LD=True, LR=False, LRSH=False, VR=False, dump_bytes=0, dump_raw_bytes=False, eflr_as_table=False, eflr_set_type=[], encrypted=False, frame_slice=',,', gnuplot=None, iflr_set_type=[], keep_going=False, log_level=30, path_in='example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS', path_out='', recurse=False, verbose=0)
     Use -v to see individual logical data.

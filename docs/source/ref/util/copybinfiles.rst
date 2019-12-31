@@ -2,10 +2,10 @@
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
 
-TotalDepth.CopyBinFiles
+TotalDepth.util.CopyBinFiles
 ===============================
 
-.. automodule:: TotalDepth.CopyBinFiles
+.. automodule:: TotalDepth.util.CopyBinFiles
 	:member-order: bysource
 	:members:
 	:special-members:

@@ -126,10 +126,10 @@ In the output directory there is the log data extracted as ``.dat`` file, the Gn
 
     $ ls -l tmp/gnuplot_process/
     total 360
-    -rw-r--r--  1 engun  staff  13679 31 Oct 14:11 process_C.log.dat
-    -rw-r--r--  1 engun  staff   1067 31 Oct 14:11 process_C.log.plt
-    -rw-r--r--@ 1 engun  staff  30878 31 Oct 14:11 process_C.log.svg
-    -rw-r--r--  1 engun  staff  32100 31 Oct 14:11 test.svg
+    -rw-r--r--  1 xxxxxxxx  staff  13679 31 Oct 14:11 process_C.log.dat
+    -rw-r--r--  1 xxxxxxxx  staff   1067 31 Oct 14:11 process_C.log.plt
+    -rw-r--r--@ 1 xxxxxxxx  staff  30878 31 Oct 14:11 process_C.log.svg
+    -rw-r--r--  1 xxxxxxxx  staff  32100 31 Oct 14:11 test.svg
 
 
 Here is :file:`process_C.log.svg`:

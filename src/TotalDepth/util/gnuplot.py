@@ -121,3 +121,34 @@ def write_test_file(path: str, typ: str) -> int:
     # TODO: Return stderr?
     return proc.returncode
 
+# Gnuplot fragments
+
+PLOT = """set grid
+set title "{title}"
+
+set pointsize 1
+set datafile separator whitespace#"	"
+set datafile missing "NaN"
+"""
+
+X_LOG = """set logscale x
+set xlabel "{label}"
+# set mxtics 5
+# set xrange [0:3000]
+# set xtics
+# set format x
+"""
+
+Y_LOG = """set logscale y
+set ylabel "{label}"
+# set yrange [1:1e5]
+# set ytics 20
+# set mytics 2
+# set ytics 8,35,3
+"""
+
+Y2_LOG = """set logscale y2
+set y2label "{label}"
+#set y2range [1e5:1e9]
+set y2tics
+"""

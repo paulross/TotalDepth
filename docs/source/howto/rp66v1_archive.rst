@@ -36,3 +36,9 @@ I'd like to create some well plots from RP66V1 data
 Unlike LIS and like LAS, RP66V1 files do not specify a plot format.
 Some producers include some producer specific information in private EFLRs.
 TotalDepth version 0.4.0 will provide a simpler, universal, way of specifying plot formats in SVG from LAS, LIS and RP66V1 data.
+
+Getting the Frame Data as a ``numpy`` Array
+------------------------------------------------
+
+There is a tutorial here on writing code that allows you to access the numpy channel data directly: :ref:`total_depth.processing_rp66v1_files.reading_frames_as_numpy`.
+There is some example code in :file:`example_data/RP66V1/demo_read.py`

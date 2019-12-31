@@ -50,14 +50,14 @@ def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
 def main() -> int:
     """Main CLI entry point."""
     print(f'CMD:', ' '.join(sys.argv))
-
     parser = cmn_cmd_opts.path_in(
         """Deletes duplicate files in the given tree.""",
-        prog='TotalDepth.RP66V1.ScanHTML.main', version=__version__, epilog=__rights__
+        prog='TotalDepth.RP66V1.util.RemoveDupeFiles.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
-    cmn_cmd_opts.add_multiprocessing(parser)
-    parser.add_argument('-n', '--nervous', help='Nervous mode, does not do anything but report.', action='store_true')
+    parser.add_argument('-n', '--nervous',
+                        help='Nervous mode, does not do anything but report [default: %(default)s].',
+                        action='store_true')
     args = parser.parse_args()
     # print(args)
     cmn_cmd_opts.set_log_level(args)
@@ -71,5 +71,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

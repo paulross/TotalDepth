@@ -11,14 +11,23 @@ This describes the command line tools that are available for processing any Tota
 
 The tools are located in ``TotalDepth/``
 
-=========================== ===========================================================================
-Tool Name                   Description
-=========================== ===========================================================================
-``tdarchive``               Scans a directory of files and provides an analysis by file type.
-``tddetif``                 Removes TIF markers from a file.
-``tdplotlogs``              Plots logs from LIS and LAS data.
-=========================== ===========================================================================
 
+.. list-table:: **LIS Command Line Tools**
+    :widths: 20 60
+    :header-rows: 1
+    
+    * - Tool Name
+      - Description
+    * - ``tdarchive``
+      - Scans a directory of files and provides an analysis by file type. :ref:`Link <TotalDepth-cmdline-archive>`
+    * - ``tdcopybinfiles``
+      - Selects files of a particular type and copies them to a directory. This can also expand compressed archives. :ref:`Link <TotalDepth-cmdline-tdcopybinfiles>`
+    * - ``tdremovedupefiles``
+      - Removes duplicate files based on their checksum. :ref:`Link <TotalDepth-cmdline-tdremovedupefiles>`
+    * - ``tddetif``
+      - Removes TIF markers from a file. :ref:`Link <TotalDepth-cmdline-detif>`
+    * - ``tdplotlogs``
+      - Plots logs from LIS and LAS data. :ref:`Link <TotalDepth-cmdline-PlotLogs>`
 
 
 .. _TotalDepth-cmdline-archive:
@@ -33,10 +42,10 @@ Usage
 
 Usage::
 
-	usage: tdarchive [-h] [--file-type FILE_TYPE] [-b BYTES] [-r]
-					 [--expand-and-delete] [--histogram] [-n] [-o] [-l LOG_LEVEL]
-					 [-v]
-					 path [path_out]
+    usage: tdarchive [-h] [--file-type FILE_TYPE] [-b BYTES] [-r]
+                     [--expand-and-delete] [--histogram] [-n] [-o] [-l LOG_LEVEL]
+                     [-v]
+                     path [path_out]
 
 Arguments
 -------------------
@@ -82,132 +91,257 @@ Examples
 -----------------
 
 Here is an example of scanning the ``example_data`` directory (the output is filleted for clarity)::
-	
-	$ tdarchive example_data/ -r --histogram
-	CMD: /Users/engun/venvs/TotalDepth37_00/bin/tdarchive example_data/ -r --histogram
-	Analysing archive.
-	Common prefix:
-		   108,707 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-013.LIS_0001_HDT.svg
-			   667 .HTML      XML      example_data/LIS/Plot/index.html
-		   163,169 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-037.LIS_0001_1.svg
-			   690 .CSS       ASCII    example_data/LIS/Plot/index.css
-			...
-		   184,084 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-037.LIS
-			96,376 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-013.LIS
-			98,508 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-049.LIS
-			10,306 .PY        ASCII    example_data/RP66V1/demo_read.py
-		   462,795 .HTML      XML      example_data/RP66V1/HTML/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.HTML.html
-			 3,098 .HTML      XML      example_data/RP66V1/HTML/index.html
-			...
-		 1,018,327 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.pkl
-		   276,045 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.pkl
-			   520 .PKL                example_data/RP66V1/pickle/MINIMAL_FILE.dlis.pkl
-			53,137 .PKL                example_data/RP66V1/pickle/BASIC_FILE.dlis.pkl
-			   949 .PKL                example_data/RP66V1/pickle/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis.pkl
-			 7,731 .LAS       LAS2.0   example_data/RP66V1/LAS/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS_0_.las
-		 1,621,374 .LAS       LAS2.0   example_data/RP66V1/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
-			...
-			44,916 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE.dlis
-		   540,372 .DLIS      RP66V1   example_data/RP66V1/data/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
-			   716 .DLIS      RP66V1   example_data/RP66V1/data/MINIMAL_FILE.dlis
-			 8,826 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis
-	Total number of files 75, total bytes 12,981,766
-	File extensions:
-	.CSS  :        5
-	.DLIS :        4
-	.HTML :       13
-	.LAS  :        6
-	.LIS  :        3
-	.PKL  :        5
-	.PY   :        1
-	.PYC  :        1
-	.SVG  :       36
-	.XML  :        1
-	Binary file types:
-	Binary type: ""
-	 Extensions: .PKL, .PYC
-		  Count: 6 [8.000%]
-		  Bytes: 1,354,629 [10.435%] from 520 to  1,018,327
-	>=2**9  [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**10 [     0] |
-	>=2**11 [     0] |
-	>=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++
-	>=2**13 [     0] |
-	>=2**14 [     0] |
-	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++
-	>=2**16 [     0] |
-	>=2**17 [     0] |
-	>=2**18 [     1] | ++++++++++++++++++++++++++++++++++++++++
-	>=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++
+    
+    $ tdarchive example_data/ -r --histogram
+    CMD: tdarchive example_data/ -r --histogram
+    Analysing archive.
+    Common prefix:
+           108,707 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-013.LIS_0001_HDT.svg
+               667 .HTML      XML      example_data/LIS/Plot/index.html
+           163,169 .SVG       XML      example_data/LIS/Plot/DILLSON-1_WELL_LOGS_FILE-037.LIS_0001_1.svg
+               690 .CSS       ASCII    example_data/LIS/Plot/index.css
+    ...
+           184,084 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-037.LIS
+            96,376 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-013.LIS
+            98,508 .LIS       LIS      example_data/LIS/data/DILLSON-1_WELL_LOGS_FILE-049.LIS
+            10,306 .PY        ASCII    example_data/RP66V1/demo_read.py
+           462,795 .HTML      XML      example_data/RP66V1/HTML/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.HTML.html
+             3,098 .HTML      XML      example_data/RP66V1/HTML/index.html
+    ...
+         1,018,327 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.pkl
+           276,045 .PKL                example_data/RP66V1/pickle/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS.pkl
+               520 .PKL                example_data/RP66V1/pickle/MINIMAL_FILE.dlis.pkl
+            53,137 .PKL                example_data/RP66V1/pickle/BASIC_FILE.dlis.pkl
+               949 .PKL                example_data/RP66V1/pickle/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis.pkl
+             7,731 .LAS       LAS2.0   example_data/RP66V1/LAS/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS_0_.las
+         1,621,374 .LAS       LAS2.0   example_data/RP66V1/LAS/206_05a-_3_DWL_DWL_WIRE_258276498_0_800T.las
+    ...
+            44,916 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE.dlis
+           540,372 .DLIS      RP66V1   example_data/RP66V1/data/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS
+               716 .DLIS      RP66V1   example_data/RP66V1/data/MINIMAL_FILE.dlis
+             8,826 .DLIS      RP66V1   example_data/RP66V1/data/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis
+    Total number of files 75, total bytes 12,981,766
+    File extensions:
+    .CSS  :        5
+    .DLIS :        4
+    .HTML :       13
+    .LAS  :        6
+    .LIS  :        3
+    .PKL  :        5
+    .PY   :        1
+    .PYC  :        1
+    .SVG  :       36
+    .XML  :        1
+    Binary file types:
+    Binary type: ""
+     Extensions: .PKL, .PYC
+          Count: 6 [8.000%]
+          Bytes: 1,354,629 [10.435%] from 520 to  1,018,327
+    >=2**9  [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**10 [     0] |
+    >=2**11 [     0] |
+    >=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++
+    >=2**13 [     0] |
+    >=2**14 [     0] |
+    >=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++
+    >=2**16 [     0] |
+    >=2**17 [     0] |
+    >=2**18 [     1] | ++++++++++++++++++++++++++++++++++++++++
+    >=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++
 
-	Binary type: "ASCII"
-	 Extensions: .CSS, .PY
-		  Count: 6 [8.000%]
-		  Bytes: 15,232 [0.117%] from 690 to  10,306
-	>=2**9  [     4] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**10 [     0] |
-	>=2**11 [     1] | ++++++++++++++++++++
-	>=2**12 [     0] |
-	>=2**13 [     1] | ++++++++++++++++++++
+    Binary type: "ASCII"
+     Extensions: .CSS, .PY
+          Count: 6 [8.000%]
+          Bytes: 15,232 [0.117%] from 690 to  10,306
+    >=2**9  [     4] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**10 [     0] |
+    >=2**11 [     1] | ++++++++++++++++++++
+    >=2**12 [     0] |
+    >=2**13 [     1] | ++++++++++++++++++++
 
-	Binary type: "LAS2.0"
-	 Extensions: .LAS
-		  Count: 6 [8.000%]
-		  Bytes: 1,785,653 [13.755%] from 1,279 to  1,621,374
-	>=2**10 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**11 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**13 [     0] |
-	>=2**14 [     0] |
-	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**16 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**17 [     0] |
-	>=2**18 [     0] |
-	>=2**19 [     0] |
-	>=2**20 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Binary type: "LAS2.0"
+     Extensions: .LAS
+          Count: 6 [8.000%]
+          Bytes: 1,785,653 [13.755%] from 1,279 to  1,621,374
+    >=2**10 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**11 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**12 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**13 [     0] |
+    >=2**14 [     0] |
+    >=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**16 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**17 [     0] |
+    >=2**18 [     0] |
+    >=2**19 [     0] |
+    >=2**20 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	Binary type: "LIS"
-	 Extensions: .LIS
-		  Count: 3 [4.000%]
-		  Bytes: 378,968 [2.919%] from 96,376 to  184,084
-	>=2**16 [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**17 [     1] | ++++++++++++++++++++++++++++++++++++++++
+    Binary type: "LIS"
+     Extensions: .LIS
+          Count: 3 [4.000%]
+          Bytes: 378,968 [2.919%] from 96,376 to  184,084
+    >=2**16 [     2] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**17 [     1] | ++++++++++++++++++++++++++++++++++++++++
 
-	Binary type: "RP66V1"
-	 Extensions: .DLIS
-		  Count: 4 [5.333%]
-		  Bytes: 594,830 [4.582%] from 716 to  540,372
-	>=2**9  [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**10 [     0] |
-	>=2**11 [     0] |
-	>=2**12 [     0] |
-	>=2**13 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**14 [     0] |
-	>=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**16 [     0] |
-	>=2**17 [     0] |
-	>=2**18 [     0] |
-	>=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Binary type: "RP66V1"
+     Extensions: .DLIS
+          Count: 4 [5.333%]
+          Bytes: 594,830 [4.582%] from 716 to  540,372
+    >=2**9  [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**10 [     0] |
+    >=2**11 [     0] |
+    >=2**12 [     0] |
+    >=2**13 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**14 [     0] |
+    >=2**15 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**16 [     0] |
+    >=2**17 [     0] |
+    >=2**18 [     0] |
+    >=2**19 [     1] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	Binary type: "XML"
-	 Extensions: .HTML, .SVG, .XML
-		  Count: 50 [66.667%]
-		  Bytes: 8,852,454 [68.191%] from 667 to  961,863
-	>=2**9  [     1] | ++++
-	>=2**10 [     1] | ++++
-	>=2**11 [     2] | +++++++++
-	>=2**12 [     2] | +++++++++
-	>=2**13 [     0] |
-	>=2**14 [     0] |
-	>=2**15 [     3] | +++++++++++++
-	>=2**16 [    16] | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**17 [    18] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	>=2**18 [     5] | ++++++++++++++++++++++
-	>=2**19 [     2] | +++++++++
+    Binary type: "XML"
+     Extensions: .HTML, .SVG, .XML
+          Count: 50 [66.667%]
+          Bytes: 8,852,454 [68.191%] from 667 to  961,863
+    >=2**9  [     1] | ++++
+    >=2**10 [     1] | ++++
+    >=2**11 [     2] | +++++++++
+    >=2**12 [     2] | +++++++++
+    >=2**13 [     0] |
+    >=2**14 [     0] |
+    >=2**15 [     3] | +++++++++++++
+    >=2**16 [    16] | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**17 [    18] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    >=2**18 [     5] | ++++++++++++++++++++++
+    >=2**19 [     2] | +++++++++
 
-	Execution time: 0.067 (s)
-			 Files: 75 rate 1,113.2 (files/s)
-			 Bytes: 1,350 rate 20,038.5 (bytes/s)
+    Execution time: 0.067 (s)
+             Files: 75 rate 1,113.2 (files/s)
+             Bytes: 1,350 rate 20,038.5 (bytes/s)
+
+.. _TotalDepth-cmdline-tdcopybinfiles:
+
+Copying a Directory of Files with ``tdcopybinfiles``
+==============================================================
+
+Scans a directory of files and can copy particular file type to another directory.
+
+Usage
+--------------
+
+Usage::
+
+    usage: TotalDepth.RP66V1.util.CopyBinFiles.main
+           [-h] [--file-types FILE_TYPES] [-m] [-n] [-l LOG_LEVEL]
+           path_in path_out
+
+Arguments
+-------------------
+
+#. The path to the input directory
+#. Path to the output directory to write the files to. The results are undefined if path_out conflicts with path_in.
+
+Options
+--------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``--file-type``                      | Types of files to copy, this option is is additive so can be used multiple      |
+|                                      | times.                                                                          |
+|                                      | Supported (and default) file types are:                                         |
+|                                      | ASCII, LAS1.2, LAS2.0, LAS3.0, LIS, LISt, LIStr, PDF, PS, RP66V1, RP66V1t,      |
+|                                      | RP66V1tr, RP66V2, SEGY, TIFF, XML, ZIP                                          |
+|                                      | Use '?' or '??' to  see what file types are available                           |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-m, --move``                       | Move rather than copy, Irrelevant for files in ZIP archives which are always    |
+|                                      | copied. [default: False]                                                        |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-n, --nervous``                    | Nervous mode, does not do anything but report.                                  |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l, --log-level=``                 | Log Level as an integer or symbol. (0<->NOTSET, 10<->DEBUG, 20<->INFO,          |
+|                                      | 30<->WARNING, 40<->ERROR, 50<->CRITICAL) [default: 30]                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+
+
+Examples
+-----------------
+
+To see what file types are supported use '?' and two dummy paths::
+
+    $ tdcopybinfiles --file-types=? '' ''
+    Cmd: tdcopybinfiles --file-types=?
+    Binary file types supported: ASCII, LAS1.2, LAS2.0, LAS3.0, LIS, LISt, LIStr, PDF, PS, RP66V1, RP66V1t, RP66V1tr, RP66V2, SEGY, TIFF, XML, ZIP
+    Execution time =    0.000 (S) 0 kb/s
+
+To get the file type description as well use '??' and two dummy paths::
+
+    $ tdcopybinfiles --file-types=?? '' ''
+    Cmd: tdcopybinfiles --file-types=??
+    Binary file types supported:
+    ASCII    - American Standard Code for Information Interchange
+    LAS1.2   - Canadian Well Logging Society Log ASCII Standard version 1.2
+    LAS2.0   - Canadian Well Logging Society Log ASCII Standard version 2.0
+    LAS3.0   - Canadian Well Logging Society Log ASCII Standard version 3.0
+    LIS      - Schlumberger LIS-79 well logging format
+    LISt     - Schlumberger LIS-79 well logging format with TIF markers
+    LIStr    - Schlumberger LIS-79 well logging format with reversed TIF markers
+    PDF      - Portable Document Format
+    PS       - Postscript
+    RP66V1   - American Petroleum Institute Recommended Practice 66 version 1
+    RP66V1t  - American Petroleum Institute Recommended Practice 66 version 1 with TIF markers
+    RP66V1tr - American Petroleum Institute Recommended Practice 66 version 1 with reversed TIF markers
+    RP66V2   - American Petroleum Institute Recommended Practice 66 version 2
+    SEGY     - Society of Exploration Geophysicists seismic format Y
+    TIFF     - Tagged Image File Format
+    XML      - eXtensible Markup Language
+    ZIP      - ZIP Compressed Archive
+    Execution time =    0.000 (S) 0 kb/s
+
+
+.. _TotalDepth-cmdline-tdremovedupefiles:
+
+Removing Duplicate Files with ``tdremovedupefiles``
+==============================================================
+
+Scans a directory of files and identifies duplicate files by their checksum.
+It is **strongly recommended** to use ``-n`` (``--nervous``) first and look at the results before running this without ``-n`` which is potentially destructive.
+
+Usage
+--------------
+
+Usage::
+
+    usage: TotalDepth.RP66V1.util.RemoveDupeFiles.main [-h] [--version] [-k] [-v]
+                                                       [-r] [-l LOG_LEVEL] [-n]
+                                                       path_in
+
+Arguments
+-------------------
+
+#. The path to the directory.
+
+Options
+--------------------
+
++--------------------------------------+---------------------------------------------------------------------------------+
+| Option                               | Description                                                                     |
++======================================+=================================================================================+
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-h, --help``                       | Show this help message and exit.                                                |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-r, --recursive``                  | Process input recursively. [default: False]                                     |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-n, --nervous``                    | Nervous mode, does not do anything but report [default: False].                 |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-l, --log-level=``                 | Log Level as an integer or symbol. (0<->NOTSET, 10<->DEBUG, 20<->INFO,          |
+|                                      | 30<->WARNING, 40<->ERROR, 50<->CRITICAL) [default: 20]                          |
++--------------------------------------+---------------------------------------------------------------------------------+
+| ``-v, --verbose``                    | Increase verbosity, additive [default: 0]                                       |
++--------------------------------------+---------------------------------------------------------------------------------+
+
 
 .. _TotalDepth-cmdline-detif:
 
@@ -224,9 +358,9 @@ Usage
 
 Usage::
 
-	usage: tddetif [-h] [-r] [-n]
-		  [-l LOG_LEVEL] [-v] [-o]
-		  path_in [path_out]
+    usage: tddetif [-h] [-r] [-n]
+          [-l LOG_LEVEL] [-v] [-o]
+          path_in [path_out]
 
 Arguments
 -------------------
@@ -245,7 +379,7 @@ Options
 +--------------------------------------+---------------------------------------------------------------------------------+
 | ``-r, --recurse``                    | Process input recursively. [default: False]                                     |
 +--------------------------------------+---------------------------------------------------------------------------------+
-| ``-n, --nervous``                    | Nervous mode, does not do anything but report.                                  |
+| ``-n, --nervous``                    | Nervous mode, does not do anything but report [default: False].                 |
 +--------------------------------------+---------------------------------------------------------------------------------+
 | ``-l, --log-level=``                 | Log Level as an integer or symbol. (0<->NOTSET, 10<->DEBUG, 20<->INFO,          |
 |                                      | 30<->WARNING, 40<->ERROR, 50<->CRITICAL) [default: 30]                          |
@@ -260,8 +394,8 @@ Examples
 -----------------
 
 todo::
-	
-	Put examples here.
+    
+    Put examples here.
 
 
 These command line tools plot wireline data.
@@ -475,64 +609,64 @@ Here is an example of plotting LIS and LAS files in directory ``in/`` with the p
 
 The command line is::
 
-	$ python3 tdplotlogs -A -j4 -r -X 4 in/ out/
+    $ python3 tdplotlogs -A -j4 -r -X 4 in/ out/
 
 First tdplotlogs echos the command::
 
-	Cmd: tdplotlogs -A -j4 -r -X 4 in/ out/
+    Cmd: tdplotlogs -A -j4 -r -X 4 in/ out/
 
 When complete tdplotlogs writes out a summary, first the number of files read (output is wrapped here with '\\' for clarity)::
 
-	plotLogInfo PlotLogInfo <__main__.PlotLogInfo object at 0x101e0da90> \
-		Files=23 \
-		Bytes=10648531 \
-		LogPasses=23 \
-		Plots=8 \
-		Curve points=229991
+    plotLogInfo PlotLogInfo <__main__.PlotLogInfo object at 0x101e0da90> \
+        Files=23 \
+        Bytes=10648531 \
+        LogPasses=23 \
+        Plots=8 \
+        Curve points=229991
 
 Then as summary of each plot in detail (output is wrapped here with '\\' for clarity)::
 
-	('in/1003578128.las', \
-		0, \
-		'Natural_GR_Spectrometry_3Track.xml', \
-		IndexTableValue( \
-			scale=100, \
-			evFirst='800.5 (FEET)', \
-			evLast='3019.5 (FEET)', \
-			evInterval='2219.0 (FEET)', \
-			curves='CGR_2, POTA, SGR_1, TENS_16, THOR, URAN', \
-			numPoints=26213, \
-			outPath='out//1003578128.las_0000_Natural_GR_Spectrometry_3Track.xml.svg' \
-		)
-	)
-	('in/1003578128.las', \
-		0, \
-		'Porosity_GR_3Track', \
-		IndexTableValue( \
-			scale=100, \
-			evFirst='800.5 (FEET)', \
-			evLast='3019.5 (FEET)', \
-			evInterval='2219.0 (FEET)', \
-			curves='Cali, DRHO, DensityPorosity, GammaRay, NeutronPorosity, OLDESTNeutronPorosity, OLDNeutronPorosity, RHOB, SP, SonicPorosity, Tension', \
-			numPoints=46170, \
-			outPath='out//1003578128.las_0000_Porosity_GR_3Track.svg' \
-		)
-	)
-	
-	... 8<------------- Snip ------------->8
-	
-	('in/1006346987.las', \
-		0, 'Sonic_3Track.xml', \
-		IndexTableValue(
-			scale=100, \
-			evFirst='4597.5 (FEET)', \
-			evLast='5799.5 (FEET)', \
-			evInterval='1202.0 (FEET)', \
-			curves='Caliper, DT, DTL_DDBHC, GammaRay, SonicPorosity, TENSION', \
-			numPoints=14430, \
-			outPath='out//1006346987.las_0000_Sonic_3Track.xml.svg' \
-		)
-	)
+    ('in/1003578128.las', \
+        0, \
+        'Natural_GR_Spectrometry_3Track.xml', \
+        IndexTableValue( \
+            scale=100, \
+            evFirst='800.5 (FEET)', \
+            evLast='3019.5 (FEET)', \
+            evInterval='2219.0 (FEET)', \
+            curves='CGR_2, POTA, SGR_1, TENS_16, THOR, URAN', \
+            numPoints=26213, \
+            outPath='out//1003578128.las_0000_Natural_GR_Spectrometry_3Track.xml.svg' \
+        )
+    )
+    ('in/1003578128.las', \
+        0, \
+        'Porosity_GR_3Track', \
+        IndexTableValue( \
+            scale=100, \
+            evFirst='800.5 (FEET)', \
+            evLast='3019.5 (FEET)', \
+            evInterval='2219.0 (FEET)', \
+            curves='Cali, DRHO, DensityPorosity, GammaRay, NeutronPorosity, OLDESTNeutronPorosity, OLDNeutronPorosity, RHOB, SP, SonicPorosity, Tension', \
+            numPoints=46170, \
+            outPath='out//1003578128.las_0000_Porosity_GR_3Track.svg' \
+        )
+    )
+    
+    ... 8<------------- Snip ------------->8
+    
+    ('in/1006346987.las', \
+        0, 'Sonic_3Track.xml', \
+        IndexTableValue(
+            scale=100, \
+            evFirst='4597.5 (FEET)', \
+            evLast='5799.5 (FEET)', \
+            evInterval='1202.0 (FEET)', \
+            curves='Caliper, DT, DTL_DDBHC, GammaRay, SonicPorosity, TENSION', \
+            numPoints=14430, \
+            outPath='out//1006346987.las_0000_Sonic_3Track.xml.svg' \
+        )
+    )
 
 The fields in each tuple are:
 
@@ -540,20 +674,20 @@ The fields in each tuple are:
 * LogPass number in the file. For example "Repeat Section" might be 0 and "Main Log" 1.
 * LgFormat used for the plot (several plots my be generated from one LogPass).
 * An IndexTableValue object (used to generate the index.html file) that has the following fields:
-	* Plot scale as an integer.
-	* First reading and units as an Engineering Value.
-	* Last reading and units as an Engineering Value.
-	* Log interval and units as an Engineering Value.
-	* List of curve names plotted.
-	* Total number of data points plotted.
-	* The ouput file.
+    * Plot scale as an integer.
+    * First reading and units as an Engineering Value.
+    * Last reading and units as an Engineering Value.
+    * Log interval and units as an Engineering Value.
+    * List of curve names plotted.
+    * Total number of data points plotted.
+    * The ouput file.
 
 Finally the total number of curve feet plotted and the time it took::
 
-	Interval*curves: EngVal: 121020.000 (FEET)
-	  CPU time =    0.043 (S)
-	Exec. time =   25.119 (S)
-	Bye, bye!
+    Interval*curves: EngVal: 121020.000 (FEET)
+      CPU time =    0.043 (S)
+    Exec. time =   25.119 (S)
+    Bye, bye!
 
 In this case (under Unix) the "CPU Time" is the cumulative amount of CPU time used. As we are using multiprocessing it is the CPU time of the parent process which is very small since it just invokes child processes. The Exec. time is the wall clock time between starting and finishing tdplotlogs.
 

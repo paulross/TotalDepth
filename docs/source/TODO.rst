@@ -15,7 +15,7 @@ Work is the estimated amount of work from 1 upwards.
 
 If you find a bug or need a feature then raise an `issue with TotalDepth <https://github.com/paulross/TotalDepth/issues>`_.
 
-TotalDepth is currently at **Alpha**, development version |version|, release version |release|.
+TotalDepth is currently at **Beta**, development version |version|, release version |release|.
 
 
 TotalDepth Improvements (General)
@@ -91,7 +91,7 @@ LAS Improvements
       - N/A
       - 
     * - LAS.merge_O_P
-      - Merge ``~O`` section int ``~P`` if correct format.
+      - Merge ``~O`` section into ``~P`` if correct format.
       - 1
       - 1
       - 
@@ -144,7 +144,7 @@ LIS Improvements
       - Move slow LIS test to tests/integration/ or mark as @slow.
       - 1
       - 1
-      - 
+      - DONE: v0.3.0
 
 RP66V1 Improvements
 =====================
@@ -175,6 +175,11 @@ RP66V1 Improvements
       - 
     * - RP66V1.RepCode
       - Add in the code that does Representation Code conversion in C/C++.
+      - 1
+      - 3
+      - 
+    * - RP66V1.numpy.read
+      - Directly populate the Frame Array in Numpy from C/C++. See also Frame.buffer.
       - 1
       - 3
       - 
@@ -228,7 +233,7 @@ Plotting Improvements
       - 3
       - 
     * - Plot.cXML
-      - Integrate the existing XML writer written in C for 4x speedup.
+      - Integrate the existing XML writer written in C for x4 speedup.
       - 1
       - 3
       - 

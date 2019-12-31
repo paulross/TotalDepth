@@ -17,5 +17,4 @@ This describes how TotalDepth can help you with various tasks when dealing with 
     lis_archive
     rp66v1_archive
     to_las
-    numpy
    

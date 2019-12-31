@@ -12,7 +12,9 @@ Converting LIS Files to LAS
 
 .. todo::
 
-    To be developed.
+    TotalDepth does not support LIS to LAS as of version 0.3.0 (and you are looking at version |version|).
+    Later versions of TotalDepth may do. It is pretty straightforward to implement.
+
 
 Converting RP66V1 Files to LAS
 -----------------------------------
