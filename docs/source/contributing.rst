@@ -30,13 +30,63 @@ Update any Trove classifiers in *setup.py*, https://pypi.python.org/pypi?%3Aacti
 Build and Test
 -------------------------
 
-Build and test for Python 3.6:
+Build
+^^^^^^^^^^^^^^^^
+
+Build, in this case for Python 3.6:
 
 .. code-block:: console
 
+    $ python3.6 -m venv ~/venvs/TotalDepth_00/
     $ . ~/venvs/TotalDepth_00/bin/activate
-    (TotalDepth_00) $ python setup.py install
-    (TotalDepth_00) $ python setup.py test
+    (TotalDepth_00) $ pip install --upgrade pip
+    (TotalDepth_00) $ pip install --user --upgrade setuptools wheel
+    (TotalDepth_00) $ pip install -r requirements.txt
+    (TotalDepth_00) $ python setup.py develop
+
+Test
+^^^^^^^^^^^^^
+
+As a minimal test:
+
+.. code-block:: console
+
+    (TotalDepth_00) $ pytest tests/
+
+This should take under a minute.
+
+A full test:
+
+.. code-block:: console
+
+    (TotalDepth_00) $ pytest --runslow tests/
+
+This can take 10 to 30 minutes.
+
+Build a Development Environment
+-------------------------------------
+
+This includes the full testing (including test coverage) and documentation environment.
+
+As above plus:
+
+.. code-block:: console
+
+    (TotalDepth_00) $ pip install -r requirements-dev.txt
+
+Test Coverage
+^^^^^^^^^^^^^^^^
+
+With test coverage:
+
+.. code-block:: console
+
+    (TotalDepth_00) $ pytest --cov=TotalDepth --cov-report html tests --runslow
+
+This can take 10 to 30 minutes.
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
 
 Build the docs HTML to test them, from an environment that has Sphinx:
 

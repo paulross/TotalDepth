@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """The setup script."""
-import TotalDepth
 import os
 import sysconfig
 
@@ -12,6 +11,11 @@ from setuptools import Extension, setup, find_packages
 
 # Mac OS:
 # MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py develop
+
+# Obtain TotalDepth.ENTRY_POINTS_CONSOLE_SCRIPTS as we can't import TotalDepth
+with open(os.path.join('src', 'TotalDepth', '__init__.py')) as init_file:
+    code = compile(init_file.read(), __file__, 'exec')
+    exec(code)
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -106,8 +110,6 @@ ext_modules = [
 ]
 
 
-print('TRACE:', ext_modules)
-
 setup(
     name='TotalDepth',
     version='0.2.2rc0',
@@ -123,14 +125,14 @@ setup(
         (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
     ],
     entry_points={
-        'console_scripts': TotalDepth.ENTRY_POINTS_CONSOLE_SCRIPTS,
+        'console_scripts': ENTRY_POINTS_CONSOLE_SCRIPTS,
     },
     include_package_data=True,
     license="GPLv2",
     zip_safe=False,
     keywords='TotalDepth',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Natural Language :: English',

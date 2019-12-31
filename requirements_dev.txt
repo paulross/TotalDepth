@@ -1,7 +1,0 @@
-coverage==4.1
-flake8==2.6.0
-pip==8.1.2
-pytest-runner==2.11.1
-pytest==2.9.2
-Sphinx==1.4.8
-tox==2.3.1
