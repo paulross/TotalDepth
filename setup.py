@@ -3,7 +3,6 @@
 
 """The setup script.
 copyright 2010-2020, Paul Ross
-
 """
 import os
 import sysconfig
@@ -117,7 +116,7 @@ ext_modules = [
 
 setup(
     name='TotalDepth',
-    version='0.2.2rc0',
+    version='0.3.0',
     description="TotalDepth is a software collection that can process petrophysical data such as wireline logs and seismic data.",
     long_description=readme + '\n\n' + history,
     author="Paul Ross",

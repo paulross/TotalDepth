@@ -2,10 +2,10 @@
 History
 ***********
 
-0.3.0 (2019-12-31)
+0.3.0 (2020-01-01)
 ====================
 
-* Adds full RP66V1 support
+* Adds full RP66V1 support.
 * Tested against multi GB data set.
 
 0.2.1 (2018-04-21)
@@ -29,4 +29,3 @@ Earlier versions (unreleased):
 
 * OpenLis - 2010-11-11 to 2011-08-01
 * PyLis - 2009 to 2010
-
