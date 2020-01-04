@@ -60,6 +60,7 @@ TotalDepth.egg-info/
 # Coverage artifacts
 .coverage
 .coverage.*
+.coverage*
 htmlcov/
 
 # The contents is created when testing and have data that is randomly generated.
