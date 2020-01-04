@@ -41,10 +41,39 @@ def test_Set_eq(ld, expected_type, expected_name):
 @pytest.mark.parametrize(
     'ld, expected',
     (
+        (LogicalData(b'\xf0\x07CHANNEL'), 9),
+        (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), 11),
+    )
+)
+def test_Set_logical_data_consumed(ld, expected):
+    result = EFLR.Set(ld)
+    assert result.logical_data_consumed == expected
+    assert ld.remain == 0
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
         (LogicalData(b'\x00\x07CHANNEL'), 'Component Descriptor does not represent a set but a Absent Attribute.'),
     )
 )
 def test_Set_raises(ld, expected):
+    with pytest.raises(EFLR.ExceptionEFLRSet) as err:
+        EFLR.Set(ld)
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.parametrize(
+    'ld, expected',
+    (
+        (
+            LogicalData(b'\xf0\x07CHANNEL'),
+            'Trying to create a Set where the LogicalData <LogicalData Len: 0x9 Idx: 0x1> index is non-zero.',
+        ),
+    )
+)
+def test_Set_raises_logical_data(ld, expected):
+    ld.seek(1)
     with pytest.raises(EFLR.ExceptionEFLRSet) as err:
         EFLR.Set(ld)
     assert err.value.args[0] == expected
@@ -259,8 +288,7 @@ TEMPLATE_BYTES = (
     )
 )
 def test_Template(ld):
-    template = EFLR.Template()
-    template.read(ld)
+    template = EFLR.Template(ld)
     assert ld.remain == 1  # Object byte terminates template
     assert len(template.attrs) == 5
     expected = {
@@ -280,8 +308,7 @@ def test_Template(ld):
     )
 )
 def test_Template_eq(ld):
-    template = EFLR.Template()
-    template.read(ld)
+    template = EFLR.Template(ld)
     assert template == template
     assert template != 1
 
@@ -293,8 +320,7 @@ def test_Template_eq(ld):
     )
 )
 def test_Template_header_as_strings(ld):
-    template = EFLR.Template()
-    template.read(ld)
+    template = EFLR.Template(ld)
     expected = ['LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION']
     assert template.header_as_strings(stringify.stringify_object_by_type) == expected
 
@@ -350,17 +376,15 @@ OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
 @pytest.mark.parametrize('eflr_data', OBJECT_DATA_FROM_STANDARD)
 def test_Object(eflr_data: DataForEFLR):
     eflr_data.rewind()
-    template = EFLR.Template()
-    template.read(eflr_data.template)
+    template = EFLR.Template(eflr_data.template)
     obj = EFLR.Object(eflr_data.object, template)
     assert obj.name == RepCode.ObjectName(O=0, C=0, I=b'TIME')
     assert eflr_data.object.remain == 1  # Object byte terminates template
 
 
 def test_Object_attr_label_map():
-    template = EFLR.Template()
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj.attr_label_map == {
         b'LONG-NAME': 0,
@@ -372,17 +396,15 @@ def test_Object_attr_label_map():
 
 
 def test_Object_getitem_index():
-    template = EFLR.Template()
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[0].value == [ObjectName(O=0, C=0, I=b'1')]
 
 
 def test_Object_getitem_label():
-    template = EFLR.Template()
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[b'LONG-NAME'].value == [ObjectName(O=0, C=0, I=b'1')]
 

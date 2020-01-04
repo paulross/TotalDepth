@@ -498,6 +498,12 @@ def html_write_body(
                 xhtml_stream.characters(' '.join(header))
             with XmlWrite.Element(xhtml_stream, 'p'):
                 xhtml_stream.characters(f'Location: {eflr_position.lrsh_position}')
+            with XmlWrite.Element(xhtml_stream, 'p'):
+                xhtml_stream.characters(
+                    f'Logical Data consumed to create: Set: {eflr_position.eflr.set.logical_data_consumed}'
+                    f' Template: {eflr_position.eflr.template.logical_data_consumed}'
+                    f' Complete EFLR: {eflr_position.eflr.logical_data_consumed}'
+                )
             if eflr_position.eflr.set.type == b'FILE-HEADER':
                 obj = eflr_position.eflr.objects[0]
                 with XmlWrite.Element(xhtml_stream, 'p'):
