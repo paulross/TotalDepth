@@ -800,7 +800,7 @@ Generates HTML from input LIS file or directory to an output destination."""
     optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
                       help="Process input recursively. [default: %default]")
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -846,7 +846,7 @@ Generates HTML from input LIS file or directory to an output destination."""
     print('plotLogInfo:')
     print(str(myResult))
     print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
-    print('Exec. time = %8.3f (S)' % (time.time() - timStart))
+    print('Exec. time = %8.3f (S)' % (time.perf_counter() - timStart))
     print('Bye, bye!')
     return 0
 
