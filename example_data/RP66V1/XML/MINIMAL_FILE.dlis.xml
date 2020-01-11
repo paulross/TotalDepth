@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding="utf-8"?>
+<RP66V1FileIndex creator="TotalDepth.RP66V1.IndexXML" path="example_data/RP66V1/data/MINIMAL_FILE.dlis" schema_version="0.1.0" size="716" utc_file_mtime="2020-01-01 11:08:33.877573" utc_now="2020-01-11 10:45:10.737654">
+  <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="              +++TIF@C:\INSITE\Data\ExpFiles\VA2456~1.DLI+++" storage_unit_structure="RECORD"/>
+  <LogicalFiles count="1">
+    <LogicalFile has_log_pass="False" index="0">
+      <EFLR lr_type="0" lrsh_position="0x54" object_count="1" set_name="" set_type="FILE-HEADER" vr_position="0x50">
+        <Object C="0" I="1" O="2">
+          <Attribute count="1" label="SEQUENCE-NUMBER" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="0000000001"/>
+          </Attribute>
+          <Attribute count="1" label="ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE.1                                                     "/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="1" lrsh_position="0xd0" object_count="1" set_name="" set_type="ORIGIN" vr_position="0x50">
+        <Object C="0" I="0" O="2">
+          <Attribute count="1" label="FILE-ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE.1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-SET-NAME" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="BURU ENERGY LIMITED/VALHALLA NORTH 1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-SET-NUMBER" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="257346645"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-NUMBER" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-TYPE" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="PLAYBACK"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCT" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE"/>
+          </Attribute>
+          <Attribute count="1" label="VERSION" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="R5.1.4"/>
+          </Attribute>
+          <Attribute count="0" label="PROGRAMS" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="CREATION-TIME" rc="21" rc_ascii="DTIME" units="">
+            <Value type="TotalDepth.RP66V1.core.RepCode.DateTime" value="2012-03-07 10:00:49.000 STD"/>
+          </Attribute>
+          <Attribute count="1" label="ORDER-NUMBER" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="9262611"/>
+          </Attribute>
+          <Attribute count="0" label="DESCENT-NUMBER" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="0" label="RUN-NUMBER" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="WELL-ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+          <Attribute count="1" label="WELL-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA NORTH 1"/>
+          </Attribute>
+          <Attribute count="1" label="FIELD-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCER-CODE" rc="16" rc_ascii="UNORM" units="">
+            <Value type="int" value="280"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCER-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Halliburton"/>
+          </Attribute>
+          <Attribute count="1" label="COMPANY" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="BURU ENERGY LIMITED"/>
+          </Attribute>
+          <Attribute count="0" label="NAME-SPACE-NAME" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="0" label="NAME-SPACE-VERSION" rc="19" rc_ascii="IDENT" units=""/>
+        </Object>
+      </EFLR>
+    </LogicalFile>
+  </LogicalFiles>
+  <VisibleRecords count="2" rle_len="1">
+    <RLE datum="0x50" repeat="1" stride="0x0"/>
+  </VisibleRecords>
+</RP66V1FileIndex>

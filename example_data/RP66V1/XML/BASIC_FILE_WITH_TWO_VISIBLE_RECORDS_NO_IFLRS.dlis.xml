@@ -1,0 +1,1124 @@
+<?xml version='1.0' encoding="utf-8"?>
+<RP66V1FileIndex creator="TotalDepth.RP66V1.IndexXML" path="example_data/RP66V1/data/BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis" schema_version="0.1.0" size="8826" utc_file_mtime="2020-01-01 11:08:33.877230" utc_now="2020-01-11 10:45:10.715103">
+  <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="              +++TIF@C:\INSITE\Data\ExpFiles\VA2456~1.DLI+++" storage_unit_structure="RECORD"/>
+  <LogicalFiles count="1">
+    <LogicalFile has_log_pass="False" index="0">
+      <EFLR lr_type="0" lrsh_position="0x54" object_count="1" set_name="" set_type="FILE-HEADER" vr_position="0x50">
+        <Object C="0" I="1" O="2">
+          <Attribute count="1" label="SEQUENCE-NUMBER" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="0000000001"/>
+          </Attribute>
+          <Attribute count="1" label="ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE.1                                                     "/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="1" lrsh_position="0xd0" object_count="1" set_name="" set_type="ORIGIN" vr_position="0x50">
+        <Object C="0" I="0" O="2">
+          <Attribute count="1" label="FILE-ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE.1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-SET-NAME" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="BURU ENERGY LIMITED/VALHALLA NORTH 1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-SET-NUMBER" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="257346645"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-NUMBER" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="FILE-TYPE" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="PLAYBACK"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCT" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="HES INSITE"/>
+          </Attribute>
+          <Attribute count="1" label="VERSION" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="R5.1.4"/>
+          </Attribute>
+          <Attribute count="0" label="PROGRAMS" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="CREATION-TIME" rc="21" rc_ascii="DTIME" units="">
+            <Value type="TotalDepth.RP66V1.core.RepCode.DateTime" value="2012-03-07 10:00:49.000 STD"/>
+          </Attribute>
+          <Attribute count="1" label="ORDER-NUMBER" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="9262611"/>
+          </Attribute>
+          <Attribute count="0" label="DESCENT-NUMBER" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="0" label="RUN-NUMBER" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="WELL-ID" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+          <Attribute count="1" label="WELL-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA NORTH 1"/>
+          </Attribute>
+          <Attribute count="1" label="FIELD-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCER-CODE" rc="16" rc_ascii="UNORM" units="">
+            <Value type="int" value="280"/>
+          </Attribute>
+          <Attribute count="1" label="PRODUCER-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Halliburton"/>
+          </Attribute>
+          <Attribute count="1" label="COMPANY" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="BURU ENERGY LIMITED"/>
+          </Attribute>
+          <Attribute count="0" label="NAME-SPACE-NAME" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="0" label="NAME-SPACE-VERSION" rc="19" rc_ascii="IDENT" units=""/>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="4" lrsh_position="0x2cc" object_count="1" set_name="" set_type="FRAME" vr_position="0x50">
+        <Object C="0" I="50" O="2">
+          <Attribute count="0" label="DESCRIPTION" rc="20" rc_ascii="ASCII" units=""/>
+          <Attribute count="5" label="CHANNELS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="DEPT" O="2"/>
+            <ObjectName C="0" I="TENS" O="2"/>
+            <ObjectName C="0" I="ETIM" O="2"/>
+            <ObjectName C="0" I="DHTN" O="2"/>
+            <ObjectName C="0" I="GR" O="2"/>
+          </Attribute>
+          <Attribute count="1" label="INDEX-TYPE" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="BOREHOLE-DEPTH"/>
+          </Attribute>
+          <Attribute count="1" label="DIRECTION" rc="19" rc_ascii="IDENT" units="">
+            <Value type="bytes" value="INCREASING"/>
+          </Attribute>
+          <Attribute count="1" label="SPACING" rc="7" rc_ascii="FDOUBL" units="m">
+            <Value type="float" value="0.1"/>
+          </Attribute>
+          <Attribute count="0" label="ENCRYPTED" rc="15" rc_ascii="USHORT" units=""/>
+          <Attribute count="0" label="INDEX-MIN" rc="7" rc_ascii="FDOUBL" units=""/>
+          <Attribute count="0" label="INDEX-MAX" rc="7" rc_ascii="FDOUBL" units=""/>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="5" lrsh_position="0x398" object_count="62" set_name="" set_type="PARAMETER" vr_position="0x50">
+        <Object C="0" I="LOC" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATION"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LATITUDE: 18DEG 01&apos; 32.8&apos;&apos; S"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="SVCO" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="SERVICECONAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Halliburton"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="IQVR" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="WLIQ VERSION"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="R3.2.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="STAT" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="STATE NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="WA"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="COUN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="COUNTRY NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="AUSTRALIA"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="SON" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="JOB NUMBER"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="9262611"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="SECT" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="SECTION"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="TOWN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="TOWNSHIP"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RANG" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RANGE"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="APIN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="API S/N"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="N/A"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="CN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="CUSTOMER NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="BURU ENERGY LIMITED"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="WN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="WELL NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA NORTH 1"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="FIELD NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="VALHALLA"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RIG" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RIG NAME"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="ENSIGN RIG #32"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="PDAT" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="PERMANENT DATUM"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="MSL"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="LMF" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOG MEAS FROM"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RT"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DMF" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DRILL MEAS FROM"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RT"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FL1" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATIONLINE1"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LATITUDE: 18DEG 01&apos; 32.8&apos;&apos; S"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FL2" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATIONLINE2"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LONGITUDE: 124DEG 43&apos; 47.1&apos;&apos; E"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FL3" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATIONLINE3"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="EASTING: 683112"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FL4" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATIONLINE4"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="NORTHING: 8006107"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="FL5" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="LOCATIONLINE5"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="GDA ZONE 51"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DATE" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DATE"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="06-Mar-2012"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="LCC" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="PRODUCER-CODE"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="280"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="EDF" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DF ELEV"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="114.9000015258789"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="EPD" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="ELEVATION"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="EGL" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="GL ELEV"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="109.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="GVFD" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="GRAVITY FIELD"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="g">
+            <Value type="float" value="1.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="EKB" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="KB ELEV"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="114.9000015258789"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="TVDS" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="TVDSS CORRECTN"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="5.90000057220459"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="APD" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DEPTH ABOVE PD"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="5.90000057220459"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DDEV" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="MAX INC"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="deg">
+            <Value type="float" value="1.8200000524520874"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DDEG" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="MAX INC DEPTH"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="2225.169921875"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Serial_Number" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Serial Number"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="PROT01"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Tool_Class" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Tool Class"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Surface Panels"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Max_Temp" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Max Temp"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="degC">
+            <Value type="float" value="48.900001525878906"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Max_Speed" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Max Speed"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mpm">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Max_Pressure" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Max Pressure"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="psia">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Tool_Length" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Tool Length"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Tool_Diameter" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Tool Diameter"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mm">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Tool_Weight" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Tool Weight"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="lbs">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DEP_Position" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel Position"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Serial_Number" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Serial Number"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="11435221"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Tool_Class" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Tool Class"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Cable Head"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Max_Temp" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Max Temp"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="degC">
+            <Value type="float" value="204.39999389648438"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Max_Speed" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Max Speed"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mpm">
+            <Value type="float" value="91.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Max_Pressure" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Max Pressure"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="psia">
+            <Value type="float" value="20000.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Tool_Length" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Tool Length"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="1.899999976158142"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Tool_Diameter" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Tool Diameter"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mm">
+            <Value type="float" value="92.07499694824219"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Tool_Weight" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Tool Weight"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="lbs">
+            <Value type="float" value="135.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Position" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Position"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH_Accum_Length" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH Accum Length"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="34.720001220703125"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Serial_Number" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Serial Number"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="434"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Tool_Class" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Tool Class"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DITS"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Max_Temp" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Max Temp"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="degC">
+            <Value type="float" value="176.6999969482422"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Max_Speed" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Max Speed"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mpm">
+            <Value type="float" value="18.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Max_Pressure" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Max Pressure"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="psia">
+            <Value type="float" value="20000.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Tool_Length" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Tool Length"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="2.049999952316284"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Tool_Diameter" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Tool Diameter"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="mm">
+            <Value type="float" value="92.07499694824219"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Tool_Weight" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Tool Weight"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="lbs">
+            <Value type="float" value="110.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Position" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Position"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="0.0"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG_Accum_Length" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG Accum Length"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="ZONES" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="VALUES" rc="2" rc_ascii="FSINGL" units="m">
+            <Value type="float" value="27.639999389648438"/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="5" lrsh_position="0xf74" object_count="3" set_name="" set_type="TOOL" vr_position="0x50">
+        <Object C="0" I="DEP" O="2">
+          <Attribute count="1" label="DESCRIPTION" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth Panel for WL Insite System"/>
+          </Attribute>
+          <Attribute count="1" label="TRADEMARK-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Depth_Panel"/>
+          </Attribute>
+          <Attribute count="1" label="GENERIC-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DEP"/>
+          </Attribute>
+          <Attribute count="0" label="PARTS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="STATUS" rc="26" rc_ascii="STATUS" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="2" label="CHANNELS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="TENS" O="2"/>
+            <ObjectName C="0" I="ETIM" O="2"/>
+          </Attribute>
+          <Attribute count="9" label="PARAMETERS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="DEP_Serial_Number" O="2"/>
+            <ObjectName C="0" I="DEP_Tool_Class" O="2"/>
+            <ObjectName C="0" I="DEP_Max_Temp" O="2"/>
+            <ObjectName C="0" I="DEP_Max_Speed" O="2"/>
+            <ObjectName C="0" I="DEP_Max_Pressure" O="2"/>
+            <ObjectName C="0" I="DEP_Tool_Length" O="2"/>
+            <ObjectName C="0" I="DEP_Tool_Diameter" O="2"/>
+            <ObjectName C="0" I="DEP_Tool_Weight" O="2"/>
+            <ObjectName C="0" I="DEP_Position" O="2"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="RWCH" O="2">
+          <Attribute count="1" label="DESCRIPTION" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Releasable Wireline Cable Head"/>
+          </Attribute>
+          <Attribute count="1" label="TRADEMARK-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH"/>
+          </Attribute>
+          <Attribute count="1" label="GENERIC-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="RWCH"/>
+          </Attribute>
+          <Attribute count="0" label="PARTS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="STATUS" rc="26" rc_ascii="STATUS" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="CHANNELS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="DHTN" O="2"/>
+          </Attribute>
+          <Attribute count="10" label="PARAMETERS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="RWCH_Serial_Number" O="2"/>
+            <ObjectName C="0" I="RWCH_Tool_Class" O="2"/>
+            <ObjectName C="0" I="RWCH_Max_Temp" O="2"/>
+            <ObjectName C="0" I="RWCH_Max_Speed" O="2"/>
+            <ObjectName C="0" I="RWCH_Max_Pressure" O="2"/>
+            <ObjectName C="0" I="RWCH_Tool_Length" O="2"/>
+            <ObjectName C="0" I="RWCH_Tool_Diameter" O="2"/>
+            <ObjectName C="0" I="RWCH_Tool_Weight" O="2"/>
+            <ObjectName C="0" I="RWCH_Position" O="2"/>
+            <ObjectName C="0" I="RWCH_Accum_Length" O="2"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="D4TG" O="2">
+          <Attribute count="1" label="DESCRIPTION" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DITS 4 Telemetry Gamma"/>
+          </Attribute>
+          <Attribute count="1" label="TRADEMARK-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG"/>
+          </Attribute>
+          <Attribute count="1" label="GENERIC-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="D4TG"/>
+          </Attribute>
+          <Attribute count="0" label="PARTS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="STATUS" rc="26" rc_ascii="STATUS" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="CHANNELS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="GR" O="2"/>
+          </Attribute>
+          <Attribute count="10" label="PARAMETERS" rc="23" rc_ascii="OBNAME" units="">
+            <ObjectName C="0" I="D4TG_Serial_Number" O="2"/>
+            <ObjectName C="0" I="D4TG_Tool_Class" O="2"/>
+            <ObjectName C="0" I="D4TG_Max_Temp" O="2"/>
+            <ObjectName C="0" I="D4TG_Max_Speed" O="2"/>
+            <ObjectName C="0" I="D4TG_Max_Pressure" O="2"/>
+            <ObjectName C="0" I="D4TG_Tool_Length" O="2"/>
+            <ObjectName C="0" I="D4TG_Tool_Diameter" O="2"/>
+            <ObjectName C="0" I="D4TG_Tool_Weight" O="2"/>
+            <ObjectName C="0" I="D4TG_Position" O="2"/>
+            <ObjectName C="0" I="D4TG_Accum_Length" O="2"/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="3" lrsh_position="0x12c6" object_count="5" set_name="" set_type="CHANNEL" vr_position="0x50">
+        <Object C="0" I="DEPT" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DEPT/Depth"/>
+          </Attribute>
+          <Attribute count="0" label="PROPERTIES" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="REPRESENTATION-CODE" rc="15" rc_ascii="USHORT" units="">
+            <Value type="int" value="7"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="ELEMENT-LIMIT" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="UNITS" rc="27" rc_ascii="UNITS" units="">
+            <Value type="bytes" value="m"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="0" label="SOURCE" rc="24" rc_ascii="OBJREF" units=""/>
+        </Object>
+        <Object C="0" I="TENS" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="TENS/Tension"/>
+          </Attribute>
+          <Attribute count="0" label="PROPERTIES" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="REPRESENTATION-CODE" rc="15" rc_ascii="USHORT" units="">
+            <Value type="int" value="2"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="ELEMENT-LIMIT" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="UNITS" rc="27" rc_ascii="UNITS" units="">
+            <Value type="bytes" value="lbs"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="SOURCE" rc="24" rc_ascii="OBJREF" units="">
+            <Value type="unknown" value="OBREF: O: b&apos;TOOL&apos; C: OBNAME: O: 2 C: 0 I: b&apos;DEP&apos;"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="ETIM" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="ETIM/Elapsed Time"/>
+          </Attribute>
+          <Attribute count="0" label="PROPERTIES" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="REPRESENTATION-CODE" rc="15" rc_ascii="USHORT" units="">
+            <Value type="int" value="7"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="ELEMENT-LIMIT" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="UNITS" rc="27" rc_ascii="UNITS" units="">
+            <Value type="bytes" value="min"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="SOURCE" rc="24" rc_ascii="OBJREF" units="">
+            <Value type="unknown" value="OBREF: O: b&apos;TOOL&apos; C: OBNAME: O: 2 C: 0 I: b&apos;DEP&apos;"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="DHTN" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="DHTN/CH Tension"/>
+          </Attribute>
+          <Attribute count="0" label="PROPERTIES" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="REPRESENTATION-CODE" rc="15" rc_ascii="USHORT" units="">
+            <Value type="int" value="2"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="ELEMENT-LIMIT" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="UNITS" rc="27" rc_ascii="UNITS" units="">
+            <Value type="bytes" value="lbs"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="SOURCE" rc="24" rc_ascii="OBJREF" units="">
+            <Value type="unknown" value="OBREF: O: b&apos;TOOL&apos; C: OBNAME: O: 2 C: 0 I: b&apos;RWCH&apos;"/>
+          </Attribute>
+        </Object>
+        <Object C="0" I="GR" O="2">
+          <Attribute count="1" label="LONG-NAME" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="GR/Gamma API"/>
+          </Attribute>
+          <Attribute count="0" label="PROPERTIES" rc="19" rc_ascii="IDENT" units=""/>
+          <Attribute count="1" label="REPRESENTATION-CODE" rc="15" rc_ascii="USHORT" units="">
+            <Value type="int" value="2"/>
+          </Attribute>
+          <Attribute count="1" label="DIMENSION" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="ELEMENT-LIMIT" rc="18" rc_ascii="UVARI" units="">
+            <Value type="int" value="1"/>
+          </Attribute>
+          <Attribute count="1" label="UNITS" rc="27" rc_ascii="UNITS" units="">
+            <Value type="bytes" value="api"/>
+          </Attribute>
+          <Attribute count="0" label="AXIS" rc="23" rc_ascii="OBNAME" units=""/>
+          <Attribute count="1" label="SOURCE" rc="24" rc_ascii="OBJREF" units="">
+            <Value type="unknown" value="OBREF: O: b&apos;TOOL&apos; C: OBNAME: O: 2 C: 0 I: b&apos;D4TG&apos;"/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="128" lrsh_position="0x1444" object_count="1" set_name="" set_type="280-FRAMESTEP-INFO" vr_position="0x50"/>
+      <EFLR lr_type="6" lrsh_position="0x14e6" object_count="1" set_name="" set_type="COMMENT" vr_position="0x50">
+        <Object C="0" I="52" O="2">
+          <Attribute count="1" label="TEXT" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="Location             - LATITUDE: 18DEG 01&apos; 32.8&apos;&apos; S&#013;&#010;ServiceCoName        -                Halliburton&#013;&#010;WLIQ Version         -                     R3.2.0&#013;&#010;State Name           -                         WA&#013;&#010;Country Name         -                  AUSTRALIA&#013;&#010;Job Number           -                    9262611&#013;&#010;Section              -                        N/A&#013;&#010;Township             -                        N/A&#013;&#010;Range                -                        N/A&#013;&#010;API S/N              -                        N/A&#013;&#010;DF Elev              -                    114.900 m&#013;&#010;Elevation            -                      0.000 m&#013;&#010;GL Elev              -                    109.000 m&#013;&#010;Gravity Field        -                      1.000 g&#013;&#010;KB Elev              -                    114.900 m&#013;&#010;Customer Name        -        BURU ENERGY LIMITED&#013;&#010;Well Name            -           VALHALLA NORTH 1&#013;&#010;Field Name           -                   VALHALLA&#013;&#010;Rig Name             -             ENSIGN RIG #32&#013;&#010;Permanent Datum      -                        MSL&#013;&#010;Log Meas From        -                         RT&#013;&#010;Drill Meas From      -                         RT&#013;&#010;TVDss Correctn       -                      5.900 m&#013;&#010;Depth above PD       -                      5.900 m&#013;&#010;Max Inc              -                      1.820 deg&#013;&#010;Max Inc Depth        -                   2225.170 m&#013;&#010;LocationLine1        - LATITUDE: 18DEG 01&apos; 32.8&apos;&apos; S&#013;&#010;LocationLine2        - LONGITUDE: 124DEG 43&apos; 47.1&apos;&apos; E&#013;&#010;LocationLine3        -            EASTING: 683112&#013;&#010;LocationLine4        -          NORTHING: 8006107&#013;&#010;LocationLine5        -                GDA ZONE 51&#013;&#010;Date                 -                06-Mar-2012&#013;&#010;"/>
+          </Attribute>
+        </Object>
+      </EFLR>
+      <EFLR lr_type="6" lrsh_position="0x1b82" object_count="1" set_name="" set_type="COMMENT" vr_position="0x50">
+        <Object C="0" I="53" O="2">
+          <Attribute count="1" label="TEXT" rc="20" rc_ascii="ASCII" units="">
+            <Value type="bytes" value="-START CURVE INFORMATION XML-&#013;&#010;&lt;xml version = &quot;1&quot; missingfloat = &quot;-999.250000&quot; missinginteger = &quot;-999&quot; missingascii = &quot;&quot; Section_Name = &quot;RUN Well Based&quot; &gt;&#013;&#010;        &lt;curve name = &quot;Depth&quot; wellname = &quot;&quot; run = &quot;&quot; record = &quot;&quot; description = &quot;&quot; unit = &quot;m&quot; unittype = &quot;Depth&quot; format = &quot;F&quot; size = &quot;8&quot; specialbits = &quot;&quot; decimalplaces = &quot;4&quot; optionliststring = &quot;false&quot; XUnit = &quot;&quot; XStart = &quot;&quot; XEnd = &quot;&quot; YType = &quot;&quot; &gt; &lt;/curve&gt;&#013;&#010;        &lt;curve name = &quot;Tension&quot; wellname = &quot;VALH N1 S6 RDT&quot; run = &quot;Descriptor_run&quot; record = &quot;R:WLIQ Surface&quot; description = &quot;Descriptor_data&quot; unit = &quot;lbs&quot; unittype = &quot;Wireline tens&quot; format = &quot;F&quot; size = &quot;4&quot; specialbits = &quot;&quot; decimalplaces = &quot;1&quot; optionliststring = &quot;false&quot; XUnit = &quot;&quot; XStart = &quot;&quot; XEnd = &quot;&quot; YType = &quot;&quot; &gt; &lt;/curve&gt;&#013;&#010;        &lt;curve name = &quot;Elapsed Time&quot; wellname = &quot;VALH N1 S6 RDT&quot; run = &quot;Descriptor_run&quot; record = &quot;R:WLIQ Surface&quot; description = &quot;Descriptor_data&quot; unit = &quot;min&quot; unittype = &quot;Interval time&quot; format = &quot;F&quot; size = &quot;8&quot; specialbits = &quot;C&quot; decimalplaces = &quot;-1&quot; optionliststring = &quot;false&quot; XUnit = &quot;&quot; XStart = &quot;&quot; XEnd = &quot;&quot; YType = &quot;&quot; &gt; &lt;/curve&gt;&#013;&#010;        &lt;curve name = &quot;DH Tension&quot; wellname = &quot;VALH N1 S6 RDT&quot; run = &quot;Descriptor_run&quot; record = &quot;R:DH Tension&quot; description = &quot;Descriptor_data&quot; unit = &quot;lbs&quot; unittype = &quot;Wireline tens&quot; format = &quot;F&quot; size = &quot;4&quot; specialbits = &quot;&quot; decimalplaces = &quot;1&quot; optionliststring = &quot;false&quot; XUnit = &quot;&quot; XStart = &quot;&quot; XEnd = &quot;&quot; YType = &quot;&quot; &gt; &lt;/curve&gt;&#013;&#010;        &lt;curve name = &quot;Gamma Ray&quot; wellname = &quot;VALH N1 S6 RDT&quot; run = &quot;Descriptor_run&quot; record = &quot;R:Gamma Ray&quot; description = &quot;Descriptor_data&quot; unit = &quot;api&quot; unittype = &quot;API&quot; format = &quot;F&quot; size = &quot;4&quot; specialbits = &quot;&quot; decimalplaces = &quot;2&quot; optionliststring = &quot;false&quot; XUnit = &quot;&quot; XStart = &quot;&quot; XEnd = &quot;&quot; YType = &quot;&quot; &gt; &lt;/curve&gt;&#013;&#010;&lt;/xml&gt;&#013;&#010;-END CURVE INFORMATION XML-"/>
+          </Attribute>
+        </Object>
+      </EFLR>
+    </LogicalFile>
+  </LogicalFiles>
+  <VisibleRecords count="9" rle_len="1">
+    <RLE datum="0x50" repeat="8" stride="0x0"/>
+  </VisibleRecords>
+</RP66V1FileIndex>

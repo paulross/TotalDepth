@@ -8,17 +8,15 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import File, LogPass
+from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
 from TotalDepth.RP66V1.core import LogicalRecord
 from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.RP66V1.core.Index import ExceptionIndex
 from TotalDepth.RP66V1.core.XAxis import IFLRReference
 from TotalDepth.common import process
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import Rle
-from TotalDepth.common import xml
 from TotalDepth.util import DirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
@@ -225,7 +223,7 @@ def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.
 
 def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream, private: bool) -> None:
     with XmlWrite.Element(xml_stream, 'LogicalFile', {
-        'has_log_pass': str(logical_file.log_pass is not None),
+        'has_log_pass': str(logical_file.has_log_pass),
         'index': f'{logical_file_index:d}',
         # 'schema_version': XML_SCHEMA_VERSION,
     }):
@@ -242,7 +240,7 @@ def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile
                 if private or LogicalRecord.Types.is_public(eflr.lr_type):
                     for obj in eflr.objects:
                         _write_xml_eflr_object(obj, xml_stream)
-        if logical_file.log_pass is not None:
+        if logical_file.has_log_pass:
             log_pass_to_XML(logical_file.log_pass, logical_file.iflr_position_map, xml_stream)
 
 

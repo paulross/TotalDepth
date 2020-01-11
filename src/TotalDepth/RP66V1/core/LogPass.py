@@ -331,14 +331,22 @@ class LogPass:
         self.frame_arrays: typing.List[FrameArray] = []
         self.frame_array_map: typing.Dict[typing.Hashable, int] = {}
 
+    def _invariant(self) -> bool:
+        return len(self.frame_arrays) == len(self.frame_array_map)
+
     def has(self, key: typing.Hashable) -> bool:
+        """Returns True if the key is in the Frame Array Map."""
+        assert self._invariant()
         return key in self.frame_array_map
 
     def keys(self) -> typing.Iterable:
+        """The identities of the Frame Arrays."""
+        assert self._invariant()
         return self.frame_array_map.keys()
 
     def append(self, frame_array: FrameArray) -> None:
         """Add a channel to the Array."""
+        assert self._invariant()
         if self.has(frame_array.ident):
             raise ExceptionLogPassInit(f'Duplicate FrameArray identity {frame_array.ident}')
         else:
@@ -346,6 +354,7 @@ class LogPass:
             self.frame_arrays.append(frame_array)
 
     def __str__(self) -> str:
+        assert self._invariant()
         lines = [
             f'LogPass:'
         ]
@@ -354,9 +363,13 @@ class LogPass:
         return '\n'.join(lines)
 
     def __len__(self) -> int:
+        """The number of Frame Arrays."""
+        assert self._invariant()
         return len(self.frame_arrays)
 
     def __getitem__(self, item: typing.Union[int, RepCode.ObjectName]) -> FrameArray:
+        """The Frame Array by index or ID."""
+        assert self._invariant()
         if item in self.frame_array_map:
             return self.frame_arrays[self.frame_array_map[item]]
         return self.frame_arrays[item]

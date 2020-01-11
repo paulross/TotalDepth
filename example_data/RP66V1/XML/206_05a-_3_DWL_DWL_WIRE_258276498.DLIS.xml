@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<RP66V1FileIndex creator="TotalDepth.RP66V1.core.Index" path="example_data/RP66V1/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" schema_version="0.1.0" size="540372" utc_file_mtime="2019-06-22 09:10:59.512253" utc_now="2019-10-28 11:58:55.799047">
+<RP66V1FileIndex creator="TotalDepth.RP66V1.IndexXML" path="example_data/RP66V1/data/206_05a-_3_DWL_DWL_WIRE_258276498.DLIS" schema_version="0.1.0" size="540372" utc_file_mtime="2020-01-01 11:08:33.876212" utc_now="2020-01-11 10:45:10.473224">
   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1" storage_set_identifier="Default Storage Set                                         " storage_unit_structure="RECORD"/>
   <LogicalFiles count="1">
     <LogicalFile has_log_pass="True" index="0">
@@ -7408,21 +7408,69 @@
       </LogPass>
     </LogicalFile>
   </LogicalFiles>
-  <VisibleRecords count="66" rle_len="15">
-    <RLE datum="0x50" repeat="3" stride="0x2000"/>
-    <RLE datum="0x804c" repeat="5" stride="0x2000"/>
-    <RLE datum="0x14044" repeat="4" stride="0x2000"/>
-    <RLE datum="0x1e03c" repeat="10" stride="0x2000"/>
-    <RLE datum="0x34018" repeat="3" stride="0x2000"/>
-    <RLE datum="0x3c004" repeat="3" stride="0x2000"/>
-    <RLE datum="0x43ff4" repeat="3" stride="0x2000"/>
-    <RLE datum="0x4bfe4" repeat="3" stride="0x2000"/>
-    <RLE datum="0x53fd4" repeat="2" stride="0x2000"/>
-    <RLE datum="0x59fc0" repeat="4" stride="0x2000"/>
-    <RLE datum="0x63fb4" repeat="2" stride="0x2000"/>
-    <RLE datum="0x69fa0" repeat="3" stride="0x2000"/>
-    <RLE datum="0x71f90" repeat="3" stride="0x2000"/>
-    <RLE datum="0x79f80" repeat="3" stride="0x2000"/>
-    <RLE datum="0x81f70" repeat="0" stride="0x0"/>
+  <VisibleRecords count="3252" rle_len="63">
+    <RLE datum="0x50" repeat="8" stride="0x0"/>
+    <RLE datum="0x2050" repeat="1" stride="0x0"/>
+    <RLE datum="0x4050" repeat="1" stride="0x2000"/>
+    <RLE datum="0x804c" repeat="6" stride="0x0"/>
+    <RLE datum="0xa04c" repeat="4" stride="0x0"/>
+    <RLE datum="0x1004c" repeat="1" stride="0x0"/>
+    <RLE datum="0x1204c" repeat="28" stride="0x0"/>
+    <RLE datum="0x14044" repeat="57" stride="0x0"/>
+    <RLE datum="0x16044" repeat="58" stride="0x0"/>
+    <RLE datum="0x18044" repeat="57" stride="0x0"/>
+    <RLE datum="0x1a044" repeat="56" stride="0x0"/>
+    <RLE datum="0x1c044" repeat="55" stride="0x0"/>
+    <RLE datum="0x1e03c" repeat="57" stride="0x0"/>
+    <RLE datum="0x2003c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2203c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2403c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2603c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2803c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2a03c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2c03c" repeat="56" stride="0x0"/>
+    <RLE datum="0x2e03c" repeat="56" stride="0x0"/>
+    <RLE datum="0x3003c" repeat="56" stride="0x0"/>
+    <RLE datum="0x3203c" repeat="56" stride="0x0"/>
+    <RLE datum="0x34018" repeat="55" stride="0x0"/>
+    <RLE datum="0x36018" repeat="57" stride="0x0"/>
+    <RLE datum="0x38018" repeat="56" stride="0x0"/>
+    <RLE datum="0x3a018" repeat="56" stride="0x0"/>
+    <RLE datum="0x3c004" repeat="56" stride="0x0"/>
+    <RLE datum="0x3e004" repeat="57" stride="0x0"/>
+    <RLE datum="0x40004" repeat="56" stride="0x0"/>
+    <RLE datum="0x42004" repeat="55" stride="0x0"/>
+    <RLE datum="0x43ff4" repeat="56" stride="0x0"/>
+    <RLE datum="0x45ff4" repeat="57" stride="0x0"/>
+    <RLE datum="0x47ff4" repeat="56" stride="0x0"/>
+    <RLE datum="0x49ff4" repeat="55" stride="0x0"/>
+    <RLE datum="0x4bfe4" repeat="57" stride="0x0"/>
+    <RLE datum="0x4dfe4" repeat="56" stride="0x0"/>
+    <RLE datum="0x4ffe4" repeat="56" stride="0x0"/>
+    <RLE datum="0x51fe4" repeat="55" stride="0x0"/>
+    <RLE datum="0x53fd4" repeat="56" stride="0x0"/>
+    <RLE datum="0x55fd4" repeat="57" stride="0x0"/>
+    <RLE datum="0x57fd4" repeat="56" stride="0x0"/>
+    <RLE datum="0x59fc0" repeat="56" stride="0x0"/>
+    <RLE datum="0x5bfc0" repeat="56" stride="0x0"/>
+    <RLE datum="0x5dfc0" repeat="57" stride="0x0"/>
+    <RLE datum="0x5ffc0" repeat="55" stride="0x0"/>
+    <RLE datum="0x61fc0" repeat="55" stride="0x0"/>
+    <RLE datum="0x63fb4" repeat="57" stride="0x0"/>
+    <RLE datum="0x65fb4" repeat="57" stride="0x0"/>
+    <RLE datum="0x67fb4" repeat="55" stride="0x0"/>
+    <RLE datum="0x69fa0" repeat="56" stride="0x0"/>
+    <RLE datum="0x6bfa0" repeat="57" stride="0x0"/>
+    <RLE datum="0x6dfa0" repeat="56" stride="0x0"/>
+    <RLE datum="0x6ffa0" repeat="55" stride="0x0"/>
+    <RLE datum="0x71f90" repeat="56" stride="0x0"/>
+    <RLE datum="0x73f90" repeat="56" stride="0x0"/>
+    <RLE datum="0x75f90" repeat="57" stride="0x0"/>
+    <RLE datum="0x77f90" repeat="55" stride="0x0"/>
+    <RLE datum="0x79f80" repeat="56" stride="0x0"/>
+    <RLE datum="0x7bf80" repeat="57" stride="0x0"/>
+    <RLE datum="0x7df80" repeat="56" stride="0x0"/>
+    <RLE datum="0x7ff80" repeat="55" stride="0x0"/>
+    <RLE datum="0x81f70" repeat="55" stride="0x0"/>
   </VisibleRecords>
 </RP66V1FileIndex>
