@@ -178,9 +178,10 @@ def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_
 
 def html_write_table(table_as_strings: typing.List[typing.List[str]],
                      xhtml_stream: XmlWrite.XhtmlStream,
-                     class_style) -> None:
+                     class_style,
+                     **kwargs) -> None:
     if len(table_as_strings):
-        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}):
+        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}.update(kwargs)):
             with XmlWrite.Element(xhtml_stream, 'tr', {}):
                 for cell in table_as_strings[0]:
                     with XmlWrite.Element(xhtml_stream, 'th', {'class': class_style}):
@@ -193,12 +194,14 @@ def html_write_table(table_as_strings: typing.List[typing.List[str]],
                             xhtml_stream.charactersWithBr(cell)
 
 
-def html_write_EFLR_as_table(eflr: EFLR.ExplicitlyFormattedLogicalRecord, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+        eflr = eflr_position.eflr
         if eflr.is_key_value():
             table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=True)
         else:
             table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=True)
-        html_write_table(table_as_strings, xhtml_stream, class_style='eflr')
+        html_write_table(table_as_strings, xhtml_stream, class_style='eflr',
+                         id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
 
 
 class HTMLFrameArraySummary(typing.NamedTuple):
@@ -528,7 +531,7 @@ def html_write_body(
                     xhtml_stream.characters(
                         f'Logical File Defining Origin "{obj.name.I.decode("ascii")}" O: {obj.name.O} C: {obj.name.C}:'
                     )
-            html_write_EFLR_as_table(eflr_position.eflr, xhtml_stream)
+            html_write_EFLR_as_table(eflr_position, xhtml_stream)
         with XmlWrite.Element(xhtml_stream, 'h3'):
             xhtml_stream.characters('Log Pass')
         if logical_file.has_log_pass:

@@ -82,7 +82,7 @@ class LogicalRecordIndex:
     @property
     def visible_record_positions(self) -> typing.List[int]:
         """A list of Visible Record positions. This is used by the XML index for example."""
-        return [v.position.vr_position for v  in self.lr_pos_desc]
+        return [v.position.vr_position for v in self.lr_pos_desc]
 
     def get_file_logical_data(self, index: int, offset: int = 0, length: int = -1) -> File.FileLogicalData:
         """

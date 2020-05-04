@@ -93,6 +93,13 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
         )
     with _output_section_header_trailer('RP66V1 Visible and LRSH Records', '*', os=fout):
         lrsh_dump = kwargs['lrsh_dump']
+        if lrsh_dump:
+            output = colorama.Fore.GREEN + f'LRSH is first of sequence and possibly last.'
+            fout.write(f'{output}\n')
+            output = colorama.Fore.RED + f'LRSH is last not first of sequence.'
+            fout.write(f'{output}\n')
+            output = colorama.Fore.YELLOW + f'LRSH is neither first or last sequence.'
+            fout.write(f'{output}\n')
         with File.FileRead(fobj) as rp66_file:
             vr_position = lr_position = 0
             count_vr = 0
@@ -111,11 +118,11 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
             }
             rle_visible_record_positions = Rle.RLE()
             rle_lrsh_positions = Rle.RLE()
-            for visible_record in rp66_file.iter_visible_records():
+            for v_index, visible_record in enumerate(rp66_file.iter_visible_records()):
                 vr_stride = visible_record.position - vr_position
                 rle_visible_record_positions.add(visible_record.position)
                 if verbose:
-                    fout.write(f'{visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}\n')
+                    fout.write(f'[{v_index:6d}] {visible_record} Stride: 0x{vr_stride:08x} {vr_stride:6,d}\n')
                 if lrsh_dump:
                     for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
                         count_lrsh_length.add(lrsh.length)
