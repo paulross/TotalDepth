@@ -29,7 +29,7 @@ class XAxisSpacingSummary(typing.NamedTuple):
     counts: XAxisSpacingCounts
     histogram: typing.Tuple[np.ndarray, np.ndarray]
 
-    def histogram_str(self, fmt='10.3', bar_width=80, char='*') -> str:
+    def histogram_str(self, fmt='13.6', bar_width=80, char='*') -> str:
         counts, values = self.histogram
         counts_max = counts.max()
         int_width = 2 + int(math.log10(counts_max))

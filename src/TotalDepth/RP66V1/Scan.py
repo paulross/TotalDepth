@@ -16,6 +16,7 @@ import collections
 import contextlib
 import logging
 import os
+import pprint
 import sys
 import time
 import typing
@@ -303,6 +304,8 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
             if verbose:
                 fout.write(' '.join(header) + '\n')
                 fout.write(' '.join(underline) + '\n')
+            eflr_count = iflr_count = 0
+            eflr_set_type_count = collections.defaultdict(int)
             for file_logical_data in rp66_file.iter_logical_records():
                 if file_logical_data.lr_is_eflr:
                     if file_logical_data.lr_is_encrypted:
@@ -322,6 +325,8 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                                 else:
                                     fout.write(line)
                                 fout.write('\n')
+                    eflr_count += 1
+                    eflr_set_type_count[eflr.set.type] +=1
                 else:
                     # IFLR
                     if iflr_dump and verbose:
@@ -337,6 +342,16 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                             if len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
                                 fout.write(str(iflr))
                                 fout.write('\n')
+                    iflr_count += 1
+            fout.write(f'Records counted in this run: EFLR: {eflr_count} IFLR: {iflr_count}\n')
+            # Pretty print histogram of EFLR set types
+            if len(eflr_set_type_count):
+                fw = max(len(repr(k)) for k in eflr_set_type_count)
+                fout.write(f'EFLR count of Set Type(s) [{len(eflr_set_type_count)}]:\n')
+                for k in sorted(eflr_set_type_count.keys()):
+                    fout.write(f'{k!r:{fw}}: {eflr_set_type_count[k]:6d}\n')
+            else:
+                fout.write(f'EFLR count of Set Type(s) {len(eflr_set_type_count)}:\n{pprint.pformat(eflr_set_type_count)}\n')
 
 
 def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:

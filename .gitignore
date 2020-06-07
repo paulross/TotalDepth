@@ -59,6 +59,7 @@ TotalDepth.egg-info/
 
 # Coverage artifacts
 .coverage
+.coverage.*
 htmlcov/
 
 # The contents is created when testing and have data that is randomly generated.
@@ -85,4 +86,5 @@ private/
 
 # Sphinx documentation
 docs/publish/_build/*
+
 

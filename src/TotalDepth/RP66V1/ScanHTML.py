@@ -269,26 +269,26 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
     html_write_table(x_axis_table, xhtml_stream, class_style='monospace')
     with XmlWrite.Element(xhtml_stream, 'h4'):
         xhtml_stream.characters('X Axis Spacing')
-    with XmlWrite.Element(xhtml_stream, 'p'):
-        xhtml_stream.characters(f'Definitions: {XAxis.SPACING_DEFINITIONS}')
-    x_spacing_table = [['X Axis Spacing', 'Value'],]
+    # with XmlWrite.Element(xhtml_stream, 'p'):
+    #     xhtml_stream.characters(f'Definitions: {XAxis.SPACING_DEFINITIONS}')
+    x_spacing_table = [['X Axis Spacing', 'Value', 'Description'],]
     if x_axis.summary.spacing is not None:
         spacing = x_axis.summary.spacing
-        x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]'])
-        x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]'])
-        x_spacing_table.append(['Median', f'{spacing.median} [{units}]'])
-        x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]'])
+        x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]', ''])
+        x_spacing_table.append(['Mean', f'{spacing.mean} [{units}]', ''])
+        x_spacing_table.append(['Median', f'{spacing.median} [{units}]', ''])
+        x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]', ''])
         if spacing.median != 0:
             x_spacing_table.append(
-                ['Range', f'{spacing.max - spacing.min} ({(spacing.max - spacing.min) / spacing.median:%}) [{units}]']
+                ['Range', f'{spacing.max - spacing.min} ({(spacing.max - spacing.min) / spacing.median:%}) [{units}]', '']
             )
         else:
-            x_spacing_table.append(['Range', f'{spacing.max - spacing.min} [{units}]'])
-        x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]'])
-        x_spacing_table.append(['Count of Normal', f'{spacing.counts.norm:,d}'])
-        x_spacing_table.append(['Count of Duplicate', f'{spacing.counts.dupe:,d}'])
-        x_spacing_table.append(['Count of Skipped', f'{spacing.counts.skip:,d}'])
-        x_spacing_table.append(['Count of Back', f'{spacing.counts.back:,d}'])
+            x_spacing_table.append(['Range', f'{spacing.max - spacing.min} [{units}]', ''])
+        x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]', ''])
+        x_spacing_table.append(['Count of back', f'{spacing.counts.back:,d}', 'spacing < -0.5 median'])
+        x_spacing_table.append(['Count of duplicate', f'{spacing.counts.dupe:,d}', '-0.5 median <= spacing < 0.5 median'])
+        x_spacing_table.append(['Count of normal', f'{spacing.counts.norm:,d}', '0.5 median <= spacing < 1.5 median'])
+        x_spacing_table.append(['Count of skipped', f'{spacing.counts.skip:,d}', 'spacing >= 1.5 median'])
     html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
     if x_axis.summary.spacing is not None:
         with XmlWrite.Element(xhtml_stream, 'p'):
@@ -333,8 +333,18 @@ def _write_frame_array_in_html(
                 f' [{stringify.stringify_object_by_type(frame_array.x_axis.units)}]'
             )
         with XmlWrite.Element(xhtml_stream, 'p'):
+            # xhtml_stream.characters(
+            #     f'Frame analysis on {frame_slice.long_str(len(iflrs))} frame(s).'
+            #     f' Frame size: {frame_array.sizeof_frame} bytes.'
+            #     f' Number of frames created: {num_frames}'
+            #     f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
+            # )
+            xhtml_stream.characters(f'Frame analysis on')
+            with XmlWrite.Element(xhtml_stream, 'tt'):
+                xhtml_stream.characters(f' {frame_slice.long_str(len(iflrs))}')
             xhtml_stream.characters(
-                f'Frame analysis on {frame_slice.long_str(len(iflrs))} frame(s).'
+                f' frame(s).'
+                f' Frame size: {frame_array.sizeof_frame} bytes.'
                 f' Number of frames created: {num_frames}'
                 f' Numpy total memory: {frame_array.sizeof_array:,d} bytes'
             )
