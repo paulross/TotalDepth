@@ -69,7 +69,7 @@ tests/unit/test_util/test_plot/test_svg/*
 gitignore/
 
 # Airspeed velocity benchmarks
-.asv/
+.asv/*
 
 # Generated binary files
 tests/integration/test_LIS/test_core/binary_files
