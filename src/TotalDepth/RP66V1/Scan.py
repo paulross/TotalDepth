@@ -94,11 +94,13 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
     with _output_section_header_trailer('RP66V1 Visible and LRSH Records', '*', os=fout):
         lrsh_dump = kwargs['lrsh_dump']
         if lrsh_dump:
-            output = colorama.Fore.GREEN + f'LRSH is first of sequence and possibly last.'
+            output = colorama.Fore.GREEN + f'LRSH first=True  last=True '
             fout.write(f'{output}\n')
-            output = colorama.Fore.RED + f'LRSH is last not first of sequence.'
+            output = colorama.Fore.LIGHTBLUE_EX + f'LRSH first=True  last=False'
             fout.write(f'{output}\n')
-            output = colorama.Fore.YELLOW + f'LRSH is neither first or last sequence.'
+            output = colorama.Fore.RED + f'LRSH first=False last=True  --'
+            fout.write(f'{output}\n')
+            output = colorama.Fore.YELLOW + f'LRSH first=False last=False ..'
             fout.write(f'{output}\n')
         with File.FileRead(fobj) as rp66_file:
             vr_position = lr_position = 0
@@ -133,11 +135,15 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
                                 count_lrsh_type['EFLR'].update([lrsh.record_type])
                             else:
                                 count_lrsh_type['IFLR'].update([lrsh.record_type])
-                            output = colorama.Fore.GREEN + f' {lrsh}'
-                        elif lrsh.attributes.is_last:
-                            output = colorama.Fore.RED + f'  --{lrsh}'
+                            if lrsh.attributes.is_last:
+                                output = colorama.Fore.GREEN + f' {lrsh}'
+                            else:
+                                output = colorama.Fore.LIGHTBLUE_EX + f' {lrsh}'
                         else:
-                            output = colorama.Fore.YELLOW + f'  ..{lrsh}'
+                            if lrsh.attributes.is_last:
+                                output = colorama.Fore.RED + f'  --{lrsh}'
+                            else:
+                                output = colorama.Fore.YELLOW + f'  ..{lrsh}'
                         if verbose:
                             lr_stride = lrsh.position - lr_position
                             fout.write(f'  {output} Stride: 0x{lr_stride:08x} {lr_stride:6,d}\n')
@@ -178,6 +184,71 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
                             _write_position_rle(rle_lrsh_positions, fout)
                         for length in sorted(count_lrsh_length.keys()):
                             fout.write(f'{length:3d} : {count_lrsh_length[length]:8,d}\n')
+
+
+class LRSHSummary(typing.NamedTuple):
+    vr_position: int
+    lrsh_position: int
+    lrsh_attributes: File.LogicalRecordSegmentHeaderAttributes
+    lrsh_record_type: int
+
+
+def scan_RP66V1_LRSH_consistency(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
+    """Look at the consistency of the sequence of LRSH."""
+    def _output(lrsh_summary: LRSHSummary, message: str, fout: typing.TextIO):
+        fout.write(f'VR: Ox{lrsh_summary.vr_position:08x} LRSH: Ox{lrsh_summary.lrsh_position:08x} {message}\n')
+
+    with _output_section_header_trailer('LRSH Consistency', '-', os=fout):
+        list_data = []
+        with File.FileRead(fobj) as rp66_file:
+            for visible_record in rp66_file.iter_visible_records():
+                for lrsh in rp66_file.iter_LRSHs_for_visible_record(visible_record):
+                    list_data.append(
+                        LRSHSummary(
+                            visible_record.position,
+                            lrsh.position,
+                            lrsh.attributes,
+                            lrsh.record_type,
+                        )
+                    )
+        output = colorama.Fore.GREEN + f'Number of LRSH: {len(list_data)}'
+        _output(list_data[0], output, fout)
+        if len(list_data):
+            if not list_data[0].lrsh_attributes.is_first:
+                output = colorama.Fore.RED + f'First record is not marked as first: {list_data[0].lrsh_attributes}'
+                _output(list_data[0], output, fout)
+            if not list_data[-1].lrsh_attributes.is_last:
+                output = colorama.Fore.RED + f'Last record is not marked as last: {list_data[-1].lrsh_attributes}'
+                _output(list_data[-1], output, fout)
+            for i in range(1, len(list_data) - 1):
+                if list_data[i].lrsh_attributes.is_first and not list_data[i - 1].lrsh_attributes.is_last:
+                    output = colorama.Fore.RED + f'Record [{i}] is marked as first but previous is not last.'
+                    _output(list_data[i], output, fout)
+                if list_data[i].lrsh_attributes.is_last and not list_data[i + 1].lrsh_attributes.is_first:
+                    output = colorama.Fore.RED + f'Record [{i}] is marked as last but next is not first.'
+                    _output(list_data[i], output, fout)
+            # Split list into lists of lists based on is_first flag.
+            list_of_lists = []
+            for lrsh_summary in list_data:
+                if lrsh_summary.lrsh_attributes.is_first:
+                    list_of_lists.append([lrsh_summary])
+                else:
+                    list_of_lists[-1].append(lrsh_summary)
+
+            output = colorama.Fore.GREEN + f'Number of LogicalRecords: {len(list_of_lists)}'
+            _output(list_data[0], output, fout)
+            for list_of_record in list_of_lists:
+                first_record = list_of_record[0]
+
+                data = {lsrh.lrsh_attributes.is_eflr for lsrh in list_of_record}
+                if len(data) > 1:
+                    output = colorama.Fore.RED + f'Multiple EFLR/IFLR flags: {data}.'
+                    _output(first_record, output, fout)
+
+                data = {lsrh.lrsh_record_type for lsrh in list_of_record}
+                if len(data) > 1:
+                    output = colorama.Fore.RED + f'Multiple Logical Record types: {data}.'
+                    _output(first_record, output, fout)
 
 
 def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
@@ -325,7 +396,10 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                     else:
                         eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
                         if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
-                            lines = str(eflr).split('\n')
+                            if verbose:
+                                lines = str(eflr.str_long()).split('\n')
+                            else:
+                                lines = str(eflr).split('\n')
                             for i, line in enumerate(lines):
                                 if i == 0:
                                     fout.write(colorama.Fore.MAGENTA + line + colorama.Style.RESET_ALL)
@@ -715,6 +789,11 @@ def main() -> int:
              ' Segment Headers, use -v to dump records. [default: %(default)s]',
     )
     parser.add_argument(
+        '--LRSH-consistency', action='store_true',
+        help='Check the consistency the Logical Record Segment Headers.' 
+             ' [default: %(default)s]',
+    )
+    parser.add_argument(
         '-D', '--LD', action='store_true',
         help='Summarise logical data, use -v to dump records.'
              ' See also --dump-bytes, --dump-raw-bytes. [default: %(default)s]',
@@ -817,6 +896,17 @@ def main() -> int:
             lrsh_dump=args.LRSH,
             verbose=args.verbose,
         )
+    if args.LRSH_consistency:
+        result = scan_dir_or_file(
+            args.path_in,
+            args.path_out,
+            scan_RP66V1_LRSH_consistency,
+            args.recurse,
+            output_extension,
+            # kwargs passed to scanning function
+            # lrsh_dump=args.LRSH,
+            verbose=args.verbose,
+        )
     if args.LD:
         result = scan_dir_or_file(
             args.path_in,
@@ -874,7 +964,10 @@ def main() -> int:
         idx_result = result[path]
         if idx_result.size_input > 0:
             ms_mb = idx_result.time * 1000 / (idx_result.size_input / 1024 ** 2)
-            ratio = idx_result.size_output / idx_result.size_input
+            if idx_result.size_output != -1:
+                ratio = idx_result.size_output / idx_result.size_input
+            else:
+                ratio = 0.0
             print(
                 f'{idx_result.size_input:16,d} {idx_result.size_output:10,d}'
                 f' {idx_result.time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'

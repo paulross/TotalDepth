@@ -654,6 +654,8 @@ REP_CODE_NUMPY_TYPE_MAP = {
     16: np.uint16,
     17: np.uint32,
     18: np.uint64,
+
+    26: np.uint8, # Boolean
 }
 assert set(REP_CODE_NUMPY_TYPE_MAP.keys()) - REP_CODES_SUPPORTED == set()
 

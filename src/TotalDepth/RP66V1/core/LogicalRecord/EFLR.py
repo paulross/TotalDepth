@@ -64,8 +64,6 @@ class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
 class Set:
     """Class that represents a component set. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, ld: LogicalData):
-        if ld.index != 0:
-            raise ExceptionEFLRSet(f'Trying to create a Set where the LogicalData {ld} index is non-zero.')
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_set_group:
             raise ExceptionEFLRSet(f'Component Descriptor does not represent a set but a {component_descriptor.type}.')
@@ -73,7 +71,6 @@ class Set:
         self.name: bytes = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_MAP['N'].global_default
         if component_descriptor.has_set_N:
             self.name = RepCode.IDENT(ld)
-        self.logical_data_consumed = ld.index
 
     def __str__(self) -> str:
         """String representation."""
@@ -178,10 +175,12 @@ class Attribute(AttributeBase):
 
 class Template:
     """Class that represents a component template. See [RP66V1 3.2.2.1 Component Descriptor]"""
-    def __init__(self, ld: LogicalData):
-        """Populate the template with the Logical Data."""
+    def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
+
+    def read(self, ld: LogicalData):
+        """Populate the template with the Logical Data."""
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
@@ -199,7 +198,6 @@ class Template:
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
                 break
-        self.logical_data_consumed = ld.index
 
     def __len__(self) -> int:
         """Return the number of columns described by this Template."""
@@ -382,9 +380,9 @@ class ExplicitlyFormattedLogicalRecord:
 
     def __init__(self, lr_type: int, ld: LogicalData):
         self.lr_type: int = lr_type
-        self.logical_data_consumed = 0
+        ld.rewind()
         self.set: Set = Set(ld)
-        self.template: Template = Template(ld)
+        self.template: Template = Template()
         # This object list contains all objects not including duplicates.
         self.objects: typing.List[Object] = []
         # This is the final object name map after de-duplication depending on the de-duplication strategy.
@@ -393,13 +391,15 @@ class ExplicitlyFormattedLogicalRecord:
         self.object_name_map: typing.Dict[RepCode.ObjectName, int] = {}
         temp_object_name_map: typing.Dict[RepCode.ObjectName, int] = {}
         dupes_to_remove: typing.List[int] = []
-        while ld:
-            obj = Object(ld, self.template)
-            if obj.name not in temp_object_name_map:
-                temp_object_name_map[obj.name] = len(self.objects)
-                self.objects.append(obj)
-            else:
-                self._handle_duplicate_object(obj, temp_object_name_map, dupes_to_remove)
+        if ld:
+            self.template.read(ld)
+            while ld:
+                obj = Object(ld, self.template)
+                if obj.name not in temp_object_name_map:
+                    temp_object_name_map[obj.name] = len(self.objects)
+                    self.objects.append(obj)
+                else:
+                    self._handle_duplicate_object(obj, temp_object_name_map, dupes_to_remove)
         # Clear out any duplicates then index those remaining.
         dupes_to_remove.sort()
         for i in reversed(dupes_to_remove):
@@ -408,7 +408,6 @@ class ExplicitlyFormattedLogicalRecord:
         assert len(self.object_name_map) == 0
         for i, obj in enumerate(self.objects):
             self.object_name_map[obj.name] = i
-        self.logical_data_consumed = ld.index
 
     def _handle_duplicate_object(self, obj: Object,
                                  temp_object_name_map: typing.Dict[RepCode.ObjectName, int],

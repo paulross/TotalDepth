@@ -26,6 +26,7 @@ class IndirectlyFormattedLogicalRecord:
     """
     def __init__(self, lr_type: int, ld: File.LogicalData):
         self.lr_type: int = lr_type
+        ld.rewind()
         # [RP66V1 Section 3.3 Indirectly Formatted Logical Record]
         self.object_name: RepCode.ObjectName = RepCode.OBNAME(ld)
         # [RP66V1 Section 5.6.1 Frames]
