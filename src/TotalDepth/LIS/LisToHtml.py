@@ -703,7 +703,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         except ExceptionTotalDepthLIS as err:
             logging.error('Can not create file and index: {!r:s}'.format(err))
             return
-        clkStart = time.clock()
+        clkStart = time.perf_counter()
         # Write the CSS is not already there
         self._writeCss(fpOut)
         numEntries = 0
@@ -740,11 +740,11 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                         __version__,
                         __date__,
                         __rights__,
-                        time.clock() - clkStart,
+                        time.perf_counter() - clkStart,
                         )
                     )
         # Update the counter
-        self._summary.add(fpIn, fpOut, numEntries, time.clock() - clkStart)
+        self._summary.add(fpIn, fpOut, numEntries, time.perf_counter() - clkStart)
                 
 def processFile(fpIn, fpOut, keepGoing):
     """Used by the multiprocessing code."""
@@ -845,8 +845,8 @@ Generates HTML from input LIS file or directory to an output destination."""
     #myResult.writeHTML(os.path.join(args[1], 'index.html'))
     print('plotLogInfo:')
     print(str(myResult))
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
-    print('Exec. time = %8.3f (S)' % (time.perf_counter() - timStart))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
+    print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0
 

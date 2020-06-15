@@ -110,6 +110,7 @@ ext_modules = [
             "src/TotalDepth/LIS/core/src/cpp/LISRepCode.cpp",
         ],
         extra_compile_args=extra_compile_args + [
+            "-Isrc/TotalDepth/LIS/core/src/cp/",
             "-Isrc/TotalDepth/LIS/core/src/cpp/",
             '-std=c++14',
         ],
