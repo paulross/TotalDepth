@@ -85,7 +85,10 @@ XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 #     module_list="src/TotalDepth/LIS/core/*.pyx",
 # )
 
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
+extra_compile_args = []
+cflags = sysconfig.get_config_var('CFLAGS')
+if cflags != None:
+    extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 
 ext_modules = [
     Extension(

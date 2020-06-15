@@ -9,4 +9,7 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-include src *.pyx
 
+graft src/TotalDepth/LIS/core/src/cp
+graft src/TotalDepth/LIS/core/src/cpp
+
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
