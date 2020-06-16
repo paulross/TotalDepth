@@ -358,14 +358,6 @@ class LogicalIndex:
                         self.logical_files[-1].add_iflr(file_logical_data, iflr)
                     # else:
                     #     logger.warning(f'Ignoring empty IFLR at {file_logical_data.position}')
-        for logical_file in self.logical_files:
-            # TODO:
-            seq = logical_file.file_header_logical_record.objects[0].attrs[0]
-            id_ = logical_file.file_header_logical_record.objects[0].attrs[1]
-            print('TRACE:')
-            print('TRACE:  ID:', id_)
-            print('TRACE: SEQ:', seq)
-            print('TRACE:')
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

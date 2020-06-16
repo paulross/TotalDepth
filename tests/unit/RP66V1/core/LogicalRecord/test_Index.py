@@ -160,6 +160,7 @@ def test_logical_record_index_pickle():
     fobj = io.BytesIO(test_data.BASIC_FILE)
     with Index.LogicalRecordIndex(fobj) as lr_index:
         pickled_index = pickle.dumps(lr_index)
-        # assert len(pickled_index) == 53106
+        assert len(lr_index) == 660
+        print(f'len(pickled_index) == {len(pickled_index)}')
         new_lr_index = pickle.loads(pickled_index)
         assert len(new_lr_index) == 660
