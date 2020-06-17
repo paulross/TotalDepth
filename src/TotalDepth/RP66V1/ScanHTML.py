@@ -302,7 +302,7 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
 
 def _write_frame_array_in_html(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: LogPass.FrameArray,
+        frame_array: LogPass.RP66V1FrameArray,
         frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,

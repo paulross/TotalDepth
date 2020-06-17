@@ -240,13 +240,13 @@ class LogicalFile:
             frame_array.x_axis.array.mean(),
         )
 
-    def num_frames(self, frame_array: LogPass.FrameArray) -> int:
+    def num_frames(self, frame_array: LogPass.RP66V1FrameArray) -> int:
         """Return the number of frames in the FrameArray"""
         return len(self.iflr_position_map[frame_array.ident])
 
     def populate_frame_array(
             self,
-            frame_array: LogPass.FrameArray,
+            frame_array: LogPass.RP66V1FrameArray,
             frame_slice: typing.Union[Slice.Slice, Slice.Sample, None] = None,
             channels: typing.Union[typing.Set[typing.Hashable], None] = None,
     ) -> int:

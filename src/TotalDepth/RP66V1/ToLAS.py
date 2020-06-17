@@ -212,7 +212,7 @@ def extract_well_information_from_origin(logical_file: LogicalFile.LogicalFile) 
 
 def _add_start_stop_step_to_dictionary(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: typing.Union[LogPass.FrameArray, None],
+        frame_array: typing.Union[LogPass.RP66V1FrameArray, None],
         frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         las_map: typing.Dict[str, UnitValueDescription]
 ):
@@ -245,7 +245,7 @@ def _add_start_stop_step_to_dictionary(
 
 def write_well_information_to_las(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: typing.Union[LogPass.FrameArray, None],
+        frame_array: typing.Union[LogPass.RP66V1FrameArray, None],
         frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         ostream: typing.TextIO,
     ) -> None:
@@ -342,7 +342,7 @@ def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
 
 
 def write_curve_section_to_las(
-        frame_array: LogPass.FrameArray,
+        frame_array: LogPass.RP66V1FrameArray,
         channels: typing.Set[str],
         ostream: typing.TextIO,
     ) -> None:
@@ -368,7 +368,7 @@ def write_curve_section_to_las(
 
 def write_array_section_to_las(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: LogPass.FrameArray,
+        frame_array: LogPass.RP66V1FrameArray,
         array_reduction: str,
         frame_slice: Slice.Slice,
         channels: typing.Set[str],

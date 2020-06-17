@@ -103,7 +103,7 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
             pass
 
 
-def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
+def frame_channel_to_XML(channel: LogPass.RP66V1FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML Channel node suitable for RP66V1.
 
     Example:
@@ -119,7 +119,7 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
         'long_name': f'{channel.long_name.decode("ascii")}',
         'rep_code': f'{channel.rep_code:d}',
         'units': f'{channel.units.decode("ascii")}',
-        'dimensions': ','.join(f'{v:d}' for v in channel.dimensions),
+        'shape': ','.join(f'{v:d}' for v in channel.shape),
         'count': f'{channel.count:d}',
     }
     with XmlWrite.Element(xml_stream, 'Channel', channel_attrs):
@@ -127,7 +127,7 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
 
 
 
-def frame_array_to_XML(frame_array: LogPass.FrameArray,
+def frame_array_to_XML(frame_array: LogPass.RP66V1FrameArray,
                        iflr_data: typing.Sequence[IFLRReference],
                        xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML FrameArray node suitable for RP66V1.
@@ -170,7 +170,7 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
     with XmlWrite.Element(xml_stream, 'FrameArray', frame_array_attrs):
         with XmlWrite.Element(xml_stream, 'Channels', {'count': f'{len(frame_array)}'}):
             for channel in frame_array.channels:
-                    frame_channel_to_XML(channel, xml_stream)
+                frame_channel_to_XML(channel, xml_stream)
         with XmlWrite.Element(xml_stream, 'IFLR', {'count' : f'{len(iflr_data)}'}):
             # Frame number output
             rle = Rle.create_rle(v.frame_number for v in iflr_data)
