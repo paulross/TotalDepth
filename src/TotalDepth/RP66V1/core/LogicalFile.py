@@ -305,8 +305,8 @@ class LogicalIndex:
         # Low level index of Logical Records. A reference to this is given to every LogicalFile
         self._logical_record_index = Index.LogicalRecordIndex(path_or_file)
         # TODO: Created from the FILE-HEADER values
-        # {ID : {SEQUENCE-NUMBER : index_into_self.logical_ffiels, ...}, ...}
-        self.sequence_map = typing.Dict[str, typing.Dict[int, int]]
+        # {ID : {SEQUENCE-NUMBER : index_into_self.logical_files, ...}, ...}
+        self.sequence_map: typing.Dict[str, typing.Dict[int, int]] = {}
 
     def __len__(self) -> int:
         """Returns the number of Logical Files."""

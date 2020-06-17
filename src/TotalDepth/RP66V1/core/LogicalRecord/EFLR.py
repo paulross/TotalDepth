@@ -64,6 +64,7 @@ class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
 class Set:
     """Class that represents a component set. See [RP66V1 3.2.2.1 Component Descriptor]"""
     def __init__(self, ld: LogicalData):
+        ld_index = ld.index
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_set_group:
             raise ExceptionEFLRSet(f'Component Descriptor does not represent a set but a {component_descriptor.type}.')
@@ -71,6 +72,7 @@ class Set:
         self.name: bytes = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_MAP['N'].global_default
         if component_descriptor.has_set_N:
             self.name = RepCode.IDENT(ld)
+        self.logical_data_consumed = ld.index - ld_index
 
     def __str__(self) -> str:
         """String representation."""
@@ -408,6 +410,7 @@ class ExplicitlyFormattedLogicalRecord:
         assert len(self.object_name_map) == 0
         for i, obj in enumerate(self.objects):
             self.object_name_map[obj.name] = i
+        self.logical_data_consumed = ld.index
 
     def _handle_duplicate_object(self, obj: Object,
                                  temp_object_name_map: typing.Dict[RepCode.ObjectName, int],

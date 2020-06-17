@@ -68,7 +68,7 @@ def test_Set_raises(ld, expected):
     (
         (
             LogicalData(b'\xf0\x07CHANNEL'),
-            'Trying to create a Set where the LogicalData <LogicalData Len: 0x9 Idx: 0x1> index is non-zero.',
+            'Component Descriptor does not represent a set but a Absent Attribute.',
         ),
     )
 )
@@ -288,7 +288,8 @@ TEMPLATE_BYTES = (
     )
 )
 def test_Template(ld):
-    template = EFLR.Template(ld)
+    template = EFLR.Template()
+    template.read(ld)
     assert ld.remain == 1  # Object byte terminates template
     assert len(template.attrs) == 5
     expected = {
@@ -308,7 +309,8 @@ def test_Template(ld):
     )
 )
 def test_Template_eq(ld):
-    template = EFLR.Template(ld)
+    template = EFLR.Template()
+    template.read(ld)
     assert template == template
     assert template != 1
 
@@ -320,7 +322,8 @@ def test_Template_eq(ld):
     )
 )
 def test_Template_header_as_strings(ld):
-    template = EFLR.Template(ld)
+    template = EFLR.Template()
+    template.read(ld)
     expected = ['LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION']
     assert template.header_as_strings(stringify.stringify_object_by_type) == expected
 
@@ -376,7 +379,8 @@ OBJECT_DATA_FROM_STANDARD: typing.Tuple[DataForEFLR] = (
 @pytest.mark.parametrize('eflr_data', OBJECT_DATA_FROM_STANDARD)
 def test_Object(eflr_data: DataForEFLR):
     eflr_data.rewind()
-    template = EFLR.Template(eflr_data.template)
+    template = EFLR.Template()
+    template.read(eflr_data.template)
     obj = EFLR.Object(eflr_data.object, template)
     assert obj.name == RepCode.ObjectName(O=0, C=0, I=b'TIME')
     assert eflr_data.object.remain == 1  # Object byte terminates template
@@ -384,7 +388,8 @@ def test_Object(eflr_data: DataForEFLR):
 
 def test_Object_attr_label_map():
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj.attr_label_map == {
         b'LONG-NAME': 0,
@@ -397,14 +402,16 @@ def test_Object_attr_label_map():
 
 def test_Object_getitem_index():
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[0].value == [ObjectName(O=0, C=0, I=b'1')]
 
 
 def test_Object_getitem_label():
     OBJECT_DATA_FROM_STANDARD[0].rewind()
-    template = EFLR.Template(OBJECT_DATA_FROM_STANDARD[0].template)
+    template = EFLR.Template()
+    template.read(OBJECT_DATA_FROM_STANDARD[0].template)
     obj = EFLR.Object(OBJECT_DATA_FROM_STANDARD[0].object, template)
     assert obj[b'LONG-NAME'].value == [ObjectName(O=0, C=0, I=b'1')]
 
@@ -720,6 +727,17 @@ def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
       CD: 001 00001 L: b'REPRESENTATION-CODE' C: 1 R: 15 (USHORT) U: b'' V: [13]
       CD: 000 00000 L: b'UNITS' C: 1 R: 19 (IDENT) U: b'' V: None
       CD: 001 01001 L: b'DIMENSION' C: 2 R: 18 (UVARI) U: b'' V: [8, 10]"""
+
+
+@pytest.mark.parametrize(
+    'ld',
+    (
+        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+    )
+)
+def test_ExplicitlyFormattedLogicalRecord_logical_data_consumed(ld):
+    eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
+    assert eflr.logical_data_consumed == 155
 
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8] but with a duplicate object.
