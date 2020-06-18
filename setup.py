@@ -121,7 +121,7 @@ ext_modules = [
 setup(
     name='TotalDepth',
     version='0.3.2rc0',
-    description="TotalDepth is a software collection that can process petrophysical data such as wireline logs and seismic data.",
+    description="TotalDepth is a software collection that can process petrophysical data such as wireline logs.",
     long_description=readme + '\n\n' + history,
     author="Paul Ross",
     author_email='apaulross@gmail.com',
@@ -147,6 +147,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     test_suite='tests',
     setup_requires=setup_requirements,

@@ -149,7 +149,7 @@ class FrameArray:
 
     Subclass this depending on the source of the information: LIS/LAS/DLIS file, XML index etc.
     """
-    def __init__(self, ident: typing.Hashable, description: bytes):
+    def __init__(self, ident: typing.Hashable, description: typing.Union[str, bytes]):
         self.ident: typing.Hashable = ident
         self.description: bytes = description
         self.channels: typing.List[FrameChannel] = []

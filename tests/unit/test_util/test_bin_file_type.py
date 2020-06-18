@@ -608,6 +608,44 @@ def test__pdf(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
+            # Typical OK
+            (io.BytesIO(b"""UTIM Unix Time sec
+DATE Date ddmmyy
+TIME Time hhmmss
+WAC Wits Activity Code unitless
+BDIA Bit Diameter inch
+NPEN n-Pentane ppm
+EPEN Neo-Pentane ppm
+UTIM DATE TIME WAC BDIA NPEN EPEN
+1165665017 09Dec06 11-50-17 0 8.50 0 0
+"""), 0),
+            # Missing frame
+            (io.BytesIO(b"""UTIM Unix Time sec
+DATE Date ddmmyy
+TIME Time hhmmss
+WAC Wits Activity Code unitless
+BDIA Bit Diameter inch
+NPEN n-Pentane ppm
+EPEN Neo-Pentane ppm
+UTIM DATE TIME WAC BDIA NPEN EPEN
+"""), 1),
+            # Missing channel definitions
+            (io.BytesIO(b"""
+    UTIM DATE TIME WAC BDIA NPEN EPEN
+    1165665017 09Dec06 11-50-17 0 8.50 0 0
+    """), 1),
+            # Empty string
+            (io.BytesIO(b""""""), 1),
+    )
+)
+def test__dat(fobj: io.BytesIO, expected: int):
+    result = TotalDepth.util.bin_file_type._dat(fobj)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'fobj, expected',
+    (
         (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
         (io.BytesIO(b'%PDF-'), 'PDF'),
         # Need extra bytes so that TIF can be tested as well.
@@ -699,6 +737,20 @@ def test__pdf(fobj: io.BytesIO, expected: int):
                 ]
             )),
             'RP66V1tr',
+        ),
+        (
+            # RP66V1 with a reversed TIF marker.
+            io.BytesIO(b"""UTIM Unix Time sec
+DATE Date ddmmyy
+TIME Time hhmmss
+WAC Wits Activity Code unitless
+BDIA Bit Diameter inch
+NPEN n-Pentane ppm
+EPEN Neo-Pentane ppm
+UTIM DATE TIME WAC BDIA NPEN EPEN
+1165665017 09Dec06 11-50-17 0 8.50 0 0
+"""),
+            'DAT',
         ),
     )
 )

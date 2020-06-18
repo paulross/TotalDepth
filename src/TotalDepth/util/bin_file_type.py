@@ -2,10 +2,12 @@
 Identifies the type of file as a string such as "PDF", "RP66V1" by an analysis (mostly) of the
 initial bytes of the file.
 """
-
+import io
 import re
 import string
 import typing
+
+from TotalDepth.DAT import DAT_parser
 
 RE_COMPILED = {
     'RP66V1': {
@@ -410,16 +412,71 @@ def _xml(fobj: typing.BinaryIO) -> int:
     return 1
 
 
-EBCDIC_PRINTABLE = set(
-    b'\x40'  # Space
-    b'\x81\x82\x83\x84\x85\x86\x87\x88\x89'  # a-i
-    b'\x91\x92\x93\x94\x95\x96\x97\x98\x99'  # j-r
-    b'\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9'  # s-z
-    b'\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9'  # A-I
-    b'\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9'  # J-R
-    b'\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9'  # S-Z
-    b'\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9'  # 0-9
+def _dat(fobj: typing.BinaryIO) -> int:
+    """Returns 0 if the file is a DAT file, non-zero otherwise.
+    """
+    try:
+        fobj.seek(0)
+        # Bit of a hack to convert a binary file to a text one
+        text_file = io.StringIO(fobj.read().decode('ascii'))
+    except UnicodeDecodeError:
+        return 1
+    else:
+        if DAT_parser.can_parse_file(text_file):
+            return 0
+        return 1
+
+
+# EBCDIC_PRINTABLE = set(
+#     b'\x40'  # Space
+#     b'\x81\x82\x83\x84\x85\x86\x87\x88\x89'  # a-i
+#     b'\x91\x92\x93\x94\x95\x96\x97\x98\x99'  # j-r
+#     b'\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9'  # s-z
+#     b'\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9'  # A-I
+#     b'\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9'  # J-R
+#     b'\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9'  # S-Z
+#     b'\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9'  # 0-9
+# )
+
+
+EBCDIC_ALL = (
+    {range(0x0, 0x30)}
+    |
+    {range(0x32, 0x3e)}
+    |
+    {range(0x3f, 0x41)}
+    |
+    {range(0x4a, 0x51)}
+    |
+    {range(0x5a, 0x62)}
+    |
+    {range(0x6a, 0x70)}
+    |
+    {range(0x79, 0x80)}
+    |
+    {range(0x81, 0x8a)}
+    |
+    {0x8f}
+    |
+    {range(0x91, 0x9a)}
+    |
+    {range(0xa1, 0xaa)}
+    |
+    {0xb0, 0xba, 0xbb}
+    |
+    {range(0xc0, 0xca)}
+    |
+    {range(0xd0, 0xda)}
+    |
+    {range(0xe0, 0xea)}
+    |
+    {range(0xf0, 0xfa)}
+    |
+    {0xff}
 )
+
+
+EBCDIC_PRINTABLE = set(range(0x40, 0xfa)) & EBCDIC_ALL
 
 
 def _segy(fobj: typing.BinaryIO) -> int:
@@ -427,9 +484,10 @@ def _segy(fobj: typing.BinaryIO) -> int:
     EBCDIC charcters used. Reference: https://en.wikipedia.org/wiki/EBCDIC
     """
     fobj.seek(0)
-    for i in range(3200):
+    # SEG-Y Starts with 40 cards of 80 characters of EBCDIC data, 3200 (0xc80) bytes.
+    for i in range(40 * 80):
         by = fobj.read(1)
-        if len(by) != 1 or by[0] not in EBCDIC_PRINTABLE:
+        if len(by) != 1 or by[0] not in EBCDIC_ALL:
             return 1
     return 0
 
@@ -452,6 +510,7 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_rp66v1_tif, 'RP66V1t'),
     (_rp66v1_tif_r, 'RP66V1tr'),
     (_rp66v2, 'RP66V2'),
+    (_dat, 'DAT'), # Strong, but slow. Needs to be before ASCII as it is a specialisation of ASCII.
     (_ascii, 'ASCII'),
     (_lis, 'LIS'),  # LIS without TIF is potentially the weakest test, around 2^11
 )
@@ -479,6 +538,7 @@ BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
     'RP66V1tr': 'American Petroleum Institute Recommended Practice 66 version 1 with reversed TIF markers',
     'RP66V2': 'American Petroleum Institute Recommended Practice 66 version 2',
     'ASCII': 'American Standard Code for Information Interchange',
+    'DAT': 'Simple data format.',
 }
 
 assert set(BINARY_FILE_TYPE_DESCRIPTIONS.keys()) == BINARY_FILE_TYPES_SUPPORTED, \
