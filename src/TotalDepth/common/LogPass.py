@@ -18,17 +18,22 @@ from TotalDepth import ExceptionTotalDepth
 logger = logging.getLogger(__file__)
 
 
-class ExceptionLogPass(ExceptionTotalDepth):
+class ExceptionLogPassBase(ExceptionTotalDepth):
+    """General exception for problems with this module."""
+    pass
+
+
+class ExceptionLogPass(ExceptionLogPassBase):
     """General exception for problems with a LogPass object."""
     pass
 
 
-class ExceptionFrameChannel(ExceptionLogPass):
+class ExceptionFrameChannel(ExceptionLogPassBase):
     """General exception for problems with a FrameChannel object."""
     pass
 
 
-class ExceptionFrameArray(ExceptionLogPass):
+class ExceptionFrameArray(ExceptionLogPassBase):
     """General exception for problems with a FrameArray object."""
     pass
 
@@ -164,8 +169,7 @@ class FrameArray:
     def append(self, channel: FrameChannel) -> None:
         """Add a channel to the Array."""
         if self.has(channel.ident):
-            # raise ExceptionFrameObject(f'Duplicate channel identity {channel.ident}')
-            logger.warning(f'Duplicate channel identity {channel.ident} ignored')
+            raise ExceptionFrameArray(f'Duplicate channel identity {channel.ident}')
         else:
             self.channel_ident_map[channel.ident] = len(self.channels)
             self.channels.append(channel)
@@ -281,7 +285,7 @@ class LogPass:
         """Add a channel to the Array."""
         assert self._invariant()
         if self.has(frame_array.ident):
-            raise ExceptionLogPassInit(f'Duplicate FrameArray identity {frame_array.ident}')
+            raise ExceptionLogPass(f'Duplicate FrameArray identity {frame_array.ident}')
         else:
             self.frame_array_map[frame_array.ident] = len(self.frame_arrays)
             self.frame_arrays.append(frame_array)

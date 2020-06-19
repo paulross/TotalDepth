@@ -33,7 +33,7 @@ class DATFileResult(typing.NamedTuple):
 def scan_a_single_file(path_in: str, label_process: bool) -> DATFileResult:
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'DAT':
-        logging.info(f'Scan DAT "{path_in}"')
+        logging.info(f'Scanning DAT file at "{path_in}"')
         t_start = time.perf_counter()
         try:
             dat_frame_array = DAT_parser.parse_path(path_in)
@@ -101,21 +101,21 @@ set grid
 set title "Scan of DAT Files with ReadDATFiles."
 set xlabel "DAT File Size (bytes)"
 # set mxtics 5
-# set xrange [0:3000]
-# set xtics
+set xrange [:10e6]
+set xtics
 # set format x ""
 
 set logscale y
-set ylabel "Scan Rate (ms/Mb)"
+set ylabel "Read Time (s)"
 # set yrange [1:1e5]
 # set ytics 20
 # set mytics 2
 # set ytics 8,35,3
 
 set logscale y2
-# set y2label "Scan time (s), Ratio original size / HTML size"
-# set y2range [1e-4:10]
-# set y2tics
+set y2label "Read Rate (ms/Mb)"
+set y2range [10:1000]
+set y2tics
 
 set pointsize 1
 set datafile separator whitespace#"	"
@@ -123,48 +123,19 @@ set datafile missing "NaN"
 
 # set fit logfile
 
-# Curve fit, rate
-rate(x) = 10**(a + b * log10(x))
-fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+# Fields: size_input, time, path
 
-rate2(x) = 10**(5.5 - 0.5 * log10(x))
-
-# Curve fit, size ratio
-size_ratio(x) = 10**(c + d * log10(x))
-fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
-# By hand
-# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
-
-# Curve fit, compression ratio
-compression_ratio(x) = 10**(e + f * log10(x))
-fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+# Curve fit, read time
+read_time(x) = a*x + b
+fit read_time(x) "{name}.dat" using 1:2 via a, b
 
 set terminal svg size 1000,700 # choose the file format
-set output "{name}_rate.svg" # choose the output device
+set output "{name}.svg" # choose the output device
 
-# set key off
+    # read_time(x) title sprintf("Read Time Fit: %+.3g + %+.3g * x", a, b) lt 1 lw 2, \\
 
-#set key title "Window Length"
-#  lw 2 pointsize 2
-
-# Fields: size_input, size_index, time, exception, ignored, path
-
-#plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
-    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
-    "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
-    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
-    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
-
-plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
-    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points
-
-set output "{name}_times.svg" # choose the output device
-set ylabel "Index Time (s)"
-unset y2label
-
-plot "{name}.dat" using 1:3 axes x1y1 title "Index Time (s), left axis" lt 1 w points, \\
-    "{name}.dat" using 1:4 axes x1y1 title "Write Time (s), left axis" lt 2 w points, \\
-    "{name}.dat" using 1:5 axes x1y1 title "Read Time (s), left axis" lt 3 w points
+plot "{name}.dat" using 1:2 axes x1y1 title "Read Time (s), left axis" lt 2 w points, \\
+    "{name}.dat" using 1:($2*1000/($1/(1024*1024))) axes x1y2 title "Read Rate (ms/Mb), right axis" lt 3 w points
 
 reset
 """
@@ -214,10 +185,7 @@ def main() -> int:
             results: typing.Dict[str, DATFileResult] = scan_dir_or_file(args.path_in, args.recurse, label_process=False)
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing DAT Files Complete.')
-    clk_exec = time.perf_counter() - clk_start
     # print('Execution time = %8.3f (S)' % clk_exec)
-    size_input = 0
-    files_processed = 0
     header = (
         f'{"Size In":>16}',
         f'{"Channels":>8}',
@@ -232,6 +200,8 @@ def main() -> int:
     print(f'Common prefix: {common_prefix}')
     print(' '.join(header))
     print(' '.join('-' * len(v) for v in header))
+    total_input = total_frames = files_ok = files_fail = 0
+    total_time = 0.0
     for path in sorted(results.keys()):
         result = results[path]
         if result.size_input > 0:
@@ -245,18 +215,35 @@ def main() -> int:
                 f' {str(result.exception):5}'
                 f' "{path[len(common_prefix):]}"'
             )
-            size_input += results[path].size_input
-            files_processed += 1
+            if result.exception:
+                files_fail += 1
+            else:
+                files_ok += 1
+            total_input += result.size_input
+            total_frames += result.frames
+            total_time += result.time
     if args.gnuplot:
         try:
             plot_gnuplot(results, args.gnuplot)
         except IOError:
             logger.exception('Plotting with gnuplot failed.')
-    if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input / 1024**2)
+    if total_input > 0:
+        ms_mb = total_time * 1000 / (total_input / 1024**2)
     else:
         ms_mb = 0.0
-    print(f'Processed {len(results):,d} files and {size_input:,d} bytes in {clk_exec:.3f} s, {ms_mb:.1f} ms/Mb')
+    clk_exec = time.perf_counter() - clk_start
+    print(f'Statistics:')
+    print(f'   Processed: {len(results):16,d} total files')
+    print(f'    Of which: {files_fail+files_ok:16,d} are DAT files')
+    print(f'     Success: {files_ok:16,d}')
+    print(f'    Failures: {files_fail:16,d}')
+    print(f' Total input: {total_input:16,d} bytes')
+    print(f'Average size: {int(total_input / (files_fail+files_ok)):16,d} bytes')
+    print(f'Total frames: {total_frames:16,d}')
+    print(f'  Total time: {total_time:16.3f} (s)')
+    print(f'        Rate: {ms_mb:16.1f} ms/Mb')
+    print()
+    print(f'    Run time: {clk_exec:16.3f} (s)')
     print('Bye, bye!')
     return 0
 

@@ -28,7 +28,9 @@ UTIM DATE TIME WAC BDIA <...> NPEN EPEN
 1165665017 09Dec06 11-50-17 0 8.50 <...> 0 0
 """
 import datetime
+import logging
 import re
+import string
 import time
 import typing
 
@@ -37,6 +39,8 @@ import numpy as np
 from TotalDepth import ExceptionTotalDepth
 from TotalDepth.common import LogPass
 
+
+logger = logging.getLogger(__file__)
 
 class ExceptionDAT(ExceptionTotalDepth):
     """General exception for problems with a DAT object."""
@@ -67,9 +71,11 @@ def _numpy_dtype(name: str, units: str) -> np.dtype:
 def _unit_unix_time_to_datetime_datetime(value: str) -> datetime.datetime:
     """Converts UNIX time string to datetime.datetime."""
     try:
-        struct_tm = time.gmtime(int(value))
+        int_val = int(value)
+        struct_tm = time.gmtime(int_val)
         return datetime.datetime(*(struct_tm[:6]))
     except ValueError as err:
+        logger.exception('_unit_unix_time_to_datetime_datetime()')
         raise ExceptionDATRead(f'{err} on value "{value}"')
 
 
@@ -109,6 +115,11 @@ def _ret_conversion_function(channel: LogPass.FrameChannel) -> typing.Callable:
     return float
 
 
+_ASCII_PRINTABLE_MAP = {k: None for k in range(256)}
+_ASCII_PRINTABLE_MAP.update({ord(c): c for c in string.printable})
+ASCII_PRINTABLE_TABLE = str.maketrans(_ASCII_PRINTABLE_MAP)
+
+
 def _parse_file(file_object: typing.TextIO, ident: str = '', description: str = 'DAT File',
                 break_after_first_row: bool = False) -> LogPass.FrameArray:
     """
@@ -124,7 +135,10 @@ def _parse_file(file_object: typing.TextIO, ident: str = '', description: str = 
     data_table = []
     for line in file_object.readlines():
         assert len(channels) == len(result), f'{len(channels)} != {len(result)}'
+        # Sometimes there are spurious spaces at the end of line.
         line = line.strip()
+        # Remove non-ASCII printable characters
+        line = line.translate(ASCII_PRINTABLE_TABLE)
         if line.split() == channels:
             # We are hitting the header line that is the boundary between the channel definition and the data.
             in_channel_definition_section = False
@@ -193,7 +207,7 @@ def can_parse_file(file_object: typing.TextIO):
     try:
         frame_array = _parse_file(file_object, break_after_first_row=True)
         return len(frame_array) > 0 and len(frame_array.x_axis) == 1
-    except ExceptionDAT:
+    except (ExceptionDAT, LogPass.ExceptionLogPassBase):
         return False
 
 

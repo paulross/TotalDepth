@@ -87,7 +87,7 @@ DEFAULT_OPT_LOG_LEVEL = 30  # Warning
 #: Default log format (terse)
 DEFAULT_OPT_LOG_FORMAT = '%(asctime)s %(process)d %(levelname)-8s %(message)s'
 #: Default log format (verbose)
-DEFAULT_OPT_LOG_FORMAT_VERBOSE = '%(asctime)s - %(filename)-16s - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s'
+DEFAULT_OPT_LOG_FORMAT_VERBOSE = '%(asctime)s - %(filename)-16s - %(lineno)4d - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s'
 
 
 def add_log_level(parser: argparse.ArgumentParser, level: int = DEFAULT_OPT_LOG_LEVEL) -> None:
