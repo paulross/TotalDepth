@@ -151,7 +151,10 @@ def _parse_file(file_object: typing.TextIO, ident: str = '', description: str = 
                     channel = LogPass.FrameChannel(
                         m.group(1), m.group(2), m.group(3), shape=(1,), np_dtype=_numpy_dtype(m.group(1), m.group(3)),
                     )
-                    result.append(channel)
+                    try:
+                        result.append(channel)
+                    except LogPass.ExceptionLogPassBase as err:
+                        raise ExceptionDATRead(str(err))
                     if m.group(1) in channels:
                         raise ExceptionDATRead(f'In channel definition section with duplicate channel "{m.group(1)}"')
                     channels.append(m.group(1))

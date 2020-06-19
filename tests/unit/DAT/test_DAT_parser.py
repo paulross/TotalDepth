@@ -219,7 +219,7 @@ def test_parse_example_file_channel_names():
         ("""UTIM Unix Time sec
 UTIM DATE TIME WAC BDIA DBTM DBTV DMEA DVER RSU RSD SWAB SURG ROP BPOS HKL WOB TRQ RPMA RPMB BROT BDTI TBR SPP COPP CEPP WHP KLP CHP HVMX CCVL CFO CFI CDI CDO CTVL TVA TPVT ETPT MFO MFI MDO MDI MTO MTI ECDB ECDT ECDC ECDW ECDM GAS METH ETH PRP IBUT NBUT IPEN NPEN EPEN
 1165665017 09Dec06 11-50-17 0 8.50 10.00 10.00 3131.07 3036.55 0.11 0.00 1.20 0.00 3.02 1.15 33.26 0.00 0.00 -0 0 222036.00 0.00 269999 0.7 0.0 0.0 0.0 0.0 0.0 0.00 0.0 0.0 0.0 0.0 0.0 0.0 14.70 0.35 0.00 7.7035 0.0000 1.20 1.20 30.2 22.7 1.1976 1.1976 1.1976 1.1976 0.0000 0.000 11 0 0 0 0 0 0 0
-""", 'In channel definition section with duplicate channel "UTIM"'),
+""", 'Duplicate channel identity UTIM'),
     )
 )
 def test_parse_example_file_fails(value, expected):
@@ -227,3 +227,42 @@ def test_parse_example_file_fails(value, expected):
     with pytest.raises(DAT_parser.ExceptionDATRead) as err:
         DAT_parser.parse_file(file_object)
     assert err.value.args[0] == expected
+
+
+# File with time/date, two channels, three frames
+EXAMPLE_MINIMAL_DAT_FILE = """UTIM Unix Time sec
+DATE Date ddmmyy
+TIME Time hhmmss
+WAC Wits Activity Code unitless
+BDIA Bit Diameter inch
+UTIM DATE TIME WAC BDIA 
+1165665017 09Dec06 11-50-17 0 8.50 
+1165665022 09Dec06 11-50-22 1 8.25 
+1165665027 09Dec06 11-50-27 2 8.00 
+"""
+
+
+def test_parse_minimal_example_file():
+    file_object = io.StringIO(EXAMPLE_MINIMAL_DAT_FILE)
+    frame_array = DAT_parser.parse_file(file_object)
+    assert len(frame_array) == 5
+    assert [len(frame_array[i]) for i in range(len(frame_array))] == [3, 3, 3, 3, 3]
+
+
+EXAMPLE_MINIMAL_DAT_FILE_WITH_GARBAGE = """UTIM Unix Time sec
+DATE \x00Date ddmmyy
+TIME Time hhmmss
+WAC Wits Activity Code unitless
+BDIA Bit \x01Diameter inch
+UTIM DATE TIME WAC BDIA 
+1165665017 \x02 09Dec06 11-50-17 0 8.50 
+1165665022 09Dec06 11-50-22 1 8.25 
+1165665027 09Dec06 11-50-27 2 8.00 
+"""
+
+
+def test_parse_minimal_example_file_with_garbage():
+    file_object = io.StringIO(EXAMPLE_MINIMAL_DAT_FILE_WITH_GARBAGE)
+    frame_array = DAT_parser.parse_file(file_object)
+    assert len(frame_array) == 5
+    assert [len(frame_array[i]) for i in range(len(frame_array))] == [3, 3, 3, 3, 3]
