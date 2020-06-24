@@ -32,8 +32,11 @@ import collections
 
 class Histogram(object):
     """A histogram class."""
-    def __init__(self):
+    def __init__(self, pre_load=None):
         self._h = collections.defaultdict(int)
+        if pre_load:
+            for value in pre_load:
+                self._h[value] = 0
         
     def add(self, x, count=1):
         """Increments the count of value x by count (default 1)."""
