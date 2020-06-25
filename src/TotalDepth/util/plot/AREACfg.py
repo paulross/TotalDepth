@@ -38,12 +38,12 @@ import typing
 
 def png_location(pattern: str, is_monochrome: bool) -> str:
     """Returns the absolute path of the location of a PNG file for the pattern."""
-    # B&W PNG files in: TotalDepth/src/TotalDepth/util/plot/formats_attic/PNG/mono
-    # RGB PNG files in: TotalDepth/src/TotalDepth/util/plot/formats_attic/PNG/rgb
+    # B&W PNG files in: TotalDepth/src/TotalDepth/util/plot/patterns/PNG/mono
+    # RGB PNG files in: TotalDepth/src/TotalDepth/util/plot/patterns/PNG/rgb
     sub_dir = 'mono' if is_monochrome else 'rgb'
     path = os.path.abspath(
         os.path.join(
-            os.path.dirname(__file__), 'formats_attic', 'PNG', sub_dir, pattern + '.png'
+            os.path.dirname(__file__), 'patterns', 'PNG', sub_dir, pattern + '.png'
         )
     )
     if not os.path.isfile(path):
