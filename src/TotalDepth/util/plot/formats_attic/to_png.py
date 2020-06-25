@@ -109,17 +109,23 @@ Examples:
 
 DataURIScheme: https://en.wikipedia.org/wiki/Data_URI_scheme
 
+Also see this for a similar idea: https://davenquinn.com/projects/geologic-patterns/
+Source: https://github.com/davenquinn/geologic-patterns
+
+Also: http://web.mit.edu/12.001/Archive2010/Lab%208/Rock_type_symbols.pdf
+
 """
-import collections
 import base64
 import io
+import logging
 import os
-import pprint
 import sys
 import typing
 import xml.etree.ElementTree as et
 
 from PIL import Image
+
+logger = logging.getLogger(__file__)
 
 SCHEMA = '{x-schema:LgSchema2.xml}'
 
@@ -127,13 +133,36 @@ EXPECTED_PATTERN_HEIGHT = 12
 EXPECTED_PATTERN_WIDTH = 15
 
 
-def pattern_to_array(width: int, pattern: bytes) -> typing.List[typing.List[int]]:
+def pattern_to_array(width: int, pattern: str) -> typing.List[typing.List[int]]:
+    """Takes a width and a base64 encoded pattern and returns a list of list of 0/1 values.
+
+    For example with width 15 and b'x+677qvuu+7H7gAA78bvuu+q77rvxgAA' this returns::
+
+        [
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            ...
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    """
     b = base64.b64decode(pattern)
     st = ''.join(['{:08b}'.format(v) for v in b])
     # TODO: Check bit 16 is always '0' in each row
-    text_table  = [st[i:i+width] for i in range(0, len(st), width+1)]
+    text_table = [st[i:i+width] for i in range(0, len(st), width+1)]
     int_table = [[int(v) for v in row] for row in text_table]
     return int_table
+
+
+def pattern_to_str(width: int, pattern: str) -> str:
+    """Takes a width and a base64 encoded pattern and returns a string representation."""
+    int_table = pattern_to_array(width, pattern)
+    rows = []
+    for int_row in int_table:
+        rows.append(''.join(str(i) for i in int_row))
+    return '\n'.join(rows)
 
 
 def _text(val):
@@ -141,8 +170,7 @@ def _text(val):
 
 
 def parse_iwwpatterns_xml():
-    """Reads the IWWPatterns.xml file and returns the root element.
-    """
+    """Reads the IWWPatterns.xml file and returns the root element."""
     tree = et.parse(os.path.join(os.path.dirname(__file__), 'IWWPatterns.xml'))
     root = tree.getroot()
     if root.tag != _text('LgPatternTable'):
@@ -150,9 +178,48 @@ def parse_iwwpatterns_xml():
     return root
 
 
-Pattern = collections.namedtuple('Pattern', 'unique_id, width, height, background, array')
+class Pattern(typing.NamedTuple):
+    """Holds data about the pattern."""
+    unique_id: str
+    width: int
+    height: int
+    background: str
+    array: typing.List[typing.List[int]]
 
-def read_iwwpatterns():
+    def _assert_invariants(self):
+        assert len(self.array) == self.height, f'len(self.array) {len(self.array)} != self.height {self.height}'
+        set_widths = set([len(row) for row in self.array])
+        assert len(set_widths) == 1, f'Widths should be unique not {set_widths}'
+        assert set_widths.pop() == self.width, f'Unique widths != {self.width}'
+        assert len(self.background) == 6, 'Background wrong length at "{}"'.format(self.background)
+
+    def __str__(self) -> str:
+        self._assert_invariants()
+        rows= []
+        for int_row in self.array:
+            rows.append(''.join(str(i) for i in int_row))
+        return f'{self.unique_id}:\n' + '\n'.join(rows)
+
+    def png_image(self, background: str = '') -> bytes:
+        """Returns a PNG image,  given background can override native one."""
+        self._assert_invariants()
+        if background == '':
+            background = self.background
+        data = bytearray.fromhex(background * (self.width * self.height))
+        for r in range(len(self.array)):
+            for c in range(len(self.array[r])):
+                if self.array[r][c] == 0:
+                    offset = r * self.width + c
+                    for i in range(3):
+                        data[offset * 3 + i] = 0x00
+        img = Image.frombytes(mode='RGB', size=(self.width, self.height), data=bytes(data))
+        fp = io.BytesIO()
+        img.save(fp, 'PNG')
+        return fp.getvalue()
+
+
+def read_iwwpatterns() -> typing.Dict[str, Pattern]:
+    """Read IWWPatterns.xml and return a dict of patterns."""
     result = {}
     ids = set()
     root = parse_iwwpatterns_xml()
@@ -188,25 +255,9 @@ def read_iwwpatterns():
             width = int(bit_pattern.find(_text('PatternWidth')).text)
             array = pattern_to_array(width, encoded_bits)
             result[description] = Pattern(unique_id, width, height, bc, array)
+        else:
+            logger.warning(f'IWWPatterns.xml Duplicate ID "{description}"')
     return result
-
-
-def create_png_image(background: str, array: typing.List[typing.List[int]]):
-    assert len(set([len(row) for row in array])) == 1
-    height = len(array)
-    width = len(array[0])
-    assert len(background) == 6, 'Background is "{}"'.format(background)
-    data = bytearray.fromhex(background * (width * height))
-    for r in range(len(array)):
-        for c in range(len(array[r])):
-            if array[r][c] == 0:
-                offset = r * width + c
-                for i in range(3):
-                    data[offset*3 + i] = 0x00
-    img = Image.frombytes(mode='RGB', size=(width, height), data=bytes(data))
-    fp = io.BytesIO()
-    img.save(fp, 'PNG')
-    return fp.getvalue()
 
 
 def png_to_data_uri(png: bytes) -> str:
@@ -217,7 +268,8 @@ def png_to_data_uri(png: bytes) -> str:
     return '{}{}'.format('data:image/png;base64,', b64.decode())
 
 
-def main():
+def create_png_images():
+    """Write out patterns as PNG to directories and print out URI SCHEME dicts to go into AREACfg.py"""
     patterns = read_iwwpatterns()
     print('PNG file data')
     data_uri_schemes = {}
@@ -226,9 +278,9 @@ def main():
         os.makedirs(directory, exist_ok=True)
         for name in patterns:
             if sub_dir == 'mono':
-                png = create_png_image('FFFFFF', patterns[name].array)
+                png = patterns[name].png_image('FFFFFF')
             else:
-                png = create_png_image(patterns[name].background, patterns[name].array)
+                png = patterns[name].png_image()
             with open(os.path.join(directory, name + '.png'), 'wb') as f:
                 f.write(png)
             data_uri_schemes[name] = png_to_data_uri(png)
@@ -248,8 +300,13 @@ def main():
     for k in sorted(data_uri_schemes.keys()):
         print('    {!r:{width}s} : {!r:s},'.format(k, unique_ids[k], width=key_width))
     print('}')
+
+
+def main():
+    create_png_images()
     print('Bye, bye!')
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())
