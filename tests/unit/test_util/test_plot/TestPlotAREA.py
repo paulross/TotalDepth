@@ -63,6 +63,7 @@ from TotalDepth.util.plot import AREACfg
 from . import TestPlotShared
 
 
+
 TEST_SVG_AREAS = {
     1   : TestPlotShared.SVGTestOutput(
             'Area_Patterns_Mono_Data_URI.svg',
@@ -98,12 +99,12 @@ def _plot_all_lithology_patterns_uri(filename: str, area_dict: typing.Dict[str, 
             attrs_panel = {
                 'stroke' : 'black',
                 'stroke-width': '2.0',
-                'fill' : 'url(#{})'.format(AREACfg.PATTERN_IDS[pattern])
+                'fill': 'url(#{})'.format(AREACfg.PATTERN_IDS[pattern])
             }
             with SVGWriter.SVGRect(xS, Coord.Pt(x, y), Coord.Box(panel_width, panel_height), attrs_panel):
                 pass
             attrs_text = {
-                'text-anchor' : 'middle',
+                'text-anchor': 'middle',
             }
             with SVGWriter.SVGText(xS, Coord.Pt(x + panel_width / 2, y - Coord.Dim(2, 'mm')),
                                    'Helvetica', 10, attrs_text):

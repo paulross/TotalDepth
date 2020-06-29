@@ -33,16 +33,20 @@ import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 
+
 class ExceptionCoord(ExceptionTotalDepthLIS):
     """Exception class for representing Coordinates."""
     pass
+
 
 class ExceptionCoordUnitConvert(ExceptionCoord):
     """Exception raised when converting units."""
     pass
 
+
 #: Base units for dimensions
 BASE_UNITS = 'px'
+
 
 #: Map of {unit name : conversion factor to base units, ...}
 UNIT_MAP = {
@@ -55,6 +59,7 @@ UNIT_MAP = {
     'mm'        : 72.0/25.4,
 }
 
+
 def exactConversion(units_a, units_b=BASE_UNITS):
     """Returns True it the two dimension can be converted exactly.
     This is the case where the units are the same or the factors are exact
@@ -64,6 +69,7 @@ def exactConversion(units_a, units_b=BASE_UNITS):
     if factor_a >= factor_b:
         return factor_a / factor_b == factor_a // factor_b
     return factor_b / factor_a == factor_b // factor_a
+
 
 #: Formatting strings for writing attributes.
 #: We are trying not to write 3.999999999mm here!
@@ -84,9 +90,11 @@ UNIT_MAP_DEFAULT_FORMAT = {
 #: Map of formatting strings for value and units e.g. to create '0.667in' from (2.0 / 3.0, 'in')
 UNIT_MAP_DEFAULT_FORMAT_WITH_UNITS = {__k : UNIT_MAP_DEFAULT_FORMAT[__k] + '%s' for __k in UNIT_MAP_DEFAULT_FORMAT}
 
+
 def units():
     """Returns the unsorted list of acceptable units."""
     return UNIT_MAP.keys()
+
 
 def convert(val, unitFrom, unitTo):
     """Convert a value from one set of units to another."""
@@ -98,6 +106,7 @@ def convert(val, unitFrom, unitTo):
         if unitFrom not in UNIT_MAP:
             raise ExceptionCoordUnitConvert('Unsupported units %s' % unitTo)
         raise ExceptionCoordUnitConvert('Unsupported units %s' % unitFrom)
+
 
 class Dim(collections.namedtuple('Dim', 'value units',)):
     """Represents a dimension as an engineering value i.e. a number and units.""" 
@@ -232,6 +241,7 @@ class Dim(collections.namedtuple('Dim', 'value units',)):
         else:
             return NotImplemented
 
+
 def dimIn(v):
     """Returns a Dim object with the value in inches."""
     return Dim(v, 'in')
@@ -243,6 +253,7 @@ def dimIn(v):
 # Padding around another object that forms the Bounding Box
 # All 4 attributes are Dim() objects
 #Pad         = collections.namedtuple('Pad', 'prev next parent child',)
+
 
 class Box(collections.namedtuple('Box', 'width depth', )):
     __slots__ = ()
@@ -280,6 +291,29 @@ class Pad(collections.namedtuple('Pad', 'prev next parent child', )):
             format_spec.format(self.next),
             format_spec.format(self.parent),
             format_spec.format(self.child),
+        )
+
+
+class Margin(collections.namedtuple('Margin', 'left right top bottom',)):
+    """Margin padding around another object. All 4 attributes are Coord.Dim()
+    objects."""
+    __slots__ = ()
+
+    def __str__(self):
+        return 'Margin(left=%s, right=%s, top=%s, bottom=%s)' \
+            % (self.left, self.right, self.top, self.bottom)
+
+    def __repr__(self):
+        return 'Margin(left={!r:s}, right={!r:s}, top={!r:s}, bottom={!r:s})'.format(
+            self.left, self.right, self.top, self.bottom
+        )
+
+    def __format__(self, format_spec):
+        return 'Margin(left={!r:s}, right={!r:s}, top={!r:s}, bottom={!r:s})'.format(
+            format_spec.format(self.left),
+            format_spec.format(self.right),
+            format_spec.format(self.top),
+            format_spec.format(self.bottom),
         )
 
 

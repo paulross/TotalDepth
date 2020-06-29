@@ -125,6 +125,8 @@ import xml.etree.ElementTree as et
 
 from PIL import Image
 
+from TotalDepth.util import XmlWrite
+
 logger = logging.getLogger(__file__)
 
 SCHEMA = '{x-schema:LgSchema2.xml}'
@@ -268,6 +270,47 @@ def png_to_data_uri(png: bytes) -> str:
     return '{}{}'.format('data:image/png;base64,', b64.decode())
 
 
+def write_index_html(directory: str, patterns: typing.Dict[str, Pattern]) -> None:
+    CSS = """table, th, td {
+  border: 1px solid black;
+}
+"""
+    with open(os.path.join(directory, 'index.css'), 'w') as file:
+        file.write(CSS)
+    with XmlWrite.XhtmlStream(open(os.path.join(directory, 'index.html'), 'w')) as myS:
+        with XmlWrite.Element(myS, 'head'):
+            with XmlWrite.Element(
+                myS,
+                'link', {'href': 'index.css', 'type': "text/css", 'rel': "stylesheet",}
+            ):
+                pass
+            with XmlWrite.Element(myS, 'title'):
+                myS.characters('Area Patterns')
+        with XmlWrite.Element(myS, 'body'):
+            with XmlWrite.Element(myS, 'table'):
+                # with XmlWrite.Element(myS, 'tr', {}):
+                #     with XmlWrite.Element(myS, 'th'):
+                #         myS.characters('LIS File')
+                # Body of table
+                p = 0
+                pattern_keys = sorted(patterns.keys())
+                while p < len(pattern_keys):
+                    with XmlWrite.Element(myS, 'tr'):
+                        column = 0
+                        while p < len(pattern_keys) and column < 4:
+                            with XmlWrite.Element(myS, 'td'):
+                                with XmlWrite.Element(myS, 'img', {
+                                    'src': pattern_keys[p] + '.png',
+                                    'alt': pattern_keys[p],
+                                    'width': '12',
+                                    'height': '15',
+                                }):
+                                    myS.literal('&nbsp;')
+                                    myS.characters(pattern_keys[p])
+                            p += 1
+                            column += 1
+
+
 def create_png_images():
     """Write out patterns as PNG to directories and print out URI SCHEME dicts to go into AREACfg.py"""
     patterns = read_iwwpatterns()
@@ -284,6 +327,7 @@ def create_png_images():
             with open(os.path.join(directory, name + '.png'), 'wb') as f:
                 f.write(png)
             data_uri_schemes[name] = png_to_data_uri(png)
+        write_index_html(directory, patterns)
         key_width = max([len(repr(k)) for k in data_uri_schemes.keys()])
         # Dump to stdout to paste into Python code
         print(directory)

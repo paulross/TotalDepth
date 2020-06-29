@@ -378,13 +378,13 @@ def write_svg_defs(xS, area_map, keys=None):
                 'id': PATTERN_IDS[pattern],
                 'width': '15',
                 'height': '12',
-                'viewBox' : "0 0 15 12",
+                # 'viewBox' : "0 0 15 12",
                 'patternUnits' : 'userSpaceOnUse',
                 'alt': pattern,
             }
             with XmlWrite.Element(xS, 'pattern', attrs_pattern):
                 attrs_image = {
-                    'xlink:href': area_map[pattern],
+                    'href': area_map[pattern],
                 }
                 with XmlWrite.Element(xS, 'image', attrs_image):
                     pass
