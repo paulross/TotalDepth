@@ -200,7 +200,7 @@ def parse_file(file_object: typing.TextIO, ident: str = '', description: str = '
     return _parse_file(file_object, ident, description, break_after_first_row=False)
 
 
-def parse_path(path: str) -> LogPass.FrameArray:
+def parse_path(path: str) -> LogPass.FrameArray:  # pragma: no cover
     with open(path) as file_object:
         return parse_file(file_object, ident=path)
 
@@ -214,7 +214,7 @@ def can_parse_file(file_object: typing.TextIO):
         return False
 
 
-def can_parse_path(path: str) -> bool:
+def can_parse_path(path: str) -> bool:  # pragma: no cover
     """Tries to parse the file at path with just one row of data. On error returns False."""
     with open(path) as file_object:
         return can_parse_file(file_object)

@@ -170,23 +170,27 @@ class Dim(collections.namedtuple('Dim', 'value units',)):
         return self
 
     def __mul__(self, other):
+        """Multiply by a factor that is a number."""
         return self.scale(other)
 
     def __truediv__(self, other):
+        """Divide by a factor that is a number."""
         return self.scale(1.0 / other)
 
     def __imul__(self, other):
+        """Indirect multiply by a factor that is a number."""
         # Use __mul__()
         self = self * other
         return self
 
     def __itruediv__(self, other):
+        """Indirect divide by a factor that is a number."""
         # Use __div__()
         self = self / other
         return self
 
     def __pow__(self, other):
-        return self._replace(value=self.value**other)
+        return self._replace(value=self.value ** other)
 
     def __ipow__(self, other):
         # Use __pow__()
@@ -370,7 +374,13 @@ ANGLE_Y_MINUS = math.pi * 1.5
 
 
 def to_cartesian(origin: Pt, radius: Dim, angle: float) -> Pt:
-    """Expects angle in radians."""
+    """Displaces a point by radius in direction angle in radians which is an x to y rotation.
+    dx is cos(angle) and dy is sin(angle).
+    For example in a SVG coordinate system where +x is right and +y down an angle of less than pi/2 will move the point
+    to the right and down.
+    For use in a mapping system where +x is northing/Latitude N and +y easting/Longitude E an angle of less then pi/2
+    will move the point up and to the right.
+    """
     if radius.value == 0.0:
         return origin
     # Common cases where the move is along an axis

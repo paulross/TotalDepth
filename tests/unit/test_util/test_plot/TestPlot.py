@@ -216,6 +216,7 @@ TEST_SVG_FILE_MAP_LAS = {
         ),
 }
 
+
 def writeTestSVGIndex():
     """Write the TEST_SVG_FILE_MAP_LIS as an index.html."""
     if not os.path.isdir(TestPlotShared.outPath('')):
@@ -260,6 +261,7 @@ def writeTestSVGIndex():
 #=================================================
 # End: Managing where our test SVG is written.
 #=================================================
+
 
 class TestPlotRollStatic(unittest.TestCase):
     """Simple arrangement of PlotRoll."""
@@ -380,6 +382,7 @@ class TestPlotRollStatic(unittest.TestCase):
             self._plotRoll.retMainPaneStart()
         )
     
+
 class TestPlotRoll(unittest.TestCase):
     def setUp(self):
         """Set up."""
@@ -637,8 +640,10 @@ class TestPlotRoll(unittest.TestCase):
         except Plot.ExceptionTotalDepthPlotRoll:
             pass
 
+
 class TestPlotBase(BaseTestClasses.TestBaseFile):
     pass
+
 
 class TestPlotBase_00(TestPlotBase):
     """Base class that has a typical FILM and PRES table."""
@@ -911,7 +916,8 @@ class TestPlotBase_00(TestPlotBase):
 #        myFileIndex = FileIndexer.FileIndex(myFile)
 #        logging.info('TestPlotBase_00.retFileAndFileIndex_ShortSP(): returning File and FileIndex.')
 #        return myFile, myFileIndex
-        
+
+
 class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
     """Tests low level functionality of Plot, generally where no LogPass is initialised."""
     def setUp(self):
@@ -1153,6 +1159,7 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
         """TestPlotLowLevelCurvePlotScale.test_31(): _retCurvePlotScaleOrder() from FILM/PRES table test number of slices."""
         myCpso = self._prl._retCurvePlotScaleOrder(Mnem.Mnem(b'1   '), theLp=None)
         self.assertEqual(6, max(s.slice for s in myCpso))
+
 
 class TestPlotLowLevelCurvePlotScaleXML(TestPlotBase_00):
     """Tests low level functionality of Plot for LgFormat XML descriptions."""
@@ -1765,6 +1772,7 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
         )
         self.assertEqual(expResult, myPts)
 
+
 class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
     """Tests plotting a LIS file."""
     def retPresBytes_TEST(self):
@@ -1903,7 +1911,7 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
 #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -1914,8 +1922,9 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[1].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
-     
+            sys.stderr.write(str(myTimerS))
+
+
 class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
     """Tests plotting a square wave with a low frequency (4 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 2
@@ -2023,7 +2032,7 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2034,7 +2043,8 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
     """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
@@ -2143,7 +2153,7 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2154,7 +2164,8 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
     """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
@@ -2278,7 +2289,7 @@ class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(975.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2289,7 +2300,8 @@ class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_HDTBase(TestPlotBase_00):
     """Base class for plotting HDT data."""
@@ -2620,6 +2632,7 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
 
+
 class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data."""
     TEST_SVG_FILE_MAP_ENTRY = 4
@@ -2647,7 +2660,7 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
             myXStop = EngVal.EngVal(4950.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2658,7 +2671,8 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data on a 1:20 scale."""
@@ -2702,7 +2716,7 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
             myXStop = EngVal.EngVal(4950.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2713,7 +2727,8 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
     """Tests plotting HDT data on a 1:40 scale."""
@@ -2757,7 +2772,7 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
             myXStop = EngVal.EngVal(4950.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2768,8 +2783,9 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
-            
+            sys.stderr.write(str(myTimerS))
+
+
 class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
     """Tests plotting a square wave with a low frequency (4 foot spacing) to illustrate super sampling."""
     TEST_SVG_FILE_MAP_ENTRY = 5
@@ -2917,7 +2933,7 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -2928,7 +2944,8 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
     """Tests plotting a LIS file with colours."""
@@ -3068,7 +3085,7 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
 #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -3079,7 +3096,8 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
     """Tests plotting a LIS file with numbered colours."""
@@ -3219,7 +3237,7 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
 #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -3230,7 +3248,8 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
     """Tests plotting a LIS file with numbered complimentary colours."""
@@ -3370,7 +3389,7 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
 #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -3381,7 +3400,8 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_Perf_00(TestPlotBase_00):
     """Tests plotting performance, 2000' of 10 curves."""
@@ -3790,7 +3810,7 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
             myXStop = EngVal.EngVal(4000.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -3801,14 +3821,14 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
 
     def test_02(self):
         """{:s} FILM 2""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'2   ']].description)
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(5000.0, b'FEET')
             myXStop = EngVal.EngVal(4000.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -3819,7 +3839,8 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'2   ']].description,
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
     """Tests plotting of 1000' of curves from "Triple_Combo" LgFormat XML file."""
@@ -3960,7 +3981,7 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(self.PLOT_START_IN_FEET, b'FEET')
             myXStop = EngVal.EngVal(self.PLOT_START_IN_FEET-self.PLOT_LENGTH_IN_FEET, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             for lgFormat in self._prlMap:
                 fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].fileName)
                 self._prlMap[lgFormat].plotLogPassLIS(
@@ -3973,8 +3994,9 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
                     frameStep=1,
                     title=TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].description,
                     timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
             sys.stderr.flush()
+
 
 class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
     """Example of a plot of HDT data extracted from real LIS file."""
@@ -4086,7 +4108,7 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         for anIlp in myFileIndex.genLogPasses():
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[22].fileName)
             myPlot = Plot.PlotReadXML('HDT', theScale=40)
             myPlot.plotLogPassLIS(
@@ -4100,9 +4122,10 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
                 title=TEST_SVG_FILE_MAP_LIS[22].description,
                 lrCONS=[self._consRecord(),],
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
             sys.stderr.flush()
             break
+
 
 class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
     """Tests plotting a LIS file."""
@@ -4133,7 +4156,7 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
 #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
-            myTimerS = ExecTimer.ExecTimerList()
+            myTimerS = ExecTimer.TimerList()
             self._prl.plotLogPassLIS(
                 self._lisFile,
                 anIlp.logPass,
@@ -4145,7 +4168,8 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
                 title=TEST_SVG_FILE_MAP_LIS[1].description,
                 lrCONS=[TestLogHeader.headerLogicalRecordLIS(),],
                 timerS=myTimerS)
-            myTimerS.writeToStderr()
+            sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
     """Tests plotting of 200' of curves from "Triple_Combo" LgFormat XML file from LAS."""
@@ -4164,7 +4188,7 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
     
     def _plotLAS(self, theLasFile, fIdxMap, plotHeader):
         """TestPlotReadLAS_XML_LgFormat.test_00(): Plot from XML LgFormat files - down log, no header."""
-        myTimerS = ExecTimer.ExecTimerList()
+        myTimerS = ExecTimer.TimerList()
         for lgFormat in fIdxMap:
             fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LAS[fIdxMap[lgFormat]].fileName)
             myPlot = Plot.PlotReadXML(lgFormat)
@@ -4178,7 +4202,7 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
                 title=TEST_SVG_FILE_MAP_LAS[fIdxMap[lgFormat]].description,
                 plotHeader=plotHeader,
                 timerS=myTimerS)
-        myTimerS.writeToStderr()
+        sys.stderr.write(str(myTimerS))
         sys.stderr.flush()
 
     def test_01(self):
@@ -4258,6 +4282,7 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
             True,
         )            
 
+
 class SpecialUnused(unittest.TestCase):
     """Special tests."""
     pass
@@ -4292,15 +4317,16 @@ class SpecialUnused(unittest.TestCase):
         print(' OUTP : UniqueId(s) END '.center(75, '='))
 
 
-
 class TestWriteTestSVGIndex(unittest.TestCase):
 
     def test_00(self):
         writeTestSVGIndex()
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -4340,6 +4366,7 @@ def unitTest(theVerbosity=2):
 ##################
 # End: Unit tests.
 ##################
+
 
 def usage():
     """Send the help to stdout."""

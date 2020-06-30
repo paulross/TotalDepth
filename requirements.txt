@@ -6,6 +6,7 @@ lxml==4.4.2
 more-itertools==8.0.2
 numpy==1.18.0
 packaging==19.2
+Pillow==7.1.2
 pluggy==0.13.1
 psutil==5.6.7
 py==1.8.1

@@ -50,7 +50,7 @@ class StorageUnitLabel:
             raise ExceptionStorageUnitLabel(f'Expected {self.SIZE} bytes, got {len(by)}')
         # FIXME: Make this the responsibility of FileRead
         # We do not support TIF markers.
-        if by[len(TIF_FILE_PREFIX):] == TIF_FILE_PREFIX:  # pragma: no coverage
+        if by[len(TIF_FILE_PREFIX):] == TIF_FILE_PREFIX:  # pragma: no cover
             raise ExceptionStorageUnitLabel(f'This file appears to have TIF markers, de-TIF the file to read it.')
         # Now the fields, storage_unit_sequence_number and maximum_record_length are converted to int
         # the rest are kept as bytes.
