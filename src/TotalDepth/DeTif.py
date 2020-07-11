@@ -47,7 +47,8 @@ class TifMarker(typing.NamedTuple):
     next: int
 
     def __str__(self) -> str:
-        return f'TifMarker: 0x{self.tell:08x} Type: 0x{self.type:08x} Prev: 0x{self.prev:08x} Next: 0x{self.next:08x}'
+        return f'TifMarker: 0x{self.tell:08x} Type: 0x{self.type:08x} Prev: 0x{self.prev:08x} Next: 0x{self.next:08x}' \
+               f' Length: 0x{self.next - self.tell:08x} Payload: 0x{self.next - self.tell - TIF_TRIPLET_NUM_BYTES:08x}'
 
     @property
     def is_tif_start(self) -> bool:

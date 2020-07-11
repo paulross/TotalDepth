@@ -85,7 +85,8 @@ class FileRead(FileBase):
     def readLrBytes(self, theLen=-1):
         """Reads theLen LogicalData bytes and returns it or None if nothing
         left to read for this logical record.
-        If theLen is -1 all the remaining Logical data is read."""
+        If theLen is -1 all the remaining Logical data is read.
+        This positions the file at the _next_ Logical Record or EOF."""
         try:
             return self._prh.readLrBytes(theLen)
         except PhysRec.ExceptionPhysRec as e:

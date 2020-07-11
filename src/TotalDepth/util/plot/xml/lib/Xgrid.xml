@@ -4,8 +4,8 @@
     <Xgrid id="D200" scale="200" units="FEET" description="1:200 in Feet">
         <XLine interval="2" stroke-width="0.25" stroke="black" stroke-dasharray="" stoke-opacity="1.0" tick_mark="False"/>
         <XLine interval="10" stroke-width="0.5" stroke="" stroke-dasharray="" stoke-opacity="1.0" tick_mark="False"/>
-        <XLine interval="50" stroke-width="0.75" stroke="" stroke-dasharray="" stoke-opacity="1.0" tick_mark="False"/>
-        <XLine interval="200" stroke-width="1" stroke="" stroke-dasharray="" stoke-opacity="1.0" tick_mark="False"/>
+        <XLine interval="50" stroke-width="0.75" stroke="" stroke-dasharray="" stoke-opacity="1.0" tick_mark="0.05in"/>
+        <XLine interval="200" stroke-width="1" stroke="" stroke-dasharray="" stoke-opacity="1.0" tick_mark="0.1in"/>
         <XText interval="50" typeface="Courier" size="9"/>
         <XText interval="100" typeface="Courier" size="12"/>
     </Xgrid>

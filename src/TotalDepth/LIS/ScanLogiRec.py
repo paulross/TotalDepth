@@ -40,7 +40,7 @@ from TotalDepth.LIS.core import LogiRec
 def dumpTable(lr, theS=sys.stdout):
     for aRow in lr.genRows():
         for aCbev in aRow.genCells():
-            theS.write('\t{:s}'.format(aCbev.value))
+            theS.write('\t{!s}'.format(aCbev.value))
         theS.write('\n')
 
 def dumpDfsr(lr, theS=sys.stdout):
@@ -98,8 +98,7 @@ def scanFile(fp, isVerbose, keepGoing, theS=sys.stdout):
                 if isVerbose:
                     dumpLr(myLr)
         except LogiRec.ExceptionLr as err:
-            pass
-            #logging.error('LR at 0x{:08x}: {:s}'.format(myTellLr, err))
+            logging.error('LR at 0x{:08x}: {:s}'.format(myTellLr, err))
         myFile.skipToNextLr()
         
 def main():

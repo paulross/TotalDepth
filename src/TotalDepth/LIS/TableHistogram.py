@@ -139,7 +139,7 @@ def _processFile(fp, keepGoing, tabMtch, theCntr):
                         if tabMtch.nameRowMatch(aRow.value):
                             for aCell in aRow.genCells():
                                 theCntr.incCol(anIo.lrType, anIo.name, aCell.mnem)
-                                if tabMtch.nameColMatch(aCell.mnem):
+                                if tabMtch.nameColMatch(aCell.mnem) and aCell.engVal is not None:
                                     theCntr.incAll(
                                         tabMtch,
                                         anIo.lrType,

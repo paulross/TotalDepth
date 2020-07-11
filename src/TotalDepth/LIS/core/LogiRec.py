@@ -18,17 +18,14 @@
 # 
 # Paul Ross: apaulross@gmail.com
 """Handles LIS Logical Records.
-
-
 """
-
-
 
 __author__  = 'Paul Ross'
 __date__    = '29 Dec 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
+import codecs
 import struct
 import logging
 import collections
@@ -38,7 +35,7 @@ from TotalDepth.LIS.core import Units
 from TotalDepth.LIS.core import EngVal
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.LIS.core.File import ExceptionFileRead
+from TotalDepth.LIS.core import File
 
 class ExceptionLr(ExceptionTotalDepthLIS):
     """Specialisation of exception for Logical Records."""
@@ -628,10 +625,12 @@ class LrMisc(LrBase):
     
 class LrMiscRead(LrMisc):
     """Miscellaneous Logical Record read from a LIS file."""
-    def __init__(self, theFile):
+    def __init__(self, theFile: File.FileRead):
         t, a = self._typeAttrUnpack(theFile)
         super().__init__(t, a)
-        self.bytes = theFile.readLrBytes()  
+        self.bytes: bytes = theFile.readLrBytes()
+        # Set to beginning of LR as we have consumed the complete LR and the caller is most likely to call skipToNextLr.
+        theFile.seekCurrentLrStart()
 
 ############################################################################
 # End: Misc Logical records - these have no interpreted internal format.
@@ -1145,7 +1144,7 @@ class LrTableRead(LrTable):
             except ExceptionCbEngValInit as err:
                 logging.error('LrTableRead.__init__(): Can not construct CB block: {:s}'.format(str(err)))
                 break
-            except ExceptionFileRead as err:
+            except File.ExceptionFileRead as err:
                 # Will happen if there is spurious extra bytes not enough to
                 # create a block
                 logging.warning('LrTableRead.__init__(): Tell: 0x{:x} LD index: 0x{:x} Error: {:s}'.format(theFile.tellLr(), theFile.ldIndex(), str(err)))
@@ -1737,6 +1736,8 @@ class LrFactoryRead(LrFactory):
         if t is not None:
             theFile.seekCurrentLrStart()
             return self._lrMap[myLtype](theFile)
+        elif myLtype != 0:
+            logging.error(f'No Logical Record Handler for type {myLtype}')
 
 ###################################
 # End: Indirect Logical Records

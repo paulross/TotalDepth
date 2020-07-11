@@ -435,7 +435,7 @@ class FileIndex(object):
         }
         while not theF.isEOF:
             # Grab the file position
-            t = theF.tellLr()
+            tell = theF.tellLr()
             # Read the LRH
             myBy = theF.readLrBytes(LogiRec.STRUCT_LR_HEAD.size)
             if not myBy:
@@ -445,15 +445,21 @@ class FileIndex(object):
             if lrTy in self._logPassIndexMap:
                 if self._logPassIndexMap[lrTy] is not None:
                     # Normal/Alternate data with prior LogPass
-                    self._idx[self._logPassIndexMap[lrTy]].add(t, lrTy, theF)
+                    self._idx[self._logPassIndexMap[lrTy]].add(tell, lrTy, theF)
             else:
                 # Despatch on lrTy
-                fn = self._despatchLrType[lrTy]
+                try:
+                    fn = self._despatchLrType[lrTy]
+                except KeyError:
+                    fn = None
                 if fn is None:
-                    logging.warning('FileIndex.__init__(): Can not handle logical record type {:d}'.format(lrTy))
+                    logging.warning(
+                        'FileIndex.__init__(): Can not handle logical record type {:d} at 0x{:08x} so skipping it.'.format(lrTy, tell)
+                    )
+                    theF.skipToNextLr()
                 else:
                     # TODO: Use self._xAxisIndex
-                    self._idx.append(fn(t, lrTy, theF))
+                    self._idx.append(fn(tell, lrTy, theF))
                     # Check and fix self._logPassIndexMap
                     if LogiRec.isDelimiter(lrTy):
                         # De-index the LogPass(es)

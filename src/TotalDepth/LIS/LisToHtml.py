@@ -27,6 +27,7 @@ __date__    = '2011-06-14'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
+import codecs
 import time
 import sys
 import os
@@ -239,6 +240,9 @@ class IndexSummary(object):
         return sum([fi.cpuTime for fi in self._fileInfoS])
 
     def writeIndexHTML(self, theOutDir):
+        if len(self._fileInfoS) == 0:
+            return
+        os.makedirs(theOutDir, exist_ok=True)
         # Write CSS
         with open(os.path.join(theOutDir, self.CSS_FILE_PATH), 'w') as f:
             f.write(CSS_CONTENT_INDEX)
@@ -277,7 +281,8 @@ class IndexSummary(object):
                     for aF in sorted(set(self._fileInfoS)):
                         with XmlWrite.Element(myS, 'tr'):
                             with XmlWrite.Element(myS, 'td'):
-                                with XmlWrite.Element(myS, 'a', {'href' : os.path.basename(aF.pathOut)}):
+                                # with XmlWrite.Element(myS, 'a', {'href' : os.path.basename(aF.pathOut)}):
+                                with XmlWrite.Element(myS, 'a', {'href' : aF.pathOut}):
                                     myS.characters(aF.pathIn[lenCmnPrefixFpIn:])
                             self._writeCols(myS, aF)
 #                            with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
@@ -407,6 +412,12 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
             theS.characters('Verbatim bytes [{:d}]:'.format(len(myLr.bytes)))
         with XmlWrite.Element(theS, 'pre', {'class' : 'verbatim'}):
             theS.characters(myLr.bytes.decode('ascii', 'replace'))
+        with XmlWrite.Element(theS, 'p'):
+            theS.characters('EBCDIC -> ASCII:')
+        # Often old LIS files have EBCDIC data as they may have been processed on an IBM mainframe.
+        with XmlWrite.Element(theS, 'pre', {'class' : 'verbatim'}):
+            ascii = codecs.decode(myLr.bytes, 'cp500')
+            theS.characters(ascii)
 
     def _HTMLTable(self, theIe, theFi, theS):
         self._HTMLEntryBasic(theIe, theS)
@@ -794,7 +805,7 @@ Generates HTML from input LIS file or directory to an output destination."""
             "-l", "--loglevel",
             type="int",
             dest="loglevel",
-            default=40,
+            default=20,
             help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
         )      
     optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 

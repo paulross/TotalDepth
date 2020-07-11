@@ -234,7 +234,7 @@ class TifMarkerRead(TifMarkerBase):
                 # If PR trailing padding is allowed then seek the shortfall
                 # (if positive) and continue.
                 if self._prPad and shortFall > 0:
-                    logging.warning(
+                    logging.debug(
                         'TifMarkerRead: tell 0x{:x} making up PR padding of 0x{:x} by seeking to 0x{:x}'.format(
                                 retTell,
                                 shortFall,

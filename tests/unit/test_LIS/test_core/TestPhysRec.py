@@ -245,13 +245,13 @@ class TestPhysRecSingleRead(unittest.TestCase):
     def test_03(self):
         """TestPhysRecRead.test_03(): Single physical record __str__()."""
         myLd = self._pr.readLrBytes()
-        self.assertEqual(self._pr.strHeader(), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
         self.assertEqual(str(self._pr), 'PR: 0x       0      62  0x   0      58  ------  ------  ------')
 
     def test_04(self):
         """TestPhysRecRead.test_04(): Single physical record __str__() at EOF."""
         myLd = self._pr.readLrBytes()
-        self.assertEqual(self._pr.strHeader(), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
         self.assertEqual(str(self._pr), 'PR: 0x       0      62  0x   0      58  ------  ------  ------')
         self.assertTrue(self._pr.readLrBytes() is None)
         self.assertEqual(str(self._pr), 'PR: EOF')
@@ -296,7 +296,7 @@ class TestPhysRecSingleReadWithTif(unittest.TestCase):
         myLd = self._pr.readLrBytes()
         #print
         #print(self._pr.strHeader())
-        self.assertEqual(self._pr.strHeader(), 'TIF     ?  :        Type        Back        Next  PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'TIF     ?  :        Type        Back        Next  PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
         #print(self._pr)
         self.assertEqual(str(self._pr), 'TIF  True >:  0x       0  0x       0  0x      4a  PR: 0x       0      62  0x   0      58  ------  ------  ------')
 

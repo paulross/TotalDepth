@@ -209,8 +209,9 @@ class PhysRecBase(object):
         if self.stream is not None:
             self.stream.close()
     
-    def strHeader(self):
-        """Returns the header string to go at the top of a list of __str__()."""
+    def strHeader(self, inc_attributes_short: bool):
+        """Returns the header string to go at the top of a list of __str__().
+        If inc_attributes_short then the header is suitable for using the string created by attribute_str_short()."""
         rS = []
         if self.tif is not None and self.tif.hasTif:
             rS.append(self.tif.strHeader())
@@ -221,6 +222,8 @@ class PhysRecBase(object):
         rS.append('  RecNum')
         rS.append('  FilNum')
         rS.append('  ChkSum')
+        if inc_attributes_short:
+            rS.append('  PSRFC')
         return ''.join(rS)
     
     def __str__(self):
@@ -237,7 +240,35 @@ class PhysRecBase(object):
             else:
                 rS.append('  ------')
         return ''.join(rS)
-    
+
+    def attribute_str(self) -> str:
+        """Human readable attributes."""
+        ret = []
+        if self._hasPredecessor():
+            ret.append('Pred')
+        if self._hasSuccessor():
+            ret.append('Succ')
+        if self._hasRecordNumber():
+            ret.append('RecNum')
+        if self._hasFileNumber():
+            ret.append('FileNum')
+        if self._hasChecksum():
+            ret.append('ChkSum')
+        return ', '.join(ret)
+
+    def attribute_str_short(self) -> str:
+        """Human readable attributes."""
+        YES = 'Y'
+        NO = 'N'
+        ret = [
+            YES if self._hasPredecessor() else NO,
+            YES if self._hasSuccessor() else NO,
+            YES if self._hasRecordNumber() else NO,
+            YES if self._hasFileNumber() else NO,
+            YES if self._hasChecksum() else NO,
+        ]
+        return ''.join(ret)
+
     #=====================================
     # Section: Attribute bit manipulation.
     #=====================================
