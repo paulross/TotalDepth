@@ -185,9 +185,9 @@ Various values have been predefined and there are existing mappings from LIS dat
 +---------+---------------+-----------------------------------------------+----------------+----------------------+
 | (-2, 2) | BACKUP_TWICE  | Two backups to left or right                  |                | '2'                  |
 +---------+---------------+-----------------------------------------------+----------------+----------------------+
-| (-1, 1) | BACKUP_LEFT   | Single backup to left only                    |                | 'LG_LEFT_WRAPPED'    |
+| (0, -1) | BACKUP_LEFT   | Single backup to left only                    |                | 'LG_LEFT_WRAPPED'    |
 +---------+---------------+-----------------------------------------------+----------------+----------------------+
-| (1, 1)  | BACKUP_RIGHT  | Single backup to right only                   |                | 'LG_RIGHT_WRAPPED'   |
+| (1, 0)  | BACKUP_RIGHT  | Single backup to right only                   |                | 'LG_RIGHT_WRAPPED'   |
 +---------+---------------+-----------------------------------------------+----------------+----------------------+
 
 Note that it is also common to have one curve with no backup and a second curve driven from the same output with a different scale acting as a backup. This has the advantage that a different coding and colour can be assigned to it. See :ref:`tech-plotting-legends` above for an example with a Laterlog plot.
@@ -220,6 +220,8 @@ A further refinement to the algorithm is limiting the number of *crossing lines*
     10247.5    334.176
 
 Clearly some episode happened between 10245.0 and 10245.5 feet that caused a jump of 13716615.276 mV. This could have been an recording disturbance (unlikely as where would you find 96kV at 10247 feet?) or an editing error. In any case on a scale of -20 to 80 mV means 137,166 (mostly spurious) wrap lines crossing the track. This can turn a 1.6Mb file into a 91Mb file! To stop this a arbitrary limit is made to the number of *crossing lines* (e.g. 4) between each Xaxis interval. This limit filters the *crossing line* list to an evenly distributed list of 4 (or thereabouts).
+
+This is also applicable to RFT plots where it is common to plot the pressure modulo 10 psi in RHT3.
 
 The method that does this is The ``Plot._filterCrossLineList()`` method
 

@@ -10,14 +10,11 @@ import pytest
 import TotalDepth
 
 
-EXAMPLE_DATA_DIRECTORY = os.path.join(
-    os.path.dirname(TotalDepth.__file__), os.path.pardir, os.path.pardir, 'example_data'
-)
+TOTAL_DEPTH_SOURCE_ROOT = os.path.dirname(TotalDepth.__file__)
 
+EXAMPLE_DATA_DIRECTORY = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data')
 
-EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(
-    os.path.dirname(TotalDepth.__file__), os.path.pardir, os.path.pardir, 'example_data', 'LIS',
-)
+EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data', 'LIS', )
 
 
 def test_example_data_directory_exists():
@@ -395,6 +392,12 @@ def test_tdrp66v1scanhtml_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1scanhtml', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
 # -------- END: tdrp66v1scanhtml --------
+
+
+def test_rp66v1_scan_ff01():
+    script = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, 'RP66V1', 'SearchFF01.py')
+    subprocess.check_call(['python', script, RP66V1_BASIC_FILE])
+
 
 #======================== END: RP66V1 ==================
 
