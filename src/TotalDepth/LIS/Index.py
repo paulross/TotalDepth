@@ -134,7 +134,7 @@ class IndexTimer(object):
         self._sizeTime.append((s,t))
 
 def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
-    logging.info('Index.indexFile(): {:s}'.format(fp))
+    logging.info('Index.indexFile(): {:s}'.format(os.path.abspath(fp)))
     assert(os.path.isfile(fp))
     retIt = IndexTimer()
     try:
@@ -301,7 +301,7 @@ Indexes LIS files recursively."""
     opts, args = optParser.parse_args()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    format='%(asctime)s %(filename)24s %(lineno)4d %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
     # Your code here

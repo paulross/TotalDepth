@@ -446,6 +446,9 @@ class FileIndex(object):
                 if self._logPassIndexMap[lrTy] is not None:
                     # Normal/Alternate data with prior LogPass
                     self._idx[self._logPassIndexMap[lrTy]].add(tell, lrTy, theF)
+                else:
+                    logging.warning(f'Logical record type {lrTy} at 0x{tell:08x} but no corresponding DFSR.')
+                    theF.skipToNextLr()
             else:
                 # Despatch on lrTy
                 try:
