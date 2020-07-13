@@ -247,17 +247,19 @@ class IndexSummary(object):
         with open(os.path.join(theOutDir, self.CSS_FILE_PATH), 'w') as f:
             f.write(CSS_CONTENT_INDEX)
         # Now Generate the HTML
-        with XmlWrite.XhtmlStream(open(os.path.join(theOutDir, 'index.html'), 'w')) as myS:
+        index_html_path = os.path.join(theOutDir, 'index.html')
+        logging.info(f'Writing index to {index_html_path}')
+        with XmlWrite.XhtmlStream(open(index_html_path, 'w')) as myS:
             with XmlWrite.Element(myS, 'head'):
                 with XmlWrite.Element(
                         myS,
                         'link',
                         {
-                            'href'  : self.CSS_FILE_PATH,
-                            'type'  : "text/css",
-                            'rel'   : "stylesheet",
+                            'href': self.CSS_FILE_PATH,
+                            'type': "text/css",
+                            'rel': "stylesheet",
                         }
-                    ):
+                ):
                     pass
                 with XmlWrite.Element(myS, 'title'):
                     myS.characters('LIS as HTML')
@@ -281,22 +283,9 @@ class IndexSummary(object):
                     for aF in sorted(set(self._fileInfoS)):
                         with XmlWrite.Element(myS, 'tr'):
                             with XmlWrite.Element(myS, 'td'):
-                                # with XmlWrite.Element(myS, 'a', {'href' : os.path.basename(aF.pathOut)}):
-                                with XmlWrite.Element(myS, 'a', {'href' : aF.pathOut}):
+                                with XmlWrite.Element(myS, 'a', {'href' : os.path.abspath(aF.pathOut)}):
                                     myS.characters(aF.pathIn[lenCmnPrefixFpIn:])
                             self._writeCols(myS, aF)
-#                            with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
-#                                myS.characters('{:.3f}'.format(aF.lisSize / 1024**2))
-#                            with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
-#                                myS.characters('{:d}'.format(aF.numLr))
-#                            with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
-#                                myS.characters('{:.3f}'.format(aF.cpuTime))
-#                            if aF.cpuTime != 0:
-#                                with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
-#                                    myS.characters('{:.3f}'.format(aF.lisSize / (aF.cpuTime * 1024**2)))
-#                            else:
-#                                with XmlWrite.Element(myS, 'td', {'align' : 'right'}):
-#                                    myS.characters('N/A')
                     with XmlWrite.Element(myS, 'tr'):
                         with XmlWrite.Element(myS, 'td'):
                             myS.characters('Totals')
@@ -851,10 +840,10 @@ Generates HTML from input LIS file or directory to an output destination."""
             # Write index.html
             myResult.writeIndexHTML(args[1])
         else:
-            myLth = LisToHtml(args[0],args[1], opts.recursive, opts.keepGoing)
+            myLth = LisToHtml(args[0], args[1], opts.recursive, opts.keepGoing)
             myResult = myLth._summary
     #myResult.writeHTML(os.path.join(args[1], 'index.html'))
-    print('plotLogInfo:')
+    print('LisToHtml results:')
     print(str(myResult))
     print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
