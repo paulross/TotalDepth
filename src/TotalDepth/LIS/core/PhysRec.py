@@ -471,7 +471,7 @@ class PhysRecRead(PhysRecBase):
         #print('_readTail()', self.stream.tell())
         self._mustReadHead = True
         if self.isEOF:
-            self._raiseOrErrorOnEOF('PhysRecRead._readTail() when already EOF')
+            raise ExceptionPhysRecEOF('PhysRecRead._readTail() when already EOF')
         else:
             try:
                 if self._hasRecordNumber():
