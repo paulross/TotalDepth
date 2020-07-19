@@ -20,26 +20,25 @@
 """Tests the file indexer.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '10 Feb 2011'
-__version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
-
-import os
+import logging
 import sys
 import time
-import logging
-
-from TotalDepth.LIS.core import FileIndexer
-from TotalDepth.LIS.core import LogiRec
-from TotalDepth.LIS.core import LisGen
-
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
-import BaseTestClasses
+# sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+# import BaseTestClasses
 ######################
 # Section: Unit tests.
 ######################
 import unittest
+
+from TotalDepth.LIS.core import FileIndexer
+from TotalDepth.LIS.core import LisGen
+from TotalDepth.LIS.core import LogiRec
+from tests.unit import BaseTestClasses
+
+__author__  = 'Paul Ross'
+__date__    = '10 Feb 2011'
+__version__ = '0.8.0'
+__rights__  = 'Copyright (c) Paul Ross'
 
 
 class TestPlotRecordSet(unittest.TestCase):
@@ -137,6 +136,7 @@ class TestPlotRecordSet(unittest.TestCase):
         myPrs.clear()
         self.assertFalse(myPrs.canPlotFromInternalRecords())
         self.assertFalse(myPrs.canPlotFromExternalRecords())
+
 
 class TestFileIndexerBase(BaseTestClasses.TestBaseLogPass):
     """Base class to create LIS files to index."""

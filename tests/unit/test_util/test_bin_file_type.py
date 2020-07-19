@@ -1,10 +1,9 @@
 import io
 import typing
 
-import TotalDepth.util.bin_file_type
-# from TotalDepth.util import archive
-
 import pytest
+
+import TotalDepth.util.bin_file_type
 
 
 @pytest.mark.parametrize(
@@ -34,10 +33,6 @@ import pytest
             b' VERS.                 2.0:',
             (b'2.0', None),
         ),
-        # b' VERS. 2.0 : CWLS Log ASCII Standard - VERSION 2.0',
-        # b' VERS. 2.0 :CWLS Log ASCII Standard - VERSION 2.0',
-        # b'VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-        # b'VERS.          2.0                                     : CWLS LOG ASCII Standard',
     )
 )
 def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
@@ -50,31 +45,31 @@ def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
     'fobj, expected',
     (
         # Physical record type 1
-        (io.BytesIO(b'\x00\xFF\x40\x00\x80\x00'), 10),
+        (io.BytesIO(b'\x00\xFF\x40\x00\x80\x00'), ''),
         # First PR has predecessor
-        (io.BytesIO(b'\x00\xFF\x00\x02\x80\x00'), 20),
+        (io.BytesIO(b'\x00\xFF\x00\x02\x80\x00'), ''),
         # Checksum flags are 10
-        (io.BytesIO(b'\x00\xFF\x20\x00\x80\x00'), 30),
+        (io.BytesIO(b'\x00\xFF\x20\x00\x80\x00'), ''),
         # Checksum flags are both set
-        (io.BytesIO(b'\x00\xFF\x30\x00\x80\x00'), 40),
+        (io.BytesIO(b'\x00\xFF\x30\x00\x80\x00'), ''),
         # Length check with no PRT
-        (io.BytesIO(b'\x00\x04\x00\x00\x80\x00'), 50),
+        (io.BytesIO(b'\x00\x04\x00\x00\x80\x00'), ''),
         # Length check with checksum
-        (io.BytesIO(b'\x00\x06\x10\x00\x80\x00'), 50),
+        (io.BytesIO(b'\x00\x06\x10\x00\x80\x00'), ''),
         # Length check with record number
-        (io.BytesIO(b'\x00\x06\x04\x00\x80\x00'), 50),
+        (io.BytesIO(b'\x00\x06\x04\x00\x80\x00'), ''),
         # Length check with file number
-        (io.BytesIO(b'\x00\x06\x02\x00\x80\x00'), 50),
+        (io.BytesIO(b'\x00\x06\x02\x00\x80\x00'),''),
         # Length check with checksum, record and file number
-        (io.BytesIO(b'\x00\x0A\x16\x00\x80\x00'), 50),
+        (io.BytesIO(b'\x00\x0A\x16\x00\x80\x00'), ''),
         # Length check passes with checksum, record and file number
-        (io.BytesIO(b'\x00\x0B\x16\x00\x80\x00'), 0),
+        (io.BytesIO(b'\x00\x0B\x16\x00\x80\x00'), 'LIS'),
         # Logical record type is 0
-        (io.BytesIO(b'\x00\xFF\x00\x00\x00\x00'), 60),
+        (io.BytesIO(b'\x00\xFF\x00\x00\x00\x00'), ''),
         # Logical record attributes are non-zero
-        (io.BytesIO(b'\x00\xFF\x00\x00\x80\x01'), 70),
+        (io.BytesIO(b'\x00\xFF\x00\x00\x80\x01'), ''),
         # Test reserved/unused bits set and return code is 0
-        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00'), 0),
+        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00'), 'LIS'),
     )
 )
 def test__lis(fobj: io.BytesIO, expected: int):
@@ -86,43 +81,71 @@ def test__lis(fobj: io.BytesIO, expected: int):
 LIS_PR_GOOD_BYTES = b'\x00\x3e\x00\x00\x80\x00'
 
 
+# b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00\x00\x84\x80\x00\x83\x00EDI         81/09/22  ETJ.  20814     01            FILE SEQ:DIS-GR,FDC-GR,BHC-GR & NORMALIZED DATA                           \x00\x00\x00\x00\x00\x00\x00\x00 \x01\x00\x00\x00\x84\x80\x00\x85\x00EDI         81/09/22        ETJ20814  01            EDIT/NORM. TAPE OF D.TEXACO A.G. WELL KUDHA-1 LOGGED ON 22-JUL-81         \x01\x00\x00\x00\x90\x00\x00\x00,\x01\x00\x00\x01\x00\x00\x00 \x01\x00\x008\x01\x00\x00'
+LIS_MINIMAL = (
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x83\x00EDI         81/09/22  ETJ.  20814     01            FILE SEQ:DIS-GR,FDC-GR,BHC-GR & NORMALIZED DATA                           '
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x85\x00EDI         81/09/22        ETJ20814  01            EDIT/NORM. TAPE OF D.TEXACO A.G. WELL KUDHA-1 LOGGED ON 22-JUL-81         '
+)
+
+
+LIS_TIF_MINIMAL = (
+    # TIF
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00'
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x83\x00EDI         81/09/22  ETJ.  20814     01            FILE SEQ:DIS-GR,FDC-GR,BHC-GR & NORMALIZED DATA                           '
+    # TIF
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x20\x01\x00\x00'
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x85\x00EDI         81/09/22        ETJ20814  01            EDIT/NORM. TAPE OF D.TEXACO A.G. WELL KUDHA-1 LOGGED ON 22-JUL-81         '
+    # TIF EOF
+    b'\x01\x00\x00\x00\x90\x00\x00\x00\x2c\x01\x00\x00'
+    # TIF EOF
+    b'\x01\x00\x00\x00\x20\x01\x00\x00\x38\x01\x00\x00'
+)
+
+
+LIS_TIF_REVERSED_MINIMAL = (
+    # TIF @ 0x0
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90'
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x83\x00EDI         81/09/22  ETJ.  20814     01            FILE SEQ:DIS-GR,FDC-GR,BHC-GR & NORMALIZED DATA                           '
+    # TIF @ 0x90
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x20'
+    # PR
+    b'\x00\x84\x80\x00'
+    # LD
+    b'\x85\x00EDI         81/09/22        ETJ20814  01            EDIT/NORM. TAPE OF D.TEXACO A.G. WELL KUDHA-1 LOGGED ON 22-JUL-81         '
+    # TIF EOF @ 0x120
+    b'\x00\x00\x00\x01\x00\x00\x00\x90\x00\x00\x01\x2c'
+    # TIF EOF @ 0x12c
+    b'\x00\x00\x00\x01\x00\x00\x01\x20\x00\x00\x01\x38'
+)
+
+
 @pytest.mark.parametrize(
     'fobj, expected',
     (
+        (io.BytesIO(LIS_MINIMAL), 'LIS'),
         # Typical TIF OK
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 0),
-        # TIF word[0] bad
-        (io.BytesIO(b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 1),
-        # TIF word[1] bad
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 2),
-        # TIF word[2] Too large
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\xff\xff\x0d\x00' + LIS_PR_GOOD_BYTES), 3),
-        # TIF word[2] mismatch with PRL, TIF can be greater because of padding but not smaller.
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x49\x00\x00\x00' + LIS_PR_GOOD_BYTES), 4),
+        (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
+        # Typical TIF reversed
+        (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
     )
 )
-def test__lis_tif(fobj: io.BytesIO, expected: int):
-    result = TotalDepth.util.bin_file_type._lis_tif(fobj)
-    assert result == expected
-
-
-@pytest.mark.parametrize(
-    'fobj, expected',
-    (
-        # Typical TIF reversed OK
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 0),
-        # TIF word[0] bad
-        (io.BytesIO(b'\x00\x00\x00\x01' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 1),
-        # TIF word[1] bad
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x01' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 2),
-        # TIF word[2] too big
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x0D\xFF\xFF' + LIS_PR_GOOD_BYTES), 3),
-        # TIF word[2] mismatch with PRL
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x49' + LIS_PR_GOOD_BYTES), 4),
-    )
-)
-def test__lis_tif_r(fobj: io.BytesIO, expected: int):
-    result = TotalDepth.util.bin_file_type._lis_tif_r(fobj)
+def test__lis(fobj: io.BytesIO, expected: int):
+    result = TotalDepth.util.bin_file_type._lis(fobj)
     assert result == expected
 
 
@@ -138,7 +161,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -148,7 +171,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -158,7 +181,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -168,7 +191,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -178,7 +201,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         # No space prefix and '1.2:CWLS' rather than '1.2: CWLS'
         (
@@ -189,7 +212,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b'WRAP. NO:One line per depth step',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         # Comment line(s)
         (
@@ -201,7 +224,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         # Comment line(s)
         (
@@ -223,7 +246,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         # Blank lines
         (
@@ -236,7 +259,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
         # Failure
         (
@@ -247,7 +270,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            1
+            ''
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -257,7 +280,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            3
+            ''
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -267,7 +290,7 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            3
+            ''
         ),
         (
             io.BytesIO(b'\n'.join(
@@ -277,13 +300,13 @@ def test__lis_tif_r(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            5
+            ''
         ),
-        (io.BytesIO(b'\n'), 6),
+        (io.BytesIO(b'\n'), ''),
     )
 )
 def test__las(fobj: io.BytesIO, expected: int):
-    result = TotalDepth.util.bin_file_type._las(fobj, (b'1.2:', b'1.2'))
+    result = TotalDepth.util.bin_file_type._las(fobj, b'1.2')#(b'1.2:', b'1.2'))
     assert result == expected
 
 
@@ -299,7 +322,7 @@ def test__las(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS1.2'
         ),
     )
 )
@@ -320,7 +343,7 @@ def test__las12(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS2.0'
         ),
     )
 )
@@ -341,7 +364,7 @@ def test__las20(fobj: io.BytesIO, expected: int):
                     b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
                 ]
             )),
-            0
+            'LAS3.0'
         ),
     )
 )
@@ -377,7 +400,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            0,
+            'RP66V1',
         ),
         (
             # Missing sequence number, byte[3]
@@ -394,7 +417,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            1,
+            '',
         ),
         (
             # Bad version, initial bytes are not 'V1.'
@@ -411,7 +434,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            2,
+            '',
         ),
         (
             # Bad version, minor number is spaces
@@ -428,7 +451,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            2,
+            '',
         ),
         (
             # Storage unit structure is not b'RECORD'
@@ -445,7 +468,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            3,
+            '',
         ),
         (
             # Maximum Record Length is not a number, (last byte is a space)
@@ -462,7 +485,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            4,
+            '',
         ),
         (
             # Storage Set Identifier - too short (last field)
@@ -479,7 +502,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     (b'\x20' * 15),
                 ]
             )),
-            -1,
+            '',
         ),
         (
             # Storage Set Identifier - non-printable bytes (last field)
@@ -496,7 +519,7 @@ def test__las30(fobj: io.BytesIO, expected: int):
                     b'\x00' * 16,
                 ]
             )),
-            6,
+            '',
         ),
     )
 )
@@ -526,7 +549,7 @@ def test__rp66v1(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            0,
+            'RP66V1t',
         ),
     )
 )
@@ -556,7 +579,7 @@ def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
                     b'\x20' * 16,
                 ]
             )),
-            0,
+            'RP66V1tr',
         ),
     )
 )
@@ -565,11 +588,61 @@ def test__rp66v1_tif_r(fobj: io.BytesIO, expected: int):
     assert result == expected
 
 
+SEGY_EMPTY = b''.join(
+    [
+        b'\xc3\xf0\xf1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf0\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf1\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf2\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf3\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+        b'\xc3\xf4\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
+    ])
+
+def test_segy():
+    file = io.BytesIO(SEGY_EMPTY)
+    result = TotalDepth.util.bin_file_type._segy(file)
+    assert result == 'SEGY'
+
+
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (io.BytesIO(b''), 0),
-        (io.BytesIO(b'PK'), 0),
+        (io.BytesIO(b''), 'ASCII'),
+        (io.BytesIO(b'PK'), 'ASCII'),
     )
 )
 def test__ascii(fobj: io.BytesIO, expected: int):
@@ -581,9 +654,9 @@ def test__ascii(fobj: io.BytesIO, expected: int):
     'fobj, expected',
     (
         # Typical ZIP OK
-        (io.BytesIO(b'PK\x03\x04'), 0),
+        (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
         # ZIP bad
-        (io.BytesIO(b'PK\x03\x05'), 1),
+        (io.BytesIO(b'PK\x03\x05'), ''),
     )
 )
 def test__zip(fobj: io.BytesIO, expected: int):
@@ -595,9 +668,9 @@ def test__zip(fobj: io.BytesIO, expected: int):
     'fobj, expected',
     (
         # Typical PDF OK
-        (io.BytesIO(b'%PDF-'), 0),
+        (io.BytesIO(b'%PDF-'), 'PDF'),
         # PDF bad
-        (io.BytesIO(b'%PDFX'), 1),
+        (io.BytesIO(b'%PDFX'), ''),
     )
 )
 def test__pdf(fobj: io.BytesIO, expected: int):
@@ -618,7 +691,7 @@ NPEN n-Pentane ppm
 EPEN Neo-Pentane ppm
 UTIM DATE TIME WAC BDIA NPEN EPEN
 1165665017 09Dec06 11-50-17 0 8.50 0 0
-"""), 0),
+"""), 'DAT'),
             # Missing frame
             (io.BytesIO(b"""UTIM Unix Time sec
 DATE Date ddmmyy
@@ -628,14 +701,14 @@ BDIA Bit Diameter inch
 NPEN n-Pentane ppm
 EPEN Neo-Pentane ppm
 UTIM DATE TIME WAC BDIA NPEN EPEN
-"""), 1),
+"""), ''),
             # Missing channel definitions
             (io.BytesIO(b"""
-    UTIM DATE TIME WAC BDIA NPEN EPEN
-    1165665017 09Dec06 11-50-17 0 8.50 0 0
-    """), 1),
+UTIM DATE TIME WAC BDIA NPEN EPEN
+1165665017 09Dec06 11-50-17 0 8.50 0 0
+"""), ''),
             # Empty string
-            (io.BytesIO(b""""""), 1),
+            (io.BytesIO(b""""""), ''),
     )
 )
 def test__dat(fobj: io.BytesIO, expected: int):
@@ -649,9 +722,9 @@ def test__dat(fobj: io.BytesIO, expected: int):
         (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
         (io.BytesIO(b'%PDF-'), 'PDF'),
         # Need extra bytes so that TIF can be tested as well.
-        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00' + b'\x00' * 12), 'LIS'),
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' + LIS_PR_GOOD_BYTES), 'LISt'),
-        (io.BytesIO(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x00\x00\x00\x4a' + LIS_PR_GOOD_BYTES), 'LIStr'),
+        (io.BytesIO(LIS_MINIMAL), 'LIS'),
+        (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
+        (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
         (
             io.BytesIO(b'\n'.join(
                 [
@@ -739,7 +812,7 @@ def test__dat(fobj: io.BytesIO, expected: int):
             'RP66V1tr',
         ),
         (
-            # RP66V1 with a reversed TIF marker.
+            # Short DAT file.
             io.BytesIO(b"""UTIM Unix Time sec
 DATE Date ddmmyy
 TIME Time hhmmss
@@ -752,50 +825,9 @@ UTIM DATE TIME WAC BDIA NPEN EPEN
 """),
             'DAT',
         ),
+        (io.BytesIO(SEGY_EMPTY), 'SEGY',),
     )
 )
 def test_binary_file_type_from_bytes(fobj: io.BytesIO, expected: str):
     result = TotalDepth.util.bin_file_type.binary_file_type(fobj)
     assert result == expected
-
-
-
-# TIF encoded RP66V1:
-# Storage Unit Label is from 0xC to 0xC + 80 = 92 (0x5c)
-# 00000000: 0000 0000 0000 0000 5c00 0000 2020 2031  ........\...   1
-# 00000010: 5631 2e30 3052 4543 4f52 4420 3831 3932  V1.00RECORD 8192
-# 00000020: 4445 4641 554c 5420 2020 2020 2020 2020  DEFAULT
-# 00000030: 2020 2020 2020 2020 2020 2020 2020 2020
-# 00000040: 2020 2020 2020 2020 2020 2020 2020 2020
-# 00000050: 2020 2020 2020 2020 2020 2020 0000 0000              ....
-# 00000060: 0000 0000 6820 0000 2000 ff01 007c 8000  ....h .. ....|..
-# 00000070: f00b 4649 4c45 2d48 4541 4445 5234 0f53  ..FILE-HEADER4.S
-# 00000080: 4551 5545 4e43 452d 4e55 4d42 4552 1434  EQUENCE-NUMBER.4
-# 00000090: 0249 4414 7010 0001 3321 0a20 2020 2020  .ID.p...3!.
-# 000000a0: 2020 2020 3921 4144 5353 5442 202e 3030      9!ADSSTB .00
-# 000000b0: 3920 2020 2020 2020 2020 2020 2020 2020  9
-# 000000c0: 2020 2020 2020 2020 2020 2020 2020 2020
-# 000000d0: 2020 2020 2020 2020 2020 2020 2020 2020
-# 000000e0: 2020 2020 2020 2020 0280 8101 f806 4f52          ......OR
-# 000000f0: 4947 494e 0130 3407 4649 4c45 2d49 4414  IGIN.04.FILE-ID.
-# 00000100: 340d 4649 4c45 2d53 4554 2d4e 414d 4513  4.FILE-SET-NAME.
-
-
-# Example of RP66V1 without the Storage Unit Label
-# Looks like this is TIF encoded.
-# Note the common run:
-# 2000 ff01 007c 8000 f00b 4649 4c45 2d48 4541 4445
-# Petrologic/CD1/DLIS/200003.D15
-# 00000000: 0000 0000 0000 0000 0c20 0000 2000 ff01  ......... .. ...
-# 00000010: 007c 8000 f00b 4649 4c45 2d48 4541 4445  .|....FILE-HEADE
-# 00000020: 5234 0f53 4551 5545 4e43 452d 4e55 4d42  R4.SEQUENCE-NUMB
-# 00000030: 4552 1434 0249 4414 702e 0001 3921 0a20  ER.4.ID.p...9!.
-# 00000040: 2020 2020 2020 2031 3521 414e 4754 4420         15!ANGTD
-# 00000050: 202e 3030 3920 2020 2020 2020 2020 2020   .009
-# 00000060: 2020 2020 2020 2020 2020 2020 2020 2020
-# 00000070: 2020 2020 2020 2020 2020 2020 2020 2020
-# 00000080: 2020 2020 2020 2020 2020 2020 02fc 8001              ....
-# 00000090: f806 4f52 4947 494e 0130 3407 4649 4c45  ..ORIGIN.04.FILE
-# 000000a0: 2d49 4414 340d 4649 4c45 2d53 4554 2d4e  -ID.4.FILE-SET-N
-# 000000b0: 414d 4513 340f 4649 4c45 2d53 4554 2d4e  AME.4.FILE-SET-N
-# Proposal: Ignore this as it is so far from the standard: missing SUL _and_ spurious TIF encoding.

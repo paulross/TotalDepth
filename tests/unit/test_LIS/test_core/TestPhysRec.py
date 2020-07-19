@@ -544,6 +544,9 @@ class TestPhysRecFail(unittest.TestCase):
         except PhysRec.ExceptionPhysRecEOF:
             pass
 
+    @pytest.mark.xfail(
+        reason='Investigate this, the behaviour of PRH on EOF has changed so this test may not be relevant.'
+    )
     def test_41(self):
         """TestPhysRecFail.test_41(): header says two bytes but only one there with keepGoing=True."""
         myFi = io.BytesIO(
