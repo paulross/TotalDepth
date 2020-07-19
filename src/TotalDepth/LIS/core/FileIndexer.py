@@ -34,14 +34,16 @@ from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import LogPass
 
-class ExceptionFileIndex(ExceptionTotalDepthLIS):
-    """Specialisation of exception for the LIS file indexer."""
-    pass
-
 __author__  = 'Paul Ross'
 __date__    = '2011-02-10'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) Paul Ross'
+
+
+class ExceptionFileIndex(ExceptionTotalDepthLIS):
+    """Specialisation of exception for the LIS file indexer."""
+    pass
+
 
 class IndexObjBase(object):
     """Base class for indexed objects.
