@@ -22,25 +22,23 @@
 Created on 14 Nov 2010
 
 """
-
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
-
-#import time
-#import sys
-#import logging
-#from optparse import OptionParser
-
+import io
 import struct
+import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import PhysRec
 
+__author__  = 'Paul Ross'
+__date__    = '2010-08-02'
+__version__ = '0.1.0'
+__rights__  = 'Copyright (c) 2010-2020 Paul Ross'
+
+
 class ExceptionFile(ExceptionTotalDepthLIS):
     """Specialisation of exception for Physical files."""
     pass
+
 
 class ExceptionFileRead(ExceptionFile):
     """Specialisation of exception for reading Physical files."""
@@ -50,6 +48,7 @@ class ExceptionFileRead(ExceptionFile):
 class ExceptionFileWrite(ExceptionFile):
     """Specialisation of exception for writing Physical files."""
     pass
+
 
 class FileBase(object):
     """LIS file handler. This handles Physical Records (and TIF records)."""
@@ -163,16 +162,6 @@ class FileRead(FileBase):
         try:
             myB = self.readLrBytes(theStruct.size)
             if myB is None or len(myB) != theStruct.size:
-                # print('WTF')
-                # print(type(myB), myB)
-                # print(type(theStruct.size), theStruct.size)
-                # # TODO: Why do the broken down lines work when the one liner does not?
-                # msg = 'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
-                # msg = 'FileRead.unpack(): Bytes: '
-                # msg += '{}'.format(myB)
-                # msg += ' not enough for struct that needs: '
-                # msg += '{:d} bytes.'.format(theStruct.size)
-                # logging.error(msg)
                 raise ExceptionFileRead(
                     'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
                 )
@@ -183,6 +172,7 @@ class FileRead(FileBase):
     #####################
     # End: Reading words.
     #####################
+
 
 class FileWrite(FileBase):
     """LIS file writer. This handles Physical Records (and TIF records).
@@ -236,3 +226,50 @@ class FileWrite(FileBase):
     def close(self):
         """Closes the file."""
         self._prh.close()                
+
+
+class PhysicalRecordSettings(typing.NamedTuple):
+    """Container for the settings to read Physical Records."""
+    pad_modulo: int
+    pad_non_null: bool
+
+
+def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BinaryIO],
+                                      pr_limit=0) -> typing.Union[None, PhysicalRecordSettings]:
+    """This attempts to find the best settings to read Physical Records. It returns a PhysicalRecordSettings on
+    success or None on failure.
+    pr_limit limits the number of Physical Records to test if you want higher performance otherwise all Physical Records
+    are read.
+
+    Typically 38Mb file with 46276 Physical Records processed in 0.380 (s) so 10ms/Mb or 100Mb/s.
+    This is proportionate so if limited to 100 records this would be around 0.001 (s)
+    """
+    file_id = file_path_or_object if isinstance(file_path_or_object, str) else 'Unknown'
+    # Try False first as the standard says that they should be null.
+    # True means the file is more likely to be corrupt.
+    for pad_non_null in (False, True):
+        # 0 - No padding.
+        # 4 - More likely to be reliable.
+        # 2 - Might work
+        for pad_modulo in (0, 4, 2):
+            pr_count = 0
+            try:
+                phys_rec = PhysRec.PhysRecRead(
+                    file_path_or_object, file_id, keepGoing=True, pad_modulo=pad_modulo, pad_non_null=pad_non_null
+                )
+                for _ in phys_rec.genPr():
+                    pr_count += 1
+                    if pr_limit and pr_count >= pr_limit:
+                        break
+            except PhysRec.ExceptionPhysRec:
+                pass
+            else:
+                return PhysicalRecordSettings(pad_modulo, pad_non_null)
+
+
+def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BinaryIO],
+                                                     file_id=None,
+                                                     pr_limit=0) -> FileRead:
+    pr_settings = best_physical_record_pad_settings(file_path_or_object, pr_limit)
+    if pr_settings is not None:
+        return FileRead(file_path_or_object, file_id, True, *pr_settings)

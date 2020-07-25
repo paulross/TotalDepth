@@ -77,17 +77,13 @@ def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
         theS.write('  ')
         theS.write(myPrh.attribute_str_short())
         if isLdStart:
-            #theS.write(' >')
-            #theS.write(' 0x{0:08X}'.format(myPrh.tellLr()))
             if len(myLd) >= 2:
-                #print(myLd)
                 h, a = LD_STRUCT_HEAD.unpack(myLd[:LD_STRUCT_HEAD.size])
                 theS.write(' 0x{0:02X} 0x{1:02x}'.format(h, a))
             else:
                 theS.write(' 0x??')
         else:
             theS.write(' + --   --')
-        #theS.write(' %6d' % len(myLd))
         numPR += 1
     theS.write(' [%8d]' % myLdSum)
     theS.write('\n')
@@ -100,25 +96,30 @@ def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
     theS.write('\n')
 
 
-def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null):
-    """Reads a file as if it was a LIS file and returns the number of Physical Records."""
+def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=0):
+    """Reads a file as if it was a LIS file and returns the number of Physical Records.
+
+    Typically 38Mb file processed in 0.381 seconds so 10ms/Mb or 100Mb/s.
+    """
     pr_count = 0
-    phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
-                                   pad_non_null=pad_non_null)
-    for _ in phys_rec.genLd():
-        pr_count += 1
+    try:
+        phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
+                                       pad_non_null=pad_non_null)
+        for _ in phys_rec.genPr():
+            pr_count += 1
+            if pr_limit and pr_count >= pr_limit:
+                break
+    except PhysRec.ExceptionPhysRec:
+        pr_count = 0
     return pr_count
 
 
 def scan_file_with_different_padding(file_path: str, keep_going: bool) -> typing.Union[None, typing.Tuple[int, bool]]:
     for pad_modulo in (0, 2, 4):
         for pad_non_null in (False, True):
-            try:
-                result = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
-                if result:
-                    return (pad_modulo, pad_non_null)
-            except PhysRec.ExceptionPhysRec as err:
-                pass
+            result = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
+            if result:
+                return pad_modulo, pad_non_null
 
 
 class PhysRecScanResult(typing.NamedTuple):
@@ -154,6 +155,9 @@ class PhysRecScanResultWithPad(typing.NamedTuple):
     pad_modulo: int
     pad_non_null: bool
 
+    def __str__(self):
+        return f'{self.pad_modulo:2d} {self.pad_non_null!r:5} {self.result!s}'
+
 
 def scan_directory_with_different_padding(
         file_path: str,
@@ -164,6 +168,7 @@ def scan_directory_with_different_padding(
         result = scan_file_with_different_padding(file_in_out.filePathIn, keep_going)
         if result is not None:
             pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, result[0], result[1])
+            error = False
         else:
             pr_count = 0
             error = True
@@ -198,7 +203,11 @@ Scans a LIS79 file and reports Physical Record structure."""
             result = scan_file_with_different_padding(args.path_in, args.keepGoing)
             print(f'Succesfull pad options: {result}')
         else:
-            scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+            if args.verbose:
+                scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+            else:
+                pr_count = scan_file_no_output(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+                print(f'Scan found {pr_count} Physical Records. Use -v to see the details.')
     elif os.path.isdir(args.path_in):
         fails = 0
         if args.pad_opts_all:
