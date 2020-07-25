@@ -34,7 +34,6 @@ import struct
 import sys
 import time
 import typing
-from optparse import OptionParser
 
 from TotalDepth.LIS import lis_cmn_cmd_opts
 from TotalDepth.LIS.core import PhysRec
