@@ -60,6 +60,7 @@ class FileBase(object):
         self.mode = mode
         self.keepGoing = keepGoing
 
+
 class FileRead(FileBase):
     """LIS file reader, this offers the caller a number of incremental
     read operations. This handles Physical Records (and TIF records).
@@ -70,7 +71,8 @@ class FileRead(FileBase):
 
     keepGoing - If True we do our best to keep going.
     """
-    def __init__(self, theFile, theFileId=None, keepGoing=False):
+
+    def __init__(self, theFile, theFileId=None, keepGoing=False, pad_modulo: int = 0, pad_non_null: bool = False):
         """Constructor with:
         theFile - A file like object or string, if the latter it assumed to be a path.
         theFileId - File identifier, this could be a path for example. If None the RawStream will try and cope with it.
@@ -78,7 +80,7 @@ class FileRead(FileBase):
         """
         super(FileRead, self).__init__(theFile, theFileId, 'r', keepGoing)
         try:
-            self._prh = PhysRec.PhysRecRead(self.file, self.fileId, self.keepGoing)
+            self._prh = PhysRec.PhysRecRead(self.file, self.fileId, self.keepGoing, pad_modulo, pad_non_null)
         except PhysRec.ExceptionPhysRec as e:
             raise ExceptionFileRead('FileRead.__init__(): error "%s"' % str(e))
 
