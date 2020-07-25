@@ -110,6 +110,17 @@ def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null):
     return pr_count
 
 
+def scan_file_with_different_padding(file_path: str, keep_going: bool) -> typing.Union[None, typing.Tuple[int, bool]]:
+    for pad_modulo in (0, 2, 4):
+        for pad_non_null in (False, True):
+            try:
+                result = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
+                if result:
+                    return (pad_modulo, pad_non_null)
+            except PhysRec.ExceptionPhysRec as err:
+                pass
+
+
 class PhysRecScanResult(typing.NamedTuple):
     path: str
     pr_count: int
@@ -138,12 +149,44 @@ def scan_directory(
     return ret
 
 
+class PhysRecScanResultWithPad(typing.NamedTuple):
+    result: PhysRecScanResult
+    pad_modulo: int
+    pad_non_null: bool
+
+
+def scan_directory_with_different_padding(
+        file_path: str,
+        recursive: bool,
+        keep_going: bool) -> typing.Dict[str, PhysRecScanResultWithPad]:
+    ret = {}
+    for file_in_out in DirWalk.dirWalk(file_path, '', '', recursive=recursive, bigFirst=False):
+        result = scan_file_with_different_padding(file_in_out.filePathIn, keep_going)
+        if result is not None:
+            pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, result[0], result[1])
+        else:
+            pr_count = 0
+            error = True
+        if result is not None:
+            ret[file_in_out.filePathIn] = PhysRecScanResultWithPad(
+                PhysRecScanResult(file_in_out.filePathIn, pr_count, error),
+                *result)
+        else:
+            ret[file_in_out.filePathIn] = PhysRecScanResultWithPad(
+                PhysRecScanResult(file_in_out.filePathIn, pr_count, error),
+                -1, False)
+    return ret
+
+
 def main():
     usage = """usage: %(prog)s [options] file
 Scans a LIS79 file and reports Physical Record structure."""
     print('Cmd: %s' % ' '.join(sys.argv))
     arg_parser = cmn_cmd_opts.path_in(usage, prog='TotalDepth.LIS.ScanPhysRec', version='%(prog)s ' + __version__)
     lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
+    arg_parser.add_argument("--pad-opts-all", action="store_true", default=False,
+                      help="Try all padding options. Default: %(default)s.")
+
     cmn_cmd_opts.add_log_level(arg_parser, level=20)
     args = arg_parser.parse_args()
     print(args)
@@ -151,16 +194,25 @@ Scans a LIS79 file and reports Physical Record structure."""
     clk_start = time.perf_counter()
     # Your code here
     if os.path.isfile(args.path_in):
-        scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+        if args.pad_opts_all:
+            result = scan_file_with_different_padding(args.path_in, args.keepGoing)
+            print(f'Succesfull pad options: {result}')
+        else:
+            scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
     elif os.path.isdir(args.path_in):
-        result = scan_directory(args.path_in, args.recurse, args.keepGoing, args.pad_modulo, args.pad_non_null)
         fails = 0
-        for r in sorted(result.keys()):
-            print(result[r])
-            if result[r].error:
-                fails += 1
-        print(f'Total files: {len(result):8,d}')
-        print(f'    Success: {len(result) - fails:8,d}')
+        if args.pad_opts_all:
+            results = scan_directory_with_different_padding(args.path_in, args.recurse, args.keepGoing)
+            for r in sorted(results.keys()):
+                print(results[r])
+        else:
+            results = scan_directory(args.path_in, args.recurse, args.keepGoing, args.pad_modulo, args.pad_non_null)
+            for r in sorted(results.keys()):
+                print(results[r])
+                if results[r].error:
+                    fails += 1
+        print(f'Total files: {len(results):8,d}')
+        print(f'    Success: {len(results) - fails:8,d}')
         print(f'    Failure: {fails:8,d}')
     clkExec = time.perf_counter() - clk_start
     print('CPU time = %8.3f (S)' % clkExec)
