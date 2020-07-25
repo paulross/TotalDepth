@@ -614,7 +614,7 @@ Generates plot(s) from input LIS file or directory to an output destination."""
     optParser.add_option("-x", "--xml", action="append", dest="LgFormat", default=[],
                       help="Add an XML LgFormat to use for plotting. Value is the UniqueId. Use -x? to see what LgFormats are available. [default: %default]")
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -641,7 +641,7 @@ Generates plot(s) from input LIS file or directory to an output destination."""
         myResult = plotLogPassesMP(args[0], args[1], None, opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader, opts.jobs)
     myResult.writeHTML(os.path.join(args[1], 'index.html'), args[0])
     print('plotLogInfo', str(myResult))
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0

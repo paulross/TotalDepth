@@ -243,6 +243,17 @@ def _rp66v2(fobj: typing.BinaryIO) -> str:
     return 'RP66V2'
 
 
+def _lis_ver(fobj: typing.BinaryIO) -> str:
+    """Returns 'LISVER' for LIS verification files."""
+    # Often has leading '\n'
+    for expected_bytes in (b'=LIS VERIFICATION by PETROLOG rev ', b'=LIS VERIFICATION BY PETROLOG REVISION '):
+        fobj.seek(0)
+        byt = fobj.read(len(expected_bytes) + 16)
+        if byt.lstrip()[:len(expected_bytes)] == expected_bytes:
+            return 'LISVER'
+    return ''
+
+
 def _ascii(fobj: typing.BinaryIO) -> str:
     """Returns 'ASCII' if all the bytes are ASCII characters 0 to 127, '' otherwise.
     """
@@ -329,6 +340,36 @@ def _segy(fobj: typing.BinaryIO) -> str:
     return ''
 
 
+def _jpeg(fobj: typing.BinaryIO) -> str:
+    """
+    JPEG.
+    From https://en.wikipedia.org/wiki/List_of_file_signatures
+    """
+    signatures = (
+        b'\xFF\xD8\xFF\xDB',
+        b'\xFF\xD8\xFF\xE0\x00\x10\x4A\x46\x49\x46\x00\x01',
+        b'\xFF\xD8\xFF\xEE',
+    )
+    for sig in signatures:
+        fobj.seek(0)
+        if fobj.read(len(sig)) == sig:
+            return 'JPEG'
+    return ''
+
+
+def _exe(fobj: typing.BinaryIO) -> str:
+    """Returns 'EXE' if the magic number is a EXE file, '' otherwise.
+    From https://en.wikipedia.org/wiki/List_of_file_signatures
+    Two bytes have to be right so 2^16
+    """
+    fobj.seek(0)
+    # 4949 2a00 3d00 0000 3e3e 205f 6766 665f 6669 II*.=...>> _gff_fi
+    if fobj.read(2) == b'\x4d\x5a':
+        return 'EXE'
+    return ''
+
+
+
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
@@ -337,6 +378,7 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_ps, 'PS'),  # 2^40
     (_zip, 'ZIP'),  # 2^32
     (_tiff, 'TIFF'),  # 2^32
+    (_jpeg, 'JPEG'),  # 2^32
     (_lasv12, 'LAS1.2'),
     (_lasv20, 'LAS2.0'),
     (_lasv30, 'LAS3.0'),
@@ -346,6 +388,7 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_rp66v2, 'RP66V2'),
     (_dat, 'DAT'), # Strong, but slow. Needs to be before ASCII as it is a specialisation of ASCII.
     (_segy, 'SEGY'),  # 3200 EBCDIC characters.
+    (_lis_ver, 'LISVER'), # Highly specific first line.
     (_ascii, 'ASCII'),
     (_lis, 'LISt'),
     (_lis, 'LIStr'),
@@ -361,6 +404,7 @@ BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
     'PS': 'Postscript',
     'ZIP': 'ZIP Compressed Archive',
     'TIFF': 'Tagged Image File Format',
+    'JPEG': 'Joint Photographic Expert Group File Format',
     'SEGY': 'Society of Exploration Geophysicists seismic format Y',
     'LIS': 'Schlumberger LIS-79 well logging format',
     'LISt': 'Schlumberger LIS-79 well logging format with TIF markers',
@@ -374,6 +418,7 @@ BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
     'RP66V2': 'American Petroleum Institute Recommended Practice 66 version 2',
     'ASCII': 'American Standard Code for Information Interchange',
     'DAT': 'Simple data format.',
+    'LISVER': 'LIS Verification file.',
 }
 
 assert set(BINARY_FILE_TYPE_DESCRIPTIONS.keys()) == BINARY_FILE_TYPES_SUPPORTED, \

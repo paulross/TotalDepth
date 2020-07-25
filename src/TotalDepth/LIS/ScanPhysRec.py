@@ -22,27 +22,31 @@ Created on 10 Nov 2010
 
 @author: p2ross
 """
+import os
+
 __author__  = 'Paul Ross'
 __date__    = '2010-08-02'
 __version__ = '0.1.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
-import time
-import sys
 import logging
-from optparse import OptionParser
 import struct
+import sys
+import time
+import typing
+from optparse import OptionParser
 
 from TotalDepth.LIS.core import PhysRec
-from TotalDepth.util import Histogram
+from TotalDepth.util import Histogram, DirWalk
 
 # One byte for type, on for attributes
 LD_STRUCT_HEAD = struct.Struct('>BB')
 assert(LD_STRUCT_HEAD.size == 2)
 
-def scanFile(fp, keepGoing, theS=sys.stdout):
+
+def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
     try:
-        myPrh = PhysRec.PhysRecRead(fp, fp, keepGoing)
+        myPrh = PhysRec.PhysRecRead(fp, fp, keepGoing, pad_modulo, pad_non_null=pad_non_null)
     except PhysRec.ExceptionPhysRec as err:
         print('Can not open file, error: %s' % str(err))
         return
@@ -94,43 +98,91 @@ def scanFile(fp, keepGoing, theS=sys.stdout):
     theS.write(myLenHist.strRep(100, valTitle='Bytes', inclCount=True))
     theS.write('\n')
 
+
+def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null):
+    """Reads a file as if it was a LIS file and returns the number of Physical Records."""
+    pr_count = 0
+    phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
+                                   pad_non_null=pad_non_null)
+    for _ in phys_rec.genLd():
+        pr_count += 1
+    return pr_count
+
+
+class PhysRecScanResult(typing.NamedTuple):
+    path: str
+    pr_count: int
+    error: bool
+
+    def __str__(self):
+        return f'{self.error!r:5} {self.pr_count:8,d} {self.path}'
+
+
+def scan_directory(
+        file_path: str,
+        recursive: bool,
+        keep_going: bool,
+        pad_modulo: int,
+        pad_non_null: bool) -> typing.Dict[str, PhysRecScanResult]:
+    ret = {}
+    for file_in_out in DirWalk.dirWalk(file_path, '', '', recursive=recursive, bigFirst=False):
+        try:
+            pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, pad_modulo, pad_non_null)
+            error = False
+        except PhysRec.ExceptionPhysRec as err:
+            logging.exception(f'Can not read {file_in_out.filePathIn}')
+            pr_count = 0
+            error = True
+        ret[file_in_out.filePathIn] = PhysRecScanResult(file_in_out.filePathIn, pr_count, error)
+    return ret
+
+
 def main():
     usage = """usage: %prog [options] file
 Scans a LIS79 file and reports Physical Record structure."""
     print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. [default: %default]")
+    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
+                         help="Keep going as far as sensible. [default: %default]")
+    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
+                         help="Process a directory recursively. [default: %default]")
+    optParser.add_option("--pad-modulo", type="int", default=0,
+                         help="Consume pad bytes up to tell() modulo this value, typically 2 or 4. [default: %default]")
+    optParser.add_option("--pad-non-null", action="store_true", default=False,
+                         help="Pad bytes can be non-null bytes. Only relevant if --pad-modulo > 0 [default: %default]")
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=30,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=30,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    print(opts)
+    print(args)
+    clk_start = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
     if len(args) == 1:
-        scanFile(args[0], opts.keepGoing)
+        if os.path.isfile(args[0]):
+            scan_file(args[0], opts.keepGoing, opts.pad_modulo, opts.pad_non_null)
+        elif os.path.isdir(args[0]):
+            result = scan_directory(args[0], opts.recursive, opts.keepGoing, opts.pad_modulo, opts.pad_non_null)
+            for r in result:
+                print(result[r])
     else:
         optParser.print_help()
         optParser.error("Wrong number of arguments, I need one only.")
         return 1
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clk_start
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0
 
-if __name__ == '__main__':
-    #multiprocessing.freeze_support()
-    sys.exit(main())
 
-    
-    
-    
+if __name__ == '__main__':
+    sys.exit(main())

@@ -261,6 +261,10 @@ def analyse_archive(files: typing.List[FileBase],
             if include_size_histogram:
                 print('\n'.join(archive_count.histogram_power_of_2()))
                 print()
+    print('Uncatalogued files:')
+    for file in files:
+        if file.bin_type == '':
+            print(f'{file.size:12,d} {file.path[len(common_prefix):]}')
 
 
 EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
@@ -269,6 +273,7 @@ EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
 def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) -> None:
     if file_name not in EXCLUDE_FILENAMES:
         path = os.path.join(dir_name, file_name)
+        logger.info(f'Examining: {path}')
         if os.path.isfile(path):
             # If this is a ZIP archive then open it a process the contents.
             if zipfile.is_zipfile(path):

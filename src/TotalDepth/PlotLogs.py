@@ -735,7 +735,7 @@ def main():
     cmn_cmd_opts.set_log_level(args)
     # print('args', args)
     # return 0
-    start_clock = time.clock()
+    start_clock = time.perf_counter()
     start_time = time.time()
     # Your code here
     if '?' in ''.join(args.LgFormat):
@@ -760,7 +760,7 @@ def main():
     if os.path.isdir(args.path_out):
         myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in)
     print('plotLogInfo', str(myResult))
-    print('  CPU time = %8.3f (S)' % (time.clock() - start_clock))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - start_clock))
     print('Exec. time = %8.3f (S)' % (time.time() - start_time))
     print('Bye, bye!')
     return 0

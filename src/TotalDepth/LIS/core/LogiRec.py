@@ -58,53 +58,53 @@ LR_HEADER_LENGTH = 2
 #
 # Group 0 - Data records
 # ----------------------
-LR_TYPE_NORMAL_DATA             = 0    #: Normal data record containing log data
-LR_TYPE_ALTERNATE_DATA          = 1    #: Alternate data.
+LR_TYPE_NORMAL_DATA             = 0    #: 0x00 Normal data record containing log data
+LR_TYPE_ALTERNATE_DATA          = 1    #: 0x01 Alternate data.
 #
 # Group 1 Information records
 # ---------------------------
-LR_TYPE_JOB_ID                  = 32    #: Job identification
-LR_TYPE_WELL_DATA               = 34    #: Well site data
-LR_TYPE_TOOL_INFO               = 39    #: Tool string info
-LR_TYPE_ENCRYPTED_TABLE         = 42    #: Encrypted table dump
-LR_TYPE_TABLE_DUMP              = 47    #: Table dump
+LR_TYPE_JOB_ID                  = 32    #: 0x20 Job identification
+LR_TYPE_WELL_DATA               = 34    #: 0x22 Well site data
+LR_TYPE_TOOL_INFO               = 39    #: 0x27 Tool string info
+LR_TYPE_ENCRYPTED_TABLE         = 42    #: 0x2a Encrypted table dump
+LR_TYPE_TABLE_DUMP              = 47    #: 0x2f Table dump
 #
 # Group 2 Data format specification records
 # -----------------------------------------
-LR_TYPE_DATA_FORMAT             = 64    #: Data format specification record
-LR_TYPE_DATA_DESCRIPTOR         = 65    #: Data descriptor (not defined in the LIS79 Description Reference Manual)
+LR_TYPE_DATA_FORMAT             = 64    #: 0x40 Data format specification record
+LR_TYPE_DATA_DESCRIPTOR         = 65    #: 0x41 Data descriptor (not defined in the LIS79 Description Reference Manual)
 #
 # Group 3 Program records (CSU only)
 # ----------------------------------
-LR_TYPE_TU10_BOOT               = 95    #: TU10 software boot
-LR_TYPE_BOOTSTRAP_LOADER        = 96    #: Bootstrap loader
-LR_TYPE_CP_KERNEL               = 97    #: CP-kernel loader boot
-LR_TYPE_PROGRAM_FILE_HEAD       = 100    #: Program file header
-LR_TYPE_PROGRAM_OVER_HEAD       = 101    #: Program overlay header
-LR_TYPE_PROGRAM_OVER_LOAD       = 102    #: Program overlay load
+LR_TYPE_TU10_BOOT               = 95    #: 0x5f TU10 software boot
+LR_TYPE_BOOTSTRAP_LOADER        = 96    #: 0x60 Bootstrap loader
+LR_TYPE_CP_KERNEL               = 97    #: 0x61 CP-kernel loader boot
+LR_TYPE_PROGRAM_FILE_HEAD       = 100   #: 0x64 Program file header
+LR_TYPE_PROGRAM_OVER_HEAD       = 101   #: 0x65 Program overlay header
+LR_TYPE_PROGRAM_OVER_LOAD       = 102   #: 0x66 Program overlay load
 #
 # Group 4 Delimiters
 # ------------------
-LR_TYPE_FILE_HEAD               = 128    #: File header
-LR_TYPE_FILE_TAIL               = 129    #: File trailer
-LR_TYPE_TAPE_HEAD               = 130    #: Tape header
-LR_TYPE_TAPE_TAIL               = 131    #: Tape trailer
-LR_TYPE_REEL_HEAD               = 132    #: Reel header
-LR_TYPE_REEL_TAIL               = 133    #: Reel trailer
-LR_TYPE_EOF                     = 137    #: Logical EOF (end of file)
-LR_TYPE_BOT                     = 138    #: Logical BOT (beginning of tape)
-LR_TYPE_EOT                     = 139    #: Logical EOT (end of tape)
-LR_TYPE_EOM                     = 141    #: Logical EOM (end of medium)
+LR_TYPE_FILE_HEAD               = 128    #: 0x80 File header
+LR_TYPE_FILE_TAIL               = 129    #: 0x81 File trailer
+LR_TYPE_TAPE_HEAD               = 130    #: 0x82 Tape header
+LR_TYPE_TAPE_TAIL               = 131    #: 0x83 Tape trailer
+LR_TYPE_REEL_HEAD               = 132    #: 0x84 Reel header
+LR_TYPE_REEL_TAIL               = 133    #: 0x85 Reel trailer
+LR_TYPE_EOF                     = 137    #: 0x89 Logical EOF (end of file)
+LR_TYPE_BOT                     = 138    #: 0x8a Logical BOT (beginning of tape)
+LR_TYPE_EOT                     = 139    #: 0x8b Logical EOT (end of tape)
+LR_TYPE_EOM                     = 141    #: 0x8d Logical EOM (end of medium)
 #
 # Group 7 Miscellaneous records
 # -----------------------------
-LR_TYPE_OPERATOR_INPUT          = 224    #: Operator command inputs
-LR_TYPE_OPERATOR_RESPONSE       = 225    #: Operator response inputs
-LR_TYPE_SYSTEM_OUTPUT           = 227    #: System outputs to operator
-LR_TYPE_FLIC_COMMENT            = 232    #: FLIC comment
-LR_TYPE_BLANK_RECORD            = 234    #: Blank record/CSU comment
-LR_TYPE_PICTURE                 = 85     #: Picture
-LR_TYPE_IMAGE                   = 86     #: Image
+LR_TYPE_OPERATOR_INPUT          = 224    #: 0xe0 Operator command inputs
+LR_TYPE_OPERATOR_RESPONSE       = 225    #: 0xe1 Operator response inputs
+LR_TYPE_SYSTEM_OUTPUT           = 227    #: 0xe3 System outputs to operator
+LR_TYPE_FLIC_COMMENT            = 232    #: 0xe8 FLIC comment
+LR_TYPE_BLANK_RECORD            = 234    #: 0xea Blank record/CSU comment
+LR_TYPE_PICTURE                 = 85     #: 0x55 Picture
+LR_TYPE_IMAGE                   = 86     #: 0x56 Image
 #
 # Collections
 # -----------
@@ -160,6 +160,23 @@ LR_TYPE_DELIMITER = LR_TYPE_DELIMITER_START + LR_TYPE_DELIMITER_END
 LR_TYPE_MARKER = (LR_TYPE_EOF, LR_TYPE_BOT, LR_TYPE_EOT, LR_TYPE_EOM)
 #: Logical Records Types for all delimiter and marker records.
 LR_TYPE_DELIMITER_MARKER = LR_TYPE_DELIMITER + LR_TYPE_MARKER
+
+#: Table of fixed format Logical Record types and their fixed length in bytes.
+LR_FIXED_FORMAT = {
+    LR_TYPE_TU10_BOOT: 594,
+    # In the LIS standard but 'This shows a typical implementation of this type.'
+    LR_TYPE_PROGRAM_OVER_HEAD: 52,
+    LR_TYPE_FILE_HEAD: 58,
+    LR_TYPE_FILE_TAIL: 58,
+    LR_TYPE_TAPE_HEAD: 128,
+    LR_TYPE_TAPE_TAIL: 128,
+    LR_TYPE_REEL_HEAD: 128,
+    LR_TYPE_REEL_TAIL: 128,
+    LR_TYPE_EOF: 0,
+    LR_TYPE_BOT: 0,
+    LR_TYPE_EOT: 0,
+    LR_TYPE_EOM: 0,
+}
 
 # Global function for detecting delimiter records
 def isDelimiter(theType):
