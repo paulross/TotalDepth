@@ -36,7 +36,9 @@ import time
 import typing
 from optparse import OptionParser
 
+from TotalDepth.LIS import lis_cmn_cmd_opts
 from TotalDepth.LIS.core import PhysRec
+from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util import Histogram, DirWalk
 
 # One byte for type, on for attributes
@@ -138,46 +140,29 @@ def scan_directory(
 
 
 def main():
-    usage = """usage: %prog [options] file
+    usage = """usage: %(prog)s [options] file
 Scans a LIS79 file and reports Physical Record structure."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
-                         help="Keep going as far as sensible. [default: %default]")
-    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
-                         help="Process a directory recursively. [default: %default]")
-    optParser.add_option("--pad-modulo", type="int", default=0,
-                         help="Consume pad bytes up to tell() modulo this value, typically 2 or 4. [default: %default]")
-    optParser.add_option("--pad-non-null", action="store_true", default=False,
-                         help="Pad bytes can be non-null bytes. Only relevant if --pad-modulo > 0 [default: %default]")
-    optParser.add_option(
-        "-l", "--loglevel",
-        type="int",
-        dest="loglevel",
-        default=30,
-        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-    )
-    opts, args = optParser.parse_args()
-    print(opts)
+    arg_parser = cmn_cmd_opts.path_in(usage, prog='TotalDepth.LIS.ScanPhysRec', version='%(prog)s ' + __version__)
+    lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
+    cmn_cmd_opts.add_log_level(arg_parser, level=20)
+    args = arg_parser.parse_args()
     print(args)
+    cmn_cmd_opts.set_log_level(args)
     clk_start = time.perf_counter()
-    # Initialise logging etc.
-    logging.basicConfig(level=opts.loglevel,
-                        format='%(asctime)s %(levelname)-8s %(message)s',
-                        # datefmt='%y-%m-%d % %H:%M:%S',
-                        stream=sys.stdout)
     # Your code here
-    if len(args) == 1:
-        if os.path.isfile(args[0]):
-            scan_file(args[0], opts.keepGoing, opts.pad_modulo, opts.pad_non_null)
-        elif os.path.isdir(args[0]):
-            result = scan_directory(args[0], opts.recursive, opts.keepGoing, opts.pad_modulo, opts.pad_non_null)
-            for r in result:
-                print(result[r])
-    else:
-        optParser.print_help()
-        optParser.error("Wrong number of arguments, I need one only.")
-        return 1
+    if os.path.isfile(args.path_in):
+        scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+    elif os.path.isdir(args.path_in):
+        result = scan_directory(args.path_in, args.recurse, args.keepGoing, args.pad_modulo, args.pad_non_null)
+        fails = 0
+        for r in sorted(result.keys()):
+            print(result[r])
+            if result[r].error:
+                fails += 1
+        print(f'Total files: {len(result):8,d}')
+        print(f'    Success: {len(result) - fails:8,d}')
+        print(f'    Failure: {fails:8,d}')
     clkExec = time.perf_counter() - clk_start
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
