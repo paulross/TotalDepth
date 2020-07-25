@@ -33,7 +33,7 @@ __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2010-2019 Paul Ross. All rights reserved.'
 
 
-def arg_parser(desc, prog=None, version=None, **kwargs):
+def arg_parser(desc, prog=None, version=None, **kwargs) -> argparse.ArgumentParser:
     """Return an command line parser with the standard pre-set options.
     
     Standard options are ``-h, --version`` and:
@@ -57,7 +57,7 @@ def arg_parser(desc, prog=None, version=None, **kwargs):
     return parser
 
 
-def path_in(*args, **kwargs):
+def path_in(*args, **kwargs) -> argparse.ArgumentParser:
     """
     Return an command line parser with the standard pre-set options plus an input path as an argument.
     """
@@ -71,7 +71,7 @@ def path_in(*args, **kwargs):
     return parser
 
 
-def path_in_out(*args, **kwargs):
+def path_in_out(*args, **kwargs) -> argparse.ArgumentParser:
     """
     Return an command line parser with the standard pre-set options plus an input and output paths as an arguments.
     """
