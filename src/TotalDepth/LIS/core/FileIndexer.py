@@ -45,7 +45,7 @@ class ExceptionFileIndex(ExceptionTotalDepthLIS):
     pass
 
 
-class IndexObjBase(object):
+class IndexObjBase:
     """Base class for indexed objects.
     
     tell - The file position of the Logical Record as an integer.
@@ -333,7 +333,8 @@ class IndexLogPass(IndexObjBase):
         d['LogPass'] = self._logPass.jsonObject()
         return d
 
-class PlotRecordSet(object):
+
+class PlotRecordSet:
     """A POD class that can contain a set of references to the essential (plus
     optional) logical records for plotting."""
     def __init__(self):
@@ -384,8 +385,9 @@ class PlotRecordSet(object):
         information from the file that allows a plot using some external definition
         of what has to be plotted. In practice this means a LogPass."""
         return self.logPass is not None
-    
-class FileIndex(object):
+
+
+class FileIndex:
     """Create an index for the LIS file, theF is a LIS File object.
     
     xAxisIndex is the channel index that is regarded as the X axis (default 0).

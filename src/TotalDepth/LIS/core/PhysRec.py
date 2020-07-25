@@ -730,6 +730,19 @@ class PhysRecRead(PhysRecBase):
             self._readTail()
             yield myLd, self.isLrStart
 
+    def genPr(self):
+        """A generator that iterates through all the Physical Records from the current position.
+        This seeks through the Logical Data so should be as fast as possible.
+        """
+        self.seekLr(0)
+        while not self.isEOF:
+            self._readHead()
+            if self.isEOF:
+                break
+            self.skipLrBytes(self.ldLen)
+            self._readTail()
+            yield self
+
 
 class PhysRecTail(object):
     """Represents Physical Record Tail fields."""
