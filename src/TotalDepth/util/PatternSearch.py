@@ -221,7 +221,7 @@ def main():
     op.add_argument('infile', type=argparse.FileType('rb'), help='The file to search')
     args = op.parse_args()
 #    print('TRACE: args', args)
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=args.loglevel,
@@ -239,7 +239,7 @@ def main():
 #    reportIDENT(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
 #    reportSLB(args.infile, showTell=args.show_tell)
     reportTOOL(args.infile, showTell=args.show_tell)
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0

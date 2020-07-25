@@ -127,7 +127,7 @@ Scans a LIS79 file and dumps logical record data."""
     optParser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, 
                       help="Verbose Output. [default: %default]")
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -140,7 +140,7 @@ Scans a LIS79 file and dumps logical record data."""
         optParser.print_help()
         optParser.error("Wrong number of arguments, I need one only.")
         return 1
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

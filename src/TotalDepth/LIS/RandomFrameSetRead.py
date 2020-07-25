@@ -116,14 +116,14 @@ class ResultS(object):
         return 'NO results.'
 
 def _loadFrameSetAndAccumulate(theF, theLp, theFrameSlice, theChList):
-    tS = time.clock()
+    tS = time.perf_counter()
     theLp.setFrameSet(theF, theFrSl=theFrameSlice, theChList=theChList)
-    tE_load = time.clock() - tS
-    tS = time.clock()
+    tE_load = time.perf_counter() - tS
+    tS = time.perf_counter()
     #print('theFrameSlice', theFrameSlice)
     myAcc = theLp.frameSet.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean,])
     #print(myAcc)
-    tE_acc = time.clock() - tS
+    tE_acc = time.perf_counter() - tS
     numVals = theLp.frameSet.numValues
     mbRead = numVals * 4 / 2**20
     loadCost = 1000 * tE_load / mbRead
@@ -293,10 +293,10 @@ def processFile(f, tests, keepGoing, resultMap):
         myFi = File.FileRead(f, theFileId=f, keepGoing=keepGoing)
         #a = r'W:\LISTestData\logPassStd256MB.lis'
         #myFi = File.FileRead(a, theFileId=a)
-        clkStart = time.clock()
+        clkStart = time.perf_counter()
         myIdx = FileIndexer.FileIndex(myFi)
         #print(myIdx.longDesc())
-        print('Index time: {:.3f}'.format(time.clock() - clkStart))
+        print('Index time: {:.3f}'.format(time.perf_counter() - clkStart))
     except Exception as err:
         logging.error(str(err))
         traceback.print_exc()
@@ -372,7 +372,7 @@ E - Random frames, random channels.
     opts, args = optParser.parse_args()
     global LOOPS_TO_TEST
     LOOPS_TO_TEST = opts.numTests
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -400,7 +400,7 @@ E - Random frames, random channels.
         optParser.print_help()
         optParser.error("Wrong number of arguments, I need one only.")
         return 1
-    clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

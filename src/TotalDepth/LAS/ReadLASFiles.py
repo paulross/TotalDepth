@@ -82,7 +82,7 @@ class ReadLASFiles(object):
     def _processFile(self, fp):
         """Process a single file. Returns the size of the file and the time taken to process."""
         rSize = os.path.getsize(fp)
-        clkStart = time.clock()
+        clkStart = time.perf_counter()
         try:
             myLr = LASRead.LASRead(fp)
             self._cntrs['byte'] += rSize
@@ -98,7 +98,7 @@ class ReadLASFiles(object):
             logging.critical(traceback.format_exc())
             self._cntrs['crit'] += 1
         self._cntrs['file'] += 1
-        return rSize, time.clock() - clkStart 
+        return rSize, time.perf_counter() - clkStart
     
     def _procLAS(self, las):
         self._updateDescMaps(las)
@@ -273,7 +273,7 @@ Recursively reads LAS files in a directory reporting information about their con
             help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
         )      
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -293,7 +293,7 @@ Recursively reads LAS files in a directory reporting information about their con
     myReader.pprintWsd()
     # myReader.pprintSizeTime()
     print(myReader.results())
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0
