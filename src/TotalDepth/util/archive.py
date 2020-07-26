@@ -260,8 +260,9 @@ def analyse_archive(files: typing.List[FileBase],
                 f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
             if include_size_histogram:
                 print('\n'.join(archive_count.histogram_power_of_2()))
-                print()
-    print('Uncatalogued files:')
+            print()
+
+    print(f'Uncatalogued files: [{len([file for file in  files if file.bin_type == ""])}]')
     for file in files:
         if file.bin_type == '':
             print(f'{file.size:12,d} {file.path[len(common_prefix):]}')

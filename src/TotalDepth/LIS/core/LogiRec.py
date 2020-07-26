@@ -307,7 +307,7 @@ class LrBase(object):
     
     def __str__(self):
         """String representation."""
-        return '{:s}: "{:s}"'.format(repr(self), self.desc)
+        return '{:s}: Type: {} "{:s}"'.format(repr(self), self.type, self.desc)
     
     @property
     def desc(self):
@@ -632,6 +632,8 @@ class LrReelTailRead(LrReelTail):
 ############################################################################
 # Section: Misc Logical records - these have no interpreted internal format.
 ############################################################################
+
+
 class LrMisc(LrBase):
     """Miscellaneous Logical Record."""
     def __init__(self, theType, theAttr):
@@ -640,7 +642,26 @@ class LrMisc(LrBase):
             'Illegal LR type of %d for a LrMisc' % self.type
         self.bytes = b''
     
+
 class LrMiscRead(LrMisc):
+    """Miscellaneous Logical Record read from a LIS file."""
+    def __init__(self, theFile: File.FileRead):
+        t, a = self._typeAttrUnpack(theFile)
+        super().__init__(t, a)
+        self.bytes: bytes = theFile.readLrBytes()
+        # Set to beginning of LR as we have consumed the complete LR and the caller is most likely to call skipToNextLr.
+        theFile.seekCurrentLrStart()
+
+
+class LrUnknown(LrBase):
+    """Logical Record that does not fall into any other category."""
+    def __init__(self, theType, theAttr):
+        super().__init__(theType, theAttr)
+        self.bytes = b''
+
+
+class LrUnkownRead(LrUnknown):
+    """Logical Record that does not fall into any other category."""
     """Miscellaneous Logical Record read from a LIS file."""
     def __init__(self, theFile: File.FileRead):
         t, a = self._typeAttrUnpack(theFile)
@@ -1746,15 +1767,19 @@ class LrFactoryRead(LrFactory):
         appropriate Logical Record object or None."""
         # Read from file
         # First read a single byte
-        myLtype = theFile.readLrBytes(1)[0]
+        logical_record_type = theFile.readLrBytes(1)[0]
         # Now rewind and re-read. This causes duplicate PR readHead() calls.
-        #print('Logical record type', myLtype)
-        t = self._lrMap[myLtype]
-        if t is not None:
+        if logical_record_type not in self._lrMap:
+            logging.info(f'Using LrUnkown Logical Record Handler for type {logical_record_type}')
             theFile.seekCurrentLrStart()
-            return self._lrMap[myLtype](theFile)
-        elif myLtype != 0:
-            logging.error(f'No Logical Record Handler for type {myLtype}')
+            return LrUnkownRead(theFile)
+        else:
+            t = self._lrMap[logical_record_type]
+            if t is not None:
+                theFile.seekCurrentLrStart()
+                return self._lrMap[logical_record_type](theFile)
+            elif logical_record_type != 0:
+                logging.error(f'No Logical Record Handler for type {logical_record_type}')
 
 ###################################
 # End: Indirect Logical Records

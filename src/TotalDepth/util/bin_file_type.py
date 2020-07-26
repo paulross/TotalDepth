@@ -3,6 +3,7 @@ Identifies the type of file as a string such as "PDF", "RP66V1" by an analysis (
 initial bytes of the file.
 """
 import io
+import logging
 import re
 import string
 import struct
@@ -12,6 +13,9 @@ from TotalDepth.DAT import DAT_parser
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File, FileIndexer
 from TotalDepth.util import SEGY
+
+
+logger = logging.getLogger(__file__)
 
 
 RE_COMPILED = {
@@ -91,7 +95,7 @@ def _lis(fobj: typing.BinaryIO) -> str:
     """This is a LIS file if we can create an index."""
     fobj.seek(0)
     try:
-        lis_file = File.FileRead(fobj, theFileId='', keepGoing=False)
+        lis_file = File.file_read_with_best_physical_record_pad_settings(fobj, '')
         # tif = lis_file._prh.tif.hasTif
         lis_index = FileIndexer.FileIndex(lis_file)
         if len(lis_index):
@@ -443,10 +447,14 @@ def binary_file_type(fobj: typing.BinaryIO) -> str:
     """
     result = ''
     for fn, typ in FUNCTION_ID_MAP:
+        logging.debug(f'Trying {typ} {fn}')
         result = fn(fobj)
         assert isinstance(result, str), f'result of {fn} is {result!r}'
         if result:
+            logging.debug(f'Found file type result: {result}')
             break
+    else:
+        logging.debug(f'No file type found.')
     fobj.seek(0)
     return result
 

@@ -122,10 +122,12 @@ class IndexTimer(object):
         return len(self._sizeTime)
         
     def __str__(self):
-        l = ['Size(kb)\tTime(s)\tRate(ms/MB)']
-        l += ['{:.3f}\t{:.6f}\t{:.3f}'.format(s/1024, t, t * 1000 / (s / 1024**2)) for s, t in self._sizeTime]
-        l.append('\nFiles: {:d}\nErrors: {:d}'.format(self._errCount+len(self._sizeTime), self._errCount))
-        return '\n'.join(l)
+        str_list = [
+            '{:>10} {:>10} {:>12}'.format('Size(kb)', 'Time(s)', 'Rate(ms/MB)')
+        ]
+        str_list += ['{:10.3f} {:10.6f} {:12.3f}'.format(s/1024, t, t * 1000 / (s / 1024**2)) for s, t in self._sizeTime]
+        str_list.append('\nFiles: {:d}\nErrors: {:d}'.format(self._errCount+len(self._sizeTime), self._errCount))
+        return '\n'.join(str_list)
         
     def addErr(self):
         self._errCount += 1
@@ -143,7 +145,8 @@ def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
         timeS = []
         for t in range(numTimes):
             clkStart = time.perf_counter()
-            myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
+            # myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
+            myFi  = File.file_read_with_best_physical_record_pad_settings(fp, fp)
             try:
                 myIdx = FileIndexer.FileIndex(myFi)
             except ExceptionTotalDepthLIS as err:
@@ -264,6 +267,7 @@ def indexDirMultiProcess(dir, recursive, numT, verbose, keepGoing, convertJson, 
 # End: Multiprocessing code.
 ################################
 
+
 def main():
     usage = """usage: %prog [options] path
 Indexes LIS files recursively."""
@@ -337,6 +341,6 @@ Indexes LIS files recursively."""
     print('Bye, bye!')
     return 0
 
+
 if __name__ == '__main__':
-    multiprocessing.freeze_support()
     sys.exit(main())
