@@ -102,9 +102,10 @@ def dump_logical_record(logical_record: LogiRec.LrBase, theS=sys.stdout):
         LogiRec.LR_TYPE_FILE_TAIL   : dump_logical_record_attributes,
     }
     try:
-        DUMP_MAP[logical_record.type](logical_record)
+        DUMP_MAP[logical_record.type](logical_record, theS)
     except KeyError:
-        pass
+        if hasattr(logical_record, 'bytes'):
+            theS.write(logical_record.bytes.decode('ascii', 'replaceF'))
 
 
 def scan_file(fp, verbose, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):

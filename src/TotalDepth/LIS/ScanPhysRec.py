@@ -36,7 +36,7 @@ import time
 import typing
 
 from TotalDepth.LIS import lis_cmn_cmd_opts
-from TotalDepth.LIS.core import PhysRec
+from TotalDepth.LIS.core import PhysRec, File
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util import Histogram, DirWalk
 
@@ -165,7 +165,7 @@ def scan_directory_with_different_padding(
         keep_going: bool) -> typing.Dict[str, PhysRecScanResultWithPad]:
     ret = {}
     for file_in_out in DirWalk.dirWalk(file_path, '', '', recursive=recursive, bigFirst=False):
-        result = scan_file_with_different_padding(file_in_out.filePathIn, keep_going)
+        result = File.best_physical_record_pad_settings(file_in_out.filePathIn, keep_going)
         if result is not None:
             pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, result[0], result[1])
             error = False
@@ -190,7 +190,7 @@ Scans a LIS79 file and reports Physical Record structure."""
     arg_parser = cmn_cmd_opts.path_in(usage, prog='TotalDepth.LIS.ScanPhysRec', version='%(prog)s ' + __version__)
     lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
     arg_parser.add_argument("--pad-opts-all", action="store_true", default=False,
-                      help="Try all padding options. Default: %(default)s.")
+                            help="Try all padding options. Default: %(default)s.")
 
     cmn_cmd_opts.add_log_level(arg_parser, level=20)
     args = arg_parser.parse_args()
@@ -223,8 +223,8 @@ Scans a LIS79 file and reports Physical Record structure."""
         print(f'Total files: {len(results):8,d}')
         print(f'    Success: {len(results) - fails:8,d}')
         print(f'    Failure: {fails:8,d}')
-    clkExec = time.perf_counter() - clk_start
-    print('CPU time = %8.3f (S)' % clkExec)
+    clk_exec = time.perf_counter() - clk_start
+    print('CPU time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')
     return 0
 

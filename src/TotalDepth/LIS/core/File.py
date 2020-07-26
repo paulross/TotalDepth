@@ -23,6 +23,7 @@ Created on 14 Nov 2010
 
 """
 import io
+import logging
 import struct
 import typing
 
@@ -234,7 +235,7 @@ class PhysicalRecordSettings(typing.NamedTuple):
     pad_non_null: bool
 
 
-def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BinaryIO],
+def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
                                       pr_limit=0) -> typing.Union[None, PhysicalRecordSettings]:
     """This attempts to find the best settings to read Physical Records. It returns a PhysicalRecordSettings on
     success or None on failure.
@@ -267,9 +268,10 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
                 return PhysicalRecordSettings(pad_modulo, pad_non_null)
 
 
-def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BinaryIO],
+def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
                                                      file_id=None,
-                                                     pr_limit=0) -> FileRead:
+                                                     pr_limit=0) -> typing.Union[None, FileRead]:
     pr_settings = best_physical_record_pad_settings(file_path_or_object, pr_limit)
+    logging.info(f'Best PR settings: {pr_settings}')
     if pr_settings is not None:
         return FileRead(file_path_or_object, file_id, True, *pr_settings)
