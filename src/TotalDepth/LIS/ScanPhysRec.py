@@ -114,12 +114,29 @@ def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limi
     return pr_count
 
 
-def scan_file_with_different_padding(file_path: str, keep_going: bool) -> typing.Union[None, typing.Tuple[int, bool]]:
+def scan_file_with_different_padding(file_path: str, keep_going: bool) -> typing.Dict[typing.Tuple[int, bool], int]:
+    """Tries all different padding options and returns a dict with the number of Physical Records parsed."""
+    result: typing.Dict[typing.Tuple[int, bool], int] = {}
     for pad_modulo in (0, 2, 4):
         for pad_non_null in (False, True):
-            result = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
-            if result:
-                return pad_modulo, pad_non_null
+            num_prs = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
+            result[(pad_modulo, pad_non_null)] = num_prs
+            logging.debug(f'pad_modulo {pad_modulo} pad_non_null {pad_non_null} gives {num_prs} PRs')
+    return result
+
+
+def find_best_padding_options(pad_opts_to_prs: typing.Dict[typing.Tuple[int, bool], int]) -> typing.List[typing.Tuple[int, bool]]:
+    """Returns the list of padding options that maximises the number of Physical Records parsed from the structure
+    provided by scan_file_with_different_padding()."""
+    max_prs = max(pad_opts_to_prs.values())
+    ret = [k for k in pad_opts_to_prs if pad_opts_to_prs[k] == max_prs]
+    return ret
+
+
+def scan_file_to_get_best_padding(file_path: str, keep_going: bool) -> typing.List[typing.Tuple[int, bool]]:
+    """Returns the list of padding options that maximises the number of Physical Records parsed."""
+    pad_opts_to_prs = scan_file_with_different_padding(file_path, keep_going)
+    return find_best_padding_options(pad_opts_to_prs)
 
 
 class PhysRecScanResult(typing.NamedTuple):
@@ -189,8 +206,15 @@ Scans a LIS79 file and reports Physical Record structure."""
     print('Cmd: %s' % ' '.join(sys.argv))
     arg_parser = cmn_cmd_opts.path_in(usage, prog='TotalDepth.LIS.ScanPhysRec', version='%(prog)s ' + __version__)
     lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
-    arg_parser.add_argument("--pad-opts-all", action="store_true", default=False,
-                            help="Try all padding options. Default: %(default)s.")
+    arg_parser.add_argument(
+        "--pad-opts-all", action="store_true", default=False,
+        help=(
+            "Explores all the padding options and reports which works."
+            " This ignores --pad-modulo and --pad-non-null."
+            " For file argument only, not directory."
+            " Default: %(default)s."
+        )
+    )
 
     cmn_cmd_opts.add_log_level(arg_parser, level=20)
     args = arg_parser.parse_args()
@@ -201,7 +225,10 @@ Scans a LIS79 file and reports Physical Record structure."""
     if os.path.isfile(args.path_in):
         if args.pad_opts_all:
             result = scan_file_with_different_padding(args.path_in, args.keepGoing)
-            print(f'Succesfull pad options: {result}')
+            for k in sorted(result.keys()):
+                print(f'Pad options: {k!s:12} PRs {result[k]:8,d}')
+            best_pad_options = find_best_padding_options(result)
+            print(f'Best pad options: {best_pad_options}')
         else:
             if args.verbose:
                 scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
@@ -223,6 +250,8 @@ Scans a LIS79 file and reports Physical Record structure."""
         print(f'Total files: {len(results):8,d}')
         print(f'    Success: {len(results) - fails:8,d}')
         print(f'    Failure: {fails:8,d}')
+    else:
+        logging.error(f'{args.path_in} does not exist.')
     clk_exec = time.perf_counter() - clk_start
     print('CPU time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')

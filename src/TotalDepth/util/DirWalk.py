@@ -30,7 +30,6 @@ __rights__  = 'Copyright (c) Paul Ross'
 
 import os
 import fnmatch
-import collections
 
 from TotalDepth import ExceptionTotalDepth
 

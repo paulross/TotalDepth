@@ -245,6 +245,7 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
     Typically 38Mb file with 46276 Physical Records processed in 0.380 (s) so 10ms/Mb or 100Mb/s.
     This is proportionate so if limited to 100 records this would be around 0.001 (s)
     """
+    logging.info(f'Finding best PR settings for: {file_path_or_object}')
     file_id = file_path_or_object if isinstance(file_path_or_object, str) else 'Unknown'
     # Try False first as the standard says that they should be null.
     # True means the file is more likely to be corrupt.
@@ -265,13 +266,14 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
             except PhysRec.ExceptionPhysRec:
                 pass
             else:
-                return PhysicalRecordSettings(pad_modulo, pad_non_null)
+                pr_settings = PhysicalRecordSettings(pad_modulo, pad_non_null)
+                logging.info(f'Best PR settings: {pr_settings} gives PR count {pr_count}')
+                return pr_settings
 
 
 def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
                                                      file_id=None,
                                                      pr_limit=0) -> typing.Union[None, FileRead]:
     pr_settings = best_physical_record_pad_settings(file_path_or_object, pr_limit)
-    logging.info(f'Best PR settings: {pr_settings}')
     if pr_settings is not None:
         return FileRead(file_path_or_object, file_id, True, *pr_settings)

@@ -139,19 +139,19 @@ PR_ATTRIBUTE_UNUSED_MASK = PR_ATTRIBUTE_UNUSED_ONLY_MASK & PR_ATTRIBUTE_UNUSED_R
 PR_PRT_REC_NUM_FORMAT           = struct.Struct('>H')
 #: The length of the Physical Record Trailer for the record number
 PR_PRT_REC_NUM_LEN              = 2
-#: The minimum record number
-PR_PRT_REC_NUM_MIN              = RepCode.RC_79_MIN
-#: The maximum record number
-PR_PRT_REC_NUM_MAX              = RepCode.RC_79_MAX
+#: The minimum record number, two byte unsigned.
+PR_PRT_REC_NUM_MIN              = 0
+#: The maximum record number, two byte unsigned.
+PR_PRT_REC_NUM_MAX              = (1 << 16) - 1
 
 #: The struct.Struct() format for the Physical Record Trailer file number, unsigned short.
 PR_PRT_FILE_NUM_FORMAT          = struct.Struct('>H')
 #: The length of the Physical Record Trailer for the file number
 PR_PRT_FILE_NUM_LEN             = 2
-#: The minimum file number
-PR_PRT_FILE_NUM_MIN              = RepCode.RC_79_MIN
-#: The maximum file number
-PR_PRT_FILE_NUM_MAX              = RepCode.RC_79_MAX
+#: The minimum file number, two byte unsigned.
+PR_PRT_FILE_NUM_MIN              = 0
+#: The maximum file number, two byte unsigned.
+PR_PRT_FILE_NUM_MAX              = (1 << 16) - 1
 
 # PR trailer checksum 2 bytes long
 #: The struct.Struct() format for the Physical Record Trailer checksum, unsigned short.
@@ -179,7 +179,7 @@ assert(PR_PRT_CHECKSUM_FORMAT.size == PR_PRT_CHECKSUM_LEN)
 class PhysRecBase:
     """Base class for physical record read and write.
     TODO: Checksum reading, writing and testing."""
-    def __init__(self, theFileId: str, keepGoing: bool, pad_modulo: int, pad_non_null: bool):
+    def __init__(self, theFileId: str, keepGoing: bool):
         """Constructor, initialise data common to child classes.
 
         theFileId - The ID of the file being read, usually the path.
@@ -208,10 +208,7 @@ class PhysRecBase:
                                 # This is the position of the TIF marker
                                 # (if present) or the position of the PR header
                                 # if TIF markers are absent.
-        # Handling padd bytes.
-        self.pad_modulo = pad_modulo
-        self.pad_non_null = pad_non_null
-    
+
     def _reset(self):
         """Resets internal state, for example when the caller makes a seek."""
         self.prLen = 0
@@ -389,7 +386,10 @@ class PhysRecRead(PhysRecBase):
         """Constructor with a file path or file-like object.
         TODO: checksum.
         """
-        super(PhysRecRead, self).__init__(theFileId, keepGoing, pad_modulo, pad_non_null)
+        super(PhysRecRead, self).__init__(theFileId, keepGoing)
+        # Handling pad bytes.
+        self.pad_modulo = pad_modulo
+        self.pad_non_null = pad_non_null
         try:
             self.stream = RawStream.RawStream(theFile, mode='rb', fileId=self.fileId)
         except IOError:
@@ -437,10 +437,10 @@ class PhysRecRead(PhysRecBase):
     
     def _raiseOrErrorOnEOF(self, theMsg):
         self.isEOF = True
-        if not self.keepGoing:
-            raise ExceptionPhysRecEOF(theMsg)
+        # if not self.keepGoing:
         logging.error('PhysRec._raiseOnEOF(): {0:s}'.format(theMsg))
-    
+        raise ExceptionPhysRecEOF(theMsg)
+
     def _readHead(self):
         """Read the Physical Record header and set internal state."""
         # If the previous record did not have a successor then this record is
@@ -752,7 +752,7 @@ class PhysRecTail(object):
         self._recNum = 0
         if fileNum is not None \
         and (fileNum < PR_PRT_FILE_NUM_MIN or fileNum > PR_PRT_FILE_NUM_MAX):
-            self._fileNum = self._normInt(
+            self._fileNum = self.normalise_integer(
                 fileNum,
                 PR_PRT_FILE_NUM_MIN,
                 PR_PRT_FILE_NUM_MAX
@@ -783,9 +783,12 @@ class PhysRecTail(object):
             str(self.hasRec), str(self._fileNum), str(self.hasCheck)
         )
 
-    def _normInt(self, v, theMin, theMax):
-        assert(theMin < theMax)
-        return ((v - theMin) % (theMax - theMin + 1)) + theMin
+    @staticmethod
+    def normalise_integer(value: int, value_min: int, value_max) -> int:
+        """Given a value this normalises it to be within the range value_min <= value <= value_max."""
+        if value_min >=  value_max:
+            raise ValueError(f'min {value_min} is >= max {value_max}')
+        return ((value - value_min) % (value_max - value_min + 1)) + value_min
     
     @property
     def recNum(self):
@@ -827,7 +830,7 @@ class PhysRecTail(object):
         if self.hasRec:
             if self._recNum < PR_PRT_REC_NUM_MIN or self._recNum > PR_PRT_REC_NUM_MAX:
                 oldRecNum = self._recNum
-                self._recNum = self._normInt(
+                self._recNum = self.normalise_integer(
                     self._recNum,
                     PR_PRT_REC_NUM_MIN,
                     PR_PRT_REC_NUM_MAX
@@ -848,6 +851,7 @@ class PhysRecTail(object):
         if self.hasCheck:
             return PR_PRT_CHECKSUM_FORMAT.pack(self.checkSum)
         return b''
+
 
 class PhysRecWrite(PhysRecBase):
     """Specialisation of PhysRecBase for writing to files."""
