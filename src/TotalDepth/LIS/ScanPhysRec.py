@@ -37,6 +37,7 @@ import typing
 
 from TotalDepth.LIS import lis_cmn_cmd_opts
 from TotalDepth.LIS.core import PhysRec, File
+# from TotalDepth.LIS.core.File import scan_file_no_output, scan_file_with_different_padding, find_best_padding_options
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util import Histogram, DirWalk
 
@@ -96,49 +97,6 @@ def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
     theS.write('\n')
 
 
-def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=0):
-    """Reads a file as if it was a LIS file and returns the number of Physical Records.
-
-    Typically 38Mb file processed in 0.381 seconds so 10ms/Mb or 100Mb/s.
-    """
-    pr_count = 0
-    try:
-        phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
-                                       pad_non_null=pad_non_null)
-        for _ in phys_rec.genPr():
-            pr_count += 1
-            if pr_limit and pr_count >= pr_limit:
-                break
-    except PhysRec.ExceptionPhysRec:
-        pr_count = 0
-    return pr_count
-
-
-def scan_file_with_different_padding(file_path: str, keep_going: bool) -> typing.Dict[typing.Tuple[int, bool], int]:
-    """Tries all different padding options and returns a dict with the number of Physical Records parsed."""
-    result: typing.Dict[typing.Tuple[int, bool], int] = {}
-    for pad_modulo in (0, 2, 4):
-        for pad_non_null in (False, True):
-            num_prs = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null)
-            result[(pad_modulo, pad_non_null)] = num_prs
-            logging.debug(f'pad_modulo {pad_modulo} pad_non_null {pad_non_null} gives {num_prs} PRs')
-    return result
-
-
-def find_best_padding_options(pad_opts_to_prs: typing.Dict[typing.Tuple[int, bool], int]) -> typing.List[typing.Tuple[int, bool]]:
-    """Returns the list of padding options that maximises the number of Physical Records parsed from the structure
-    provided by scan_file_with_different_padding()."""
-    max_prs = max(pad_opts_to_prs.values())
-    ret = [k for k in pad_opts_to_prs if pad_opts_to_prs[k] == max_prs]
-    return ret
-
-
-def scan_file_to_get_best_padding(file_path: str, keep_going: bool) -> typing.List[typing.Tuple[int, bool]]:
-    """Returns the list of padding options that maximises the number of Physical Records parsed."""
-    pad_opts_to_prs = scan_file_with_different_padding(file_path, keep_going)
-    return find_best_padding_options(pad_opts_to_prs)
-
-
 class PhysRecScanResult(typing.NamedTuple):
     path: str
     pr_count: int
@@ -157,7 +115,7 @@ def scan_directory(
     ret = {}
     for file_in_out in DirWalk.dirWalk(file_path, '', '', recursive=recursive, bigFirst=False):
         try:
-            pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, pad_modulo, pad_non_null)
+            pr_count = File.scan_file_no_output(file_in_out.filePathIn, keep_going, pad_modulo, pad_non_null)
             error = False
         except PhysRec.ExceptionPhysRec as err:
             logging.exception(f'Can not read {file_in_out.filePathIn}')
@@ -184,7 +142,7 @@ def scan_directory_with_different_padding(
     for file_in_out in DirWalk.dirWalk(file_path, '', '', recursive=recursive, bigFirst=False):
         result = File.best_physical_record_pad_settings(file_in_out.filePathIn, keep_going)
         if result is not None:
-            pr_count = scan_file_no_output(file_in_out.filePathIn, keep_going, result[0], result[1])
+            pr_count = File.scan_file_no_output(file_in_out.filePathIn, keep_going, result[0], result[1])
             error = False
         else:
             pr_count = 0
@@ -224,16 +182,16 @@ Scans a LIS79 file and reports Physical Record structure."""
     # Your code here
     if os.path.isfile(args.path_in):
         if args.pad_opts_all:
-            result = scan_file_with_different_padding(args.path_in, args.keepGoing)
+            result = File.scan_file_with_different_padding(args.path_in, args.keepGoing)
             for k in sorted(result.keys()):
                 print(f'Pad options: {k!s:12} PRs {result[k]:8,d}')
-            best_pad_options = find_best_padding_options(result)
+            best_pad_options = File.find_best_padding_options(result)
             print(f'Best pad options: {best_pad_options}')
         else:
             if args.verbose:
                 scan_file(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
             else:
-                pr_count = scan_file_no_output(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
+                pr_count = File.scan_file_no_output(args.path_in, args.keepGoing, args.pad_modulo, args.pad_non_null)
                 print(f'Scan found {pr_count} Physical Records. Use -v to see the details.')
     elif os.path.isdir(args.path_in):
         fails = 0
