@@ -225,8 +225,9 @@ def analyse_archive(files: typing.List[FileBase],
     if len(files) == 0:
         return
     summary: ArchiveSummary = ArchiveSummary()
-    common_prefix_len = path_utils.common_directory_prefix_len([file.path for file in files])
-    print(f'Common prefix: {common_prefix_len}')
+    common_prefix = path_utils.common_directory_prefix([file.path for file in files])
+    common_prefix_len = len(common_prefix)
+    print(f'Common prefix: {common_prefix}')
     for file in files:
         if len(file_types) == 0 or file.bin_type in file_types:
             fields = [

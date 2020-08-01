@@ -24,6 +24,7 @@ Created on 14 Nov 2010
 """
 import io
 import logging
+import pprint
 import struct
 import typing
 
@@ -247,28 +248,36 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
     """
     logging.info(f'Finding best PR settings for: {file_path_or_object}')
     file_id = file_path_or_object if isinstance(file_path_or_object, str) else 'Unknown'
-    # Try False first as the standard says that they should be null.
-    # True means the file is more likely to be corrupt.
-    for pad_non_null in (False, True):
-        # 0 - No padding.
-        # 4 - More likely to be reliable.
-        # 2 - Might work
-        for pad_modulo in (0, 4, 2):
-            pr_count = 0
-            try:
-                phys_rec = PhysRec.PhysRecRead(
-                    file_path_or_object, file_id, keepGoing=True, pad_modulo=pad_modulo, pad_non_null=pad_non_null
-                )
-                for _ in phys_rec.genPr():
-                    pr_count += 1
-                    if pr_limit and pr_count >= pr_limit:
-                        break
-            except PhysRec.ExceptionPhysRec:
-                pass
-            else:
-                pr_settings = PhysicalRecordSettings(pad_modulo, pad_non_null)
-                logging.info(f'Best PR settings: {pr_settings} gives PR count {pr_count}')
-                return pr_settings
+    # # Try False first as the standard says that they should be null.
+    # # True means the file is more likely to be corrupt.
+    # for pad_non_null in (False, True):
+    #     # 0 - No padding.
+    #     # 4 - More likely to be reliable.
+    #     # 2 - Might work
+    #     for pad_modulo in (0, 4, 2):
+    #         pr_count = 0
+    #         try:
+    #             phys_rec = PhysRec.PhysRecRead(
+    #                 file_path_or_object, file_id, keepGoing=True, pad_modulo=pad_modulo, pad_non_null=pad_non_null
+    #             )
+    #             for _ in phys_rec.genPr():
+    #                 pr_count += 1
+    #                 if pr_limit and pr_count >= pr_limit:
+    #                     break
+    #         except PhysRec.ExceptionPhysRec:
+    #             pass
+    #         else:
+    #             pr_settings = PhysicalRecordSettings(pad_modulo, pad_non_null)
+    #             logging.info(f'Best PR settings: {pr_settings} gives PR count {pr_count}')
+    #             return pr_settings
+    pad_opts_to_prs = scan_file_with_different_padding(file_path_or_object, keep_going=True, pr_limit=pr_limit)
+    logging.debug('PR count for different padding options, pr_limit=%d:\n%s', pr_limit, pprint.pformat(pad_opts_to_prs))
+    best_pad_opts = find_best_padding_options(pad_opts_to_prs)
+    if len(best_pad_opts) and pad_opts_to_prs[best_pad_opts[0]] > 0:
+        ret = best_pad_opts[0]
+        logging.info('Best pad options, first of %d: %s giving %d Physical Records.', len(best_pad_opts), ret, pad_opts_to_prs[ret])
+        return ret
+    logging.info('No best pad options.')
 
 
 def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
@@ -277,3 +286,40 @@ def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing
     pr_settings = best_physical_record_pad_settings(file_path_or_object, pr_limit)
     if pr_settings is not None:
         return FileRead(file_path_or_object, file_id, True, *pr_settings)
+
+
+def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=0):
+    """Reads a file as if it was a LIS file and returns the number of Physical Records.
+
+    Typically 38Mb file processed in 0.381 seconds so 10ms/Mb or 100Mb/s.
+    """
+    pr_count = 0
+    try:
+        phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
+                                       pad_non_null=pad_non_null)
+        for _ in phys_rec.genPr():
+            pr_count += 1
+            if pr_limit and pr_count >= pr_limit:
+                break
+    except PhysRec.ExceptionPhysRec:
+        pr_count = 0
+    return pr_count
+
+
+def scan_file_with_different_padding(file_path: str, keep_going: bool, pr_limit=0) -> typing.Dict[PhysicalRecordSettings, int]:
+    """Tries all different padding options and returns a dict with the number of Physical Records parsed."""
+    result: typing.Dict[PhysicalRecordSettings, int] = {}
+    for pad_modulo in (0, 2, 4):
+        for pad_non_null in (False, True):
+            num_prs = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=pr_limit)
+            result[PhysicalRecordSettings(pad_modulo, pad_non_null)] = num_prs
+            logging.debug(f'pad_modulo {pad_modulo} pad_non_null {pad_non_null} gives {num_prs} PRs')
+    return result
+
+
+def find_best_padding_options(pad_opts_to_prs: typing.Dict[PhysicalRecordSettings, int]) -> typing.List[PhysicalRecordSettings]:
+    """Returns the list of padding options that maximises the number of Physical Records parsed from the structure
+    provided by scan_file_with_different_padding()."""
+    max_prs = max(pad_opts_to_prs.values())
+    ret = [k for k in pad_opts_to_prs if pad_opts_to_prs[k] == max_prs]
+    return ret
