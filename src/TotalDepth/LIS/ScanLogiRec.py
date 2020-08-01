@@ -104,8 +104,9 @@ def dump_logical_record(logical_record: LogiRec.LrBase, theS=sys.stdout):
     try:
         DUMP_MAP[logical_record.type](logical_record, theS)
     except KeyError:
-        if hasattr(logical_record, 'bytes'):
-            theS.write(logical_record.bytes.decode('ascii', 'replaceF'))
+        # Dump the bytes if not and encrypted table (42).
+        if hasattr(logical_record, 'bytes') and logical_record.type not in (42,):
+            theS.write(f'Raw bytes [{len(logical_record.bytes)}]: {repr(logical_record.bytes[:40])} ...\n')
 
 
 def scan_file(fp, verbose, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):

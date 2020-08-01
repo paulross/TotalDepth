@@ -1449,6 +1449,21 @@ def test_consume_physical_record_padding_fails(byt, pad_modulo, pad_non_null, ex
     assert err.value.args[0] == expected_error
 
 
+@pytest.mark.parametrize(
+    'value, value_min, value_max, expected',
+    (
+        (0, 0, 127, 0),
+        (127, 0, 127, 127),
+        (128, 0, 127, 0),
+        (-128, 0, 127, 0),
+    )
+)
+def test_physrectail_normalise_integer(value, value_min, value_max, expected):
+    result = PhysRec.PhysRecTail.normalise_integer(value, value_min, value_max)
+    assert result == expected
+
+
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass

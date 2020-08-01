@@ -96,18 +96,18 @@ def _lis(fobj: typing.BinaryIO) -> str:
     fobj.seek(0)
     try:
         lis_file = File.file_read_with_best_physical_record_pad_settings(fobj, '')
-        # tif = lis_file._prh.tif.hasTif
-        lis_index = FileIndexer.FileIndex(lis_file)
-        if len(lis_index):
-            if lis_file._prh.tif.hasTif:
-                if lis_file._prh.tif.isReversed:
-                    return 'LIStr'
+        if lis_file is not None:
+            # tif = lis_file._prh.tif.hasTif
+            lis_index = FileIndexer.FileIndex(lis_file)
+            if len(lis_index):
+                if lis_file._prh.tif.hasTif:
+                    if lis_file._prh.tif.isReversed:
+                        return 'LIStr'
+                    else:
+                        return 'LISt'
                 else:
-                    return 'LISt'
-            else:
-                return 'LIS'
-        else:
-            return ''
+                    return 'LIS'
+        return ''
     except ExceptionTotalDepthLIS as err:
         return ''
 

@@ -9,7 +9,7 @@ import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import LogicalFile
-from TotalDepth.common import cmn_cmd_opts
+from TotalDepth.common import cmn_cmd_opts, path_utils
 from TotalDepth.common import data_table
 from TotalDepth.common import process
 from TotalDepth.util import gnuplot, DirWalk
@@ -256,7 +256,7 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
     size_index = size_input = 0
     files_processed = 0
     try:
-        path_prefix = os.path.commonpath(result.keys())
+        path_prefix = path_utils.common_directory_prefix(result.keys())
         len_path_prefix = len(path_prefix)
         table: typing.List[typing.List[str]] = [
             [
