@@ -185,7 +185,7 @@ Scans a LIS79 file and reports Physical Record structure."""
             result = File.scan_file_with_different_padding(args.path_in, args.keepGoing)
             for k in sorted(result.keys()):
                 print(f'Pad options: {k!s:12} PRs {result[k]:8,d}')
-            best_pad_options = File.find_best_padding_options(result)
+            best_pad_options = File.ret_padding_options_with_max_records(result)
             print(f'Best pad options: {best_pad_options}')
         else:
             if args.verbose:

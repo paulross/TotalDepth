@@ -166,7 +166,7 @@ def index_file(file_path: str, num_times: int, verbose: int, keepGoing) -> Index
     try:
         for t in range(num_times):
             clk_start = time.perf_counter()
-            lis_file  = File.file_read_with_best_physical_record_pad_settings(file_path, file_path)
+            lis_file  = File.file_read_with_best_physical_record_pad_settings(file_path, file_path, pr_limit=100)
             if lis_file is None:
                 raise ExceptionTotalDepthLIS('Can not find valid PR pad settings for {:s}'.format(file_path))
             # May raise an ExceptionTotalDepthLIS

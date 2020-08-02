@@ -29,7 +29,7 @@ import struct
 import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-from TotalDepth.LIS.core import PhysRec
+from TotalDepth.LIS.core import PhysRec, TifMarker
 
 __author__  = 'Paul Ross'
 __date__    = '2010-08-02'
@@ -235,6 +235,11 @@ class PhysicalRecordSettings(typing.NamedTuple):
     pad_modulo: int
     pad_non_null: bool
 
+    def __str__(self) -> str:
+        return f'<PhysicalRecordSettings(pad_modulo={self.pad_modulo}, pad_non_null: {self.pad_non_null!r:5}>'
+
+    __repr__ = __str__
+
 
 def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
                                       pr_limit=0) -> typing.Union[None, PhysicalRecordSettings]:
@@ -247,32 +252,9 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
     This is proportionate so if limited to 100 records this would be around 0.001 (s)
     """
     logging.info(f'Finding best PR settings for: {file_path_or_object}')
-    file_id = file_path_or_object if isinstance(file_path_or_object, str) else 'Unknown'
-    # # Try False first as the standard says that they should be null.
-    # # True means the file is more likely to be corrupt.
-    # for pad_non_null in (False, True):
-    #     # 0 - No padding.
-    #     # 4 - More likely to be reliable.
-    #     # 2 - Might work
-    #     for pad_modulo in (0, 4, 2):
-    #         pr_count = 0
-    #         try:
-    #             phys_rec = PhysRec.PhysRecRead(
-    #                 file_path_or_object, file_id, keepGoing=True, pad_modulo=pad_modulo, pad_non_null=pad_non_null
-    #             )
-    #             for _ in phys_rec.genPr():
-    #                 pr_count += 1
-    #                 if pr_limit and pr_count >= pr_limit:
-    #                     break
-    #         except PhysRec.ExceptionPhysRec:
-    #             pass
-    #         else:
-    #             pr_settings = PhysicalRecordSettings(pad_modulo, pad_non_null)
-    #             logging.info(f'Best PR settings: {pr_settings} gives PR count {pr_count}')
-    #             return pr_settings
     pad_opts_to_prs = scan_file_with_different_padding(file_path_or_object, keep_going=True, pr_limit=pr_limit)
     logging.debug('PR count for different padding options, pr_limit=%d:\n%s', pr_limit, pprint.pformat(pad_opts_to_prs))
-    best_pad_opts = find_best_padding_options(pad_opts_to_prs)
+    best_pad_opts = ret_padding_options_with_max_records(pad_opts_to_prs)
     if len(best_pad_opts) and pad_opts_to_prs[best_pad_opts[0]] > 0:
         ret = best_pad_opts[0]
         logging.info('Best pad options, first of %d: %s giving %d Physical Records.', len(best_pad_opts), ret, pad_opts_to_prs[ret])
@@ -288,36 +270,45 @@ def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing
         return FileRead(file_path_or_object, file_id, True, *pr_settings)
 
 
-def scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=0):
+def scan_file_no_output(file_path_or_object: typing.Union[str, io.BytesIO], keep_going: bool, pad_modulo: int,
+                        pad_non_null: bool, pr_limit=0):
     """Reads a file as if it was a LIS file and returns the number of Physical Records.
 
     Typically 38Mb file processed in 0.381 seconds so 10ms/Mb or 100Mb/s.
     """
     pr_count = 0
+    if isinstance(file_path_or_object, str):
+        file_id = file_path_or_object
+    else:
+        file_id = 'Unknown'
+        file_path_or_object.seek(0)
     try:
-        phys_rec = PhysRec.PhysRecRead(file_path, file_path, keep_going, pad_modulo=pad_modulo,
+        phys_rec = PhysRec.PhysRecRead(file_path_or_object, file_id, keep_going, pad_modulo=pad_modulo,
                                        pad_non_null=pad_non_null)
         for _ in phys_rec.genPr():
             pr_count += 1
             if pr_limit and pr_count >= pr_limit:
                 break
-    except PhysRec.ExceptionPhysRec:
+    except (PhysRec.ExceptionPhysRec, TifMarker.ExceptionTifMarker):
         pr_count = 0
+    except Exception as err:
+        logging.exception('Fatal error %s in scan_file_no_output', err)
+        raise
     return pr_count
 
 
-def scan_file_with_different_padding(file_path: str, keep_going: bool, pr_limit=0) -> typing.Dict[PhysicalRecordSettings, int]:
+def scan_file_with_different_padding(file_path_or_object: typing.Union[str, io.BytesIO], keep_going: bool, pr_limit=0) -> typing.Dict[PhysicalRecordSettings, int]:
     """Tries all different padding options and returns a dict with the number of Physical Records parsed."""
     result: typing.Dict[PhysicalRecordSettings, int] = {}
     for pad_modulo in (0, 2, 4):
         for pad_non_null in (False, True):
-            num_prs = scan_file_no_output(file_path, keep_going, pad_modulo, pad_non_null, pr_limit=pr_limit)
+            num_prs = scan_file_no_output(file_path_or_object, keep_going, pad_modulo, pad_non_null, pr_limit=pr_limit)
             result[PhysicalRecordSettings(pad_modulo, pad_non_null)] = num_prs
-            logging.debug(f'pad_modulo {pad_modulo} pad_non_null {pad_non_null} gives {num_prs} PRs')
+            logging.debug('File: %s pad_modulo %d pad_non_null %5s gives %d PRs', file_path_or_object, pad_modulo, pad_non_null, num_prs)
     return result
 
 
-def find_best_padding_options(pad_opts_to_prs: typing.Dict[PhysicalRecordSettings, int]) -> typing.List[PhysicalRecordSettings]:
+def ret_padding_options_with_max_records(pad_opts_to_prs: typing.Dict[PhysicalRecordSettings, int]) -> typing.List[PhysicalRecordSettings]:
     """Returns the list of padding options that maximises the number of Physical Records parsed from the structure
     provided by scan_file_with_different_padding()."""
     max_prs = max(pad_opts_to_prs.values())
