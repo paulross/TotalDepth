@@ -95,7 +95,7 @@ def _lis(fobj: typing.BinaryIO) -> str:
     """This is a LIS file if we can create an index."""
     fobj.seek(0)
     try:
-        lis_file = File.file_read_with_best_physical_record_pad_settings(fobj, '')
+        lis_file = File.file_read_with_best_physical_record_pad_settings(fobj, '', pr_limit=100)
         if lis_file is not None:
             # tif = lis_file._prh.tif.hasTif
             lis_index = FileIndexer.FileIndex(lis_file)
@@ -373,10 +373,94 @@ def _exe(fobj: typing.BinaryIO) -> str:
     return ''
 
 
+def _cfbf(fobj: typing.BinaryIO) -> str:
+    """Returns 'CFBF' if the magic number is an older Excel/Powerpoint/Word file, '' otherwise.
+    From https://en.wikipedia.org/wiki/List_of_file_signatures
+    And: https://en.wikipedia.org/wiki/Compound_File_Binary_Format
+    Eight bytes have to be right so 2^64.
+    00000000: d0cf 11e0 a1b1 1ae1 0000 0000 0000 0000  ................
+    """
+    fobj.seek(0)
+    # 00000000: d0cf 11e0 a1b1 1ae1 0000 0000 0000 0000  ................
+    if fobj.read(8) == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
+        return 'CFBF'
+    return ''
+
+
+def _rcd(fobj: typing.BinaryIO) -> str:
+    """Returns 'RCD' if the magic number is looks like a RCD Seismic file, '' otherwise.
+    This is a bit of guesswork.
+    16 bytes have to be right.
+    00000000: 0400 0000 0000 0000 ffff ffff 0000 0000  ................
+    """
+    fobj.seek(0)
+    # 00000000: 0400 0000 0000 0000 ffff ffff 0000 0000  ................
+    if fobj.read(16) == (
+            b'\x04\x00'
+            b'\x00\x00'
+            b'\x00\x00'
+            b'\x00\x00'
+            b'\xff\xff'
+            b'\xff\xff'
+            b'\x00\x00'
+            b'\x00\x00'
+        ):
+        return 'RCD'
+    return ''
+
+
+def _stk(fobj: typing.BinaryIO) -> str:
+    """Returns 'STK' if the magic number is looks like a STK (stacked?) Seismic file, '' otherwise.
+    This is a bit of guesswork.
+    Seen:
+    00000000: 0400 0000 0100 0000 0400 0000 0000 0000  ................
+    Also:
+    00000000: 0400 0000 0100 0000 0400 0000 0100 0000  ................
+    So take common header (12 bytes)
+    """
+    fobj.seek(0)
+    if fobj.read(12) == (
+            b'\x04\x00'
+            b'\x00\x00'
+            b'\x01\x00'
+            b'\x00\x00'
+            b'\x04\x00'
+            b'\x00\x00'
+        ):
+        return 'STK'
+    return ''
+
+
+def _pds(fobj: typing.BinaryIO) -> str:
+    """Returns 'PDS' if the magic number is looks like a Schlumberger proprietary image format, '' otherwise.
+    This is a bit of guesswork.
+
+    Seen:
+    00000000: 0119 f1f8 ff82 0384 2750 6473 2053 7065  ........'Pds Spe
+    00000010: 6320 322e 392c 2044 6563 656d 6265 722c  c 2.9, December,
+    00000020: 2031 3939 3220 2843 534c 382e 312f 3929   1992 (CSL8.1/9)
+    00000030: 8418 4d6f 6e20 4665 6220 3037 2031 323a  ..Mon Feb 07 12:
+
+    Just take 8 bytes. There may be versioning going on here.
+    """
+    fobj.seek(0)
+    if fobj.read(8) == (
+            b'\x01\x19'
+            b'\xf1\xf8'
+            b'\xff\x82'
+            b'\x03\x84'
+        ):
+        return 'PDS'
+    return ''
+
 
 # Ordered so that more specific files are earlier in the list, more general ones later.
 # Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
+    (_rcd, 'RCD'),  # 16 bytes
+    (_stk, 'STK'),  # 12 bytes
+    (_cfbf, 'CFBF'),  # 8 bytes so 2^64
+    (_pds, 'PDS'),  # 8 bytes so 2^64
     (_xml, 'XML'),  # '<?xml ', 6 characters so 2^(6*8) 2^48
     (_pdf, 'PDF'),  # 2^40
     (_ps, 'PS'),  # 2^40
@@ -403,6 +487,10 @@ BINARY_FILE_TYPES_SUPPORTED: typing.Set[str] = {v[1] for v in FUNCTION_ID_MAP}
 
 
 BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
+    'RCD': 'RCD Seismic Format',
+    'STK': 'STK Seismic Format',
+    'CFBF': 'Compound File Binary Format',
+    'PDS': 'Schlumberger proprietary image format',
     'XML': 'eXtensible Markup Language',
     'PDF': 'Portable Document Format',
     'PS': 'Postscript',

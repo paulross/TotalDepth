@@ -272,7 +272,8 @@ EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
 
 
 def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) -> None:
-    if file_name not in EXCLUDE_FILENAMES:
+    # if file_name not in EXCLUDE_FILENAMES:
+    if not file_name.startswith('.'):
         path = os.path.join(dir_name, file_name)
         logger.info(f'Examining: {path}')
         if os.path.isfile(path):
@@ -431,7 +432,7 @@ will be copied across."""
     # print(args.path_out)
     # return 0
     cmn_cmd_opts.set_log_level(args)
-    if  os.path.exists(args.path_in):
+    if os.path.exists(args.path_in):
         t_start = time.perf_counter()
         FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
         num_files = 0

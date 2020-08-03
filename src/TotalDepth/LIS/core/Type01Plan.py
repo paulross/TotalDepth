@@ -125,7 +125,7 @@ class FrameSetPlan(object):
         myLen = recLen - self._indirectSize
         if myLen % self._frameSize != 0:
             raise ExceptionFrameSetPlan(
-                'Can not fit integer number of frames length {:d} into LR length {:d}, modulo {:d} [indirect size {:d}].'.format(
+                'Can not fit integer number of frames length {:d} into LR length {:d}, remainder {:d} [indirect size {:d}].'.format(
                         self._frameSize, myLen, myLen % self._frameSize, self._indirectSize)
                 )
         return myLen // self._frameSize
