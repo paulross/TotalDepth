@@ -9,7 +9,7 @@ import time
 import typing
 
 from TotalDepth.DAT import DAT_parser
-from TotalDepth.common import cmn_cmd_opts, process, path_utils
+from TotalDepth.common import cmn_cmd_opts, process
 from TotalDepth.util import gnuplot, DirWalk, bin_file_type
 
 logger = logging.getLogger(__file__)
@@ -195,7 +195,7 @@ def main() -> int:
         f'{"Fail?":5}',
         f'Path',
     )
-    common_prefix = path_utils.common_directory_prefix(results.keys())
+    common_prefix = os.path.commonpath(results.keys())
     print(f'Common prefix: {common_prefix}')
     print(' '.join(header))
     print(' '.join('-' * len(v) for v in header))

@@ -16,7 +16,7 @@ import typing
 import zipfile
 
 import TotalDepth.util.bin_file_type
-from TotalDepth.common import cmn_cmd_opts, path_utils
+from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import statistics
 from TotalDepth.util import DirWalk
 
@@ -225,7 +225,7 @@ def analyse_archive(files: typing.List[FileBase],
     if len(files) == 0:
         return
     summary: ArchiveSummary = ArchiveSummary()
-    common_prefix = path_utils.common_directory_prefix([file.path for file in files])
+    common_prefix = os.path.commonpath([file.path for file in files])
     common_prefix_len = len(common_prefix)
     print(f'Common prefix: {common_prefix}')
     for file in files:
@@ -316,7 +316,7 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
         _log_message(f'Create directory {path_to}')
         if not nervous:
             os.makedirs(path_to)
-    common_prefix = path_utils.common_directory_prefix_len([path_from, path_to])
+    common_prefix = len(os.path.commonpath([path_from, path_to]))
     logger.info(f'copy_tree(): common prefix: {common_prefix}')
     file_type_count: typing.Dict[str, int] = {}
     byte_count = 0

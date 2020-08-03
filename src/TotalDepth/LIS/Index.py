@@ -84,7 +84,6 @@ Fixed by being a bit more cautious about dealing with DSB blocks that are 'null'
 import math
 import typing
 
-from TotalDepth.common import path_utils
 
 __author__  = 'Paul Ross'
 __date__    = '2010-08-02'
@@ -319,7 +318,7 @@ Indexes LIS files recursively."""
     print('Summary:')
     error_count = sum([r.error_count > 0 for r in results.values()])
     if opts.statistics:
-        common_prefix_len = path_utils.common_directory_prefix_len([v.path for v in results.values()])
+        common_prefix_len = len(os.path.commonpath([v.path for v in results.values()]))
         # Separate non-error indexes from error indexes
         print(f'Indexes completed without error [{len(results) - error_count}]:')
         for k in sorted(results.keys()):
