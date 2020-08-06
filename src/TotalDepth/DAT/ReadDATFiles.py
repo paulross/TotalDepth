@@ -1,5 +1,5 @@
 """
-Runs through a directory reading DAT files.
+Runs through a directory reading DAT files measuring the performance of the parser.
 """
 import logging
 import multiprocessing
