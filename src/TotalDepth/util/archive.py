@@ -356,7 +356,7 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
         _log_message(f'Create directory {path_to}')
         if not nervous:
             os.makedirs(path_to)
-    common_prefix = len(os.path.commonpath([path_from, path_to]))
+    common_prefix = os.path.commonpath([path_from, path_to])
     logger.info(f'copy_tree(): common prefix: {common_prefix}')
     file_type_count: typing.Dict[str, int] = {}
     byte_count = 0
