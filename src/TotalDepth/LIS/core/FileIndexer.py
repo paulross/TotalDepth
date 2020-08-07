@@ -554,8 +554,8 @@ class FileIndex:
                 # Do not call clear() on the PlotRecord set yet as there might
                 # be another DFSR (LogPass) that uses these FILM/PRES tables
 
-    def genAll(self):
-        """Generates each index object (child class of IndexObjBase)."""
+    def genAll(self) -> IndexObjBase:
+        """Generates each index object (child class of IndexObjBase) for example a IndexLogPass."""
         for anObj in self._idx:
             yield anObj
 
