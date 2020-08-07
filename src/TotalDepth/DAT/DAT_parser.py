@@ -1,4 +1,7 @@
 """
+DAT Files
+---------
+
 Parses DAT files. DAT is an informal specification (i.e. undefined) with loads of poor implementations.
 
 Here described:
@@ -30,6 +33,7 @@ The column order is defined by the order of the Channel Header.
 Note many deficiencies here:
 
 DATE Date ddmmyy but value 9Dec06, 09-Dec-06 etc.
+
 TIME Time hhmmss but value 11-50-17
 
 Example, <...> is  continuation:
@@ -49,6 +53,9 @@ Performance
 -----------
 There is no particular effort made here for high performance.
 DAT files are small, typically <10Mb, so artful coding is not really required.
+
+API
+---
 """
 import datetime
 import logging
@@ -90,6 +97,7 @@ RE_DATE_STYLE_A = re.compile(r'^(\d+)(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|No
 RE_DATE_STYLE_B = re.compile(r'^(\d+)-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d+)$')
 
 
+#: Map of numpy dtype from the name/units.
 NAME_UNITS_TYPE_MAP = {
     ('UTIM', 'sec'): np.object,
     ('DATE', 'ddmmyy'): np.object,
@@ -277,6 +285,7 @@ def parse_file(file_object: typing.TextIO, ident: str = '', description: str = '
 
 
 def parse_path(path: str) -> LogPass.FrameArray:  # pragma: no cover
+    """Parse the DAT file in the given path."""
     with open(path) as file_object:
         return parse_file(file_object, ident=path)
 
@@ -297,7 +306,8 @@ def can_parse_path(path: str) -> bool:  # pragma: no cover
         return can_parse_file(file_object)
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover
+    """Read a file and dump the Log Pass."""
     log_pass = parse_path(sys.argv[1])
     if len(log_pass.x_axis):
         print(
@@ -320,5 +330,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

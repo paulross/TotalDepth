@@ -183,10 +183,8 @@ class PhysRecBase:
         """Constructor, initialise data common to child classes.
 
         theFileId - The ID of the file being read, usually the path.
+
         keepGoing - If True continue parsing files that are not standard compliant.
-        pad_modulo - If non zero this is used to consume pad bytes.
-            Usually this is 4 so that tell() will be increased to % pad_modulo.
-        pad_is_null - If True only consume pad bytes if they are '\x00'.
         """
         self.fileId = theFileId
         self.keepGoing = keepGoing
@@ -385,6 +383,11 @@ class PhysRecRead(PhysRecBase):
     def __init__(self, theFile, theFileId: str = '', keepGoing:bool = False, pad_modulo: int = 0, pad_non_null: bool = False):
         """Constructor with a file path or file-like object.
         TODO: checksum.
+
+        pad_modulo - If non zero this is used to consume pad bytes. Usually this is 4 so that tell() will be increased to % pad_modulo.
+
+        pad_is_null - If True only consume pad bytes if they are '\x00'.
+
         """
         super(PhysRecRead, self).__init__(theFileId, keepGoing)
         # Handling pad bytes.
