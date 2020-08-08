@@ -13,7 +13,7 @@ import typing
 import numpy as np
 
 from TotalDepth import ExceptionTotalDepth
-
+from TotalDepth.common import data_table, Slice
 
 logger = logging.getLogger(__file__)
 
@@ -65,7 +65,7 @@ class FrameChannel:
             matrix such as sonic waveform of 1024 samples with 4 waveforms per frame.
         :param np_dtype: The numpy dtype to use.
         """
-        self.ident: typing.Hashable = ident
+        self._ident: typing.Hashable = ident
         self.long_name: typing.Union[str, bytes] = long_name
         self.units: typing.Union[str, bytes] = units
         self.dimensions: typing.Tuple[int, ...] = tuple(shape)
@@ -73,8 +73,12 @@ class FrameChannel:
         self.rank: int = len(self.dimensions)
         # Number of values per frame
         self.count: int = functools.reduce(lambda x, y: x * y, self.dimensions, 1)
-        self.array: np.ndarray = None
-        self.init_array(0)
+        self.array = np.empty((0, *self.dimensions), dtype=self.np_dtype)
+
+    @property
+    def ident(self) -> typing.Hashable:
+        """Overload this if necessary, for example RP66V1 has an OBNAME."""
+        return self._ident
 
     def __str__(self) -> str:
         return f'<FrameChannel: \'{self.ident}\' "{self.long_name}" units: \'{str(self.units)}\'' \
@@ -310,3 +314,146 @@ class LogPass:
         if item in self.frame_array_map:
             return self.frame_arrays[self.frame_array_map[item]]
         return self.frame_arrays[item]
+
+
+# =================== Writing a Frame Array to LAS ===================
+#: Possible methods to reduce an array to a single value.
+ARRAY_REDUCTIONS = {'first', 'mean', 'median', 'min', 'max'}
+
+
+def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
+    """Take a numpy array and apply a method to it to get a single value."""
+    if method not in ARRAY_REDUCTIONS:
+        raise ValueError(f'{method} is not in {ARRAY_REDUCTIONS}')
+    if method == 'first':
+        return array.flatten()[0]
+    return getattr(np, method)(array)
+
+
+def _stringify(value: typing.Union[str, bytes, typing.Any]) -> str:
+    """Convert bytes to an ASCII string. Leave string untouched. str() everything else."""
+    if isinstance(value, bytes):
+        return value.decode("ascii")
+    elif isinstance(value, str):
+        return value
+    return str(value)
+
+
+def write_curve_section_to_las(frame_array: FrameArray, channels: typing.Set[str], out_stream: typing.TextIO) -> None:
+    """
+    Write the ``~Curve Information Section`` to the LAS file.
+
+    Example::
+
+        ~Curve Information Section
+        #MNEM.UNIT  Curve Description
+        #---------  -----------------
+        DEPT.m      : DEPT/Depth Dimensions: [1]
+        TENS.lbs    : TENS/Tension Dimensions: [1]
+        ETIM.min    : ETIM/Elapsed Time Dimensions: [1]
+        DHTN.lbs    : DHTN/CH Tension Dimensions: [1]
+        GR  .api    : GR/Gamma API Dimensions: [1]
+    """
+    out_stream.write('~Curve Information Section\n')
+    table = [
+        ['#MNEM.UNIT', 'Curve Description'],
+        ['#---------', '-----------------'],
+    ]
+    for c, channel in enumerate(frame_array.channels):
+        channel_ident_as_str = _stringify(channel.ident)
+        if len(channels) == 0 or c == 0 or channel_ident_as_str in channels:
+            table.append(
+                [
+                    f'{channel_ident_as_str:<4}.{_stringify(channel.units):<4}',
+                    f': {_stringify(channel.long_name)} Dimensions: {channel.dimensions}',
+                ]
+            )
+    rows = data_table.format_table(table, pad='  ', left_flush=True)
+    for row in rows:
+        out_stream.write(row)
+        out_stream.write('\n')
+
+
+def write_array_section_to_las(
+        frame_array: FrameArray,
+        max_num_available_frames: int,
+        array_reduction: str,
+        frame_slice: Slice.Slice,
+        channel_name_sub_set: typing.Set[str],
+        field_width: int,
+        float_format: str,
+        out_stream: typing.TextIO,
+    ) -> None:
+    """
+    Write the ``~Array Section`` to the LAS file, the actual log data.
+
+    Example::
+
+        # Array processing information:
+        # Frame Array: ID: OBNAME: O: 2 C: 0 I: b'50' description: b''
+        # All [5] original channels reproduced here.
+        # Where a channel has multiple values the reduction method is by "first" value.
+        # Number of original frames: 649
+        # Requested frame slicing: <Slice on length=649 start=0 stop=649 step=1> total number of frames presented here: 649
+        ~A          DEPT            TENS            ETIM            DHTN              GR
+                2889.400        -999.250        -999.250        -999.250        -999.250
+    """
+    if array_reduction not in ARRAY_REDUCTIONS:
+        raise ValueError(f'Array reduction {array_reduction} not in {ARRAY_REDUCTIONS}')
+    # Write information about how the frames and channels were processed
+    out_stream.write(f'# Array processing information:\n')
+    out_stream.write(f'# Frame Array: ID: {frame_array.ident} description: {frame_array.description}\n')
+    if len(channel_name_sub_set):
+        original_channels = ','.join(_stringify(channel.ident) for channel in frame_array.channels)
+        out_stream.write(f'# Original channels in Frame Array [{len(frame_array.channels):4d}]: {original_channels}\n')
+        out_stream.write(
+            f'# Requested Channels this LAS file [{len(channel_name_sub_set):4d}]: {",".join(channel_name_sub_set)}\n'
+        )
+    else:
+        out_stream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
+    out_stream.write(f'# Where a channel has multiple values the reduction method is by "{array_reduction}" value.\n')
+    num_writable_frames = len(frame_array.x_axis)
+    out_stream.write(f'# Maximum number of original frames: {max_num_available_frames}\n')
+    out_stream.write(
+        f'# Requested frame slicing: {frame_slice.long_str(max_num_available_frames)}'
+        f', total number of frames presented here: {num_writable_frames}\n'
+    )
+    out_stream.write('~A')
+    for c, channel in enumerate(frame_array.channels):
+        if len(channel_name_sub_set) == 0 or c == 0 or channel.ident in channel_name_sub_set:
+            if c == 0:
+                out_stream.write(f'{channel.ident:>{field_width - 2}}')
+            else:
+                out_stream.write(' ')
+                out_stream.write(f'{channel.ident:>{field_width}}')
+    out_stream.write('\n')
+    num_values = sum(c.count for c in frame_array.channels)
+    logger.info(
+        f'Writing array section with {num_writable_frames:,d} frames'
+        f', {len(frame_array):,d} channels'
+        f' and {num_values:,d} values per frame'
+        f', total: {num_writable_frames * num_values:,d} input values.'
+    )
+    for frame_number in range(num_writable_frames):
+        for c, channel in enumerate(frame_array.channels):
+            if len(channel.array):
+                value = array_reduce(channel.array[frame_number], array_reduction)
+                if c > 0:
+                    out_stream.write(' ')
+                # if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
+                #     ostream.write(f'{value:{field_width}.0f}')
+                # elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
+                #     ostream.write(f'{value:{field_width}{float_format}}')
+                # else:
+                #     ostream.write(str(value))
+                if issubclass(channel.array.dtype, np.int):
+                    out_stream.write(f'{value:{field_width}.0f}')
+                elif issubclass(channel.array.dtype, np.float):
+                    out_stream.write(f'{value:{field_width}{float_format}}')
+                else:
+                    out_stream.write(str(value))
+        out_stream.write('\n')
+    # Garbage collect
+    frame_array.init_arrays(1)
+
+# =================== END: Writing a Frame Array to LAS ===================
