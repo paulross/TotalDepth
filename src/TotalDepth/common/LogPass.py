@@ -52,7 +52,7 @@ class FrameChannel:
                  units: typing.Union[str, bytes],
                  # shape: typing.Sequence[int] = (1,),
                  # np_dtype: np.dtype = DEFAULT_NP_TYPE,
-                 shape: typing.Tuple[int],
+                 shape: typing.Tuple[int, ...],
                  np_dtype: np.dtype,
                  ):
         """
@@ -173,7 +173,7 @@ class FrameArray:
     def append(self, channel: FrameChannel) -> None:
         """Add a channel to the Array."""
         if self.has(channel.ident):
-            raise ExceptionFrameArray(f'Duplicate channel identity {channel.ident}')
+            raise ExceptionFrameArray(f'Duplicate channel identity "{channel.ident}"')
         else:
             self.channel_ident_map[channel.ident] = len(self.channels)
             self.channels.append(channel)
