@@ -73,6 +73,11 @@ class RP66V1FrameChannel(LogPass.FrameChannel):
         self.rep_code: int = rep_code
 
     @property
+    def ident(self) -> typing.Hashable:
+        """Overload base class."""
+        return self._ident.I.decode("ascii")
+
+    @property
     def len_input_bytes(self) -> int:
         """The number of RP66V1 bytes to read for one frame of this channel."""
         try:
