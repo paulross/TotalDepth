@@ -302,7 +302,7 @@ def write_parameter_section_to_las(
                 value = stringify.stringify_object_by_type(obj[b'VALUES'].value).strip()
                 descr = stringify.stringify_object_by_type(obj[b'LONG-NAME'].value).strip()
                 # NOTE: Overwriting is possible here.
-                las_mnem_map[obj.name.I.decode('ascii')] = UnitValueDescription(units, value, descr)
+                las_mnem_map[obj.name] = UnitValueDescription(units, value, descr)
     table = [
         ['#MNEM.UNIT', 'Value', 'Description'],
         ['#---------', '-----', '-----------'],
@@ -343,7 +343,7 @@ def _write_array_section_to_las(
     # TODO: Could optimise memory by reading one frame at a time
     max_num_available_frames = logical_file.num_frames(frame_array)
     if len(channel_name_sub_set):
-        array_channels = {c.ident for c in frame_array.channels if c.ident.I.decode("ascii") in channel_name_sub_set}
+        array_channels = {c.ident for c in frame_array.channels if c.ident in channel_name_sub_set}
         num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice, array_channels)
     else:
         num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice)
@@ -385,7 +385,7 @@ def write_logical_index_to_las(
                     # Write each section
                     _write_las_header(
                         os.path.basename(logical_index.id),
-                        logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
+                        logical_file, lf, frame_array.ident, ostream
                     )
                     write_well_information_to_las(logical_file, frame_array, frame_slice, ostream)
                     write_parameter_section_to_las(logical_file, ostream)

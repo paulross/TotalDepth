@@ -113,9 +113,9 @@ def frame_channel_to_XML(channel: LogPass.RP66V1FrameChannel, xml_stream: XmlWri
         <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
     """
     channel_attrs = {
-        'O': f'{channel.ident.O}',
-        'C': f'{channel.ident.C}',
-        'I': f'{channel.ident.I.decode("ascii")}',
+        'O': f'{channel._ident.O}',
+        'C': f'{channel._ident.C}',
+        'I': f'{channel._ident.I.decode("ascii")}',
         'long_name': f'{channel.long_name.decode("ascii")}',
         'rep_code': f'{channel.rep_code:d}',
         'units': f'{channel.units.decode("ascii")}',
@@ -163,7 +163,7 @@ def frame_array_to_XML(frame_array: LogPass.RP66V1FrameArray,
         'C': f'{frame_array.ident.C}',
         'I': f'{frame_array.ident.I.decode("ascii")}',
         'description': frame_array.description.decode('ascii'),
-        'x_axis' : frame_array.channels[0].ident.I.decode("ascii"),
+        'x_axis' : frame_array.channels[0].ident,
         'x_units' : frame_array.channels[0].units.decode("ascii"),
     }
 

@@ -131,21 +131,19 @@ def test_log_pass_frame_channels_from_RP66V1_file():
     frame_array = log_pass[FRAME_ARRAY_IDENT]
     assert len(frame_array) == 9
     # print(list(frame_array.keys()))
-    expected = [
-        RepCode.ObjectName(O=11, C=0, I=b'DEPT'), RepCode.ObjectName(O=11, C=0, I=b'INC'),
-        RepCode.ObjectName(O=11, C=0, I=b'AZI'), RepCode.ObjectName(O=11, C=0, I=b'MTTVD'),
-        RepCode.ObjectName(O=11, C=0, I=b'SECT'), RepCode.ObjectName(O=11, C=0, I=b'RCN'),
-        RepCode.ObjectName(O=11, C=0, I=b'RCE'), RepCode.ObjectName(O=11, C=0, I=b'DLSEV'),
-        RepCode.ObjectName(O=11, C=0, I=b'TLTS'),
-
-    ]
+    #     RepCode.ObjectName(O=11, C=0, I=b'DEPT'), RepCode.ObjectName(O=11, C=0, I=b'INC'),
+    #     RepCode.ObjectName(O=11, C=0, I=b'AZI'), RepCode.ObjectName(O=11, C=0, I=b'MTTVD'),
+    #     RepCode.ObjectName(O=11, C=0, I=b'SECT'), RepCode.ObjectName(O=11, C=0, I=b'RCN'),
+    #     RepCode.ObjectName(O=11, C=0, I=b'RCE'), RepCode.ObjectName(O=11, C=0, I=b'DLSEV'),
+    #     RepCode.ObjectName(O=11, C=0, I=b'TLTS'),
+    expected = ['DEPT', 'INC', 'AZI', 'MTTVD', 'SECT', 'RCN', 'RCE', 'DLSEV', 'TLTS',]
     assert list(frame_array.keys()) == expected
 
 
 def test_log_pass_frame_channel_numpy_indexes():
     log_pass = _log_pass()
     frame_array = log_pass[FRAME_ARRAY_IDENT]
-    channel = frame_array[RepCode.ObjectName(O=11, C=0, I=b'DEPT')]
+    channel = frame_array['DEPT']
     assert list(channel.numpy_indexes(0)) == [(0, 0)]
 
 
@@ -233,11 +231,10 @@ def test_read_iflr():
 def test_read_iflr_partial():
     log_pass = _log_pass()
     frame_array: LogPass.FrameArray = log_pass[FRAME_ARRAY_IDENT]
-    channels = {
-            RepCode.ObjectName(O=11, C=0, I=b'DEPT'),
-            RepCode.ObjectName(O=11, C=0, I=b'INC'),
-            RepCode.ObjectName(O=11, C=0, I=b'SECT'),
-    }
+            # RepCode.ObjectName(O=11, C=0, I=b'DEPT'),
+            # RepCode.ObjectName(O=11, C=0, I=b'INC'),
+            # RepCode.ObjectName(O=11, C=0, I=b'SECT'),
+    channels = {'DEPT', 'INC', 'SECT'}
     frame_array.init_arrays_partial(len(IFLR_BYTES), channels)
     for f, by in enumerate(IFLR_BYTES):
         iflr, logical_data = _iflr_and_logical_data_from_bytes(by)
@@ -544,19 +541,19 @@ def test_example_iflr():
 
 def test_log_pass_str():
     log_pass: LogPass = _create_log_pass()
-    # print()
-    # print(log_pass)
+    print()
+    print(log_pass)
     assert str(log_pass) == """LogPass:
   FrameArray: ID: OBNAME: O: 11 C: 0 I: b'0B' b''
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'DEPT'' "b'MWD Tool Measurement Depth'" units: 'b'0.1 in'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'INC'' "b'Inclination'" units: 'b'deg'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'AZI'' "b'Azimuth'" units: 'b'deg'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'MTTVD'' "b'MWD Tool Measurement TVD'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'SECT'' "b'Section'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'RCN'' "b'Rectangular Co-ordinates North'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'RCE'' "b'Rectangular Co-ordinates East'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'DLSEV'' "b'Dog-leg Severity'" units: 'b'deg/30m'' count: 1 dimensions: (1,) frames: 0>
-    <FrameChannel: 'OBNAME: O: 11 C: 0 I: b'TLTS'' "b'Tool Temperature Static'" units: 'b'degC'' count: 1 dimensions: (1,) frames: 0>"""
+    <FrameChannel: 'DEPT' "b'MWD Tool Measurement Depth'" units: 'b'0.1 in'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'INC' "b'Inclination'" units: 'b'deg'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'AZI' "b'Azimuth'" units: 'b'deg'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'MTTVD' "b'MWD Tool Measurement TVD'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'SECT' "b'Section'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'RCN' "b'Rectangular Co-ordinates North'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'RCE' "b'Rectangular Co-ordinates East'" units: 'b'm'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'DLSEV' "b'Dog-leg Severity'" units: 'b'deg/30m'' count: 1 dimensions: (1,) frames: 0>
+    <FrameChannel: 'TLTS' "b'Tool Temperature Static'" units: 'b'degC'' count: 1 dimensions: (1,) frames: 0>"""
 
 
 def test_example_iflr_process():

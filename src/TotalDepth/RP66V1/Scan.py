@@ -497,7 +497,7 @@ def _scan_log_pass_content(
                 fout.write('\n')
                 frame_table = [['Channel', 'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'Units', 'dtype']]
                 for channel in frame_array.channels:
-                    channel_ident = channel.ident.I.decode("ascii")
+                    channel_ident = channel.ident
                     # arr = channel.array
                     arr = AbsentValue.mask_absent_values(channel.array)
                     frame_table.append(
