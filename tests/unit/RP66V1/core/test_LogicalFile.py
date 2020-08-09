@@ -123,8 +123,8 @@ def test_logical_file_populate_frame_array():
         assert frame_count == 649
         assert len(frame_array) == 5
         assert frame_array.shape == [(649, 1), (649, 1), (649, 1), (649, 1), (649, 1)]
-        names = [c.ident.I for c in frame_array.channels]
-        assert names == [b'DEPT', b'TENS', b'ETIM', b'DHTN', b'GR']
+        names = [c.ident for c in frame_array.channels]
+        assert names == ['DEPT', 'TENS', 'ETIM', 'DHTN', 'GR']
 
 
 def test_logical_file_populate_frame_array_raises_if_frame_array_not_member():
@@ -154,8 +154,8 @@ def test_logical_file_populate_frame_array_channels():
         assert frame_count == 649
         assert len(frame_array) == 5
         assert frame_array.shape == [(649, 1), (649, 1), (0, 1), (0, 1), (649, 1)]
-        names = [c.ident.I for c in frame_array.channels]
-        assert names == [b'DEPT', b'TENS', b'ETIM', b'DHTN', b'GR']
+        names = [c.ident for c in frame_array.channels]
+        assert names == ['DEPT', 'TENS', 'ETIM', 'DHTN', 'GR']
         assert frame_array[0].array.shape == (649, 1)
         assert frame_array[1].array.shape == (649, 1)
         assert frame_array[2].array.shape == (0, 1)
