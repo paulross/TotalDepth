@@ -46,7 +46,7 @@ __version__ = '0.1.0'
 __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
-LAS_PRODUCER_VERSION = '0.1.1'
+LAS_PRODUCER_VERSION = '0.1.2'
 
 
 logger = logging.getLogger(__file__)
@@ -329,45 +329,6 @@ def las_file_name(path_out: str, logicial_file_index: int, frame_array_ident: by
     return file_path_out
 
 
-#: Possible methods to reduce an array to a single value.
-ARRAY_REDUCTIONS = {'first', 'mean', 'median', 'min', 'max'}
-
-
-def array_reduce(array: np.ndarray, method: str) -> typing.Union[float, int]:
-    """Take a numpy array and apply a method to it to get a single value."""
-    if method not in ARRAY_REDUCTIONS:
-        raise ValueError(f'{method} is not in {ARRAY_REDUCTIONS}')
-    if method == 'first':
-        return array.flatten()[0]
-    return getattr(np, method)(array)
-
-
-def _write_curve_section_to_las(
-        frame_array: LogPass.RP66V1FrameArray,
-        channels: typing.Set[str],
-        ostream: typing.TextIO,
-    ) -> None:
-    """Write the ``~Curve Information Section`` to the LAS file."""
-    TotalDepth.common.LogPass.write_curve_section_to_las(frame_array, channels, ostream)
-    # ostream.write('~Curve Information Section\n')
-    # table = [
-    #     ['#MNEM.UNIT', 'Curve Description'],
-    #     ['#---------', '-----------------'],
-    # ]
-    # for c, channel in enumerate(frame_array.channels):
-    #     if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
-    #         desc = ' '.join([
-    #             f': {channel.long_name.decode("ascii")}',
-    #             f'Rep Code: {RepCode.REP_CODE_INT_TO_STR[channel.rep_code]}',
-    #             f'Dimensions: {channel.dimensions}'
-    #         ])
-    #         table.append([f'{channel.ident.I.decode("ascii"):<4}.{channel.units.decode("ascii"):<4}', desc])
-    # rows = data_table.format_table(table, pad='  ', left_flush=True)
-    # for row in rows:
-    #     ostream.write(row)
-    #     ostream.write('\n')
-
-
 def _write_array_section_to_las(
         logical_file: LogicalFile.LogicalFile,
         frame_array: LogPass.RP66V1FrameArray,
@@ -379,7 +340,6 @@ def _write_array_section_to_las(
         ostream: typing.TextIO,
     ) -> None:
     """Write the ``~Array Section`` to the LAS file, the actual log data"""
-    assert array_reduction in ARRAY_REDUCTIONS
     # TODO: Could optimise memory by reading one frame at a time
     max_num_available_frames = logical_file.num_frames(frame_array)
     if len(channel_name_sub_set):
@@ -388,7 +348,7 @@ def _write_array_section_to_las(
     else:
         num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice)
     if num_writable_frames > 0:
-        TotalDepth.common.LogPass.write_array_section_to_las(
+        TotalDepth.common.LogPass.write_curve_and_array_section_to_las(
             frame_array,
             max_num_available_frames,
             array_reduction,
@@ -398,54 +358,6 @@ def _write_array_section_to_las(
             float_format,
             ostream,
         )
-
-
-    # # Write information about how the frames and channels were processed
-    # ostream.write(f'# Array processing information:\n')
-    # ostream.write(f'# Frame Array: ID: {frame_array.ident} description: {frame_array.description}\n')
-    # if len(channels):
-    #     original_channels = ','.join(channel.ident.I.decode("ascii") for channel in frame_array.channels)
-    #     ostream.write(f'# Original channels in Frame Array [{len(frame_array.channels):4d}]: {original_channels}\n')
-    #     ostream.write(f'# Requested Channels this LAS file [{len(channels):4d}]: {",".join(channels)}\n')
-    # else:
-    #     ostream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
-    # ostream.write(f'# Where a channel has multiple values the reduction method is by "{array_reduction}" value.\n')
-    # ostream.write(f'# Number of original frames: {num_available_frames}\n')
-    # ostream.write(
-    #     f'# Requested frame slicing: {frame_slice.long_str(num_available_frames)}'
-    #     f', total number of frames presented here: {num_writable_frames}\n'
-    # )
-    # ostream.write('~A')
-    # for c, channel in enumerate(frame_array.channels):
-    #     if len(channels) == 0 or c == 0 or channel.ident.I.decode("ascii") in channels:
-    #         if c == 0:
-    #             ostream.write(f'{channel.ident.I.decode("ascii"):>{field_width-2}}')
-    #         else:
-    #             ostream.write(' ')
-    #             ostream.write(f'{channel.ident.I.decode("ascii"):>{field_width}}')
-    # ostream.write('\n')
-    # num_values = sum(c.count for c in frame_array.channels)
-    # logger.info(
-    #     f'Writing array section with {num_writable_frames:,d} frames'
-    #     f', {len(frame_array):,d} channels'
-    #     f' and {num_values:,d} values per frame'
-    #     f', total: {num_writable_frames * num_values:,d} input values.'
-    # )
-    # for frame_number in range(num_writable_frames):
-    #     for c, channel in enumerate(frame_array.channels):
-    #         if len(channel.array):
-    #             value = array_reduce(channel.array[frame_number], array_reduction)
-    #             if c > 0:
-    #                 ostream.write(' ')
-    #             if RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.INTEGER:
-    #                 ostream.write(f'{value:{field_width}.0f}')
-    #             elif RepCode.REP_CODE_CATEGORY_MAP[channel.rep_code] == RepCode.NumericCategory.FLOAT:
-    #                 ostream.write(f'{value:{field_width}{float_format}}')
-    #             else:
-    #                 ostream.write(str(value))
-    #     ostream.write('\n')
-    # # Garbage collect
-    # frame_array.init_arrays(1)
 
 
 def write_logical_index_to_las(
@@ -458,7 +370,7 @@ def write_logical_index_to_las(
         float_format: str,
 ) -> typing.List[str]:
     """Take a Logical Index for a Logical File within a RP66V1 file and write out a set of LAS 2.0 files."""
-    assert array_reduction in ARRAY_REDUCTIONS
+    assert array_reduction in TotalDepth.common.LogPass.ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
         TotalDepth.common.process.add_message_to_queue(f'Logical file {lf}')
@@ -476,8 +388,6 @@ def write_logical_index_to_las(
                         logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
                     )
                     write_well_information_to_las(logical_file, frame_array, frame_slice, ostream)
-                    # _write_curve_section_to_las(frame_array, channels, ostream)
-                    TotalDepth.common.LogPass.write_curve_section_to_las(frame_array, channels, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
                     _write_array_section_to_las(
                         logical_file, frame_array, array_reduction, frame_slice,
@@ -509,7 +419,7 @@ def single_rp66v1_file_to_las(
 ) -> LASWriteResult:
     """Convert a single RP66V1 file to a set of LAS files."""
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
-    assert array_reduction in ARRAY_REDUCTIONS
+    assert array_reduction in TotalDepth.common.LogPass.ARRAY_REDUCTIONS
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         logger.info(f'Converting RP66V1 {path_in} to LAS {os.path.splitext(path_out)[0]}*')
@@ -565,9 +475,6 @@ def convert_rp66v1_dir_or_file_to_las_multiprocessing(
             dir_in, dir_out, theFnMatch='', recursive=recurse, bigFirst=True
         )
     ]
-    # print('tasks:')
-    # pprint.pprint(tasks, width=200)
-    # return {}
     results = [
         r.get() for r in [
             pool.apply_async(single_rp66v1_file_to_las, t) for t in tasks
@@ -787,7 +694,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
         '--array-reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='first',
-        choices=list(sorted(ARRAY_REDUCTIONS)),
+        choices=list(sorted(TotalDepth.common.LogPass.ARRAY_REDUCTIONS)),
         )
     parser.add_argument(
         '--channels', type=str,
@@ -801,8 +708,6 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
                         help='Floating point format for array data [default: "%(default)s"].', default='.3f')
     args = parser.parse_args()
     TotalDepth.common.cmn_cmd_opts.set_log_level(args)
-    # print('args:', args)
-    # return 0
     # Your code here
     clk_start = time.perf_counter()
     ret_val = 0
