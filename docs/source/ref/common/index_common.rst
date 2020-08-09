@@ -11,9 +11,11 @@ Contents:
 .. toctree::
     :maxdepth: 2
     
+    LogPass
+    Rle
+    Slice
     cmn_cmd_opts
     data_table
     process
-    Rle
-    Slice
+    statistics
     xml
