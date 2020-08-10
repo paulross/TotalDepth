@@ -35,8 +35,7 @@ Petrophysical File Formats Supported by TotalDepth
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | WellLogML             | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
-| RP66v1 "DLIS"         | Full      | 0.3.0     | Version 0.3.0 is written in Python, later versions are much       |
-|                       |           |           | faster as perfomance critical code is written in C/C++            |
+| RP66v1 "DLIS"         | Full      | 0.3.0     | Full.                                                             |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+
 | RP66v2 "DLIS"         | None      |           | No evidence that this is used by the industry.                    |
 +-----------------------+-----------+-----------+-------------------------------------------------------------------+

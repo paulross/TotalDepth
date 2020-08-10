@@ -332,6 +332,7 @@ RE_FLOAT_DECIMAL_FORMAT = re.compile(r'^\.[0-9]+')
 
 
 def _check_float_decimal_places_format(float_decimal_places_format: str) -> None:
+    """Raise if float format string is wrong."""
     m = RE_FLOAT_DECIMAL_FORMAT.match(float_decimal_places_format)
     if m is None:
         raise ValueError(f'Invalid float fractional format of "{float_decimal_places_format}"')
