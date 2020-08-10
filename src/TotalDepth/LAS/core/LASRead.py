@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
 # Copyright (C) 1999-2012 Paul Ross
 # 
@@ -113,6 +113,9 @@ SECT_DESCRIPTION_MAP = {
 
 #: The 'MENM' field, no spaces, dots or colons.
 #: ONE group
+#: TODO: Allow spaces. For example "SWU -CPX.V/V          00 000 00 00:  75  Unlimited Formation Water Saturation (Complex Litho Model)"
+#: This is specifically excluded by LAS 2.0 (Page 4, 2017-01) but it happens.
+#: Also: "Spaces are permitted in front of the mnemonic and between the end of the mnemonic and the dot."
 RE_LINE_FIELD_0 = re.compile(r'^\s*([^ .:]+)\s*$')
 
 #: The data field which is the middle of the line between the first '.' and last ':'
@@ -135,7 +138,8 @@ RE_LINE_FIELD_2 = re.compile(r"""
 #: Captures the 6 fields: mnem unit valu desc format assoc
 SectLine = collections.namedtuple('SectLine', 'mnem unit valu desc format assoc')
 
-class LASSection():
+
+class LASSection:
     """Contains data on a section."""
     RULES_MAP = {
         'V' : [
@@ -257,7 +261,7 @@ class LASSection():
         # TODO: Essential MNEM in other sections
         # TODO: 'W' section: Check consistency of STRT/STOP/STEP and their units
     
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> SectLine:
         """Returns an entry, key can be int or str."""
         if isinstance(key, int):
             return self._members[key]
@@ -357,8 +361,9 @@ class LASSectionArray(LASSection):
                 ))
                 
     def finalise(self):
-        """Finalisation.
-        TODO: Make a numpy array and get rid of the members. Need to overload __getitem__."""
+        """Finalisation."""
+        # TODO: Make a TotalDepth.common.LogPass.FrameArray and get rid of the members. Need to overload __getitem__.
+        # Can get rid of _createIndex() call.
         self._addBuf(-1)
         self._createIndex()
     
@@ -592,10 +597,12 @@ class LASBase(object):
         # End: Channel data access.
         #--------------------------
 
+
 class LASRead(LASBase):
     """Reads a LAS file."""
-    def __init__(self, theFp, theFileID=None):
-        """Reads a LAS file from theFp that is either a string (file path) or a file like object."""
+    def __init__(self, theFp, theFileID=None, raise_on_error: bool=True):
+        """Reads a LAS file from theFp that is either a string (file path) or a file like object.
+        If raise_on_error is True then some errors will terminate processing, if False then some errors will be ignored."""
         self._sectDespatchMap = {
             'V' : self._procSectV,
             'W' : self._procSect,
@@ -605,8 +612,9 @@ class LASRead(LASBase):
             'A' : self._procSectA,
         }
         if isinstance(theFp, str):
-            theFp = open(theFp)
+            theFp = open(theFp, 'r', errors='replace')
         myFileID = theFileID
+        self.raise_on_error = raise_on_error
         try:
             myFileID = theFp.name
         except AttributeError:
@@ -617,11 +625,12 @@ class LASRead(LASBase):
         
     def _procFile(self, gen):
         for i, l in gen:
+            logging.debug('_procFile(): line %d "%s"', i, l)
+            l = l.strip()
             m = RE_SECT_HEAD.match(l)
             if m is not None:
                 self._sectDespatchMap[m.group(1)](m, gen)
             else:
-#                raise ExceptionLASRead('LASRead._procFile(): Line: {:d} Unknown line: "{:s}"'.format(i, l))
                 logging.warning('LASRead._procFile(): Line: {:d} Unknown line: "{:s}"'.format(i, l.replace('\n', '\\n')))
                 # Consume following non-section lines
                 numLines = 0
@@ -634,13 +643,21 @@ class LASRead(LASBase):
                 logging.warning('LASRead._procFile(): Consumed {:d} succeeding lines.'.format(numLines))
 
     def _procSectGeneric(self, mtch, gen):
-        mySect = LASSection(mtch.group(1))
+        section_name = mtch.group(1)
+        mySect = LASSection(section_name)
         for i, l in gen:
+            logging.debug('_procSectGeneric(): line %d "%s"', i, l)
+            l = l.strip()
             # Bail out if start of new section
-            if l.startswith('~'):#RE_SECT_HEAD.match(l) is not None:
+            if l.startswith('~'):
                 gen.send(l)
                 break
-            mySect.addMemberLine(i, l)
+            try:
+                mySect.addMemberLine(i, l)
+            except ExceptionLASRead as error:
+                if self.raise_on_error:
+                    raise
+                logging.warning('Ignoring error %s', error)
         return mySect
     
     def _procSectV(self, mtch, gen):

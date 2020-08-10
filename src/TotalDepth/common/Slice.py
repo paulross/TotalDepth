@@ -123,7 +123,7 @@ class Slice(SliceABC):
 class Sample(SliceABC):
     """This has the same API as Slice but takes a single integer.
 
-    NOTE: This may not p[roduce a regular sequence. For example sampling 7 items out  of a 12 element list has the
+    NOTE: This may not produce a regular sequence. For example sampling 7 items out  of a 12 element list gives the
     indices [0, 1, 3, 5, 6, 8, 10]
     """
     def __init__(self, sample_size: int):

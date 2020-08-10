@@ -27,6 +27,7 @@ Created on 10 Feb 2011
 #import time
 #import sys
 import logging
+import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 #from TotalDepth.LIS.core import EngVal
@@ -396,10 +397,10 @@ class FileIndex:
         self._fileId = theF.fileId
         self._xAxisIndex = xAxisIndex
         theF.rewind()
-        # List of indexable objects that are a IndexObjBase example; an IndexLogPass
+        # List of indexable objects that are a IndexObjBase examples: IndexTable, IndexLogPass
         self._idx = []
         # Indexes to log pass objects: {0 : None, 1 : None}
-        self._logPassIndexMap = self._resetLogPassIndexMap()
+        log_pass_index_map = FileIndex._reset_log_pass_index_map()
         # Despatch table for LR type
         self._despatchLrType = {
             # The first two should be handled by the LogPass, if not
@@ -446,10 +447,10 @@ class FileIndex:
                 break
             lrTy, lrAt = LogiRec.STRUCT_LR_HEAD.unpack(myBy)
             # If this can be handled by a Log Pass then do so
-            if lrTy in self._logPassIndexMap:
-                if self._logPassIndexMap[lrTy] is not None:
+            if lrTy in log_pass_index_map:
+                if log_pass_index_map[lrTy] is not None:
                     # Normal/Alternate data with prior LogPass
-                    self._idx[self._logPassIndexMap[lrTy]].add(tell, lrTy, theF)
+                    self._idx[log_pass_index_map[lrTy]].add(tell, lrTy, theF)
                 else:
                     logging.warning(f'Logical record type {lrTy} at 0x{tell:08x} but no corresponding DFSR.')
                     theF.skipToNextLr()
@@ -467,32 +468,36 @@ class FileIndex:
                 else:
                     # TODO: Use self._xAxisIndex
                     self._idx.append(fn(tell, lrTy, theF))
-                    # Check and fix self._logPassIndexMap
+                    # Check and fix log_pass_index_map
                     if LogiRec.isDelimiter(lrTy):
                         # De-index the LogPass(es)
-                        self._logPassIndexMap = self._resetLogPassIndexMap()
+                        log_pass_index_map = FileIndex._reset_log_pass_index_map()
                     elif lrTy == LogiRec.LR_TYPE_DATA_FORMAT:
                         # DFSR so update the map to point at the latest index
-                        self._logPassIndexMap[self._idx[-1].iflrType()] = len(self._idx)-1
+                        log_pass_index_map[self._idx[-1].iflrType()] = len(self._idx) - 1
 
-    def longDesc(self):
+    def longDesc(self) -> str:
         """Returns a string that is the long description of this object."""
         return '{!r:s} "{!r:s}" [{:d}]:\n  '.format(
             repr(self), self._fileId, len(self._idx)) \
-        + '\n  '.join([str(i) for i in self._idx])
+            + '\n  '.join([str(i) for i in self._idx])
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._idx)
 
-    def _resetLogPassIndexMap(self):
+    def __getitem__(self, item) -> IndexObjBase:
+        return self._idx[item]
+
+    @staticmethod
+    def _reset_log_pass_index_map() -> typing.Dict[int, None]:
         return {0 : None, 1 : None}
 
     @property
-    def lrTypeS(self):
+    def lrTypeS(self) -> typing.Sequence[int]:
         """Returns a list of Logical Record types (integers) that is in the index."""
         return [l.lrType for l in self._idx]
     
-    def numLogPasses(self):
+    def numLogPasses(self) -> int:
         """Returns the number of IndexLogPass objects in the index."""
         r = 0
         for l in self._idx:
@@ -500,13 +505,13 @@ class FileIndex:
                 r += 1
         return r
     
-    def genLogPasses(self):
+    def genLogPasses(self) -> typing.Sequence[IndexLogPass]:
         """Yields all IndexLogPass objects in the index."""
         for l in self._idx:
             if isinstance(l, IndexLogPass):
                 yield l
 
-    def genPlotRecords(self, fromInternalRecords=True):
+    def genPlotRecords(self, fromInternalRecords=True) -> typing.Sequence[PlotRecordSet]:
         """This provides the minimal information for creating a Plot. It yields
         a PlotRecordSet that has (tell_FILM, tell_PRES, tell_AREA, tell_PIP, IndexLogPass) objects that are not
         separated by delimiter records.
@@ -522,7 +527,7 @@ class FileIndex:
         # same thing on spurious internal records
         prsHasChanged = False
         for iObj in self._idx:
-#            print('TRACE: iObj', iObj)
+            # print('TRACE: iObj', iObj)
             if iObj.isDelimiter:
                 myPlotRecSet.clear()
             elif iObj.lrType == LogiRec.LR_TYPE_WELL_DATA:
@@ -554,12 +559,12 @@ class FileIndex:
                 # Do not call clear() on the PlotRecord set yet as there might
                 # be another DFSR (LogPass) that uses these FILM/PRES tables
 
-    def genAll(self) -> IndexObjBase:
+    def genAll(self) -> typing.Sequence[IndexObjBase]:
         """Generates each index object (child class of IndexObjBase) for example a IndexLogPass."""
         for anObj in self._idx:
             yield anObj
 
-    def jsonObject(self):
+    def jsonObject(self) -> typing.Dict[str, typing.Any]:
         """Return an Python object that can be JSON encoded."""
         return {
             'FileID' : self._fileId,

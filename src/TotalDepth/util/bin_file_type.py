@@ -516,6 +516,14 @@ BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
 assert set(BINARY_FILE_TYPE_DESCRIPTIONS.keys()) == BINARY_FILE_TYPES_SUPPORTED, \
     f'{set(BINARY_FILE_TYPE_DESCRIPTIONS.keys())} != {BINARY_FILE_TYPES_SUPPORTED}'
 
+#: LIS binary file types we support
+LIS_BINARY_FILE_TYPES = {'LIS', 'LISt', 'LIStr'}
+
+
+def is_lis_file_type(file_type: str) -> bool:
+    """True if the binary file type is supported by the LIS parser."""
+    return file_type in LIS_BINARY_FILE_TYPES
+
 
 def summary_file_types_supported(short: bool) -> str:
     """Returns a string of the supported file types. If short is False this is a multi-line string."""

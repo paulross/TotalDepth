@@ -1771,6 +1771,157 @@ Some other stuff that shouldn't be here.
             self.assertTrue(myLf.hasOutpMnem(Mnem.Mnem(m)))
         self.assertFalse(myLf.hasOutpMnem(Mnem.Mnem('WTF')))        
 
+
+def test_with_leading_space():
+    las_raw_file = io.StringIO("""~Version Information
+ VERS.                 2.0:   CWLS Log ASCII Standard -VERSION 2.0
+ WRAP.                  NO:   One line per depth step
+~Well Information Block
+ STRT.F             35.0000: START DEPTH
+ STOP.F           1961.0000: STOP DEPTH
+ STEP.F              0.5000: STEP
+ NULL.            -999.2500                       :NULL VALUE
+ COMP.                                            :COMPANY
+ WELL.      TUBRIDGI 7                            :WELL
+ FLD .                                            :FIELD
+ LOC .                                            :LOCATION
+ CNTY.                                            :COUNTY
+ STAT.                                            :STATE
+ CTRY.                                            :COUNTRY
+ SRVC.                                            :SERVICE COMPANY
+ DATE.      23 10 94                              :LOG DATE
+ API .                                            :API NUMBER
+ UWI .                                            :UNIQUE WELL ID
+ ~Curve Information Block
+ DEPT.F                   :     1  DEPTH
+ CALI.IN                  :     2  Caliper
+ PEF .B/EL                :     3  Photo Electric Factor
+ RHOB.G/C3                :     4  Bulk Density
+ DRHO.G/C3                :     5  Bulk Density Correction
+ TNPH.PU                  :     6  Thermal Neutron Porosity
+ NPHI.PU                  :     7  Neutron Porosity
+ RHGX.G/C3                :     8  Crossplot Grain Density
+ THOR.PPM                 :     9  Thorium
+ URAN.PPM                 :    10  Uranium
+ POTA.                    :    11  Potasium
+ SGR .GAPI                :    12  Spectroscopy GR
+ CGR .GAPI                :    13  Computed GR
+ GR  .GAPI                :    14  Gamma Ray
+ DTL .US/F                :    15  Sonic Long Spacing
+ DT  .US/F                :    16  Sonic
+ SP  .MV                  :    17  Spontaneous Potential
+ LLD .OHMM                :    18  Latero-Log Deep
+ LLS .OHMM                :    19  Latero-Log Shallow
+ LLG .OHMM                :    20  Latero-Log Groninggen (resistivity)
+ CALS.IN                  :    21  Caliper (Frame MSFL)
+ GR1 .GAPI                :    22  Gamma Ray No1
+ MSFL.OHMM                :    23  MSFL Resistivity
+~Parameter Information Block
+~Other Information - Comments
+#***********************************************************
+# This LAS file was created by Wiltshire Geological Services.
+# The edit data contained herein are copyright property of
+# Wiltshire Geological Services. The data are licensed to the
+# purchasing company and subsidiaries worldwide, and are NOT
+# for on-copying to third parties.  We place no restriction on
+# the distribution of plots generated from the digital data.
+#***********************************************************
+~A
+    35.0000  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500  -999.2500    21.3125  -999.2500
+""")
+    las_parsed_file = LASRead.LASRead(las_raw_file, 'MyID')
+    print(las_parsed_file)
+
+
+def test_with_numeric_channels():
+    las_raw_file = io.StringIO("""~Version Information
+VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+WRAP.                      NO: One line per depth step
+~Well Information Block
+#MNEM.UNIT                 Value                       Information
+#------------              -----                       -----------
+STRT.M                        1670                    :START
+STOP.M                        2217                    :STOP
+STEP.M                         0.5                    :STEP
+NULL.                     -999.25                     :NULL VALUE
+COMP.                                                 :Company Name
+WELL.         Jacala-1_Gas_Data_1670-2217m            :Well Name
+FLD .                                                 :Field Name
+LOC .         WA-351-P                                :Field Location
+PROV.                                                 :Province
+CNTY.                                                 :County
+STATE.                                                 :State
+CTRY.                                                 :Country
+DATE.                                                 :Log Date
+SRVC.                                                 :Service Company
+UWI .         W002831                                 :Unique Well ID
+API .                                                 :API Number
+PD  .         MSL                                     :Perm. Datum
+ELZ .M               0.0                              :Elev. Log Zero (wrt EPD)
+~Curve Information
+#MNEM   .UNIT             API CODE Curve Description
+#------------             -------- -----------------
+DEPTH   .M            00 001 00 00:   0  Depth
+LAMU_TO .%            00 000 00 00:   1
+TGAS_AVG   CHDE_C1.%  00 000 00 00:   2
+CHDE_C2 .%            00 000 00 00:   3
+CHDE_C3 .%            00 000 00 00:   4
+CHDE_IC .%            00 000 00 00:   5
+4          CHDE_NC.%  00 000 00 00:   6
+4          CHDE_IC.%  00 000 00 00:   7
+5          CHDE_NC.%  00 000 00 00:   8
+5       .             00 000 00 00:   9
+~Parameter Information
+#MNEM.UNIT       Value           Description
+#------------    -----           -----------
+RUN .         1                 :Run number
+~Other Information
+# --- LOG MNEMONICS AND UNITS ---
+#Depth     LAMU_TO    TGAS_AVG   CHDE_C2    CHDE_C3    CHDE_IC    4          4          5          5
+#M         %          %          %          %          %          %          %          %
+~A
+      1670    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25
+""")
+    las_parsed_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
+    print(las_parsed_file)
+    print(las_parsed_file.curveMnems())
+    # assert 0
+
+
+def test_with_numeric_channels_minimal():
+    las_raw_file = io.StringIO("""~Version Information
+VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+WRAP.                      NO: One line per depth step
+~Well Information Block
+#MNEM.UNIT                 Value                       Information
+#------------              -----                       -----------
+STRT.M                        1670                    :START
+STOP.M                        2217                    :STOP
+STEP.M                         0.5                    :STEP
+NULL.                     -999.25                     :NULL VALUE
+~Curve Information
+#MNEM   .UNIT             API CODE Curve Description
+#------------             -------- -----------------
+DEPTH   .M            00 001 00 00:   0  Depth
+4          CHDE_NC.%  00 000 00 00:   6
+5       .             00 000 00 00:   9
+~Parameter Information
+#MNEM.UNIT       Value           Description
+#------------    -----           -----------
+RUN .         1                 :Run number
+~Other Information
+# --- LOG MNEMONICS AND UNITS ---
+#Depth     LAMU_TO    TGAS_AVG   CHDE_C2    CHDE_C3    CHDE_IC    4          4          5          5
+#M         %          %          %          %          %          %          %          %
+~A
+      1670    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25    -999.25
+""")
+    las_parsed_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
+    print(las_parsed_file)
+    print(las_parsed_file.curveMnems())
+    # assert 0
+
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass

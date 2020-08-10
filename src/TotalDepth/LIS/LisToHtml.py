@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
 # Copyright (C) 1999-2011 Paul Ross
 # 

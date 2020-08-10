@@ -36,6 +36,7 @@ import logging
 #import array
 #import numpy
 #import pprint
+import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import Type01Plan
@@ -246,29 +247,24 @@ class LogPass(object):
         else:
             strS.append('   Channels: {:s}'.format(str([b.mnem for b in self._dfsr.dsbBlocks])))
         strS.append('        RLE: {:s}'.format(str(self._rle)))
-        if self._rle.hasXaxisData:
-#            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} units={:s}'.format(
-#                        self._rle.xAxisFirst(),
-#                        self._rle.xAxisLast(),
-#                        self._rle.totalFrames(),
-#                        self._rle.frameSpacing(),
-#                        self._rle.xAxisUnits,
-#                        ))
-            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} in optical units={!s:s} (actual units={!s:s})'.format(
-                        self.xAxisFirstValOptical,
-                        self.xAxisLastValOptical,
-                        self._rle.totalFrames(),
-                        self.xAxisSpacingOptical,
-                        self.xAxisUnitsOptical,
-                        self._rle.xAxisUnits,
-                        ))
-        else:
-            strS.append('     X axis: No data.')
+        strS.append(f'     {self.x_axis_str()}')
         strS.append('  Frame set: {:s}'.format(str(self._frameSet)))
         return '\n'.join(strS)
-    
+
     __str__ = longStr
-    
+
+    def x_axis_str(self) -> str:
+        if self._rle.hasXaxisData:
+            return (
+                f'X axis:'
+                f' first={self.xAxisFirstValOptical:.3f}'
+                f' last={self.xAxisLastValOptical:.3f}'
+                f' frames={self._rle.totalFrames():d}'
+                f' overall spacing={self.xAxisSpacingOptical:.4f}'
+                f' in optical units={self.xAxisUnitsOptical!s:s} (actual units={self._rle.xAxisUnits!s:s})'
+            )
+        return 'X axis: No data.'
+
     def frameSetLongStr(self):
         """Returns a long (multiline) descriptive string of the Frame Set or N/A if not initialised."""
         if self._frameSet is None:
@@ -684,6 +680,11 @@ class LogPass(object):
             d['Xaxis'] = None
         return d
 
+    def gen_mnemonic_units(self) -> typing.Sequence[typing.Tuple[bytes, bytes]]:
+        """Yields a sequence of (mnemonic, units) fro each of the recorded channels."""
+        dsb_block: LogiRec.DatumSpecBlock
+        for dsb_block in self._dfsr.dsbBlocks:
+            yield dsb_block.mnem, dsb_block.units
 ##############
 # End: LogPass
 ##############
