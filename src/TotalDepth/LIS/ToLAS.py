@@ -144,6 +144,7 @@ def write_well_information_section(lis_logical_file: LisLogicalFile, float_forma
                 try:
                     units = row[b'PUNI'].value
                 except KeyError:
+                    logger.warning(f'No "PUNI" entry for {row.value}')
                     units = 'N/A'
                 try:
                     value = row[b'VALU'].value
@@ -184,11 +185,15 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
             row: LogiRec.TableRow = logical_record.retRowByMnem(row_name_bytes)
             row_name_bytes = row_name_bytes.replace(b'\x00', b'')
             if row_name_bytes not in LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS:
-                units = row[b"PUNI"].value.decode("ascii")
                 try:
                     value = row[b'VALU'].value
                 except KeyError:
                     value = 'N/A'
+                try:
+                    units = row[b"PUNI"].value.decode("ascii")
+                except KeyError:
+                    logger.warning(f'No "PUNI" entry for {row.value}')
+                    units = 'N/A'
                 value_str = stringify(value, float_format)
                 desc = LASConstants.PARAMETER_MNEM_DESCRIPTION.get(row_name_bytes, 'N/A')
                 table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}',])
@@ -259,7 +264,7 @@ def write_las_file(path_in: str,
         write_parameter_information_section(lis_logical_file, float_format, out_stream)
         if lis_logical_file.last_log_pass is not None:
             write_array_section(lis_logical_file, field_width, float_format, out_stream)
-    return 0
+    return os.path.getsize(output_file)
 
 
 def single_lis_file_to_las(path_in: str,
@@ -282,7 +287,8 @@ def single_lis_file_to_las(path_in: str,
         logger.info(f'Reading {binary_file_type} in {path_in}')
         logging.info('Index.indexFile(): {:s}'.format(path_in))
         assert (os.path.isfile(path_in))
-        lis_file = File.FileRead(path_in, theFileId=path_in, keepGoing=True)
+        # lis_file = File.FileRead(path_in, theFileId=path_in, keepGoing=True)
+        lis_file = File.file_read_with_best_physical_record_pad_settings(path_in, file_id=path_in)
         lis_file_index = FileIndexer.FileIndex(lis_file)
         # Run through the complete index splitting it up into 'logical files'
         # A logical file is a set of 'CONS' IndexTable entries followed by a LogPass
