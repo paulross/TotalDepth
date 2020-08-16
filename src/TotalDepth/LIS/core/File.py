@@ -265,6 +265,7 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
 def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
                                                      file_id=None,
                                                      pr_limit=0) -> typing.Union[None, FileRead]:
+    """Explores a LIS file with the 'best' Physical Record settings and returns a FileRead object or None."""
     pr_settings = best_physical_record_pad_settings(file_path_or_object, pr_limit)
     if pr_settings is not None:
         return FileRead(file_path_or_object, file_id, True, *pr_settings)

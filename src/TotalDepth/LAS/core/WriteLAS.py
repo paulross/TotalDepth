@@ -111,7 +111,7 @@ def convert_dir_or_file_to_las(
 STANDARD_TEXT_WIDTH = 132
 
 
-def process_to_las(args: argparse.PARSER, file_conversion_function: typing.Callable):
+def process_to_las(args: argparse.PARSER, file_conversion_function: typing.Callable) -> typing.Dict[str, LASWriteResult]:
     result: typing.Dict[str, LASWriteResult] = {}
     # if os.path.isfile(args.path_in) and (args.frame_slice.strip() == '?' or args.channels.strip() == '?'):
     logger.info(f'process_to_las(): {args}')
