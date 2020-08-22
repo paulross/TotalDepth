@@ -181,7 +181,6 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
         ]
         for path in sorted(result.keys()):
             las_result = result[path]
-            # print('TRACE: las_result', las_result)
             if las_result.size_input > 0:
                 ms_mb = las_result.time * 1000 / (las_result.size_input / 1024 ** 2)
                 ratio = las_result.size_output / las_result.size_input

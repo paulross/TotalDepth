@@ -55,6 +55,7 @@ from . import TestPlotLASData
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
+
 class TestXMLMatches(unittest.TestCase):
 
     def setUp(self):
@@ -107,6 +108,7 @@ class TestXMLMatches(unittest.TestCase):
             [Mnem.Mnem(o) for o in ['CALI', 'DPHI', 'GR  ', 'ILD ', 'ILM ', 'NPHI', 'SFL ', 'SP  ', 'TNPH']],
             sorted(filmMap['Triple_Combo']),
         )
+
 
 class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
     """Tests whether XML matches can be made with RHDT channel and a LIS LogPass."""

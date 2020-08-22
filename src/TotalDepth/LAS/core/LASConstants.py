@@ -23,6 +23,7 @@ Created on Jan 12, 2012
 
 @author: paulross
 """
+import typing
 
 __author__ = 'Paul Ross'
 __date__ = '2011-08-03'
@@ -5193,20 +5194,20 @@ LGFORMAT_OUTP_UNIQUEID = {
 
 #: This is a map of LgFormat <ChannelName/> to correspondingly appropriate LAS menmonics
 #: It's a best guess...
-LGFORMAT_LAS = {
-    b'BS': ['BIT', ],
-    b'C1': ['C13', 'CAL1', ],
-    b'C2': ['C24', 'CAL2', ],
-    b'CALI': ['CAL', 'DLCL', ],
-    b'CGR': ['ACGR', 'GCGR', ],
-    b'DEVI': ['TILT', ],
-    b'DRHO': ['DLDC', ],
-    b'GR': ['DLGR', 'DLGRH', 'GRDI', 'GRPD', 'GRSG', 'GSGR', 'IDGR', 'MEGR', 'RXGR', 'RXGR01', ],
-    b'HAZI': ['AZID', ],
-    b'POTA': ['GRPO', ],
-    b'SFL': ['SFLU', ],
-    b'THOR': ['GSTH', 'GRTH', ],
-    b'URAN': ['GSUR', 'GRUR', ],
+LGFORMAT_LAS: typing.Dict[str, str] = {
+    'BS': ['BIT', ],
+    'C1': ['C13', 'CAL1', ],
+    'C2': ['C24', 'CAL2', ],
+    'CALI': ['CAL', 'DLCL', ],
+    'CGR': ['ACGR', 'GCGR', ],
+    'DEVI': ['TILT', ],
+    'DRHO': ['DLDC', ],
+    'GR': ['DLGR', 'DLGRH', 'GRDI', 'GRPD', 'GRSG', 'GSGR', 'IDGR', 'MEGR', 'RXGR', 'RXGR01', ],
+    'HAZI': ['AZID', ],
+    'POTA': ['GRPO', ],
+    'SFL': ['SFLU', ],
+    'THOR': ['GSTH', 'GRTH', ],
+    'URAN': ['GSUR', 'GRUR', ],
 }
 
 #: Reverse map to LAS mnemonics to LgFormat <ChannelName/> values.
