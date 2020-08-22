@@ -171,11 +171,10 @@ def las_size_input_output(result: typing.Dict[str, LASWriteResult]) -> typing.Tu
 
 
 def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: str) -> int:
-    # Report output
+    """Print output returning the number of failed files"""
     size_index = size_input = 0
-    ret_val = 0
     if result:
-        files_processed = 0
+        files_failed = files_processed = 0
         table = [
             ['Input', 'Output', 'LAS Count', 'Time', 'Ratio', 'ms/Mb', 'Exception', 'Path']
         ]
@@ -200,7 +199,7 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
                 size_index += result[path].size_output
                 files_processed += 1
                 if las_result.exception:
-                    ret_val = 1
+                    files_failed += 1
         for row in TotalDepth.common.data_table.format_table(table, pad=' ', heading_underline='-'):
             print(row)
         try:
@@ -208,7 +207,7 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
                 plot_gnuplot(result, gnuplot)
         except Exception as err:  # pragma: no cover
             logger.exception(str(err))
-            ret_val = 2
+            ret_val = -1
         # print('Execution time = %8.3f (S)' % clk_exec)
         # if size_input > 0:
         #     ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
@@ -218,7 +217,7 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
         #     ratio = 0.0
         # print(f'Out of  {len(result):,d} processed {files_processed:,d} files of total size {size_input:,d} input bytes')
         # print(f'Wrote {size_index:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
-    return ret_val
+    return files_failed
 
 
 GNUPLOT_PLT = """set logscale x
