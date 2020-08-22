@@ -82,6 +82,15 @@ def path_in_out(*args, **kwargs) -> argparse.ArgumentParser:
     return parser
 
 
+def path_in_out_required(*args, **kwargs) -> argparse.ArgumentParser:
+    """
+    Return an command line parser with the standard pre-set options plus an input and output paths as an arguments.
+    """
+    parser = path_in(*args, **kwargs)
+    parser.add_argument('path_out', type=str, help='Output path.')
+    return parser
+
+
 # ============ Logging ==================
 
 #: Default log level

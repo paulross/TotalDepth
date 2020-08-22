@@ -20,11 +20,6 @@
 """Tests LogiRec module.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '29 Dec 2010'
-__version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
-
 import os
 import sys
 import time
@@ -32,22 +27,27 @@ import logging
 import io
 import pprint
 import random
+import unittest
 
-from TotalDepth.LIS.core import PhysRec
+import pytest
+
+from TotalDepth.LIS.core import EngVal
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import LogiRec
-from TotalDepth.LIS.core import EngVal
+from TotalDepth.LIS.core import Mnem
+from TotalDepth.LIS.core import PhysRec
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import Units
-from TotalDepth.LIS.core import Mnem
 
-######################
-# Section: Unit tests.
-######################
-import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
+
+__author__  = 'Paul Ross'
+__date__    = '29 Dec 2010'
+__version__ = '0.8.0'
+__rights__  = 'Copyright (c) Paul Ross'
+
 
 #class TestLrBase(unittest.TestCase):
 #    def _retFileSinglePr(self, theB):
@@ -822,6 +822,7 @@ class TestCbEngValWrite(TestLrBase):
         self.assertEqual(b'LENG', myCbev.mnem)
         self.assertEqual(b'    ', myCbev.units)
 
+
 class TestTableRow(TestLrBase):
     """Tests LogiRec.TableRow"""
     def setUp(self):
@@ -1013,55 +1014,56 @@ class TestTableRow(TestLrBase):
         self.assertTrue(b'GCOD' in myTr)
         self.assertFalse(b'????' in myTr)
 
+
 class TestLrTableSimple(TestLrBase):
     """Tests ..."""
     def setUp(self):
         """Set up."""
         myB = bytes([34, 0]) \
             + bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii') \
+                + bytes('TYPE', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('FILM', 'ascii') \
             + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DEST', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('PF1 ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DSCA', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('S5  ', 'ascii') \
+                + bytes('MNEM', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('1   ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('GCOD', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('E2E ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('GDEC', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('2   ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('DEST', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('PF1 ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('DSCA', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('S5  ', 'ascii') \
             + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('BBB ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('____', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DEST', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('PF2 ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DSCA', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('S5  ', 'ascii')
+                + bytes('MNEM', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('2   ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('GCOD', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('BBB ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('GDEC', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('____', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('DEST', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('PF2 ', 'ascii') \
+                + bytes([69, 65, 4, 0]) \
+                + bytes('DSCA', 'ascii') \
+                + bytes('    ', 'ascii') \
+                + bytes('S5  ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self._lrTable = LogiRec.LrTableRead(myF)
 
@@ -1141,6 +1143,27 @@ class TestLrTableSimple(TestLrBase):
             pass
         # Get non-existent slice
         self.assertEqual(self._lrTable[5:7], [])
+
+    def test_genRowNames(self):
+        row_names = list(self._lrTable.genRowNames(sort=0))
+        self.assertEqual([b'1   ', b'2   '], row_names)
+        row_names = list(self._lrTable.genRowNames(sort=1))
+        self.assertEqual([b'1   ', b'2   '], row_names)
+        row_names = list(self._lrTable.genRowNames(sort=-1))
+        self.assertEqual([b'2   ', b'1   '], row_names)
+
+    def test_genRowNames_retRowByMnem_fails(self):
+        for row_name_bytes in self._lrTable.genRowNames(sort=1):
+            with pytest.raises(KeyError) as err:
+                self._lrTable.retRowByMnem(row_name_bytes)
+            assert err.value.args[0] == row_name_bytes
+
+    def test_genRowNames_retRowByMnem(self):
+        for row_name_bytes in self._lrTable.genRowNames(sort=1):
+            row = self._lrTable.retRowByMnem(Mnem.Mnem(row_name_bytes))
+            assert row is not None
+
+
 
 class TestLrTableDupeRow(TestLrBase):
     """Tests ..."""

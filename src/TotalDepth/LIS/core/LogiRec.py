@@ -1036,14 +1036,17 @@ class LrTable(LrBase):
             for v in valS:
                 yield v
 
-    def retRowByMnem(self, m):
+    def retRowByMnem(self, m: Mnem.Mnem) -> TableRow:
         """Returns the TableRow from a Mnem.Mnem object. i.e. the table row that has a b'MNEM'
         column whose value matches m.
         May raise a KeyError. Note: an IndexError would mean that self.__mnemRowIndex is corrupt."""
         try:
             return self._rows[self._mnemRowIndex[m]]
         except IndexError as err:
-            raise ExceptionLrTableInternaStructuresCorrupt('self._mnemRowIndex[m] is index {:d} but number of rows is {:d}'.format(self._mnemRowIndex[m], len(self._rows)))
+            raise ExceptionLrTableInternaStructuresCorrupt(
+                'self._mnemRowIndex[m] is index {:d} but number of rows is {:d}'.format(self._mnemRowIndex[m],
+                                                                                        len(self._rows))
+            )
     
     @property
     def isSingleParam(self):
@@ -1060,7 +1063,6 @@ class LrTable(LrBase):
         """If key is an integer or slice this returns block by index(es).
         If key is a bytes() object then this returns row by label.
         May raise a KeyError or IndexError."""
-#        print('TRACE: __getitem__()', repr(key))
         if isinstance(key, int) or isinstance(key, slice):
             return self._rows[key]
         elif isinstance(key, bytes):
@@ -1122,19 +1124,20 @@ class LrTable(LrBase):
                 'COMPONENT_BLOCK_DATUM_BLOCK_ENTRY with no COMPONENT_BLOCK_DATUM_BLOCK_START in table Logical Record.')
         # Add new cell and add name to column super-set
         self._incColMnem(self._rows[-1].addCb(theCbEv))
-        
+
     def _indexLastRowOrDiscard(self):
         # Check if the last row is unique, if not discard it
         if len(self._rows) > 0:
             if self._rows[-1].value in self._tableRowIndex:
                 myRow = self._rows.pop()
                 logging.warning(
-                'LrTableRead(): Discarding duplicate row {:s} in table {:s}'.format(
-                    str(myRow.value), str(self.value)
-                ))
+                    'LrTableRead(): Discarding duplicate row {:s} in table {:s}'.format(
+                        str(myRow.value), str(self.value)
+                    ))
             else:
                 # Add last row to index
-                self._tableRowIndex[self._rows[-1].value] = len(self._rows) - 1
+                row_key = self._rows[-1].value
+                self._tableRowIndex[row_key] = len(self._rows) - 1
                 # If last row has a b'MNEM' column then add the value to the Mnem map
                 try:
                     myMnem = Mnem.Mnem(self._rows[-1][b'MNEM'].value)
@@ -1239,7 +1242,6 @@ class LrTableWrite(LrTable):
                 else:
                     self.addDatumBlock(myCbEv)
             self._indexLastRowOrDiscard()
-#        print('TRACE:', self._rows)
 
 ############################
 # End: Table logical records
