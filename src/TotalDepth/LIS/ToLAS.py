@@ -31,7 +31,8 @@ import typing
 import TotalDepth.common
 from TotalDepth.LAS.core import WriteLAS, LASConstants
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-from TotalDepth.LIS.core import FrameSet, File, FileIndexer, LogiRec
+from TotalDepth.LIS.core import FrameSet, File, FileIndexer, LogiRec, Mnem
+from TotalDepth.common import LogPass
 from TotalDepth.util import gnuplot, DirWalk, bin_file_type
 
 __author__  = 'Paul Ross'
@@ -152,14 +153,9 @@ def write_well_information_section(lis_logical_file: LisLogicalFile, float_forma
         logical_record: LogiRec.LrTable = table_index.logicalRecord
         assert (logical_record is not None)
         for row_name_bytes in logical_record.genRowNames(sort=1):
-            row: LogiRec.TableRow = logical_record.retRowByMnem(row_name_bytes)
-            row_name_bytes = row_name_bytes.replace(b'\x00', b'')
+            row: LogiRec.TableRow = logical_record.retRowByMnem(Mnem.Mnem(row_name_bytes))
             if row_name_bytes in LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS:
-                try:
-                    units = row[b'PUNI'].value
-                except KeyError:
-                    logger.warning(f'No "PUNI" entry for {row.value}')
-                    units = 'N/A'
+                units = _units_from_logical_record_table_row(row).decode('ascii')
                 try:
                     value = row[b'VALU'].value
                 except KeyError:
@@ -172,17 +168,37 @@ def write_well_information_section(lis_logical_file: LisLogicalFile, float_forma
 
 def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream: typing.TextIO) -> None:
     table: typing.List[typing.List[str]] = [
-        ['#MNEM.UNIT', 'Curve Description'],
-        ['#---------', '-----------------'],
+        ['#MNEM.UNIT', 'API CODE',    'Curve Description'],
+        ['#---------', '------------', '-----------------'],
     ]
     log_pass = lis_logical_file.last_log_pass.logPass
     frame_set = log_pass.frameSet
     assert frame_set is not None
     if frame_set.isIndirectX:
-        table.append([f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}', ': X axis (implied)'])
-    for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True):
+        table.append(
+            [
+                f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}',
+                '00 001 00 00',
+                ': X axis (implied)'
+            ]
+        )
+
+    for i, mnemonic, units in log_pass.genFrameSetChIndexScNameUnit(toAscii=False):
+        # print(f'TRACE: YYYY {log_pass.dfsr.dsbBlocks[i].apiLogType}')
         desc = LASConstants.CURVE_MNEM_DESCRIPTIONS.get(mnemonic.strip(), 'N/A')
-        table.append([f'{mnemonic}.{units}', f': {desc} '])
+        table.append(
+            [
+                f'{mnemonic.decode("ascii")}.{units.decode("ascii")}',
+                # 'TODO: API',
+                (
+                    f'{log_pass.dfsr.dsbBlocks[i].apiLogType:2}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiCurveType:3}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiCurveClass:2}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiModifier:2}'
+                ),
+                f': {desc} '
+            ]
+        )
     write_table('~Curve Information Section', table, out_stream)
 
 
@@ -196,26 +212,21 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
         logical_record: LogiRec.LrTable = table_index.logicalRecord
         assert (logical_record is not None)
         for row_name_bytes in logical_record.genRowNames(sort=1):
-            row: LogiRec.TableRow = logical_record.retRowByMnem(row_name_bytes)
-            row_name_bytes = row_name_bytes.replace(b'\x00', b'')
+            row: LogiRec.TableRow = logical_record.retRowByMnem(Mnem.Mnem(row_name_bytes))
             if row_name_bytes not in LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS:
                 units = _units_from_logical_record_table_row(row).decode("ascii")
                 try:
                     value = row[b'VALU'].value
                 except KeyError:
                     value = 'N/A'
-                try:
-                    units = row[b"PUNI"].value.decode("ascii")
-                except KeyError:
-                    logger.warning(f'No "PUNI" entry for {row.value}')
-                    units = 'N/A'
                 value_str = stringify(value, float_format)
                 desc = LASConstants.PARAMETER_MNEM_DESCRIPTION.get(row_name_bytes, 'N/A')
                 table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}',])
     write_table('~Parameter Information Section', table, out_stream)
 
 
-def write_array_section(lis_logical_file: LisLogicalFile, field_width: int, float_format: str, out_stream: typing.TextIO) -> None:
+def write_array_section(lis_logical_file: LisLogicalFile, array_reduction: str, field_width: int, float_format: str,
+                        out_stream: typing.TextIO) -> None:
     log_pass = lis_logical_file.last_log_pass.logPass
     frame_set: FrameSet.FrameSet = log_pass.frameSet
     assert frame_set is not None
@@ -224,9 +235,9 @@ def write_array_section(lis_logical_file: LisLogicalFile, field_width: int, floa
     out_stream.write('#')
     if frame_set.isIndirectX:
         x_axis = f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}'
-        out_stream.write(f'{x_axis:{field_width}}')
+        out_stream.write(f'{x_axis:{field_width - 6}}')
     for m_u in [f'{mnemonic}.{units}' for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True)]:
-        out_stream.write(f'{m_u:{field_width}}')
+        out_stream.write(f'{m_u:>{field_width}}')
     out_stream.write('\n')
 
     for frame_index in range(frame_set.numFrames):
@@ -235,15 +246,9 @@ def write_array_section(lis_logical_file: LisLogicalFile, field_width: int, floa
             out_stream.write(' ')
         for channel_index in range(frame_set.numChannels):
             for sub_channel_index in range(frame_set.numSubChannels(channel_index)):
-                # values = []
-                # for sample_index in range(frame_set.numSamples(channel_index, sub_channel_index)):
-                #     for burst_index in range(frame_set.numBursts(channel_index, sub_channel_index)):
-                #         values.append(frame_set.value(frIdx, channel_index, sub_channel_index, sample_index, burst_index))
                 values = frame_set.frame_channel_sub_channel_values(frame_index, channel_index, sub_channel_index)
-                out_stream.write(f'{channel_index} {sub_channel_index} {values}\n')
-        # for value in frame_set.frame(frIdx):
-        #     out_stream.write(f'{stringify(value, float_format):{field_width}}')
-        #     out_stream.write(' ')
+                value = LogPass.array_reduce(values, array_reduction)
+                out_stream.write(f'{stringify(value, float_format):>{field_width}}')
         out_stream.write('\n')
 
 
@@ -260,7 +265,7 @@ def write_las_file(path_in: str,
                    ) -> int:
     """Writes a single LAS file corresponding ot a LIS logical file (set of CONS tables and a LogPass)."""
     logger.info(f'write_las_file(): path_in: {path_in} path_out: {path_out}')
-    output_file = os.path.join(path_out, f'{os.path.splitext(os.path.basename(path_in))[0]}_{logical_file_index}.las')
+    output_file = f'{path_out}_{logical_file_index}.las'
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     logger.info(f'Writing to LAS {output_file}')
     with open(output_file, 'w') as out_stream:
@@ -269,10 +274,6 @@ def write_las_file(path_in: str,
         # Write the well information
         if lis_logical_file.last_log_pass:
             write_well_information_section(lis_logical_file, float_format, out_stream)
-
-        # log_pass = lis_logical_file.last_log_pass.logPass
-        # print(f'TRACE: XXXX {log_pass}')
-
         # Populate the Log Pass before writing the curve information
         if lis_logical_file.last_log_pass is not None:
             lis_frame_slice = slice(
@@ -280,22 +281,15 @@ def write_las_file(path_in: str,
                 frame_slice.last(lis_logical_file.last_log_pass.logPass.totalFrames) + 1,
                 frame_slice.step(lis_logical_file.last_log_pass.logPass.totalFrames),
             )
-
-            # print(f'TRACE: lis_frame_slice: {lis_frame_slice}')
-
             if len(channels) == 0:
                 lis_logical_file.last_log_pass.logPass.setFrameSet(lis_file, lis_frame_slice, None)
             else:
                 lis_logical_file.last_log_pass.logPass.setFrameSet(lis_file, lis_frame_slice, channels)
-
-            # frame_set = lis_logical_file.last_log_pass.logPass.frameSet
-            # print(f'TRACE: frame_set {frame_set}')
-
             # Write the curve information
             write_curve_information_section(lis_logical_file, out_stream)
         write_parameter_information_section(lis_logical_file, float_format, out_stream)
         if lis_logical_file.last_log_pass is not None:
-            write_array_section(lis_logical_file, field_width, float_format, out_stream)
+            write_array_section(lis_logical_file, array_reduction, field_width, float_format, out_stream)
     return os.path.getsize(output_file)
 
 
@@ -319,8 +313,7 @@ def single_lis_file_to_las(path_in: str,
         logger.info(f'Reading {binary_file_type} in {path_in}')
         logging.info('Index.indexFile(): {:s}'.format(path_in))
         assert (os.path.isfile(path_in))
-        # lis_file = File.FileRead(path_in, theFileId=path_in, keepGoing=True)
-        lis_file = File.file_read_with_best_physical_record_pad_settings(path_in, file_id=path_in)
+        lis_file = File.FileRead(path_in, theFileId=path_in, keepGoing=True)
         lis_file_index = FileIndexer.FileIndex(lis_file)
         # Run through the complete index splitting it up into 'logical files'
         # A logical file is a set of 'CONS' IndexTable entries followed by a LogPass
@@ -328,11 +321,6 @@ def single_lis_file_to_las(path_in: str,
         logical_file_entries: typing.List[LisLogicalFile] = []
         logical_file = LisLogicalFile()
         for l, lis_index in enumerate(lis_file_index.genAll()):
-            # print('TRACE: LIS Index:', lis_index)
-            # if isinstance(lis_index, FileIndexer.IndexTable):
-            #     print('TRACE: LIS Index:', type(lis_index), lis_index.name)
-            # else:
-            #     print('TRACE: LIS Index:', type(lis_index))
             if isinstance(lis_index, FileIndexer.IndexTable) and lis_index.name == b'CONS':
                 # Create the Logical Record
                 lis_index.setLogicalRecord(lis_file)
@@ -343,7 +331,6 @@ def single_lis_file_to_las(path_in: str,
         if len(logical_file):
             logical_file_entries.append(logical_file)
 
-        # print('TRACE: logical_file_entries:', logical_file_entries)
         for l, lis_logical_file in enumerate(logical_file_entries):
             try:
                 sum_path_out = write_las_file(path_in, array_reduction, path_out, frame_slice, channels, field_width,
@@ -402,7 +389,7 @@ def main():
     Reads RP66V1 file(s) and writes them out as LAS files."""
     print('Cmd: %s' % ' '.join(sys.argv))
 
-    parser = TotalDepth.common.cmn_cmd_opts.path_in_out(
+    parser = TotalDepth.common.cmn_cmd_opts.path_in_out_required(
         description, prog='TotalDepth.RP66V1.ToLAS.main', version=__version__, epilog=__rights__
     )
     TotalDepth.common.cmn_cmd_opts.add_log_level(parser, level=20)
@@ -427,7 +414,6 @@ def main():
     parser.add_argument('--float-format', type=str,
                         help='Floating point format for array data [default: "%(default)s"].', default='.3f')
     args = parser.parse_args()
-    print('TRACE:', args)
     TotalDepth.common.cmn_cmd_opts.set_log_level(args)
     # Your code here
     ret_val = 0
