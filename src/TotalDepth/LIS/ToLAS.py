@@ -82,6 +82,7 @@ def write_las_header(input_file: str,
 
 
 class LisLogicalFile:
+    """Contains a representation of a LIS Logical File which is a series of indexes followed by a Log Pass"""
     def __init__(self):
         self.cons_table_index_entries: typing.List[FileIndexer.IndexObjBase] = []
         self.last_log_pass: FileIndexer.IndexLogPass = None
@@ -90,6 +91,7 @@ class LisLogicalFile:
         return len(self.cons_table_index_entries)
 
     def add_index(self, index_entry: FileIndexer.IndexObjBase) -> None:
+        """Adds an index or Log Pass."""
         if isinstance(index_entry, FileIndexer.IndexLogPass):
             if self.last_log_pass is None or self.last_log_pass.logPass.totalFrames == 0:
                 self.last_log_pass = index_entry
@@ -99,6 +101,7 @@ class LisLogicalFile:
             self.cons_table_index_entries.append(index_entry)
 
     def is_end(self) -> bool:
+        """Can be added to."""
         return self.last_log_pass is not None
 
 
@@ -177,9 +180,9 @@ def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream
     assert frame_set is not None
     if frame_set.isIndirectX:
         table.append([f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}', ': X axis (implied)'])
-    for mnemonic, units in log_pass.gen_mnemonic_units():
+    for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True):
         desc = LASConstants.CURVE_MNEM_DESCRIPTIONS.get(mnemonic.strip(), 'N/A')
-        table.append([f'{mnemonic.decode("ascii")}.{units.decode("ascii")}', f': {desc} '])
+        table.append([f'{mnemonic}.{units}', f': {desc} '])
     write_table('~Curve Information Section', table, out_stream)
 
 
@@ -214,16 +217,33 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
 
 def write_array_section(lis_logical_file: LisLogicalFile, field_width: int, float_format: str, out_stream: typing.TextIO) -> None:
     log_pass = lis_logical_file.last_log_pass.logPass
-    frame_set = log_pass.frameSet
+    frame_set: FrameSet.FrameSet = log_pass.frameSet
     assert frame_set is not None
+
     out_stream.write('~A (ASCII Log Data)\n')
-    for frIdx in range(frame_set.numFrames):
+    out_stream.write('#')
+    if frame_set.isIndirectX:
+        x_axis = f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}'
+        out_stream.write(f'{x_axis:{field_width}}')
+    for m_u in [f'{mnemonic}.{units}' for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True)]:
+        out_stream.write(f'{m_u:{field_width}}')
+    out_stream.write('\n')
+
+    for frame_index in range(frame_set.numFrames):
         if frame_set.isIndirectX:
-            out_stream.write(stringify(frame_set.xAxisValue(frIdx), float_format))
+            out_stream.write(stringify(frame_set.xAxisValue(frame_index), float_format))
             out_stream.write(' ')
-        for value in frame_set.frame(frIdx):
-            out_stream.write(f'{stringify(value, float_format):{field_width}}')
-            out_stream.write(' ')
+        for channel_index in range(frame_set.numChannels):
+            for sub_channel_index in range(frame_set.numSubChannels(channel_index)):
+                # values = []
+                # for sample_index in range(frame_set.numSamples(channel_index, sub_channel_index)):
+                #     for burst_index in range(frame_set.numBursts(channel_index, sub_channel_index)):
+                #         values.append(frame_set.value(frIdx, channel_index, sub_channel_index, sample_index, burst_index))
+                values = frame_set.frame_channel_sub_channel_values(frame_index, channel_index, sub_channel_index)
+                out_stream.write(f'{channel_index} {sub_channel_index} {values}\n')
+        # for value in frame_set.frame(frIdx):
+        #     out_stream.write(f'{stringify(value, float_format):{field_width}}')
+        #     out_stream.write(' ')
         out_stream.write('\n')
 
 
@@ -415,12 +435,13 @@ def main():
         _dump_frames_and_or_channels(args.path_in, args.recurse, args.frame_slice.strip(), args.channels.strip())
     else:
         clk_start = time.perf_counter()
-        result: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_lis_file_to_las)
+        results: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_lis_file_to_las)
         clk_exec = time.perf_counter() - clk_start
         # Report output
-        ret_val = WriteLAS.report_las_write_results(result, args.gnuplot)
-        print(f'Writing results returned: {ret_val}')
-        size_input, size_output = WriteLAS.las_size_input_output(result)
+        failed_files = WriteLAS.report_las_write_results(results, args.gnuplot)
+        print(f' Total files: {len(results)}')
+        print(f'Failed files: {failed_files}')
+        size_input, size_output = WriteLAS.las_size_input_output(results)
         print('Execution time = %8.3f (S)' % clk_exec)
         if size_input > 0:
             ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
@@ -428,7 +449,7 @@ def main():
         else:
             ms_mb = 0.0
             ratio = 0.0
-        print(f'Out of  {len(result):,d} processed {len(result):,d} files of total size {size_input:,d} input bytes')
+        print(f'Out of  {len(results):,d} processed {len(results):,d} files of total size {size_input:,d} input bytes')
         print(f'Wrote {size_output:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
         print(f'Execution time: {clk_exec:.3f} (s)')
     print('Bye, bye!')

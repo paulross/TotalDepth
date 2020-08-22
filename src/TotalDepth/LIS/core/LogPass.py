@@ -681,7 +681,10 @@ class LogPass(object):
         return d
 
     def gen_mnemonic_units(self) -> typing.Sequence[typing.Tuple[bytes, bytes]]:
-        """Yields a sequence of (mnemonic, units) fro each of the recorded channels."""
+        """
+        Yields a sequence of (mnemonic, units) for each of the recorded Datum Specification Blocks.
+        This does not include sub-channels.
+        """
         dsb_block: LogiRec.DatumSpecBlock
         for dsb_block in self._dfsr.dsbBlocks:
             yield dsb_block.mnem, dsb_block.units

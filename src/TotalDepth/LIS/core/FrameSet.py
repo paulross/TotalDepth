@@ -810,6 +810,11 @@ class FrameSet(object):
         chIdxInt = self.internalChIdx(chIdxExt)
         return self._frames[:,self._sliceTree[chIdxInt][sc]]
     
+    def frame_channel_sub_channel_values(self, frame_index, channel_index, sub_channel_index):
+        """Returns a numpy array that is a view of the values for the frame, external channel and sub channel."""
+        channel_index_internal = self.internalChIdx(channel_index)
+        return self._frames[frame_index][self._sliceTree[channel_index_internal][sub_channel_index]]
+
 #    def _value(self, fr, chInt, sc, sa, bu):
 #        """Returns a single value from an: internal fr, external ch, sc, sa, bu."""
 #        i = self._intChValIdxS[chInt]

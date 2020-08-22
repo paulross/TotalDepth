@@ -46,6 +46,7 @@ entry_points_console_scripts_dict = {
     'tdlisdumpframeset': 'TotalDepth.LIS.DumpFrameSet:main',
     'tdlisindex': 'TotalDepth.LIS.Index:main',
     'tdlistohtml': 'TotalDepth.LIS.LisToHtml:main',
+    'tdlistolas': 'TotalDepth.LIS.ToLAS:main',
     'tdlisplotlogpasses': 'TotalDepth.LIS.PlotLogPasses:main',
     # 'tdXlisrandomframesetread': 'TotalDepth.LIS.RandomFrameSetRead:main',
     'tdlisscanlogidata': 'TotalDepth.LIS.ScanLogiData:main',
