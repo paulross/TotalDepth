@@ -32,6 +32,7 @@ import TotalDepth.common
 from TotalDepth.LAS.core import WriteLAS, LASConstants
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import FrameSet, File, FileIndexer, LogiRec, Mnem
+from TotalDepth.common import LogPass
 from TotalDepth.util import gnuplot, DirWalk, bin_file_type
 
 __author__  = 'Paul Ross'
@@ -167,17 +168,37 @@ def write_well_information_section(lis_logical_file: LisLogicalFile, float_forma
 
 def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream: typing.TextIO) -> None:
     table: typing.List[typing.List[str]] = [
-        ['#MNEM.UNIT', 'Curve Description'],
-        ['#---------', '-----------------'],
+        ['#MNEM.UNIT', 'API CODE',    'Curve Description'],
+        ['#---------', '------------', '-----------------'],
     ]
     log_pass = lis_logical_file.last_log_pass.logPass
     frame_set = log_pass.frameSet
     assert frame_set is not None
     if frame_set.isIndirectX:
-        table.append([f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}', ': X axis (implied)'])
-    for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True):
+        table.append(
+            [
+                f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}',
+                '00 001 00 00',
+                ': X axis (implied)'
+            ]
+        )
+
+    for i, mnemonic, units in log_pass.genFrameSetChIndexScNameUnit(toAscii=False):
+        # print(f'TRACE: YYYY {log_pass.dfsr.dsbBlocks[i].apiLogType}')
         desc = LASConstants.CURVE_MNEM_DESCRIPTIONS.get(mnemonic.strip(), 'N/A')
-        table.append([f'{mnemonic}.{units}', f': {desc} '])
+        table.append(
+            [
+                f'{mnemonic.decode("ascii")}.{units.decode("ascii")}',
+                # 'TODO: API',
+                (
+                    f'{log_pass.dfsr.dsbBlocks[i].apiLogType:2}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiCurveType:3}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiCurveClass:2}'
+                    f' {log_pass.dfsr.dsbBlocks[i].apiModifier:2}'
+                ),
+                f': {desc} '
+            ]
+        )
     write_table('~Curve Information Section', table, out_stream)
 
 
@@ -214,9 +235,9 @@ def write_array_section(lis_logical_file: LisLogicalFile, array_reduction: str, 
     out_stream.write('#')
     if frame_set.isIndirectX:
         x_axis = f'X   .{frame_set.xAxisDecl.depthUnits.decode("ascii")}'
-        out_stream.write(f'{x_axis:{field_width}}')
+        out_stream.write(f'{x_axis:{field_width - 6}}')
     for m_u in [f'{mnemonic}.{units}' for mnemonic, units in log_pass.genFrameSetScNameUnit(toAscii=True)]:
-        out_stream.write(f'{m_u:{field_width}}')
+        out_stream.write(f'{m_u:>{field_width}}')
     out_stream.write('\n')
 
     for frame_index in range(frame_set.numFrames):
@@ -225,15 +246,9 @@ def write_array_section(lis_logical_file: LisLogicalFile, array_reduction: str, 
             out_stream.write(' ')
         for channel_index in range(frame_set.numChannels):
             for sub_channel_index in range(frame_set.numSubChannels(channel_index)):
-                # values = []
-                # for sample_index in range(frame_set.numSamples(channel_index, sub_channel_index)):
-                #     for burst_index in range(frame_set.numBursts(channel_index, sub_channel_index)):
-                #         values.append(frame_set.value(frIdx, channel_index, sub_channel_index, sample_index, burst_index))
                 values = frame_set.frame_channel_sub_channel_values(frame_index, channel_index, sub_channel_index)
-                out_stream.write(f'{channel_index} {sub_channel_index} {values}\n')
-        # for value in frame_set.frame(frIdx):
-        #     out_stream.write(f'{stringify(value, float_format):{field_width}}')
-        #     out_stream.write(' ')
+                value = LogPass.array_reduce(values, array_reduction)
+                out_stream.write(f'{stringify(value, float_format):>{field_width}}')
         out_stream.write('\n')
 
 

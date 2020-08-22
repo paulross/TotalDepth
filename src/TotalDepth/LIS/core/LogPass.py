@@ -493,6 +493,37 @@ class LogPass(object):
                     else:
                         yield myDsb.subChMnem(aScIdx), myDsb.units
         
+    def genFrameSetChIndexScNameUnit(self, toAscii=True):
+        """This generates an index, name and units for sub-channel in a frame in the
+        current frame set.
+        Like genFrameSetScNameUnit() but with the channel index as well.
+        """
+        if self._frameSet is None:
+            raise ExceptionLogPassNoFrameSet('LogPass has no FrameSet')
+        for extChIdx in self._frameSet.genExtChIndexes():
+            myDsb = self._dfsr.dsbBlocks[extChIdx]
+            if myDsb.repCode in RepCode.DIPMETER_REP_CODES:
+                # Dipmeter is a special case
+                # Type 130
+                numVals = RepCode.DIPMETER_NUM_FAST_CHANNELS
+                if myDsb.repCode == RepCode.DIPMETER_CSU_FIELD_TAPE_REP_CODE:
+                    # Type 234
+                    numVals += RepCode.DIPMETER_NUM_SLOW_CHANNELS
+                for i in range(numVals):
+                    if toAscii:
+                        yield extChIdx, self._toAscii(RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[i][0]), \
+                            self._toAscii(myDsb.units)
+                    else:
+                        yield extChIdx, RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[i][0], \
+                            myDsb.units
+            else:
+                for aScIdx in range(myDsb.subChannels):
+                    if toAscii:
+                        yield extChIdx, self._toAscii(myDsb.subChMnem(aScIdx)), \
+                            self._toAscii(myDsb.units)
+                    else:
+                        yield extChIdx, myDsb.subChMnem(aScIdx), myDsb.units
+
     #=============================================
     # End: Mapping of MNEM to channel indices.
     #=============================================
