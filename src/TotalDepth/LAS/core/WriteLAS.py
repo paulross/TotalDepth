@@ -173,8 +173,8 @@ def las_size_input_output(result: typing.Dict[str, LASWriteResult]) -> typing.Tu
 def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: str) -> int:
     """Print output returning the number of failed files"""
     size_index = size_input = 0
+    files_failed = files_processed = 0
     if result:
-        files_failed = files_processed = 0
         table = [
             ['Input', 'Output', 'LAS Count', 'Time', 'Ratio', 'ms/Mb', 'Exception', 'Path']
         ]
