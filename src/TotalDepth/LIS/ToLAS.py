@@ -137,16 +137,37 @@ def _units_from_logical_record_table_row(row: LogiRec.TableRow) -> bytes:
     return units
 
 
-def write_well_information_section(lis_logical_file: LisLogicalFile, float_format: str,
+def write_well_information_section(lis_logical_file: LisLogicalFile,
+                                   frame_slice: typing.Union[
+                                       TotalDepth.common.Slice.Slice, TotalDepth.common.Slice.Sample
+                                   ],
+                                   float_format: str,
                                    out_stream: typing.TextIO) -> None:
     log_pass = lis_logical_file.last_log_pass.logPass
+    step = log_pass.xAxisSpacingOptical * frame_slice.step(log_pass.totalFrames)
     table: typing.List[typing.List[str]] = [
         ['#MNEM.UNIT', 'Value', 'Description'],
         ['#---------', '-----', '-----------'],
-        [f'STRT.{log_pass.xAxisUnitsOptical.decode("ascii")}', f'{log_pass.xAxisFirstValOptical:{float_format}}', ': START'],
-        [f'STOP.{log_pass.xAxisUnitsOptical.decode("ascii")}', f'{log_pass.xAxisLastValOptical:{float_format}}', ': STOP'],
-        [f'STEP.{log_pass.xAxisUnitsOptical.decode("ascii")}', f'{log_pass.xAxisSpacingOptical:{float_format}}', ': STEP'],
-        [f'NULL.', f'{log_pass.nullValue:{float_format}}', ': NULL VALUE'],
+        [
+            f'STRT.{log_pass.xAxisUnitsOptical.decode("ascii")}',
+            f'{log_pass.xAxisFirstValOptical:{float_format}}',
+            ': START',
+        ],
+        [
+            f'STOP.{log_pass.xAxisUnitsOptical.decode("ascii")}',
+            f'{log_pass.xAxisLastValOptical:{float_format}}',
+            ': STOP',
+        ],
+        [
+            f'STEP.{log_pass.xAxisUnitsOptical.decode("ascii")}',
+            f'{step:{float_format}}',
+            ': STEP',
+        ],
+        [
+            f'NULL.',
+            f'{log_pass.nullValue:{float_format}}',
+            ': NULL VALUE',
+        ],
     ]
     # Extract the data from b'CONS' tables.
     for table_index in lis_logical_file.cons_table_index_entries:
@@ -162,7 +183,7 @@ def write_well_information_section(lis_logical_file: LisLogicalFile, float_forma
                     value = 'N/A'
                 value_str = stringify(value, float_format)
                 desc = LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS[row_name_bytes]
-                table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}',])
+                table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}', ])
     write_table('~Well Information Section', table, out_stream)
 
 
@@ -273,7 +294,7 @@ def write_las_file(path_in: str,
         write_las_header(path_in, logical_file_index, out_stream)
         # Write the well information
         if lis_logical_file.last_log_pass:
-            write_well_information_section(lis_logical_file, float_format, out_stream)
+            write_well_information_section(lis_logical_file, frame_slice, float_format, out_stream)
         # Populate the Log Pass before writing the curve information
         if lis_logical_file.last_log_pass is not None:
             lis_frame_slice = slice(
