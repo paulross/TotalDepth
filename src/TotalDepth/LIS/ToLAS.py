@@ -89,7 +89,10 @@ class LisLogicalFile:
         self.last_log_pass: FileIndexer.IndexLogPass = None
 
     def __len__(self):
-        return len(self.cons_table_index_entries)
+        ret = len(self.cons_table_index_entries)
+        if self.last_log_pass is not None:
+            ret += 1
+        return ret
 
     def add_index(self, index_entry: FileIndexer.IndexObjBase) -> None:
         """Adds an index or Log Pass."""
@@ -342,6 +345,7 @@ def single_lis_file_to_las(path_in: str,
         logical_file_entries: typing.List[LisLogicalFile] = []
         logical_file = LisLogicalFile()
         for l, lis_index in enumerate(lis_file_index.genAll()):
+            logger.debug('LIS Index %s', lis_index)
             if isinstance(lis_index, FileIndexer.IndexTable) and lis_index.name == b'CONS':
                 # Create the Logical Record
                 lis_index.setLogicalRecord(lis_file)
@@ -351,7 +355,7 @@ def single_lis_file_to_las(path_in: str,
             logical_file.add_index(lis_index)
         if len(logical_file):
             logical_file_entries.append(logical_file)
-
+        logger.info('LIS Logical Files: %s',  logical_file_entries)
         for l, lis_logical_file in enumerate(logical_file_entries):
             try:
                 sum_path_out = write_las_file(path_in, array_reduction, path_out, frame_slice, channels, field_width,

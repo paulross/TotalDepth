@@ -12,6 +12,7 @@ import typing
 from TotalDepth.DAT import DAT_parser
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File, FileIndexer
+from TotalDepth.common import xxd
 from TotalDepth.util import SEGY
 
 
@@ -46,9 +47,6 @@ RE_COMPILED = {
 ASCII_PRINTABLE_BYTES = set(
     # bytes(string.digits + string.ascii_letters + string.punctuation + ' \n\x0d\x0a', 'ascii')
     bytes(string.printable, 'ascii')
-)
-ASCII_VISUAL_BYTES = set(
-    bytes(string.digits + string.ascii_letters + string.punctuation + ' ', 'ascii')
 )
 ASCII_BYTES_LOWER_128 = set(bytes(range(128)))
 RE_LAS_VERSION_LINE = re.compile(br'^\s*VERS\s*\.\s+([\d.]+)\s*:\s*(.+?)?\s*$')
@@ -560,30 +558,5 @@ def binary_file_type_from_path(path: str) -> str:
         return binary_file_type(file_object)
 
 
-def xxd(by: bytes) -> str:
-    """Returns an xxd style string of the bytes. For example:
-    0084 8000 8400 2647 3546 3239 2020 2020 2020 ......&G5F29     """
-    hex_list = []
-    chr_list = []
-    for i in range(len(by)):
-        if by[i] in ASCII_VISUAL_BYTES:
-            chr_list.append(chr(by[i]))
-        else:
-            chr_list.append('.')
-        if i and i % 2 == 0:
-            hex_list.append(' ')
-        hex_list.append('{:02x}'.format(by[i]))
-    return ''.join(hex_list) + ' ' + ''.join(chr_list)
-
-
-def xxd_size(len_bytes: int) -> int:
-    """Returns the length of an xxd style string given the number of bytes."""
-    # Size for B bytes is 2*B + (B//2  -1) + 1 + B
-    ret = 2 * len_bytes + 1 + len_bytes
-    if len_bytes > 2:
-        ret += len_bytes // 2 - 1
-    return ret
-
-
 def format_bytes(by: bytes) -> str:
-    return f'{xxd(by):{xxd_size(len(by))}s}'
+    return f'{xxd.xxd(by):{xxd.xxd_size(len(by))}s}'

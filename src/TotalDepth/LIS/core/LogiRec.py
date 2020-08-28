@@ -965,8 +965,8 @@ class TableRow(object):
             self._cellMnemMap = {}
             for i, c in enumerate(self._blocks):
                 if c.mnem in self._cellMnemMap:
-                    logging.error('Ignoring duplicate mnemonic {!s:s}'
-                                  ' in row {!s:s}'.format(c.mnem, self._blocks[0].mnem))
+                    logging.warning('Ignoring duplicate mnemonic {!s:s}'
+                                    ' in row {!s:s}'.format(c.mnem, self._blocks[0].mnem))
                 else:
                     self._cellMnemMap[c.mnem] = i
         # Could raise KeyError here

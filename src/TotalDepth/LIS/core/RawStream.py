@@ -103,7 +103,7 @@ class RawStream(object):
         try:
             return self._stream.read(theLen)
         except ValueError as err:
-            raise ExceptionRawStreamEOF(str(err))
+            raise ExceptionRawStreamEOF(f'{str(err)} at tell: 0x{self._stream.tell():08x}')
         
     def write(self, theB):
         """Writes theB bytes."""
@@ -120,8 +120,11 @@ class RawStream(object):
         theStruct - A formated instance of struct.Struct()."""
         myBuf = self._stream.read(theStruct.size)
         if len(myBuf) < theStruct.size:
-            raise ExceptionRawStreamEOF('RawStream.readAndUnpack(): EOF; read %s but need %d bytes' \
-                                     % (myBuf, theStruct.size))
+            raise ExceptionRawStreamEOF(
+                f'RawStream.readAndUnpack(): EOF at 0x{self._stream.tell():08x}'
+                f' read {myBuf}'
+                f' but need {theStruct.size} bytes'
+            )
         return theStruct.unpack(myBuf)
 #===============================================================================
 #        try:

@@ -440,8 +440,8 @@ class PhysRecRead(PhysRecBase):
     
     def _raiseOrErrorOnEOF(self, theMsg):
         self.isEOF = True
-        # if not self.keepGoing:
-        logging.error('PhysRec._raiseOnEOF(): {0:s}'.format(theMsg))
+        if not self.keepGoing:
+            logging.error('PhysRec._raiseOnEOF(): {0:s}'.format(theMsg))
         raise ExceptionPhysRecEOF(theMsg)
 
     def _readHead(self):
@@ -513,8 +513,8 @@ class PhysRecRead(PhysRecBase):
             if self._hasChecksum():
                 # TODO: Check data against checksum.
                 self.checksum = self.stream.readAndUnpack(PR_PRT_CHECKSUM_FORMAT)[0]
-        except RawStream.ExceptionRawStreamEOF:
-            self._raiseOrErrorOnEOF('PhysRecRead._readTail() encountered EOF')
+        except RawStream.ExceptionRawStreamEOF as err:
+            self._raiseOrErrorOnEOF(f'PhysRecRead._readTail() encountered EOF {err}')
         if not self.isEOF:
             pad_bytes = self._consume_padding()
             if pad_bytes:
