@@ -836,7 +836,7 @@ def test_FileLogicalData_str():
     fld = File.FileLogicalData(vr, lrsh)
     assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0000 Bytes:  >'
     fld.add_bytes(b'\x00\x00')
-    assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0002 Bytes: 0000 ..>'
+    assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0002 Bytes: 0 0000                                    ..              >'
     fld.seal()
     assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n <LogicalData Len: 0x2 Idx: 0x0>>'
 
