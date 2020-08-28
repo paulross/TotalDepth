@@ -172,9 +172,9 @@ def number_multiprocessing_jobs(parsed_args) -> int:
     """Returns the number of multiprocessing nodes interpreted from the``--jobs=`` option."""
     # TODO: Use this or lose it.
     if multiprocessing_requested(parsed_args):
-        if parsed_args['jobs'] == 0:
+        if parsed_args.jobs == 0:
             return multiprocessing.cpu_count()
-        return parsed_args['jobs']
+        return parsed_args.jobs
     return 1
 
 # ============ END: Multiprocessing ==================
