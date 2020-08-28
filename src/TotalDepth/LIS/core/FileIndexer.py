@@ -118,11 +118,19 @@ class IndexObjBase:
             # 'fileID' : self._fileId,
         }
 
+
 class IndexNone(IndexObjBase):
     """NULL class just takes the LR information and skips to next LR."""
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF)
         theF.skipToNextLr()
+
+    def setLogicalRecord(self, theFile):
+        if self._lr is None:
+            self._seekFile(theFile)
+            self._lr = LogiRec.LrMiscRead(theFile)
+            theFile.skipToNextLr()
+
 
 class IndexUnknownInternalFormat(IndexObjBase):
     """Binary verbatim class for things like encrypted records, images, raw table dumps and so on."""
@@ -282,10 +290,14 @@ class IndexLogPass(IndexObjBase):
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         if self._logPass.totalFrames > 0:
-            return 'Log Pass: {:d} channels, from {:.3f} to {:.3f} ({:s})'.format(
+            if self._logPass.rle.xAxisLastFrame() is not None:
+                last_x_optical = f'{self._logPass.xAxisLastValOptical:.3f}'
+            else:
+                last_x_optical = 'None'
+            return 'Log Pass: {:d} channels, from {:.3f} to {} ({:s})'.format(
                 len(self._logPass.dfsr.dsbBlocks),
                 self._logPass.xAxisFirstValOptical,
-                self._logPass.xAxisLastValOptical,
+                last_x_optical,
                 self._logPass.xAxisUnitsOptical.decode('ascii'),
             )
         return 'Log Pass: {:d} channels, no frames'.format(
