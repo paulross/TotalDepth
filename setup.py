@@ -33,6 +33,8 @@ install_requirements = [
     'lxml',
     'colorama',
     'psutil',
+    'requests',
+    'beautifulsoup4'
 ]
 
 setup_requirements = [
