@@ -74,7 +74,7 @@ class SVGGroup(XmlWrite.Element):
         
         See: http://www.w3.org/TR/2003/REC-SVG11-20030114/struct.html#GElement
         
-        Sadly we can't use \*\*kwargs because of Python restrictions on keyword
+        Sadly we can't use **kwargs because of Python restrictions on keyword
         names. ``stroke-width`` is not a valid keyword
         argument (although ``stroke_width`` would be). So instead we pass in an
         optional dictionary {string : string, ...}

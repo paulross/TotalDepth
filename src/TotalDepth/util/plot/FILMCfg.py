@@ -272,7 +272,8 @@ class PhysFilmCfg(object):
     # 3. Primary track number
     # 4. None or secondary track number
     # b'2   ' and b'3   ' or variants, e.g. b'2\x00\x00\x00' and b'3\x00\x00\x00'
-    RE_TRAC = re.compile(b'^(LH|RH)*([TF])(\d|D)(\d)*\s*$')
+    RE_TRAC = re.compile(rb'^(LH|RH)*([TF])(\d|D)(\d)*\s*$')
+
     def __init__(self, theName, theTracks, theDest, theX):
         """Constructor.
         theName is a hashable.

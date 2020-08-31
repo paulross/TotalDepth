@@ -15,3 +15,9 @@ pytest==5.3.2
 six==1.13.0
 wcwidth==0.1.7
 zipp==0.6.0
+
+TotalDepth~=0.3.2rc0
+beautifulsoup4~=4.9.1
+requests~=2.22.0
+setuptools~=28.8.0
+PyYAML~=5.3.1
