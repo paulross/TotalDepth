@@ -210,7 +210,7 @@ class EngVal(object):
         return NotImplemented
 
     def __imul__(self, other):
-        """Overload self *= other. other must be a real number or a dimensionless EngVal."""
+        """Overload self `*= other`. other must be a real number or a dimensionless EngVal."""
         if isinstance(other, numbers.Real):
             self.value *= other
             return self

@@ -1,3 +1,17 @@
+"""
+This provides Unit conversion information from lookup sources.
+
+The primary source is Schlumberger's Oilfield Services Data Dictionary (OSDD): https://www.apps.slb.com/cmd/units.aspx
+
+The fallback, secondary source, is from our static snapshot of that page which lives in
+``src/TotalDepth/common/data/osdd.json``
+
+When running tests with ``--runslow`` the ``tests.integration.common.test_units.test_slb_units_write_to_json`` test will
+re-populate that static data file.
+
+"""
+import functools
+import json
 import logging
 import os
 import typing
@@ -11,6 +25,7 @@ from TotalDepth.common import lookup_mnemonic
 
 
 class ExceptionUnits(ExceptionTotalDepth):
+    """Base class exception for this module."""
     pass
 
 
@@ -25,10 +40,6 @@ class ExceptionUnitsDimension(ExceptionUnits):
 
 
 logger = logging.getLogger(__file__)
-
-
-def osdd_data_file_path() -> str:
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'osdd.json'))
 
 
 class Unit(typing.NamedTuple):
@@ -61,6 +72,7 @@ class Unit(typing.NamedTuple):
 
 
 def _slb_units_from_parse_tree(parse_tree: BeautifulSoup) -> typing.Dict[str, Unit]:
+    """Parse the OSDD Units page for units."""
     raw_units = lookup_mnemonic._decompose_table_by_header_row(parse_tree, 'main_GridView1')
     ret: typing.Dict[str, Unit] = {}
     for raw_unit in raw_units:
@@ -74,6 +86,18 @@ def _slb_units_from_parse_tree(parse_tree: BeautifulSoup) -> typing.Dict[str, Un
         )
         ret[unit.code] = unit
     return ret
+
+
+def osdd_data_file_path() -> str:
+    """Path to our static snapshot of the OSDD units page."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'osdd.json'))
+
+
+def read_osdd_static_data() -> typing.Dict[str, Unit]:
+    """Read our static snapshot of the OSDD units page."""
+    with open(osdd_data_file_path()) as file:
+        result = {k: Unit(*v) for k, v in json.load(file).items()}
+    return result
 
 
 @lru_cache(maxsize=1)
@@ -123,8 +147,12 @@ def _slb_units() -> typing.Dict[str, Unit]:
             </tr>
     """
     logger.info('Loading all units into the cache')
-    parse_tree = lookup_mnemonic._parse_url_to_beautiful_soup('https://www.apps.slb.com/cmd/units.aspx')
-    ret = _slb_units_from_parse_tree(parse_tree)
+    try:
+        parse_tree = lookup_mnemonic._parse_url_to_beautiful_soup('https://www.apps.slb.com/cmd/units.aspx')
+        ret = _slb_units_from_parse_tree(parse_tree)
+    except lookup_mnemonic.ExceptionLookupMnemonicReadURL as err:
+        logger.info('Falling back to the units static data.')
+        ret = read_osdd_static_data()
     return ret
 
 
@@ -186,6 +214,24 @@ def same_dimension(a: Unit, b: Unit) -> bool:
     return a.dimension == b.dimension
 
 
+def _convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
+    """Converts a value from one unit to another with no error checking.
+
+    Examples::
+
+        Code    Name                Standard Form   Dimension   Scale               Offset
+        DEGC    'degree celsius'    degC            Temperature 1                   -273.15
+        DEGF    'degree fahrenheit' degF            Temperature 0.555555555555556   -459.67
+
+    So conversion from, say DEGC to DEGF is::
+
+        ((value - DEGC.offset) * DEGC.scale) / DEGF.scale + DEGF.offset
+
+        ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
+    """
+    return ((value - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+
+
 def convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
     """Converts a value from one unit to another.
 
@@ -203,5 +249,10 @@ def convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
     """
     if not same_dimension(unit_from, unit_to):
         raise ExceptionUnitsDimension(f'Units {unit_from} and {unit_to} are not the same dimension.')
-    ret = ((value - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+    ret = _convert(value, unit_from, unit_to)
     return ret
+
+
+def convert_function(unit_from: Unit, unit_to: Unit) -> typing.Callable:
+    """Return a partial function to convert from one units to another."""
+    return functools.partial(convert, unit_from=unit_from, unit_to=unit_to)

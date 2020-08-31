@@ -28,13 +28,19 @@ def xxd(by: bytes,
 
         0084 8000 8400 2647 3546 3239 2020 2020 2020 ......&G5F29
 
-    columns - Number of octets in each row.
-    uppercase - use upper case hex letters.
-    ebcdic - show characters in EBCDIC. Default ASCII.
-    binary - binary digit dump. Default hex.
-    length  - stop after <length> octets.
-    offset - add <offset> to the displayed file position.
-    seek - start at <seek> bytes infile offset.
+    ``columns`` - Number of octets in each row.
+
+    ``uppercase`` - use upper case hex letters.
+
+    ``ebcdic`` - show characters in EBCDIC. Default ASCII.
+
+    ``binary`` - binary digit dump. Default hex.
+
+    ``length``  - stop after <length> octets.
+
+    ``offset`` - add <offset> to the displayed file position.
+
+    ``seek`` - start at <seek> bytes infile offset.
     """
     if columns < 1:
         raise ValueError(f'Columns must be +ve not {columns}')
