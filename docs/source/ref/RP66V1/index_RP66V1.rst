@@ -30,9 +30,10 @@ Contents:
     
     IndexPickle
     IndexXML
-    IndexXMLRead
     LogRecIndex
     Scan
     ScanHTML
     SearchFF01
     ToLAS
+
+    util/index_rp66v1_util

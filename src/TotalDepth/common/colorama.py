@@ -24,7 +24,6 @@ import sys
 import typing
 
 import colorama
-# from colorama.Fore import *
 
 colorama.init(autoreset=True)
 

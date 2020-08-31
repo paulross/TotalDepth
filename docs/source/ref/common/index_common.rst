@@ -3,19 +3,23 @@
 
 .. TotalDepth API reference.
 
-Common Package Reference
-==========================
+TotalDepth.common - Common Package Reference
+================================================
 
 Contents:
 
 .. toctree::
     :maxdepth: 2
     
+    cmn_cmd_opts
+    colorama
+    data_table
     LogPass
+    lookup_mnemonic
+    process
     Rle
     Slice
-    cmn_cmd_opts
-    data_table
-    process
     statistics
+    units
     xml
+    xxd

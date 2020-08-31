@@ -418,7 +418,6 @@ def _slb_logging_tool(parse_tree: BeautifulSoup) -> LoggingTool:
 def slb_logging_tool(name: str) -> LoggingTool:
     """
     Logging Tools
-    -------------
 
     Example::
 

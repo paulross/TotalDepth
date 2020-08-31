@@ -14,10 +14,10 @@ def test_slb_units():
 
 
 @pytest.mark.slow
-def test_slb_units_dupe():
-    result = units.slb_units('DEGC')
-    assert result == units.Unit(code='DEGC', name='degree celsius', standard_form='degC',
-                                dimension='Temperature', scale=1.0, offset=-273.15)
+def test_slb_units_raises():
+    with pytest.raises(KeyError) as err:
+        units.slb_units('XXXX')
+    assert err.value.args[0] == 'XXXX'
 
 
 @pytest.mark.slow
@@ -78,3 +78,37 @@ def test_convert(value, unit_from_code, unit_to_code, expected):
     unit_to = units.slb_units(unit_to_code)
     result = units.convert(value, unit_from, unit_to)
     assert math.isclose(result, expected, abs_tol=1e-9)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'value, unit_from_code, unit_to_code, expected',
+    (
+        (1, 'FEET', 'METRE', 0.3048),
+        (0.3048, 'METRE', 'FEET', 1.0),
+        (0.0, 'DEGC', 'DEGF', 32.0),
+        (32.0, 'DEGF', 'DEGC', 0.0),
+    )
+)
+def test_convert_function(value, unit_from_code, unit_to_code, expected):
+    unit_from = units.slb_units(unit_from_code)
+    unit_to = units.slb_units(unit_to_code)
+    convert_function = units.convert_function(unit_from, unit_to)
+    result = convert_function(value)
+    assert math.isclose(result, expected, abs_tol=1e-9)
+
+
+@pytest.mark.slow
+def test_convert_function_fails():
+    unit_from = units.slb_units('FEET')
+    unit_to = units.slb_units('DEGC')
+    convert_function = units.convert_function(unit_from, unit_to)
+    with pytest.raises(units.ExceptionUnitsDimension) as err:
+        convert_function(1.0)
+    assert err.value.args[0] == (
+        "Units"
+        " Unit(code='FEET', name='foot', standard_form='ft', dimension='Length', scale=0.3048, offset=0.0)"
+        " and"
+        " Unit(code='DEGC', name='degree celsius', standard_form='degC', dimension='Temperature', scale=1.0, offset=-273.15)"
+        " are not the same dimension."
+    )

@@ -1,9 +1,12 @@
 """
 Handles RP66V1 units.
 
-Currently we only support a limited and crude set of X axis units.
+There are two approaches:
 
-Full unit coverage is a fairly big job.
+Standard Based Parser
+=====================
+
+Formal but slow and does not appreciate that there are a load of non-standard implementations out there.
 
 References:
     [RP66V1 Appendix b, B.27 Code UNITS: Units Expression]
@@ -87,84 +90,140 @@ References:
 
     BinaryPrefix ::= 'Ki' | 'Mi' | 'Gi' | 'Ti' | 'Pi' | 'Ei' | 'Zi' | 'Yi' .
 
+Something like this::
+
+    import re
+    import typing
+
+
+    # Token = collections.namedtuple('Token', ['type', 'value', 'line', 'column'])
+    class Token(typing.NamedTuple):
+        type: str
+        value: str
+        line: int
+        column:int
+
+
+    def tokenise_units(code: str) -> typing.Sequence[Token]:
+        # See also [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
+        token_specification = [
+            ('BinaryPrefix',   r'Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi'),
+            ('SiPrefix',   r'y|z|a|f|p|n|u|m|c|d|da|h|k|M|G|T|P|E|Z|Y'),
+            ('NonZeroDigit', r'1|2|3|4|5|6|7|8|9'),
+            ('Digit', r'0|1|2|3|4|5|6|7|8|9'),
+            ('GtOneDigit', r'2|3|4|5|6|7|8|9'),
+            ('E', r'E'),
+            ('Letter', r'[A-Za-z]'),
+            ('COMMA', r','),
+            ('AT', r'\@'),
+            ('SpecialAtom', r'%|inH2O|cmH2O'),
+            ('PARENLEFT', r'\('),
+            ('PARENRIGHT', r'\)'),
+            ('MULTIPLY', r'\*'),
+            ('DIVIDE', r'/'),
+            ('BLANK', r' '),
+            ('DOT', r'.'),
+            ('HYPHEN', r'-'),
+            ('NEWLINE',  r'\\n'),
+            ('ID',       r'[A-Za-z]+'),
+            ('MISSMATCH', r'.'),
+        ]
+        tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
+        line_num = 1
+        line_start = 0
+        for mo in re.finditer(tok_regex, code):
+            kind = mo.lastgroup
+            value = mo.group()
+            column = mo.start() - line_start
+            if kind == 'NUMBER':
+                value = float(value) if '.' in value else int(value)
+            # elif kind == 'ID' and value in keywords:
+            #     kind = value
+            # elif kind == 'NEWLINE':
+            #     line_start = mo.end()
+            #     line_num += 1
+            #     continue
+            # elif kind == 'SKIP':
+            #     continue
+            elif kind == 'MISMATCH':
+                raise RuntimeError(f'{value!r} unexpected on line {line_num}')
+            yield Token(kind, value, line_num, column)
+
+    for token in tokenise_units('0.1m/s2'):
+    for token in tokenise_units('627264E5/15499969 m2'):
+        print(token)
+
+
+This is likely to be slow, some pre-processing may help.
+
+Lookup
+======
+
+This uses online or offline data structures.
+The primary source is Schlumberger's Oilfield Services Data Dictionary (OSDD): https://www.apps.slb.com/cmd/units.aspx
+It is quick and largely respects existing implementations.
+
+Other data providers (by PRODUCER-CODE) may have alternate mappings that can be put into
+PRODUCER_CODE_MAPPING_OF_UNIT_CODE.
+
+See src/TotalDepth/RP66V1/util/XMLReadUnits.py for some analysis.
+
 """
+import functools
 import typing
 
+from TotalDepth import ExceptionTotalDepth
+from TotalDepth.common import units
 
-_CONVERSION_FACTORS = {
-    (b'0.1 in', b'm'): 0.3048 / 120,
-    # (b'in', b'm'): 0.3048 / 12,
-    # (b'ft', b'm'): 0.3048,
+
+class ExceptionRP66V1Units(ExceptionTotalDepth):
+    """Base class exception for this module."""
+    pass
+
+
+#: This permits different producer codes to map into Schlumberger's Oilfield Services Data Dictionary (OSDD).
+#: This is just an example, see `src/TotalDepth/RP66V1/util/XMLReadUnits.py` for some analysis of test files.
+PRODUCER_CODE_MAPPING_OF_UNIT_CODE: typing.Dict[int, typing.Dict[bytes, bytes]] = {
+    280: {
+        b'ltrs' : b'dm3',
+        b'sec' : b'SEC',
+        b'gapi' : b'GAPI',
+    },
 }
 
 
-def conversion_factor(units_from: bytes, units_to: bytes) -> typing.Union[int, float]:
-    """Really dumb way to get a conversion factor."""
+def convert(value: float, unit_from: bytes, unit_to: bytes, producer_code: int = 0) -> float:
+    """Converts a value from one unit to another.
+    This uses TotalDepth.common.units with an additional producer code mapping.
+
+    Examples::
+
+        Code    Name                Standard Form   Dimension   Scale               Offset
+        DEGC    'degree celsius'    degC            Temperature 1                   -273.15
+        DEGF    'degree fahrenheit' degF            Temperature 0.555555555555556   -459.67
+
+    So conversion from, say DEGC to DEGF is::
+
+        ((value - DEGC.offset) * DEGC.scale) / DEGF.scale + DEGF.offset
+
+        ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
+    """
+    if producer_code > 0:
+        if unit_from in PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code]:
+            unit_from = PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code][unit_from]
+        if unit_to in PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code]:
+            unit_to = PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code][unit_to]
     try:
-        return _CONVERSION_FACTORS[(units_from, units_to)]
-    except KeyError:
-        return 1 / _CONVERSION_FACTORS[(units_to, units_from)]
+        _unit_from = units.slb_units(unit_from.decode('ascii'))
+        _unit_to = units.slb_units(unit_to.decode('ascii'))
+    except KeyError as err:
+        raise ExceptionRP66V1Units(f'Can not lookup units with error: {err}')
+    try:
+        return units.convert(value, _unit_from, _unit_to)
+    except units.ExceptionUnitsDimension as err:
+        raise ExceptionRP66V1Units(f'Can not convert units with error: {err}')
 
 
-# import collections
-# import re
-# import typing
-#
-#
-# # Token = collections.namedtuple('Token', ['type', 'value', 'line', 'column'])
-# class Token(typing.NamedTuple):
-#     type: str
-#     value: str
-#     line: int
-#     column:int
-#
-#
-# def tokenise_units(code: str) -> typing.Sequence[Token]:
-#     # See also [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]
-#     token_specification = [
-#         ('BinaryPrefix',   r'Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi'),
-#         ('SiPrefix',   r'y|z|a|f|p|n|u|m|c|d|da|h|k|M|G|T|P|E|Z|Y'),
-#         ('NonZeroDigit', r'1|2|3|4|5|6|7|8|9'),
-#         ('Digit', r'0|1|2|3|4|5|6|7|8|9'),
-#         ('GtOneDigit', r'2|3|4|5|6|7|8|9'),
-#         ('E', r'E'),
-#         ('Letter', r'[A-Za-z]'),
-#         ('COMMA', r','),
-#         ('AT', r'\@'),
-#         ('SpecialAtom', r'%|inH2O|cmH2O'),
-#         ('PARENLEFT', r'\('),
-#         ('PARENRIGHT', r'\)'),
-#         ('MULTIPLY', r'\*'),
-#         ('DIVIDE', r'/'),
-#         ('BLANK', r' '),
-#         ('DOT', r'.'),
-#         ('HYPHEN', r'-'),
-#         ('NEWLINE',  r'\n'),
-#         ('ID',       r'[A-Za-z]+'),
-#         ('MISSMATCH', r'.'),
-#     ]
-#     tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
-#     line_num = 1
-#     line_start = 0
-#     for mo in re.finditer(tok_regex, code):
-#         kind = mo.lastgroup
-#         value = mo.group()
-#         column = mo.start() - line_start
-#         if kind == 'NUMBER':
-#             value = float(value) if '.' in value else int(value)
-#         # elif kind == 'ID' and value in keywords:
-#         #     kind = value
-#         # elif kind == 'NEWLINE':
-#         #     line_start = mo.end()
-#         #     line_num += 1
-#         #     continue
-#         # elif kind == 'SKIP':
-#         #     continue
-#         elif kind == 'MISMATCH':
-#             raise RuntimeError(f'{value!r} unexpected on line {line_num}')
-#         yield Token(kind, value, line_num, column)
-#
-# for token in tokenise_units('0.1m/s2'):
-# for token in tokenise_units('627264E5/15499969 m2'):
-#     print(token)
-
+def convert_function(unit_from: units.Unit, unit_to: units.Unit) -> typing.Callable:
+    """Return a partial function to convert from one RP66V1 units to another."""
+    return functools.partial(convert, unit_from=unit_from, unit_to=unit_to)
