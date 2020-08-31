@@ -3,6 +3,11 @@
 Schlumberger Data
 =================
 
+https://www.apps.slb.com/cmd/
+
+"The Curve Mnemonic Dictionary is the publicly accessible version of the Oilfield Services Data Dictionary (OSDD)."
+
+
 Mnemonics
 ---------
 

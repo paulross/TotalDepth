@@ -664,6 +664,95 @@ Producer code attribute units:
 440 us/ft        :            7,500
 440 us/m         :               20
 
+
+2020-08-31 11:28:31,102 - units.py         -  152 -  1801 - (MainThread) - INFO     - Loading all unit standard forms into the cache
+
+Channels:
+Producer code: -1
+  Found code: ['', '%', 'GAPI', 'degC', 'g/cc', 'in', 'm', 'ohmm', 'ppm']
+Missing code: ['UNITS', 'brne', 'deg', 'frac', 'm/hr', 'us/f', 'v/v']
+  Found standard form: ['deg', 'degC', 'in', 'm', 'ppm']
+Missing standard form: ['', '%', 'GAPI', 'UNITS', 'brne', 'frac', 'g/cc', 'm/hr', 'ohmm', 'us/f', 'v/v']
+
+Producer code: 0
+  Found code: ['', 'F3', 'MMHO', 'b/e', 'degC', 'g', 'g/cm3', 'gAPI', 'gauss', 'in', 'lbf', 'm', 'm/min', 'm/s', 'mV', 'ms', 'ohm.m', 'us', 'us/ft']
+Missing code: ['MS10', 'deg', 'flg', 'lb', 'unitless', 'v/v']
+  Found standard form: ['deg', 'degC', 'g', 'g/cm3', 'gAPI', 'in', 'lbf', 'm', 'm/min', 'm/s', 'ms', 'ohm.m', 'us', 'us/ft']
+Missing standard form: ['', 'F3', 'MMHO', 'MS10', 'b/e', 'flg', 'gauss', 'lb', 'mV', 'unitless', 'v/v']
+
+Producer code: 15
+  Found code: ['m', 'ohm.m']
+Missing code: ['deg']
+  Found standard form: ['deg', 'm', 'ohm.m']
+Missing standard form: []
+
+Producer code: 126
+  Found code: ['', 'G', 'MMHO', 'b/e', 'cps', 'degC', 'ft/s', 'g', 'g/cc', 'g/cm3', 'gAPI', 'gauss', 'in', 'lbf', 'm', 'm/h', 'm/min', 'm3', 'mA', 'mD', 'mV', 'min', 'mm', 'mmho/m', 'ms', 'ohm.m', 'psi', 'pu', 't', 'us', 'us/ft']
+Missing code: ['CCPS', 'DC/S', 'GAUSS', 'MPM', 'b/elec', 'deg', 'gapi', 'inch', 'lb', 'microseconds', 'milliVolts', 'unitless', 'v/v']
+  Found standard form: ['deg', 'degC', 'ft/s', 'g', 'g/cm3', 'gAPI', 'in', 'lbf', 'm', 'm/h', 'm/min', 'm3', 'mD', 'min', 'mm', 'ms', 'ohm.m', 'psi', 'pu', 't', 'us', 'us/ft']
+Missing standard form: ['', 'CCPS', 'DC/S', 'G', 'GAUSS', 'MMHO', 'MPM', 'b/e', 'b/elec', 'cps', 'g/cc', 'gapi', 'gauss', 'inch', 'lb', 'mA', 'mV', 'microseconds', 'milliVolts', 'mmho/m', 'unitless', 'v/v']
+
+Producer code: 150
+  Found code: ['', '%', '1/psi', '1/s', '1E-5 Oe', 'K', 'L', 'V', 'b/e', 'bbl', 'cP', 'cm', 'cm3', 'cm3/s', 'cu', 'dAPI', 'dB', 'dB/ft', 'degC', 'degC/min', 'degF', 'degF/min', 'ft', 'ft/s', 'ft3', 'ft3/bbl', 'g/cm3', 'gAPI', 'h', 'in', 'kHz', 'lbf', 'm', 'm/min', 'm3', 'mA', 'mD', 'mS/m', 'mV', 'min', 'mm', 'ms', 'ohm.m', 'pF', 'ppm', 'psi', 'psi/min', 'pu', 's', 'uV', 'us', 'us/ft']
+Missing code: ['1E-2 T/m', 'deg', 'mG']
+  Found standard form: ['1/psi', '1/s', '1E-5 Oe', 'K', 'L', 'V', 'bbl', 'cP', 'cm', 'cm3', 'cm3/s', 'cu', 'dAPI', 'dB', 'dB/ft', 'deg', 'degC', 'degC/min', 'degF', 'degF/min', 'ft', 'ft/s', 'ft3', 'ft3/bbl', 'g/cm3', 'gAPI', 'h', 'in', 'kHz', 'lbf', 'm', 'm/min', 'm3', 'mD', 'mS/m', 'min', 'mm', 'ms', 'ohm.m', 'ppm', 'psi', 'psi/min', 'pu', 's', 'uV', 'us', 'us/ft']
+Missing standard form: ['', '%', '1E-2 T/m', 'b/e', 'mA', 'mG', 'mV', 'pF']
+
+Producer code: 280
+  Found code: ['', '%', '0.1 in', 'C/C', 'DECP', 'G', 'G/CC', 'NONE', 'RPM', 'S', 'SEC', 'V', 'b/e', 'cP', 'cc', 'cps', 'dB', 'degC', 'degF', 'ft', 'ft3', 'g', 'g/cc', 'gAPI', 'in', 'kHz', 'kg/m3', 'lbm', 'm', 'm/mi', 'm/min', 'm3', 'mA', 'mD', 'mS', 'mV', 'min', 'mm', 'mmho', 'mmho/m', 'ms', 'nT', 'ohm.m', 'ohmm', 'pF', 'ppm', 'psi', 'psig', 'pu', 'uS', 'us', 'us/m']
+Missing code: ['0.00', '0.001/ohm', '0.01', '0.01 L', '0.1', '0.1 L/S', '08.3', '1.0/', '1.0/S', '1/PS', '100', '100 pu', 'GOR', 'IN_2', 'Kv/K', 'MILS', 'NESW', 'QLTY', 'api', 'ccps', 'cnts', 'decp', 'deg', 'dist', 'fph', 'fpm', 'g/c3', 'gapi', 'gm/c', 'klbf', 'lb', 'lbs', 'ltrs', 'mG', 'mPsec', 'mSEC', 'md/cp', 'mmo/', 'mmo/m', 'mpm', 'no.', 'ohm.', 'pres', 'psia', 'sec', 'serv', 'time', 'uS/f', 'uS/ft', 'ucts', 'uspf', 'v/v', 'vol', 'x8.3ms', 'z1x1', 'z1x2', 'z1y1', 'z1y2', 'z2x1', 'z2x2', 'z2y1', 'z2y2', 'zoom']
+  Found standard form: ['0.01', '0.1 in', 'S', 'V', 'cP', 'dB', 'deg', 'degC', 'degF', 'ft', 'ft3', 'g', 'gAPI', 'in', 'kHz', 'kg/m3', 'lbm', 'm', 'm/min', 'm3', 'mD', 'mS', 'min', 'mm', 'ms', 'nT', 'ohm.m', 'ppm', 'psi', 'pu', 'uS', 'us', 'us/m']
+Missing standard form: ['', '%', '0.00', '0.001/ohm', '0.01 L', '0.1', '0.1 L/S', '08.3', '1.0/', '1.0/S', '1/PS', '100', '100 pu', 'C/C', 'DECP', 'G', 'G/CC', 'GOR', 'IN_2', 'Kv/K', 'MILS', 'NESW', 'NONE', 'QLTY', 'RPM', 'SEC', 'api', 'b/e', 'cc', 'ccps', 'cnts', 'cps', 'decp', 'dist', 'fph', 'fpm', 'g/c3', 'g/cc', 'gapi', 'gm/c', 'klbf', 'lb', 'lbs', 'ltrs', 'm/mi', 'mA', 'mG', 'mPsec', 'mSEC', 'mV', 'md/cp', 'mmho', 'mmho/m', 'mmo/', 'mmo/m', 'mpm', 'no.', 'ohm.', 'ohmm', 'pF', 'pres', 'psia', 'psig', 'sec', 'serv', 'time', 'uS/f', 'uS/ft', 'ucts', 'uspf', 'v/v', 'vol', 'x8.3ms', 'z1x1', 'z1x2', 'z1y1', 'z1y2', 'z2x1', 'z2x2', 'z2y1', 'z2y2', 'zoom']
+
+Producer code: 440
+  Found code: ['', '%', '----', '0.1 deg/m', '0.1 in', '0.5 ms', '1/min', '1/s', '10 ms', '1000 ft.lbf', '1000 kPa.s/m', '1000 kgf', '1000 lbf', 'A', 'A/m', 'CPS', 'GPa', 'Hz', 'L/min', 'MPa', 'Mrayl', 'N', 'N.m', 'Oe', 'Pa', 'Pa.s', 'S', 'V', 'W', 'b/cm3', 'b/e', 'bar', 'c/min', 'c/s', 'cP', 'cm3', 'cm3/s', 'cu', 'dB', 'dB.mW', 'dB/m', 'deg/100ft', 'deg/30m', 'deg/ft', 'deg/m', 'degC', 'degF', 'ft', 'ft/h', 'ft/min', 'ft/s2', 'ft2', 'ft3', 'ft3/bbl', 'ft3/ft3', 'g', 'g/cm3', 'gAPI', 'gal/min', 'gn', 'h', 'in', 'in2', 'kN.m', 'kPa', 'kPa/h', 'kg/m3', 'kgf/kgf', 'km.daN', 'lbf', 'lbm/gal', 'm', 'm/h', 'm/min', 'm/s', 'm/s2', 'm2', 'm3', 'm3/m', 'm3/m3', 'mA', 'mD', 'mD.ft', 'mD.m', 'mPa.s', 'mS/m', 'mSv/h', 'mT', 'mV', 'mgn', 'min', 'min/ft', 'min/m', 'mm', 'mm2', 'ms', 'nT', 'nW', 'nm', 'ohm', 'ohm.m', 'ppk', 'ppm', 'psi', 'pu', 'rad', 's', 'uA', 'uV', 'us', 'us/ft', 'us/m']
+Missing code: ['1/30 deg/m', '96.487 C/g', 'BAD_UNIT-?', 'deg', 'unitless']
+  Found standard form: ['0.1 deg/m', '0.1 in', '0.5 ms', '1/30 deg/m', '1/min', '1/s', '10 ms', '1000 ft.lbf', '1000 kgf', '1000 lbf', 'A', 'A/m', 'GPa', 'Hz', 'L/min', 'MPa', 'N', 'N.m', 'Oe', 'Pa', 'Pa.s', 'S', 'V', 'b/cm3', 'bar', 'c/min', 'c/s', 'cP', 'cm3', 'cm3/s', 'cu', 'dB', 'dB.mW', 'dB/m', 'deg', 'deg/ft', 'deg/m', 'degC', 'degF', 'ft', 'ft/h', 'ft/min', 'ft/s2', 'ft2', 'ft3', 'ft3/bbl', 'ft3/ft3', 'g', 'g/cm3', 'gAPI', 'gal/min', 'h', 'in', 'in2', 'kN.m', 'kPa', 'kPa/h', 'kg/m3', 'kgf/kgf', 'km.daN', 'lbf', 'lbm/gal', 'm', 'm/h', 'm/min', 'm/s', 'm/s2', 'm2', 'm3', 'm3/m', 'm3/m3', 'mD', 'mD.ft', 'mD.m', 'mPa.s', 'mS/m', 'mSv/h', 'mT', 'min', 'min/ft', 'min/m', 'mm', 'mm2', 'ms', 'nT', 'nW', 'nm', 'ohm', 'ohm.m', 'ppk', 'ppm', 'psi', 'pu', 'rad', 's', 'uA', 'uV', 'us', 'us/ft', 'us/m']
+Missing standard form: ['', '%', '----', '1000 kPa.s/m', '96.487 C/g', 'BAD_UNIT-?', 'CPS', 'Mrayl', 'W', 'b/e', 'deg/100ft', 'deg/30m', 'gn', 'mA', 'mV', 'mgn', 'unitless']
+
+
+Attributes:
+Producer code: -1
+  Found code: ['', 'GAPI', 'degC', 'g/cc', 'in', 'm', 'ohmm', 'ppm']
+Missing code: ['dCpm', 'deg', 'frac', 'lb/g', 'us/f']
+  Found standard form: ['deg', 'degC', 'in', 'm', 'ppm']
+Missing standard form: ['', 'GAPI', 'dCpm', 'frac', 'g/cc', 'lb/g', 'ohmm', 'us/f']
+
+Producer code: 0
+  Found code: ['', 'DEG', 'M', 'deg C', 'degC', 'g/cm3', 'in', 'kg/m', 'lb/ft', 'm', 'mL/30min', 'ohm.m', 'us', 'us/ft']
+Missing code: ['Hrs', 'Metres', 'SEC/QT', 'g/c3', 'inches', 'lb/USg', 'metres', 'ml/30Min', 'ohm-m', 'sec/qt']
+  Found standard form: ['degC', 'g/cm3', 'in', 'kg/m', 'm', 'ohm.m', 'us', 'us/ft']
+Missing standard form: ['', 'DEG', 'Hrs', 'M', 'Metres', 'SEC/QT', 'deg C', 'g/c3', 'inches', 'lb/USg', 'lb/ft', 'mL/30min', 'metres', 'ml/30Min', 'ohm-m', 'sec/qt']
+Producer code: 15
+  Found code: ['', 'M', 'm']
+Missing code: ['Hrs']
+  Found standard form: ['m']
+Missing standard form: ['', 'Hrs', 'M']
+
+Producer code: 126
+  Found code: ['', 'CP', 'FT', 'IN', 'INCHES', 'M', 'METRES', 'degC', 'g/cc', 'g/cm3', 'in', 'm', 'mm', 'ohm.m', 'ohmm', 'us']
+Missing code: ['Celsius', 'DEG C', 'OHM-M', 'grams/cc', 'lbf/ft', 'metres', 'ml/30Min', 'pounds/ft', 'sec/qt']
+  Found standard form: ['degC', 'g/cm3', 'in', 'm', 'mm', 'ohm.m', 'us']
+Missing standard form: ['', 'CP', 'Celsius', 'DEG C', 'FT', 'IN', 'INCHES', 'M', 'METRES', 'OHM-M', 'g/cc', 'grams/cc', 'lbf/ft', 'metres', 'ml/30Min', 'ohmm', 'pounds/ft', 'sec/qt']
+
+Producer code: 150
+  Found code: ['', '%', 'Hz', 'cP', 'cm', 'cm3', 'cm3/s', 'dB/ft', 'degC', 'degC/min', 'degF', 'ft', 'g/cm3', 'gAPI', 'in', 'kHz', 'lbf', 'lbm', 'lbm/ft', 'lbm/gal', 'm', 'm/min', 'mD/cP', 'mS/m', 'mV', 'mm', 'ms', 'ohm.m', 'ppm', 'psi', 'psi/min', 'pu', 's', 'us', 'us/ft']
+Missing code: ['deg']
+  Found standard form: ['Hz', 'cP', 'cm', 'cm3', 'cm3/s', 'dB/ft', 'deg', 'degC', 'degC/min', 'degF', 'ft', 'g/cm3', 'gAPI', 'in', 'kHz', 'lbf', 'lbm', 'lbm/ft', 'lbm/gal', 'm', 'm/min', 'mD/cP', 'mS/m', 'mm', 'ms', 'ohm.m', 'ppm', 'psi', 'psi/min', 'pu', 's', 'us', 'us/ft']
+Missing standard form: ['', '%', 'mV']
+
+Producer code: 280
+  Found code: ['', '%', '0.1 in', 'Hz', 'N', 'cP', 'cps', 'degC', 'degF', 'ft', 'g', 'g/cc', 'gpm', 'in', 'kHz', 'kPaa', 'kg/m3', 'm', 'mV', 'mm', 'ms', 'nT', 'ohmm', 'ppm', 'psi', 'psig', 'rpm', 's', 'us', 'us/m']
+Missing code: ['$/da', 'cptm', 'deg', 'f-p', 'fph', 'hr', 'kgm3', 'klb', 'lbpf', 'lbs', 'm/hr', 'mmo/m', 'mpm', 'mptm', 'pH', 'pa', 'ppg', 'psia', 's/qt', 'sec', 'sg', 'spf', 'spl', 'spqt', 'ucts', 'uspf']
+  Found standard form: ['0.1 in', 'Hz', 'N', 'cP', 'deg', 'degC', 'degF', 'ft', 'g', 'in', 'kHz', 'kg/m3', 'm', 'mm', 'ms', 'nT', 'ppm', 'psi', 's', 'us', 'us/m']
+Missing standard form: ['', '$/da', '%', 'cps', 'cptm', 'f-p', 'fph', 'g/cc', 'gpm', 'hr', 'kPaa', 'kgm3', 'klb', 'lbpf', 'lbs', 'm/hr', 'mV', 'mmo/m', 'mpm', 'mptm', 'ohmm', 'pH', 'pa', 'ppg', 'psia', 'psig', 'rpm', 's/qt', 'sec', 'sg', 'spf', 'spl', 'spqt', 'ucts', 'uspf']
+
+Producer code: 440
+  Found code: ['', '%', '0.01 degF/ft', '0.1 in', '0.5 ms', '1/s', '1000 1/s', '1000 ft.lbf', '1000 kPa.s/m', '1000 kgf', '1000 lbf', '1000 lbm', '1E-4 cm2/s', '1E-5 Oe', '1E-6 1/Pa', '1E-6 1/psi', 'A', 'A/m', 'Hz', 'K', 'Mrayl', 'N', 'Oe', 'V', 'bbl', 'c/min', 'cP', 'cm', 'cm3', 'cm3/h', 'cm3/min', 'cm3/s', 'cu', 'd', 'dAPI', 'dB', 'dB/m', 'degC', 'degC/km', 'degC/m', 'degF', 'degF/ft', 'ft', 'ft/h', 'ft/s2', 'ft3', 'ft3/bbl', 'ft3/ft3', 'g', 'g/cm3', 'gAPI', 'gn', 'h', 'in', 'kHz', 'kN.m', 'kPa', 'kPa/h', 'keV', 'kg', 'kg/m', 'kg/m3', 'kgf/kgf', 'kohm', 'lbf', 'lbf/lbf', 'lbm', 'lbm/ft', 'lbm/gal', 'lbm/min', 'm', 'm/h', 'm/min', 'm/s', 'm/s2', 'm2/g', 'm3', 'm3/m3', 'mA', 'mD', 'mD.ft', 'mD/cP', 'mPa.s', 'mS/m', 'mT', 'mV', 'mV/m', 'mbar', 'mgn', 'min', 'mm', 'mm2', 'mol/kg', 'ms', 'nT', 'nW', 'nm', 'ohm', 'ohm.m', 'ppk', 'ppm', 'psi', 'psi/h', 'pu', 'rad/ft3', 'rad/m3', 's', 's/m3', 'uA', 'uV', 'us', 'us/ft', 'us/m']
+Missing code: ['96.487 C/g', 'deg']
+  Found standard form: ['0.01 degF/ft', '0.1 in', '0.5 ms', '1/s', '1000 1/s', '1000 ft.lbf', '1000 kgf', '1000 lbf', '1000 lbm', '1E-4 cm2/s', '1E-5 Oe', '1E-6 1/Pa', '1E-6 1/psi', 'A', 'A/m', 'Hz', 'K', 'N', 'Oe', 'V', 'bbl', 'c/min', 'cP', 'cm', 'cm3', 'cm3/h', 'cm3/min', 'cm3/s', 'cu', 'd', 'dAPI', 'dB', 'dB/m', 'deg', 'degC', 'degC/km', 'degC/m', 'degF', 'degF/ft', 'ft', 'ft/h', 'ft/s2', 'ft3', 'ft3/bbl', 'ft3/ft3', 'g', 'g/cm3', 'gAPI', 'h', 'in', 'kHz', 'kN.m', 'kPa', 'kPa/h', 'keV', 'kg', 'kg/m', 'kg/m3', 'kgf/kgf', 'kohm', 'lbf', 'lbf/lbf', 'lbm', 'lbm/ft', 'lbm/gal', 'lbm/min', 'm', 'm/h', 'm/min', 'm/s', 'm/s2', 'm2/g', 'm3', 'm3/m3', 'mD', 'mD.ft', 'mD/cP', 'mPa.s', 'mS/m', 'mT', 'mV/m', 'min', 'mm', 'mm2', 'mol/kg', 'ms', 'nT', 'nW', 'nm', 'ohm', 'ohm.m', 'ppk', 'ppm', 'psi', 'psi/h', 'pu', 'rad/ft3', 'rad/m3', 's', 's/m3', 'uA', 'uV', 'us', 'us/ft', 'us/m']
+Missing standard form: ['', '%', '1000 kPa.s/m', '96.487 C/g', 'Mrayl', 'gn', 'mA', 'mV', 'mbar', 'mgn']
+
 """
 import collections
 import contextlib
@@ -675,8 +764,11 @@ import time
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.common import xml, cmn_cmd_opts
+from TotalDepth.common import cmn_cmd_opts
+from TotalDepth.common import units
+from TotalDepth.common import xml
 from TotalDepth.util.DirWalk import dirWalk
+
 
 __author__  = 'Paul Ross'
 __date__    = '2020-08-29'
@@ -787,10 +879,15 @@ def read_a_single_file(xml_path_in: str, accumulator: AggregateCounts) -> FileRe
     """
     logger.info(f'Reading XML index: {xml_path_in}')
     xml_size = os.path.getsize(xml_path_in)
-    parser = xml.etree.XMLParser(recover=True)
     try:
         t_start = time.perf_counter()
-        tree = xml.etree.parse(xml_path_in, parser=parser)
+        try:
+            # Faster but stricter
+            tree = xml.etree.parse(xml_path_in)
+        except xml.etree.XMLSyntaxError as err:
+            logger.info('XML Syntax error %s, trying with recover=True', err)
+            parser = xml.etree.XMLParser(recover=True)
+            tree = xml.etree.parse(xml_path_in, parser=parser)
         root = tree.getroot()
         if root.tag != 'RP66V1FileIndex':
             raise ExceptionTotalDepthRP66V1(f'Root tag is {root.tag}')
@@ -810,9 +907,11 @@ def read_index_dir_or_file(path_in: str, recurse: bool, accumulator: AggregateCo
     ret = {}
     if os.path.isdir(path_in):
         for file_in_out in dirWalk(path_in, theFnMatch='', recursive=recurse, bigFirst=False):
-            ret[file_in_out.filePathIn] = read_a_single_file(file_in_out.filePathIn, accumulator)
+            if os.path.splitext(file_in_out.filePathIn)[1] == '.xml':
+                ret[file_in_out.filePathIn] = read_a_single_file(file_in_out.filePathIn, accumulator)
     else:
-        ret[path_in] = read_a_single_file(path_in, accumulator)
+        if os.path.splitext(path_in)[1] == '.xml':
+            ret[path_in] = read_a_single_file(path_in, accumulator)
     return ret
 
 
@@ -850,6 +949,39 @@ def analyse_result(acc: AggregateCounts, include_parameters: bool, include_chann
         _pprint(acc.prod_code_attribute_units)
 
 
+def _check_against_osdd_units(cntr) -> None:
+    for code in sorted(cntr.keys()):
+        keys = sorted(cntr[code])
+        print(f'Producer code: {code}')
+        unit_codes_found = set()
+        unit_codes_missing = set()
+        for key in keys:
+            if units.has_slb_units(key):
+                unit_codes_found.add(key)
+            else:
+                unit_codes_missing.add(key)
+        print(f'  Found code: {sorted(unit_codes_found)}')
+        print(f'Missing code: {sorted(unit_codes_missing)}')
+        unit_codes_found = set()
+        unit_codes_missing = set()
+        for key in keys:
+            if units.has_slb_standard_form(key):
+                unit_codes_found.add(key)
+            else:
+                unit_codes_missing.add(key)
+        print(f'  Found standard form: {sorted(unit_codes_found)}')
+        print(f'Missing standard form: {sorted(unit_codes_missing)}')
+
+
+def check_against_osdd_units(acc: AggregateCounts) -> None:
+    """Checks which units are in our version of the OSDD."""
+    units.slb_load_units()
+    print('Channels:')
+    _check_against_osdd_units(acc.prod_code_channel_units)
+    print('Attributes:')
+    _check_against_osdd_units(acc.prod_code_attribute_units)
+
+
 def main() -> int:
     description = """usage: %(prog)s [options] file
 Reads a RP66V1 index XML file and all the data."""
@@ -875,6 +1007,7 @@ Reads a RP66V1 index XML file and all the data."""
     )
     clk_exec = time.perf_counter() - clk_start
     analyse_result(accumulator, args.parameters, args.channels)
+    check_against_osdd_units(accumulator)
     size_input = files_processed = files_failed = 0
     try:
         for path in sorted(result.keys()):
@@ -897,7 +1030,7 @@ Reads a RP66V1 index XML file and all the data."""
         ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
     else:
         ms_mb = 0.0
-    print(f'Out of  {len(result):,d} failed {files_failed:,d} files of total size {size_input:,d} input bytes at {ms_mb:.1f} ms/Mb')
+    print(f'Out of {len(result):,d} failed {files_failed:,d} files of total size {size_input:,d} input bytes at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0
 

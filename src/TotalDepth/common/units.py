@@ -1,4 +1,5 @@
 import logging
+import os
 import typing
 from functools import lru_cache
 
@@ -24,6 +25,10 @@ class ExceptionUnitsDimension(ExceptionUnits):
 
 
 logger = logging.getLogger(__file__)
+
+
+def osdd_data_file_path() -> str:
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'osdd.json'))
 
 
 class Unit(typing.NamedTuple):
@@ -73,15 +78,8 @@ def _slb_units_from_parse_tree(parse_tree: BeautifulSoup) -> typing.Dict[str, Un
 
 @lru_cache(maxsize=1)
 def _slb_units() -> typing.Dict[str, Unit]:
-    """Reads and caches the table of units at https://www.apps.slb.com/cmd/units.aspx"""
-    logger.info('Loading all units into the cache')
-    parse_tree = lookup_mnemonic._parse_url_to_beautiful_soup('https://www.apps.slb.com/cmd/units.aspx')
-    ret = _slb_units_from_parse_tree(parse_tree)
-    return ret
+    """Reads and caches the table of units at https://www.apps.slb.com/cmd/units.aspx
 
-
-def slb_units(unit: str) -> Unit:
-    """
     Units
     -----
 
@@ -124,6 +122,24 @@ def slb_units(unit: str) -> Unit:
                 <td>0</td>
             </tr>
     """
+    logger.info('Loading all units into the cache')
+    parse_tree = lookup_mnemonic._parse_url_to_beautiful_soup('https://www.apps.slb.com/cmd/units.aspx')
+    ret = _slb_units_from_parse_tree(parse_tree)
+    return ret
+
+
+def slb_load_units():
+    """Eagerly load the units into the cache."""
+    _slb_units()
+
+
+def has_slb_units(unit_code: str) -> bool:
+    """Returns True if the Schlumberger Unit exists."""
+    return unit_code in _slb_units()
+
+
+def slb_units(unit: str) -> Unit:
+    """Returns the Schlumberger Unit corresponding to the unit code."""
     return _slb_units()[unit]
 
 
@@ -147,10 +163,15 @@ def _slb_unit_standard_form_to_unit_codes() -> typing.Dict[str, typing.List[str]
     return ret
 
 
+def has_slb_standard_form(standard_form: str) -> bool:
+    """Returns True if an entry for the standard form exists."""
+    return standard_form in _slb_unit_standard_form_to_unit_codes()
+
+
 def slb_standard_form_to_unit_code(standard_form: str) -> typing.List[Unit]:
     """
     Returns the unit(s) corresponding to the standard form.
-    Example given 'degC' this returns the Units ['DEGC', 'deg C', 'oC'].
+    Example given 'degC' this returns the Units corresponding to ['DEGC', 'deg C', 'oC'].
     """
     standard_form_to_unit_code_dict = _slb_unit_standard_form_to_unit_codes()
     try:
