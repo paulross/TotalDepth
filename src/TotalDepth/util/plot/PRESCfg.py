@@ -80,7 +80,7 @@ TRAC nomenclature:
 
 ``<LH | RH> T n <m>``
 
-Or as a regex: ``re.compile(r'^(LH|RH)*T(\d)(\d)*\s*$')``
+Or as a regex: ``re.compile(r'^(LH|RH)*T(\\d)(\\d)*\\s*$')``
 
 But this is handled by FILMCfg.
 
