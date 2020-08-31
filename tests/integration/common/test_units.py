@@ -23,8 +23,17 @@ def test_slb_units_dupe():
 @pytest.mark.slow
 def test_slb_units_to_json():
     all_units = units._slb_units()
-    units_json = json.dumps(all_units)
+    units_json = json.dumps(all_units, sort_keys=True, indent=4)
     print(units_json)
+    # assert 0
+
+
+@pytest.mark.slow
+def test_slb_units_write_to_json():
+    all_units = units._slb_units()
+    units_json = json.dumps(all_units, sort_keys=True, indent=4)
+    with open(units.osdd_data_file_path(), 'w') as file:
+        file.write(units_json)
 
 
 @pytest.mark.slow
