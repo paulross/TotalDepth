@@ -209,10 +209,15 @@ def convert(value: float, unit_from: bytes, unit_to: bytes, producer_code: int =
         ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
     """
     if producer_code > 0:
-        if unit_from in PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code]:
-            unit_from = PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code][unit_from]
-        if unit_to in PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code]:
-            unit_to = PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code][unit_to]
+        try:
+            producer_map = PRODUCER_CODE_MAPPING_OF_UNIT_CODE[producer_code]
+        except KeyError as err:
+            raise ExceptionRP66V1Units(f'Can not lookup PRODUCER-CODE with error: {err}')
+        else:
+            if unit_from in producer_map:
+                unit_from = producer_map[unit_from]
+            if unit_to in producer_map:
+                unit_to = producer_map[unit_to]
     try:
         _unit_from = units.slb_units(unit_from.decode('ascii'))
         _unit_to = units.slb_units(unit_to.decode('ascii'))
@@ -224,6 +229,6 @@ def convert(value: float, unit_from: bytes, unit_to: bytes, producer_code: int =
         raise ExceptionRP66V1Units(f'Can not convert units with error: {err}')
 
 
-def convert_function(unit_from: units.Unit, unit_to: units.Unit) -> typing.Callable:
+def convert_function(unit_from: units.Unit, unit_to: units.Unit, producer_code: int = 0) -> typing.Callable:
     """Return a partial function to convert from one RP66V1 units to another."""
-    return functools.partial(convert, unit_from=unit_from, unit_to=unit_to)
+    return functools.partial(convert, unit_from=unit_from, unit_to=unit_to, producer_code=producer_code)

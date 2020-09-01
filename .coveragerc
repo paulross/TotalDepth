@@ -24,7 +24,8 @@ omit =
     src/TotalDepth/RP66V1/SearchFF01.py
     src/TotalDepth/RP66V1/Scan.py
     src/TotalDepth/RP66V1/ScanHTML.py
-    src/TotalDepth/RP66V1/IndexXMLRead.py
+    src/TotalDepth/RP66V1/util/IndexXMLRead.py
+    src/TotalDepth/RP66V1/util/XMLReadUnits.py
 
     # LIS command line tools
     src/TotalDepth/LIS/DumpFrameSet.py
@@ -39,6 +40,9 @@ omit =
     src/TotalDepth/LIS/TableHistogram.py
     # Slightly special case of the synthetic LIS file generator command line tool.
     src/TotalDepth/LIS/core/GenLisFiles.py
+    # Unused code
+    src/TotalDepth/LIS/core/XNAM.py
+
 
     # DAT files
     src/TotalDepth/DAT/ReadDATFiles.py
