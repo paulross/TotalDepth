@@ -19,7 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """TotalDepth - a suite of Petrophysical software."""
 
-__all__ = ['LAS', 'LIS', 'RP66V1', 'util',]
+__all__ = ['LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
 
 __version__ = '0.3.2rc0'
 
@@ -67,6 +67,7 @@ entry_points_console_scripts_dict = {
 ENTRY_POINTS_CONSOLE_SCRIPTS = [
     f'{k}={v}' for k, v in entry_points_console_scripts_dict.items()
 ]
+
 
 class ExceptionTotalDepth(Exception):
     """Specialisation of an exception class for TotalDepth package."""

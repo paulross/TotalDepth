@@ -4,7 +4,7 @@ This provides Unit conversion information from lookup sources.
 The primary source is Schlumberger's Oilfield Services Data Dictionary (OSDD): https://www.apps.slb.com/cmd/units.aspx
 
 The fallback, secondary source, is from our static snapshot of that page which lives in
-``src/TotalDepth/common/data/osdd.json``
+``src/TotalDepth/common/data/osdd_units.json``
 
 When running tests with ``--runslow`` the ``tests.integration.common.test_units.test_slb_units_write_to_json`` test will
 re-populate that static data file.
@@ -90,7 +90,7 @@ def _slb_units_from_parse_tree(parse_tree: BeautifulSoup) -> typing.Dict[str, Un
 
 def osdd_data_file_path() -> str:
     """Path to our static snapshot of the OSDD units page."""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'osdd.json'))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'osdd_units.json'))
 
 
 def read_osdd_static_data() -> typing.Dict[str, Unit]:

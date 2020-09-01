@@ -22,11 +22,11 @@ There is a generalised well log plotting command line tool :ref:`tdplotlogs <Tot
 LIS files may or may not contain an internal plot specification, if so ``tdplotlogs`` can take advantage of that, if not then external plot specifications can be used.
 For files needing an external plot specification there is some background information on plotting in a technical note here :ref:`TotalDepth-tech-plotting-external`.
 
-
-I have some troublesome LIS files
+I'd like to convert LIS files to LAS format files
 ---------------------------------------------------------------------
 
-This is a highly specialised area. Feel free to contact the author for advice.
+There is a tutorial here : :ref:`cmd_line_tools_lis_tdlistolas`.
+
 
 
 Getting the Frame Data as a ``numpy`` Array
@@ -34,3 +34,9 @@ Getting the Frame Data as a ``numpy`` Array
 
 TotalDepth's LIS represents the channel data as Numpy arrays.
 There is a tutorial here on writing code that allows you to access the Numpy channel data directly: :ref:`total_depth.processing_lis_files.numpy_arrays`
+
+
+I have some troublesome LIS files
+---------------------------------------------------------------------
+
+This is a highly specialised area. Feel free to contact the author for advice.

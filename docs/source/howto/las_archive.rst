@@ -17,20 +17,6 @@ LAS files do not contain an internal plot specification.
 For files needing an external plot specification there is some background information on plotting in a technical note here :ref:`TotalDepth-tech-plotting-external`.
 
 
-I have some troublesome LAS files
----------------------------------------------------------------------
-
-There are several problem areas for LAS files:
-
-* The LAS specification is fairly weak and provides a lot of uncertainty. So LAS files from some producers are not readable by some other LAS consumers.
-* LAS is a 'human readable' format, unfortunately that means it is a human writable format as well. This often means that LAS files can be mangled by well meaning, but mistaken intervention.
-* Some LAS file archives have serious errors such as swapping value and description fields. These are not easily fixable by a rule based system.
-
-The advantage, of course, with LAS files is that the can be hacked around with a simple text editor at will.
-This will often fix small local problems.
-   
-Feel free to contact the author for advice.
-
 Getting the Frame Data as a ``numpy`` Array
 ----------------------------------------------------
 
@@ -54,3 +40,18 @@ For example::
             #    (1700.5, 40.7909),
             #    (1701.0, 44.0165),
             #    ...
+
+
+I have some troublesome LAS files
+---------------------------------------------------------------------
+
+There are several problem areas for LAS files:
+
+* The LAS specification is fairly weak and provides a lot of uncertainty. So LAS files from some producers are not readable by some other LAS consumers.
+* LAS is a 'human readable' format, unfortunately that means it is a human writable format as well. This often means that LAS files can be mangled by well meaning, but mistaken intervention.
+* Some LAS file archives have serious errors such as swapping value and description fields. These are not easily fixable by a rule based system.
+
+The advantage, of course, with LAS files is that the can be hacked around with a simple text editor at will.
+This will often fix small local problems.
+   
+Feel free to contact the author for advice.

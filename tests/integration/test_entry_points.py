@@ -123,6 +123,10 @@ def test_tdcopybinfiles_no_paths(args):
 # -------- END: tdcopybinfiles --------
 
 
+# ================ LIS ==================
+LIS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LIS', 'data', 'DILLSON-1_WELL_LOGS_FILE-049.LIS')
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
@@ -134,6 +138,53 @@ def test_tdcopybinfiles_no_paths(args):
 )
 def test_tdlistohtml(tmpdir, args):
     subprocess.check_call(['tdlistohtml',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+
+# -------- tdlistolas --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0',],
+        ['--frame-slice=64',],
+        ['--frame-slice=,,2',],
+        ['--frame-slice=?',],
+        ['--array-reduction=median',],
+        ['--channels=?',],
+        ['--channels=TENS,ETIM',],
+        ['--field-width=32',],
+        ['--float-format=.6f',],
+    )
+)
+def test_tdlistolas_basic_file(tmpdir, args):
+    subprocess.check_call(['tdlistolas',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--frame-slice=?', ],
+        ['-r', '--channels=?', ],
+    )
+)
+def test_tdlistolas_dir(tmpdir, args):
+    subprocess.check_call(['tdlistolas',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+
+
+@pytest.mark.slow
+def test_tdlistolas_gnuplot(tmpdir):
+    subprocess.check_call(['tdlistolas', EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdlistolas --------
+
+#======================== END: LIS ==================
 
 
 #======================== RP66V1 ==================
@@ -365,7 +416,7 @@ def test_tdrp66v1tolas_dir(tmpdir, args):
 def test_tdrp66v1tolas_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1tolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
-# -------- END: tdrp66v1logrecindex --------
+# -------- END: tdrp66v1tolas --------
 
 
 # -------- tdrp66v1scanhtml --------

@@ -36,3 +36,6 @@ Contents:
 	ScanLogiRec
 	ScanPhysRec
 	TableHistogram
+	ToLAS
+	lis_cmn_cmd_opts
+	
