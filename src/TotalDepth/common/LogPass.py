@@ -16,7 +16,7 @@ import typing
 import numpy as np
 
 from TotalDepth import ExceptionTotalDepth
-from TotalDepth.common import data_table, Slice
+from TotalDepth.common import data_table, Slice, AbsentValue
 
 logger = logging.getLogger(__file__)
 
@@ -41,7 +41,7 @@ class ExceptionFrameArray(ExceptionLogPassBase):
     pass
 
 
-DEFAULT_NP_TYPE = np.float64
+DEFAULT_NP_TYPE: np.dtype = np.float64
 
 
 class FrameChannel:
@@ -152,6 +152,10 @@ class FrameChannel:
         for d in self.dimensions:
             products.append(range(d))
         return itertools.product(*products)
+
+    def mask_array(self, absent_value: typing.Union[int, float]) -> None:
+        """Masks the absent values."""
+        self.array = AbsentValue.mask_absent_values(self.array, absent_value)
 
 
 class FrameArray:

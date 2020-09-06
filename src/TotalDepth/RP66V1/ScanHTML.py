@@ -10,8 +10,8 @@ import typing
 
 import colorama
 
+import TotalDepth.common.AbsentValue
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import AbsentValue
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
@@ -23,6 +23,7 @@ from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.common import Slice
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import process
+from TotalDepth.common.ToHTML import HTMLFrameArraySummary, HTMLLogicalFileSummary, HTMLBodySummary, HTMLResult
 from TotalDepth.util import DirWalk
 from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
@@ -37,7 +38,6 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 logger = logging.getLogger(__file__)
-
 
 # Examples:
 # https://jrgraphix.net/r/Unicode/
@@ -204,16 +204,6 @@ def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stre
                          id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
 
 
-class HTMLFrameArraySummary(typing.NamedTuple):
-    ident: bytes
-    num_frames: int
-    channels: typing.Tuple[bytes]
-    x_start: float
-    x_stop: float
-    x_units: bytes
-    href: str
-
-
 def _write_log_pass_content_in_html(
         logical_file: LogicalFile.LogicalFile,
         xhtml_stream: XmlWrite.XhtmlStream,
@@ -362,7 +352,7 @@ def _write_frame_array_in_html(
         ]
         for channel in frame_array.channels:
             # arr = channel.array
-            arr = AbsentValue.mask_absent_values(channel.array)
+            arr = TotalDepth.common.AbsentValue.mask_absent_values(channel.array)
             frame_table.append(
                 [
                     channel.ident.I.decode("ascii"),
@@ -375,7 +365,7 @@ def _write_frame_array_in_html(
                     stringify.stringify_object_by_type(channel.long_name),
                     f'{arr.size:d}',
                     # NOTE: Not the masked array!
-                    f'{AbsentValue.count_of_absent_values(channel.array):d}',
+                    f'{TotalDepth.common.AbsentValue.count_of_absent_values(channel.array):d}',
                     f'{arr.min():.3f}',
                     f'{arr.mean():.3f}',
                     f'{arr.std():.3f}',
@@ -455,30 +445,6 @@ def html_write_file_info(path_in: str, xhtml_stream: XmlWrite.XhtmlStream) -> No
         ['File size:', f'{os.path.getsize(path_in):,d}'],
     ]
     html_write_table(table, xhtml_stream, class_style='monospace')
-
-
-class HTMLLogicalFileSummary(typing.NamedTuple):
-    """Contains the result of a Logical File as HTML."""
-    eflr_types: typing.Tuple[bytes]
-    frame_arrays: typing.Tuple[HTMLFrameArraySummary]
-
-
-class HTMLBodySummary(typing.NamedTuple):
-    """Contains the result of processing the body of the HTML."""
-    link_text: str
-    logical_files: typing.Tuple[HTMLLogicalFileSummary]
-
-
-class HTMLResult(typing.NamedTuple):
-    """Contains the result of processing a RP66V1 file to HTML."""
-    path_input: str
-    path_output: str
-    size_input: int
-    size_output: int
-    time: float
-    exception: bool
-    ignored: bool
-    html_summary: typing.Union[HTMLBodySummary, None]
 
 
 def html_write_body(
@@ -618,6 +584,7 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                 file_path_out,
                 os.path.getsize(path_in),
                 len_scan_output,
+                binary_file_type,
                 time.perf_counter() - t_start,
                 False,
                 False,
@@ -625,13 +592,15 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
             )
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
+                                None)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
+                                None)
     else:
         logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
-        result = HTMLResult(path_in, file_path_out, 0, 0, 0.0, False, True, None)
+        result = HTMLResult(path_in, file_path_out, 0, 0, binary_file_type, 0.0, False, True, None)
     return result
 
 
