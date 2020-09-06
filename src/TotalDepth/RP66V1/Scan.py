@@ -23,6 +23,7 @@ import typing
 
 import colorama
 
+import TotalDepth.common.AbsentValue
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import AbsentValue
 from TotalDepth.RP66V1.core import File
@@ -499,11 +500,11 @@ def _scan_log_pass_content(
                 for channel in frame_array.channels:
                     channel_ident = channel.ident
                     # arr = channel.array
-                    arr = AbsentValue.mask_absent_values(channel.array)
+                    arr = TotalDepth.common.AbsentValue.mask_absent_values(channel.array)
                     frame_table.append(
                         [channel_ident, arr.size,
                          # NOTE: Not the masked array!
-                         AbsentValue.count_of_absent_values(channel.array),
+                         TotalDepth.common.AbsentValue.count_of_absent_values(channel.array),
                          arr.min(), arr.mean(),
                          arr.std(), arr.max(), channel.units, arr.dtype]
                     )
