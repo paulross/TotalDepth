@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation
+# Copyright (C) 1999-2020 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
+"""
+Provides means of summarizing a numpy ndarray.
+"""
+import functools
+
+import numpy as np
+import typing
+
+
+class ArraySummary(typing.NamedTuple):
+    len: int
+    shape: typing.Tuple[int, ...]
+    count: int
+    min: float
+    max: float
+    mean: float
+    std: float
+    median: float
+    count_eq: int
+    count_dec: int
+    count_inc: int
+    activity: float
+
+
+def count_eq(array: np.array, flatten: bool = True) -> int:
+    """Count where adjacent values are equal."""
+    if flatten:
+        array = array.flatten()
+    result = 0
+    if len(array) > 1:
+        result = np.count_nonzero(array[1:] == array[:-1])
+    return result
+
+
+def count_inc(array: np.array, flatten: bool = True) -> int:
+    """Count where adjacent values are increasing."""
+    if flatten:
+        array = array.flatten()
+    result = 0
+    if len(array) > 1:
+        result = np.count_nonzero(array[1:] > array[:-1])
+    return result
+
+
+def count_dec(array: np.array, flatten: bool = True) -> int:
+    """Count where adjacent values are decreasing."""
+    if flatten:
+        array = array.flatten()
+    result = 0
+    if len(array) > 1:
+        result = np.count_nonzero(array[1:] < array[:-1])
+    return result
+
+
+def activity(array: np.array, flatten: bool = True) -> float:
+    """Returns array activity."""
+    if flatten:
+        array = array.flatten()
+    result = 0.0
+    if len(array) > 1:
+        log2_array = np.log2(array)
+        diff = log2_array[1:] - log2_array[:-1]
+        result = np.abs(diff).mean()
+    return result
+
+
+def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
+    if flatten:
+        array = array.flatten()
+    len_array = functools.reduce(lambda x, y: x * y, array.shape, 1)
+    count_of_values = len_array
+    if hasattr(array, 'mask'):
+        count_of_values -= np.count_nonzero(array.mask)
+    if count_of_values > 1:
+        result = ArraySummary(
+            len_array,
+            array.shape,
+            count_of_values,
+            array.min(),
+            array.max(),
+            array.mean(),
+            array.std(),
+            np.median(array),
+            count_eq(array),
+            count_dec(array),
+            count_inc(array),
+            activity(array),
+        )
+        return result
