@@ -52,6 +52,10 @@ ASCII_BYTES_LOWER_128 = set(bytes(range(128)))
 RE_LAS_VERSION_LINE = re.compile(br'^\s*VERS\s*\.\s+([\d.]+)\s*:\s*(.+?)?\s*$')
 
 
+#: LAS binary file types we support
+LAS_BINARY_FILE_TYPES = {'LAS1.2', 'LAS2.0'}
+
+
 def _las(fobj: typing.BinaryIO, version_prefix: bytes) -> str:
     """Returns non-empty string if this is a LAS file of specified version(s), empty string otherwise."""
     fobj.seek(0)
