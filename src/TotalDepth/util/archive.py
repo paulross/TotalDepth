@@ -278,11 +278,11 @@ def analyse_archive(files: typing.List[FileBase],
 
     uncatalogued_files = [file for file in  files if file.bin_type == ""]
     print(f'Uncatalogued files: [{len(uncatalogued_files)}]')
-    print('File extension count:')
+    print('File extension count of uncatalogued files:')
     file_ext_counter = collections.Counter([os.path.splitext(file.path)[1] for file in uncatalogued_files])
     for k in sorted(file_ext_counter.keys()):
         print(f'{k:12} : {file_ext_counter[k]:6d}')
-    print('File size and path:')
+    print('File size and path of uncatalogued files:')
     for file in uncatalogued_files:
         print(f'{file.size:12,d} {file.path[common_prefix_len:]}')
 
