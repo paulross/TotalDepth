@@ -248,7 +248,12 @@ class FrameArray:
     def mask_array(self, absent_value: typing.Union[int, float]) -> None:
         """Mask the absent values in all but the index channels."""
         for i in range(1, len(self)):
-            self.channels[i].mask_array(absent_value)
+            if np.issubdtype(self.channels[i].array.dtype, np.floating):
+                self.channels[i].mask_array(float(absent_value))
+            elif np.issubdtype(self.channels[i].array.dtype, np.integer):
+                self.channels[i].mask_array(int(absent_value))
+            elif np.issubdtype(self.channels[i].array.dtype, np.dtype(object).type):
+                self.channels[i].mask_array(None)
 
 
 class LogPass:

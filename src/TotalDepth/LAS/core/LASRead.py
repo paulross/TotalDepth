@@ -39,10 +39,13 @@ M: 114
 S:  29
 Total 772 or about 3.2%
 """
+import datetime
 import logging
 import os
 import re
 import typing
+
+import numpy as np
 
 from TotalDepth.LAS import ExceptionTotalDepthLAS
 from TotalDepth.LAS.core import LASConstants
@@ -337,6 +340,9 @@ class LASSection:
 
 class LASSectionArray(LASSection):
     """Contains data on an array section."""
+    # FIXME: Locale specific %b.
+    DATE_FORMATS_SUPPORTED = ('%d-%b-%y',)
+    TIME_FORMATS_SUPPORTED = ('%H:%M:%S',)
 
     def __init__(self, section_type: str, wrap: bool, curve_section: LASSection,
                  null: typing.Union[int, float] = -999.25):
@@ -357,7 +363,12 @@ class LASSectionArray(LASSection):
         self.frame_array = LogPass.FrameArray(self.type, self.type)
         try:
             for mnemonic, units in self._mnemUnitS:
-                channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), LogPass.DEFAULT_NP_TYPE)
+                if mnemonic == 'DATE' and units == 'D':
+                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
+                elif mnemonic == 'TIME' and units == 'HHMMSS':
+                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
+                else:
+                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), LogPass.DEFAULT_NP_TYPE)
                 self.frame_array.append(channel)
         except LogPass.ExceptionLogPassBase as err:
             raise ExceptionLASReadSection(str(err)) from err
@@ -376,19 +387,47 @@ class LASSectionArray(LASSection):
             self.members.append(self._unwrapBuf)
             self._unwrapBuf = []
 
+    def _convert_value(self, channel: LogPass.FrameChannel, value: str, line_number: int) -> typing.Any:
+        """Convert a value to a float, date or time. If the conversion is not successful then self._null, None, None are
+        returned respectively."""
+        if channel.ident == 'DATE' and channel.units == 'D':
+            for dt_format in self.DATE_FORMATS_SUPPORTED:
+                try:
+                    return datetime.datetime.strptime(value, dt_format).date()
+                except ValueError:
+                    pass
+            logger.warning(
+                'LASSectionArray._convert_value(): line [%d], can not convert "%s" to date, returning None.',
+                    line_number, value
+            )
+            return None
+        elif channel.ident == 'TIME' and channel.units == 'HHMMSS':
+            for dt_format in self.TIME_FORMATS_SUPPORTED:
+                try:
+                    return datetime.datetime.strptime(value, dt_format).time()
+                except ValueError:
+                    pass
+            logger.warning(
+                'LASSectionArray._convert_value(): line [%d], can not convert "%s" to time, returning None.',
+                    line_number, value
+            )
+            return None
+        else:
+            try:
+                return float(value)
+            except ValueError:
+                logger.warning(
+                    'LASSectionArray._convert_value(): line [%d], can not convert "%s" to float, returning %s.',
+                        line_number, value, self._null
+                )
+            return self._null
+
     def add_member_line(self, line_number: int, line: str) -> None:
         """Process a line in an array section."""
         # Convert to float inserting null where that can not be done
         values = []
-        for v in line.strip().split():
-            try:
-                values.append(float(v))
-            except ValueError:
-                logger.warning(
-                    'LASSectionArray.addMemberLine(): line [{:d}], can not convert "{:s}" to float.'.format(
-                        line_number, v)
-                )
-                values.append(self._null)
+        for channel_index, value in enumerate(line.strip().split()):
+            values.append(self._convert_value(self.frame_array[channel_index], value, line_number))
         # Add it to the members
         if len(values) > 0:
             if not self._wrap:
@@ -451,7 +490,9 @@ class LASSectionArray(LASSection):
                         for c, channel_value in enumerate(member_frame):
                             self.frame_array[c][f] = channel_value
                     # Free up temporary members
-                    self.members = []
+                    for member in self.members:
+                        member.clear()
+                    self.members.clear()
                     # Mask the array
                     self.frame_array.mask_array(self._null)
                 except LogPass.ExceptionLogPassBase as err:
@@ -749,7 +790,8 @@ class LASRead(LASBase):
 
     def _add_members_to_section(self, gen, section: LASSection):
         for i, line in gen:
-            logger.debug('line %d "%s"', i, line)
+            if DEBUG_LINE_BY_LINE:
+                logger.debug('line %d "%s"', i, line)
             line = line.strip()
             # Bail out if start of new section
             if line.startswith('~'):
