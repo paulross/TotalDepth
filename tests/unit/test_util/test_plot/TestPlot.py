@@ -4194,8 +4194,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
             myPlot = Plot.PlotReadXML(lgFormat)
             myPlot.plotLogPassLAS(
                 theLasFile,
-                theLasFile.xAxisStart,
-                theLasFile.xAxisStop,
+                theLasFile.x_axis_start,
+                theLasFile.x_axis_stop,
                 lgFormat,
                 fp,
                 frameStep=1,

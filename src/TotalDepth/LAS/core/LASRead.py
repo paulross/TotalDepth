@@ -21,99 +21,134 @@
 
 Created on Jan 11, 2012
 
+Research
+========
+
+Finding occurrences of ``STEP``::
+
+    $ grep -rIh 'STEP\.' LAS_1.2_2.0/ | sed -e 's/^[[:space:]]*//' | tr -s ' ' | sort -b | uniq
+
+From that file occurrences of ``STEP`` of zero in around 24,000 files:
+
+    $ grep -rI 'STEP\.' LAS_1.2_2.0/ | sed -e 's/^[[:space:]]*//' | tr -s ' ' | grep 'STEP\.F 0\.00' | wc -l
+    $ grep -rI 'STEP\.' LAS_1.2_2.0/ | sed -e 's/^[[:space:]]*//' | tr -s ' ' | grep 'STEP\.M 0\.00' | wc -l
+    $ grep -rI 'STEP\.' LAS_1.2_2.0/ | sed -e 's/^[[:space:]]*//' | tr -s ' ' | grep 'STEP\.S 0\.00' | wc -l
+
+F: 629
+M: 114
+S:  29
+Total 772 or about 3.2%
 """
-
-__author__  = 'Paul Ross'
-__date__    = '2012-01-11'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
-
 import logging
 import os
 import re
-import collections
-from TotalDepth.LIS.core import EngVal
+import typing
 
 from TotalDepth.LAS import ExceptionTotalDepthLAS
 from TotalDepth.LAS.core import LASConstants
+from TotalDepth.LIS.core import EngVal
+from TotalDepth.common import LogPass
+
+__author__ = 'Paul Ross'
+__date__ = '2012-01-11'
+__version__ = '0.1.0'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
+
+
+logger = logging.getLogger(__file__)
+
 
 class ExceptionLASRead(ExceptionTotalDepthLAS):
     """Specialisation of exception for LASRead."""
     pass
 
+
 class ExceptionLASReadSection(ExceptionLASRead):
     """Specialisation of exception for LASRead when handling sections."""
     pass
+
 
 class ExceptionLASReadSectionArray(ExceptionLASReadSection):
     """Specialisation of exception for LASRead when handling array section."""
     pass
 
+
 class ExceptionLASReadData(ExceptionLASRead):
     """Specialisation of exception for LASRead when reading data."""
     pass
 
+
 class ExceptionLASKeyError(ExceptionLASRead):
     """Equivalent to KeyError when looking stuff up."""
     pass
+
 
 #: LAS file extension
 LAS_FILE_EXT = '.las'
 #: LAS lower case file extension
 LAS_FILE_EXT_LOWER = LAS_FILE_EXT.lower()
 
-def hasLASExtension(fp):
+
+def has_las_extension(fp):
     """Returns True if the file extansion is a LAS one."""
     return os.path.splitext(os.path.normcase(fp))[1] == LAS_FILE_EXT
+
 
 #: Regex to match a comment
 RE_COMMENT = re.compile(r'^\s*#(.*)$')
 
-#: logging.debug call here can add about 50% of the processing time
+
+#: logger.debug call here can add about 50% of the processing time
 DEBUG_LINE_BY_LINE = False
 
-def genLines(f):
+
+def generate_lines(text_file):
     """Given an file-like object this generates non-blank, non-comment lines.
     It's a co-routine so can accept a line to put back.
     """
-    n = 0
+    line_number = 1
     while 1:
-        l = f.readline()
-        n += 1
-        # logging.debug call here can add about 50% of the processing time
-        if DEBUG_LINE_BY_LINE: logging.debug('[{:08d}]: {:s}'.format(n, l.replace('\n', '\\n')))
-        if len(l) == 0:
+        line = text_file.readline()
+        # logger.debug call here can add about 50% of the processing time
+        if DEBUG_LINE_BY_LINE:
+            logger.debug('[{:08d}]: {:s}'.format(line_number, line.replace('\n', '\\n')))
+        if len(line) == 0:
             break
-        if l != '\n' and not RE_COMMENT.match(l):
-            l = yield n, l
-            if l is not None:
+        if line != '\n' and not RE_COMMENT.match(line):
+            if line.find('#') != -1:
+                line = line[:line.find('#')] + '\n'
+            line = yield line_number, line
+            if line is not None:
                 # Recycle it
                 yield None
-                yield n, l
+                yield line_number, line
+        line_number += 1
+
 
 #: All section identifiers
-SECT_TYPES                  = 'VWCPOA'
+SECT_TYPES = 'VWCPOA'
 #: Section with data lines
-SECT_TYPES_WITH_DATA_LINES  = 'VWCP'
+SECT_TYPES_WITH_DATA_LINES = 'VWCP'
 #: Section with index value in column 0
-SECT_TYPES_WITH_INDEX       = 'VWCPA'
+SECT_TYPES_WITH_INDEX = 'VWCPA'
 
 #: Regex to match a section heasd
 RE_SECT_HEAD = re.compile(r'^~([{:s}])(.+)*$'.format(SECT_TYPES))
 
 #: Map of section identifiers to description
 SECT_DESCRIPTION_MAP = {
-    'V' : "Version Information Section",
-    'W' : "Well Information Section",
-    'C' : "Curve Information Section",
-    'P' : "Parameter Information Section",
-    'O' : "Other Information Section",
-    'A' : "ASCII Log Data",
+    'V': "Version Information Section",
+    'W': "Well Information Section",
+    'C': "Curve Information Section",
+    'P': "Parameter Information Section",
+    'O': "Other Information Section",
+    'A': "ASCII Log Data",
 }
 
 #: The 'MENM' field, no spaces, dots or colons.
 #: ONE group
-#: TODO: Allow spaces. For example "SWU -CPX.V/V          00 000 00 00:  75  Unlimited Formation Water Saturation (Complex Litho Model)"
+#: Perhaps Allow spaces in mnemonic. For example:
+#: "SWU -CPX.V/V          00 000 00 00:  75  Unlimited Formation Water Saturation (Complex Litho Model)"
 #: This is specifically excluded by LAS 2.0 (Page 4, 2017-01) but it happens.
 #: Also: "Spaces are permitted in front of the mnemonic and between the end of the mnemonic and the dot."
 RE_LINE_FIELD_0 = re.compile(r'^\s*([^ .:]+)\s*$')
@@ -124,138 +159,147 @@ RE_LINE_FIELD_0 = re.compile(r'^\s*([^ .:]+)\s*$')
 #: Note: Group 2 may have leading and trailing spaces
 #: TWO groups 
 RE_LINE_FIELD_1 = re.compile(r'^([^ :]+)*(.+)*$')
-#: Data field 2 is after the last ':'
-#: THREE groups
-RE_LINE_FIELD_2 = re.compile(r"""
-    ^          # Start of line
-    ([^{|]+)*  # Description, anything but '{' or '|', needs strip()
-    ({.+?})*   # Optional format {...}
-    \s*        # Optional space
-    [|]*       # Optional '|'
-    (.+)*      # Optional reference, needs strip()
-    $""", re.VERBOSE)
 
-#: Captures the 6 fields: mnem unit valu desc format assoc
-SectLine = collections.namedtuple('SectLine', 'mnem unit valu desc format assoc')
+
+def string_to_value(value: typing.Any) -> typing.Any:
+    """Convert a value to an integer, float, bool or string. If a string it is stripped."""
+    if value is not None:
+        try:
+            return int(value)
+        except ValueError:
+            pass
+        try:
+            return float(value)
+        except ValueError:
+            pass
+        if isinstance(value, str):
+            value = value.strip()
+            if value.lower() == "yes":
+                return True
+            elif value.lower() == "no":
+                return False
+            return value
+    return ''
+
+
+class SectLine(typing.NamedTuple):
+    """Captures the four fields from a single line: mnem unit valu desc"""
+    mnem: str
+    unit: str
+    valu: typing.Any
+    desc: str
+
+
+def line_to_sect_line(line: str) -> SectLine:
+    # A hybrid approach where we split the line then apply individual regex's
+    dot_index = line.find('.')
+    if dot_index == -1:
+        raise ExceptionLASReadSection(f'Can not find \'.\' in line: {line}')
+    colon_index = line.rfind(':')
+    if colon_index == -1:
+        raise ExceptionLASReadSection(f'Can not find \':\' in line: {line}')
+    m0 = RE_LINE_FIELD_0.match(line[:dot_index])
+    m1 = RE_LINE_FIELD_1.match(line[dot_index + 1:colon_index])
+    description = line[colon_index + 1:]
+    if m0 is None or m1 is None:
+        # Use !s prefix as any of m0, m1, m2 can be None.
+        raise ExceptionLASReadSection('Can not decompose line "{:s}" with results: {!s:s}, {!s:s}'.format(
+                line.replace('\n', '\\n'), m0, m1
+            )
+        )
+    return SectLine(*[string_to_value(g) for g in (m0.groups() + m1.groups() + (description,))])
 
 
 class LASSection:
     """Contains data on a section."""
-    RULES_MAP = {
-        'V' : [
+    #: Contains the allowable values of certain mnemonics in a section.
+    #: The appropriate section must have these mnemonics in the given order and the values of those mnemonics must be
+    #: one of the given values.
+    SECTION_MNEMONIC_ORDER_AND_VALUES = {
+        'V': (
                ('VERS', (1.2, 2.0)),
                ('WRAP', (True, False)),
-            ],
+            ),
     }
-    def __init__(self, sectType):
-        assert(sectType in SECT_TYPES)
-        self.type = sectType
+
+    def __init__(self, section_type: str):
+        # assert(section_type in SECT_TYPES)
+        self.type = section_type
         # One entry per line
-        self._members = []
+        self.members: typing.List[SectLine] = []
         # {MNEM : ordinal, ...} for those sections that have it
         # Populated by finalise()
-        self._indexMap = {}
+        self.mnemonic_index_map: typing.Dict[typing.Union[str, float], int] = {}
         
     def __str__(self):
-        return 'LASSection: "{:s}" with {:d} lines'.format(self.type, len(self._members))
+        return 'LASSection: "{:s}" with {:d} lines'.format(self.type, len(self.members))
     
     def __len__(self):
         """Number of members."""
-        return len(self._members)
+        return len(self.members)
     
-    def __contains__(self, theMnem):
+    def __contains__(self, mnemonic: str):
         """Membership test."""
-        return theMnem in self._indexMap
+        return mnemonic in self.mnemonic_index_map
     
-    def addMemberLine(self, i, l):
-        """Given a line this decomposes it to its _members. i is the position
-        of the line l in the file."""
-        if self.type in SECT_TYPES_WITH_DATA_LINES:
-            # A hybrid approach where we split the line then apply individual regex's
-            dIdx = l.find('.')
-            cIdx = l.rfind(':')
-            if dIdx != -1 and cIdx != -1:
-                m0 = RE_LINE_FIELD_0.match(l[:dIdx])
-                m1 = RE_LINE_FIELD_1.match(l[dIdx + 1:cIdx])
-                m2 = RE_LINE_FIELD_2.match(l[cIdx + 1:])
-                if m0 is None or m1 is None or m2 is None:
-                    # Use !s prefix as any of m0, m1, m2 can be None.
-                    raise ExceptionLASReadSection(
-                        'Can not decompose line [{:d}]: "{:s}" with results: '
-                        '{!s:s}, {!s:s}, {!s:s}'.format(
-                            i, l.replace('\n', '\\n'), m0, m1, m2
-                        )
-                    )
-                else:
-                    self._members.append(
-                        SectLine(
-                            *[self._val(g) for g in (m0.groups() + m1.groups() + m2.groups())]
-                        )
-                    )
-        else:
-            self._members.append(l.strip())
-    
-    def _val(self, v):
-        """Convert a value to an integer, float, bool or string. If a string it is stripped."""
-        if v is not None:
-            try:
-                return int(v)
-            except ValueError:
-                pass
-            try:
-                return float(v)
-            except ValueError:
-                pass
-            if isinstance(v, str):
-                v = v.strip()
-                if v in ("YES", "yes", "Yes"):
-                    return True
-                elif v in ("NO", "no", "No"):
-                    return False
-                return v
-        # Returns None
-        
-    def _createIndex(self):
+    def add_member_line(self, line_number, line):
+        """Given a line this decomposes it to its _members. line_number is the position of the line l in the file
+        starting at 1.
+        Empty lines are ignored."""
+        if len(line):
+            if self.type in SECT_TYPES_WITH_DATA_LINES:
+                try:
+                    self.members.append(line_to_sect_line(line))
+                except ExceptionLASReadSection as err:
+                    raise ExceptionLASReadSection(f'Can not add member, line {line_number} error: {err}') from err
+            else:
+                self.members.append(line.strip())
+
+    def create_index(self):
         """Creates an index of {key : ordinal, ...}.
         key is the first object in each member. This will be a MNEM for most
         sections but a depth as a float for an array section."""
-        self._indexMap = {}
+        self.mnemonic_index_map: typing.Dict[typing.Union[str, float], int] = {}
         if self.type in SECT_TYPES_WITH_INDEX:
-            for m, memb in enumerate(self._members):
+            for m, memb in enumerate(self.members):
                 # Note we use memb[0] so this works for SectLine and lists
                 k = memb[0]
-                if k in self._indexMap:
-                    logging.warning('Ignoring duplicate menmonic "{:s}", was {:s} dupe is {:s}'.format(
+                if k in self.mnemonic_index_map:
+                    logger.warning('Ignoring duplicate menmonic "{:s}", was {:s} dupe is {:s}'.format(
                         str(k),
-                        str(self._members[self._indexMap[k]]),
+                        str(self.members[self.mnemonic_index_map[k]]),
                         str(memb),
                         )
                     )
                 else:
-                    self._indexMap[k] = m
-#        print(self._indexMap)
-        
+                    self.mnemonic_index_map[k] = m
+
     def finalise(self):
         """Finalisation of section, this updates the internal representation."""
-        self._createIndex()
-        if self.type == 'V':
-            myR = self.RULES_MAP[self.type]
-            if len(self._members) != len(myR):
-#                raise ExceptionLASReadSection('Section "{:s}" must have {:d} entries not {:d}.'.format(self.type, len(myR), len(self)))
-                logging.warning('Section "{:s}" must have {:d} entries not {:d}.'.format(self.type, len(myR), len(self)))
-            for i, (m, rng) in enumerate(myR):
-                if i >= len(self._members):
-                    # This will be reported as a length miss-match above
-                    break
-                if self._members[i].mnem != m:
-                    raise ExceptionLASReadSection('Section "{:s}" must have entry[{:d}]: "{:s}".'.format(self.type, i, m))
-                if self._members[i].valu not in rng:
+        self.create_index()
+        # Apply static rules if appropriate.
+        if self.type in self.SECTION_MNEMONIC_ORDER_AND_VALUES:
+            rules_list = self.SECTION_MNEMONIC_ORDER_AND_VALUES[self.type]
+            # if len(self.members) != len(rules_list):
+            #     logger.warning(
+            #         'Section "%s" must have %d entries not %d.', self.type, len(rules_list), len(self)
+            #     )
+            for i, (m, rng) in enumerate(rules_list):
+                if i >= len(self.members):
+                    raise ExceptionLASReadSection(
+                        'Section "{:s}" must have {:d} entries not {:d}.'.format(self.type, len(rules_list), len(self))
+                    )
+                if self.members[i].mnem != m:
+                    raise ExceptionLASReadSection(
+                        'Section "{:s}" must have entry[{:d}]: "{:s}".'.format(self.type, i, m)
+                    )
+                if self.members[i].valu not in rng:
                     raise ExceptionLASReadSection(
                         'Section "{:s}" must have value for "{:s}" converted to {:s} from "{:s}".'.format(
                             self.type,
                             m,
                             str(rng),
-                            str(self._members[i].valu),
+                            str(self.members[i].valu),
                         )
                     )
         # TODO: Essential MNEM in other sections
@@ -264,182 +308,209 @@ class LASSection:
     def __getitem__(self, key) -> SectLine:
         """Returns an entry, key can be int or str."""
         if isinstance(key, int):
-            return self._members[key]
+            return self.members[key]
         if isinstance(key, str):
-            return self._members[self._indexMap[key]]
+            return self.members[self.mnemonic_index_map[key]]
         raise TypeError('{:s} object is not subscriptable with {:s}'.format(type(self), type(key)))
         
-    def mnemS(self):
+    def mnemonics(self):
         """Returns an list of mnemonics."""
-        return [m.mnem for m in self._members]
+        return [m.mnem for m in self.members]
 
-    def unitS(self):
+    def units(self):
         """Returns an list of mnemonic units."""
-        return [m.unit for m in self._members]
+        return [m.unit for m in self.members]
     
     def keys(self):
         """Returns the keys in the internal map."""
-        return self._indexMap.keys()
+        return self.mnemonic_index_map.keys()
     
     def find(self, m):
         """Returns the member ordinal for mnemonic m or -1 if not found.
         This can be used for finding the array column for a particular curve."""
         try:
-            return self._indexMap[m]
+            return self.mnemonic_index_map[m]
         except KeyError:
             pass
         return -1
 
+
 class LASSectionArray(LASSection):
     """Contains data on an array section."""
-    def __init__(self, sectType, wrap, curvSect, null=-999.25):
-        assert(sectType == 'A')
+
+    def __init__(self, section_type: str, wrap: bool, curve_section: LASSection,
+                 null: typing.Union[int, float] = -999.25):
+        assert (section_type == 'A')
         self._wrap = wrap
         # Accumulation of array values when un-wrapping
         self._unwrapBuf = []
-        self._mnemUnitS = list(zip(curvSect.mnemS(), curvSect.unitS()))
-#        # Removed as we now support wrap when there is a single channel
-#        if self._wrap and len(self._mnemUnitS) <= 2:
-#            raise ExceptionLASReadSectionArray('Wrapped array section with a single curve makes no sense')
-        super().__init__(sectType)
+        self._mnemUnitS = list(zip(curve_section.mnemonics(), curve_section.units()))
+        super().__init__(section_type)
         self._null = null
+        # TODO: If we have STRT, STOP and STEP we can predict the  length of the array section and initialise a
+        # FrameArray before adding member lines.
+        # If STEP is 0 we can't do this, instead read all the member lines and populate a FrameArray on finalise().
+        # In that case how strict are we about the (STRT - STOP) / STEP
+        # calculation and how strict about the members coming up short or overflowing?
+        # Need to pass in a ~Well Information Section (for STRT, STOP, STEP, NULL) and a ~Curve Information Section as
+        # before.
+        self.frame_array = LogPass.FrameArray(self.type, self.type)
+        try:
+            for mnemonic, units in self._mnemUnitS:
+                channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), LogPass.DEFAULT_NP_TYPE)
+                self.frame_array.append(channel)
+        except LogPass.ExceptionLogPassBase as err:
+            raise ExceptionLASReadSection(str(err)) from err
 
-    def _addBuf(self, lineNum):
+    def _add_buffer(self, line_number: int) -> None:
         """Adds the temporary buffer to the array. This is associated with the given line number."""
         if len(self._unwrapBuf) > 0:
             if len(self._unwrapBuf) != len(self._mnemUnitS):
                 raise ExceptionLASReadSectionArray(
                     'Line [{:d}] buffer length miss-match, frame length {:d} which should be length {:d}'.format(
-                        lineNum,
+                        line_number,
                         len(self._unwrapBuf),
                         len(self._mnemUnitS),
                     )
                 )
-            self._members.append(self._unwrapBuf)
+            self.members.append(self._unwrapBuf)
             self._unwrapBuf = []
 
-    def addMemberLine(self, i, l):
+    def add_member_line(self, line_number: int, line: str) -> None:
         """Process a line in an array section."""
         # Convert to float inserting null where that can not be done
-        valS = []
-        for v in l.strip().split():
+        values = []
+        for v in line.strip().split():
             try:
-                valS.append(float(v))
+                values.append(float(v))
             except ValueError:
-                logging.warning('LASSectionArray.addMemberLine(): line [{:d}], can not convert "{:s}" to float.'.format(i, v))
-                valS.append(self._null)
+                logger.warning(
+                    'LASSectionArray.addMemberLine(): line [{:d}], can not convert "{:s}" to float.'.format(
+                        line_number, v)
+                )
+                values.append(self._null)
         # Add it to the members
-        if len(valS) > 0:
+        if len(values) > 0:
             if not self._wrap:
-                self._members.append(valS)
+                self.members.append(values)
             else:
-                self._addMemberWithWrapMode(i, l, valS)
-                
-    def _addMemberWithWrapMode(self, i, l, valS):
+                self._add_member_with_wrap_mode(line_number, line, values)
+
+    def _add_member_with_wrap_mode(self, line_number: int, line: str, values: typing.List[typing.Any]) -> None:
         """Addes a line in wrap mode."""
-        assert(self._wrap)
+        assert self._wrap
         if len(self._unwrapBuf) == 0:
             # Add the index, raise if there is more than one item on the line
             # We add to the buffer until the length matches the len(self._mnemUnitS)
-            if len(valS) == 1:
-                self._unwrapBuf.append(valS[0])
+            if len(values) == 1:
+                self._unwrapBuf.append(values[0])
             else:
+                # Abandon existing data
+                self.members = []
                 raise ExceptionLASReadSectionArray(
                     'Line [{:d}] More than one [{:d}] index values, line is: {:s}'.format(
-                        i, len(valS), l.replace('\n', '\\n'),
-                ))
+                        line_number, len(values), line.replace('\n', '\\n'),
+                    ))
         else:
             # Add to buffer
-            self._unwrapBuf.extend(valS)
+            self._unwrapBuf.extend(values)
             # Is buffer complete or has overflowed?
             if len(self._unwrapBuf) == len(self._mnemUnitS):
-                self._addBuf(i)
+                self._add_buffer(line_number)
             elif len(self._unwrapBuf) > len(self._mnemUnitS):
                 raise ExceptionLASReadSectionArray(
                     'Line [{:d}] array overflow; frame length {:d} which should be length {:d}'.format(
-                        i, len(self._unwrapBuf), len(self._mnemUnitS),
-                ))
-                
+                        line_number, len(self._unwrapBuf), len(self._mnemUnitS),
+                    ))
+
+    def __getitem__(self, key) -> LogPass.FrameChannel:
+        """Returns an entry, key can be int or str."""
+        return self.frame_array[key]
+
+    def __len__(self):
+        """Number of members."""
+        return len(self.frame_array)
+
     def finalise(self):
         """Finalisation."""
-        # TODO: Make a TotalDepth.common.LogPass.FrameArray and get rid of the members. Need to overload __getitem__.
-        # Can get rid of _createIndex() call.
-        self._addBuf(-1)
-        self._createIndex()
-    
-    def frameSize(self):
+        # TODO: If this raises then do we still continue with the FrameArray?
+        # TODO: See test_simple_curve_and_array_section_with_wrap_1_missing_value_raises_b()
+        try:
+            self._add_buffer(-1)
+        finally:
+            self.create_index()
+            # TODO: Make a TotalDepth.common.LogPass.FrameArray and get rid of the members. Need to overload __getitem__.
+            if len(self.members):
+                try:
+                    self.frame_array.init_arrays(len(self.members))
+                    for f, member_frame in enumerate(self.members):
+                        if len(member_frame) != len(self.frame_array):
+                            raise ExceptionLASRead(
+                                f'Expected {len(self.frame_array)} channels but found {len(member_frame)} in frame {f}'
+                            )
+                        for c, channel_value in enumerate(member_frame):
+                            self.frame_array[c][f] = channel_value
+                    # Free up temporary members
+                    self.members = []
+                    # Mask the array
+                    self.frame_array.mask_array(self._null)
+                except LogPass.ExceptionLogPassBase as err:
+                    raise ExceptionLASRead(f'LogPass exception: {err}') from err
+
+    def frame_size(self):
         """Returns the number of data points in a frame."""
         return len(self._mnemUnitS)
-    
-class LASBase(object):
+
+
+class LASBase:
     """Base class for LAS reading and writing. This provides common functionality to child classes."""
     #: Mapping of commonly seen LAS units to proper LIS units
     #: Both key and value must be strings
     UNITS_LAS_TO_LIS = {
         # Noticed on depth indices
-        'F'             : 'FEET',
-        'mts'           : 'M   ',
-#        # Curves
-#        'INCHES'        : 'IN  ',
-#        'API'           : 'GAPI',
-#        'OHM-M'         : 'OHMM',
+        'F': 'FEET',
+        'mts': 'M   ',
     }
     # Hack to expand units to 4 chars so 'FT' becomes 'FT  '
     UNITS_MNEM_LEN = 4
-    def __init__(self, id):
-        self.id = id
-        self._sects = []
+
+    def __init__(self, identity: str):
+        self.id = identity
+        self._sections: typing.List[LASSection] = []
         # {sect_type : ordinal, ...}
         # Populated by _finalise()
-        self._sectMap = {}
+        self._section_map = {}
         self._wrap = None
         
     def __len__(self):
         """Number of sections."""
-        return len(self._sects)
+        return len(self._sections)
     
     def __getitem__(self, key):
         """Returns a section, key can be int or str."""
         if isinstance(key, int):
-            return self._sects[key]
+            return self._sections[key]
         if isinstance(key, str):
-            return self._sects[self._sectMap[key]]
+            return self._sections[self._section_map[key]]
         raise TypeError('{:s} object is not subscriptable with {:s}'.format(type(self), type(key)))
 
-    def _finaliseSectAndAdd(self, theSect):
-        theSect.finalise()
-        if theSect.type in self._sectMap:
-            raise ExceptionLASRead('Duplicate section {:s}'.format(theSect.type))
-        self._sectMap[theSect.type] = len(self._sects)
-        self._sects.append(theSect)
+    def _finalise_section_and_add(self, section: LASSection) -> None:
+        section.finalise()
+        if section.type in self._section_map:
+            raise ExceptionLASRead('Duplicate section {:s}'.format(section.type))
+        self._section_map[section.type] = len(self._sections)
+        self._sections.append(section)
     
-    def _finalise(self):
-        pass
+    # def _finalise(self):
+    #     raise NotImplementedError
     
-    def numFrames(self):
-        """Returns the number of frames of data in an 'A' record if I have one."""
-        try:
-            return len(self._sects[self._sectMap['A']])
-        except KeyError:
-            pass
-        return 0
-
-    def numDataPoints(self):
-        """Returns the number of frame data points in an 'A' record if I have one."""
-        try:
-            myA = self['A']
-            return len(myA) * myA.frameSize()
-        except KeyError:
-            pass
-        return 0
-    
-    def genSects(self):
+    def generate_sections(self) -> typing.Sequence[LASSection]:
         """Yields up each section."""
-        for s in self._sects:
+        for s in self._sections:
             yield s
             
     @property
-    def nullValue(self):
+    def null_value(self) -> float:
         """The NULL value, defaults to -999.25."""
         try:
             return self['W']['NULL'].valu
@@ -449,7 +520,7 @@ class LASBase(object):
         return -999.25
         
     @property
-    def xAxisUnits(self):
+    def x_axis_units(self):
         """The X axis units."""
         try:
             return self._units(self['W']['STRT'].unit)
@@ -469,37 +540,38 @@ class LASBase(object):
             u = u + ' ' * (self.UNITS_MNEM_LEN - len(u))
         return bytes(u, 'ascii')
 
-    def _wsdEngVal(self, m):
-        v, u = self.getWsdMnem(m)
+    def _wsd_eng_value(self, mnemonic) -> EngVal.EngVal:
+        v, u = self.get_wsd_mnemonic(mnemonic)
         if v is not None:
             return EngVal.EngVal(v, self._units(u))
             
     @property
-    def xAxisStart(self):
+    def x_axis_start(self) -> EngVal.EngVal:
         """The Xaxis start value as an EngVal."""
-        return self._wsdEngVal('STRT')
+        return self._wsd_eng_value('STRT')
 
     @property
-    def xAxisStop(self):
+    def x_axis_stop(self) -> EngVal.EngVal:
         """The Xaxis end value as an EngVal."""
-        return self._wsdEngVal('STOP')
+        return self._wsd_eng_value('STOP')
 
     @property
-    def xAxisStep(self):
+    def x_axis_step(self) -> EngVal.EngVal:
         """The Xaxis step value as an EngVal."""
-        return self._wsdEngVal('STEP')
+        return self._wsd_eng_value('STEP')
 
-    def logDown(self):
+    def is_log_down(self) -> bool:
         """Returns True if X axis is increasing i.e. for time or down log."""
         try:
             return self['W']['STEP'].valu > 0
         except KeyError:
             raise ExceptionLASReadData('LASBase.logDown(): No "W" section or no "STEP" value.')
     
-    def getWsdMnem(self, m):
+    def get_wsd_mnemonic(self, mnemonic) -> typing.Tuple[typing.Union[str, None], typing.Union[str, None]]:
         """Returns a tuple of (value, units) for a Mnemonic that may appear in either a
         Well section or a Parameter section. Units may be None if empty.
-        Returns (None, None) if nothing found."""
+        Returns (None, None) if nothing found.
+        """
         for s in 'WP':
             try:
                 sect = self[s]
@@ -507,64 +579,61 @@ class LASBase(object):
                 pass
             else:
                 try:
-                    member = sect[m]
+                    member = sect[mnemonic]
                 except KeyError:
                     pass
                 else:
                     return member.valu, member.unit
-        return (None, None)
+        return None, None
     
-    def getAllWsdMnemonics(self):
+    def get_all_wsd_mnemonics(self) -> typing.Set[str]:
         """Returns a set of mnemonics from the Well section and the Parameter section."""
-        r = set()
+        ret = set()
         for s in 'WP':
             try:
-                r |= set(self[s].keys())
+                ret |= set(self[s].keys())
             except KeyError:
                 pass
-        return r
+        return ret
     
-        #------------------------------
-        # Section: Channel data access.
-        #------------------------------
-    def _curveOrAltCurve(self, theMnem):
+    # Section: Channel data access.
+    def _curve_or_alt_curve(self, mnemonic: str):
         """Returns the entry in the Curve table corresponding to theMnem.
         The list of alternate names table LGFORMAT_LAS from LASConstants to interpret 
         curves that are not exact matches.
         Will raise KeyError if no Curve section or no matching curve."""
-        i = self._findCurveOrAltCurve(theMnem)
+        i = self._find_curve_or_alt_curve(mnemonic)
         if i != -1:
             return self['C'][i]
         raise KeyError
         
-    def _findCurveOrAltCurve(self, theMnem):
+    def _find_curve_or_alt_curve(self, mnemonic: str):
         """Returns the index if entry in the Curve table corresponding to theMnem.
         The list of alternate names table LGFORMAT_LAS from LASConstants to interpret 
         curves that are not exact matches.
         Returns -1 if not found. Will raise KeyError if no Curve section."""
-        m = theMnem.pStr(strip=True)
-        idx = self['C'].find(m)
+        idx = self['C'].find(mnemonic)
         if idx != -1:
             return idx
-        if m in LASConstants.LGFORMAT_LAS:
-            for alt in LASConstants.LGFORMAT_LAS[m]:
+        if mnemonic in LASConstants.LGFORMAT_LAS:
+            for alt in LASConstants.LGFORMAT_LAS[mnemonic]:
                 idx = self['C'].find(alt)
                 if idx != -1:
                     return idx
         return -1
         
-    def hasOutpMnem(self, theMnem):
+    def has_output_mnemonic(self, mnemonic: str):
         """Returns True if theMnem, a Mnem.Mnem() object is an output in the Curve section.
         It will use the alternate names table LGFORMAT_LAS from LASConstants to interpret 
         curves that are not exact matches."""
         try:
-            return self._findCurveOrAltCurve(theMnem) != -1
+            return self._find_curve_or_alt_curve(mnemonic) != -1
         except KeyError:
             # No curve section
             pass
         return False
     
-    def curveMnems(self, ordered=False):
+    def curve_mnemonics(self, ordered=False):
         """Returns list of curve names actually declared in the Curve section.
         List will be unordered if ordered is False."""
         r = []
@@ -579,125 +648,165 @@ class LASBase(object):
             pass
         return r
     
-    def curveUnitsAsStr(self, m):
+    def curve_units_as_str(self, m):
         """Given a curve as a Mnem.Mnem() this returns the units as a string.
         May raise KeyError."""
-        return self._units(self._curveOrAltCurve(m).unit)
+        return self._units(self._curve_or_alt_curve(m).unit)
     
-    def genOutpPoints(self, theMnem):
-        """Generates curve values for theMnem, a Mnem.Mnem() object."""
-        assert(self.hasOutpMnem(theMnem))
-        arrayIndex = self._findCurveOrAltCurve(theMnem)
-        assert(arrayIndex != -1)
-        sectArray = self['A']
-        numFrames = len(sectArray)
-        for f in range(numFrames):
-            yield sectArray[f][0], sectArray[f][arrayIndex]
-        #--------------------------
-        # End: Channel data access.
-        #--------------------------
+    # End: Channel data access.
 
 
 class LASRead(LASBase):
     """Reads a LAS file."""
-    def __init__(self, theFp, theFileID=None, raise_on_error: bool=True):
-        """Reads a LAS file from theFp that is either a string (file path) or a file like object.
-        If raise_on_error is True then some errors will terminate processing, if False then some errors will be ignored."""
-        self._sectDespatchMap = {
-            'V' : self._procSectV,
-            'W' : self._procSect,
-            'C' : self._procSect,
-            'P' : self._procSect,
-            'O' : self._procSect,
-            'A' : self._procSectA,
+    def __init__(self, file_path: typing.Union[str, typing.TextIO],
+                 file_identity: str = '', raise_on_error: bool = True):
+        """
+        Reads a LAS file from theFp that is either a string (file path) or a file like object.
+        If raise_on_error is True then some errors will terminate processing, if False then some errors will be
+        ignored.
+        """
+        self._section_dispatch_map = {
+            'V': self._process_section_v,
+            'W': self._process_section,
+            'C': self._process_section,
+            'P': self._process_section,
+            'O': self._process_section,
+            'A': self._process_section_a,
         }
-        if isinstance(theFp, str):
-            theFp = open(theFp, 'r', errors='replace')
-        myFileID = theFileID
+        if isinstance(file_path, str):
+            file_path = open(file_path, 'r', errors='replace')
         self.raise_on_error = raise_on_error
-        try:
-            myFileID = theFp.name
-        except AttributeError:
-            pass
-        super().__init__(myFileID)
-        self._procFile(genLines(theFp))
-        self._finalise()
-        
-    def _procFile(self, gen):
-        for i, l in gen:
-            logging.debug('_procFile(): line %d "%s"', i, l)
-            l = l.strip()
-            m = RE_SECT_HEAD.match(l)
-            if m is not None:
-                self._sectDespatchMap[m.group(1)](m, gen)
-            else:
-                logging.warning('LASRead._procFile(): Line: {:d} Unknown line: "{:s}"'.format(i, l.replace('\n', '\\n')))
-                # Consume following non-section lines
-                numLines = 0
-                for i, l in gen:
-                    m = RE_SECT_HEAD.match(l)
-                    if m is not None:
-                        gen.send(l)
-                        break
-                    numLines += 1
-                logging.warning('LASRead._procFile(): Consumed {:d} succeeding lines.'.format(numLines))
+        if not file_identity:
+            try:
+                file_identity = file_path.name
+            except AttributeError:
+                pass
+        super().__init__(file_identity)
+        self._process_file(generate_lines(file_path))
+        # self._finalise()
 
-    def _procSectGeneric(self, mtch, gen):
-        section_name = mtch.group(1)
-        mySect = LASSection(section_name)
-        for i, l in gen:
-            logging.debug('_procSectGeneric(): line %d "%s"', i, l)
-            l = l.strip()
+    def number_of_frames(self):
+        """Returns the number of frames of data in an 'A' record if I have one."""
+        if self.frame_array is not None:
+            return len(self.frame_array.x_axis)
+        return 0
+
+    def number_of_data_points(self):
+        """Returns the number of frame data points in an 'A' record if I have one."""
+        if self.frame_array is not None:
+            return len(self.frame_array.x_axis) * len(self.frame_array)
+        return 0
+
+    def _process_file(self, gen: typing.Generator[typing.Tuple[int, str], None, None]):
+
+        def _consume_section(gen):
+            """Just read the section and throw it away."""
+            logger.warning(
+                'LASRead._proccess_file(): Line: %d Unknown line: "%s"', line_number, line.replace('\n', '\\n')
+            )
+            # Consume following non-section lines
+            num_lines = 0
+            for _l, throw_away_line in gen:
+                match = RE_SECT_HEAD.match(throw_away_line)
+                if match is not None:
+                    gen.send(throw_away_line)
+                    break
+                num_lines += 1
+            logger.warning('LASRead._procFile(): Consumed {:d} succeeding lines.'.format(num_lines))
+
+        for line_number, line in gen:
+            logger.debug('_procFile(): line %d "%s"', line_number, line)
+            line = line.strip()
+            m = RE_SECT_HEAD.match(line)
+            if m is not None:
+                self._section_dispatch_map[m.group(1)](m, gen)
+            else:
+                if line.startswith('~') and len(line) > 1:
+                    # A section that has undefined content. Must appear after a 'V' section and before an 'A' section.
+                    if 'V' not in self._section_map:
+                        if self.raise_on_error:
+                            raise ExceptionLASRead(f'User defined section "{line}" but no version section.')
+                        else:
+                            _consume_section(gen)
+                    elif 'A' in self._section_map:
+                        if self.raise_on_error:
+                            raise ExceptionLASRead(f'User defined section "{line}" after array section.')
+                        else:
+                            _consume_section(gen)
+                    else:
+                        section = LASSection(line[1])
+                        self._add_members_to_section(gen, section)
+                        self._finalise_section_and_add(section)
+                else:
+                    _consume_section(gen)
+
+    def _proc_section_generic(self, match: re.match,
+                              gen: typing.Generator[typing.Tuple[int, str], None, None]) -> LASSection:
+        section_name = match.group(1)
+        section = LASSection(section_name)
+        self._add_members_to_section(gen, section)
+        return section
+
+    def _add_members_to_section(self, gen, section: LASSection):
+        for i, line in gen:
+            logger.debug('line %d "%s"', i, line)
+            line = line.strip()
             # Bail out if start of new section
-            if l.startswith('~'):
-                gen.send(l)
+            if line.startswith('~'):
+                gen.send(line)
                 break
             try:
-                mySect.addMemberLine(i, l)
+                section.add_member_line(i, line)
             except ExceptionLASRead as error:
                 if self.raise_on_error:
                     raise
-                logging.warning('Ignoring error %s', error)
-        return mySect
-    
-    def _procSectV(self, mtch, gen):
-        logging.debug('_procSectV(): Start')
-        assert(mtch is not None)
-        if len(self._sects) != 0:
+                logger.warning('Ignoring error %s', error)
+
+    def _process_section_v(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
+        logger.debug('_procSectV(): Start')
+        assert(match is not None)
+        if len(self._sections) != 0:
             raise ExceptionLASRead('Version section must be first one.')
-        mySect = self._procSectGeneric(mtch, gen)
-        self._finaliseSectAndAdd(mySect)
-        self._wrap = mySect['WRAP'].valu
-        logging.debug('_procSectV(): End')
+        section = self._proc_section_generic(match, gen)
+        self._finalise_section_and_add(section)
+        self._wrap = section['WRAP'].valu
+        logger.debug('_procSectV(): End')
 
-    def _procSect(self, mtch, gen):
-        logging.debug('_procSect(): Start: {:s}'.format(mtch.group(1)))
-        assert(mtch is not None)
-        if len(self._sects) == 0:
+    def _process_section(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
+        logger.debug('_procSect(): Start: {:s}'.format(match.group(1)))
+        assert(match is not None)
+        if len(self._sections) == 0:
             raise ExceptionLASRead('Non-version section can not be the first one.')
-        self._finaliseSectAndAdd(self._procSectGeneric(mtch, gen))
-        logging.debug('_procSect(): End: {:s}'.format(mtch.group(1)))
+        self._finalise_section_and_add(self._proc_section_generic(match, gen))
+        logger.debug('_procSect(): End: {:s}'.format(match.group(1)))
 
-    def _procSectA(self, mtch, gen):
-        logging.debug('_procSectA(): Start')
-        assert(mtch is not None)
-        if len(self._sects) == 0:
+    def _process_section_a(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
+        logger.debug('_procSectA(): Start')
+        assert(match is not None)
+        if len(self._sections) == 0:
             raise ExceptionLASRead('Non-version section can not be the first one.')
         assert(self._wrap is not None)
-        curvIdx = 0
-        for s in self._sects:
-            if s.type == 'C':
+        curve_index = 0
+        for section in self._sections:
+            if section.type == 'C':
                 break
-            curvIdx += 1
-        if curvIdx > len(self._sects)-1:
+            curve_index += 1
+        if curve_index > len(self._sections)-1:
             raise ExceptionLASRead('No curve section to describe array section.')
-        mySect = LASSectionArray(mtch.group(1), self._wrap, self._sects[curvIdx])
-        for i, l in gen:
+        array_section = LASSectionArray(match.group(1), self._wrap, self._sections[curve_index])
+        for i, line in gen:
             # Bail out if start of new section
-            if l.startswith('~'):#RE_SECT_HEAD.match(l) is not None:
-                gen.send(l)
-                raise ExceptionLASRead('Line: {:d}. Found section header line "{:s}" after array section'.format(i, l))
-                #break
-            mySect.addMemberLine(i, l)
-        self._finaliseSectAndAdd(mySect)
-        logging.debug('_procSectA(): End')
+            if line.startswith('~'):
+                gen.send(line)
+                if self.raise_on_error:
+                    raise ExceptionLASRead(
+                        'Line: {:d}. Found section header line "{:s}" after array section'.format(i, line.strip())
+                    )
+            array_section.add_member_line(i, line)
+        self._finalise_section_and_add(array_section)
+        logger.debug('_procSectA(): End')
+
+    @property
+    def frame_array(self) -> typing.Union[LogPass.FrameChannel, None]:
+        if 'A' in self._section_map:
+            return self._sections[self._section_map['A']].frame_array
