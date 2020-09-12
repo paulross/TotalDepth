@@ -15,15 +15,15 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
-from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
-from TotalDepth.common import Slice
+from TotalDepth.common import Slice, np_summary
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import process
-from TotalDepth.common.ToHTML import HTMLFrameArraySummary, HTMLLogicalFileSummary, HTMLBodySummary, HTMLResult
+from TotalDepth.common.ToHTML import HTMLFrameArraySummary, HTMLLogicalFileSummary, HTMLBodySummary, HTMLResult, \
+    html_write_table
 from TotalDepth.util import DirWalk
 from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
@@ -176,24 +176,6 @@ def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_
     html_write_table(table, xhtml_stream, class_style='sul')
 
 
-def html_write_table(table_as_strings: typing.List[typing.List[str]],
-                     xhtml_stream: XmlWrite.XhtmlStream,
-                     class_style,
-                     **kwargs) -> None:
-    if len(table_as_strings):
-        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}.update(kwargs)):
-            with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                for cell in table_as_strings[0]:
-                    with XmlWrite.Element(xhtml_stream, 'th', {'class': class_style}):
-                        xhtml_stream.characters(cell)
-            for row in table_as_strings[1:]:
-                with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                    for cell in row:
-                        with XmlWrite.Element(xhtml_stream, 'td', {'class': class_style}):
-                            assert isinstance(cell, str), f'{cell} is not a string but {type(cell)}'
-                            xhtml_stream.charactersWithBr(cell)
-
-
 def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream) -> None:
         eflr = eflr_position.eflr
         if eflr.is_key_value():
@@ -343,22 +325,21 @@ def _write_frame_array_in_html(
             )
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
-                f'RP66V1 Frame size {frame_array.len_input_bytes} (bytes/frame))'
+                f'RP66V1 Frame size {frame_array.sizeof_array} (bytes))'
                 f' represented internally as {frame_array.sizeof_frame} (bytes/frame).'
             )
         frame_table = [
-            ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
-             'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],
+            ['Channel',
+             'Dims', 'Count', 'Units', 'Long Name',
+             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++',  'Activity', 'dtype'],
         ]
         for channel in frame_array.channels:
             # arr = channel.array
             arr = TotalDepth.common.AbsentValue.mask_absent_values(channel.array)
+            array_summary = np_summary.summarise_array(arr)
             frame_table.append(
                 [
-                    channel.ident.I.decode("ascii"),
-                    f'{channel.ident.O}',
-                    f'{channel.ident.C}',
-                    f'{channel.rep_code:d} ({RepCode.REP_CODE_INT_TO_STR[channel.rep_code]})',
+                    channel.ident,
                     stringify.stringify_object_by_type(channel.dimensions),
                     stringify.stringify_object_by_type(channel.count),
                     stringify.stringify_object_by_type(channel.units),
@@ -366,10 +347,15 @@ def _write_frame_array_in_html(
                     f'{arr.size:d}',
                     # NOTE: Not the masked array!
                     f'{TotalDepth.common.AbsentValue.count_of_absent_values(channel.array):d}',
-                    f'{arr.min():.3f}',
-                    f'{arr.mean():.3f}',
-                    f'{arr.std():.3f}',
-                    f'{arr.max():.3f}',
+                    f'{array_summary.min:.3f}',
+                    f'{array_summary.mean:.3f}',
+                    f'{array_summary.median:.3f}',
+                    f'{array_summary.std:.3f}',
+                    f'{array_summary.max:.3f}',
+                    f'{array_summary.count_dec:d}',
+                    f'{array_summary.count_eq:d}',
+                    f'{array_summary.count_inc:d}',
+                    f'{array_summary.activity:.3f}',
                     f'{arr.dtype}',
                 ]
             )
@@ -381,9 +367,9 @@ def _write_frame_array_in_html(
             xhtml_stream.characters('No frames.')
         x_axis_start = x_axis_stop = 0.0
     return HTMLFrameArraySummary(
-        frame_array.ident.I,
+        frame_array.ident,
         len(iflrs),
-        tuple(c.ident.I for c in frame_array.channels),
+        tuple(c.ident for c in frame_array.channels),
         x_axis_start,
         x_axis_stop,
         frame_array.x_axis.units,

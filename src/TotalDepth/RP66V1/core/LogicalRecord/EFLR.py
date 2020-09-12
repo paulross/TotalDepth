@@ -180,9 +180,12 @@ class Template:
     def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
+        self.logical_data_consumed = 0
+
 
     def read(self, ld: LogicalData):
         """Populate the template with the Logical Data."""
+        ld_index = ld.index
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
@@ -200,6 +203,7 @@ class Template:
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
                 break
+        self.logical_data_consumed = ld.index
 
     def __len__(self) -> int:
         """Return the number of columns described by this Template."""

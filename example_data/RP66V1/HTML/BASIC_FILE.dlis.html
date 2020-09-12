@@ -1187,7 +1187,7 @@ th.monospace, td.monospace {
       </tr>
       <tr>
         <td class="monospace">Channel</td>
-        <td class="monospace">OBNAME: O: 2 C: 0 I: b&apos;DEPT&apos;</td>
+        <td class="monospace">DEPT</td>
       </tr>
       <tr>
         <td class="monospace">Long Name</td>
@@ -1207,65 +1207,72 @@ th.monospace, td.monospace {
       </tr>
     </table>
     <h4>X Axis Spacing</h4>
-    <p>Definitions: &apos;backward&apos; if space &lt; -0.5 median&#010;&apos;duplicate&apos; if -0.5 median &lt;= space &lt; 0.5 median&#010;&apos;normal&apos; if 0.5 median &lt;= space &lt; 1.5 median&#010;&apos;skipped&apos; if space &gt;= 1.5 median&#010;</p>
     <table class="monospace">
       <tr>
         <th class="monospace">X Axis Spacing</th>
         <th class="monospace">Value</th>
+        <th class="monospace">Description</th>
       </tr>
       <tr>
         <td class="monospace">Minimum</td>
         <td class="monospace">0.09999999999990905 [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
         <td class="monospace">Mean</td>
         <td class="monospace">0.09999999999990905 [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
         <td class="monospace">Median</td>
         <td class="monospace">0.09999999999990905 [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
         <td class="monospace">Maximum</td>
         <td class="monospace">0.09999999999990905 [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
         <td class="monospace">Range</td>
         <td class="monospace">0.0 (0.000000%) [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
         <td class="monospace">Std. Dev.</td>
         <td class="monospace">0.0 [m]</td>
+        <td class="monospace"/>
       </tr>
       <tr>
-        <td class="monospace">Count of Normal</td>
+        <td class="monospace">Count of back</td>
+        <td class="monospace">0</td>
+        <td class="monospace">spacing &lt; -0.5 median</td>
+      </tr>
+      <tr>
+        <td class="monospace">Count of duplicate</td>
+        <td class="monospace">0</td>
+        <td class="monospace">-0.5 median &lt;= spacing &lt; 0.5 median</td>
+      </tr>
+      <tr>
+        <td class="monospace">Count of normal</td>
         <td class="monospace">648</td>
+        <td class="monospace">0.5 median &lt;= spacing &lt; 1.5 median</td>
       </tr>
       <tr>
-        <td class="monospace">Count of Duplicate</td>
+        <td class="monospace">Count of skipped</td>
         <td class="monospace">0</td>
-      </tr>
-      <tr>
-        <td class="monospace">Count of Skipped</td>
-        <td class="monospace">0</td>
-      </tr>
-      <tr>
-        <td class="monospace">Count of Back</td>
-        <td class="monospace">0</td>
+        <td class="monospace">spacing &gt;= 1.5 median</td>
       </tr>
     </table>
     <p>Frame spacing frequency:</p>
-    <pre>     Value [   N]: Relative Frequency&#010;    -0.400 [ 648]: ********************************************************************************</pre>
+    <pre>        Value [   N]: Relative Frequency&#010;    -0.400000 [ 648]: ********************************************************************************</pre>
     <h4>Frame Analysis</h4>
     <p>Available frames: 649 X axis from 2889.400 to 2954.200 interval 0.100 [m]</p>
-    <p>Frame analysis on &lt;Slice on length=649 start=0 stop=649 step=1&gt; frame(s). Number of frames created: 649 Numpy total memory: 18,172 bytes</p>
-    <p>RP66V1 Frame size 28 (bytes/frame)) represented internally as 28 (bytes/frame).</p>
+    <p>Frame analysis on<tt> &lt;Slice on length=649 start=0 stop=649 step=1&gt;</tt> frame(s). Frame size: 28 bytes. Number of frames created: 649 Numpy total memory: 18,172 bytes</p>
+    <p>RP66V1 Frame size 18172 (bytes)) represented internally as 28 (bytes/frame).</p>
     <table class="monospace">
       <tr>
         <th class="monospace">Channel</th>
-        <th class="monospace">O</th>
-        <th class="monospace">C</th>
-        <th class="monospace">Rep Code</th>
         <th class="monospace">Dims</th>
         <th class="monospace">Count</th>
         <th class="monospace">Units</th>
@@ -1274,15 +1281,17 @@ th.monospace, td.monospace {
         <th class="monospace">Absent</th>
         <th class="monospace">Min</th>
         <th class="monospace">Mean</th>
+        <th class="monospace">Median</th>
         <th class="monospace">Std.Dev.</th>
         <th class="monospace">Max</th>
+        <th class="monospace">--</th>
+        <th class="monospace">==</th>
+        <th class="monospace">++</th>
+        <th class="monospace">Activity</th>
         <th class="monospace">dtype</th>
       </tr>
       <tr>
         <td class="monospace">DEPT</td>
-        <td class="monospace">2</td>
-        <td class="monospace">0</td>
-        <td class="monospace">7 (FDOUBL)</td>
         <td class="monospace">1</td>
         <td class="monospace">1</td>
         <td class="monospace">m</td>
@@ -1291,15 +1300,17 @@ th.monospace, td.monospace {
         <td class="monospace">0</td>
         <td class="monospace">2889.400</td>
         <td class="monospace">2921.800</td>
+        <td class="monospace">2921.800</td>
         <td class="monospace">18.735</td>
         <td class="monospace">2954.200</td>
+        <td class="monospace">0</td>
+        <td class="monospace">0</td>
+        <td class="monospace">648</td>
+        <td class="monospace">0.000</td>
         <td class="monospace">float64</td>
       </tr>
       <tr>
         <td class="monospace">TENS</td>
-        <td class="monospace">2</td>
-        <td class="monospace">0</td>
-        <td class="monospace">2 (FSINGL)</td>
         <td class="monospace">1</td>
         <td class="monospace">1</td>
         <td class="monospace">lbs</td>
@@ -1308,15 +1319,17 @@ th.monospace, td.monospace {
         <td class="monospace">367</td>
         <td class="monospace">5292.037</td>
         <td class="monospace">5843.039</td>
+        <td class="monospace">0.000</td>
         <td class="monospace">79.866</td>
         <td class="monospace">5988.410</td>
+        <td class="monospace">154</td>
+        <td class="monospace">366</td>
+        <td class="monospace">128</td>
+        <td class="monospace">0.004</td>
         <td class="monospace">float32</td>
       </tr>
       <tr>
         <td class="monospace">ETIM</td>
-        <td class="monospace">2</td>
-        <td class="monospace">0</td>
-        <td class="monospace">7 (FDOUBL)</td>
         <td class="monospace">1</td>
         <td class="monospace">1</td>
         <td class="monospace">min</td>
@@ -1325,15 +1338,17 @@ th.monospace, td.monospace {
         <td class="monospace">367</td>
         <td class="monospace">0.019</td>
         <td class="monospace">1.345</td>
+        <td class="monospace">0.000</td>
         <td class="monospace">0.766</td>
         <td class="monospace">2.661</td>
+        <td class="monospace">281</td>
+        <td class="monospace">366</td>
+        <td class="monospace">1</td>
+        <td class="monospace">0.025</td>
         <td class="monospace">float64</td>
       </tr>
       <tr>
         <td class="monospace">DHTN</td>
-        <td class="monospace">2</td>
-        <td class="monospace">0</td>
-        <td class="monospace">2 (FSINGL)</td>
         <td class="monospace">1</td>
         <td class="monospace">1</td>
         <td class="monospace">lbs</td>
@@ -1342,15 +1357,17 @@ th.monospace, td.monospace {
         <td class="monospace">369</td>
         <td class="monospace">2562.916</td>
         <td class="monospace">2712.542</td>
+        <td class="monospace">0.000</td>
         <td class="monospace">33.645</td>
         <td class="monospace">2842.415</td>
+        <td class="monospace">82</td>
+        <td class="monospace">494</td>
+        <td class="monospace">72</td>
+        <td class="monospace">0.003</td>
         <td class="monospace">float32</td>
       </tr>
       <tr>
         <td class="monospace">GR</td>
-        <td class="monospace">2</td>
-        <td class="monospace">0</td>
-        <td class="monospace">2 (FSINGL)</td>
         <td class="monospace">1</td>
         <td class="monospace">1</td>
         <td class="monospace">api</td>
@@ -1359,8 +1376,13 @@ th.monospace, td.monospace {
         <td class="monospace">373</td>
         <td class="monospace">43.201</td>
         <td class="monospace">85.262</td>
+        <td class="monospace">-999.250</td>
         <td class="monospace">32.936</td>
         <td class="monospace">166.509</td>
+        <td class="monospace">151</td>
+        <td class="monospace">371</td>
+        <td class="monospace">126</td>
+        <td class="monospace">0.076</td>
         <td class="monospace">float32</td>
       </tr>
     </table>
