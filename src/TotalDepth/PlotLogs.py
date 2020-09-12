@@ -419,7 +419,7 @@ class PlotLogPasses(object):
         logging.info('PlotLogPasses._processFileLAS(): Starting LAS file {:s}'.format(fpIn))
         assert(os.path.isfile(fpIn))
         assert(os.path.exists(os.path.dirname(fpOut)))
-        if not TotalDepth.LAS.core.LASRead.hasLASExtension(fpIn):
+        if not TotalDepth.LAS.core.LASRead.has_las_extension(fpIn):
             return False
         if self.usesInternalRecords:
             # LAS logs do not have internal records that can describe plots
@@ -638,8 +638,8 @@ class PlotLogPasses(object):
             if myPlot.hasDataToPlotLAS(theLasFile, aUniqueId):
                 myCurvIDs, numPoints = myPlot.plotLogPassLAS(
                     theLasFile,
-                    theLasFile.xAxisStart,
-                    theLasFile.xAxisStop,
+                    theLasFile.x_axis_start,
+                    theLasFile.x_axis_stop,
                     aUniqueId,
                     myOutFilePath,
                     frameStep=1,
@@ -657,8 +657,8 @@ class PlotLogPasses(object):
                     0,
                     aUniqueId,
                     myPlot.xScale(aUniqueId),
-                    theLasFile.xAxisStart,
-                    theLasFile.xAxisStop,
+                    theLasFile.x_axis_start,
+                    theLasFile.x_axis_stop,
                     theCurveS=myCurvIDs,
                     ptsPlotted=numPoints)
     #=======================================================

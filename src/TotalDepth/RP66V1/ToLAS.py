@@ -18,20 +18,18 @@ import sys
 import time
 import typing
 
+import TotalDepth.common
 from TotalDepth.LAS.core import WriteLAS
-from TotalDepth.LAS.core.WriteLAS import WELL_INFORMATION_KEYS
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import LogPass, RepCode
+from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
+from TotalDepth.RP66V1.core import RepCode
 from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
-import TotalDepth.common
-from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot
-
-
+from TotalDepth.util.DirWalk import dirWalk
 
 __author__  = 'Paul Ross'
 __date__    = '2019-04-10'
@@ -58,7 +56,7 @@ def write_las_header(input_file: str,
         PROD.           TotalDepth                    : LAS Producer
         PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
         CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
-        DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hh:mm]
+        DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hhmm]
         SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
         FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
         LOGICAL-FILE.   3                             : Logical File number in the DLIS file
@@ -89,11 +87,7 @@ def write_las_header(input_file: str,
         table.append(
             ['FRAME-ARRAY.', f'{frame_array_ident}', ': Identity of the Frame Array in the Logical File'],
         )
-    rows = TotalDepth.common.data_table.format_table(table, pad='  ', left_flush=True)
-    ostream.write('~Version Information Section\n')
-    for row in rows:
-        ostream.write(row)
-        ostream.write('\n')
+    WriteLAS.write_table(table, '~Version Information Section', ostream)
 
 
 #: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic.
@@ -188,7 +182,7 @@ def _add_start_stop_step_to_dictionary(
         las_map['STRT'] = WriteLAS.UnitValueDescription(x_units, stringify.stringify_object_by_type(x_strt), 'Start X')
         las_map['STOP'] = WriteLAS.UnitValueDescription(
             x_units, stringify.stringify_object_by_type(x_stop),
-            f'Stop X, frames: {num_frames_to_write} out of {len(iflr_data):,d} available.'
+            f'Stop X, frames {num_frames_to_write} out of {len(iflr_data):,d} available.'
         )
         if num_frames_to_write > 1:
             x_step: float = (x_stop - x_strt) / float(num_frames_to_write - 1)
@@ -234,17 +228,13 @@ def write_well_information_to_las(
         ['#MNEM.UNIT', 'DATA', 'DESCRIPTION',],
         ['#----.----', '----', '-----------',],
     ]
-    for k in WELL_INFORMATION_KEYS:
+    for k in WriteLAS.WELL_INFORMATION_KEYS:
         if k in las_map:
             row = [f'{k:4}.{las_map[k].unit:4}', f'{las_map[k].value}', f': {las_map[k].description}',]
         else:
             row = [f'{k:4}.{"":4}', '', ':']
         table.append(row)
-    rows = TotalDepth.common.data_table.format_table(table, pad='  ', left_flush=True)
-    ostream.write('~Well Information Section\n')
-    for row in rows:
-        ostream.write(row)
-        ostream.write('\n')
+    WriteLAS.write_table(table, '~Well Information Section', ostream)
 
 
 def write_parameter_section_to_las(
@@ -261,7 +251,7 @@ def write_parameter_section_to_las(
                 value = stringify.stringify_object_by_type(obj[b'VALUES'].value).strip()
                 descr = stringify.stringify_object_by_type(obj[b'LONG-NAME'].value).strip()
                 # NOTE: Overwriting is possible here.
-                las_mnem_map[obj.name] = WriteLAS.UnitValueDescription(units, value, descr)
+                las_mnem_map[obj.name.I.decode('ascii')] = WriteLAS.UnitValueDescription(units, value, descr)
     table = [
         ['#MNEM.UNIT', 'Value', 'Description'],
         ['#---------', '-----', '-----------'],
@@ -271,11 +261,7 @@ def write_parameter_section_to_las(
         table.append(
             [f'{k:<4}.{las_mnem_map[k].unit:<4}', las_mnem_map[k].value, f': {las_mnem_map[k].description}']
         )
-    rows = TotalDepth.common.data_table.format_table(table, pad='  ', left_flush=True)
-    ostream.write('~Parameter Information Section\n')
-    for row in rows:
-        ostream.write(row)
-        ostream.write('\n')
+    WriteLAS.write_table(table, '~Parameter Information Section', ostream)
 
 
 def las_file_name(path_out: str, logicial_file_index: int, frame_array_ident: bytes) -> str:
@@ -307,7 +293,7 @@ def _write_array_section_to_las(
     else:
         num_writable_frames = logical_file.populate_frame_array(frame_array, frame_slice)
     if num_writable_frames > 0:
-        TotalDepth.common.LogPass.write_curve_and_array_section_to_las(
+        TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
             frame_array,
             max_num_available_frames,
             array_reduction,
@@ -329,7 +315,7 @@ def write_logical_index_to_las(
         float_format: str,
 ) -> typing.List[str]:
     """Take a Logical Index for a Logical File within a RP66V1 file and write out a set of LAS 2.0 files."""
-    assert array_reduction in TotalDepth.common.LogPass.ARRAY_REDUCTIONS
+    assert array_reduction in TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS
     ret = []
     for lf, logical_file in enumerate(logical_index.logical_files):
         TotalDepth.common.process.add_message_to_queue(f'Logical file {lf}')
@@ -344,7 +330,7 @@ def write_logical_index_to_las(
                     # Write each section
                     write_las_header(
                         os.path.basename(logical_index.id),
-                        logical_file, lf, frame_array.ident, ostream
+                        logical_file, lf, frame_array.ident.I.decode('ascii'), ostream
                     )
                     write_well_information_to_las(logical_file, frame_array, frame_slice, ostream)
                     write_parameter_section_to_las(logical_file, ostream)
@@ -378,7 +364,7 @@ def single_rp66v1_file_to_las(
 ) -> WriteLAS.LASWriteResult:
     """Convert a single RP66V1 file to a set of LAS files."""
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
-    assert array_reduction in TotalDepth.common.LogPass.ARRAY_REDUCTIONS, f'{array_reduction} not in {TotalDepth.common.LogPass.ARRAY_REDUCTIONS}'
+    assert array_reduction in TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS, f'{array_reduction} not in {TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS}'
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
         logger.info(f'Converting RP66V1 {path_in} to LAS {os.path.splitext(path_out)[0]}*')
@@ -391,6 +377,7 @@ def single_rp66v1_file_to_las(
                 output_size = sum(os.path.getsize(f) for f in las_files_written)
                 result = WriteLAS.LASWriteResult(
                     path_in,
+                    binary_file_type,
                     os.path.getsize(path_in),
                     output_size,
                     len(las_files_written),
@@ -402,12 +389,12 @@ def single_rp66v1_file_to_las(
                 return result
         except ExceptionTotalDepthRP66V1:  # pragma: no cover
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            return WriteLAS.LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
+            return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), 0, 0, 0.0, True, False)
         except Exception:  # pragma: no cover
             logger.exception(f'Failed to index with Exception: {path_in}')
-            return WriteLAS.LASWriteResult(path_in, os.path.getsize(path_in), 0, 0, 0.0, True, False)
+            return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), 0, 0, 0.0, True, False)
     logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
-    return WriteLAS.LASWriteResult(path_in, 0, 0, 0, 0.0, False, True)
+    return WriteLAS.LASWriteResult(path_in, binary_file_type, 0, 0, 0, 0.0, False, True)
 
 
 def _dump_frames_and_or_channels_single_rp66v1_file(path_in: str, frame_slices, channels) -> None:
@@ -504,7 +491,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
         '--array-reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='first',
-        choices=list(sorted(TotalDepth.common.LogPass.ARRAY_REDUCTIONS)),
+        choices=list(sorted(TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS)),
         )
     parser.add_argument(
         '--channels', type=str,

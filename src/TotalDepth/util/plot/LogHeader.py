@@ -539,7 +539,7 @@ class APIHeaderLAS(APIHeaderBase):
         A set of mnemonics that could be plotted but are not in the Logical Record(s).
         
         A set of mnemonics that are in the Logical Record(s) but could not be plotted."""
-        allMnemS = theLasFile.getAllWsdMnemonics()
+        allMnemS = theLasFile.get_all_wsd_mnemonics()
         # Convert to LAS like Mnemonics from LIS ones
         myMnemSet = set()
         for str in set([m.pStr(strip=True) for m in MNEM_SET]):
@@ -565,7 +565,7 @@ class APIHeaderLAS(APIHeaderBase):
                 mnemVal = self.LIS_MNEM_TO_LAS_MNEM[mnemVal]
             except KeyError:
                 pass
-            v, u = theWsd.getWsdMnem(mnemVal)
+            v, u = theWsd.get_wsd_mnemonic(mnemVal)
             if v is not None:
                 if u is not None:
                     self._plotCONS(xS, theSt, '{:s} ({:s})'.format(str(v), u))

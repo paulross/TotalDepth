@@ -3,6 +3,7 @@ import io
 import pytest
 import numpy as np
 
+import TotalDepth.LAS.core.WriteLAS
 from TotalDepth.common import LogPass, Slice
 
 
@@ -19,6 +20,7 @@ def test_log_pass_channel_ctor_str():
 def test_log_pass_channel_init_array():
     fc = LogPass.FrameChannel('GR  ', 'Gamma Ray', 'GAPI', (1,), LogPass.DEFAULT_NP_TYPE)
     fc.init_array(8)
+    assert fc.array.shape == (8, 1)
     assert len(fc) == 8
 
 
@@ -431,7 +433,7 @@ def test_log_pass_log_pass_single_frame_array_getitem_str_raises():
     )
 )
 def test_log_pass__array_reduce(array, method, expected):
-    result = LogPass.array_reduce(array, method)
+    result = TotalDepth.LAS.core.WriteLAS.array_reduce(array, method)
     assert result == expected
 
 
@@ -444,7 +446,7 @@ def test_log_pass__array_reduce(array, method, expected):
 )
 def test_log_pass__array_reduce_raises(array, method, expected):
     with pytest.raises(ValueError) as err:
-        _result = LogPass.array_reduce(array, method)
+        _result = TotalDepth.LAS.core.WriteLAS.array_reduce(array, method)
     assert err.value.args[0] == expected
 
 
@@ -457,7 +459,7 @@ def test_log_pass__array_reduce_raises(array, method, expected):
     )
 )
 def test_log_pass__stringify(value, expected):
-    result = LogPass._stringify(value)
+    result = TotalDepth.LAS.core.WriteLAS._stringify(value)
     assert result == expected
 
 
@@ -469,7 +471,7 @@ def test_log_pass__stringify(value, expected):
 )
 def test_log_pass__stringify_raises(value, expected):
     with pytest.raises(ValueError) as err:
-        _result = LogPass._stringify(value)
+        _result = TotalDepth.LAS.core.WriteLAS._stringify(value)
     assert err.value.args[0] == expected
 
 
@@ -482,14 +484,14 @@ def test_log_pass__stringify_raises(value, expected):
 )
 def test__check_float_decimal_places_format_raises(value, expected_error):
     with pytest.raises(ValueError) as err:
-        LogPass._check_float_decimal_places_format(value)
+        TotalDepth.LAS.core.WriteLAS._check_float_decimal_places_format(value)
     assert err.value.args[0] == expected_error
 
 
 def test_las_write():
     frame_array = _create_log_pass_single_frame_array(4)
     out_stream = io.StringIO()
-    LogPass.write_curve_and_array_section_to_las(
+    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
         frame_array['IDENT'],
         len(frame_array['IDENT'].x_axis),
         'first',
@@ -500,10 +502,10 @@ def test_las_write():
         out_stream
     )
     expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description           
-#---------  -----------------           
-DEPT.FEET   : Depth Dimensions: (1,)    
-GR  .GAPI   : Gamma Ray Dimensions: (1,)
+#MNEM.UNIT  Curve Description          
+#---------  -----------------          
+DEPT.FEET   : Depth Dimensions (1,)    
+GR  .GAPI   : Gamma Ray Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: IDENT description: Test FrameArray
 # All [2] original channels reproduced here.
@@ -523,7 +525,7 @@ GR  .GAPI   : Gamma Ray Dimensions: (1,)
 def test_las_write_partial():
     frame_array = _create_log_pass_single_frame_array(4)
     out_stream = io.StringIO()
-    LogPass.write_curve_and_array_section_to_las(
+    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
         frame_array['IDENT'],
         len(frame_array['IDENT'].x_axis),
         'first',
@@ -534,10 +536,10 @@ def test_las_write_partial():
         out_stream
     )
     expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description           
-#---------  -----------------           
-DEPT.FEET   : Depth Dimensions: (1,)    
-GR  .GAPI   : Gamma Ray Dimensions: (1,)
+#MNEM.UNIT  Curve Description          
+#---------  -----------------          
+DEPT.FEET   : Depth Dimensions (1,)    
+GR  .GAPI   : Gamma Ray Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: IDENT description: Test FrameArray
 # Original channels in Frame Array [   2]: DEPT,GR  
@@ -551,14 +553,14 @@ GR  .GAPI   : Gamma Ray Dimensions: (1,)
              2.0              2.0
              1.0              3.0
 """
-    print(out_stream.getvalue())
+    # print(out_stream.getvalue())
     assert out_stream.getvalue() == expected
 
 
 def test_las_write_partial_int64():
     frame_array = _create_log_pass_single_frame_array_integer(4)
     out_stream = io.StringIO()
-    LogPass.write_curve_and_array_section_to_las(
+    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
         frame_array['IDENT'],
         len(frame_array['IDENT'].x_axis),
         'first',
@@ -569,10 +571,10 @@ def test_las_write_partial_int64():
         out_stream
     )
     expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description           
-#---------  -----------------           
-DEPT.FEET   : Depth Dimensions: (1,)    
-GR  .GAPI   : Gamma Ray Dimensions: (1,)
+#MNEM.UNIT  Curve Description          
+#---------  -----------------          
+DEPT.FEET   : Depth Dimensions (1,)    
+GR  .GAPI   : Gamma Ray Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: IDENT description: Test FrameArray
 # Original channels in Frame Array [   2]: DEPT,GR  

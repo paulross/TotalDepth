@@ -627,7 +627,7 @@ class Plot(object):
         for anO in myOutS:
 #            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
             # If an output is in the LogPass we are good to go
-            if theLogPass.hasOutpMnem(anO):
+            if theLogPass.has_output_mnemonic(anO):
                 return True
         logging.info(
             'Plot.hasDataToPlotLIS():'
@@ -791,7 +791,7 @@ class Plot(object):
     def hasDataToPlotLAS(self, theLasFile, theFilmId):
         """Returns True if a call to plotLogPassLIS() is likely to lead to some
         plot data being produced."""
-        if theLasFile.numFrames() == 0:
+        if theLasFile.number_of_frames() == 0:
             # No frames no data...
             logging.info('Plot.hasDataToPlotLAS(): No frames no data...')
             return False
@@ -808,14 +808,14 @@ class Plot(object):
             str(sorted(list(myOutS)))
         ))
         logging.debug('Plot.hasDataToPlotLAS(): Available curves:\n{:s}'.format(
-            str(sorted(list(theLasFile.curveMnems())))
+            str(sorted(list(theLasFile.curve_mnemonics())))
         ))
         for anO in myOutS:
             logging.debug(
                 'Plot.hasDataToPlotLAS(): Testing output "{:s}"'.format(repr(anO))
             )
             # If an output is in the LogPass we are good to go
-            if theLasFile.hasOutpMnem(anO):
+            if theLasFile.has_output_mnemonic(anO):
                 return True
         logging.info(
             'Plot.hasDataToPlotLAS():'
@@ -888,7 +888,7 @@ class Plot(object):
             myHeadDepth,
             # theTailDepth
             Coord.Dim(0.0, 'in'),
-            plotUp=not theLasFile.logDown(),
+            plotUp=not theLasFile.is_log_down(),
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch)
         logging.info(
@@ -939,7 +939,7 @@ class Plot(object):
             retVal = self._plotCurves(theFilmId, theLasFile, myPlRo, xS)
             self._insertCommentInSVG(xS, ' Plot Curves END ', 0)
             # End timer
-            self._incTimers(timerS, theLasFile.numDataPoints() * 6, None)
+            self._incTimers(timerS, theLasFile.number_of_data_points() * 6, None)
         return retVal
     
     def _incTimers(self, theTim, theSize=0, theNewMsg=None):
@@ -975,7 +975,7 @@ class Plot(object):
         Returns number of LIS bytes read."""
         # Load the FrameSet
         logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet...')
-        myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.hasOutpMnem(m)]
+        myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.has_output_mnemonic(m)]
         logging.info('Plot._loadFrameSet(): X axis from="{:s}" to="{:s}" frame step={:d}. Channel IDs[{:d}]:\n{:s}'.format(
                 str(theXStart),
                 str(theXStop),
@@ -1182,7 +1182,7 @@ class Plot(object):
                 # this curve
                 myTxt = '{:s}'.format(myCurvCfg.mnem.pStr(strip=True))
                 # Add units if present
-                myUnits = theLpData.curveUnitsAsStr(myCurvCfg.outp)
+                myUnits = theLpData.curve_units_as_str(myCurvCfg.outp)
                 assert(myUnits is not None), 'None returned for curve: "{!r:s}"'.format(myCurvCfg.outp)
                 if len(myUnits.strip()) > 0:
                     myTxt += ' [{!r:s}]'.format(myUnits)
@@ -1255,7 +1255,7 @@ class Plot(object):
         for anO in self._retOutputChIDs(theFilmID):
             if self._presCfg.usesOutpChannel(theFilmID, anO):
                 if theLp is None \
-                or theLp.hasOutpMnem(anO):
+                or theLp.has_output_mnemonic(anO):
                     for cur in self._presCfg.outpCurveIDs(theFilmID, anO):
                         curvIdSet.add(cur)
                 else:
@@ -1298,7 +1298,7 @@ class Plot(object):
             logging.debug('Plot._plotCurves(): Plotting Output "{!r:s}"...'.format(anO))
             self._insertCommentInSVG(xS, ' Output {:s} START '.format(anO.pStr()), 1)
             if self._presCfg.usesOutpChannel(theFilmID, anO):
-                if theFrameHolder.hasOutpMnem(anO):
+                if theFrameHolder.has_output_mnemonic(anO):
                     c, n = self._plotSingleOutput(theFilmID, anO, theFrameHolder, thePlRo, xS)
                     curveS += c
                     numPoints += n
@@ -1319,7 +1319,7 @@ class Plot(object):
         """
         logging.info('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
         assert(self._presCfg.usesOutpChannel(theFilmID, theOutpID))
-        assert(theFrameHolder.hasOutpMnem(theOutpID))
+        assert(theFrameHolder.has_output_mnemonic(theOutpID))
         # Given an output ID select all curve IDs and iterate through their
         # X/v points and scale them accordingly; X by the X axis scale and v by
         # the tracValueFunction() and the track dimensions. Finally assemble
@@ -1333,9 +1333,9 @@ class Plot(object):
         numPoints = 0
         numMathErrors = 0
         if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
-        for x, v in theFrameHolder.genOutpPoints(theOutpID):
+        for x, v in theFrameHolder.gen_output_points(theOutpID):
             # If v is a null or absent value then flush the buffer and start again
-            if v == theFrameHolder.nullValue:
+            if v == theFrameHolder.null_value:
                 for cuPlot in myCurvPlotS:
                     self._flushPolyLineBuffer(cuPlot, xS)
                 continue
@@ -1364,11 +1364,11 @@ class Plot(object):
                             pt,
                             myCuPlot.prevWrap,
                             wr,
-                            theFrameHolder.xAxisUnits,
+                            theFrameHolder.x_axis_units,
                         )
                     if not myCuPlot.fn.offScale(wr):
                         # Add to the buffer
-                        myCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(x, theFrameHolder.xAxisUnits), pt))
+                        myCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(x, theFrameHolder.x_axis_units), pt))
                     myCuPlot.prevWrap = wr
                     ptPrevS[cuIdx] = pt
             xPrev = x

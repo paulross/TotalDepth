@@ -28,6 +28,7 @@ import sys
 import time
 import typing
 
+import TotalDepth.LAS.core.WriteLAS
 import TotalDepth.common
 from TotalDepth.LAS.core import WriteLAS, LASConstants
 from TotalDepth.LIS import ExceptionTotalDepthLIS
@@ -75,11 +76,7 @@ def write_las_header(input_file: str,
         ['SOURCE.', f'{os.path.basename(input_file)}', ': LIS File Name'],
         ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the LIS file'],
     ]
-    rows = TotalDepth.common.data_table.format_table(table, pad='  ', left_flush=True)
-    ostream.write('~Version Information Section\n')
-    for row in rows:
-        ostream.write(row)
-        ostream.write('\n')
+    WriteLAS.write_table(table, '~Version Information Section', ostream)
 
 
 class LisLogicalFile:
@@ -112,21 +109,12 @@ class LisLogicalFile:
 def stringify(value: typing.Any, float_format: str) -> str:
     """Convert an object to a string respecting the requested floating point format."""
     if isinstance(value, bytes):
-        value_str = value.decode('ascii', 'ignore')
+        value_str = value.replace(b'\x00', b' ').decode('ascii', 'ignore')
     elif isinstance(value, float):
         value_str = f'{value:{float_format}}'
     else:
         value_str = str(value)
     return value_str
-
-
-def write_table(section: str, table: typing.List[typing.List[str]], out_stream: typing.TextIO) -> None:
-    """For a given LAS section then format the table and write it out to the stream."""
-    out_stream.write(f'{section}\n')
-    rows = TotalDepth.common.data_table.format_table(table, pad='  ', left_flush=True)
-    for row in rows:
-        out_stream.write(row)
-        out_stream.write('\n')
 
 
 def _units_from_logical_record_table_row(row: LogiRec.TableRow) -> bytes:
@@ -168,7 +156,7 @@ def write_well_information_section(lis_logical_file: LisLogicalFile,
         ],
         [
             f'NULL.',
-            f'{log_pass.nullValue:{float_format}}',
+            f'{log_pass.null_value:{float_format}}',
             ': NULL VALUE',
         ],
     ]
@@ -187,7 +175,7 @@ def write_well_information_section(lis_logical_file: LisLogicalFile,
                 value_str = stringify(value, float_format)
                 desc = LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS[row_name_bytes]
                 table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}', ])
-    write_table('~Well Information Section', table, out_stream)
+    WriteLAS.write_table(table, '~Well Information Section', out_stream)
 
 
 def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream: typing.TextIO) -> None:
@@ -223,7 +211,7 @@ def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream
                 f': {desc} '
             ]
         )
-    write_table('~Curve Information Section', table, out_stream)
+    WriteLAS.write_table(table, '~Curve Information Section', out_stream)
 
 
 def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_format: str, out_stream: typing.TextIO) -> None:
@@ -238,6 +226,7 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
         for row_name_bytes in logical_record.genRowNames(sort=1):
             row: LogiRec.TableRow = logical_record.retRowByMnem(Mnem.Mnem(row_name_bytes))
             if row_name_bytes not in LASConstants.WELL_SITE_MNEMONIC_DESCRIPTIONS:
+                mnem_str = row_name_bytes.replace(b'\x00', b' ').decode("ascii")
                 units = _units_from_logical_record_table_row(row).decode("ascii")
                 try:
                     value = row[b'VALU'].value
@@ -245,8 +234,8 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
                     value = 'N/A'
                 value_str = stringify(value, float_format)
                 desc = LASConstants.PARAMETER_MNEM_DESCRIPTION.get(row_name_bytes, 'N/A')
-                table.append([f'{row_name_bytes.decode("ascii")}.{units}', value_str, f': {desc}',])
-    write_table('~Parameter Information Section', table, out_stream)
+                table.append([f'{mnem_str}.{units}', value_str, f': {desc}',])
+    WriteLAS.write_table(table, '~Parameter Information Section', out_stream)
 
 
 def write_array_section(lis_logical_file: LisLogicalFile, array_reduction: str, field_width: int, float_format: str,
@@ -271,7 +260,7 @@ def write_array_section(lis_logical_file: LisLogicalFile, array_reduction: str, 
         for channel_index in range(frame_set.numChannels):
             for sub_channel_index in range(frame_set.numSubChannels(channel_index)):
                 values = frame_set.frame_channel_sub_channel_values(frame_index, channel_index, sub_channel_index)
-                value = LogPass.array_reduce(values, array_reduction)
+                value = TotalDepth.LAS.core.WriteLAS.array_reduce(values, array_reduction)
                 out_stream.write(f'{stringify(value, float_format):>{field_width}}')
         out_stream.write('\n')
 
@@ -326,11 +315,12 @@ def single_lis_file_to_las(path_in: str,
                            float_format: str,
                            ) -> WriteLAS.LASWriteResult:
     logger.info(f'single_lis_file_to_las(): path_in: {path_in} path_out: {path_out}')
-    assert array_reduction in TotalDepth.common.LogPass.ARRAY_REDUCTIONS, f'{array_reduction} not in {TotalDepth.common.LogPass.ARRAY_REDUCTIONS}'
+    assert array_reduction in TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS, \
+        f'{array_reduction} not in {TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS}'
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     sum_path_out = las_file_count = 0
     if not bin_file_type.is_lis_file_type(binary_file_type):
-        return WriteLAS.LASWriteResult(path_in, os.path.getsize(path_in), sum_path_out, las_file_count, 0.0, False,
+        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out, las_file_count, 0.0, False,
                                        True)
     clock_start = time.perf_counter()
     try:
@@ -357,20 +347,20 @@ def single_lis_file_to_las(path_in: str,
             logical_file_entries.append(logical_file)
         logger.info('LIS Logical Files: %s',  logical_file_entries)
         for l, lis_logical_file in enumerate(logical_file_entries):
-            try:
-                sum_path_out = write_las_file(path_in, array_reduction, path_out, frame_slice, channels, field_width,
-                                              float_format,
-                                              lis_file, l, lis_logical_file)
-                las_file_count += 1
-            except Exception as error:
-                logger.exception(f'Unable to write LAS file with error {error}')
-        return WriteLAS.LASWriteResult(path_in, os.path.getsize(path_in), sum_path_out, las_file_count,
+            # try:
+            sum_path_out = write_las_file(path_in, array_reduction, path_out, frame_slice, channels, field_width,
+                                          float_format,
+                                          lis_file, l, lis_logical_file)
+            las_file_count += 1
+            # except Exception as error:
+            #     logger.exception(f'Unable to write LAS file with error {error}')
+        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out, las_file_count,
                                        time.perf_counter() - clock_start, False, False)
     except ExceptionTotalDepthLIS as error:
         logger.error(f'Could not convert file {path_in} to LAS with error: {error}')
     except Exception as error:
         logger.exception(f'Unable to write LAS file with error {error}')
-    return WriteLAS.LASWriteResult(path_in, os.path.getsize(path_in), sum_path_out, las_file_count,
+    return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out, las_file_count,
                                    time.perf_counter() - clock_start, True, False)
 
 
@@ -426,7 +416,7 @@ def main():
         '--array-reduction', type=str,
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='first',
-        choices=list(sorted(TotalDepth.common.LogPass.ARRAY_REDUCTIONS)),
+        choices=list(sorted(TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS)),
     )
     parser.add_argument(
         '--channels', type=str,

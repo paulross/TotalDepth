@@ -20,7 +20,7 @@
 """TotalDepth.LAS: Processing of LAS files.
 """
 
-__all__ = ['core', ]
+__all__ = ['core', 'ExceptionTotalDepthLAS']
 
 VERSION = (0, 1, 0)
 
@@ -30,6 +30,7 @@ RELEASE_NOTES = [
 ]
 
 from TotalDepth import ExceptionTotalDepth
+
 
 class ExceptionTotalDepthLAS(ExceptionTotalDepth):
     """Simple specialisation of an exception class for TotalDepth.LAS."""
