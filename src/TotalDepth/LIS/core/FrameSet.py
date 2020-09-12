@@ -1106,7 +1106,7 @@ class FrameSet(object):
         If chIsExt is True then ch is the external channel index otherwise
         it is the internal index."""
         assert(0)
-        if self.numFrames > 0 and len(theChScS) > 0:
+        if self.number_of_frames > 0 and len(theChScS) > 0:
             if chIsExt:
                 # Internalise channel index
                 myChScS = [(self.internalChIdx(cs[0]), cs[1]) for cs in theChScS]

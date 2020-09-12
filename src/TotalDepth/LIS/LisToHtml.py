@@ -693,7 +693,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 ('Interval',    '{} ({:s})'.format(interval, myOptUnitStr)),
                 ('Total number of frames',    '{:d}'.format(myLp.rle.totalFrames())),
                 ('Overall frame spacing',    '{} ({:s})'.format(spacing_optical, myOptUnitStr)),
-                ('Original recording units',    '{!r:s}'.format(myLp.xAxisUnits)),
+                ('Original recording units',    '{!r:s}'.format(myLp.x_axis_units)),
             ]
             self._HTMLKeyValTable(theS, myFrInfo, fieldTitle='')
         else:

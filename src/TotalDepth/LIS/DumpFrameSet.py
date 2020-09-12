@@ -75,7 +75,7 @@ def dump_frame_sets(fp, keep_going, summary_only, channels):
                         )
                     )
                 print('\t'.join(headers))
-                for frIdx in range(frame_set.numFrames):
+                for frIdx in range(frame_set.number_of_frames):
                     if frame_set.isIndirectX:
                         print(frame_set.xAxisValue(frIdx), '\t', end='')
                     if len(indexes):
