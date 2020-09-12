@@ -1832,9 +1832,9 @@ def test_with_numeric_channels_when_raise_on_error_true_fails_on_curve_read():
     expected = (
         'Can not add member, line 15 error:'
         ' Can not decompose line "4          CHDE_NC.%  00 000 00 00:   6"'
-        ' with results: None, <re.Match object; span=(0, 15), match=\'%  00 000 00 00\'>'
+        ' with results: None,'
     )
-    assert err.value.args[0] == expected
+    assert err.value.args[0].startswith(expected)
 
 
 def test_time_date_channels():
