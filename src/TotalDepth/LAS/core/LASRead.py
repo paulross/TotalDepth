@@ -225,9 +225,10 @@ class LASSection:
             ),
     }
 
-    def __init__(self, section_type: str):
+    def __init__(self, section_type: str, raise_on_error: bool = True):
         # assert(section_type in SECT_TYPES)
         self.type = section_type
+        self.raise_on_error = raise_on_error
         # One entry per line
         self.members: typing.List[SectLine] = []
         # {MNEM : ordinal, ...} for those sections that have it
@@ -345,13 +346,14 @@ class LASSectionArray(LASSection):
     TIME_FORMATS_SUPPORTED = ('%H:%M:%S',)
 
     def __init__(self, section_type: str, wrap: bool, curve_section: LASSection,
-                 null: typing.Union[int, float] = -999.25):
+                 null: typing.Union[int, float] = -999.25, raise_on_error: bool = True):
         assert (section_type == 'A')
         self._wrap = wrap
         # Accumulation of array values when un-wrapping
-        self._unwrapBuf = []
-        self._mnemUnitS = list(zip(curve_section.mnemonics(), curve_section.units()))
-        super().__init__(section_type)
+        self._unwrap_buffer = []
+        self._mnemonics_units = list(zip(curve_section.mnemonics(), curve_section.units()))
+        self._duplicate_column_indexes: typing.Set[int] = set()
+        super().__init__(section_type, raise_on_error)
         self._null = null
         # TODO: If we have STRT, STOP and STEP we can predict the  length of the array section and initialise a
         # FrameArray before adding member lines.
@@ -362,30 +364,34 @@ class LASSectionArray(LASSection):
         # before.
         self.frame_array = LogPass.FrameArray(self.type, self.type)
         try:
-            for mnemonic, units in self._mnemUnitS:
-                if mnemonic == 'DATE' and units == 'D':
-                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
-                elif mnemonic == 'TIME' and units == 'HHMMSS':
-                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
+            for channel_index, (mnemonic, units) in enumerate(self._mnemonics_units):
+                if self.frame_array.has(mnemonic) and not self.raise_on_error:
+                    self._duplicate_column_indexes.add(channel_index)
+                    logger.warning('Populating Frame Array, ignoring duplicate channel %s', mnemonic)
                 else:
-                    channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), LogPass.DEFAULT_NP_TYPE)
-                self.frame_array.append(channel)
+                    if mnemonic == 'DATE' and units == 'D':
+                        channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
+                    elif mnemonic == 'TIME' and units == 'HHMMSS':
+                        channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), np.dtype('O'))
+                    else:
+                        channel = LogPass.FrameChannel(mnemonic, mnemonic, units, (1,), LogPass.DEFAULT_NP_TYPE)
+                    self.frame_array.append(channel)
         except LogPass.ExceptionLogPassBase as err:
             raise ExceptionLASReadSection(str(err)) from err
 
     def _add_buffer(self, line_number: int) -> None:
         """Adds the temporary buffer to the array. This is associated with the given line number."""
-        if len(self._unwrapBuf) > 0:
-            if len(self._unwrapBuf) != len(self._mnemUnitS):
+        if len(self._unwrap_buffer) > 0:
+            if len(self._unwrap_buffer) != len(self._mnemonics_units):
                 raise ExceptionLASReadSectionArray(
                     'Line [{:d}] buffer length miss-match, frame length {:d} which should be length {:d}'.format(
                         line_number,
-                        len(self._unwrapBuf),
-                        len(self._mnemUnitS),
+                        len(self._unwrap_buffer),
+                        len(self._mnemonics_units),
                     )
                 )
-            self.members.append(self._unwrapBuf)
-            self._unwrapBuf = []
+            self.members.append(self._unwrap_buffer)
+            self._unwrap_buffer = []
 
     def _convert_value(self, channel: LogPass.FrameChannel, value: str, line_number: int) -> typing.Any:
         """Convert a value to a float, date or time. If the conversion is not successful then self._null, None, None are
@@ -426,8 +432,15 @@ class LASSectionArray(LASSection):
         """Process a line in an array section."""
         # Convert to float inserting null where that can not be done
         values = []
-        for channel_index, value in enumerate(line.strip().split()):
-            values.append(self._convert_value(self.frame_array[channel_index], value, line_number))
+        channel_index = 0
+        for column_index, value in enumerate(line.strip().split()):
+            if column_index not in self._duplicate_column_indexes:
+                if channel_index >= len(self.frame_array):
+                    raise ExceptionLASRead(
+                        f'Expected {len(self.frame_array)} channels but found {column_index + 1} in line {line_number}'
+                    )
+                values.append(self._convert_value(self.frame_array[channel_index], value, line_number))
+                channel_index += 1
         # Add it to the members
         if len(values) > 0:
             if not self._wrap:
@@ -438,11 +451,11 @@ class LASSectionArray(LASSection):
     def _add_member_with_wrap_mode(self, line_number: int, line: str, values: typing.List[typing.Any]) -> None:
         """Addes a line in wrap mode."""
         assert self._wrap
-        if len(self._unwrapBuf) == 0:
+        if len(self._unwrap_buffer) == 0:
             # Add the index, raise if there is more than one item on the line
             # We add to the buffer until the length matches the len(self._mnemUnitS)
             if len(values) == 1:
-                self._unwrapBuf.append(values[0])
+                self._unwrap_buffer.append(values[0])
             else:
                 # Abandon existing data
                 self.members = []
@@ -452,14 +465,14 @@ class LASSectionArray(LASSection):
                     ))
         else:
             # Add to buffer
-            self._unwrapBuf.extend(values)
+            self._unwrap_buffer.extend(values)
             # Is buffer complete or has overflowed?
-            if len(self._unwrapBuf) == len(self._mnemUnitS):
+            if len(self._unwrap_buffer) == len(self._mnemonics_units):
                 self._add_buffer(line_number)
-            elif len(self._unwrapBuf) > len(self._mnemUnitS):
+            elif len(self._unwrap_buffer) > len(self._mnemonics_units):
                 raise ExceptionLASReadSectionArray(
                     'Line [{:d}] array overflow; frame length {:d} which should be length {:d}'.format(
-                        line_number, len(self._unwrapBuf), len(self._mnemUnitS),
+                        line_number, len(self._unwrap_buffer), len(self._mnemonics_units),
                     ))
 
     def __getitem__(self, key) -> LogPass.FrameChannel:
@@ -487,8 +500,11 @@ class LASSectionArray(LASSection):
                             raise ExceptionLASRead(
                                 f'Expected {len(self.frame_array)} channels but found {len(member_frame)} in frame {f}'
                             )
-                        for c, channel_value in enumerate(member_frame):
-                            self.frame_array[c][f] = channel_value
+                        channel_num = 0
+                        for column_number, channel_value in enumerate(member_frame):
+                            if column_number not in self._duplicate_column_indexes:
+                                self.frame_array[channel_num][f] = channel_value
+                                channel_num += 1
                     # Free up temporary members
                     for member in self.members:
                         member.clear()
@@ -500,7 +516,7 @@ class LASSectionArray(LASSection):
 
     def frame_size(self):
         """Returns the number of data points in a frame."""
-        return len(self._mnemUnitS)
+        return len(self._mnemonics_units)
 
 
 class LASBase:
@@ -775,7 +791,7 @@ class LASRead(LASBase):
                         else:
                             _consume_section(gen)
                     else:
-                        section = LASSection(line[1])
+                        section = LASSection(line[1], raise_on_error = self.raise_on_error)
                         self._add_members_to_section(gen, section)
                         self._finalise_section_and_add(section)
                 else:
@@ -835,7 +851,8 @@ class LASRead(LASBase):
             curve_index += 1
         if curve_index > len(self._sections)-1:
             raise ExceptionLASRead('No curve section to describe array section.')
-        array_section = LASSectionArray(match.group(1), self._wrap, self._sections[curve_index])
+        # TODO: Pass in NULL
+        array_section = LASSectionArray(match.group(1), self._wrap, self._sections[curve_index], raise_on_error=self.raise_on_error)
         for i, line in gen:
             # Bail out if start of new section
             if line.startswith('~'):

@@ -121,10 +121,10 @@ class ReadLASFiles:
             logger.error('File: "{:s}", Error: {!r:s}'.format(file_path, err))
             logger.exception('File: "{:s}", Error [{!r:s}]: {!r:s}'.format(file_path, type(err), err))
             self.counters['erro'] += 1
-        # except Exception as err:
-        #     logger.critical('File: "{:s}", Error: {!r:s}'.format(file_path, err))
-        #     logger.exception('File: "{:s}", Error [{!r:s}]: {!r:s}'.format(file_path, type(err), err))
-        #     self.counters['crit'] += 1
+        except Exception as err:
+            logger.critical('File: "{:s}", Error: {!r:s}'.format(file_path, err))
+            logger.exception('File: "{:s}", Error [{!r:s}]: {!r:s}'.format(file_path, type(err), err))
+            self.counters['crit'] += 1
         self.counters['file'] += 1
         return file_size, exec_time
     
@@ -238,6 +238,7 @@ class ReadLASFiles:
     def pprint_unit_description(self, out_stream: typing.TextIO = sys.stdout):
         out_stream.write(' Channels and their Units '.center(75, '-'))
         out_stream.write('\n')
+        out_stream.write('{\n')
         for mnemonic in sorted(self.unit_description_map.menmonics()):
             # description = self.unit_description_map.most_popular_description(mnemonic)
             out_stream.write(
@@ -246,7 +247,7 @@ class ReadLASFiles:
                 )
             )
         out_stream.write('}\n')
-        out_stream.write(' DONE: Units and the channels that use them '.center(75, '-'))
+        out_stream.write(' DONE: Channels and their Units '.center(75, '-'))
         out_stream.write('\n')
 
     def pprint_size_time(self, out_stream=sys.stdout):

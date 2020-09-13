@@ -23,6 +23,7 @@ Created on Jan 11, 2012
 
 @author: paulross
 """
+import datetime
 import io
 
 import numpy as np
@@ -419,7 +420,7 @@ def test_simple_curve_and_empty_array_section():
         ('NPHI', 'V/V'),
         ('ILD', 'OHMM'),
     ]
-    assert las_array_section._mnemUnitS == expected
+    assert las_array_section._mnemonics_units == expected
 
 
 def test_simple_curve_and_array_section_no_wrap_members():
@@ -1761,7 +1762,7 @@ GR  .API  00 000 00 00:   6
 """)
     with pytest.raises(LASRead.ExceptionLASRead) as err:
         LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
-    assert err.value.args[0] == 'Expected 2 channels but found 3 in frame 0'
+    assert err.value.args[0] == 'Expected 2 channels but found 3 in line 17'
 
 
 def test_array_underrun():
@@ -1822,7 +1823,7 @@ def test_with_numeric_channels_when_raise_on_error_false_fails_on_overrun():
     las_raw_file = io.StringIO(LAS_WITH_NUMERIC_CHANNELS_MINIMAL)
     with pytest.raises(LASRead.ExceptionLASRead) as err:
         LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
-    assert err.value.args[0] == 'Expected 2 channels but found 10 in frame 0'
+    assert err.value.args[0] == 'Expected 2 channels but found 3 in line 26'
 
 
 def test_with_numeric_channels_when_raise_on_error_true_fails_on_curve_read():
@@ -1875,7 +1876,10 @@ RUN  .        1                          :Run Number
 23:05:54 15-Dec-06  1803.2001     1.0000   214.8267
 """)
     las_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=True)
-    assert 0
+    frame_array = las_file.frame_array
+    assert len(frame_array) == 5
+    assert frame_array['TIME'].array[0] == datetime.time(23, 5, 4)
+    assert frame_array['DATE'].array[0] == datetime.date(2006, 12, 15)
 
 
 @pytest.mark.parametrize(
@@ -2019,6 +2023,55 @@ Some stuff here.
 """
     las_raw_file = io.StringIO(las_text)
     las_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=True)
+
+
+def test_duplicate_curve_ignored_when_raise_on_error_false():
+    las_raw_file = io.StringIO("""~Version Information
+VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+WRAP.                      NO: One line per depth step
+~Well Information Block
+#MNEM.UNIT                 Value                       Information
+#------------              -----                       -----------
+STRT.M                        1670                    :START
+STOP.M                        1670                    :STOP
+STEP.M                         0.5                    :STEP
+NULL.                     -999.25                     :NULL VALUE
+~Curve Information
+#MNEM   .UNIT             API CODE Curve Description
+#------------             -------- -----------------
+DEPTH   .M            00 001 00 00:   0  Depth
+GR  .API  00 000 00 00:   6
+GR  .API  00 000 00 00:   6
+~A
+      1670 123
+""")
+    las_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
+    assert len(las_file) == 4
+
+
+def test_duplicate_curve_raises_when_raise_on_error_true():
+    las_raw_file = io.StringIO("""~Version Information
+VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+WRAP.                      NO: One line per depth step
+~Well Information Block
+#MNEM.UNIT                 Value                       Information
+#------------              -----                       -----------
+STRT.M                        1670                    :START
+STOP.M                        1670                    :STOP
+STEP.M                         0.5                    :STEP
+NULL.                     -999.25                     :NULL VALUE
+~Curve Information
+#MNEM   .UNIT             API CODE Curve Description
+#------------             -------- -----------------
+DEPTH   .M            00 001 00 00:   0  Depth
+GR  .API  00 000 00 00:   6
+GR  .API  00 000 00 00:   6
+~A
+      1670 123
+""")
+    with pytest.raises(LASRead.ExceptionLASRead) as err:
+        LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=True)
+    assert err.value.args[0] == 'Duplicate channel identity "GR"'
 
 
 # Examples from LAS VERSION 2.0 September 25, 1992
