@@ -1,3 +1,4 @@
+import os
 import typing
 
 from TotalDepth.util import XmlWrite
@@ -54,3 +55,25 @@ def html_write_table(table_as_strings: typing.List[typing.List[str]],
                         with XmlWrite.Element(xhtml_stream, 'td', {'class': class_style}):
                             assert isinstance(cell, str), f'{cell} is not a string but {type(cell)}'
                             xhtml_stream.charactersWithBr(cell)
+
+
+# Creating an index.html that presents the directory structure as a table.
+
+class IndexHTML:
+
+    def __init__(self, headings: typing.List[str]):
+        self.headings = headings[:]
+        self.index = {}
+
+    def add(self, path, *args) -> None:
+        norm_path = os.path.abspath(path)
+        if norm_path in self.index:
+            raise ValueError(f'Duplicate path {norm_path}')
+        if len(args) != len(self.headings):
+            raise ValueError(f'Got {len(args)} values but expected {len(self.headings)}')
+        self.index[norm_path] = args[:]
+
+    def commonpath(self) ->str:
+        return os.path.commonpath(self.index.keys())
+
+

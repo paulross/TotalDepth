@@ -98,6 +98,7 @@ def has_las_extension(fp):
 
 
 #: Regex to match a comment
+#: Section 5.1 of "LAS Version 2.0: A Digital Standard for Logs, Update February 2017"
 RE_COMMENT = re.compile(r'^\s*#(.*)$')
 
 
@@ -106,20 +107,18 @@ DEBUG_LINE_BY_LINE = False
 
 
 def generate_lines(text_file):
-    """Given an file-like object this generates non-blank, non-comment lines.
+    """
+    Given an file-like object this generates non-blank, non-comment lines.
     It's a co-routine so can accept a line to put back.
     """
     line_number = 1
     while 1:
         line = text_file.readline()
         # logger.debug call here can add about 50% of the processing time
-        if DEBUG_LINE_BY_LINE:
-            logger.debug('[{:08d}]: {:s}'.format(line_number, line.replace('\n', '\\n')))
+        if DEBUG_LINE_BY_LINE: logger.debug('[{:08d}]: {:s}'.format(line_number, line.replace('\n', '\\n')))
         if len(line) == 0:
             break
         if line != '\n' and not RE_COMMENT.match(line):
-            if line.find('#') != -1:
-                line = line[:line.find('#')] + '\n'
             line = yield line_number, line
             if line is not None:
                 # Recycle it
@@ -431,22 +430,23 @@ class LASSectionArray(LASSection):
     def add_member_line(self, line_number: int, line: str) -> None:
         """Process a line in an array section."""
         # Convert to float inserting null where that can not be done
-        values = []
-        channel_index = 0
-        for column_index, value in enumerate(line.strip().split()):
-            if column_index not in self._duplicate_column_indexes:
-                if channel_index >= len(self.frame_array):
-                    raise ExceptionLASRead(
-                        f'Expected {len(self.frame_array)} channels but found {column_index + 1} in line {line_number}'
-                    )
-                values.append(self._convert_value(self.frame_array[channel_index], value, line_number))
-                channel_index += 1
+        # values = []
+        # channel_index = 0
+        # for column_index, value in enumerate(line.strip().split()):
+        #     if column_index not in self._duplicate_column_indexes:
+        #         if channel_index >= len(self.frame_array):
+        #             raise ExceptionLASRead(
+        #                 f'Expected {len(self.frame_array)} channels but found {column_index + 1} in line {line_number}'
+        #             )
+        #         values.append(self._convert_value(self.frame_array[channel_index], value, line_number))
+        #         channel_index += 1
+        values = line.strip().split()
         # Add it to the members
         if len(values) > 0:
-            if not self._wrap:
-                self.members.append(values)
-            else:
+            if self._wrap:
                 self._add_member_with_wrap_mode(line_number, line, values)
+            else:
+                self.members.append(values)
 
     def _add_member_with_wrap_mode(self, line_number: int, line: str, values: typing.List[typing.Any]) -> None:
         """Addes a line in wrap mode."""
@@ -483,28 +483,44 @@ class LASSectionArray(LASSection):
         """Number of members."""
         return len(self.frame_array)
 
+    def create_index(self):
+        """Creates an index of {key : ordinal, ...}.
+        key is the first object in each member. This will be a MNEM for most
+        sections but a depth as a float for an array section."""
+        self.mnemonic_index_map: typing.Dict[typing.Union[str, float], int] = {}
+        if self.frame_array and len(self.frame_array):
+            for i, x_value in enumerate(self.frame_array.x_axis):
+                key = x_value[0]
+                if key in self.mnemonic_index_map:
+                    if self.raise_on_error:
+                        raise ExceptionLASRead(f'Duplicate Xaxis value {key} in frame {i}')
+                    logger.warning('Duplicate Xaxis value %f in frame %d', key, i)
+                else:
+                    self.mnemonic_index_map[key] = i
+
     def finalise(self):
         """Finalisation."""
-        # TODO: If this raises then do we still continue with the FrameArray?
-        # TODO: See test_simple_curve_and_array_section_with_wrap_1_missing_value_raises_b()
         try:
             self._add_buffer(-1)
         finally:
-            self.create_index()
-            # TODO: Make a TotalDepth.common.LogPass.FrameArray and get rid of the members. Need to overload __getitem__.
             if len(self.members):
                 try:
                     self.frame_array.init_arrays(len(self.members))
-                    for f, member_frame in enumerate(self.members):
-                        if len(member_frame) != len(self.frame_array):
+                    expected_number_of_columns = len(self.frame_array) + len(self._duplicate_column_indexes)
+                    for frame_number, member_frame in enumerate(self.members):
+                        if len(member_frame) != expected_number_of_columns:
                             raise ExceptionLASRead(
-                                f'Expected {len(self.frame_array)} channels but found {len(member_frame)} in frame {f}'
+                                f'Expected {expected_number_of_columns} columns'
+                                f' but found {len(member_frame)} in frame {frame_number}'
                             )
-                        channel_num = 0
-                        for column_number, channel_value in enumerate(member_frame):
-                            if column_number not in self._duplicate_column_indexes:
-                                self.frame_array[channel_num][f] = channel_value
-                                channel_num += 1
+                        channel_index = 0
+                        for column_index, value in enumerate(member_frame):
+                            if column_index not in self._duplicate_column_indexes:
+                                self.frame_array[channel_index][frame_number] = self._convert_value(
+                                    self.frame_array[channel_index], value, frame_number
+                                )
+                                channel_index += 1
+                    self.create_index()
                     # Free up temporary members
                     for member in self.members:
                         member.clear()

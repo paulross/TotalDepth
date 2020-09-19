@@ -563,4 +563,4 @@ def binary_file_type_from_path(path: str) -> str:
 
 
 def format_bytes(by: bytes) -> str:
-    return f'{xxd.xxd(by):{xxd.xxd_size(len(by))}s}'
+    return xxd.xxd(by)

@@ -152,9 +152,15 @@ class FrameChannel:
             products.append(range(d))
         return itertools.product(*products)
 
-    def mask_array(self, absent_value: typing.Union[int, float]) -> None:
+    def mask_array(self, absent_value: typing.Union[None, int, float]) -> None:
         """Masks the absent values."""
-        self.array = AbsentValue.mask_absent_values(self.array, absent_value)
+        # self.array = AbsentValue.mask_absent_values(self.array, absent_value)
+        if np.issubdtype(self.array.dtype, np.floating):
+            self.array = AbsentValue.mask_absent_values(self.array, float(absent_value))
+        elif np.issubdtype(self.array.dtype, np.integer):
+            self.array = AbsentValue.mask_absent_values(self.array, int(absent_value))
+        elif np.issubdtype(self.array.dtype, np.dtype(object).type):
+            self.array = AbsentValue.mask_absent_values(self.array, None)
 
 
 class FrameArray:
@@ -248,12 +254,7 @@ class FrameArray:
     def mask_array(self, absent_value: typing.Union[int, float]) -> None:
         """Mask the absent values in all but the index channels."""
         for i in range(1, len(self)):
-            if np.issubdtype(self.channels[i].array.dtype, np.floating):
-                self.channels[i].mask_array(float(absent_value))
-            elif np.issubdtype(self.channels[i].array.dtype, np.integer):
-                self.channels[i].mask_array(int(absent_value))
-            elif np.issubdtype(self.channels[i].array.dtype, np.dtype(object).type):
-                self.channels[i].mask_array(None)
+            self.channels[i].mask_array(absent_value)
 
 
 class LogPass:

@@ -17,7 +17,7 @@ def absent_value_from_array(array: np.ndarray) -> typing.Union[float, int, None]
         return ABSENT_VALUE_FLOAT
 
 
-def mask_absent_values(array: np.ndarray, null_value: typing.Union[None, int, float] = None) -> np.ndarray:
+def mask_absent_values(array: np.ndarray, absent_value: typing.Union[None, int, float] = None) -> np.ndarray:
     """Return a view on an array with the absent values masked out."""
     # data pointer: array.__array_interface__['data'][0]
     # New array
@@ -26,11 +26,11 @@ def mask_absent_values(array: np.ndarray, null_value: typing.Union[None, int, fl
     # marr2 = arr.view(np.ma.MaskedArray)
     # marr2.mask = arr == 3
     ret = array.view(np.ma.MaskedArray)
-    if null_value is None:
-        _null_value = absent_value_from_array(array)
+    if absent_value is None:
+        mask_value = absent_value_from_array(array)
     else:
-        _null_value = null_value
-    ret.mask = (array == _null_value)
+        mask_value = absent_value
+    ret.mask = (array == mask_value)
     # Check that we have not created a new array but a view on the original one.
     assert ret.__array_interface__['data'][0] == array.__array_interface__['data'][0]
     return ret

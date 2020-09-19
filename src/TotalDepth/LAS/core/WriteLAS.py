@@ -9,7 +9,7 @@ import numpy as np
 
 import TotalDepth.common
 from TotalDepth.common import data_table, Slice
-from TotalDepth.common.LogPass import FrameArray, logger
+from TotalDepth.common.LogPass import FrameArray
 from TotalDepth.util import DirWalk, gnuplot
 
 
@@ -47,8 +47,16 @@ LAS_DATE_FORMAT_TEXT = 'YYYY-mm-dd HH MM SS.us UTC'
 class UnitValueDescription(typing.NamedTuple):
     """Class for accumulating data from PARAMETER tables and Well Information sections."""
     unit: str
-    value: str
-    desc: str  # description can not have ':' in it as that will be treated as a seperator.
+    # value and description can not have:
+    # A ':' in it as that will be treated as a seperator.
+    # NOTE: An '#' in it is allowed as the comments are whitespace, '#' ...
+    # See Section 5.1 of "LAS Version 2.0: A Digital Standard for Logs, Update February 2017"
+    val: str
+    desc: str
+
+    @property
+    def value(self) -> str:
+        return self.val.replace(':', ' ')
 
     @property
     def description(self) -> str:
@@ -152,7 +160,9 @@ def process_to_las(args: argparse.PARSER, file_conversion_function: typing.Calla
         )
     else:
         if args.log_process > 0.0:
-            with TotalDepth.common.process.log_process(args.log_process):
+            # FIXME: log_level
+            log_level = 40
+            with TotalDepth.common.process.log_process(args.log_process, log_level):
                 result = convert_dir_or_file_to_las(
                     args.path_in,
                     args.path_out,
@@ -185,7 +195,6 @@ def las_size_input_output(result: typing.Dict[str, LASWriteResult]) -> typing.Tu
         size_input += result[path].size_input
         size_output += result[path].size_output
     return size_input, size_output
-
 
 
 def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: str) -> int:

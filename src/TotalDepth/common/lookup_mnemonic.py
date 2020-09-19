@@ -238,9 +238,9 @@ def _parse_url_to_beautiful_soup(url: str) -> BeautifulSoup:
     logger.info('Parsing URL %s', url)
     try:
         response = requests.get(url)
-    except requests.exceptions.ConnectionError as err:
+    except requests.exceptions.ConnectionError as err:  # pragma: no cover
         raise ExceptionLookupMnemonicReadURL(f'URP request {url} raised: {err}')
-    if response.status_code != 200:
+    if response.status_code != 200:  # pragma: no cover
         raise ExceptionLookupMnemonicReadURL(f'URP request {url} failed: {response.status_code}')
     logger.info('Parsed %d bytes from URL %s ', len(response.text), url)
     parse_tree = BeautifulSoup(response.text, features='lxml')
@@ -249,13 +249,13 @@ def _parse_url_to_beautiful_soup(url: str) -> BeautifulSoup:
 
 def _decompose_table_to_key_value(parse_tree: BeautifulSoup, table_id: str) -> typing.Dict[str, str]:
     tables = parse_tree.find_all('table', id=table_id)
-    if len(tables) != 1:
+    if len(tables) != 1:  # pragma: no cover
         raise ExceptionLookupMnemonicTable('Multiple tables')
     table = tables[0]
     ret = {}
     for row in table.find_all('tr'):
         cells = row.find_all('td')
-        if len(cells) != 2:
+        if len(cells) != 2:  # pragma: no cover
             raise ExceptionLookupMnemonicReadTable(f'Expected two cells but found {len(cells)}')
         ret[cells[0].text.strip()] = cells[1].text.strip()
     return ret
@@ -263,18 +263,18 @@ def _decompose_table_to_key_value(parse_tree: BeautifulSoup, table_id: str) -> t
 
 def _decompose_table_by_header_row(parse_tree: BeautifulSoup, table_id: str) -> typing.List[typing.Dict[str, str]]:
     tables = parse_tree.find_all('table', id=table_id)
-    if len(tables) != 1:
+    if len(tables) != 1:  # pragma: no cover
         raise ExceptionLookupMnemonicTable('Multiple tables')
     table = tables[0]
     ret = []
     for r, row in enumerate(table.find_all('tr')):
         if r == 0:
             titles = [cell.text.strip() for cell in row.find_all('th')]
-            if len(set(titles)) != len(titles):
+            if len(set(titles)) != len(titles):  # pragma: no cover
                 raise ExceptionLookupMnemonicReadTable(f'Header row is not unique {titles}')
         else:
             values = [cell.text.strip() for cell in row.find_all('td')]
-            if len(titles) != len(values):
+            if len(titles) != len(values):  # pragma: no cover
                 raise ExceptionLookupMnemonicReadTable(
                     f'Length of header row {len(titles)} != length of values {len(values)}'
                 )
@@ -447,5 +447,3 @@ def slb_logging_tool(name: str) -> LoggingTool:
     url = _slb_url('ToolItem', name)
     parse_tree = _parse_url_to_beautiful_soup(url)
     return _slb_logging_tool(parse_tree)
-
-

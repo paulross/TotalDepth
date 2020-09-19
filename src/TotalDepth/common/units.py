@@ -150,7 +150,7 @@ def _slb_units() -> typing.Dict[str, Unit]:
     try:
         parse_tree = lookup_mnemonic._parse_url_to_beautiful_soup('https://www.apps.slb.com/cmd/units.aspx')
         ret = _slb_units_from_parse_tree(parse_tree)
-    except lookup_mnemonic.ExceptionLookupMnemonicReadURL as err:
+    except lookup_mnemonic.ExceptionLookupMnemonicReadURL as _err:  # pragma: no cover
         logger.info('Falling back to the units static data.')
         ret = read_osdd_static_data()
     return ret

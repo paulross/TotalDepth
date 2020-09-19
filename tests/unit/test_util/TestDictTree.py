@@ -19,23 +19,19 @@
 # Paul Ross: apaulross@gmail.com
 """Tests DictTree."""
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-15'
-__version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
-
 import os
-import sys
-import time
-import logging
-#import pprint
+import unittest
+
+import pytest
 
 from TotalDepth.util import DictTree
 
-######################
-# Section: Unit tests.
-######################
-import unittest
+
+__author__ = 'Paul Ross'
+__date__ = '2009-09-15'
+__version__ = '0.8.0'
+__rights__ = 'Copyright (c) Paul Ross'
+
 
 class TestDictTreeCtor(unittest.TestCase):
     """Tests DictTree constructor."""
@@ -590,9 +586,7 @@ Z
       Value ZXX""",
             self._dt.indentedStr()
         )
-        #print 'walkRowColSpan():'
-        #print self._dt.walkColRowSpan()
-        self.assertEqual("""X r=1, c=1
+        expected = """X r=1, c=1
   XX r=1, c=1
     XXX r=1, c=1
     XXY r=1, c=1
@@ -604,7 +598,11 @@ Y r=1, c=1
 Z r=1, c=1
   ZX r=1, c=1
     ZXX r=1, c=1
-""", self._dt.walkColRowSpan())
+"""
+        print('walkRowColSpan():')
+        print(self._dt.walkColRowSpan())
+        print(expected)
+        self.assertEqual(expected, self._dt.walkColRowSpan())
         #print 'genRowColEvents()'
         #for anEvent in self._dt.genColRowEvents():
         #    print anEvent
@@ -737,7 +735,7 @@ Z
 </tr>
 </table>""",
             self._retHtmlTableString())
-    
+
 class TestDictTreeHtmlTableFile(TestDictTreeHtmlTableBase):
     """Tests TestDictTreeHtmlTable simulating a file/line/column table."""
     def fnSplit(self, f, l=None):
@@ -931,7 +929,7 @@ spam/
             self._dt.indentedStr())
         #print
         #print self._retHtmlTableString()
-        self.assertEqual("""<table border="2" width="100%">
+        expected = """<table border="2" width="100%">
 <tr>
     <td>spam.h</td>
     <td colspan="4">12</td>
@@ -958,8 +956,9 @@ spam/
     <td>beans.h</td>
     <td>12</td>
 </tr>
-</table>""",
-            self._retHtmlTableString())
+</table>"""
+        result = self._retHtmlTableString()
+        self.assertEqual(expected, result)
         
     def test_04(self):
         """TestDictTreeHtmlTableFileLineCol: test_04(): Multiple file/line/column with split on path."""
@@ -1315,80 +1314,49 @@ sf/
             self._retHtmlTableString(cellContentsIsValue=True))
 
 
-class NullClass(unittest.TestCase):
-    pass
+def _create_simple_file_system():
+    dict_tree = DictTree.DictTreeHtmlTable('list')
+    for i, file_path in enumerate(
+        (
+            'spam.h',
+            'spam/eggs.h',
+            'spam/cheese.h',
+            'spam/eggs/chips.h',
+            'spam/eggs/chips/beans.h',
+        )
+    ):
+        dict_tree.add(file_path.split('/'), i)
+    return dict_tree
 
-def unitTest(theVerbosity=2):
-    suite = unittest.TestLoader().loadTestsFromTestCase(NullClass)
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeCtor))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeAdd))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeAddList))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeAddSet))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeAddBespokeList))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeIadd))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeHtmlTable))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeHtmlTableFileLineCol))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDictTreeHtmlTableFileTree))
-    myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
-    return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
-##################
-# End: Unit tests.
-##################
 
-def usage():
-    """Send the help to stdout."""
-    print("""TestDictTree.py - A module that tests DictTree module.
-Usage:
-python TestDictTree.py [-lh --help]
+def test_simple_file_system():
+    dict_tree = _create_simple_file_system()
+    assert dict_tree.depth() == 4
+    print(sorted(dict_tree.keys()))
+    assert sorted(dict_tree.keys()) == [
+        ['spam', 'cheese.h'],
+        ['spam', 'eggs', 'chips', 'beans.h'],
+        ['spam', 'eggs', 'chips.h'],
+        ['spam', 'eggs.h'],
+        ['spam.h'],
+    ]
+    assert sorted(dict_tree.values()) == [[0], [1], [2], [3], [4]]
+    assert len(dict_tree) == 5
 
-Options:
--h, --help  Help (this screen) and exit
 
-Options (debug):
--l:         Set the logging level higher is quieter.
-             Default is 20 (INFO) e.g.:
-                CRITICAL    50
-                ERROR       40
-                WARNING     30
-                INFO        20
-                DEBUG       10
-                NOTSET      0
-""")
-
-def main():
-    """Invoke unit test code."""
-    print('TestDictTree.py script version "%s", dated %s' % (__version__, __date__))
-    print('Author: %s' % __author__)
-    print(__rights__)
+def test_simple_file_system_walk():
+    dict_tree = _create_simple_file_system()
     print()
-    import getopt
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
-    except getopt.GetoptError:
-        usage()
-        print('ERROR: Invalid options!')
-        sys.exit(1)
-    logLevel = logging.INFO
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-            sys.exit(2)
-        elif o == '-l':
-            logLevel = int(a)
-    if len(args) != 0:
-        usage()
-        print('ERROR: Wrong number of arguments!')
-        sys.exit(1)
-    # Initialise logging etc.
-    logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
-    clkStart = time.perf_counter()
-    unitTest()
-    clkExec = time.perf_counter() - clkStart
-    print('CPU time = %8.3f (S)' % clkExec)
-    print('Bye, bye!')
+    for event in dict_tree.genColRowEvents():
+        print(event)
+    assert 0
 
-if __name__ == "__main__":
-    main()
+
+def test_simple_file_system_intermediate_walk():
+    dict_tree = _create_simple_file_system()
+    # events = list(dict_tree.genColRowEventsFromBranch(['spam', 'eggs']))
+    print()
+    # print(events)
+    for event in dict_tree.genColRowEventsFromBranch(['spam', 'eggs']):
+        print(event)
+    assert 0

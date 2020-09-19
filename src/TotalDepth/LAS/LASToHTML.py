@@ -3,19 +3,18 @@ import multiprocessing
 import os
 import sys
 import time
-
 import typing
 
-from TotalDepth.LAS.core import LASRead, WriteLAS
+from TotalDepth.LAS.core import LASRead
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, AbsentValue, np_summary
-from TotalDepth.util import gnuplot, XmlWrite, bin_file_type
+from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
-__author__  = 'Paul Ross'
-__date__    = '2020-09-05'
+__author__ = 'Paul Ross'
+__date__ = '2020-09-05'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2020 Paul Ross'
+__rights__ = 'Copyright (c) 2020 Paul Ross'
 
 
 logger = logging.getLogger(__file__)
@@ -23,42 +22,42 @@ logger = logging.getLogger(__file__)
 
 CSS_LAS = """/* CSS for LAS */
 body {
-font-size:      12px;
-font-family:    arial,helvetica,sans-serif;
-margin:         6px;
-padding:        6px;
+    font-size:      12px;
+    font-family:    arial,helvetica,sans-serif;
+    margin:         6px;
+    padding:        6px;
 }
 h1 {
-color:            darkgoldenrod;
-font-family:      sans-serif;
-font-size:        14pt;
-font-weight:      bold;
+    color:            darkgoldenrod;
+    font-family:      sans-serif;
+    font-size:        14pt;
+    font-weight:      bold;
 }
 h2 {
-color:          IndianRed;
-font-family:    sans-serif;
-font-size:      14pt;
-font-weight:    normal;
+    color:          IndianRed;
+    font-family:    sans-serif;
+    font-size:      14pt;
+    font-weight:    normal;
 }
 h3 {
-color:          Black;
-font-family:    sans-serif;
-font-size:      12pt;
-font-weight:    bold;
+    color:          Black;
+    font-family:    sans-serif;
+    font-size:      12pt;
+    font-weight:    bold;
 }
 h4 {
-color:          FireBrick;
-font-family:    sans-serif;
-font-size:      10pt;
-font-weight:    bold;
+    color:          FireBrick;
+    font-family:    sans-serif;
+    font-size:      10pt;
+    font-weight:    bold;
 }
 span.line {
-color:           slategrey;
-/*font-style:    italic; */
+    color:           slategrey;
+    /*font-style:    italic; */
 }
 span.file {
- color:         black;
- font-style:    italic;
+    color:         black;
+    font-style:    italic;
 }
 
 table.filetable {
@@ -83,22 +82,6 @@ table.las {
     border-collapse:   collapse;
     font-family:    monospace;
     color:          black;
-}
-th.eflr, td.eflr {
-    border: 1px solid black;
-    /* border-top-style:solid; */
-    /* border-right-style:dotted; */
-    /* border-bottom-style:none; */
-    /* border-left-style:none; */
-    vertical-align:top;
-    padding: 2px 6px 2px 6px; 
-}
-
-table.sul {
-    border:            2px solid black;
-    border-collapse:   collapse;
-    /* font-family:       monospace; */
-    color:             black;
 }
 
 th.las, td.las {
@@ -137,7 +120,7 @@ def las_section_members_to_html_table(members: typing.List[LASRead.SectLine], xh
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'las'}):
                     xhtml_stream.characters(str(row.valu))
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'las'}):
-                    xhtml_stream.characters(row.desc)
+                    xhtml_stream.characters(str(row.desc))
 
 
 def las_section_to_html(las_section: LASRead.LASSection, xhtml_stream:XmlWrite.XhtmlStream) -> None:
@@ -150,7 +133,57 @@ def las_section_to_html(las_section: LASRead.LASSection, xhtml_stream:XmlWrite.X
         las_section_members_to_html_table(las_section.members, xhtml_stream)
 
 
-def las_file_to_html(las_file_path: str, html_file_path: str, *args) -> None:
+def write_file_metadata(las_file_path: str, xhtml_stream:XmlWrite.XhtmlStream) -> None:
+    table = [
+        ['Field', 'Value'],
+        ['Path', las_file_path],
+        ['Size', f'{os.path.getsize(las_file_path):,d}'],
+        ['Mod time', f'{time.ctime(os.path.getmtime(las_file_path))}'],
+    ]
+    with XmlWrite.Element(xhtml_stream, 'h2', {'class': 'las_h2'}):
+        xhtml_stream.characters(f'File Metadata')
+    ToHTML.html_write_table(table, xhtml_stream, class_style='monospace')
+
+
+def write_file_array(las_file: LASRead.LASRead, xhtml_stream:XmlWrite.XhtmlStream) -> None:
+    if las_file.frame_array is not None:
+        with XmlWrite.Element(xhtml_stream, 'h2', {'class': 'las_h2'}):
+            xhtml_stream.characters(f'LAS Section "A" - Array Section')
+        frame_table = [
+            ['Channel',
+             # 'Dims', 'Count',
+             'Units', 'Long Name',
+             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++', 'Activity', 'Drift',
+             'dtype'],
+        ]
+        for channel in las_file.frame_array.channels:
+            array_summary = np_summary.summarise_array(channel.array)
+            frame_table.append(
+                [
+                    channel.ident,
+                    # stringify.stringify_object_by_type(channel.dimensions),
+                    # stringify.stringify_object_by_type(channel.count),
+                    stringify.stringify_object_by_type(channel.units),
+                    stringify.stringify_object_by_type(channel.long_name),
+                    f'{array_summary.len:d}',
+                    f'{array_summary.len - array_summary.count:d}',
+                    f'{array_summary.min:.3f}',
+                    f'{array_summary.mean:.3f}',
+                    f'{array_summary.median:.3f}',
+                    f'{array_summary.std:.3f}',
+                    f'{array_summary.max:.3f}',
+                    f'{array_summary.count_dec:d}',
+                    f'{array_summary.count_eq:d}',
+                    f'{array_summary.count_inc:d}',
+                    f'{array_summary.activity:.5f}',
+                    f'{array_summary.drift:.5f}',
+                    f'{channel.array.dtype}',
+                ]
+            )
+        ToHTML.html_write_table(frame_table, xhtml_stream, class_style='monospace')
+
+
+def las_file_to_html(las_file_path: str, html_file_path: str, *args) -> ToHTML.HTMLBodySummary:
     las_file = LASRead.LASRead(las_file_path, las_file_path)
     with open(html_file_path, 'w') as html_file:
         with XmlWrite.XhtmlStream(html_file) as xhtml_stream:
@@ -166,56 +199,21 @@ def las_file_to_html(las_file_path: str, html_file_path: str, *args) -> None:
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_LAS)
             with XmlWrite.Element(xhtml_stream, 'body'):
+                write_file_metadata(las_file_path, xhtml_stream)
                 for las_section in las_file.generate_sections():
                     if las_section.type != 'A':
                         las_section_to_html(las_section, xhtml_stream)
-                # Now array section
-                if las_file.frame_array is not None:
-                    with XmlWrite.Element(xhtml_stream, 'h2', {'class': 'las_h2'}):
-                        with XmlWrite.Element(xhtml_stream, 'p', {'class': 'las_p'}):
-                            xhtml_stream.characters(
-                                f'LAS Section "A" - Array Section'
-                            )
-                    frame_table = [
-                        ['Channel',
-                         'Dims', 'Count', 'Units', 'Long Name',
-                         'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++', 'Activity',
-                         'dtype'],
-                    ]
-                    for channel in las_file.frame_array.channels:
-                        arr = AbsentValue.mask_absent_values(channel.array)
-                        array_summary = np_summary.summarise_array(arr)
-                        frame_table.append(
-                            [
-                                channel.ident,
-                                stringify.stringify_object_by_type(channel.dimensions),
-                                stringify.stringify_object_by_type(channel.count),
-                                stringify.stringify_object_by_type(channel.units),
-                                stringify.stringify_object_by_type(channel.long_name),
-                                f'{arr.size:d}',
-                                # NOTE: Not the masked array!
-                                f'{AbsentValue.count_of_absent_values(channel.array):d}',
-                                f'{array_summary.min:.3f}',
-                                f'{array_summary.mean:.3f}',
-                                f'{array_summary.median:.3f}',
-                                f'{array_summary.std:.3f}',
-                                f'{array_summary.max:.3f}',
-                                f'{array_summary.count_dec:d}',
-                                f'{array_summary.count_eq:d}',
-                                f'{array_summary.count_inc:d}',
-                                f'{array_summary.activity:.3f}',
-                                f'{arr.dtype}',
-                            ]
-                        )
-                    ToHTML.html_write_table(frame_table, xhtml_stream, class_style='monospace')
+                write_file_array(las_file, xhtml_stream)
+                with XmlWrite.Element(xhtml_stream, 'p', {'class': 'las_p'}):
+                    xhtml_stream.characters(f'Produced by TotalDepth.LAS.LASToHTML version {__version__} copyright {__rights__}')
 
 
 def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                        frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> ToHTML.HTMLResult:
     """Scan a single file and write out an HTML summary."""
     file_path_out = path_out + '.html'
-    logger.debug(f'Scanning "{path_in}" to "{file_path_out}"')
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
+    logger.info(f'Scanning file type "{binary_file_type}" from "{path_in}" to "{file_path_out}"')
     if binary_file_type in bin_file_type.LAS_BINARY_FILE_TYPES:
         logging.info(f'scan_a_single_file(): "{path_in}" to "{file_path_out}"')
         t_start = time.perf_counter()
@@ -231,28 +229,57 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                 html_summary = las_file_to_html(path_in, sys.stdout, label_process, frame_slice)
                 len_scan_output = -1
             result = ToHTML.HTMLResult(
-                path_in,
-                file_path_out,
-                os.path.getsize(path_in),
-                len_scan_output,
-                binary_file_type,
-                time.perf_counter() - t_start,
-                False,
-                False,
-                html_summary,
+                path_in, file_path_out, os.path.getsize(path_in), len_scan_output, binary_file_type,
+                time.perf_counter() - t_start, False, False, html_summary,
             )
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            result = ToHTML.HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
-                                None)
+            result = ToHTML.HTMLResult(
+                path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False, None)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            result = ToHTML.HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
-                                None)
+            result = ToHTML.HTMLResult(
+                path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False, None)
     else:
         logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
         result = ToHTML.HTMLResult(path_in, file_path_out, 0, 0, binary_file_type, 0.0, False, True, None)
     return result
+
+
+def _write_indexes(path_out: str, index_map_global: typing.Dict[str, ToHTML.HTMLResult]) -> None:
+    assert os.path.isdir(path_out), f'{path_out} is not a directory'
+    # pprint.pprint(index)
+    # print('TRACE: _write_indexes():')
+    # pprint.pprint(index)
+    logger.info(f'_write_indexes(): to "{path_out}"')
+    # _write_low_level_indexes(path_out, index)
+    # _write_top_level_index(path_out, index)
+    index_file_path = os.path.join(path_out, 'index.html')
+    logging.info(f'_write_top_level_index(): to "{index_file_path}"')
+    with open(index_file_path, 'w') as fout:
+        with XmlWrite.XhtmlStream(fout) as xhtml_stream:
+            with XmlWrite.Element(xhtml_stream, 'head'):
+                with XmlWrite.Element(xhtml_stream, 'meta', {
+                    'charset': "UTF-8",
+                    'name': "viewport",
+                    'content': "width=device-width, initial-scale=1",
+                }):
+                    pass
+                with XmlWrite.Element(xhtml_stream, 'title'):
+                    xhtml_stream.charactersWithBr(f'LASToHtml Scan of {path_out}')
+                # with XmlWrite.Element(xhtml_stream, 'style'):
+                #     xhtml_stream.literal(CSS_RP66V1_INDEX)
+            with XmlWrite.Element(xhtml_stream, 'body'):
+                with XmlWrite.Element(xhtml_stream, 'h1'):
+                    xhtml_stream.charactersWithBr(f'Index of RP66V1 Scan: {path_out}')
+                with XmlWrite.Element(xhtml_stream, 'p'):
+                    xhtml_stream.characters('Command:')
+                with XmlWrite.Element(xhtml_stream, 'p'):
+                    with XmlWrite.Element(xhtml_stream, 'pre'):
+                        xhtml_stream.characters(' '.join(sys.argv))
+                with XmlWrite.Element(xhtml_stream, 'table', {'class': 'filetable'}):
+                    for html_file in sorted(index_map_global.keys()):
+                        pass
 
 
 def scan_dir_multiprocessing(dir_in, dir_out, jobs,
@@ -293,10 +320,10 @@ def scan_dir_or_file(path_in: str, path_out: str,
     path_in = os.path.normpath(path_in)
     path_out = os.path.normpath(path_out)
     logging.info(f'scan_dir_or_file(): "{path_in}" to "{path_out}" recurse: {recursive}')
-    ret: typing.Dict[str, HTMLResult] = {}
+    ret: typing.Dict[str, ToHTML.HTMLResult] = {}
     # Output file path to FileResult
     if os.path.isdir(path_in):
-        index_map_global: typing.Dict[str, HTMLResult] = {}
+        index_map_global: typing.Dict[str, ToHTML.HTMLResult] = {}
         if not recursive:
             for file_in_out in DirWalk.dirWalk(path_in, path_out, theFnMatch='', recursive=recursive, bigFirst=False):
                 result = scan_a_single_file(
@@ -315,8 +342,6 @@ def scan_dir_or_file(path_in: str, path_out: str,
                 dir_out = os.path.join(path_out, *root_rel_to_path_in)
                 for file in files:
                     file_path_in = os.path.join(root, file)
-                    # Respect sub-directories in root
-                    # root_rel_to_path_in.append(file)
                     file_path_out = os.path.join(dir_out, file)
                     result = scan_a_single_file(file_path_in, file_path_out, label_process, frame_slice)
                     ret[file_path_in] = result
@@ -346,12 +371,12 @@ Generates HTML from input LAS file or directory to an output destination."""
                         help="File match pattern. Default: %(default)s.")
     args = parser.parse_args()
     # print(args)
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
 
     clk_start = time.perf_counter()
     # Your code here
     if args.log_process > 0.0:
-        with process.log_process(args.log_process):
+        with process.log_process(args.log_process, log_level):
             result: typing.Dict[str, ToHTML.HTMLResult] = scan_dir_or_file(
                 args.path_in,
                 args.path_out,

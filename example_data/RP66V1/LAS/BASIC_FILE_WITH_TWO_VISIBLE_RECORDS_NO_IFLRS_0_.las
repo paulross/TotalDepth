@@ -3,7 +3,7 @@ VERS.          2.0                                                : CWLS Log ASC
 WRAP.          NO                                                 : One Line per depth step
 PROD.          TotalDepth                                         : LAS Producer
 PROG.          TotalDepth.RP66V1.ToLAS 0.1.2                      : LAS Program name and version
-CREA.          2020-09-12 09:53:23.036793 UTC                     : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
+CREA.          2020-09-15 12:32:55.027101 UTC                     : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
 DLIS_CREA.     2012-03-07 10:00:49.000000 UTC                     : DLIS Creation date and time [YYYY-mm-dd HH MM SS.us UTC]
 SOURCE.        BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis  : DLIS File Name
 FILE-ID.       HES INSITE.1                                       : File Identification Number
@@ -26,11 +26,11 @@ CTRY.                                    :
 UWI .                                    :
 API .                                    :
 SRVC.       Halliburton                  :
-DATE.       2012-03-07 10:00:49.000 STD  :
+DATE.       2012-03-07 10 00 49.000 STD  :
 ~Parameter Information Section
 #MNEM.UNIT               Value                           Description
 #---------               -----                           -----------
-LOC .                    LATITUDE: 18DEG 01' 32.8'' S    : LOCATION
+LOC .                    LATITUDE  18DEG 01' 32.8'' S    : LOCATION
 SVCO.                    Halliburton                     : SERVICECONAME
 IQVR.                    R3.2.0                          : WLIQ VERSION
 STAT.                    WA                              : STATE NAME
@@ -47,10 +47,10 @@ RIG .                    ENSIGN RIG #32                  : RIG NAME
 PDAT.                    MSL                             : PERMANENT DATUM
 LMF .                    RT                              : LOG MEAS FROM
 DMF .                    RT                              : DRILL MEAS FROM
-FL1 .                    LATITUDE: 18DEG 01' 32.8'' S    : LOCATIONLINE1
-FL2 .                    LONGITUDE: 124DEG 43' 47.1'' E  : LOCATIONLINE2
-FL3 .                    EASTING: 683112                 : LOCATIONLINE3
-FL4 .                    NORTHING: 8006107               : LOCATIONLINE4
+FL1 .                    LATITUDE  18DEG 01' 32.8'' S    : LOCATIONLINE1
+FL2 .                    LONGITUDE  124DEG 43' 47.1'' E  : LOCATIONLINE2
+FL3 .                    EASTING  683112                 : LOCATIONLINE3
+FL4 .                    NORTHING  8006107               : LOCATIONLINE4
 FL5 .                    GDA ZONE 51                     : LOCATIONLINE5
 DATE.                    06-Mar-2012                     : DATE
 LCC .                    280                             : PRODUCER-CODE

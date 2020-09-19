@@ -170,13 +170,13 @@ def main() -> int:
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     # print('args:', args)
     # return 0
     clk_start = time.perf_counter()
     # Your code here
     if args.log_process > 0.0:
-        with process.log_process(args.log_process):
+        with process.log_process(args.log_process, log_level):
             results: typing.Dict[str, DATFileResult] = scan_dir_or_file(args.path_in, args.recurse, label_process=True)
     else:
         if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):

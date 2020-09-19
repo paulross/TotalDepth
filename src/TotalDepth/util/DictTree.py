@@ -33,6 +33,11 @@ class ExceptionDictTree(ExceptionTotalDepthLIS):
     pass
 
 
+class ExceptionDictTreeHtmlTable(ExceptionDictTree):
+    """Exception when handling a DictTreeHtmlTable object."""
+    pass
+
+
 class DictTree:
     """A dictionary that takes a list of hashables as a key and behaves like a tree."""
     INDENT_STR = '  '
@@ -43,13 +48,12 @@ class DictTree:
 
     def __init__(self, valIterable=None):
         if valIterable not in self.ITERABLE_TYPE:
-            raise ExceptionDictTree('"%s" not in acceptable range: %s' \
-                                    % (valIterable, self.ITERABLE_TYPE))
+            raise ExceptionDictTree('"%s" not in acceptable range: %s' % (valIterable, self.ITERABLE_TYPE))
         self._vI = valIterable
-        # Otherwise a dictionary
-        self._ir = None
-        # Otherwise anything
-        self._v = None
+        # A dictionary of hashable to a node
+        self._ir: typing.Optional[typing.Dict[typing.Hashable, DictTree]] = None
+        # Node 'value' can be anything
+        self._v: typing.Any = None
 
     def __iadd__(self, other):
         if self._vI != other._vI:
@@ -203,8 +207,14 @@ class DictTree:
                 
 
 class DictTreeTableEvent(typing.NamedTuple):
+    """POD class that contains the data needed for a HTML table entry.
+    branch - the data route to this node.
+    node - the columns of the table entry.
+    row_span - the HTML rowspan attribute for the <td>.
+    col_span - the HTML colspan attribute for the <td>.
+    """
     branch: typing.List[typing.Any]
-    node: typing.Union[None, typing.Any]
+    node: typing.Any
     row_span: int
     col_span: int
 
@@ -317,8 +327,20 @@ class DictTreeHtmlTable(DictTree):
     ROW_CLOSE = DictTreeTableEvent([], None, -1, -1)
 
     def __init__(self, *args):
-        super(DictTreeHtmlTable, self).__init__(*args)
+        super().__init__(*args)
         self._colSpan = self._rowSpan = 1
+        self._has_valid_row_col_span = False
+
+    # Overload mutating methods
+    def add(self, k, v):
+        """Add a key/value. k is a list of hashable."""
+        self._has_valid_row_col_span = False
+        super().add(k, v)
+
+    def remove(self, k, v=None):
+        """Remove a key/value. k is a list of hashable."""
+        self._has_valid_row_col_span = False
+        super().remove(k, v)
 
     def retNewInstance(self):
         return DictTreeHtmlTable(self._vI)
@@ -333,31 +355,33 @@ class DictTreeHtmlTable(DictTree):
 
     def setColRowSpan(self):
         """Top level call that sets colspan and rowspan attributes."""
-        self._setRowSpan()
-        maxDepth = self.depth()
-        self._setColSpan(maxDepth, -1)
+        if not self._has_valid_row_col_span:
+            self._set_row_span()
+            max_depth = self.depth()
+            self._set_column_span(max_depth, -1)
+            self._has_valid_row_col_span = True
 
-    def _setColSpan(self, mD, d):
-        """"""
+    def _set_column_span(self, max_depth: int, depth: int):
+        """Traverses the tree setting the columns span."""
         if self._ir is None:
             # Leaf node
-            self._colSpan = mD- d
+            self._colSpan = max_depth - depth
         else:
             # Non-leaf
             self._colSpan = 1
-            for aTree in self._ir.values():
-                aTree._setColSpan(mD, d+1)
+            for tree in self._ir.values():
+                tree._set_column_span(max_depth, depth + 1)
+                tree._has_valid_row_col_span = True
     
-    def _setRowSpan(self):
+    def _set_row_span(self):
         """Sets self._rowSpan recursively."""
-#        retVal = 1
         if self._ir is None:
             self._rowSpan = 1
         else:
             # Non-leaf node
             self._rowSpan = 0
             for aTree in self._ir.values():
-                self._rowSpan += aTree._setRowSpan()
+                self._rowSpan += aTree._set_row_span()
         return self._rowSpan
 
     def genColRowEvents(self):
@@ -369,48 +393,46 @@ class DictTreeHtmlTable(DictTree):
         and at row end (</tr> a ROW_CLOSE will be yielded
         """
         self.setColRowSpan()
-        hasYielded = False
-        for anEvent in self._genColRowEvents([]):
-            if not hasYielded:
+        has_yielded = False
+        for anEvent in self.genColRowEventsFromBranch([]):
+            if not has_yielded:
                 yield self.ROW_OPEN
-                hasYielded = True
+                has_yielded = True
             yield anEvent
-        if hasYielded:
+        if has_yielded:
             yield self.ROW_CLOSE
     
-    def _genColRowEvents(self, keyBranch) -> typing.Iterable[DictTreeTableEvent]:
+    def genColRowEventsFromBranch(self, key_branch) -> typing.Iterable[DictTreeTableEvent]:
         """Returns a set of events that are a tuple of quadruples.
         (key_branch, value, rowspan_integer, colspan_integer)
         For example: (['a', 'b'], 'c', 3, 7)
         At the start of the a <tr> there will be a ROW_OPEN
-        and at row end (</tr> a ROW_CLOSE will be yielded
+        and at row end (</tr>) a ROW_CLOSE will be yielded
         """
+        # This is a NOP if the internal data has not changed.
+        self.setColRowSpan()
         if self._ir is not None:
             # Non-leaf
-            keyS = sorted(self._ir.keys())
-            for i, k in enumerate(keyS):
-                keyBranch.append(k)
+            keys = sorted(self._ir.keys())
+            for i, k in enumerate(keys):
+                key_branch.append(k)
                 if i != 0:
                     yield self.ROW_CLOSE
                     yield self.ROW_OPEN
-                yield DictTreeTableEvent(keyBranch[:], self._ir[k]._v, self._ir[k].rowSpan, self._ir[k].colSpan)
+                yield DictTreeTableEvent(key_branch[:], self._ir[k]._v, self._ir[k].rowSpan, self._ir[k].colSpan)
                 # Recurse
-                for anEvent in self._ir[k]._genColRowEvents(keyBranch):
+                for anEvent in self._ir[k].genColRowEventsFromBranch(key_branch):
                     yield anEvent
-                keyBranch.pop()
+                key_branch.pop()
 
     def walkColRowSpan(self) -> str:
-        dMax = self.depth()
-        #print 'dMax=%d' % dMax
-        return self._walkColRowSpan(0, dMax)
+        max_depth = self.depth()
+        return self._walk_column_row_span(0, max_depth)
 
-    def _walkColRowSpan(self, d, dMax) -> str:
-        #print '%srow=%d col=%d "%s"' \
-        #    % ('  '*d, self.rowSpan(), dMax-self.colSpan(), self._v)
-        retVal = ""
+    def _walk_column_row_span(self, d, max_depth) -> str:
+        ret_list = []
         if self._ir is not None:
-            kS = sorted(self._ir.keys())
-            for k in kS:
-                retVal += '%s%s r=%d, c=%d\n' % ('  '*d, k, self._ir[k].rowSpan, self._ir[k].colSpan)
-                retVal += self._ir[k]._walkColRowSpan(d+1, dMax)
-        return retVal
+            for k in sorted(self._ir.keys()):
+                ret_list.append('%s%s r=%d, c=%d\n' % ('  '*d, k, self._ir[k].rowSpan, self._ir[k].colSpan))
+                ret_list.append(self._ir[k]._walk_column_row_span(d + 1, max_depth))
+        return ''.join(ret_list)

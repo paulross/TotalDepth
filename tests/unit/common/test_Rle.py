@@ -6,6 +6,7 @@ from TotalDepth.common import Rle
 
 # ====================== Test of Rle.RLEItem ======================
 
+
 def _create_simple_rle_item(values):
     """Returns a RLEItem with the values [5, 8, 11, 14, 17, 20, 23, 26]"""
     rle_item = Rle.RLEItem(values[0])
@@ -94,6 +95,12 @@ def test_rle_item_values():
 )
 def test_rle_item_value(index, expected):
     assert SIMPLE_RLE_ITEM.value(index) == expected
+
+
+def test_rle_item_value_negative():
+    rle_item = Rle.RLEItem(10.0)
+    result = rle_item.value(0)
+    assert result == (0, 10.0)
 
 
 @pytest.mark.parametrize(
@@ -318,6 +325,53 @@ def test_rle_direct_construction():
     rle_item.stride = 3
     rle.rle_items.append(rle_item)
     assert list(rle.values()) == list(RLE_TWO_RANGES.values())
+
+
+@pytest.mark.parametrize(
+    'value, expected',
+    (
+        (0, 5),
+        (-1, 26),
+    )
+)
+def test_rle_single_range_value(value, expected):
+    rle = RLE_SINGLE_RANGE
+    result = rle.value(value)
+    assert result == expected
+
+
+def test_rle_ranges():
+    rle = RLE_MULTIPLE_RANGE
+    result = rle.ranges()
+    # print(result)
+    assert result == [range(0, 24, 3), range(72, 95), range(105, 117, 2)]
+
+
+def test_rle_first():
+    rle = Rle.RLE()
+    rle.add(1.0)
+    assert rle.first() == 1.0
+
+
+def test_rle_empty_first():
+    rle = Rle.RLE()
+    assert rle.first() is None
+
+
+def test_rle_last():
+    rle = Rle.RLE()
+    rle.add(1.0)
+    assert rle.last() == 1.0
+
+
+def test_rle_empty_last():
+    rle = Rle.RLE()
+    assert rle.last() is None
+
+
+def test_rle_create_rle():
+    rle = Rle.create_rle(range(8))
+    assert list(rle.values()) == list(range(8))
 
 
 # ====================== END: Test of Rle.RLE ======================

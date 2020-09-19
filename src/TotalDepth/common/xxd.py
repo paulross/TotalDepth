@@ -6,15 +6,6 @@ ASCII_VISUAL_BYTES = set(
 )
 
 
-def xxd_size(len_bytes: int) -> int:
-    """Returns the length of an xxd style string given the number of bytes."""
-    # Size for B bytes is 2*B + (B//2  -1) + 1 + B
-    ret = 2 * len_bytes + 1 + len_bytes
-    if len_bytes > 2:
-        ret += len_bytes // 2 - 1
-    return ret
-
-
 def xxd(by: bytes,
         columns: int = 16,
         uppercase: bool = False,

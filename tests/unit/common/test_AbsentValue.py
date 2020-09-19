@@ -51,17 +51,18 @@ def test_numpy_unmask_behaviour_view():
 
 
 @pytest.mark.parametrize(
-    'array, expected_sum',
+    'array, absent_value, expected_sum',
     (
-        (np.arange(4.0), 6.0),
-        (np.arange(4), 6),
-        (np.array([-999.25, -999.25, 42.0]), 42.0),
-        (np.array([-999.25, -999, 42.0]), 42.0 - 999.0),
-        (np.array([-999, -999, 42]), 42),
+        (np.arange(4.0), None, 6.0),
+        (np.arange(4), None, 6),
+        (np.array([-999.25, -999.25, 42.0]), None, 42.0),
+        (np.array([-999.25, -999, 42.0]), None, 42.0 - 999.0),
+        (np.array([-999, -999, 42]), None, 42),
+        (np.array([-123.25, -123.25, 42.0]), -123.25, 42.0),
     )
 )
-def test_mask_absent_values(array, expected_sum):
-    masked_array = AbsentValue.mask_absent_values(array)
+def test_mask_absent_values(array, absent_value, expected_sum):
+    masked_array = AbsentValue.mask_absent_values(array, absent_value)
     assert masked_array.sum() == expected_sum
 
 

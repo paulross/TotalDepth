@@ -1,10 +1,7 @@
-import io
-
 import pytest
 import numpy as np
 
-import TotalDepth.LAS.core.WriteLAS
-from TotalDepth.common import LogPass, Slice
+from TotalDepth.common import LogPass
 
 
 def test_log_pass_channel_ctor():
@@ -122,6 +119,30 @@ def test_log_pass_channel_numpy_indexes_raises():
     with  pytest.raises(LogPass.ExceptionFrameChannel) as err:
         fc.numpy_indexes(-1)
     assert err.value.args[0] == 'FrameChannel.numpy_indexes() frame number must be > 0 not -1'
+
+
+@pytest.mark.parametrize(
+    'data, dtype, absent_value,  expected',
+    (
+        (
+            (-999.25, -999.25, 50.0, 60.0,), np.dtype('float'), -999.25, 55.0,
+        ),
+        (
+            (-999, -999, 50, 60,), np.dtype('int'), -999, 55.0,
+        ),
+        (
+                (None, None, 50.0, 60.0,), np.dtype(object).type, None, 55.0,
+        ),
+    ),
+)
+def test_log_pass_channel_mask_array(data, dtype, absent_value, expected):
+    fc = LogPass.FrameChannel('GR  ', 'Gamma Ray', 'GAPI', shape=(1,), np_dtype=dtype)
+    fc.init_array(len(data))
+    for i, value in enumerate(data):
+        fc[i][0] = value
+    fc.mask_array(absent_value)
+    result = fc.array.mean()
+    assert result == expected
 
 
 # ==== Frame Array
@@ -298,7 +319,6 @@ def test_log_pass_frame_array_sizeof_array(shape, frames, expected):
     assert frame_array.sizeof_array == expected
 
 
-
 def test_log_pass_frame_array_x_axis():
     frame_array = LogPass.FrameArray(ident='IDENT', description='Test FrameArray')
     frame_array.append(LogPass.FrameChannel('DEPT', 'Depth', 'FEET', shape=(1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
@@ -421,172 +441,15 @@ def test_log_pass_log_pass_single_frame_array_getitem_str_raises():
     assert err.value.args == ('X',)
 
 
-# ==== Test LAS Writing ====
-@pytest.mark.parametrize(
-    'array, method, expected',
-    (
-        (np.array(np.arange(5.0)), 'first', 0.0),
-        (np.array(np.arange(5.0)), 'mean', 2.0),
-        (np.array(np.arange(5.0)), 'median', 2.0),
-        (np.array(np.arange(5.0)), 'min', 0.0),
-        (np.array(np.arange(5.0)), 'max', 4.0),
-    )
-)
-def test_log_pass__array_reduce(array, method, expected):
-    result = TotalDepth.LAS.core.WriteLAS.array_reduce(array, method)
-    assert result == expected
-
-
-@pytest.mark.parametrize(
-    'array, method, expected',
-    (
-            (np.array(np.arange(5.0)), 'FIRST',
-             "Array reduction method FIRST is not in ['first', 'max', 'mean', 'median', 'min']"),
-    )
-)
-def test_log_pass__array_reduce_raises(array, method, expected):
-    with pytest.raises(ValueError) as err:
-        _result = TotalDepth.LAS.core.WriteLAS.array_reduce(array, method)
-    assert err.value.args[0] == expected
-
-
-@pytest.mark.parametrize(
-    'value, expected',
-    (
-        ('abc', 'abc'),
-        (b'abc', 'abc'),
-        (1.0, '1.0'),
-    )
-)
-def test_log_pass__stringify(value, expected):
-    result = TotalDepth.LAS.core.WriteLAS._stringify(value)
-    assert result == expected
-
-
-@pytest.mark.parametrize(
-    'value, expected',
-    (
-        (b'\xff', 'ascii'),
-    )
-)
-def test_log_pass__stringify_raises(value, expected):
-    with pytest.raises(ValueError) as err:
-        _result = TotalDepth.LAS.core.WriteLAS._stringify(value)
-    assert err.value.args[0] == expected
-
-
-@pytest.mark.parametrize(
-    'value, expected_error',
-    (
-        ('', 'Invalid float fractional format of ""'),
-        ('abc', 'Invalid float fractional format of "abc"'),
-    )
-)
-def test__check_float_decimal_places_format_raises(value, expected_error):
-    with pytest.raises(ValueError) as err:
-        TotalDepth.LAS.core.WriteLAS._check_float_decimal_places_format(value)
-    assert err.value.args[0] == expected_error
-
-
-def test_las_write():
-    frame_array = _create_log_pass_single_frame_array(4)
-    out_stream = io.StringIO()
-    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
-        frame_array['IDENT'],
-        len(frame_array['IDENT'].x_axis),
-        'first',
-        Slice.Slice(),
-        set(),
-        16,
-        '.3',
-        out_stream
-    )
-    expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description          
-#---------  -----------------          
-DEPT.FEET   : Depth Dimensions (1,)    
-GR  .GAPI   : Gamma Ray Dimensions (1,)
-# Array processing information:
-# Frame Array: ID: IDENT description: Test FrameArray
-# All [2] original channels reproduced here.
-# Where a channel has multiple values the reduction method is by "first" value.
-# Maximum number of original frames: 4
-# Requested frame slicing: <Slice on length=4 start=0 stop=4 step=1>, total number of frames presented here: 4
-~A          DEPT             GR  
-             4.0              0.0
-             3.0              1.0
-             2.0              2.0
-             1.0              3.0
-"""
-    # print(out_stream.getvalue())
-    assert out_stream.getvalue() == expected
-
-
-def test_las_write_partial():
-    frame_array = _create_log_pass_single_frame_array(4)
-    out_stream = io.StringIO()
-    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
-        frame_array['IDENT'],
-        len(frame_array['IDENT'].x_axis),
-        'first',
-        Slice.Slice(),
-        {'GR  '},
-        16,
-        '.3',
-        out_stream
-    )
-    expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description          
-#---------  -----------------          
-DEPT.FEET   : Depth Dimensions (1,)    
-GR  .GAPI   : Gamma Ray Dimensions (1,)
-# Array processing information:
-# Frame Array: ID: IDENT description: Test FrameArray
-# Original channels in Frame Array [   2]: DEPT,GR  
-# Requested Channels this LAS file [   1]: GR  
-# Where a channel has multiple values the reduction method is by "first" value.
-# Maximum number of original frames: 4
-# Requested frame slicing: <Slice on length=4 start=0 stop=4 step=1>, total number of frames presented here: 4
-~A          DEPT             GR  
-             4.0              0.0
-             3.0              1.0
-             2.0              2.0
-             1.0              3.0
-"""
-    # print(out_stream.getvalue())
-    assert out_stream.getvalue() == expected
-
-
-def test_las_write_partial_int64():
-    frame_array = _create_log_pass_single_frame_array_integer(4)
-    out_stream = io.StringIO()
-    TotalDepth.LAS.core.WriteLAS.write_curve_and_array_section_to_las(
-        frame_array['IDENT'],
-        len(frame_array['IDENT'].x_axis),
-        'first',
-        Slice.Slice(),
-        {'GR  '},
-        16,
-        '.3',
-        out_stream
-    )
-    expected = """~Curve Information Section
-#MNEM.UNIT  Curve Description          
-#---------  -----------------          
-DEPT.FEET   : Depth Dimensions (1,)    
-GR  .GAPI   : Gamma Ray Dimensions (1,)
-# Array processing information:
-# Frame Array: ID: IDENT description: Test FrameArray
-# Original channels in Frame Array [   2]: DEPT,GR  
-# Requested Channels this LAS file [   1]: GR  
-# Where a channel has multiple values the reduction method is by "first" value.
-# Maximum number of original frames: 4
-# Requested frame slicing: <Slice on length=4 start=0 stop=4 step=1>, total number of frames presented here: 4
-~A          DEPT             GR  
-             4.0                0
-             3.0                1
-             2.0                2
-             1.0                3
-"""
-    # print(out_stream.getvalue())
-    assert out_stream.getvalue() == expected
+def test_frame_array_mask_array():
+    frame_array = LogPass.FrameArray(ident='IDENT', description='Test FrameArray')
+    frame_array.append(LogPass.FrameChannel('DEPT', 'Depth', 'FEET', (1,), LogPass.DEFAULT_NP_TYPE))
+    frame_array.append(LogPass.FrameChannel('GR  ', 'Gamma Ray', 'GAPI', (1,), LogPass.DEFAULT_NP_TYPE))
+    data = (-999.25, -999.0, -998.75, -998.5)
+    frame_array.init_arrays(len(data))
+    for i, value in enumerate(data):
+        frame_array[0][i][0] = value
+        frame_array[1][i][0] = value
+    frame_array.mask_array(-999.25)
+    assert frame_array[0].array.mean() == sum(data) / len(data)
+    assert frame_array[1].array.mean() == sum(data[1:]) / len(data[1:])
