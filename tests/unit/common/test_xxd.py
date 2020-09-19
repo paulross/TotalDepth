@@ -31,7 +31,6 @@ from TotalDepth.common import xxd
 )
 def test_xxd(by, expected):
     result = xxd.xxd(by)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -104,7 +103,6 @@ def test_xxd(by, expected):
 )
 def test_xxd_columns(by, columns, expected):
     result = xxd.xxd(by, columns=columns)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -131,7 +129,6 @@ def test_xxd_columns(by, columns, expected):
 )
 def test_xxd_uppercase(by, expected):
     result = xxd.xxd(by, uppercase=True)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -185,7 +182,6 @@ def test_xxd_ebcdic(by, expected):
 )
 def test_xxd_binary(by, expected):
     result = xxd.xxd(by, binary=True)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -217,7 +213,6 @@ def test_xxd_binary(by, expected):
 )
 def test_xxd_length(by, length, expected):
     result = xxd.xxd(by, length=length)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -264,7 +259,6 @@ def test_xxd_length(by, length, expected):
 )
 def test_xxd_offset(by, offset, expected):
     result = xxd.xxd(by, offset=offset)
-    # print(f'TRACE: "{result}"')
     assert result == expected
 
 
@@ -309,5 +303,28 @@ f0 f0f1 f2f3 f4f5 f6f7 f8f9 fafb fcfd feff ................"""
 )
 def test_xxd_seek(by, seek, expected):
     result = xxd.xxd(by, seek=seek)
-    # print(f'TRACE: "{result}"')
     assert result == expected
+
+
+def test_xxd_column_zero_raises():
+    with pytest.raises(ValueError) as err:
+        xxd.xxd(b'', columns=0)
+    assert err.value.args[0] == 'Columns must be +ve not 0'
+
+
+def test_xxd_offset_negative_raises():
+    with pytest.raises(ValueError) as err:
+        xxd.xxd(b'', offset=-1)
+    assert err.value.args[0] == 'Offset must be +ve not -1'
+
+
+def test_xxd_length_negative_raises():
+    with pytest.raises(ValueError) as err:
+        xxd.xxd(b'', length=-1)
+    assert err.value.args[0] == 'Length must be +ve not -1'
+
+
+def test_xxd_seek_negative_raises():
+    with pytest.raises(ValueError) as err:
+        xxd.xxd(b'', seek=-1)
+    assert err.value.args[0] == 'Seek must be +ve not -1'

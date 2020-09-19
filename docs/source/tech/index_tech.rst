@@ -15,6 +15,7 @@ Contents:
     :maxdepth: 3
    
     performance
+    LAS_processing
     LIS_indexing
     LIS_processing
     RP66V1_indexing

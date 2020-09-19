@@ -3,7 +3,7 @@ VERS.          2.0                                     : CWLS Log ASCII Standard
 WRAP.          NO                                      : One Line per depth step
 PROD.          TotalDepth                              : LAS Producer
 PROG.          TotalDepth.RP66V1.ToLAS 0.1.2           : LAS Program name and version
-CREA.          2020-09-12 09:53:21.798193 UTC          : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
+CREA.          2020-09-15 12:32:53.903431 UTC          : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
 DLIS_CREA.     2011-08-20 22:48:50.000000 UTC          : DLIS Creation date and time [YYYY-mm-dd HH MM SS.us UTC]
 SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
 FILE-ID.       MSCT_197LTP                             : File Identification Number
@@ -27,7 +27,7 @@ CTRY.                                    :
 UWI .                                    :
 API .                                    :
 SRVC.       Schlumberger                 :
-DATE.       2011-08-20 22:48:50.000 DST  :
+DATE.       2011-08-20 22 48 50.000 DST  :
 ~Parameter Information Section
 #MNEM.UNIT           Value                                               Description
 #---------           -----                                               -----------
@@ -203,7 +203,7 @@ R5  .                                                                    : Remar
 R4  .                                                                    : Remark Line 4
 R3  .                25 Attempted cores, recovery was ... %              : Remark Line 3
 R2  .                Tool run as per sketch                              : Remark Line 2
-R1  .                Log Objective: Obtain sidewall cores from the well  : Remark Line 1
+R1  .                Log Objective  Obtain sidewall cores from the well  : Remark Line 1
 OS5 .                ZVSP Seismic                                        : Other Services Line 5
 OS4 .                MDT-GR                                              : Other Services Line 4
 OS3 .                MRX-ADT                                             : Other Services Line 3
@@ -219,7 +219,7 @@ CASG.                                                                    : Casin
 WITN.                I Barwick                                           : Witness's Name
 ENGI.                E. Cormack                                          : Engineer's Name
 LUL .                UKI CC3                                             : Logging Unit Location
-TLAB.                23:00                                               : Time Logger At Bottom
+TLAB.                23 00                                               : Time Logger At Bottom
 DLAB.                21 Aug 2011                                         : Date Logger At Bottom
 RUN .                7                                                   : Run Number
 DATE.                21-Aug-2011                                         : Date as Month-Day-Year
@@ -234,9 +234,9 @@ APIN.                                                                    : API S
 DMF .                DF                                                  : Drilling Measured From
 LMF .                DF                                                  : Log Measured From
 PDAT.                MSL                                                 : Permanent Datum
-FL2 .                UTME: 549269.92                                     : Field Location Line 2
-FL1 .                UTMN: 6747834.11                                    : Field Location Line 1
-FL  .                UTM Zone: 30 deg N, Datum: 3 Deg W                  : Field Location
+FL2 .                UTME  549269.92                                     : Field Location Line 2
+FL1 .                UTMN  6747834.11                                    : Field Location Line 1
+FL  .                UTM Zone  30 deg N, Datum  3 Deg W                  : Field Location
 STAT.                WilPhoenix                                          : State or Province
 COUN.                North Sea                                           : County or Rig Name
 FN  .                Fulla                                               : Field Name
@@ -246,8 +246,8 @@ CN  .                Faroe Petroleum                                     : Compa
 RLAB.                Range                                               : Range Label
 TLLAB.               Township                                            : Township Label
 LLAB.                Section                                             : Section Label
-CLAB.                Rig:                                                : County/Rig Label
-SLAB.                Scale:                                              : State/Province Label
+CLAB.                Rig                                                 : County/Rig Label
+SLAB.                Scale                                               : State/Province Label
 LOGMODE.             MEASURED_DEPTH                                      : Depth Logging Mode
 PBVSADP.             NO                                                  : Use alternate depth channel for playback
 DO  .ft              0.0                                                 : Depth Offset for Playback

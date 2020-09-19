@@ -3,7 +3,7 @@ VERS.          2.0                             : CWLS Log ASCII Standard - VERSI
 WRAP.          NO                              : One Line per depth step
 PROD.          TotalDepth                      : LAS Producer
 PROG.          TotalDepth.RP66V1.ToLAS 0.1.2   : LAS Program name and version
-CREA.          2020-09-12 09:53:23.041789 UTC  : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
+CREA.          2020-09-15 12:32:55.030359 UTC  : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
 DLIS_CREA.     2012-03-07 10:00:49.000000 UTC  : DLIS Creation date and time [YYYY-mm-dd HH MM SS.us UTC]
 SOURCE.        MINIMAL_FILE.dlis               : DLIS File Name
 FILE-ID.       HES INSITE.1                    : File Identification Number
@@ -26,7 +26,7 @@ CTRY.                                    :
 UWI .                                    :
 API .                                    :
 SRVC.       Halliburton                  :
-DATE.       2012-03-07 10:00:49.000 STD  :
+DATE.       2012-03-07 10 00 49.000 STD  :
 ~Parameter Information Section
 #MNEM.UNIT  Value  Description
 #---------  -----  -----------

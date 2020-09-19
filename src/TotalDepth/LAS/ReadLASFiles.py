@@ -346,7 +346,7 @@ set y2label "Scan Rate (ms/Mb)"
 # set y2range [1e-4:10]
 set y2tics
 
-set pointsize 1
+set pointsize 0.75
 set datafile separator whitespace#"	"
 set datafile missing "NaN"
 
@@ -410,12 +410,12 @@ Recursively reads LAS files in a directory reporting information about their con
     # print(args)
     # return 0
     # Initialise logging etc.
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     clkStart = time.perf_counter()
     timStart = time.time()
     # Your code here.
     if args.log_process > 0.0:
-        with process.log_process(args.log_process):
+        with process.log_process(args.log_process, log_level):
             las_reader = ReadLASFiles(args.path_in, raise_on_error=not args.keepGoing)
     else:
         las_reader = ReadLASFiles(args.path_in, raise_on_error=not args.keepGoing)

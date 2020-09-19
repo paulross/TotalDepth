@@ -127,7 +127,7 @@ def add_log_level(parser: argparse.ArgumentParser, level: int = DEFAULT_OPT_LOG_
     parser.add_argument("-l", "--log-level", default=level, help=log_level_help)
 
 
-def set_log_level(parsed_args, format: str = DEFAULT_OPT_LOG_FORMAT_VERBOSE) -> None:
+def set_log_level(parsed_args, format: str = DEFAULT_OPT_LOG_FORMAT_VERBOSE) -> int:
     """Initialise logging."""
     log_name_map = _get_logging_name_to_level()
     # print(logging._nameToLevel)
@@ -139,6 +139,7 @@ def set_log_level(parsed_args, format: str = DEFAULT_OPT_LOG_FORMAT_VERBOSE) -> 
     else:
         log_level = int(parsed_args.log_level)
     logging.basicConfig(level=log_level, format=format, stream=sys.stdout)
+    return log_level
 
 # ============ END: Logging ==================
 

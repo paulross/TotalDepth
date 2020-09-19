@@ -1227,7 +1227,7 @@ class TestLogPass_UpDirect_Dipmeter(BaseTestClasses.TestBaseLogPass):
         self._lp.setFrameSet(self._file, theFrSl=None, theChList=None)
         #print()
         #print(self._lp.frameSet)
-        self.assertEqual(96, self._lp.frameSet.number_of_frames)
+        self.assertEqual(96, self._lp.frameSet.numFrames)
         self.assertEqual(91, self._lp.frameSet.valuesPerFrame)
 
     def test_10(self):
@@ -1439,7 +1439,7 @@ class TestLogPass_UpDirect_Dipmeter(BaseTestClasses.TestBaseLogPass):
         # 76 / 3 == 25.3333
         # Round up to 26
         numFrames = int(1 + ((9999.0 - 9980.0) / (3 * 0.25)))
-        self.assertEqual(numFrames, self._lp.frameSet.number_of_frames)
+        self.assertEqual(numFrames, self._lp.frameSet.numFrames)
         self.assertEqual(91, self._lp.frameSet.valuesPerFrame)
 
 class TestLogPass_UpIndirect(BaseTestClasses.TestBaseLogPass):

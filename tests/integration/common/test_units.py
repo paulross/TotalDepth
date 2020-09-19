@@ -64,6 +64,27 @@ def test_slb_unit_standard_form_to_unit_code():
 
 
 @pytest.mark.slow
+def test_slb_unit_standard_form_to_unit_code_fails():
+    # TODO: Move this to code that specifically handles units rather than lookups.
+    with pytest.raises(units.ExceptionUnitsLookup) as err:
+        units.slb_standard_form_to_unit_code('XXX')
+    assert err.value.args[0] == 'No record of unit corresponding to standard form XXX'
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'standard_form, expected',
+    (
+        ('degC', True),
+        ('XXX', False),
+    )
+)
+def test_has_slb_standard_form(standard_form, expected):
+    result = units.has_slb_standard_form(standard_form)
+    assert result == expected
+
+
+@pytest.mark.slow
 @pytest.mark.parametrize(
     'value, unit_from_code, unit_to_code, expected',
     (
@@ -99,6 +120,16 @@ def test_convert_function(value, unit_from_code, unit_to_code, expected):
 
 
 @pytest.mark.slow
+def test_slb_load_units():
+    units.slb_load_units()
+
+
+@pytest.mark.slow
+def test_has_slb_units():
+    assert units.has_slb_units('DEGC')
+
+
+@pytest.mark.slow
 def test_convert_function_fails():
     unit_from = units.slb_units('FEET')
     unit_to = units.slb_units('DEGC')
@@ -112,3 +143,4 @@ def test_convert_function_fails():
         " Unit(code='DEGC', name='degree celsius', standard_form='degC', dimension='Temperature', scale=1.0, offset=-273.15)"
         " are not the same dimension."
     )
+

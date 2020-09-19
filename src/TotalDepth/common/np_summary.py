@@ -39,6 +39,7 @@ class ArraySummary(typing.NamedTuple):
     count_dec: int
     count_inc: int
     activity: float
+    drift: float  # (last - first) / length
 
 
 def count_eq(array: np.array, flatten: bool = True) -> int:
@@ -71,6 +72,19 @@ def count_dec(array: np.array, flatten: bool = True) -> int:
     return result
 
 
+def count_eq_dec_inc(array: np.array, flatten: bool = True) -> typing.Tuple[int, int, int]:
+    """
+    Returns three counts: equal, decreasing, increasing.
+    This is slightly more efficient as it only creates a diff array once.
+    """
+    if flatten:
+        array = array.flatten()
+    diff_array = array[1:] - array[:-1]
+    if len(diff_array):
+        return np.count_nonzero(diff_array == 0), np.count_nonzero(diff_array < 0), np.count_nonzero(diff_array > 0)
+    return 0, 0, 0
+
+
 def activity(array: np.array, flatten: bool = True) -> float:
     """Returns array activity."""
     if flatten:
@@ -90,6 +104,9 @@ def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
     count_of_values = len_array
     if hasattr(array, 'mask'):
         count_of_values -= np.count_nonzero(array.mask)
+        # https://numpy.org/doc/stable/reference/maskedarray.generic.html#accessing-only-the-valid-entries
+        array = array[~array.mask]
+    counts = count_eq_dec_inc(array, flatten)
     if count_of_values > 1:
         result = ArraySummary(
             len_array,
@@ -100,9 +117,10 @@ def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
             array.mean(),
             array.std(),
             np.median(array),
-            count_eq(array),
-            count_dec(array),
-            count_inc(array),
+            counts[0],
+            counts[1],
+            counts[2],
             activity(array),
+            (array[-1] - array[0]) / (count_of_values - 1),
         )
         return result

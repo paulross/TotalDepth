@@ -4,6 +4,22 @@ import pytest
 import TotalDepth.common.units
 
 
+@pytest.mark.parametrize(
+    'args, expected',
+    (
+        (
+            ('DEGC', 'degree celsius', 'degC', 'Temperature', 1, -273.15), False,
+        ),
+        (
+            ('DEGK', 'degree kelvin', 'degK', 'Temperature', 1, 0), True,
+        ),
+    )
+)
+def test_unit_is_primary(args, expected):
+    unit = TotalDepth.common.units.Unit(*args)
+    assert unit.is_primary == expected
+
+
 def test__slb_units_from_parse_tree():
     table_text = """<table cellspacing="0" cellpadding="4" id="main_GridView1" style="font-size:X-Small;border-collapse:collapse;">
     <tr align="left" style="background-color:#E0E0E0;">
@@ -52,3 +68,8 @@ def test__slb_units_from_parse_tree():
                                                                standard_form='bbl/(d.ft.psi)', dimension='Mobility',
                                                                scale=8.75618153524512e-10, offset=0.0)}
     assert result == expected
+
+
+def test_read_osdd_static_data():
+    result = TotalDepth.common.units.read_osdd_static_data()
+    assert len(result) > 0

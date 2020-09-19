@@ -471,7 +471,7 @@ def main() -> int:
     args = parser.parse_args()
     # print('args:', args)
     # return 0
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     # Your code here
     clk_start = time.perf_counter()
     ret_val = 0
@@ -484,7 +484,7 @@ def main() -> int:
         )
     else:
         if args.log_process > 0.0:
-            with process.log_process(args.log_process):
+            with process.log_process(args.log_process, log_level):
                 result: typing.Dict[str, IndexResult] = index_dir_or_file(
                     args.path_in,
                     args.path_out,

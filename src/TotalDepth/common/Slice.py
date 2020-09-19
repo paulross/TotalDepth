@@ -20,46 +20,38 @@ class SliceABC(abc.ABC):
     @abc.abstractmethod
     def first(self, length: int) -> int:
         """The index of the first element of a sequence of length."""
-        pass
 
     @abc.abstractmethod
     def last(self, length: int) -> int:
         """The index of the last element of a sequence of length."""
-        pass
 
     @abc.abstractmethod
     def step(self, length: int) -> int:
         """The sequence of length step."""
-        pass
 
     @abc.abstractmethod
     def count(self, length: int) -> int:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
-        pass
 
     @abc.abstractmethod
     def gen_indices(self, length: int) -> range:
         """Generates the indices for the sequence of the given length."""
-        pass
 
     @abc.abstractmethod
     def indices(self, length: int) -> typing.List[int]:
         """Returns a fully composed list of indices for the sequence of the given length."""
-        pass
 
     @abc.abstractmethod
     def __eq__(self, other) -> bool:
         """Mostly used for testing."""
-        pass
 
     @abc.abstractmethod
     def long_str(self, length: int) -> str:
         """Return a long string."""
-        pass
 
     @abc.abstractmethod
     def __str__(self) -> str:
-        pass
+        """String representation."""
 
 
 class Slice(SliceABC):
@@ -209,7 +201,7 @@ def create_slice_or_sample(slice_string: str) -> typing.Union[Slice, Sample]:
 
 
 def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
-                                       help_prefix: str = '', use_what: bool = False) -> None:
+                                       help_prefix: str = '', use_what: bool = False) -> None: # pragma: no cover
     help_list = []
     if help_prefix:
         help_list.append(f'{help_prefix}')

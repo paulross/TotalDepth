@@ -30,6 +30,64 @@ def test_activity_masked(array, null_value, expected):
 
 
 @pytest.mark.parametrize(
+    'array, expected',
+    (
+        (np.array([]), 0),
+        (np.arange(8.0), 0),
+        (np.array([1.0] * 8), 7),
+        (np.array(list(reversed(range(8)))), 0),
+    )
+)
+def test_counts_eq(array, expected):
+    result = np_summary.count_eq(array)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'array, expected',
+    (
+        (np.array([]), 0),
+        (np.arange(8.0), 0),
+        (np.array([1.0] * 8), 0),
+        (np.array(list(reversed(range(8)))), 7),
+    )
+)
+def test_counts_dec(array, expected):
+    result = np_summary.count_dec(array)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'array, expected',
+    (
+        (np.array([]), 0),
+        (np.arange(8.0), 7),
+        (np.array([1.0] * 8), 0),
+        (np.array(list(reversed(range(8)))), 0),
+    )
+)
+def test_counts_inc(array, expected):
+    result = np_summary.count_inc(array)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'array, expected',
+    (
+        (np.array([]), (0, 0, 0)),
+        (np.arange(8.0), (0, 0, 7)),
+        (np.array([1.0] * 8), (7, 0, 0)),
+        (np.array(list(reversed(range(8)))), (0, 7, 0)),
+    )
+)
+def test_counts_eq_dec_inc(array, expected):
+    result = np_summary.count_eq_dec_inc(array)
+    assert result == expected
+
+
+
+
+@pytest.mark.parametrize(
     'array, null_value, expected',
     (
         (
@@ -48,32 +106,33 @@ def test_activity_masked(array, null_value, expected):
             np.array([1.0, 1.0]),
             None,
             np_summary.ArraySummary(len=2, shape=(2,), count=2, min=1.0, max=1.0, mean=1.0, std=0.0, median=1.0,
-                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0),
+                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0, drift=0.0),
         ),
         (
             np.array([1.0, 1.0]),
             2.0,
             np_summary.ArraySummary(len=2, shape=(2,), count=2, min=1.0, max=1.0, mean=1.0, std=0.0, median=1.0,
-                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0),
+                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0, drift=0.0),
         ),
         (
             np.array([1.0, 1.0]),
             2.0,
             np_summary.ArraySummary(len=2, shape=(2,), count=2, min=1.0, max=1.0, mean=1.0, std=0.0, median=1.0,
-                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0),
+                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0, drift=0.0),
         ),
         (
             np.array([2.0 ** i for i in range(8)]),
             None,
             np_summary.ArraySummary(len=8, shape=(8,), count=8, min=1.0, max=128.0, mean=31.875, std=41.40784195052913,
-                                    median=12.0, count_eq=0, count_dec=0, count_inc=7, activity=1.0)
+                                    median=12.0, count_eq=0, count_dec=0, count_inc=7, activity=1.0,
+                                    drift=18.142857142857142)
         ),
         (
             np.array([2.0 ** i for i in range(8)]),
             4.0,
-            np_summary.ArraySummary(len=8, shape=(8,), count=7, min=1.0, max=128.0, mean=35.857142857142854,
-                                    std=42.809974042867864, median=12.0, count_eq=0, count_dec=0, count_inc=7,
-                                    activity=1.0)
+            np_summary.ArraySummary(len=8, shape=(7,), count=7, min=1.0, max=128.0, mean=35.857142857142854,
+                                    std=42.809974042867864, median=16.0, count_eq=0, count_dec=0, count_inc=6,
+                                    activity=1.0 + 1 / 6, drift=(128.0 - 1.0) / (8 - 2))
         ),
     )
 )

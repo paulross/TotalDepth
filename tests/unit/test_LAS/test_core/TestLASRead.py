@@ -593,6 +593,70 @@ def test_simple_curve_and_array_section_with_wrap_2():
     assert sorted(list(las_array_section.keys())) == [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5]
 
 
+def test_simple_curve_and_array_section_with_wrap_dupe_curves():
+    """TestLASReadLASSectionArray.test_04(): Populate with array, with wrap +2 line.
+    Curve section has duplicate curves."""
+    las_curve_section = LASRead.LASSection('C', raise_on_error=False)
+    las_str = """ DEPT.F                          : 
+ GR  .GAPI           45 310 01 00: 
+ GR  .GAPI           45 310 01 00: 
+ DPHI.V/V            45 890 00 00: 
+ NPHI.V/V            42 890 00 00: 
+ ILD .OHMM           05 120 00 00: 
+"""
+    for i, l in enumerate(las_str.split('\n')):
+        las_curve_section.add_member_line(i, l)
+    las_curve_section.finalise()
+    assert len(las_curve_section) == 6
+    las_array_section = LASRead.LASSectionArray('A', True, las_curve_section, raise_on_error=False)
+    las_str = """ 1700.0000
+ -999.2500  -999.2500  -999.2500
+ -999.2500  -999.2500
+ 1700.5000
+ 40.7909 40.7909     0.0218
+ 0.0417    25.9985
+ 1701.0000
+ 44.0165 44.0165     0.0347
+ 0.0333    26.1850
+ 1701.5000
+ 45.4578 45.4578     0.0506
+ 0.0272    25.7472
+ 1702.0000
+ 44.3055 44.3055     0.0527
+ 0.0213    23.8872
+ 1702.5000
+ 42.6896 42.6896     0.0443
+ 0.0167    20.8817
+ 1703.0000
+ 52.4264 52.4264     0.0290
+ 0.0229    17.8425
+ 1703.5000
+ 61.1144 61.1144     0.0199
+ 0.0383    13.2042
+"""
+    for i, l in enumerate(las_str.split('\n')):
+        las_array_section.add_member_line(i, l)
+    las_array_section.finalise()
+    assert las_array_section.type == 'A'
+    assert las_array_section.members == []
+    expected = np.array([
+        [1700.0, -999.25, -999.25, -999.25, -999.25],
+        [1700.5, 40.7909, 0.0218, 0.0417, 25.9985],
+        [1701.0, 44.0165, 0.0347, 0.0333, 26.185],
+        [1701.5, 45.4578, 0.0506, 0.0272, 25.7472],
+        [1702.0, 44.3055, 0.0527, 0.0213, 23.8872],
+        [1702.5, 42.6896, 0.0443, 0.0167, 20.8817],
+        [1703.0, 52.4264, 0.029, 0.0229, 17.8425],
+        [1703.5, 61.1144, 0.0199, 0.0383, 13.2042],
+    ]).T.reshape((5, 8, 1))
+    for i in range(len(las_array_section.frame_array)):
+        a0 = las_array_section.frame_array.channels[i].array
+        a1 = expected[i]
+        assert a0.shape == (8, 1)
+        assert np.array_equal(a0, a1)
+    assert sorted(list(las_array_section.keys())) == [1700.0, 1700.5, 1701.0, 1701.5, 1702.0, 1702.5, 1703.0, 1703.5]
+
+
 def test_simple_curve_and_array_section_non_floats_to_null():
     """TestLASReadLASSectionArray.test_05(): Convert unreadable floats to NULL."""
     las_curve_section = _ret_simple_curve_section()
@@ -1762,7 +1826,7 @@ GR  .API  00 000 00 00:   6
 """)
     with pytest.raises(LASRead.ExceptionLASRead) as err:
         LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
-    assert err.value.args[0] == 'Expected 2 channels but found 3 in line 17'
+    assert err.value.args[0] == 'Expected 2 columns but found 3 in frame 0'
 
 
 def test_array_underrun():
@@ -1786,7 +1850,7 @@ GR  .API  00 000 00 00:   6
 """)
     with pytest.raises(LASRead.ExceptionLASRead) as err:
         LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
-    assert err.value.args[0] == 'Expected 2 channels but found 1 in frame 0'
+    assert err.value.args[0] == 'Expected 2 columns but found 1 in frame 0'
 
 
 # Note channel '4' is not conformant, 5 is.
@@ -1823,7 +1887,7 @@ def test_with_numeric_channels_when_raise_on_error_false_fails_on_overrun():
     las_raw_file = io.StringIO(LAS_WITH_NUMERIC_CHANNELS_MINIMAL)
     with pytest.raises(LASRead.ExceptionLASRead) as err:
         LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
-    assert err.value.args[0] == 'Expected 2 channels but found 3 in line 26'
+    assert err.value.args[0] == 'Expected 2 columns but found 10 in frame 0'
 
 
 def test_with_numeric_channels_when_raise_on_error_true_fails_on_curve_read():
@@ -2023,6 +2087,7 @@ Some stuff here.
 """
     las_raw_file = io.StringIO(las_text)
     las_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=True)
+    assert len(las_file) == 7
 
 
 def test_duplicate_curve_ignored_when_raise_on_error_false():
@@ -2043,7 +2108,7 @@ DEPTH   .M            00 001 00 00:   0  Depth
 GR  .API  00 000 00 00:   6
 GR  .API  00 000 00 00:   6
 ~A
-      1670 123
+      1670 123 123
 """)
     las_file = LASRead.LASRead(las_raw_file, 'MyID', raise_on_error=False)
     assert len(las_file) == 4
