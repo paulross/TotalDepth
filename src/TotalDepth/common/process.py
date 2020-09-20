@@ -249,12 +249,16 @@ def add_message_to_queue(msg: str) -> None:
 class ProcessLoggingThread(threading.Thread):
     """Thread that regularly logs out process parameters."""
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+        """Constructor.
+        args[0], or interval=... must be the reporting interval in seconds, default 1.0.
+        args[1], or log_level=... must be the log level to report with, default logging.INFO.
+        """
         if name is None:
             name = 'ProcMon'
         super().__init__(group=group, target=target, name=name, daemon=daemon)
         self.args = args
         self.kwargs = kwargs
-        self._interval = args[0] if len(args) else kwargs['interval']
+        self._interval = args[0] if len(args) else kwargs.get('interval', 1.0)
         self._log_level = args[1] if len(args) > 1 else kwargs.get('log_level', logging.INFO)
         self._process = psutil.Process()
         self._run = True

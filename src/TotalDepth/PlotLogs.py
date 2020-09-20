@@ -245,7 +245,7 @@ class PlotLogInfo(object):
 
     def _writeIndexTableRows(self, theS, theTrie, theFilePath):
         # Write the rowspan/colspan data
-        for anEvent in theTrie.genColRowEvents():
+        for anEvent in theTrie.gen_row_column_events():
             if anEvent == theTrie.ROW_OPEN:
                 # Write out the '<tr>' element
                 theS.startElement('tr', {})

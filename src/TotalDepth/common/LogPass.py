@@ -154,7 +154,6 @@ class FrameChannel:
 
     def mask_array(self, absent_value: typing.Union[None, int, float]) -> None:
         """Masks the absent values."""
-        # self.array = AbsentValue.mask_absent_values(self.array, absent_value)
         if np.issubdtype(self.array.dtype, np.floating):
             self.array = AbsentValue.mask_absent_values(self.array, float(absent_value))
         elif np.issubdtype(self.array.dtype, np.integer):
