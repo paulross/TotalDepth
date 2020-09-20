@@ -33,82 +33,242 @@ __version__ = '0.8.0'
 __rights__ = 'Copyright (c) Paul Ross'
 
 
-class TestDictTreeCtor(unittest.TestCase):
-    """Tests DictTree constructor."""
-    def test_00(self):
-        """TestDictTreeCtor: test_00(): constructor."""
-        DictTree.DictTree()
-        self.assertTrue(True)
-                
-    def test_01(self):
-        """TestDictTreeCtor: test_01(): constructor fails."""
-        try:
-            DictTree.DictTree(valIterable='int')
-            self.fail('DictTree.ExceptionDictTree not raised.')
-        except DictTree.ExceptionDictTree:
-            pass
-                
-    def test_02(self):
-        """TestDictTreeCtor: test_02(): constructor OK, change valIterable and fail."""
-        myDt = DictTree.DictTree()
-        myDt._vI = 'int'
-        try:
-            myDt.add(range(1), 'one')
-            self.fail('DictTree.ExceptionDictTree not raised.')
-        except DictTree.ExceptionDictTree:
-            pass
-                
-class TestDictTreeAdd(unittest.TestCase):
-    """Tests DictTree add() function."""
-    def setUp(self):
-        self._dt = DictTree.DictTree()
-        self.assertEqual([], self._dt.keys())
-        self.assertEqual([], self._dt.values())
-        self.assertEqual(0, len(self._dt))
-        self.assertTrue('spam' not in self._dt)
-        self.assertFalse('spam' in self._dt)
-        self.assertEqual(0, self._dt.depth())
-        
-    def tearDown(self):
-        pass
-    
-    def test_00(self):
-        """TestDictTreeAdd: test setUp() and tearDown()."""
-        self.assertTrue(True)
+def test_dict_tree_ctor():
+    dict_tree = DictTree.DictTree()
+    assert dict_tree is not None
 
-    def test_01(self):
-        """TestDictTreeAdd: test_01(): simple add."""
-        self._dt.add(range(4), 'four')
-        self.assertEqual([list(range(4)),], self._dt.keys())
-        self.assertEqual(['four',], self._dt.values())
-        self.assertEqual(1, len(self._dt))
-        self.assertTrue('spam' not in self._dt)
-        self.assertFalse('spam' in self._dt)
-        self.assertTrue(range(4) in self._dt)
-        self.assertEqual('four', self._dt.value(range(4)))
-        self.assertEqual(4, self._dt.depth())
-                
-    def test_02(self):
-        """TestDictTreeAdd: test_02(): add and stringise."""
-        self._dt.add(range(2), 'one')
-        self.assertEqual(2, self._dt.depth())
-        self._dt.add(range(4), 'three')
-        self.assertEqual(4, self._dt.depth())
-        self._dt.add(range(6), 'five')
-        self.assertEqual(6, self._dt.depth())
-        self.assertEqual(
+
+def test_dict_tree_ctor_empty():
+    dict_tree = DictTree.DictTree()
+    assert dict_tree.keys() == []
+    assert dict_tree.values() == []
+    assert len(dict_tree) == 0
+    assert dict_tree.depth() == 0
+
+
+def test_dict_tree_wrong_value_iterable_raises():
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        DictTree.DictTree(value_iterable='int')
+    assert err.value.args[0] == '"int" not in acceptable range: (None, \'list\', \'set\')'
+
+
+def test_dict_tree_setting_wrong_value_iterable_raises():
+    dict_tree = DictTree.DictTree()
+    dict_tree.value_iterable = 'int'
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.add(list(range(1)), 'one')
+    assert err.value.args[0] == '"int" not in acceptable range: (None, \'list\', \'set\')'
+
+
+def test_dict_tree_simple_add_keys():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert dt.keys() == [list(range(4))]
+
+
+def test_dict_tree_simple_add_values():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert dt.values() == ['four']
+
+
+def test_dict_tree_simple_add_value():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert dt.value(list(range(4))) == 'four'
+
+
+def test_dict_tree_simple_add_value_none():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert dt.value(list(range(3))) is None
+
+
+def test_dict_tree_simple_add_len():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert len(dt) == 1
+
+
+def test_dict_tree_simple_add_depth():
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert dt.depth() == 4
+
+
+@pytest.mark.parametrize(
+    'key, expected',
+    (
+            (list(range(3)), False),
+            (list(range(4)), True),
+            (list(range(5)), False),
+    )
+)
+def test_dict_tree_simple_add_contains(key, expected):
+    dt = DictTree.DictTree()
+    dt.add(list(range(4)), 'four')
+    assert (key in dt) == expected
+
+
+@pytest.mark.parametrize(
+    'key_values, expected',
+    (
+        (
             [
-                list(range(2)),
-                list(range(4)),
-                list(range(6)),
+                ([0, 1, 2], 'two'),
             ],
-            self._dt.keys(),
-        )
-        self.assertEqual(['one','three','five',], self._dt.values())
-        self.assertEqual(3, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+            [
+                [0, 1, 2]
+            ],
+        ),
+        (
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+            [
+                [0, 1, 2],
+                [0, 1, 2, 3],
+            ],
+        ),
+        # Reverse insert order check.
+        (
+            [
+                ([0, 1, 2, 3], 'three'),
+                ([0, 1, 2], 'two'),
+            ],
+            [
+                [0, 1, 2],
+                [0, 1, 2, 3],
+            ],
+        ),
+    )
+)
+def test_dict_tree_keys(key_values, expected):
+    dt = DictTree.DictTree()
+    for key, value in key_values:
+        dt.add(key, value)
+    assert dt.keys() == expected
+
+
+@pytest.mark.parametrize(
+    'key_values, expected',
+    (
+        (
+            [
+                ([0, 1, 2], 'two'),
+            ],
+            ['two', ],
+        ),
+        (
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+            ['two', 'three', ],
+        ),
+        # Reverse insert order check.
+        (
+            [
+                ([0, 1, 2, 3], 'three'),
+                ([0, 1, 2], 'two'),
+            ],
+            ['two', 'three', ],
+        ),
+    )
+)
+def test_dict_tree_values(key_values, expected):
+    dt = DictTree.DictTree()
+    for key, value in key_values:
+        dt.add(key, value)
+    assert dt.values() == expected
+
+
+@pytest.mark.parametrize(
+    'key_values, expected',
+    (
+        (
+            [
+                ([0, 1, 2], 'two'),
+            ],
+            [
+                ([0, 1, 2], 'two'),
+            ],
+        ),
+        (
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+        ),
+        # Reverse insert order check.
+        (
+            [
+                ([0, 1, 2, 3], 'three'),
+                ([0, 1, 2], 'two'),
+            ],
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+        ),
+    )
+)
+def test_dict_tree_items(key_values, expected):
+    dt = DictTree.DictTree()
+    for key, value in key_values:
+        dt.add(key, value)
+    assert list(dt.items()) == expected
+
+
+@pytest.mark.parametrize(
+    'key_values, expected',
+    (
+        (
+            [
+                ([0, 1, 2], 'two'),
+            ],
+            """0
+  1
+    2
+      two""",
+        ),
+        (
+            [
+                ([0, 1, 2], 'two'),
+                ([0, 1, 2, 3], 'three'),
+            ],
+            """0
+  1
+    2
+      two
+      3
+        three""",
+        ),
+        # Reverse insert order check.
+        (
+            [
+                ([0, 1, 2, 3], 'three'),
+                ([0, 1, 2], 'two'),
+            ],
+            """0
+  1
+    2
+      two
+      3
+        three""",
+        ),
+        (
+                [
+                    ([0, 1, ], 'one'),
+                    ([0, 1, 2, 3], 'three'),
+                    ([0, 1, 2, 3, 4, 5], 'five'),
+                ],
+                """0
   1
     one
     2
@@ -116,26 +276,30 @@ class TestDictTreeAdd(unittest.TestCase):
         three
         4
           5
-            five""", self._dt.indentedStr())
+            five""",
+        ),
+    )
+)
+def test_dict_tree_add_indented_string(key_values, expected):
+    dt = DictTree.DictTree()
+    for key, value in key_values:
+        dt.add(key, value)
+    assert dt.indented_string() == expected
 
-    def test_03(self):
-        """TestDictTreeAdd: test_00(): add, remove and stringise."""
-        self._dt.add(range(2), 'one')
-        self._dt.add(range(4), 'three')
-        self._dt.add(range(6), 'five')
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(4)),
-                list(range(6)),
-            ],
-            self._dt.keys(),
-        )
-        self.assertEqual(['one','three','five',], self._dt.values())
-        self.assertEqual(3, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+
+def test_add_remove_and_stringise():
+    dict_tree = DictTree.DictTree()
+    dict_tree.add(list(range(2)), 'one')
+    dict_tree.add(list(range(4)), 'three')
+    dict_tree.add(list(range(6)), 'five')
+    assert dict_tree.keys() == [
+            list(range(2)),
+            list(range(4)),
+            list(range(6)),
+        ]
+    assert dict_tree.values() == ['one', 'three', 'five', ]
+    assert len(dict_tree) == 3
+    assert dict_tree.indented_string() == """0
   1
     one
     2
@@ -143,76 +307,55 @@ class TestDictTreeAdd(unittest.TestCase):
         three
         4
           5
-            five""", self._dt.indentedStr())
-        self._dt.remove(range(4))
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(6)),
-            ],
-            self._dt.keys(),
-        )
-        self.assertEqual(['one','five',], self._dt.values())
-        self.assertEqual(2, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+            five"""
+    dict_tree.remove(list(range(4)))
+    assert dict_tree.keys() == [
+            list(range(2)),
+            list(range(6)),
+        ]
+    assert dict_tree.values() == ['one', 'five', ]
+    assert len(dict_tree) == 2
+    assert dict_tree.indented_string() == """0
   1
     one
     2
       3
         4
           5
-            five""", self._dt.indentedStr())
+            five"""
 
-class TestDictTreeAddList(unittest.TestCase):
-    """Tests DictTree [list] add() function."""
-    def setUp(self):
-        self._dt = DictTree.DictTree(valIterable='list')
-        self.assertEqual([], self._dt.keys())
-        self.assertEqual([], self._dt.values())
-        self.assertEqual(0, len(self._dt))
-        self.assertTrue('spam' not in self._dt)
-        self.assertFalse('spam' in self._dt)
-        self.assertEqual(0, self._dt.depth())
-        
-    def tearDown(self):
-        pass
-    
-    def test_00(self):
-        """TestDictTreeAddList: test_00(): add value as list and stringise."""
-        self._dt.add(range(2), 'one')
-        self._dt.add(range(2), 'One')
-        self._dt.add(range(2), 'ONE')
-        self.assertEqual(2, self._dt.depth())
-        self._dt.add(range(4), 'three')
-        self._dt.add(range(4), 'Three')
-        self._dt.add(range(4), 'THREE')
-        self.assertEqual(4, self._dt.depth())
-        self._dt.add(range(6), 'five')
-        self._dt.add(range(6), 'Five')
-        self._dt.add(range(6), 'FIVE')
-        self.assertEqual(6, self._dt.depth())
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(4)),
-                list(range(6)),
-            ],
-            self._dt.keys(),
-        )
-        self.assertEqual(
-            [
-                ['one', 'One', 'ONE'],
-                ['three', 'Three', 'THREE'],
-                ['five', 'Five', 'FIVE']
-            ],
-            self._dt.values(),
-            )
-        self.assertEqual(3, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+
+def _test_add_to_list_or_set(dict_tree: DictTree.DictTree) -> None:
+    dict_tree.add(range(2), 'one')
+    dict_tree.add(range(2), 'One')
+    dict_tree.add(range(2), 'ONE')
+    assert 2 == dict_tree.depth()
+    dict_tree.add(range(4), 'three')
+    dict_tree.add(range(4), 'Three')
+    dict_tree.add(range(4), 'THREE')
+    assert 4 == dict_tree.depth()
+    dict_tree.add(range(6), 'five')
+    dict_tree.add(range(6), 'Five')
+    dict_tree.add(range(6), 'FIVE')
+    assert 6 == dict_tree.depth()
+    assert [
+            list(range(2)),
+            list(range(4)),
+            list(range(6)),
+        ] == dict_tree.keys()
+
+
+def test_value_iterable_list_add_values_as_list_and_stringise():
+    """TestDictTreeAddList: test_00(): add value as list and stringise."""
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    _test_add_to_list_or_set(dict_tree)
+    assert [
+            ['one', 'One', 'ONE'],
+            ['three', 'Three', 'THREE'],
+            ['five', 'Five', 'FIVE']
+        ] == dict_tree.values()
+    assert 3 == len(dict_tree)
+    assert """0
   1
     ['one', 'One', 'ONE']
     2
@@ -220,237 +363,186 @@ class TestDictTreeAddList(unittest.TestCase):
         ['three', 'Three', 'THREE']
         4
           5
-            ['five', 'Five', 'FIVE']""",
-            self._dt.indentedStr())
+            ['five', 'Five', 'FIVE']""" == dict_tree.indented_string()
 
-    def test_01(self):
-        """TestDictTreeAddList: test_01(): add value as list then remove it."""
-        self._dt.add(range(2), 'one')
-        self.assertTrue(range(2) in self._dt)
-        # Try removing something not there
-        try:
-            self._dt.remove(range(2), 'two')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+
+def test_value_iterable_list_add_values_as_list_and_remove():
+    """TestDictTreeAddList: test_01(): add value as list then remove it."""
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(2), 'one')
+    assert range(2) in dict_tree
+    assert """0
   1
-    ['one']""",
-            self._dt.indentedStr()
-        )
-        self._dt.remove(range(2), 'one')
-        self.assertTrue(range(2) in self._dt)
-        self.assertEqual([], self._dt.value(range(2)))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+    ['one']""" == dict_tree.indented_string()
+    dict_tree.remove(range(2), 'one')
+    assert range(2) in dict_tree
+    assert [] == dict_tree.value(range(2))
+    assert """0
   1
-    []""",
-            self._dt.indentedStr()
-        )
-        # Remove the key completely
-        self._dt.remove(range(2), None)
-        self.assertFalse(range(2) in self._dt)
-        self.assertTrue(range(2) not in self._dt)
-        self.assertEqual(None, self._dt.value(range(2)))
+    []""" == dict_tree.indented_string()
 
-    def test_02(self):
-        """TestDictTreeAddList: test_02(): add value as list then try to remove something else."""
-        self._dt.add(range(3), 'three')
-        self.assertTrue(range(3) in self._dt)
-        # Try removing something with a key overrun
-        try:
-            self._dt.remove(range(4), 'four')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-        # Try removing something with a key mismatch
-        try:
-            self._dt.remove([1, 2, 3, 4], 'one to four')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-        # Try removing something with a key underrun
-        try:
-            self._dt.remove(range(2), 'two')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
 
-class TestDictTreeAddSet(unittest.TestCase):
-    """Tests DictTree [set] add() function."""
-    def setUp(self):
-        self._dt = DictTree.DictTree(valIterable='set')
-        self.assertEqual([], self._dt.keys())
-        self.assertEqual([], self._dt.values())
-        self.assertEqual(0, len(self._dt))
-        self.assertTrue('spam' not in self._dt)
-        self.assertFalse('spam' in self._dt)
-        self.assertEqual(0, self._dt.depth())
-        
-    def tearDown(self):
-        pass
+def test_value_iterable_list_add_values_as_list_and_remove_key():
+    """TestDictTreeAddList: test_01(): add value as list then remove it."""
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(2), 'one')
+    # Remove the key completely
+    dict_tree.remove(range(2), None)
+    assert range(2) not in dict_tree
+    assert dict_tree.value(range(2)) is None
+
+
+def test_value_iterable_list_remove_missing_value_raises():
+    """TestDictTreeAddList: test_01(): add value as list then remove missing value raises."""
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(2), 'one')
+    assert range(2) in dict_tree
+    # Try removing something not there
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(2), 'two')
+    assert err.value.args[0] == 'two not in list [\'one\']'
+
+
+def test_value_iterable_list_remove_missing_key_overrun_raises():
+    """TestDictTreeAddList: test_02(): add value as list then try to remove something else."""
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key overrun
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(4), 'four')
+    assert err.value.args[0] == 'No key tree: range(3, 4)'
+
+
+def test_value_iterable_list_remove_key_mismatch_raises():
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key mismatch
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove([1, 2, 3, 4], 'one to four')
+    assert err.value.args[0] == 'No key: 1'
+
+
+def test_value_iterable_list_remove_key_underrun_raises():
+    dict_tree = DictTree.DictTree(value_iterable='list')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key underrun
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(2), 'two')
+    assert err.value.args[0] == 'Value of key is None'
+
+
+def test_value_iterable_set_add_values_as_set_and_stringise():
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    _test_add_to_list_or_set(dict_tree)
+    assert [
+            {'one', 'One', 'ONE'},
+            {'three', 'Three', 'THREE'},
+            {'five', 'Five', 'FIVE'}
+        ] == dict_tree.values()
+    assert 3 == len(dict_tree)
+
+
+def test_value_iterable_set_add_values_as_list_and_remove():
+    """TestDictTreeAddList: test_01(): add value as list then remove it."""
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(2), 'one')
+    assert range(2) in dict_tree
+    assert """0
+  1
+    {'one'}""" == dict_tree.indented_string()
+    dict_tree.remove(range(2), 'one')
+    assert range(2) in dict_tree
+    assert set() == dict_tree.value(range(2))
+    assert """0
+  1
+    set()""" == dict_tree.indented_string()
+
+
+def test_value_iterable_set_add_values_as_list_and_remove_key():
+    """TestDictTreeAddList: test_01(): add value as list then remove it."""
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(2), 'one')
+    # Remove the key completely
+    dict_tree.remove(range(2), None)
+    assert range(2) not in dict_tree
+    assert dict_tree.value(range(2)) is None
+
+
+def test_value_iterable_set_remove_missing_value_raises():
+    """TestDictTreeAddList: test_01(): add value as list then remove missing value raises."""
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(2), 'one')
+    assert range(2) in dict_tree
+    # Try removing something not there
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(2), 'two')
+    assert err.value.args[0] == 'two not in set {\'one\'}'
+
+
+def test_value_iterable_set_remove_missing_key_overrun_raises():
+    """TestDictTreeAddList: test_02(): add value as list then try to remove something else."""
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key overrun
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(4), 'four')
+    assert err.value.args[0] == 'No key tree: range(3, 4)'
+
+
+def test_value_iterable_set_remove_key_mismatch_raises():
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key mismatch
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove([1, 2, 3, 4], 'one to four')
+    assert err.value.args[0] == 'No key: 1'
+
+
+def test_value_iterable_set_remove_key_underrun_raises():
+    dict_tree = DictTree.DictTree(value_iterable='set')
+    dict_tree.add(range(3), 'three')
+    assert range(3) in dict_tree
+    # Try removing something with a key underrun
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dict_tree.remove(range(2), 'two')
+    assert err.value.args[0] == 'Value of key is None'
+
     
-    def test_00(self):
-        """TestDictTreeAddSet: test_00(): add value as set and stringise."""
-        self._dt.add(range(2), 'one')
-        self._dt.add(range(2), 'One')
-        self._dt.add(range(2), 'ONE')
-        self.assertEqual(2, self._dt.depth())
-        self._dt.add(range(4), 'three')
-        self._dt.add(range(4), 'Three')
-        self._dt.add(range(4), 'THREE')
-        self.assertEqual(4, self._dt.depth())
-        self._dt.add(range(6), 'five')
-        self._dt.add(range(6), 'Five')
-        self._dt.add(range(6), 'FIVE')
-        self.assertEqual(6, self._dt.depth())
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(4)),
-                list(range(6)),
-            ],
-            self._dt.keys(),
-        )
-        self.assertEqual(
-            [
-                set(['one', 'One', 'ONE']),
-                set(['three', 'Three', 'THREE']),
-                set(['five', 'Five', 'FIVE']),
-            ],
-            self._dt.values(),
-            )
-        self.assertEqual(3, len(self._dt))
-        self.assertEqual(6, self._dt.depth())
-        #print
-        #print self._dt.indentedStr()
-#       self.assertEqual("""0
-# 1
-#   {'One', 'ONE', 'one'}
-#   2
-#     3
-#       {'THREE', 'three', 'Three'}
-#       4
-#         5
-#           {'Five', 'FIVE', 'five'}""",
-#           self._dt.indentedStr())
-        # Try removal
-        self._dt.remove(range(4), 'THREE')
-        # Try removal of something that is not there
-        try:
-            self._dt.remove(range(4), 'TWENTY_TWO')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-
-    def test_01(self):
-        """TestDictTreeAddSet: test_01(): add value as set then remove it."""
-        self._dt.add(range(2), 'one')
-        self.assertTrue(range(2) in self._dt)
-        # Try removing something not there
-        try:
-            self._dt.remove(range(2), 'two')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-#        print()
-#        print(self._dt.indentedStr())
-        self.assertEqual("""0
-  1
-    {'one'}""",
-            self._dt.indentedStr()
-        )
-        self._dt.remove(range(2), 'one')
-        self.assertTrue(range(2) in self._dt)
-        self.assertEqual(set([]), self._dt.value(range(2)))
-#        print()
-#        print(self._dt.indentedStr())
-        self.assertEqual("""0
-  1
-    set()""",
-            self._dt.indentedStr()
-        )
-        # Remove the key completely
-        self._dt.remove(range(2), None)
-        self.assertFalse(range(2) in self._dt)
-        self.assertTrue(range(2) not in self._dt)
-        self.assertEqual(None, self._dt.value(range(2)))
-
-    def test_02(self):
-        """TestDictTreeAddList: test_02(): add value as set then try to remove something else."""
-        self._dt.add(range(3), 'three')
-        self.assertTrue(range(3) in self._dt)
-        # Try removing something with a key overrun
-        try:
-            self._dt.remove(range(4), 'four')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-        # Try removing something with a key mismatch
-        try:
-            self._dt.remove([1, 2, 3, 4], 'one to four')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-        # Try removing something with a key underrun
-        try:
-            self._dt.remove(range(2), 'two')
-            self.fail('DictTree.ExceptionDictTree not raised')
-        except DictTree.ExceptionDictTree:
-            pass
-
-class TestDictTreeAddBespokeList(unittest.TestCase):
-    """Tests DictTree add() function."""
-    def setUp(self):
-        self._dt = DictTree.DictTree()
-        self.assertEqual([], self._dt.keys())
-        self.assertEqual([], self._dt.values())
-        self.assertEqual(0, len(self._dt))
-        self.assertTrue('spam' not in self._dt)
-        self.assertFalse('spam' in self._dt)
-        
-    def tearDown(self):
-        pass
-    
-    def test_00(self):
-        """TestDictTreeAdd: test_00(): add value with bespoke list and stringise."""
-        def addKv(dt, k, v):
-            if dt.value(k) is None:
-                dt.add(k, [v,])
-            else:
-                dt.value(k).append(v)
-        addKv(self._dt, range(2), 'one')
-        addKv(self._dt, range(2), 'One')
-        addKv(self._dt, range(2), 'ONE')
-        addKv(self._dt, range(4), 'three')
-        addKv(self._dt, range(4), 'Three')
-        addKv(self._dt, range(4), 'THREE')
-        addKv(self._dt, range(6), 'five')
-        addKv(self._dt, range(6), 'Five')
-        addKv(self._dt, range(6), 'FIVE')
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(4)),
-                list(range(6)),
-            ],
-            self._dt.keys(),
-        )
-        self.assertEqual(
-            [
-                ['one', 'One', 'ONE'],
-                ['three', 'Three', 'THREE'],
-                ['five', 'Five', 'FIVE']
-            ],
-            self._dt.values(),
-            )
-        self.assertEqual(3, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
-        self.assertEqual("""0
+def test_dict_tree_add_bespoke_list():
+    """TestDictTreeAddBespokeList: test_00(): add value with bespoke list and stringise."""
+    def add_key_value(dict_tree, key, value):
+        if dict_tree.value(key) is None:
+            dict_tree.add(key, [value, ])
+        else:
+            dict_tree.value(key).append(value)
+            
+    dict_tree = DictTree.DictTree()
+    add_key_value(dict_tree, range(2), 'one')
+    add_key_value(dict_tree, range(2), 'One')
+    add_key_value(dict_tree, range(2), 'ONE')
+    add_key_value(dict_tree, range(4), 'three')
+    add_key_value(dict_tree, range(4), 'Three')
+    add_key_value(dict_tree, range(4), 'THREE')
+    add_key_value(dict_tree, range(6), 'five')
+    add_key_value(dict_tree, range(6), 'Five')
+    add_key_value(dict_tree, range(6), 'FIVE')
+    assert [
+            list(range(2)),
+            list(range(4)),
+            list(range(6)),
+        ] == dict_tree.keys()
+    assert [
+            ['one', 'One', 'ONE'],
+            ['three', 'Three', 'THREE'],
+            ['five', 'Five', 'FIVE']
+        ] == dict_tree.values()
+    assert 3 == len(dict_tree)
+    assert """0
   1
     ['one', 'One', 'ONE']
     2
@@ -458,54 +550,53 @@ class TestDictTreeAddBespokeList(unittest.TestCase):
         ['three', 'Three', 'THREE']
         4
           5
-            ['five', 'Five', 'FIVE']""",
-            self._dt.indentedStr())
+            ['five', 'Five', 'FIVE']""" == dict_tree.indented_string()
 
-class TestDictTreeIadd(unittest.TestCase):
-    """Tests DictTree __iadd__() function."""
-    def setUp(self):
-        pass
-        
-    def tearDown(self):
-        pass
-    
-    def test_00(self):
-        """TestDictTreeAdd: test setUp() and tearDown()."""
-        self.assertTrue(True)
 
-    def test_01(self):
-        """TestDictTreeIadd: test_10(): simple +=."""
-        myDt1 = DictTree.DictTree()
-        myDt1.add(range(2), 'two')
-        myDt1.add(range(3), 'three')
-        myDt2 = DictTree.DictTree()
-        myDt2.add(range(4), 'four')
-        myDt2.add(range(5), 'five')
-        myDt2 += myDt1
-        self.assertEqual(
-            [
-                list(range(2)),
-                list(range(3)),
-                list(range(4)),
-                list(range(5)),
-            ],
-            myDt2.keys(),
-        )
-        self.assertEqual(
-            [
-                'two',
-                'three',
-                'four',
-                'five',
-            ],
-            myDt2.values(),
-        )
-        self.assertEqual(4, len(myDt2))
-        self.assertTrue('spam' not in myDt2)
-        self.assertFalse('spam' in myDt2)
-        self.assertTrue(range(4) in myDt2)
-        self.assertEqual('four', myDt2.value(range(4)))
-        self.assertEqual(5, myDt2.depth())
+def test_iadd():
+    """TestDictTreeIadd: test_10(): simple +=."""
+    dt_1 = DictTree.DictTree()
+    dt_1.add(range(2), 'two')
+    dt_1.add(range(3), 'three')
+    dt_2 = DictTree.DictTree()
+    dt_2.add(range(4), 'four')
+    dt_2.add(range(5), 'five')
+    dt_2 += dt_1
+    assert [
+            list(range(2)),
+            list(range(3)),
+            list(range(4)),
+            list(range(5)),
+        ] == dt_2.keys()
+    assert [
+            'two',
+            'three',
+            'four',
+            'five',
+        ] == dt_2.values()
+    assert 4 == len(dt_2)
+    assert 'spam' not in dt_2
+    assert range(4) in dt_2
+    assert 'four' == dt_2.value(range(4))
+    assert 5 == dt_2.depth()
+
+
+def test_iadd_raises_on_type():
+    """TestDictTreeIadd: test_10(): simple +=."""
+    dict_tree = DictTree.DictTree()
+    with pytest.raises(TypeError) as err:
+        dict_tree += 1
+    assert err.value.args[0] == "unsupported operand type(s) for +=: 'DictTree' and 'int'"
+
+
+def test_iadd_raises_on_value_iterable():
+    """TestDictTreeIadd: test_10(): simple +=."""
+    dt_1 = DictTree.DictTree()
+    dt_2 = DictTree.DictTree(value_iterable='list')
+    with pytest.raises(DictTree.ExceptionDictTree) as err:
+        dt_1 += dt_2
+    assert err.value.args[0] == 'Can not += mixed values None and list'
+
 
 class TestDictTreeHtmlTableBase(unittest.TestCase):
     """Tests TestDictTreeHtmlTable row and col span functions."""
@@ -526,7 +617,7 @@ class TestDictTreeHtmlTableBase(unittest.TestCase):
         htmlLineS = []
         # Write: <table border="2" width="100%">
         htmlLineS.append('<table border="2" width="100%">')
-        for anEvent in self._dt.genColRowEvents():
+        for anEvent in self._dt.gen_row_column_events():
             if anEvent == self._dt.ROW_OPEN:
                 # Write out the '<tr>' element
                 htmlLineS.append('<tr>')
@@ -584,7 +675,7 @@ Z
   ZX
     ZXX
       Value ZXX""",
-            self._dt.indentedStr()
+            self._dt.indented_string()
         )
         expected = """X r=1, c=1
   XX r=1, c=1
@@ -599,14 +690,14 @@ Z r=1, c=1
   ZX r=1, c=1
     ZXX r=1, c=1
 """
-        print('walkRowColSpan():')
-        print(self._dt.walkColRowSpan())
-        print(expected)
-        self.assertEqual(expected, self._dt.walkColRowSpan())
+        # print('walkRowColSpan():')
+        # print(self._dt.walk_row_col_span())
+        # print(expected)
+        self.assertEqual(expected, self._dt.walk_row_col_span())
         #print 'genRowColEvents()'
         #for anEvent in self._dt.genColRowEvents():
         #    print anEvent
-        eventResult = '\n'.join([str(e) for e in self._dt.genColRowEvents()])
+        eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
         #print
         #print eventResult
 #         self.assertEqual("""(None, 0, 0)
@@ -662,13 +753,13 @@ X
 Z
   ZX
     Value ZXX""",
-        self._dt.indentedStr())
+                         self._dt.indented_string())
         #print 'walkRowColSpan():'
         #print self._dt.walkColRowSpan()
         #print 'genRowColEvents()'
         #for anEvent in self._dt.genColRowEvents():
         #    print anEvent
-        eventResult = '\n'.join([str(e) for e in self._dt.genColRowEvents()])
+        eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
         #print
         #print eventResult
 #         self.assertEqual("""(None, 0, 0)
@@ -696,7 +787,7 @@ Z
         self._dt.add(('A', 'AC', 'ACA'), None)
         self._dt.add(('B',), None)
         self._dt.add(('C', 'CA', 'CAA'), None)
-        eventResult = '\n'.join([str(e) for e in self._dt.genColRowEvents()])
+        eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
         #print
         #print 'self._dt.indentedStr()'
         #print self._dt.indentedStr()
@@ -790,7 +881,7 @@ class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
         self.assertEqual("""file_one
   12
     [24, 80]""",
-            self._dt.indentedStr())
+                         self._dt.indented_string())
         
     def test_01(self):
         """TestDictTreeHtmlTableFileLineCol: test_01(): Multiple file/line/column."""
@@ -845,7 +936,7 @@ file_two
     [1]
   14
     [75]""",
-            self._dt.indentedStr())
+                         self._dt.indented_string())
         
     def test_02(self):
         """TestDictTreeHtmlTableFileLineCol: test_02(): Single file/line/column with split on path."""
@@ -871,7 +962,7 @@ file_two
     chips.h
       12
         [24, 80]""",
-            self._dt.indentedStr())
+                         self._dt.indented_string())
         
     def test_03(self):
         """TestDictTreeHtmlTableFileLineCol: test_03(): Multiple file/line/column with split on path."""
@@ -926,7 +1017,7 @@ spam/
       beans.h
         12
           [24, 80]""",
-            self._dt.indentedStr())
+                         self._dt.indented_string())
         #print
         #print self._retHtmlTableString()
         expected = """<table border="2" width="100%">
@@ -1208,7 +1299,7 @@ sf/
               <a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.cpp">ipscprlog.cpp</a>
             ipscprlog.h
               <a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h">ipscprlog.h</a>""",
-              self._dt.indentedStr())
+                         self._dt.indented_string())
         #print
         #print eventResult
         #print
@@ -1332,7 +1423,7 @@ def _create_simple_file_system():
 def test_simple_file_system():
     dict_tree = _create_simple_file_system()
     assert dict_tree.depth() == 4
-    print(sorted(dict_tree.keys()))
+    # print(sorted(dict_tree.keys()))
     assert sorted(dict_tree.keys()) == [
         ['spam', 'cheese.h'],
         ['spam', 'eggs', 'chips', 'beans.h'],
@@ -1346,17 +1437,102 @@ def test_simple_file_system():
 
 def test_simple_file_system_walk():
     dict_tree = _create_simple_file_system()
-    print()
-    for event in dict_tree.genColRowEvents():
-        print(event)
-    assert 0
-
-
-def test_simple_file_system_intermediate_walk():
-    dict_tree = _create_simple_file_system()
-    # events = list(dict_tree.genColRowEventsFromBranch(['spam', 'eggs']))
-    print()
+    # print()
+    events = []
+    for event in dict_tree.gen_row_column_events():
+        # print(repr(event), str(event))
+        # print(str(event))
+        if dict_tree.is_row_open(event):
+            events.append('ROW_OPEN')
+        elif dict_tree.is_row_close(event):
+            events.append('ROW_CLOSE')
+        else:
+            events.append(str(event))
     # print(events)
-    for event in dict_tree.genColRowEventsFromBranch(['spam', 'eggs']):
-        print(event)
-    assert 0
+    assert events == [
+        'ROW_OPEN',
+        "DictTreeTableEvent(branch=['spam'], node=None, row_span=4, col_span=1)",
+        "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=[2], row_span=1, col_span=3)",
+        'ROW_CLOSE',
+        'ROW_OPEN',
+        "DictTreeTableEvent(branch=['spam', 'eggs'], node=None, row_span=2, col_span=1)",
+        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips'], node=None, row_span=1, col_span=1)",
+        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
+        'ROW_CLOSE',
+        'ROW_OPEN',
+        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=[3], row_span=1, col_span=2)",
+        'ROW_CLOSE',
+        'ROW_OPEN',
+        "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=[1], row_span=1, col_span=3)",
+        'ROW_CLOSE',
+        'ROW_OPEN',
+        "DictTreeTableEvent(branch=['spam.h'], node=[0], row_span=1, col_span=4)",
+        'ROW_CLOSE'
+    ]
+
+
+@pytest.mark.parametrize(
+    'branch, expected',
+    (
+        ([], 4),
+        (['spam',], 3),
+        (['spam', 'eggs'], 2),
+        (['spam', 'eggs', 'chips'], 1),
+    )
+)
+def test_simple_file_system_depth_from_branch(branch, expected):
+    dict_tree = _create_simple_file_system()
+    assert dict_tree.depth_from_branch(branch) == expected
+
+
+@pytest.mark.parametrize(
+    'branch, expected',
+    (
+        (['spam', ], [
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['cheese.h'], node=[2], row_span=1, col_span=3)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['eggs'], node=None, row_span=2, col_span=1)",
+                "DictTreeTableEvent(branch=['eggs', 'chips'], node=None, row_span=1, col_span=1)",
+                "DictTreeTableEvent(branch=['eggs', 'chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['eggs', 'chips.h'], node=[3], row_span=1, col_span=2)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['eggs.h'], node=[1], row_span=1, col_span=3)",
+                'ROW_CLOSE',
+            ]
+        ),
+        (['spam', 'eggs', ], [
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['chips'], node=None, row_span=1, col_span=1)",
+                "DictTreeTableEvent(branch=['chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['chips.h'], node=[3], row_span=1, col_span=2)",
+                'ROW_CLOSE',
+            ]
+        ),
+        (['spam', 'eggs', 'chips', ], [
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['beans.h'], node=[4], row_span=1, col_span=1)",
+                'ROW_CLOSE',
+            ]
+        ),
+    )
+)
+def test_simple_file_system_intermediate_walk(branch, expected):
+    dict_tree = _create_simple_file_system()
+    events = []
+    for event in dict_tree.gen_row_column_events_from_branch(branch):
+        # print(event)
+        if dict_tree.is_row_open(event):
+            events.append('ROW_OPEN')
+        elif dict_tree.is_row_close(event):
+            events.append('ROW_CLOSE')
+        else:
+            events.append(str(event))
+    # print(events)
+    assert events == expected

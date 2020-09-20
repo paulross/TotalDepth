@@ -122,7 +122,7 @@ def writeDictTreeAsTable(theS, theDt, tableAttrs, includeKeyTail):
     except KeyError:
         pass
     with XmlWrite.Element(theS, 'table', tableAttrs):
-        for anEvent in theDt.genColRowEvents():
+        for anEvent in theDt.gen_row_column_events():
             if anEvent == theDt.ROW_OPEN:
                 # Write out the '<tr>' element
                 theS.startElement('tr', {})
@@ -183,7 +183,7 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
         myDict.add(pathSplit(k), v)
     # Propagate table class attribute
     with XmlWrite.Element(theS, 'table', {'class' : tableStyle}):
-        for anEvent in myDict.genColRowEvents():
+        for anEvent in myDict.gen_row_column_events():
             if anEvent == myDict.ROW_OPEN:
                 # Write out the '<tr>' element
                 theS.startElement('tr', {})

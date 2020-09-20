@@ -796,7 +796,7 @@ def _write_top_level_index_table_body(index_file_path: str,
                                       dict_tree: DictTree.DictTreeHtmlTable,
                                       xhtml_stream: XmlWrite.XhtmlStream) -> None:
     strip_out_path = len(os.path.dirname(index_file_path)) + 1
-    for event in dict_tree.genColRowEvents():
+    for event in dict_tree.gen_row_column_events():
         if event == dict_tree.ROW_OPEN:
             # Write out the '<tr>' element
             xhtml_stream.startElement('tr', {'class': 'filetable'})
