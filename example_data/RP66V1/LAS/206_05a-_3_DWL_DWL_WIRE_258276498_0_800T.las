@@ -3,7 +3,7 @@ VERS.          2.0                                     : CWLS Log ASCII Standard
 WRAP.          NO                                      : One Line per depth step
 PROD.          TotalDepth                              : LAS Producer
 PROG.          TotalDepth.RP66V1.ToLAS 0.1.2           : LAS Program name and version
-CREA.          2020-09-15 12:32:53.970531 UTC          : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
+CREA.          2020-10-10 08:46:38.626729 UTC          : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
 DLIS_CREA.     2011-08-20 22:48:50.000000 UTC          : DLIS Creation date and time [YYYY-mm-dd HH MM SS.us UTC]
 SOURCE.        206_05a-_3_DWL_DWL_WIRE_258276498.DLIS  : DLIS File Name
 FILE-ID.       MSCT_197LTP                             : File Identification Number

@@ -27,6 +27,7 @@ import typing
 
 
 class ArraySummary(typing.NamedTuple):
+    """Contains the summary of an array of numbers."""
     len: int
     shape: typing.Tuple[int, ...]
     count: int
@@ -40,6 +41,11 @@ class ArraySummary(typing.NamedTuple):
     count_inc: int
     activity: float
     drift: float  # (last - first) / length
+
+    @property
+    def span(self) -> float:
+        """The max - min value."""
+        return self.max - self.min
 
 
 def count_eq(array: np.array, flatten: bool = True) -> int:
@@ -80,7 +86,7 @@ def count_eq_dec_inc(array: np.array, flatten: bool = True) -> typing.Tuple[int,
     if flatten:
         array = array.flatten()
     diff_array = array[1:] - array[:-1]
-    if len(diff_array):
+    if len(diff_array) and diff_array.dtype != np.dtype('O'):
         return np.count_nonzero(diff_array == 0), np.count_nonzero(diff_array < 0), np.count_nonzero(diff_array > 0)
     return 0, 0, 0
 
@@ -98,6 +104,7 @@ def activity(array: np.array, flatten: bool = True) -> float:
 
 
 def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
+    """Take an array and summarise it."""
     if flatten:
         array = array.flatten()
     len_array = functools.reduce(lambda x, y: x * y, array.shape, 1)

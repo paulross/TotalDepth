@@ -134,7 +134,7 @@ SECT_TYPES_WITH_DATA_LINES = 'VWCP'
 #: Section with index value in column 0
 SECT_TYPES_WITH_INDEX = 'VWCPA'
 
-#: Regex to match a section heasd
+#: Regex to match a section head
 RE_SECT_HEAD = re.compile(r'^~([{:s}])(.+)*$'.format(SECT_TYPES))
 
 #: Map of section identifiers to description
@@ -229,7 +229,7 @@ class LASSection:
         self.type = section_type
         self.raise_on_error = raise_on_error
         # One entry per line
-        self.members: typing.List[SectLine] = []
+        self.members: typing.List[typing.Union[str, SectLine]] = []
         # {MNEM : ordinal, ...} for those sections that have it
         # Populated by finalise()
         self.mnemonic_index_map: typing.Dict[typing.Union[str, float], int] = {}
@@ -244,7 +244,7 @@ class LASSection:
     def __contains__(self, mnemonic: str):
         """Membership test."""
         return mnemonic in self.mnemonic_index_map
-    
+
     def add_member_line(self, line_number, line):
         """Given a line this decomposes it to its _members. line_number is the position of the line l in the file
         starting at 1.
@@ -552,7 +552,7 @@ class LASBase:
         self._sections: typing.List[LASSection] = []
         # {sect_type : ordinal, ...}
         # Populated by _finalise()
-        self._section_map = {}
+        self._section_map:  typing.Dict[str, int] = {}
         self._wrap = None
         
     def __len__(self):
@@ -566,6 +566,9 @@ class LASBase:
         if isinstance(key, str):
             return self._sections[self._section_map[key]]
         raise TypeError('{:s} object is not subscriptable with {:s}'.format(type(self), type(key)))
+
+    def has_section(self, section_type: str) -> bool:
+        return section_type in self._section_map
 
     def _finalise_section_and_add(self, section: LASSection) -> None:
         section.finalise()
@@ -758,7 +761,7 @@ class LASRead(LASBase):
         self._process_file(generate_lines(file_path))
         # self._finalise()
 
-    def number_of_frames(self):
+    def number_of_frames(self) -> int:
         """Returns the number of frames of data in an 'A' record if I have one."""
         if self.frame_array is not None:
             return len(self.frame_array.x_axis)
@@ -815,8 +818,7 @@ class LASRead(LASBase):
 
     def _proc_section_generic(self, match: re.match,
                               gen: typing.Generator[typing.Tuple[int, str], None, None]) -> LASSection:
-        section_name = match.group(1)
-        section = LASSection(section_name)
+        section = LASSection(match.group(1))
         self._add_members_to_section(gen, section)
         return section
 
@@ -882,6 +884,6 @@ class LASRead(LASBase):
         logger.debug('_procSectA(): End')
 
     @property
-    def frame_array(self) -> typing.Union[LogPass.FrameChannel, None]:
+    def frame_array(self) -> typing.Union[LogPass.FrameArray, None]:
         if 'A' in self._section_map:
             return self._sections[self._section_map['A']].frame_array
