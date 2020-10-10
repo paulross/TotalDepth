@@ -351,8 +351,8 @@ class DictTreeHtmlTable(DictTree):
     #: HTML table event: close row with </tr>
     ROW_CLOSE = DictTreeTableEvent([], None, -1, -1)
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.column_span = self.row_span = 1
         self._has_valid_row_col_span = False
 
@@ -452,7 +452,7 @@ class DictTreeHtmlTable(DictTree):
                     yield anEvent
                 key_branch.pop()
 
-    def gen_row_column_events_from_branch(self, key_branch: typing.Sequence[typing.Hashable]) \
+    def gen_row_column_events_from_branch(self, key_branch: typing.List[typing.Hashable]) \
             -> typing.Sequence[DictTreeTableEvent]:
         """Yields a set of events that are a tuple of quadruples.
         (key_branch, value, rowspan_integer, colspan_integer)
@@ -460,9 +460,11 @@ class DictTreeHtmlTable(DictTree):
         At the start of the a <tr> there will be a ROW_OPEN
         and at row end (</tr>) a ROW_CLOSE will be yielded
         """
+        print('TRACE: XX key_branch', key_branch)
         # Find the sub-tree from the key_branch
         sub_tree = self
         for key in key_branch:
+            print('TRACE: XX sub_tree.internal_tree', sub_tree.internal_tree.keys())
             sub_tree = sub_tree.internal_tree[key]
         # yield the events from the sub-tree.
         has_yielded = False
@@ -474,7 +476,7 @@ class DictTreeHtmlTable(DictTree):
         if has_yielded:
             yield self.ROW_CLOSE
 
-    def _gen_row_column_events_from_branch(self, key_branch: typing.Sequence[typing.Hashable]) \
+    def _gen_row_column_events_from_branch(self, key_branch: typing.List[typing.Hashable]) \
             -> typing.Sequence[DictTreeTableEvent]:
         # set_column_row_span() is a NOP if the internal data has not changed.
         self.set_row_column_span()

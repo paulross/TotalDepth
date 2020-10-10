@@ -1406,17 +1406,25 @@ sf/
 
 
 def _create_simple_file_system():
-    dict_tree = DictTree.DictTreeHtmlTable('list')
-    for i, file_path in enumerate(
+    # dict_tree = DictTree.DictTreeHtmlTable('list')
+    dict_tree = DictTree.DictTreeHtmlTable()
+    for file_path, columns in zip(
         (
             'spam.h',
             'spam/eggs.h',
             'spam/cheese.h',
             'spam/eggs/chips.h',
             'spam/eggs/chips/beans.h',
+        ),
+        (
+            ('A', 'B'),
+            ('C', 'D'),
+            ('E', 'F'),
+            ('G', 'H'),
+            ('I', 'J'),
         )
     ):
-        dict_tree.add(file_path.split('/'), i)
+        dict_tree.add(file_path.split('/'), columns)
     return dict_tree
 
 
@@ -1431,7 +1439,14 @@ def test_simple_file_system():
         ['spam', 'eggs.h'],
         ['spam.h'],
     ]
-    assert sorted(dict_tree.values()) == [[0], [1], [2], [3], [4]]
+    assert sorted(dict_tree.values()) == [
+        ('A', 'B'),
+        ('C', 'D'),
+        ('E', 'F'),
+        ('G', 'H'),
+        ('I', 'J'),
+    ]
+
     assert len(dict_tree) == 5
 
 
@@ -1452,22 +1467,22 @@ def test_simple_file_system_walk():
     assert events == [
         'ROW_OPEN',
         "DictTreeTableEvent(branch=['spam'], node=None, row_span=4, col_span=1)",
-        "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=[2], row_span=1, col_span=3)",
+        "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
         'ROW_CLOSE',
         'ROW_OPEN',
         "DictTreeTableEvent(branch=['spam', 'eggs'], node=None, row_span=2, col_span=1)",
         "DictTreeTableEvent(branch=['spam', 'eggs', 'chips'], node=None, row_span=1, col_span=1)",
-        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
+        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
         'ROW_CLOSE',
         'ROW_OPEN',
-        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=[3], row_span=1, col_span=2)",
+        "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
         'ROW_CLOSE',
         'ROW_OPEN',
-        "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=[1], row_span=1, col_span=3)",
+        "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
         'ROW_CLOSE',
         'ROW_OPEN',
-        "DictTreeTableEvent(branch=['spam.h'], node=[0], row_span=1, col_span=4)",
-        'ROW_CLOSE'
+        "DictTreeTableEvent(branch=['spam.h'], node=('A', 'B'), row_span=1, col_span=4)",
+        'ROW_CLOSE',
     ]
 
 
@@ -1488,39 +1503,58 @@ def test_simple_file_system_depth_from_branch(branch, expected):
 @pytest.mark.parametrize(
     'branch, expected',
     (
-        (['spam', ], [
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['cheese.h'], node=[2], row_span=1, col_span=3)",
-                'ROW_CLOSE',
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['eggs'], node=None, row_span=2, col_span=1)",
-                "DictTreeTableEvent(branch=['eggs', 'chips'], node=None, row_span=1, col_span=1)",
-                "DictTreeTableEvent(branch=['eggs', 'chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
-                'ROW_CLOSE',
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['eggs', 'chips.h'], node=[3], row_span=1, col_span=2)",
-                'ROW_CLOSE',
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['eggs.h'], node=[1], row_span=1, col_span=3)",
-                'ROW_CLOSE',
-            ]
-        ),
-        (['spam', 'eggs', ], [
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['chips'], node=None, row_span=1, col_span=1)",
-                "DictTreeTableEvent(branch=['chips', 'beans.h'], node=[4], row_span=1, col_span=1)",
-                'ROW_CLOSE',
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['chips.h'], node=[3], row_span=1, col_span=2)",
-                'ROW_CLOSE',
-            ]
-        ),
+        ([], [
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['spam'], node=None, row_span=4, col_span=1)",
+            "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
+            'ROW_CLOSE',
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['spam', 'eggs'], node=None, row_span=2, col_span=1)",
+            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips'], node=None, row_span=1, col_span=1)",
+            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+            'ROW_CLOSE',
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+            'ROW_CLOSE',
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
+            'ROW_CLOSE',
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['spam.h'], node=('A', 'B'), row_span=1, col_span=4)",
+            'ROW_CLOSE',
+        ]),
+        (['spam', ],
+         [
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
+             'ROW_CLOSE',
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['eggs'], node=None, row_span=2, col_span=1)",
+             "DictTreeTableEvent(branch=['eggs', 'chips'], node=None, row_span=1, col_span=1)",
+             "DictTreeTableEvent(branch=['eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+             'ROW_CLOSE',
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+             'ROW_CLOSE',
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
+             'ROW_CLOSE'
+         ]),
+        (['spam', 'eggs', ],
+         [
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['chips'], node=None, row_span=1, col_span=1)",
+             "DictTreeTableEvent(branch=['chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+             'ROW_CLOSE',
+             'ROW_OPEN',
+             "DictTreeTableEvent(branch=['chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+             'ROW_CLOSE']
+         ),
         (['spam', 'eggs', 'chips', ], [
-                'ROW_OPEN',
-                "DictTreeTableEvent(branch=['beans.h'], node=[4], row_span=1, col_span=1)",
-                'ROW_CLOSE',
-            ]
-        ),
+            'ROW_OPEN',
+            "DictTreeTableEvent(branch=['beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+            'ROW_CLOSE'
+        ]),
     )
 )
 def test_simple_file_system_intermediate_walk(branch, expected):

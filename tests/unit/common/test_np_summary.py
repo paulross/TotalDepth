@@ -1,8 +1,17 @@
+import datetime
+
 import pytest
 
 import numpy as np
 
 from TotalDepth.common import np_summary
+
+
+def test_array_summary_span():
+    value = np_summary.ArraySummary(len=8, shape=(7,), count=7, min=1.0, max=128.0, mean=35.857142857142854,
+                                    std=42.809974042867864, median=16.0, count_eq=0, count_dec=0, count_inc=6,
+                                    activity=1.0 + 1 / 6, drift=(128.0 - 1.0) / (8 - 2))
+    assert value.span == 127
 
 
 @pytest.mark.parametrize(
@@ -143,4 +152,21 @@ def test_summarise_array(array, null_value, expected):
         masked_array = array.view(np.ma.MaskedArray)
         masked_array.mask = (array == null_value)
         result = np_summary.summarise_array(masked_array)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'array, expected',
+    (
+        (
+            np.array([datetime.date(2020, 9, 28), datetime.date(2020, 9, 29),]),
+            np_summary.ArraySummary(len=2, shape=(2,), count=2, min=1.0, max=1.0, mean=1.0, std=0.0, median=1.0,
+                                    count_eq=1, count_dec=0, count_inc=0, activity=0.0, drift=0.0),
+        ),
+    )
+)
+def test_summarise_array_dates_and_times(array, expected):
+    masked_array = array.view(np.ma.MaskedArray)
+    masked_array.mask = (array == None)
+    result = np_summary.summarise_array(masked_array)
     assert result == expected

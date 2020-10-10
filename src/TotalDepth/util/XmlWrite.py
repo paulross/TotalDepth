@@ -219,23 +219,22 @@ class XmlStream(object):
     def endElement(self, name):
         """Ends an element."""
         if len(self._elemStk) == 0:
-            errMsg = 'endElement() on empty stack'
+            error_message = 'endElement() on empty stack'
             if RAISE_ON_ERROR:
-                raise ExceptionXmlEndElement(errMsg)
-            logging.error(errMsg)
+                raise ExceptionXmlEndElement(error_message)
+            logging.error(error_message)
         if name != self._elemStk[-1]:
-            errMsg = 'endElement(%s) does not match %s' \
-                                         % (name, self._elemStk[-1])
+            error_message = 'endElement("%s") does not match "%s"' % (name, self._elemStk[-1])
             if RAISE_ON_ERROR:
-                raise ExceptionXmlEndElement(errMsg)
-            logging.error(errMsg)
-        myName = self._elemStk.pop()
+                raise ExceptionXmlEndElement(error_message)
+            logging.error(error_message)
+        name = self._elemStk.pop()
         if self._inElem:
             self._file.write('/>')
             self._inElem = False
         else:
             self._indent()
-            self._file.write('</%s>' % myName)
+            self._file.write('</%s>' % name)
         self._canIndentStk.pop()
         
     def writeECMAScript(self, theScript):
