@@ -142,14 +142,20 @@ def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
         myLenJson = -1
         timeS = []
         for t in range(numTimes):
-            clkStart = time.clock()
+            if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+                clkStart = time.perf_counter()
+            else:
+                clkStart = time.clock()
             myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
             try:
                 myIdx = FileIndexer.FileIndex(myFi)
             except ExceptionTotalDepthLIS as err:
                 logging.error('{:s}'.format(str(err)))
                 continue
-            timeS.append(time.clock() - clkStart)
+            if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+                timeS.append(time.perf_counter() - clkStart)
+            else:
+                timeS.append(time.clock() - clkStart)
             if verbose:
                 print(myIdx.longDesc())
                 print(' All records '.center(75, '='))
@@ -306,7 +312,10 @@ Indexes LIS files recursively."""
                     stream=sys.stdout)
     # Your code here
     #print('opts', opts)
-    clkStart = time.clock()
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     myIt = IndexTimer()
     if len(args) != 1:
         optParser.print_help()
@@ -332,7 +341,11 @@ Indexes LIS files recursively."""
         print('Results: {:8d}'.format(len(myIt)))
         print(' Errors: {:8d}'.format(myIt.errCount))
         print('  Total: {:8d}'.format(len(myIt)+myIt.errCount))
-    clkExec = time.clock() - clkStart
+
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkExec = time.perf_counter() - clkStart
+    else:
+        clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

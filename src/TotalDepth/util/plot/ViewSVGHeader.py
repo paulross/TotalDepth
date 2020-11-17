@@ -172,7 +172,10 @@ Generates plot(s) from input LIS file or directory to and output destination."""
             help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
         )      
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
@@ -184,7 +187,10 @@ Generates plot(s) from input LIS file or directory to and output destination."""
         optParser.print_help()
         return 1
     myObj = ViewSVG(args[0])
-    print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
+    else:
+        print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0

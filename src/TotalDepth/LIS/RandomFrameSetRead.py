@@ -116,14 +116,27 @@ class ResultS(object):
         return 'NO results.'
 
 def _loadFrameSetAndAccumulate(theF, theLp, theFrameSlice, theChList):
-    tS = time.clock()
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        tS = time.perf_counter()
+    else:
+        tS = time.clock()
     theLp.setFrameSet(theF, theFrSl=theFrameSlice, theChList=theChList)
-    tE_load = time.clock() - tS
-    tS = time.clock()
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        tE_load = time.perf_counter() - tS
+    else:
+        tE_load = time.clock() - tS
+
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        tS = time.perf_counter()
+    else:
+        tS = time.clock()
     #print('theFrameSlice', theFrameSlice)
     myAcc = theLp.frameSet.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean,])
     #print(myAcc)
-    tE_acc = time.clock() - tS
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        tE_acc = time.perf_counter() - tS
+    else:
+        tE_acc = time.clock() - tS
     numVals = theLp.frameSet.numValues
     mbRead = numVals * 4 / 2**20
     loadCost = 1000 * tE_load / mbRead
@@ -293,10 +306,16 @@ def processFile(f, tests, keepGoing, resultMap):
         myFi = File.FileRead(f, theFileId=f, keepGoing=keepGoing)
         #a = r'W:\LISTestData\logPassStd256MB.lis'
         #myFi = File.FileRead(a, theFileId=a)
-        clkStart = time.clock()
+        if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+            clkStart = time.perf_counter()
+        else:
+            clkStart = time.clock()
         myIdx = FileIndexer.FileIndex(myFi)
         #print(myIdx.longDesc())
-        print('Index time: {:.3f}'.format(time.clock() - clkStart))
+        if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+            print('Index time: {:.3f}'.format(time.perf_counter() - clkStart))
+        else:
+            print('Index time: {:.3f}'.format(time.clock() - clkStart))
     except Exception as err:
         logging.error(str(err))
         traceback.print_exc()
@@ -372,7 +391,10 @@ E - Random frames, random channels.
     opts, args = optParser.parse_args()
     global LOOPS_TO_TEST
     LOOPS_TO_TEST = opts.numTests
-    clkStart = time.clock()
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -400,7 +422,10 @@ E - Random frames, random channels.
         optParser.print_help()
         optParser.error("Wrong number of arguments, I need one only.")
         return 1
-    clkExec = time.clock() - clkStart
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        clkExec = time.perf_counter() - clkStart
+    else:
+        clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

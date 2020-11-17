@@ -216,7 +216,10 @@ Provides a count of elements in LIS tables."""
             help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
         )      
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -246,7 +249,10 @@ Provides a count of elements in LIS tables."""
         pprint.pprint(myCntr.cntrColMnem)
         print(' Column entries END '.center(75, '='))
         print()
-    clkExec = time.clock() - clkStart
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkExec = time.perf_counter() - clkStart
+    else:
+        clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0
