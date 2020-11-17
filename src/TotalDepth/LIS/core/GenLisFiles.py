@@ -293,7 +293,10 @@ Counts files and sizes."""
                          default='', 
                          help="Output directory. [default: %default]")
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -304,7 +307,10 @@ Counts files and sizes."""
         os.makedirs(opts.outdir)
     myGlf = GenLisFiles(opts.outdir)
     print(myGlf)
-    clkExec = time.clock() - clkStart
+    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
+        clkExec = time.perf_counter() - clkStart
+    else:
+        clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

@@ -132,7 +132,10 @@ Reads a LIS file and writes out tab separated values of each frame."""
     optParser.add_option("-c", "--channels", action="append", type="str",
                          help="Only dump these named curves.", default=[])
     opts, args = optParser.parse_args()
-    clkStart = time.clock()
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        clkStart = time.perf_counter()
+    else:
+        clkStart = time.clock()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -144,7 +147,10 @@ Reads a LIS file and writes out tab separated values of each frame."""
         optParser.error("I can't do much without a path to the LIS file.")
         return 1
     dumpFrameSets(args[0], opts.keepGoing, opts.summary, set([v.encode('ascii') for v in opts.channels]))
-    clkExec = time.clock() - clkStart
+    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
+        clkExec = time.perf_counter() - clkStart
+    else:
+        clkExec = time.clock() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0
