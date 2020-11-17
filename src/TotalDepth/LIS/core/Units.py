@@ -628,6 +628,8 @@ class UnitConvert(object):
         """Convert a value from me to the other where other is a UnitConvert object."""
         #baseVal = (val - self.offs) * self.mult
         #return (baseVal / other.mult) + other.offs
+        if val is None:
+            return 0.
         if self.offs is not None:
             val -= self.offs
         baseVal = val * self.mult
