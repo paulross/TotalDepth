@@ -448,7 +448,7 @@ class FileIndex(object):
                     self._idx[self._logPassIndexMap[lrTy]].add(t, lrTy, theF)
             else:
                 # Despatch on lrTy
-                fn = self._despatchLrType[lrTy]
+                fn = self._despatchLrType.get(lrTy)
                 if fn is None:
                     logging.warning('FileIndex.__init__(): Can not handle logical record type {:d}'.format(lrTy))
                 else:
