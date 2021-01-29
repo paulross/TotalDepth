@@ -1,0 +1,10 @@
+Cython
+Pillow
+beautifulsoup4
+colorama
+lxml
+numpy
+pytest
+psutil
+requests
+wheel

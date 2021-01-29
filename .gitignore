@@ -89,4 +89,6 @@ private/
 # Sphinx documentation
 docs/publish/_build/*
 
-
+# Log files from pymemtrace
+*.log
+*.log.tgz

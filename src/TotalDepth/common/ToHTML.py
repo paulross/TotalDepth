@@ -57,7 +57,8 @@ def html_write_table(table_as_strings: typing.List[typing.List[str]],
                 with XmlWrite.Element(xhtml_stream, 'tr', {}):
                     for cell in row:
                         with XmlWrite.Element(xhtml_stream, 'td', {'class': class_style}):
-                            assert isinstance(cell, str), f'{cell} is not a string but {type(cell)}'
+                            if not isinstance(cell, str):
+                                raise ValueError(f'{cell} is not a string but {type(cell)} in row: {row}')
                             xhtml_stream.charactersWithBr(cell)
 
 

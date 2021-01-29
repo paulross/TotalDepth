@@ -29,12 +29,13 @@ with open('HISTORY.rst') as history_file:
 
 install_requirements = [
     'Cython',
-    'numpy',
-    'lxml',
+    'Pillow',
+    'beautifulsoup4',
     'colorama',
+    'lxml',
+    'numpy',
     'psutil',
     'requests',
-    'beautifulsoup4'
 ]
 
 setup_requirements = [

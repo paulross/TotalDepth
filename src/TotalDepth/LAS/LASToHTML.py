@@ -9,6 +9,9 @@ from TotalDepth.LAS.core import LASRead
 from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, AbsentValue, np_summary
 from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
+# import cPyMemTrace
+
+
 __author__ = 'Paul Ross'
 __date__ = '2020-09-05'
 __version__ = '0.1.0'
@@ -127,7 +130,7 @@ def _las_file_ignored(path_in, binary_file_type) -> LASFileResult:
     return LASFileResult(
         path_in, '', os.path.getsize(path_in), 0, binary_file_type,
         0.0,
-        True, False,
+        False, True,
         tuple(), tuple(),
         None, None, None, 0
     )
@@ -137,7 +140,7 @@ def _las_file_exception(path_in, binary_file_type) -> LASFileResult:
     return LASFileResult(
         path_in, '', os.path.getsize(path_in), 0, binary_file_type,
         0.0,
-        False, True,
+        True, False,
         tuple(), tuple(),
         None, None, None, 0
     )
@@ -154,7 +157,6 @@ def las_section_members_to_html_table(members: typing.List[LASRead.SectLine], xh
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'las'}):
                     xhtml_stream.characters(row.mnem)
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'las'}):
-                    # print(f'TRACE: {row.unit} {type(row.unit)}')
                     xhtml_stream.characters(str(row.unit))
                 with XmlWrite.Element(xhtml_stream, 'td', {'class': 'las'}):
                     xhtml_stream.characters(str(row.valu))
@@ -224,7 +226,10 @@ def write_file_array(las_file: LASRead.LASRead, xhtml_stream: XmlWrite.XhtmlStre
                         channel.ident,
                         # stringify(channel.dimensions),
                         # stringify(channel.count),
-                        channel.units,
+                        # Example:
+                        # HKLA.1000 lbf :(RT)    (DRILLING_SURFACE)      (6in)                   Average Hookload
+                        # Units seen as '1000' and interpreted as int.
+                        str(channel.units),
                         channel.long_name,
                         f'{array_summary.len:d}',
                         f'{array_summary.len - array_summary.count:d}',
@@ -394,9 +399,10 @@ def write_indexes(result_map: typing.Dict[str, LASFileResult]) -> None:
     logger.info(f'Wrote indexes: {index_paths}')
 
 
-def scan_dir_multiprocessing(dir_in: str, dir_out: str, recursive: bool, keep_going: bool, jobs: int,
-                             frame_slice: typing.Union[Slice.Slice, Slice.Sample]) \
-        -> typing.Dict[str, LASFileResult]:
+def scan_dir_multiprocessing(dir_in: str, dir_out: str,
+                             recursive: bool, keep_going: bool, label_process: bool,
+                             frame_slice: typing.Union[Slice.Slice, Slice.Sample],
+                             jobs: int) -> typing.Dict[str, LASFileResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -405,7 +411,7 @@ def scan_dir_multiprocessing(dir_in: str, dir_out: str, recursive: bool, keep_go
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [
-        (t.filePathIn, t.filePathOut, keep_going, False, frame_slice) for t in DirWalk.dirWalk(
+        (t.filePathIn, t.filePathOut, keep_going, label_process, frame_slice) for t in DirWalk.dirWalk(
             dir_in, dir_out, theFnMatch='', recursive=recursive, bigFirst=True
         )
     ]
@@ -442,12 +448,18 @@ def scan_dir_or_file(path_in: str, path_out: str,
                 ret[file_in_out.filePathIn] = result
         else:
             len_path_in = len(path_in.split(os.sep))
-            for root, dirs, files in os.walk(path_in, topdown=False):
+            # file_count = 0
+            for root, _dirs, files in os.walk(path_in, topdown=False):
                 root_rel_to_path_in = root.split(os.sep)[len_path_in:]
                 dir_out = os.path.join(path_out, *root_rel_to_path_in)
-                for file in files:
+                # if label_process and file_count % 16 == 0:
+                #     process.add_message_to_queue(f'Dir {file_count}: {os.sep.join(root_rel_to_path_in)}')
+                #     file_count += 1
+                for file in sorted(files):
                     file_path_in = os.path.join(root, file)
                     file_path_out = os.path.join(dir_out, file)
+                    # if label_process:
+                    #     process.add_message_to_queue(f'{os.path.basename(file_path_in)}')
                     result = scan_a_single_file(file_path_in, file_path_out, keep_going, label_process, frame_slice)
                     ret[file_path_in] = result
     else:
@@ -456,6 +468,107 @@ def scan_dir_or_file(path_in: str, path_out: str,
         process.add_message_to_queue('Writing Indexes.')
     write_indexes(ret)
     return ret
+
+
+GNUPLOT_PLT = """set logscale x
+set grid
+set title "Summary of LAS Files with LASToHTML.py."
+set xlabel "LAS File Size (bytes)"
+# set mxtics 5
+# set xrange [0:3000]
+# set xtics
+# set format x ""
+
+set logscale y
+set ylabel "Scan Rate (ms/Mb), Scan Compression Ratio"
+# set yrange [1:1e5]
+# set ytics 20
+# set mytics 2
+# set ytics 8,35,3
+
+set logscale y2
+set y2label "Scan time (s), Ratio original size / HTML size"
+# set y2range [1e-4:10]
+set y2tics
+
+set pointsize 1
+set datafile separator whitespace#"	"
+set datafile missing "NaN"
+
+# set fit logfile
+
+# Curve fit, rate
+rate(x) = 10**(a + b * log10(x))
+fit rate(x) "{name}.dat" using 1:($3*1000/($1/(1024*1024))) via a, b
+
+rate2(x) = 10**(5.5 - 0.5 * log10(x))
+
+# Curve fit, size ratio
+size_ratio(x) = 10**(c + d * log10(x))
+fit size_ratio(x) "{name}.dat" using 1:($2/$1) via c,d
+# By hand
+# size_ratio2(x) = 10**(3.5 - 0.65 * log10(x))
+
+# Curve fit, compression ratio
+compression_ratio(x) = 10**(e + f * log10(x))
+fit compression_ratio(x) "{name}.dat" using 1:($1/$2) via e,f
+
+set terminal svg size 1000,700 # choose the file format
+set output "{name}_rate.svg" # choose the output device
+
+# set key off
+
+#set key title "Window Length"
+#  lw 2 pointsize 2
+
+# Fields: size_input, size_index, time, exception, ignored, path
+
+#plot "{name}.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan Rate (ms/Mb), left axis" lt 1 w points, \\
+    rate(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", a, b) lt 1 lw 2, \\
+    "{name}.dat" using 1:3 axes x1y2 title "Scan Time (s), right axis" lt 4 w points, \\
+    "{name}.dat" using 1:($1/$2) axes x1y2 title "Original Size / Scan size, right axis" lt 3 w points, \\
+    compression_ratio(x) title sprintf("Fit: 10**(%+.3g %+.3g * log10(x))", e, f) axes x1y2 lt 3 lw 2
+
+plot "ScanFileHTML.dat" using 1:($3*1000/($1/(1024*1024))) axes x1y1 title "Scan LAS Create HTML Rate (ms/Mb), left axis" lt 1 w points
+
+set output "ScanFileHTML_times.svg" # choose the output device
+set ylabel "Index Time (s)"
+unset y2label
+
+plot "ScanFileHTML.dat" using 1:3 axes x1y1 title "Create Time (s), left axis" lt 1 w points, \\
+    "ScanFileHTML.dat" using 1:2 axes x1y2 title "Output size (s), right axis" lt 2 w points
+
+reset
+"""
+
+
+def plot_gnuplot(data: typing.Dict[str, LASFileResult], gnuplot_dir: str) -> None:
+    if len(data) < 2:
+        raise ValueError(f'Can not plot data with only {len(data)} points.')
+    # First row is header row, create it then comment out the first item.
+    table = [
+        # list(HTMLResult._fields) + ['Path']
+        ['size_input', 'size_output', 'time', 'Path']
+    ]
+    table[0][0] = f'# {table[0][0]}'
+    for k in sorted(data.keys()):
+        if data[k].size_input > 0 and not data[k].exception:
+            # table.append(list(data[k]) + [k])
+            table.append(
+                [
+                    data[k].size_input,
+                    data[k].size_output,
+                    data[k].process_time,
+                    k
+                ]
+            )
+    name = 'ScanFileHTML'
+    return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
+    return_code = gnuplot.write_test_file(gnuplot_dir, 'svg')
+    if return_code:
+        raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
 def main():
@@ -472,32 +585,70 @@ Generates HTML from input LAS file or directory to an output destination."""
     gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument("-g", "--glob", action="store_true", dest="glob", default=None,
                         help="File match pattern. Default: %(default)s.")
+    parser.add_argument("-p", "--pause", action="store_true", dest="pause", default=False,
+                      help="Pause before processing showing the PID. Default: %(default)s.")
     args = parser.parse_args()
     # print(args)
+    if args.pause:
+        input(f'Ready to start PID={os.getpid()} press any key: ')
+
     log_level = cmn_cmd_opts.set_log_level(args)
 
     clk_start = time.perf_counter()
     # Your code here
-    if args.log_process > 0.0:
-        with process.log_process(args.log_process, log_level):
-            result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
-                args.path_in,
-                args.path_out,
-                args.recurse,
-                args.keepGoing,
-                label_process=True,
-                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-            )
-    else:
-        if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
+    if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
+        if args.log_process > 0.0:
+            with process.log_process(args.log_process, log_level):
+                result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
+                    args.path_in,
+                    args.path_out,
+                    args.recurse,
+                    args.keepGoing,
+                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                    label_process=True,
+                    jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
+                )
+        else:
             result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
                 args.path_in,
                 args.path_out,
                 args.recurse,
                 args.keepGoing,
-                args.jobs,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                label_process=False,
+                jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
             )
+    else:
+        # with cPyMemTrace.Profile():
+        #     if args.log_process > 0.0:
+        #         with process.log_process(args.log_process, log_level):
+        #             result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
+        #                 args.path_in,
+        #                 args.path_out,
+        #                 args.recurse,
+        #                 args.keepGoing,
+        #                 label_process=True,
+        #                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+        #             )
+        #     else:
+        #             result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
+        #                 args.path_in,
+        #                 args.path_out,
+        #                 args.recurse,
+        #                 args.keepGoing,
+        #                 label_process=False,
+        #                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+        #             )
+        if args.log_process > 0.0:
+            with process.log_process(args.log_process, log_level):
+                result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
+                    args.path_in,
+                    args.path_out,
+                    args.recurse,
+                    args.keepGoing,
+                    label_process=True,
+                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                )
         else:
             result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
                 args.path_in,
@@ -534,7 +685,7 @@ Generates HTML from input LAS file or directory to an output destination."""
             print(
                 f'{idx_result.size_input:16,d} {idx_result.size_output:10,d}'
                 f' {idx_result.process_time:8.3f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
-                f' "{path[len(common_path):]}"'
+                f' "{path[len(common_path) + 1:]}"'
             )
             size_input += result[path].size_input
             size_scan += result[path].size_output
