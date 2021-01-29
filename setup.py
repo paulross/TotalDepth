@@ -120,7 +120,7 @@ ext_modules = [
 
 setup(
     name='TotalDepth',
-    version='0.3.2',
+    version='0.3.3rc0',
     description="TotalDepth is a software collection that can process petrophysical data such as wireline logs and seismic data.",
     long_description=readme + '\n\n' + history,
     author="Paul Ross",
