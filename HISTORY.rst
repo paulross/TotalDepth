@@ -2,6 +2,11 @@
 History
 ***********
 
+0.3.2 (2021-01-29)
+====================
+
+* Make LIS Indexer more forgiving with unknown Logical Record types.
+
 0.3.1 (2020-06-15)
 ====================
 
