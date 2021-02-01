@@ -166,7 +166,9 @@ def main() -> int:
     # Smallest at 9kb
     example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_17-_12/DWL_FILE/15_17-_12_dwl__1646505.bit'
     # 12kb
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT//456728/21_25-B1/DWL_FILE/21_25-B1_dwl_DWL_WIRE_1644592.bit'
+    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/21_25-B1/DWL_FILE/21_25-B1_dwl_DWL_WIRE_1644592.bit'
+    # 6Mb
+    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_10-_1/DWL_FILE/15_10-_1_dwl__1645815.bit'
 
     # 30_07a-_1_dwl_DWL_WIRE_1644802.bit
     # 30_07a-_1_dwl_DWL_WIRE_1644822.bit
