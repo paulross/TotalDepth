@@ -31,19 +31,25 @@ From    To      Bytes   Description
 0xb4    0x104  80       Channel names, 4 bytes each.
 0x104   0x12c  40       ??? Binary data.
 
-
+Most commonly the first 12 bytes are [0, 0, 0, 0, 0, 0, 0, 0, 32, 1, 0, 0,]
 
 """
+import os
 import pprint
 import struct
 import sys
 import typing
 
+from TotalDepth.util import DirWalk
 
 OFFSET_DESCRIPTION = 0x10
 LENGTH_DESCRIPTION = 0xa0  # 160
 # Two byte int
 OFFSET_NUMBER_OF_CHANNELS = 0xb0
+
+
+BIT_FILE_SIGNATURE = b'\x00\x00\x00\x00\x00\x00\x00\x00\x32\x01\x00\x00'
+
 
 LEN_FLOAT_BYTES = 4
 
@@ -158,17 +164,28 @@ def dump_path_bytes(file_path: str) -> None:
         pprint.pprint(file.read())
 
 
+def dump_selected_bytes(directory: str, offset: int, length: int) -> None:
+    for file_in_out in DirWalk.dirWalk(directory, '', theFnMatch='*.bit', recursive=True):
+        with open(file_in_out.filePathIn, 'rb') as file:
+            if offset > 0:
+                file.seek(offset)
+            else:
+                file.seek(offset, os.SEEK_END)
+            print(f'{os.path.basename(file_in_out.filePathIn):40} : {list(file.read(length))}')
+
+
+
 def main() -> int:
     example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644802.bit'
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644822.bit'
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644825.bit'
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644826.bit'
-    # Smallest at 9kb
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_17-_12/DWL_FILE/15_17-_12_dwl__1646505.bit'
-    # 12kb
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/21_25-B1/DWL_FILE/21_25-B1_dwl_DWL_WIRE_1644592.bit'
-    # 6Mb
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_10-_1/DWL_FILE/15_10-_1_dwl__1645815.bit'
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644822.bit'
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644825.bit'
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644826.bit'
+    # # Smallest at 9kb
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_17-_12/DWL_FILE/15_17-_12_dwl__1646505.bit'
+    # # 12kb
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/21_25-B1/DWL_FILE/21_25-B1_dwl_DWL_WIRE_1644592.bit'
+    # # 6Mb
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_10-_1/DWL_FILE/15_10-_1_dwl__1645815.bit'
 
     # 30_07a-_1_dwl_DWL_WIRE_1644802.bit
     # 30_07a-_1_dwl_DWL_WIRE_1644822.bit
@@ -180,6 +197,10 @@ def main() -> int:
 
     dump_path_structure(example)
     # dump_path_bytes(example)
+
+    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', 0, 16)
+    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', 0x104, 16)
+    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', -24, 24)
 
     return 0
 
