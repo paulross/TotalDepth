@@ -116,7 +116,7 @@ REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
     2: 'FSINGL',
     # 3: 'FSING1',
     # 4: 'FSING2',
-    # 5: 'ISINGL',
+    # 5: 'ISINGL', # See ReadBIT.bytes_to_float()
     6: 'VSINGL',
     7: 'FDOUBL',
     # 8: 'FDOUB1',
