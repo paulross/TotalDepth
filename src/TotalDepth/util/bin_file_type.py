@@ -18,7 +18,7 @@ from TotalDepth.util import SEGY
 
 logger = logging.getLogger(__file__)
 
-
+#: Regular expressions for RP66 files. Keys refer to the documentation.
 RE_COMPILED = {
     'RP66V1': {
         'Comment_1': re.compile(b'^[0 ]*([1-9]+)$'),
@@ -42,13 +42,15 @@ RE_COMPILED = {
     }
 }
 
-# string.printable contains tab, backspace etc. which is undesirable:
-# '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
+#: string.printable contains tab, backspace etc. which is undesirable:
+#: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
 ASCII_PRINTABLE_BYTES = set(
     # bytes(string.digits + string.ascii_letters + string.punctuation + ' \n\x0d\x0a', 'ascii')
     bytes(string.printable, 'ascii')
 )
 ASCII_BYTES_LOWER_128 = set(bytes(range(128)))
+
+#: Regex for extracting the LAS version.
 RE_LAS_VERSION_LINE = re.compile(br'^\s*VERS\s*\.\s+([\d.]+)\s*:\s*(.+?)?\s*$')
 
 
@@ -456,11 +458,27 @@ def _pds(fobj: typing.BinaryIO) -> str:
     return ''
 
 
-# Ordered so that more specific files are earlier in the list, more general ones later.
-# Also, as an optimisation, the more common file formats appear earlier.
+def _bit(fobj: typing.BinaryIO) -> str:
+    """Returns 'BIT' if the magic number is looks like a Western Atlas BIT file, '' otherwise."""
+    fobj.seek(0)
+    r = fobj.read(12)
+    # print('TRACE:', r)
+    if r[:8] == (
+            b'\x00\x00'
+            b'\x00\x00'
+            b'\x00\x00'
+            b'\x00\x00'
+    ) and r[8] in ASCII_PRINTABLE_BYTES and r[9] in (0, 1) and r[10:] == b'\x00\x00':
+        return 'BIT'
+    return ''
+
+
+#: Ordered so that more specific files are earlier in the list, more general ones later.
+#: Also, as an optimisation, the more common file formats appear earlier.
 FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_rcd, 'RCD'),  # 16 bytes
     (_stk, 'STK'),  # 12 bytes
+    (_bit, 'BIT'),  # 12 bytes
     (_cfbf, 'CFBF'),  # 8 bytes so 2^64
     (_pds, 'PDS'),  # 8 bytes so 2^64
     (_xml, 'XML'),  # '<?xml ', 6 characters so 2^(6*8) 2^48
@@ -484,13 +502,16 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_lis, 'LIStr'),
     (_lis, 'LIS'),  # LIS. This attempts to create a LIS Index. This is strong but slow.
 )
+#: Length of the longest binary file type supported.
 BINARY_FILE_TYPE_CODE_WIDTH: int = max(len(v[1]) for v in FUNCTION_ID_MAP)
+#: Set of binary file types supported.
 BINARY_FILE_TYPES_SUPPORTED: typing.Set[str] = {v[1] for v in FUNCTION_ID_MAP}
 
 
 BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
     'RCD': 'RCD Seismic Format',
     'STK': 'STK Seismic Format',
+    'BIT': 'Western Atlas BIT Format',
     'CFBF': 'Compound File Binary Format',
     'PDS': 'Schlumberger proprietary image format',
     'XML': 'eXtensible Markup Language',
@@ -558,9 +579,11 @@ def binary_file_type(fobj: typing.BinaryIO) -> str:
 
 
 def binary_file_type_from_path(path: str) -> str:
+    """Returns a file type based on the analysis of the contents of the file."""
     with open(path, 'rb') as file_object:
         return binary_file_type(file_object)
 
 
 def format_bytes(by: bytes) -> str:
+    """Formats bytes with xxd."""
     return xxd.xxd(by)

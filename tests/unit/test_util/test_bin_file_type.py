@@ -719,6 +719,20 @@ def test__dat(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
+        # Typical OK
+        (io.BytesIO(b'\x00\x00\x00\x00\x00\x00\x00\x00\x32\x01\x00\x00'), 'BIT'),
+        # Empty string
+        (io.BytesIO(b""""""), ''),
+    )
+)
+def test__bit(fobj: io.BytesIO, expected: int):
+    result = TotalDepth.util.bin_file_type._bit(fobj)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'fobj, expected',
+    (
         (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
         (io.BytesIO(b'%PDF-'), 'PDF'),
         # Need extra bytes so that TIF can be tested as well.
@@ -826,6 +840,7 @@ UTIM DATE TIME WAC BDIA NPEN EPEN
             'DAT',
         ),
         (io.BytesIO(SEGY_EMPTY), 'SEGY',),
+        (io.BytesIO(b'\x00\x00\x00\x00\x00\x00\x00\x00\x32\x01\x00\x00'), 'BIT'),
     )
 )
 def test_binary_file_type_from_bytes(fobj: io.BytesIO, expected: str):
