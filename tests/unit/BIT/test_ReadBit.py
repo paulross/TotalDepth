@@ -16,7 +16,18 @@ ISINGL_EXAMPLES = (
     # +7.2370051 × 10**75
     (7.2370051e75, b'\x7f\xff\xff\xff'),
     # +5.397605 × 10−79
-    (5.397605668656396e-79, b'\x00\x10\x00\x00')
+    (5.397605668656396e-79, b'\x00\x10\x00\x00'),
+    (9.999999615829415e-05, b'\x3d\x68\xdb\x8b'),
+    # 443a 6600 4438 fe00          D:f.D8..
+    # 0000010c: 4040 0000 0000 0000 4210 0000 4d4e 3233  @@......B...MN23
+    # 0000011c: 394a 2031
+    (14950.0, b'\x44\x3a\x66\x00'),
+    (14590.0, b'\x44\x38\xfe\x00'),
+    (0.25, b'\x40\x40\x00\x00'),
+    (0.0, b'\x00\x00\x00\x00'),
+    (16.0, b'\x42\x10\x00\x00'),
+    (1375640257504053.0, b'\x4d\x4e\x32\x33'),
+    (1.0786716607821755e-09, b'\x39\x4a\x20\x31'),
 )
 
 
@@ -27,6 +38,19 @@ ISINGL_EXAMPLES = (
 def test_isingl_bytes_to_float(float_value, bytes_value):
     result = ReadBIT.bytes_to_float(bytes_value)
     assert math.isclose(result, float_value, rel_tol=1e-7)
+
+
+def test_binary_data_end():
+    tell = 0x128
+    tell += 4
+    frames = 1472
+    bytes_per_frame = 40
+    tell += frames * bytes_per_frame
+    padding = 12 * ((frames // 16) - 1)
+    tell += padding
+    assert tell == 60272
+    assert f'0x{tell:x}' == '0xeb70'
+
 
 # 15_17-_12/DWL_FILE/15_17-_12_dwl__1646505.bit
 EXAMPLE_BIT_FILE = (

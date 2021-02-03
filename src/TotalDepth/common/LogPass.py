@@ -272,6 +272,7 @@ class LogPass:
     * LAS (all versions) - The standard excludes simultaneous FrameArrays.
     * RP66V1 - The standard allows for any number of simultaneous FrameArrays and this is common.
     * DAT - No simultaneous FrameArrays.
+    * BIT - Custom and practice shows that there can be any number of simultaneous FrameArrays.
     """
     def __init__(self):
         # This is a list of independent recordings.
