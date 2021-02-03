@@ -84,6 +84,39 @@ Total = 4 + 160 + 2 + 2 + 80 + 5 * 4 + 8 = 276 (0x114) bytes.
 
 Of note is that while the TIF markers are little endian many values within the file are big endian.
 
+Decoding the Description
+-------------------------
+
+160 bytes long.
+Example::
+
+    $ xxd -s +16 data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit | head -n 20
+    00000010: 5348 454c 4c20 4558 5052 4f20 552e 4b2e  SHELL EXPRO U.K.
+    00000020: 2020 2020 2020 3234 204f 4354 2038 3420        24 OCT 84
+    00000030: 2020 2020 204d 414e 5346 4945 4c44 2f44       MANSFIELD/D
+    00000040: 4f44 4453 2020 2020 2020 2020 2020 2020  ODDS
+    00000050: 2020 2020 2020 2020 000a 0018 0054 2020          .....T
+    00000060: 3220 3920 2f20 3120 3020 2d20 3320 2020  2 9 / 1 0 - 3
+    00000070: 2020 2020 2020 2020 2020 2020 2020 2020
+    00000080: 2020 2020 2020 2020 2020 2020 2020 2020
+    00000090: 2020 2020 2020 2020 2020 2020 2020 2020
+    000000a0: 2020 2020 2020 2020 0012 000b 0006 2020          ......
+    000000b0: 000a 0000 434f 4e44 534e 2020 5350 2020  ....CONDSN  SP
+
+Looks like we have 4 * 16 + 8 = 72 bytes of ASCII to 0x58 as a description.
+
+Then 24 bytes of binary data to 0x70 ???
+    000a 0018 0054 2020 3220 3920 2f20 3120 3020 2d20 3320 2020
+3 * 16 + 8 = 56 ASCII spaces.
+hmm divided by 4 is 19.
+hmm maybe together 24 + 56 = 80 and 80 / 4 is 20. Channel units?
+
+Then 8 bytes of stuff: 0012 000b 0006 2020
+
+Total is:
+72 + 24 + 56 + 8 == 160
+
+
 
 Decoding the frames
 -------------------
@@ -327,8 +360,19 @@ class LogPassRange(typing.NamedTuple):
         return self.depth_to > self.depth_from
 
 
+def read_bytes_from_offset(b: bytes, count: int, offset: int) -> typing.Tuple[bytes, int]:
+    """Slices a bytes object and increments the offset.
+    Usage::
+
+        result, offset = read_bytes_from_offset(b, count, offset)
+    """
+    return b[offset:offset + count], offset + count
+
+
 class BITFrameArray:
-    """Represents a Log Pass from a BIT file."""
+    """Represents a Log Pass from a BIT file.
+    This has a number of fields, some are BIT specific but self.frame_array is a LogPass.FrameArray.
+    """
     def __init__(self, ident: str, block: bytes):
         """Example initial block, length 0x114, 276 bytes::
 
@@ -350,14 +394,28 @@ class BITFrameArray:
             000000fc: 2020 2020 2020 2020 443a 6600 4438 fe00          D:f.D8..
             0000010c: 4040 0000 0000 0000 4210 0000 4d4e 3233  @@......B...MN23
             0000011c: 394a 2031
-
         """
         self.ident = ident
         offset = 0
-        self.unknown_head = block[offset:offset + 4]
-        offset += 4
-        self.description = block[offset:offset + 160]
-        offset += 160
+        # self.unknown_head = block[offset:offset + 4]
+        # offset += 4
+        self.unknown_head, offset = read_bytes_from_offset(block, 4, offset)
+        # TODO:
+        # Looks like we have 4 * 16 + 8 = 72 bytes of ASCII to 0x58 as a description.
+        #
+        # Then 24 bytes of binary data to 0x70 ???
+        #     000a 0018 0054 2020 3220 3920 2f20 3120 3020 2d20 3320 2020
+        # 3 * 16 + 8 = 56 ASCII spaces.
+        # hmm divided by 4 is 19.
+        # hmm maybe together 24 + 56 = 80 and 80 / 4 is 20. Channel units?
+        #
+        # Then 8 bytes of stuff: 0012 000b 0006 2020
+        #
+        # Total is:
+        # 72 + 24 + 56 + 8 == 160
+        # self.description = block[offset:offset + 160]
+        # offset += 160
+        self.description, offset = read_bytes_from_offset(block, 160, offset)
         count = struct.unpack('>h', block[offset:offset + 2])[0]
         if count > 20:
             raise ValueError(f'Channel count must be <= 20 not {count}')
@@ -368,19 +426,23 @@ class BITFrameArray:
         offset += 2
         self.channel_names: typing.List[str] = []
         for i in range(count):
-            self.channel_names.append(block[offset:offset + 4].decode('ascii'))
-            offset += 4
+            # self.channel_names.append(block[offset:offset + 4].decode('ascii'))
+            # offset += 4
+            name, offset = read_bytes_from_offset(block, 4, offset)
+            self.channel_names.append(name.decode('ascii'))
         # Unused channels
         offset += 4 * (20 - count)
         _temp: typing.List[float] = []
         for i in range(5):
-            _temp.append(bytes_to_float(block[offset:]))
-            offset += 4
+            # _temp.append(bytes_to_float(block[offset:]))
+            # offset += 4
+            value, offset = read_bytes_from_offset(block, 4, offset)
+            _temp.append(bytes_to_float(value))
         self.bit_log_pass_range = LogPassRange(*_temp)
         self.unknown_tail = block[offset:]
         self.frame_count = 0
         self._temporary_frames: typing.List[typing.List[float]] = [list() for c in self. channel_names]
-        self.frame_array: typing.Optional[LogPass.LogPass] = None
+        self.frame_array: typing.Optional[LogPass.FrameArray] = None
 
     def long_str(self) -> str:
         """Returns a multi-line string describing self."""
@@ -403,6 +465,7 @@ class BITFrameArray:
         return len(self.channel_names)
 
     def add_block(self, block: bytes) -> None:
+        """Adds a data block of frame data to my temporary data structure(s)."""
         if len(block) % self.len_channels:
             raise ExceptionTotalDepthBITDataBlocks(
                 f'The block length {len(block)} does not have equal data for the channels {self.len_channels}.'
@@ -415,7 +478,8 @@ class BITFrameArray:
         self.frame_count += num_frames
 
     def complete(self) -> None:
-        """Converts the existing frame data to a LogPass.FrameArray, adds a computed X-axis and removes temporaries."""
+        """Converts the existing frame data to a LogPass.FrameArray.
+        This adds a computed X-axis and removes temporary data structures."""
         assert self.frame_array is None
         if len(self._temporary_frames):
             assert len(self.channel_names) == len(self._temporary_frames)
@@ -443,6 +507,8 @@ class BITFrameArray:
 
 
 def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFrameArray]:
+    """Given a file this returns a list of BITFrameArray objects.
+    """
     log_pass = []
     frame_array = None
     for tif_block in yield_tif_blocks(file):
@@ -462,6 +528,7 @@ def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFr
                 frame_array.complete()
                 log_pass.append(frame_array)
                 frame_array = None
+    # If there is an exception frame_array may be non-None.
     if frame_array is not None:
         frame_array.complete()
         log_pass.append(frame_array)
