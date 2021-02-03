@@ -106,6 +106,12 @@ def tif_scan_file_object(fobj: typing.BinaryIO) -> typing.List[TifMarker]:
         raise DeTifExceptionRead(f'Initial TIF marker is wrong type: {tifs[-1]}')
     logger.debug(f'[{len(tifs):8,d}] {tifs[-1]}')
     while True:
+        if tifs[-1].next <= fobj.tell():
+            logger.error(
+                f'TIF marker suggest going backwards.'
+                f' Next: {tifs[-1].next} 0x{tifs[-1].next:x} <= Tell: {fobj.tell()} 0x{fobj.tell():x}'
+            )
+            return tifs
         fobj.seek(tifs[-1].next)
         try:
             tifs.append(_read_tifs(fobj))

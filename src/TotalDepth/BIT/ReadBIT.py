@@ -18,54 +18,79 @@
 #
 # Paul Ross: apaulross@gmail.com
 """
-Reads Dresser Atlas BIT files.
+This processes Dresser Atlas BIT files.
+Dresser Atlas BIT files are TIF encoded and consist of a set of:
+
+- First block, this gives a description of the file.
+- Subsequent blocks are frame data.
+
+TIF markers are used to separate Log Passes and delineate the file.
+A TIF marker type 1 ends the Log Pass and a pair of type 1 markers ends the readable file.
+
+Here is an example of TIF markers in a file::
+
+    $ tddetif -n data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit -v
+    Cmd: DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit -v
+    Detected 187 TIF Markers in data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    [     0] TifMarker: 0x00000000 Type: 0x00000000 Prev: 0x00000000 Next: 0x00000120 Length: 0x00000120 Payload: 0x00000114
+    [     1] TifMarker: 0x00000120 Type: 0x00000000 Prev: 0x00000000 Next: 0x000003ac Length: 0x0000028c Payload: 0x00000280
+    [     2] TifMarker: 0x000003ac Type: 0x00000000 Prev: 0x00000120 Next: 0x00000638 Length: 0x0000028c Payload: 0x00000280
+    ...
+    [    91] TifMarker: 0x0000e658 Type: 0x00000000 Prev: 0x0000e3cc Next: 0x0000e8e4 Length: 0x0000028c Payload: 0x00000280
+    [    92] TifMarker: 0x0000e8e4 Type: 0x00000000 Prev: 0x0000e658 Next: 0x0000eb70 Length: 0x0000028c Payload: 0x00000280
+    [    93] TifMarker: 0x0000eb70 Type: 0x00000001 Prev: 0x0000e8e4 Next: 0x0000eb7c Length: 0x0000000c Payload: 0x00000000
+    [    94] TifMarker: 0x0000eb7c Type: 0x00000000 Prev: 0x0000eb70 Next: 0x0000ec9c Length: 0x00000120 Payload: 0x00000114
+    [    95] TifMarker: 0x0000ec9c Type: 0x00000000 Prev: 0x0000eb7c Next: 0x0000ef28 Length: 0x0000028c Payload: 0x00000280
+    ...
+    [   184] TifMarker: 0x0001cf48 Type: 0x00000000 Prev: 0x0001ccbc Next: 0x0001d1d4 Length: 0x0000028c Payload: 0x00000280
+    [   185] TifMarker: 0x0001d1d4 Type: 0x00000001 Prev: 0x0001cf48 Next: 0x0001d1e0 Length: 0x0000000c Payload: 0x00000000
+    [   186] TifMarker: 0x0001d1e0 Type: 0x00000001 Prev: 0x0001d1d4 Next: 0x0001d1ec Length: 0x0000000c Payload: 0x00000000
+    Execution time =    0.020 (S)
+    Bye, bye!
 
 
-First block without TIF markers:
+Example first block without TIF markers, length 276 (0x114) bytes::
 
+    0000000c: 0002 0000 5348 454c 4c20 4558 5052 4f20  ....SHELL EXPRO
+    0000001c: 552e 4b2e 2020 2020 2020 3234 204f 4354  U.K.      24 OCT
+    0000002c: 2038 3420 2020 2020 204d 414e 5346 4945   84      MANSFIE
+    0000003c: 4c44 2f44 4f44 4453 2020 2020 2020 2020  LD/DODDS
+    0000004c: 2020 2020 2020 2020 2020 2020 000a 0018              ....
+    0000005c: 0054 2020 3220 3920 2f20 3120 3020 2d20  .T  2 9 / 1 0 -
+    0000006c: 3320 2020 2020 2020 2020 2020 2020 2020  3
+    0000007c: 2020 2020 2020 2020 2020 2020 2020 2020
+    0000008c: 2020 2020 2020 2020 2020 2020 2020 2020
+    0000009c: 2020 2020 2020 2020 2020 2020 0012 000b              ....
+    000000ac: 0006 2020 000a 0000 434f 4e44 534e 2020  ..  ....CONDSN
+    000000bc: 5350 2020 4752 2020 4341 4c20 5445 4e20  SP  GR  CAL TEN
+    000000cc: 5350 4420 4143 5120 4143 2020 5254 2020  SPD ACQ AC  RT
+    000000dc: 2020 2020 2020 2020 2020 2020 2020 2020
+    000000ec: 2020 2020 2020 2020 2020 2020 2020 2020
+    000000fc: 2020 2020 2020 2020 443a 6600 4438 fe00          D:f.D8..
+    0000010c: 4040 0000 0000 0000 4210 0000 4d4e 3233  @@......B...MN23
+    0000011c: 394a 2031
 
-0000000c: 0002 0000 5348 454c 4c20 4558 5052 4f20  ....SHELL EXPRO
-0000001c: 552e 4b2e 2020 2020 2020 3234 204f 4354  U.K.      24 OCT
-0000002c: 2038 3420 2020 2020 204d 414e 5346 4945   84      MANSFIE
-0000003c: 4c44 2f44 4f44 4453 2020 2020 2020 2020  LD/DODDS
-0000004c: 2020 2020 2020 2020 2020 2020 000a 0018              ....
-0000005c: 0054 2020 3220 3920 2f20 3120 3020 2d20  .T  2 9 / 1 0 -
-0000006c: 3320 2020 2020 2020 2020 2020 2020 2020  3
-0000007c: 2020 2020 2020 2020 2020 2020 2020 2020
-0000008c: 2020 2020 2020 2020 2020 2020 2020 2020
-0000009c: 2020 2020 2020 2020 2020 2020 0012 000b              ....
-000000ac: 0006 2020 000a 0000 434f 4e44 534e 2020  ..  ....CONDSN
-000000bc: 5350 2020 4752 2020 4341 4c20 5445 4e20  SP  GR  CAL TEN
-000000cc: 5350 4420 4143 5120 4143 2020 5254 2020  SPD ACQ AC  RT
-000000dc: 2020 2020 2020 2020 2020 2020 2020 2020
-000000ec: 2020 2020 2020 2020 2020 2020 2020 2020
-000000fc: 2020 2020 2020 2020 443a 6600 4438 fe00          D:f.D8..
-0000010c: 4040 0000 0000 0000 4210 0000 4d4e 3233  @@......B...MN23
-0000011c: 394a 2031
+Decomposed:
 
+- 4 bytes unknown.
+- 160 bytes ASCII description, there is some structure here but it is as yet unknown.
+- C, the count of channels as big endian two byte format '>H' or '>h'.
+- A two byte null
+- Channel names, 4 bytes each, this is always 80 bytes long.
+- Five 4 byte floats start, stop, step, 0, ???.
+- Unknown tail of eight bytes.
 
-Address range:
+Total = 4 + 160 + 2 + 2 + 80 + 5 * 4 + 8 = 276 (0x114) bytes.
 
-From    To      Bytes   Description
-0x0     0x8     8       All null.
-0x8     0x9     1       Single space.
-0x9     0xa     1       Value 1, b'\x01'
-0xa     0xc     2       Two nulls, b'\x00\x00'
-0xc     0x10    4       Single float, meaning unknown.
-0x10    0xb0    160     ASCII text, the description.
-0xb0    0xb2    2       C, the count of channels as big endian two byte format '>H' or '>h'.
-0xb2    0xb4    2       Null.
-0xb4    0x104  80       Channel names, 4 bytes each.
-0x104   0x118  20       Five floats start, stop, step, 0, ???.
-0x118   0x120   8       Eight spaces, 0x20
-0x120   0x128   8       Eight nulls, 0x00
-0x128                   Start of data block.
-
-Most commonly the first 12 bytes are [0, 0, 0, 0, 0, 0, 0, 0, 32, 1, 0, 0,]
+Of note is that while the TIF markers are little endian many values within the file are big endian.
 
 
 Decoding the frames
 -------------------
+
+Each subsequent block is a subdivided into the number of channels and read into that channel.
+For example a block of data 0x280 (640) bytes long with 10 channels is decomposed into 10 sub-blocks of 64 bytes each.
+Each sub-block contains 16 floats.
 
 There is a directory that has both BIT and LIS files in it.
 
@@ -79,7 +104,8 @@ Overall frame spacing	-0.250 (FT)
 
 Corresponding BIT file 29_10-_3Z_dwl_DWL_WIRE_1644659.bit has:
 
-LogPassRange(depth_from=14950.000891089492, depth_to=14590.000869631818, spacing=0.2500000149011621, unknown_a=0.0, unknown_b=16.000000953674373)
+LogPassRange(depth_from=14950.000891089492, depth_to=14590.000869631818, spacing=0.2500000149011621, unknown_a=0.0,
+    unknown_b=16.000000953674373)
 Frames from spacing: 1441
 
 A striking feature of the LIS Log Pass 0 file is that the SP is fixed throughout at -249.709.
@@ -89,61 +115,18 @@ The BIT file 29_10-_3Z_dwl_DWL_WIRE_1644659.bit corresponds with the following:
 - The binary data is assumed to start at 0x128 + 4
 - Each channel is sequential but read in blocks of 16 floats (64 bytes).
 - After 16 floats are read for each channel (every 160 floats, or 640 bytes) then 12 bytes are read and discarded.
-- Although the BIT file states 1441 frames from spacing the LIS file has read 1472 (0x5c0) frames (modulo 16) with the remaining values as 0.0001 for all channels.
+- Although the BIT file states 1441 frames from spacing the LIS file has read 1472 (0x5c0) frames (modulo 16) with the
+   remaining values as 0.0001 for all channels.
 
-The 12 bytes read after every 640 bytes look like this: 4 nulls, two values unknown, two nulls, two values unknown, two nulls.
+The 12 bytes read after every 640 bytes look like this: 4 nulls, two values unknown, two nulls, two values unknown,
+    two nulls.
 These are TIF markers.
 
 The 0.0001 figure is actually 9.999999615829415e-05 or b'\x3d\x68\xdb\x8b'
-
-So where does the LIS file see the end of the BIT data?
-Calculation shows at 0xeb70:
-
-0000eb60: 3d68 db8b 3d68 db8b 3d68 db8b 3d68 db8b  =h..=h..=h..=h..
-0000eb70: 0100 0000 e4e8 0000 7ceb 0000 0000 0000  ........|.......
-0000eb80: 70eb 0000 9cec 0000 0002 0000 5348 454c  p...........SHEL
-0000eb90: 4c20 4558 5052 4f20 552e 4b2e 2020 2020  L EXPRO U.K.
-0000eba0: 2020 3234 204f 4354 2038 3420 2020 2020    24 OCT 84
-0000ebb0: 204d 414e 5346 4945 4c44 2f44 4f44 4453   MANSFIELD/DODDS
-0000ebc0: 2020 2020 2020 2020 2020 2020 2020 2020
-0000ebd0: 2020 2020 000a 0018 0054 2020 3220 3920      .....T  2 9
-0000ebe0: 2f20 3120 3020 2d20 3320 2020 2020 2020  / 1 0 - 3
-0000ebf0: 2020 2020 2020 2020 2020 2020 2020 2020
-0000ec00: 2020 2020 2020 2020 2020 2020 2020 2020
-0000ec10: 2020 2020 2020 2020 2020 2020 2020 2020
-0000ec20: 2020 2020 0011 002f 000d 2020 000a 0000      .../..  ....
-0000ec30: 434f 4e44 534e 2020 5350 2020 4752 2020  CONDSN  SP  GR
-
-Ah there is a TIF marker there: 0100 0000 e4e8 0000 7ceb 0000
-The 0100 0000 is a EOF marker, but only one where true end of file is two type 1 markers.
-
-TIF markers in file.
-
-$ tddetif -n data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit -v
-Cmd: /Users/paulross/pyenvs/TotalDepth_3.8_v0.3/bin/tddetif -n data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit -v
-Detected 187 TIF Markers in data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
-[     0] TifMarker: 0x00000000 Type: 0x00000000 Prev: 0x00000000 Next: 0x00000120 Length: 0x00000120 Payload: 0x00000114
-[     1] TifMarker: 0x00000120 Type: 0x00000000 Prev: 0x00000000 Next: 0x000003ac Length: 0x0000028c Payload: 0x00000280
-[     2] TifMarker: 0x000003ac Type: 0x00000000 Prev: 0x00000120 Next: 0x00000638 Length: 0x0000028c Payload: 0x00000280
-...
-[    91] TifMarker: 0x0000e658 Type: 0x00000000 Prev: 0x0000e3cc Next: 0x0000e8e4 Length: 0x0000028c Payload: 0x00000280
-[    92] TifMarker: 0x0000e8e4 Type: 0x00000000 Prev: 0x0000e658 Next: 0x0000eb70 Length: 0x0000028c Payload: 0x00000280
-[    93] TifMarker: 0x0000eb70 Type: 0x00000001 Prev: 0x0000e8e4 Next: 0x0000eb7c Length: 0x0000000c Payload: 0x00000000
-[    94] TifMarker: 0x0000eb7c Type: 0x00000000 Prev: 0x0000eb70 Next: 0x0000ec9c Length: 0x00000120 Payload: 0x00000114
-[    95] TifMarker: 0x0000ec9c Type: 0x00000000 Prev: 0x0000eb7c Next: 0x0000ef28 Length: 0x0000028c Payload: 0x00000280
-...
-[   184] TifMarker: 0x0001cf48 Type: 0x00000000 Prev: 0x0001ccbc Next: 0x0001d1d4 Length: 0x0000028c Payload: 0x00000280
-[   185] TifMarker: 0x0001d1d4 Type: 0x00000001 Prev: 0x0001cf48 Next: 0x0001d1e0 Length: 0x0000000c Payload: 0x00000000
-[   186] TifMarker: 0x0001d1e0 Type: 0x00000001 Prev: 0x0001d1d4 Next: 0x0001d1ec Length: 0x0000000c Payload: 0x00000000
-Execution time =    0.020 (S)
-Bye, bye!
-
 """
-import collections
 import enum
-import math
+import logging
 import os
-import pprint
 import string
 import struct
 import sys
@@ -155,7 +138,11 @@ from TotalDepth.common import LogPass
 from TotalDepth.util import DirWalk
 
 
+logger = logging.getLogger(__file__)
+
+
 from TotalDepth import ExceptionTotalDepth
+
 
 class ExceptionTotalDepthBIT(ExceptionTotalDepth):
     """Simple specialisation of an exception class for TotalDepth.BIT."""
@@ -172,35 +159,9 @@ class ExceptionTotalDepthBITFirstBlock(ExceptionTotalDepthBIT):
     pass
 
 
-OFFSET_DESCRIPTION = 0x10
-LENGTH_DESCRIPTION = 0xa0  # 160
-# Two byte int
-OFFSET_NUMBER_OF_CHANNELS = 0xb0
-OFFSET_FRAME_SPACING = 0x104
-OFFSET_PRE_BINARY_DATA = 0x118
-OFFSET_BINARY_DATA = 0x128
-
-
-ASCII_PRINTABLE_BYTES = set(
-    # bytes(string.digits + string.ascii_letters + string.punctuation + ' \n\x0d\x0a', 'ascii')
-    bytes(string.printable, 'ascii')
-)
-
-
-def is_bit_file(fobj: typing.BinaryIO) -> bool:
-    """Returns True if the magic number is looks like a Western Atlas BIT file, False otherwise."""
-    fobj.seek(0)
-    r = fobj.read(12)
-    if r[:8] == (
-            b'\x00\x00'
-            b'\x00\x00'
-            b'\x00\x00'
-            b'\x00\x00'
-    ) and r[8] in ASCII_PRINTABLE_BYTES and r[9] in (0, 1) and r[10:] == b'\x00\x00':
-        return True
-    return False
-
-
+class ExceptionTotalDepthBITDataBlocks(ExceptionTotalDepthBIT):
+    """Constructor from first block of data."""
+    pass
 
 
 LEN_FLOAT_BYTES = 4
@@ -254,7 +215,38 @@ def gen_floats(b: bytes) -> typing.Sequence[float]:
         offset += LEN_FLOAT_BYTES
 
 
+ASCII_PRINTABLE_BYTES = set(
+    # bytes(string.digits + string.ascii_letters + string.punctuation + ' \n\x0d\x0a', 'ascii')
+    bytes(string.printable, 'ascii')
+)
+
+
+def is_bit_file(fobj: typing.BinaryIO) -> bool:
+    """Returns True the file looks like a Western Atlas BIT file, False otherwise."""
+
+    fobj.seek(0)
+    tif = TifMarker(fobj.tell(), *TIF_WORD_STRUCT.unpack_from(fobj.read(TIF_WORD_STRUCT.size)))
+    if tif:
+        _unknown_head = fobj.read(4)
+        r = fobj.read(160)
+        if any(v not in ASCII_PRINTABLE_BYTES for v in r):
+            return False
+        count = struct.unpack('>h', fobj.read(2))[0]
+        if count > 20:
+            return False
+        null = struct.unpack('>h', fobj.read(2))[0]
+        if null != 0:
+            return False
+        for i in range(count):
+            name = fobj.read(4)
+            if any(v not in ASCII_PRINTABLE_BYTES for v in name):
+                return False
+        return True
+    return False
+
+
 class TifMarker(typing.NamedTuple):
+    """Contains a TIF marker with its file position."""
     tell: int
     type: int
     prev: int
@@ -273,12 +265,14 @@ class TifMarker(typing.NamedTuple):
 
 
 class TifType(enum.Enum):
+    """Type of TIF marker. Type 0 is normal data. Type 1 is end of Log Pass. Type 2 is end of file."""
     DATA = 1
     END_LOG_PASS = 2
     END_FILE = 3
 
 
 class TifMarkedBytes(typing.NamedTuple):
+    """This is yielded by yield_tif_blocks()."""
     tif_type: TifType
     payload: bytes
 
@@ -287,11 +281,13 @@ TIF_WORD_STRUCT = struct.Struct('<3L')
 
 
 def yield_tif_blocks(file: typing.BinaryIO) -> typing.Sequence[TifMarkedBytes]:
+    """Generate the payload from blocks of the file."""
     file.seek(0)
     tif_prev = TifMarker(0, 0, 0, 0)
     while True:
         tell = file.tell()
         tif = TifMarker(tell, *TIF_WORD_STRUCT.unpack_from(file.read(TIF_WORD_STRUCT.size)))
+        # print(tif, tif_prev)
         if tif_prev:
             if tif.tell != tif_prev.next:
                 raise ExceptionTotalDepthBIT_TIF(f'TIF marker miss-match. Was: {tif_prev} Now: {tif}')
@@ -315,6 +311,7 @@ def yield_tif_blocks(file: typing.BinaryIO) -> typing.Sequence[TifMarkedBytes]:
 
 
 class LogPassRange(typing.NamedTuple):
+    """POD container for the five floats that describe the range of the BIT Log Pass."""
     depth_from: float
     depth_to: float
     spacing: float
@@ -387,6 +384,7 @@ class BITFrameArray:
 
     def long_str(self) -> str:
         """Returns a multi-line string describing self."""
+        frame_array_str = '\n'.join(f'      {v}' for v in str(self.frame_array).split('\n'))
         ret = [
             f'BITFrameArray: ident="{self.ident}"',
             f'   Unknown head: {self.unknown_head}',
@@ -395,7 +393,7 @@ class BITFrameArray:
             f'   BIT Log Pass: {self.bit_log_pass_range}',
             f'   Unknown tail: {self.unknown_tail}',
             f'    Frame count: {self.frame_count}',
-            f'    Frame array: {self.frame_array}',
+            f'    Frame array: {frame_array_str}',
         ]
         return '\n'.join(ret)
 
@@ -406,7 +404,7 @@ class BITFrameArray:
 
     def add_block(self, block: bytes) -> None:
         if len(block) % self.len_channels:
-            raise ValueError(
+            raise ExceptionTotalDepthBITDataBlocks(
                 f'The block length {len(block)} does not have equal data for the channels {self.len_channels}.'
             )
         num_frames = len(block) // (LEN_FLOAT_BYTES * self.len_channels)
@@ -443,272 +441,6 @@ class BITFrameArray:
                 data.clear()
             self._temporary_frames.clear()
 
-# class Signature(typing.NamedTuple):
-#     signature: bytes  # 12 bytes
-#     unknown: float
-#
-#
-# def read_signature_from_file(file: typing.BinaryIO) -> Signature:
-#     file.seek(0)
-#     b = file.read(12)
-#     u = read_float(file)
-#     return Signature(b, u)
-
-
-def read_channels(byt: bytes) -> typing.List[str]:
-    """Read the channels from a complete in-memory file."""
-    offset = OFFSET_NUMBER_OF_CHANNELS
-    count = struct.unpack('>h', byt[offset:])[0]
-    offset += 2
-    null = struct.unpack('>h', byt[offset:])[0]
-    if null != 0:
-        raise ValueError(f'Expected null at 0x{offset:x} but got {null}')
-    offset += 2
-    ret = []
-    for i in range(count):
-        ret.append(byt[offset:offset+4].decode('ascii'))
-        offset += 4
-    return ret
-
-
-def number_of_channels(file: typing.BinaryIO) -> int:
-    file.seek(OFFSET_NUMBER_OF_CHANNELS)
-    count = struct.unpack('>h', file.read(2))[0]
-    return count
-
-
-def read_channels_from_file(file: typing.BinaryIO) -> typing.List[str]:
-    count = number_of_channels(file)
-    null = struct.unpack('>h', file.read(2))[0]
-    # if null != 0:
-    #     raise ValueError(f'Expected null at 0x{file.tell():x} but got {null}')
-    ret = []
-    for i in range(count):
-        ret.append(file.read(4).decode('ascii'))
-    return ret
-
-
-def read_description_from_file(file: typing.BinaryIO) -> str:
-    file.seek(OFFSET_DESCRIPTION)
-    ret = file.read(LENGTH_DESCRIPTION)
-    return ret.decode('ascii')
-
-
-
-
-class PreBinaryData(typing.NamedTuple):
-    pad: bytes  # 8 bytes
-    null: bytes  # 8 bytes
-
-
-def read_pre_binary_data_from_file(file: typing.BinaryIO) -> PreBinaryData:
-    file.seek(OFFSET_PRE_BINARY_DATA)
-    a = file.read(8)
-    b = file.read(8)
-    return PreBinaryData(a, b)
-
-
-def read_binary_data_from_file(file: typing.BinaryIO, limit: int = 0) -> typing.List[float]:
-    ret = []
-    file.seek(OFFSET_BINARY_DATA)
-    unknown = read_float(file)
-    while True:
-        t = file.tell()
-        b = file.read(LEN_FLOAT_BYTES)
-        if len(b) != LEN_FLOAT_BYTES:
-            break
-        try:
-            ret.append(bytes_to_float(b))
-        except ValueError as err:
-            print(f'ERROR: {err} at 0x{t:x}')
-        if limit and len(ret) >= limit:
-            break
-    return ret
-
-
-def read_binary_data_from_file_new(file: typing.BinaryIO,
-                                   channels: typing.List[str],
-                                   block_size: int,
-                                   limit: int = 0) -> typing.List[typing.List[float]]:
-    ret = [list() for c in channels]
-    file.seek(OFFSET_BINARY_DATA)
-    unknown = read_float(file)
-    channel_index = 0
-    count = 0
-    while True:
-        for i in range(block_size):
-            t = file.tell()
-            b = file.read(LEN_FLOAT_BYTES)
-            if len(b) != LEN_FLOAT_BYTES:
-                return ret
-            ret[channel_index % len(channels)].append(bytes_to_float(b))
-            count += 1
-            if limit and count >= limit:
-                return ret
-        channel_index += 1
-        if channel_index % len(channels) == 0:
-            # Read three values
-            # unknown_three = [read_float(file) for j in range(3)]
-            # print(f'Unknown three: {unknown_three}')
-            b = file.read(12)
-            out = ', '.join([f'{v:3d}' for v in b])
-            print(f'Unknown 12 bytes: {out}')
-    return ret
-
-
-def read_file_path_as_floats(file_path: str) -> typing.List[float]:
-    ret = []
-    with open(file_path, 'rb') as file:
-        while True:
-            t = file.tell()
-            b = file.read(LEN_FLOAT_BYTES)
-            if len(b) != LEN_FLOAT_BYTES:
-                break
-            try:
-                ret.append(bytes_to_float(b))
-            except ValueError as err:
-                print(f'ERROR: {err} at 0x{t:x}')
-    return ret
-
-
-def dump_path_structure(file_path: str) -> None:
-    # all_as_floats = read_file_path_as_floats(file_path)
-    # print(f'Read {len(all_as_floats)} floats.')
-    # print('First 16 bytes:')
-    # pprint.pprint(all_as_floats[:4])
-    # print('From 0x104')
-    # # Looks like (from, to spacing) in feet.
-    # # Followed by 0.0, 125.0
-    # pprint.pprint(all_as_floats[16 * 4 + 1:16 * 4 + 1 + 32])
-    # print('...')
-    # print('Last frame of 64:')
-    # pprint.pprint(all_as_floats[-(64 + 6):-6])
-    # print('Last 24 bytes:')
-    # pprint.pprint(all_as_floats[-6:])
-    #
-    # print()
-    # for i in range(0, len(all_as_floats), 8):
-    #     f_slice = all_as_floats[i:i + 8]
-    #     print(' '.join([f'{f:12.3f}' for f in f_slice]))
-
-    print(f'File: {file_path}')
-    print(f'Size: {os.path.getsize(file_path):d} 0x{os.path.getsize(file_path):x}')
-    with open(file_path, 'rb') as file:
-        print(f'           Signature: {read_signature_from_file(file)}')
-        print(f'         Description: "{read_description_from_file(file)}"')
-        channels = read_channels_from_file(file)
-        print(f'       Channels [{len(channels):2d}]: {channels}')
-        frame_spacing = read_frame_spacing_from_file(file)
-        print(f'             Spacing: {frame_spacing}')
-        print(f' Frames from spacing: {frame_spacing.frames}')
-        print(f'     Bytes per frame: {LEN_FLOAT_BYTES * len(channels)}')
-        len_expected_binary_data = LEN_FLOAT_BYTES * len(channels) * frame_spacing.frames
-        print(f'Bytes of binary data: {len_expected_binary_data:d} 0x{len_expected_binary_data:x}')
-        print(f'    Expected trailer: 0x{len_expected_binary_data + OFFSET_BINARY_DATA:x}')
-        print(f'     Pre-binary data: {read_pre_binary_data_from_file(file)}')
-        limit = len(channels) * frame_spacing.frames
-        limit = 1472 * 10
-        print(f'          Limit used: {limit}')
-        binary_data_floats = read_binary_data_from_file(file, limit=limit)
-        binary_data_floats_new = read_binary_data_from_file_new(file, channels, block_size=16, limit=limit)
-        print(f'Count of binary data: {len(binary_data_floats_new)}')
-        print(f'     Count of frames: {len(binary_data_floats_new) / len(channels)}')
-        # print('Frames:')
-        # for f in range(8):
-        #     f_slice = binary_data_floats[f * len(channels):(f + 1) * len(channels)]
-        #     print(' '.join([f'{f:12.3f}' for f in f_slice]))
-
-        # # Transpose the binary data
-        # channel_data = []
-        # for c in range(len(channels)):
-        #     channel_data.append(binary_data_floats[c * bit_log_pass_range.frames:(c + 1) * bit_log_pass_range.frames])
-        # print('Transposed frames:')
-        # for c, channel in enumerate(channel_data):
-        #     print(
-        #         channels[c],
-        #         ' '.join([f'{f:12.3f}' for f in channel[:8]]),
-        #         ' -> ',
-        #         ' '.join([f'{f:12.3f}' for f in channel[-8:]])
-        #     )
-
-        # prev_i = 0
-        # run_count = 0
-        # for i, value in enumerate(binary_data_floats):
-        #     if value_of_interest(value):
-        #         print(f'{i:8d} {i - prev_i:+8d} {run_count:+8d} {value:16.8g}')
-        #         if i - prev_i == 1:
-        #             run_count += 1
-        #         else:
-        #             run_count = 0
-        #             i_run_start = i
-        #         prev_i = i
-
-        # for i in range(1, len(binary_data_floats) - 1, 1):
-        #     if value_of_interest(binary_data_floats[i-1]) or value_of_interest(binary_data_floats[i]) or value_of_interest(binary_data_floats[i+1]):
-        #         print(f'{i:8d} {binary_data_floats[i]:16.8f}')
-        # for i in range(0, len(binary_data_floats), 1):
-        #     if value_of_interest(binary_data_floats[i]):
-        #         print(f'{i:8d} {binary_data_floats[i]:16.8f}')
-        #
-        # # Look for frame spacing
-        # for i in range(1, len(binary_data_floats), 1):
-        #     diff = abs(binary_data_floats[i] - binary_data_floats[i - 1])
-        #     if math.isclose(diff, bit_log_pass_range.spacing):
-        #         print('Frame spacing', i, diff)
-
-        # print(binary_data_floats[:8])
-        # print(binary_data_floats[-8:])
-        for c in range(len(channels)):
-            print(
-                channels[c],
-                len(binary_data_floats_new[c]),
-                # binary_data_floats_new[c][:4],
-                # ', '.join(f'{v:10.4f}' for v in binary_data_floats_new[c][:16]),
-                # '->',
-                # binary_data_floats_new[c][-4:]
-                # ', '.join(f'{v:10.4f}' for v in binary_data_floats_new[c][-16:]),
-            )
-            print(', '.join(f'{v:10g}' for v in binary_data_floats_new[c][:16]))
-            print(', '.join(f'{v:10g}' for v in binary_data_floats_new[c][-16:]))
-            # histogram_floats = collections.Counter()
-            # histogram_floats.update(binary_data_floats_new[c])
-            # pprint.pprint(histogram_floats.most_common(100))
-
-
-        total = 0
-        for c in range(len(channels)):
-            count = 0
-            for i, value in enumerate(binary_data_floats_new[c]):
-                if value_of_interest(value):
-                    count += 1
-            print(f'{channels[c]}: {count}')
-            total += count
-        print(total)
-
-        for thing in yield_tif_blocks(file):
-            print(thing)
-
-
-def value_of_interest(value: float) -> bool:
-    # return False
-    return value == -249.70902977639614
-    return 1600.0 < value < 1700.0
-
-
-def dump_path_bytes(file_path: str) -> None:
-    with open(file_path, 'rb') as file:
-        pprint.pprint(file.read())
-
-
-def dump_selected_bytes(directory: str, offset: int, length: int) -> None:
-    for file_in_out in DirWalk.dirWalk(directory, '', theFnMatch='*.bit', recursive=True):
-        with open(file_in_out.filePathIn, 'rb') as file:
-            if offset > 0:
-                file.seek(offset)
-            else:
-                file.seek(offset, os.SEEK_END)
-            print(f'{os.path.basename(file_in_out.filePathIn):40} : {list(file.read(length))}')
-
 
 def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFrameArray]:
     log_pass = []
@@ -721,27 +453,52 @@ def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFr
             frame_array = BITFrameArray(f'{len(log_pass)}', tif_block.payload)
         else:
             if tif_block.tif_type == TifType.DATA:
-                frame_array.add_block(tif_block.payload)
+                try:
+                    frame_array.add_block(tif_block.payload)
+                except ExceptionTotalDepthBITDataBlocks as err:
+                    logger.error(f'{str(err)} at tell={file.tell()}')
+                    break
             elif tif_block.tif_type == TifType.END_LOG_PASS:
                 frame_array.complete()
                 log_pass.append(frame_array)
                 frame_array = None
+    if frame_array is not None:
+        frame_array.complete()
+        log_pass.append(frame_array)
     return log_pass
 
 
-def create_bit_frame_array(file_path: str) -> typing.List[BITFrameArray]:
-    # print(f'File: {file_path}')
-    # print(f'Size: {os.path.getsize(file_path):d} 0x{os.path.getsize(file_path):x}')
+def create_bit_frame_array_from_path(file_path: str) -> typing.List[BITFrameArray]:
     with open(file_path, 'rb') as file:
         ret = create_bit_frame_array_from_file(file)
     return ret
 
 
+def print_process_file(file_path: str) -> None:
+    print(f'File size: {os.path.getsize(file_path):d} 0x{os.path.getsize(file_path):x}: {file_path} ')
+    log_pass = create_bit_frame_array_from_path(file_path)
+    for array in log_pass:
+        print(array.long_str())
 
 
+def print_process_directory(directory: str, recursive: bool) -> None:
+    for file_in_out in DirWalk.dirWalk(directory, theFnMatch='', recursive=recursive, bigFirst=False):
+        try:
+            print_process_file(file_in_out.filePathIn)
+        except Exception as err:
+            print(f'ERROR: type={type(err)} value={err}')
+
+
+
+
+DEFAULT_OPT_LOG_FORMAT_VERBOSE = (
+    '%(asctime)s - %(filename)24s#%(lineno)-4d - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s'
+)
 
 
 def main() -> int:
+    logging.basicConfig(level=logging.INFO, format=DEFAULT_OPT_LOG_FORMAT_VERBOSE, stream=sys.stdout)
+
     example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644802.bit'
     # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644822.bit'
     # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644825.bit'
@@ -769,16 +526,14 @@ def main() -> int:
     # 30_07a-_1_dwl_DWL_WIRE_1644827.bit
     # 30_07a-_1_dwl_DWL_WIRE_1644828.bit
 
-    # dump_path_bytes(example)
-    # dump_path_structure(example)
+    # print_process_file(example)
 
-    log_pass = create_bit_frame_array(example)
-    for array in log_pass:
-        print(array.long_str())
+    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit'
+    # print_process_file(example)
 
-    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', 0, 16)
-    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', 0x104, 16)
-    # dump_selected_bytes('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728', -24, 24)
+    # if len(sys.argv) > 1:
+    #     example = sys.argv[1]
+    print_process_directory('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT', True)
 
     return 0
 
