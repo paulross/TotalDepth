@@ -105,6 +105,8 @@ Example::
 
 Looks like we have 4 * 16 + 8 = 72 bytes of ASCII to 0x58 as a description.
 
+Either:
+
 Then 24 bytes of binary data to 0x70 ???
     000a 0018 0054 2020 3220 3920 2f20 3120 3020 2d20 3320 2020
 3 * 16 + 8 = 56 ASCII spaces.
@@ -115,6 +117,14 @@ Then 8 bytes of stuff: 0012 000b 0006 2020
 
 Total is:
 72 + 24 + 56 + 8 == 160
+
+Or, alternatively:
+72 (4 * 16 + 8) bytes of ASCII.
+Then five bytes: 000a 0018 00
+Then 75 bytes of ASCII: 54 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
+Then 8 bytes of stuff: 0012 000b 0006 2020
+Total is:
+72 + 5 + 75 + 8 == 160
 
 
 
@@ -400,6 +410,7 @@ class BITFrameArray:
         # self.unknown_head = block[offset:offset + 4]
         # offset += 4
         self.unknown_head, offset = read_bytes_from_offset(block, 4, offset)
+        assert offset == 4
         # TODO:
         # Looks like we have 4 * 16 + 8 = 72 bytes of ASCII to 0x58 as a description.
         #
@@ -415,7 +426,21 @@ class BITFrameArray:
         # 72 + 24 + 56 + 8 == 160
         # self.description = block[offset:offset + 160]
         # offset += 160
-        self.description, offset = read_bytes_from_offset(block, 160, offset)
+        # self.description, offset = read_bytes_from_offset(block, 160, offset)
+
+        # 72 (4 * 16 + 8) bytes of ASCII.
+        # Then five bytes: 000a 0018 00
+        # Then 75 bytes of ASCII: 54 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
+        # Then 8 bytes of stuff: 0012 000b 0006 2020
+        # Total is:
+        # 72 + 5 + 75 + 8 == 160
+
+        self.description, offset = read_bytes_from_offset(block, 72, offset)
+        self.unknown_a, offset = read_bytes_from_offset(block, 5, offset)
+        self.unknown_b, offset = read_bytes_from_offset(block, 75, offset)
+        self.unknown_c, offset = read_bytes_from_offset(block, 8, offset)
+        assert offset == 160 + 4
+
         count = struct.unpack('>h', block[offset:offset + 2])[0]
         if count > 20:
             raise ValueError(f'Channel count must be <= 20 not {count}')
@@ -451,6 +476,9 @@ class BITFrameArray:
             f'BITFrameArray: ident="{self.ident}"',
             f'   Unknown head: {self.unknown_head}',
             f'    Description: {self.description}',
+            f'      Unknown A: {self.unknown_a}',
+            f'      Unknown B: {self.unknown_b}',
+            f'      Unknown C: {self.unknown_c}',
             f'  Channels [{len(self.channel_names):2}]: {self.channel_names}',
             f'   BIT Log Pass: {self.bit_log_pass_range}',
             f'   Unknown tail: {self.unknown_tail}',
@@ -595,12 +623,12 @@ def main() -> int:
 
     # print_process_file(example)
 
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit'
-    # print_process_file(example)
+    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit'
 
-    # if len(sys.argv) > 1:
-    #     example = sys.argv[1]
-    print_process_directory('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT', True)
+
+    print_process_file(example)
+
+    # print_process_directory('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT', True)
 
     return 0
 
