@@ -19,7 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """
 This processes Dresser Atlas BIT files.
-Dresser Atlas BIT files are TIF encoded and consist of a set of:
+Dresser Atlas BIT files are TIF encoded and consist of a set of Log Passes:
 
 - First block, this gives a description of the file.
 - Subsequent blocks are frame data.
@@ -87,7 +87,7 @@ Of note is that while the TIF markers are little endian many values within the f
 Decoding the Description
 -------------------------
 
-160 bytes long.
+This is 160 bytes long.
 Example::
 
     $ xxd -s +16 data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit | head -n 20
@@ -107,8 +107,10 @@ Looks like we have 4 * 16 + 8 = 72 bytes of ASCII to 0x58 as a description.
 
 Either:
 
-Then 24 bytes of binary data to 0x70 ???
+Then 24 bytes of binary data to 0x70 ???::
+
     000a 0018 0054 2020 3220 3920 2f20 3120 3020 2d20 3320 2020
+
 3 * 16 + 8 = 56 ASCII spaces.
 hmm divided by 4 is 19.
 hmm maybe together 24 + 56 = 80 and 80 / 4 is 20. Channel units?
@@ -125,8 +127,6 @@ Then 75 bytes of ASCII: 54 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
 Then 8 bytes of stuff: 0012 000b 0006 2020
 Total is:
 72 + 5 + 75 + 8 == 160
-
-
 
 Decoding the frames
 -------------------
@@ -145,10 +145,11 @@ Log Pass 0 has X axis:
 Total number of frames	1472
 Overall frame spacing	-0.250 (FT)
 
-Corresponding BIT file 29_10-_3Z_dwl_DWL_WIRE_1644659.bit has:
+Corresponding BIT file 29_10-_3Z_dwl_DWL_WIRE_1644659.bit has::
 
-LogPassRange(depth_from=14950.000891089492, depth_to=14590.000869631818, spacing=0.2500000149011621, unknown_a=0.0,
+    LogPassRange(depth_from=14950.000891089492, depth_to=14590.000869631818, spacing=0.2500000149011621, unknown_a=0.0,
     unknown_b=16.000000953674373)
+
 Frames from spacing: 1441
 
 A striking feature of the LIS Log Pass 0 file is that the SP is fixed throughout at -249.709.
@@ -162,7 +163,7 @@ The BIT file 29_10-_3Z_dwl_DWL_WIRE_1644659.bit corresponds with the following:
    remaining values as 0.0001 for all channels.
 
 The 12 bytes read after every 640 bytes look like this: 4 nulls, two values unknown, two nulls, two values unknown,
-    two nulls.
+two nulls.
 These are TIF markers.
 
 The 0.0001 figure is actually 9.999999615829415e-05 or b'\x3d\x68\xdb\x8b'
@@ -173,12 +174,17 @@ import os
 import string
 import struct
 import sys
+import time
 import typing
 
 import numpy as np
 
-from TotalDepth.common import LogPass
+from TotalDepth.common import LogPass, cmn_cmd_opts, np_summary
 from TotalDepth.util import DirWalk
+
+
+__rights__  = 'Copyright (c) 2021 Paul Ross. All rights reserved.'
+__version__ = '0.1.0'
 
 
 logger = logging.getLogger(__file__)
@@ -266,26 +272,35 @@ ASCII_PRINTABLE_BYTES = set(
 
 def is_bit_file(fobj: typing.BinaryIO) -> bool:
     """Returns True the file looks like a Western Atlas BIT file, False otherwise."""
-
     fobj.seek(0)
     tif = TifMarker(fobj.tell(), *TIF_WORD_STRUCT.unpack_from(fobj.read(TIF_WORD_STRUCT.size)))
     if tif:
         _unknown_head = fobj.read(4)
         r = fobj.read(160)
-        if any(v not in ASCII_PRINTABLE_BYTES for v in r):
+        if len(r) < 160:
             return False
-        count = struct.unpack('>h', fobj.read(2))[0]
+        if any(v not in ASCII_PRINTABLE_BYTES for v in r[:72]):
+            return False
+        if any(v not in ASCII_PRINTABLE_BYTES for v in r[72 + 24:72 + 24 + 56]):
+            return False
+        count = struct.unpack('>H', fobj.read(2))[0]
         if count > 20:
             return False
-        null = struct.unpack('>h', fobj.read(2))[0]
-        if null != 0:
-            return False
+        null = struct.unpack('>H', fobj.read(2))[0]
+        # if null != 0:
+        #     return False
         for i in range(count):
             name = fobj.read(4)
             if any(v not in ASCII_PRINTABLE_BYTES for v in name):
                 return False
         return True
     return False
+
+
+def is_bit_file_from_path(file_path: str) -> bool:
+    """Returns True the file looks like a Western Atlas BIT file, False otherwise."""
+    with open(file_path, 'rb') as file:
+        return is_bit_file(file)
 
 
 class TifMarker(typing.NamedTuple):
@@ -316,6 +331,7 @@ class TifType(enum.Enum):
 
 class TifMarkedBytes(typing.NamedTuple):
     """This is yielded by yield_tif_blocks()."""
+    tell: int
     tif_type: TifType
     payload: bytes
 
@@ -329,7 +345,12 @@ def yield_tif_blocks(file: typing.BinaryIO) -> typing.Sequence[TifMarkedBytes]:
     tif_prev = TifMarker(0, 0, 0, 0)
     while True:
         tell = file.tell()
-        tif = TifMarker(tell, *TIF_WORD_STRUCT.unpack_from(file.read(TIF_WORD_STRUCT.size)))
+        tif_bytes = file.read(TIF_WORD_STRUCT.size)
+        if len(tif_bytes) < TIF_WORD_STRUCT.size:
+            # Premature EOF, just handle it silently.
+            yield TifMarkedBytes(tell, TifType.END_FILE, b'')
+            break
+        tif = TifMarker(tell, *TIF_WORD_STRUCT.unpack_from(tif_bytes))
         # print(tif, tif_prev)
         if tif_prev:
             if tif.tell != tif_prev.next:
@@ -340,17 +361,17 @@ def yield_tif_blocks(file: typing.BinaryIO) -> typing.Sequence[TifMarkedBytes]:
                 raise ExceptionTotalDepthBIT_TIF(f'First TIF marker is wrong: {tif}')
         byt = file.read(tif.payload_length)
         # Protect file position in case the caller messes with it.
-        tell = file.tell()
+        pre_yield_tell = file.tell()
         if tif.type == 0:
-            yield TifMarkedBytes(TifType.DATA, byt)
+            yield TifMarkedBytes(tell, TifType.DATA, byt)
         else:
             if tif_prev.type != 0:
-                yield TifMarkedBytes(TifType.END_FILE, byt)
+                yield TifMarkedBytes(tell, TifType.END_FILE, byt)
                 break
-            yield TifMarkedBytes(TifType.END_LOG_PASS, byt)
+            yield TifMarkedBytes(tell, TifType.END_LOG_PASS, byt)
         tif_prev = tif
         # Reset the file position if the caller has messed with it.
-        file.seek(tell)
+        file.seek(pre_yield_tell)
 
 
 class LogPassRange(typing.NamedTuple):
@@ -376,15 +397,20 @@ def read_bytes_from_offset(b: bytes, count: int, offset: int) -> typing.Tuple[by
 
         result, offset = read_bytes_from_offset(b, count, offset)
     """
+    if len(b) < offset + count:
+        raise ValueError(f'Can not read {count} bytes from offset {offset} when byte length is {len(b)}')
     return b[offset:offset + count], offset + count
 
 
 class BITFrameArray:
     """Represents a Log Pass from a BIT file.
-    This has a number of fields, some are BIT specific but self.frame_array is a LogPass.FrameArray.
+    This has a number of fields, some are BIT specific but ``self.frame_array`` is a
+    :py:class:`TotalDepth.common.LogPass.FrameArray`.
     """
-    def __init__(self, ident: str, block: bytes):
-        """Example initial block, length 0x114, 276 bytes::
+    def __init__(self, ident: str, tif_block: TifMarkedBytes):
+        """Example initial block, length 0x114, 276 bytes:
+
+        .. code-block:: console
 
             0000000c: 0002 0000 5348 454c 4c20 4558 5052 4f20  ....SHELL EXPRO
             0000001c: 552e 4b2e 2020 2020 2020 3234 204f 4354  U.K.      24 OCT
@@ -407,6 +433,7 @@ class BITFrameArray:
         """
         self.ident = ident
         offset = 0
+        block: bytes = tif_block.payload
         # self.unknown_head = block[offset:offset + 4]
         # offset += 4
         self.unknown_head, offset = read_bytes_from_offset(block, 4, offset)
@@ -441,32 +468,33 @@ class BITFrameArray:
         self.unknown_c, offset = read_bytes_from_offset(block, 8, offset)
         assert offset == 160 + 4
 
-        count = struct.unpack('>h', block[offset:offset + 2])[0]
+        count = struct.unpack('>H', block[offset:offset + 2])[0]
         if count > 20:
-            raise ValueError(f'Channel count must be <= 20 not {count}')
+            raise ExceptionTotalDepthBITFirstBlock(
+                f'BITFrameArray: Channel count must be <= 20 not {count} TIF tell 0x{tif_block.tell}'
+            )
         offset += 2
-        null = struct.unpack('>h', block[offset:offset + 2])[0]
+        null = struct.unpack('>H', block[offset:offset + 2])[0]
         if null != 0:
-            raise ValueError(f'Expected null at 0x{offset:x} but got {null}')
+            logger.warning(
+                f'BITFrameArray: Expected null at offset 0x{offset:x} but got value 0x{null:x}'
+                f' TIF tell 0x{tif_block.tell}'
+            )
         offset += 2
         self.channel_names: typing.List[str] = []
         for i in range(count):
-            # self.channel_names.append(block[offset:offset + 4].decode('ascii'))
-            # offset += 4
             name, offset = read_bytes_from_offset(block, 4, offset)
             self.channel_names.append(name.decode('ascii'))
         # Unused channels
         offset += 4 * (20 - count)
         _temp: typing.List[float] = []
         for i in range(5):
-            # _temp.append(bytes_to_float(block[offset:]))
-            # offset += 4
             value, offset = read_bytes_from_offset(block, 4, offset)
             _temp.append(bytes_to_float(value))
         self.bit_log_pass_range = LogPassRange(*_temp)
         self.unknown_tail = block[offset:]
         self.frame_count = 0
-        self._temporary_frames: typing.List[typing.List[float]] = [list() for c in self. channel_names]
+        self._temporary_frames: typing.List[typing.List[float]] = [list() for c in self.channel_names]
         self.frame_array: typing.Optional[LogPass.FrameArray] = None
 
     def long_str(self) -> str:
@@ -494,16 +522,34 @@ class BITFrameArray:
 
     def add_block(self, block: bytes) -> None:
         """Adds a data block of frame data to my temporary data structure(s)."""
-        if len(block) % self.len_channels:
-            raise ExceptionTotalDepthBITDataBlocks(
-                f'The block length {len(block)} does not have equal data for the channels {self.len_channels}.'
-            )
-        num_frames = len(block) // (LEN_FLOAT_BYTES * self.len_channels)
-        for i, value in enumerate(gen_floats(block)):
-            # Note: frame_number = i % num_frames
-            channel_number = i // num_frames
-            self._temporary_frames[channel_number].append(value)
-        self.frame_count += num_frames
+        if self.len_channels == 0:
+            logger.warning(f'Ignoring block of length {len(block)} when no channels.')
+        else:
+            assert len(self.channel_names) == len(self._temporary_frames), f'{len(self.channel_names)} != {len(self._temporary_frames)}'
+            if len(block) % self.len_channels:
+                raise ExceptionTotalDepthBITDataBlocks(
+                    f'The block length {len(block)} does not have equal data for the channels {self.len_channels}.'
+                )
+            num_frames = len(block) // (LEN_FLOAT_BYTES * self.len_channels)
+            remainder_bytes = len(block) - (LEN_FLOAT_BYTES * num_frames * self.len_channels)
+            # if len(block) % (LEN_FLOAT_BYTES * self.len_channels):
+            if remainder_bytes:
+                logger.warning(
+                    f'Frame mismatch, byte_len={len(block)} channels={self.len_channels} num_frames={num_frames}'
+                    f' Remaining bytes={remainder_bytes} ignored values={remainder_bytes / LEN_FLOAT_BYTES}'
+                )
+            for i, value in enumerate(gen_floats(block)):
+                if i >= num_frames * self.len_channels:
+                    logger.warning(
+                        f'Ignoring surplus values. Remaining bytes={remainder_bytes}'
+                        f' ignored values={remainder_bytes / LEN_FLOAT_BYTES}'
+                    )
+                    break
+                # Note: frame_number = i % num_frames
+                channel_number = i // num_frames
+                assert channel_number < len(self._temporary_frames), f'{channel_number} >= {len(self._temporary_frames)} byte len={len(block)} i={i} channels={self.len_channels} num_frames={num_frames}'
+                self._temporary_frames[channel_number].append(value)
+            self.frame_count += num_frames
 
     def complete(self) -> None:
         """Converts the existing frame data to a LogPass.FrameArray.
@@ -513,7 +559,7 @@ class BITFrameArray:
             assert len(self.channel_names) == len(self._temporary_frames)
             self.frame_array = LogPass.FrameArray(self.ident, self.description)
             # Compute X axis
-            x_channel = LogPass.FrameChannel(b'DEPT', 'Computed Depth', b'', (1,), np.float64)
+            x_channel = LogPass.FrameChannel('X   ', 'Computed X-axis', b'', (1,), np.float64)
             x_channel.init_array(self.frame_count)
             x_value = self.bit_log_pass_range.depth_from
             for i in range(self.frame_count):
@@ -535,103 +581,187 @@ class BITFrameArray:
 
 
 def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFrameArray]:
-    """Given a file this returns a list of BITFrameArray objects.
-    """
+    """Given a file this returns a list of BITFrameArray objects."""
     log_pass = []
-    frame_array = None
+    bit_frame_array: typing.Optional[BITFrameArray] = None
     for tif_block in yield_tif_blocks(file):
         if tif_block.tif_type == TifType.END_FILE:
             break
-        if frame_array is None:
-            assert tif_block.tif_type == TifType.DATA
-            frame_array = BITFrameArray(f'{len(log_pass)}', tif_block.payload)
+        if bit_frame_array is None:
+            if tif_block.tif_type == TifType.END_LOG_PASS:
+                logger.warning(f'Ignoring out of place TifType.END_LOG_PASS TIF tell 0x{tif_block.tell:x}')
+                continue
+            if tif_block.tif_type != TifType.DATA:
+                raise ExceptionTotalDepthBITDataBlocks(f'TIF block {tif_block.tif_type} != TIF DATA {TifType.DATA}')
+            # assert tif_block.tif_type == TifType.DATA, f'{tif_block.tif_type} != {TifType.DATA}'
+            bit_frame_array = BITFrameArray(f'{len(log_pass)}', tif_block)
         else:
             if tif_block.tif_type == TifType.DATA:
                 try:
-                    frame_array.add_block(tif_block.payload)
+                    bit_frame_array.add_block(tif_block.payload)
                 except ExceptionTotalDepthBITDataBlocks as err:
-                    logger.error(f'{str(err)} at tell={file.tell()}')
+                    logger.warning(f'{str(err)} at tell={file.tell()}. Ignoring rest of file.')
                     break
             elif tif_block.tif_type == TifType.END_LOG_PASS:
-                frame_array.complete()
-                log_pass.append(frame_array)
-                frame_array = None
+                bit_frame_array.complete()
+                log_pass.append(bit_frame_array)
+                bit_frame_array = None
     # If there is an exception frame_array may be non-None.
-    if frame_array is not None:
-        frame_array.complete()
-        log_pass.append(frame_array)
+    if bit_frame_array is not None:
+        bit_frame_array.complete()
+        log_pass.append(bit_frame_array)
     return log_pass
 
 
-def create_bit_frame_array_from_path(file_path: str) -> typing.List[BITFrameArray]:
+def create_bit_frame_array_from_path(file_path: str) -> typing.List[BITFrameArray]:  # pragma: no cover
+    """Given a file path this returns a list of BITFrameArray objects or raises."""
     with open(file_path, 'rb') as file:
         ret = create_bit_frame_array_from_file(file)
     return ret
 
 
-def print_process_file(file_path: str) -> None:
-    print(f'File size: {os.path.getsize(file_path):d} 0x{os.path.getsize(file_path):x}: {file_path} ')
-    log_pass = create_bit_frame_array_from_path(file_path)
-    for array in log_pass:
-        print(array.long_str())
+class FileSizeTime(typing.NamedTuple):  # pragma: no cover
+    name: str
+    size: int
+    time: float
+
+    def __str__(self):
+        return f'{self.size:12d} {self.time:12.3f} {self.time * 1000 / (self.size / 1024**2):12.3f} {self.name}'
 
 
-def print_process_directory(directory: str, recursive: bool) -> None:
+def print_summarise_frame_array(frame_array: BITFrameArray) -> None:
+    """Summarise all the channels in the Frame Array."""
+    print(
+        f'{"ID":4}',
+        f'{"Length":>6}',
+        f'{"Shape":>14}',
+        f'{"Count":>6}',
+        f'{"Min":>12}',
+        f'{"Max":>12}',
+        f'{"Mean":>12}',
+        f'{"Std.Dev.":>12}',
+        f'{"Median":>12}',
+        f'{"Equal":>6}',
+        f'{"Inc.":>6}',
+        f'{"Dec.":>6}',
+        f'{"Activity":>12}',
+        f'{"Drift":>12}',
+        f'{"First":>12}',
+        f'->',
+        f'{"Last":>12}',
+    )
+    for channel in frame_array.frame_array.channels:
+        summary = np_summary.summarise_array(channel.array)
+        # print(summary)
+        if summary is None:
+            print(f'{channel.ident:4} No Summary.')
+        else:
+            print(
+                f'{channel.ident:4}',
+                f'{summary.len:>6d}',
+                f'{str(summary.shape):>14}',
+                f'{summary.count:>6d}',
+                f'{summary.min:>12g}',
+                f'{summary.max:>12g}',
+                f'{summary.mean:>12g}',
+                f'{summary.std:>12g}',
+                f'{summary.median:>12g}',
+                f'{summary.count_eq:>6d}',
+                f'{summary.count_inc:>6d}',
+                f'{summary.count_dec:>6d}',
+                f'{summary.activity:>12g}',
+                f'{summary.drift:>12g}',
+                f'{channel.array[0][0]:12g}',
+                f'->',
+                f'{channel.array[-1][0]:12g}',
+            )
+
+
+def print_process_file(file_path: str, verbose: int, summary: bool) -> FileSizeTime:  # pragma: no cover
+    """Process a BIT file and print out a summary."""
+    logger.info(f'Processing: {file_path} ')
+    t_start = time.perf_counter()
+    frame_arrays = create_bit_frame_array_from_path(file_path)
+    if verbose:
+        print(f'File size: {os.path.getsize(file_path):d} 0x{os.path.getsize(file_path):x}: {file_path} ')
+        print(f' {os.path.basename(file_path)} '.center(75, '='))
+        for i, frame_array in enumerate(frame_arrays):
+            print(f' Frame Array [{i}] '.center(75, '-'))
+            print(frame_array.long_str())
+            if summary:
+                if frame_array.frame_array is None:
+                    print('No summary as no Frame Array initialised.')
+                else:
+                    print_summarise_frame_array(frame_array)
+            print(f' DONE: Frame Array [{i}] '.center(75, '-'))
+        print(f' DONE {os.path.basename(file_path)} '.center(75, '='))
+    return FileSizeTime(file_path, os.path.getsize(file_path), time.perf_counter() - t_start)
+
+
+def print_process_directory(directory: str,
+                            recursive: bool,
+                            verbose: int,
+                            summary: bool) -> typing.Dict[str, FileSizeTime]:  # pragma: no cover
+    """Processes a complete directory for BIT files."""
+    ret = {}
+    count_error = 0
+    error_files = []
     for file_in_out in DirWalk.dirWalk(directory, theFnMatch='', recursive=recursive, bigFirst=False):
-        try:
-            print_process_file(file_in_out.filePathIn)
-        except Exception as err:
-            print(f'ERROR: type={type(err)} value={err}')
+        if is_bit_file_from_path(file_in_out.filePathIn):
+            try:
+                result = print_process_file(file_in_out.filePathIn, verbose, summary)
+                ret[file_in_out.filePathIn] = result
+            except Exception as err:
+                logger.error(f'ERROR: in {file_in_out.filePathIn} {err}')
+                count_error += 1
+                error_files.append(file_in_out.filePathIn)
+    logger.info(f'Count of success={len(ret)} errors={count_error}')
+    if len(error_files):
+        logger.info(' Error files '.center(75, '-'))
+        for file in error_files:
+            logger.info(file)
+        logger.info(' DONE Error files '.center(75, '-'))
+    return ret
 
 
-
-
-DEFAULT_OPT_LOG_FORMAT_VERBOSE = (
-    '%(asctime)s - %(filename)24s#%(lineno)-4d - %(process)5d - (%(threadName)-10s) - %(levelname)-8s - %(message)s'
-)
-
-
-def main() -> int:
-    logging.basicConfig(level=logging.INFO, format=DEFAULT_OPT_LOG_FORMAT_VERBOSE, stream=sys.stdout)
-
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644802.bit'
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644822.bit'
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644825.bit'
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/30_07a-_1/DWL_FILE/30_07a-_1_dwl_DWL_WIRE_1644826.bit'
-    # # Smallest at 9kb
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_17-_12/DWL_FILE/15_17-_12_dwl__1646505.bit'
-    # # 12kb
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/21_25-B1/DWL_FILE/21_25-B1_dwl_DWL_WIRE_1644592.bit'
-    # # 6Mb
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/456728/15_10-_1/DWL_FILE/15_10-_1_dwl__1645815.bit'
-
-    # Has LIS file
-    # -rw-r--r--  1 paulross  staff  1004032 30 Jan 14:57 data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit
-    # -rw-r--r--  1 paulross  staff   513536 30 Jan 14:57 data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646636.bit
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit'
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646636.bit'
-
-    example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit'
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644660.bit'
-    # 30_07a-_1_dwl_DWL_WIRE_1644802.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644822.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644823.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644825.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644826.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644827.bit
-    # 30_07a-_1_dwl_DWL_WIRE_1644828.bit
-
-    # print_process_file(example)
-
-    # example = '/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT/special/29_10-_3/DWL_FILE/29_10-_3_dwl_DWL_WIRE_1646632.bit'
-
-
-    print_process_file(example)
-
-    # print_process_directory('/Users/paulross/PycharmProjects/TotalDepth/data/DresserAtlasBIT', True)
-
+def main() -> int:  # pragma: no cover
+    """Main entry point."""
+    description = """usage: %(prog)s [options] file
+Scans a file or directory for BIT files and summarises them."""
+    print('Cmd: %s' % ' '.join(sys.argv))
+    parser = cmn_cmd_opts.path_in(
+        description, prog='TotalDepth.BIT.ReadBIT.main', version=__version__, epilog=__rights__
+    )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    parser.add_argument("--summary", action="store_true", default=False,
+                        help="Display summary of channel data. [default: %(default)s]")
+    args = parser.parse_args()
+    # print('args:', args)
+    # return 0
+    cmn_cmd_opts.set_log_level(args)
+    clk_start = time.perf_counter()
+    # Your code here
+    if os.path.isfile(args.path_in):
+        result = print_process_file(args.path_in, args.verbose, args.summary)
+        print(f'Result: {result}')
+    else:
+        result = print_process_directory(args.path_in, args.recurse, args.verbose, args.summary)
+        print(f'{"Size":>12} {"Time (s)":>12} {"Rate (ms/Mb)":>12} {"File":<12}')
+        total_size = total_time = 0
+        for key in sorted(result.keys()):
+            print(f'{result[key]}')
+            total_size += result[key].size
+            total_time += result[key].time
+        print(f'Total size {total_size} bytes, total time {total_time:.3f} (s)')
+        if total_size and total_time:
+            print(f'Rate {total_time * 1000 / (total_size / 1024**2):.3f} (ms/MB) {total_size / total_time / 1024**2:.3f} Mb/s')
+    if args.verbose == 0:
+        print('Use -v, --verbose to see more information about each BIT file.')
+    clk_exec = time.perf_counter() - clk_start
+    print('Execution time = %8.3f (S)' % clk_exec)
+    print('Bye, bye!')
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())

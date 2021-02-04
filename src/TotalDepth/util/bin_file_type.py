@@ -119,6 +119,18 @@ def _lis(fobj: typing.BinaryIO) -> str:
 TIF_LEN_REQUIRED_BYTES = 3 * 4
 
 
+def _tif_third_word(by: bytes) -> int:
+    """Return the third word in the TIF marker."""
+    assert len(by) >= TIF_LEN_REQUIRED_BYTES, \
+        f'_tif_third_word_normal(): needs at least {TIF_LEN_REQUIRED_BYTES} bytes not {len(by):d}'
+    # Try the third word for being reversed
+    third_word = by[8:TIF_LEN_REQUIRED_BYTES]
+    ret = struct.unpack_from('<I', third_word)[0]
+    if ret > 0xffff:
+        return struct.unpack_from('>I', third_word)[0]
+    return ret
+
+
 def _tif_third_word_normal(by: bytes) -> bool:
     """Return True if the third word in the TIF marker is normal (little endian) else False if reversed."""
     assert len(by) >= TIF_LEN_REQUIRED_BYTES, \
@@ -461,16 +473,26 @@ def _pds(fobj: typing.BinaryIO) -> str:
 def _bit(fobj: typing.BinaryIO) -> str:
     """Returns 'BIT' if the magic number is looks like a Western Atlas BIT file, '' otherwise."""
     fobj.seek(0)
-    r = fobj.read(12)
-    # print('TRACE:', r)
-    if r[:8] == (
-            b'\x00\x00'
-            b'\x00\x00'
-            b'\x00\x00'
-            b'\x00\x00'
-    ) and r[8] in ASCII_PRINTABLE_BYTES and r[9] in (0, 1) and r[10:] == b'\x00\x00':
-        return 'BIT'
-    return ''
+    byt = fobj.read(12)
+    if len(byt) < 12:
+        return ''
+    if _tif_initial(byt) == '':
+        return ''
+    if _tif_third_word(byt) != 0x120:
+        return ''
+    byt = fobj.read(0x114)
+    if len(byt) != 0x114:
+        return ''
+    return 'BIT'
+    # # print('TRACE:', r)
+    # if byt[:8] == (
+    #         b'\x00\x00'
+    #         b'\x00\x00'
+    #         b'\x00\x00'
+    #         b'\x00\x00'
+    # ) and byt[8] in ASCII_PRINTABLE_BYTES and byt[9] in (0, 1) and byt[10:] == b'\x00\x00':
+    #     return 'BIT'
+    # return ''
 
 
 #: Ordered so that more specific files are earlier in the list, more general ones later.

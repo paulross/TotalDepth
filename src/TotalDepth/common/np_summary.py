@@ -104,7 +104,7 @@ def activity(array: np.array, flatten: bool = True) -> float:
 
 
 def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
-    """Take an array and summarise it."""
+    """Take an array and summary it."""
     if flatten:
         array = array.flatten()
     len_array = functools.reduce(lambda x, y: x * y, array.shape, 1)

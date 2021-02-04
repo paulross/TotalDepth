@@ -282,7 +282,7 @@ def analyse_archive(files: typing.List[FileBase],
     file_ext_counter = collections.Counter([os.path.splitext(file.path)[1] for file in uncatalogued_files])
     for k in sorted(file_ext_counter.keys()):
         print(f'{k:12} : {file_ext_counter[k]:6d}')
-    print('File size and path of uncatalogued files:')
+    print(f'File size and path of uncatalogued files [{len(uncatalogued_files)}]:')
     for file in uncatalogued_files:
         print(f'{file.size:12,d} {file.path[common_prefix_len:]}')
 

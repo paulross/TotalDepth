@@ -62,6 +62,8 @@ entry_points_console_scripts_dict = {
     'tdrp66v1logrecindex': 'TotalDepth.RP66V1.LogRecIndex:main',
     'tdrp66v1indexpickle': 'TotalDepth.RP66V1.IndexPickle:main',
     'tdrp66v1indexxml': 'TotalDepth.RP66V1.IndexXML:main',
+    # BIT
+    'tdbitread': 'TotalDepth.BIT.ReadBIT:main',
 }
 
 ENTRY_POINTS_CONSOLE_SCRIPTS = [

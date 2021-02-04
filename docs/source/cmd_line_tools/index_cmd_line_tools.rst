@@ -14,5 +14,6 @@ All the command line tools start with ``td``.
     :maxdepth: 2
    
     TD_cmd_line_tools
+    BIT_cmd_line_tools
     LIS_cmd_line_tools
     RP66V1_cmd_line_tools

@@ -10,15 +10,25 @@ import pytest
 import TotalDepth
 
 
+def test_tmdir_fixture(tmpdir):
+    print(tmpdir)
+    print(dir(tmpdir))
+    assert os.path.isdir(tmpdir)
+
+
 TOTAL_DEPTH_SOURCE_ROOT = os.path.dirname(TotalDepth.__file__)
 
 EXAMPLE_DATA_DIRECTORY = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data')
 
-EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data', 'LIS', )
-
-
 def test_example_data_directory_exists():
     assert os.path.isdir(EXAMPLE_DATA_DIRECTORY)
+
+
+EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LIS', 'data',)
+
+
+def test_lis_example_data_directory_lis_exists():
+    assert os.path.isdir(EXAMPLE_DATA_DIRECTORY_LIS)
 
 
 @pytest.mark.slow
@@ -124,7 +134,11 @@ def test_tdcopybinfiles_no_paths(args):
 
 
 # ================ LIS ==================
-LIS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LIS', 'data', 'DILLSON-1_WELL_LOGS_FILE-049.LIS')
+LIS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY_LIS, 'DILLSON-1_WELL_LOGS_FILE-049.LIS')
+
+
+def test_lis_basic_file_exists():
+    assert os.path.isfile(LIS_BASIC_FILE)
 
 
 @pytest.mark.slow
@@ -188,11 +202,19 @@ def test_tdlistolas_gnuplot(tmpdir):
 
 
 #======================== RP66V1 ==================
-RP66V1_DATA_DIR = [
-    os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data')
-]
+RP66V1_DATA_DIR = os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data')
+
+
+def test_rp66v1_example_data_directory_exists():
+    assert os.path.isdir(RP66V1_DATA_DIR)
+
 
 RP66V1_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', 'BASIC_FILE.dlis')
+
+
+def test_rp66v1_example_file_exists():
+    assert os.path.isfile(RP66V1_BASIC_FILE)
+
 
 RP66V1_FILES = [
     os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS'),
@@ -452,7 +474,49 @@ def test_rp66v1_scan_ff01():
 
 #======================== END: RP66V1 ==================
 
-def test(tmpdir):
-    print(tmpdir)
-    print(dir(tmpdir))
-    assert 1
+
+#======================== END: BIT ==================
+
+EXAMPLE_DATA_DIRECTORY_BIT = os.path.join(
+    TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data', 'BIT', 'data',
+)
+
+def test_example_data_directory_bit_exists():
+    assert os.path.isdir(EXAMPLE_DATA_DIRECTORY_BIT)
+
+
+EXAMPLE_DATA_FILE_BIT = os.path.join(EXAMPLE_DATA_DIRECTORY_BIT, '29_10-_3Z_dwl_DWL_WIRE_1644659.bit')
+
+
+def test_example_data_file_bit_exists():
+    assert os.path.isfile(EXAMPLE_DATA_FILE_BIT)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-v'],
+        ['-r', '-v', '--summary'],
+    )
+)
+def test_tdbitread_dir(args):
+    subprocess.check_call(['tdbitread',] + args + [EXAMPLE_DATA_DIRECTORY_BIT])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-v'],
+        ['-r', '-v', '--summary'],
+    )
+)
+def test_tdbitread_file(args):
+    subprocess.check_call(['tdbitread',] + args + [EXAMPLE_DATA_FILE_BIT])
+
+#======================== END: BIT ==================

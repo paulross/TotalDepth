@@ -11,6 +11,7 @@ Contents:
     
     detif
     plotlogs
+    BIT/index_BIT
     LAS/index_LAS
     LIS/index_LIS
     RP66V1/index_RP66V1

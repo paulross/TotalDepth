@@ -40,6 +40,18 @@ def test_isingl_bytes_to_float(float_value, bytes_value):
     assert math.isclose(result, float_value, rel_tol=1e-7)
 
 
+@pytest.mark.parametrize(
+    'bytes_value, expected',
+    (
+            (b'', "Need at least 4 bytes not b''."),
+    )
+)
+def test_bytes_to_float_raises(bytes_value, expected):
+    with pytest.raises(ValueError) as err:
+        ReadBIT.bytes_to_float(bytes_value)
+    assert err.value.args[0] == expected
+
+
 def test_binary_data_end():
     tell = 0x128
     tell += 4
@@ -365,15 +377,70 @@ EXAMPLE_BIT_FILE = (
 )
 
 
-def test_read_description_from_file():
+def test_is_bit_file():
     with io.BytesIO(EXAMPLE_BIT_FILE) as file:
-        result = ReadBIT.read_description_from_file(file)
-        assert result == (
-            'OCCIDENTAL PETROLEUM                                                    '
-            '\x00\x02\x00\x06\x00U  '
-            '15/17-12                                                                '
-            '\x00\x07\x00\x17\x008  '
-        )
+        assert ReadBIT.is_bit_file(file)
+
+
+def test_create_bit_frame_array_from_file_has_one_log_pass():
+    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
+        frame_array = ReadBIT.create_bit_frame_array_from_file(file)
+        assert len(frame_array) == 1
+
+
+def test_create_bit_frame_array_from_file_temporary_frames_empty():
+    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
+        frame_array = ReadBIT.create_bit_frame_array_from_file(file)
+        assert frame_array[0]._temporary_frames == []
+
+
+@pytest.mark.parametrize(
+    'attribute, expected',
+    (
+        ('description', b'OCCIDENTAL PETROLEUM                                                    '),
+        ('channel_names',
+         ['SSN ', 'LSN ', 'SSD ', 'LSD ', 'CAL ', 'TEN ', 'SPD ', 'THZ ', 'UZ  ', 'KZ  ', 'GR  ', 'DEN ', 'CORR',
+          'CN  ', 'TH  ', 'U   ', 'K   ']),
+        ('frame_count', 128),
+        ('ident', '0'),
+        ('len_channels', 17),
+        ('unknown_b', b'U  15/17-12                                                                '),
+    )
+)
+def test_create_bit_frame_array_from_file_attributes(attribute, expected):
+    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
+        frame_array = ReadBIT.create_bit_frame_array_from_file(file)
+        # print(frame_array)
+        assert hasattr(frame_array[0], attribute)
+        assert getattr(frame_array[0], attribute) == expected
+
+
+@pytest.mark.parametrize(
+    'attribute, expected',
+    (
+        ('depth_from', 11916.0),
+        ('depth_to', 0.0),
+        ('spacing', 0.25),
+        ('unknown_a', 0.0),
+        ('unknown_b', 32.0),
+        ('frames', 47665),
+        ('is_increasing', False),
+    )
+)
+def test_create_bit_frame_array_from_file_bit_log_pass_range(attribute, expected):
+    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
+        frame_array = ReadBIT.create_bit_frame_array_from_file(file)
+        # print(frame_array)
+        assert hasattr(frame_array[0].bit_log_pass_range, attribute)
+        assert math.isclose(getattr(frame_array[0].bit_log_pass_range, attribute), expected, rel_tol=1e-7)
+
+
+def test_create_bit_frame_array_from_file_long_str():
+    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
+        frame_array = ReadBIT.create_bit_frame_array_from_file(file)
+        # print()
+        # print(frame_array[0].long_str())
+        assert frame_array[0].long_str().startswith('BITFrameArray: ident="0"')
 
 
 @pytest.mark.parametrize(
@@ -391,19 +458,3 @@ def test_floats_at_offset(offset, expected_value):
         file.seek(offset)
         result = ReadBIT.read_float(file)
         assert math.isclose(result, expected_value, rel_tol=1e-7)
-
-
-def test_number_of_channels():
-    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
-        result = ReadBIT.number_of_channels(file)
-        assert result == 0x11
-
-
-def test_read_channels_from_file():
-    with io.BytesIO(EXAMPLE_BIT_FILE) as file:
-        result = ReadBIT.read_channels_from_file(file)
-        print(result)
-        assert result == [
-            'SSN ', 'LSN ', 'SSD ', 'LSD ', 'CAL ', 'TEN ', 'SPD ', 'THZ ', 'UZ  ', 'KZ  ', 'GR  ', 'DEN ', 'CORR',
-            'CN  ', 'TH  ', 'U   ', 'K   '
-        ]

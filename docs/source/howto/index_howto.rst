@@ -13,6 +13,7 @@ This describes how TotalDepth can help you with various tasks when dealing with 
     :maxdepth: 3
     
     archive
+    bit_archive
     las_archive
     lis_archive
     rp66v1_archive

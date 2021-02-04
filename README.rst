@@ -24,7 +24,7 @@ Petrophysical software capable of processing wireline logs.
 Features
 --------
 
-* Reads LIS, LAS (1.2, 2.0), RP66V1 (DLIS) file formats for analysis or conversion to other formats.
+* Reads LIS, LAS (1.2, 2.0), RP66V1 (DLIS), Western Atlas BIT, and DAT Mud Log file formats for analysis or conversion to other formats.
 * Creates Numpy arrays of log data.
 * Plots log data as SVG viewable in any modern browser.
 * Plots can be made with a wide variety of plot formats.
