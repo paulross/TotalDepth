@@ -1929,7 +1929,7 @@ class TestLogPass_Type0_Base(BaseTestClasses.TestBaseLogPass):
     def _iterateUsingValue(self, theFs):
         retCount = 0
         #print('_iterateUsingValue()', theFs.numFrames, theFs.numChannels)
-        for fr in range(theFs.number_of_frames):
+        for fr in range(theFs.numFrames):
             for ch in range(theFs.numChannels):
                 for sc in range(theFs.numSubChannels(ch)):
                     for sa in range(theFs.numSamples(ch, sc)):

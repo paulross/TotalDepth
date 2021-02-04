@@ -460,11 +460,11 @@ class DictTreeHtmlTable(DictTree):
         At the start of the a <tr> there will be a ROW_OPEN
         and at row end (</tr>) a ROW_CLOSE will be yielded
         """
-        print('TRACE: XX key_branch', key_branch)
+        # print('TRACE: XX key_branch', key_branch)
         # Find the sub-tree from the key_branch
         sub_tree = self
         for key in key_branch:
-            print('TRACE: XX sub_tree.internal_tree', sub_tree.internal_tree.keys())
+            # print('TRACE: XX sub_tree.internal_tree', sub_tree.internal_tree.keys())
             sub_tree = sub_tree.internal_tree[key]
         # yield the events from the sub-tree.
         has_yielded = False

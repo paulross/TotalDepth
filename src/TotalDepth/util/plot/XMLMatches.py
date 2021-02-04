@@ -50,5 +50,5 @@ def fileCurveMapFromFILM(theLpOrLasFile, theFilmCfg):
         except KeyError:
             pass
         else:
-            r[uid] = [anO for anO in outIdS if theLpOrLasFile.has_output_mnemonic(anO)]
+            r[uid] = [anO for anO in outIdS if theLpOrLasFile.hasOutpMnem(anO)]
     return r

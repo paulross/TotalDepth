@@ -627,7 +627,7 @@ class Plot(object):
         for anO in myOutS:
 #            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
             # If an output is in the LogPass we are good to go
-            if theLogPass.has_output_mnemonic(anO):
+            if theLogPass.hasOutpMnem(anO):
                 return True
         logging.info(
             'Plot.hasDataToPlotLIS():'
@@ -975,7 +975,7 @@ class Plot(object):
         Returns number of LIS bytes read."""
         # Load the FrameSet
         logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet...')
-        myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.has_output_mnemonic(m)]
+        myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.hasOutpMnem(m)]
         logging.info('Plot._loadFrameSet(): X axis from="{:s}" to="{:s}" frame step={:d}. Channel IDs[{:d}]:\n{:s}'.format(
                 str(theXStart),
                 str(theXStop),
@@ -1182,7 +1182,7 @@ class Plot(object):
                 # this curve
                 myTxt = '{:s}'.format(myCurvCfg.mnem.pStr(strip=True))
                 # Add units if present
-                myUnits = theLpData.curve_units_as_str(myCurvCfg.outp)
+                myUnits = theLpData.curveUnitsAsStr(myCurvCfg.outp)
                 assert(myUnits is not None), 'None returned for curve: "{!r:s}"'.format(myCurvCfg.outp)
                 if len(myUnits.strip()) > 0:
                     myTxt += ' [{!r:s}]'.format(myUnits)
@@ -1254,8 +1254,9 @@ class Plot(object):
         curvIdSet = set()
         for anO in self._retOutputChIDs(theFilmID):
             if self._presCfg.usesOutpChannel(theFilmID, anO):
+                print(type(theLp), dir(theLp))
                 if theLp is None \
-                or theLp.has_output_mnemonic(anO):
+                or theLp.hasOutpMnem(anO):
                     for cur in self._presCfg.outpCurveIDs(theFilmID, anO):
                         curvIdSet.add(cur)
                 else:
@@ -1298,7 +1299,7 @@ class Plot(object):
             logging.debug('Plot._plotCurves(): Plotting Output "{!r:s}"...'.format(anO))
             self._insertCommentInSVG(xS, ' Output {:s} START '.format(anO.pStr()), 1)
             if self._presCfg.usesOutpChannel(theFilmID, anO):
-                if theFrameHolder.has_output_mnemonic(anO):
+                if theFrameHolder.hasOutpMnem(anO):
                     c, n = self._plotSingleOutput(theFilmID, anO, theFrameHolder, thePlRo, xS)
                     curveS += c
                     numPoints += n
@@ -1319,7 +1320,7 @@ class Plot(object):
         """
         logging.info('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
         assert(self._presCfg.usesOutpChannel(theFilmID, theOutpID))
-        assert(theFrameHolder.has_output_mnemonic(theOutpID))
+        assert(theFrameHolder.hasOutpMnem(theOutpID))
         # Given an output ID select all curve IDs and iterate through their
         # X/v points and scale them accordingly; X by the X axis scale and v by
         # the tracValueFunction() and the track dimensions. Finally assemble
@@ -1333,9 +1334,9 @@ class Plot(object):
         numPoints = 0
         numMathErrors = 0
         if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
-        for x, v in theFrameHolder.gen_output_points(theOutpID):
+        for x, v in theFrameHolder.genOutpPoints(theOutpID):
             # If v is a null or absent value then flush the buffer and start again
-            if v == theFrameHolder.null_value:
+            if v == theFrameHolder.nullValue:
                 for cuPlot in myCurvPlotS:
                     self._flushPolyLineBuffer(cuPlot, xS)
                 continue
@@ -1364,11 +1365,11 @@ class Plot(object):
                             pt,
                             myCuPlot.prevWrap,
                             wr,
-                            theFrameHolder.x_axis_units,
+                            theFrameHolder.xAxisUnits,
                         )
                     if not myCuPlot.fn.offScale(wr):
                         # Add to the buffer
-                        myCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(x, theFrameHolder.x_axis_units), pt))
+                        myCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(x, theFrameHolder.xAxisUnits), pt))
                     myCuPlot.prevWrap = wr
                     ptPrevS[cuIdx] = pt
             xPrev = x

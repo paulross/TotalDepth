@@ -177,10 +177,10 @@ class IndexHTML:
         for path, args in self.index.items():
             local_path_parts = self.remove_common_path(path).split(os.sep)
             dict_tree.add(local_path_parts, args)
-        print()
-        print('TRACE: dict_tree.indented_string()')
-        print(dict_tree.indented_string())
-        print()
+        # print()
+        # print('TRACE: dict_tree.indented_string()')
+        # print(dict_tree.indented_string())
+        # print()
         indexes: typing.List[str] = []
         self._write_indexes(dict_tree, [], create_intermediate, class_style, css, indexes)
         return indexes
@@ -255,7 +255,7 @@ class IndexHTML:
         Process the event which will result in a <tr>, </tr>, <td>, </td> element.
         This will recurse and create intermediate indexes if necessary.
         """
-        print('TRACE: YY branch', branch, 'event', event)
+        # print('TRACE: YY branch', branch, 'event', event)
         if dict_tree.is_row_open(event):
             index_xhtml_stream.startElement('tr', self.attr(class_style))
         elif dict_tree.is_row_close(event):
