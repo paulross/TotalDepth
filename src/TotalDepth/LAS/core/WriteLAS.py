@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import logging
 import multiprocessing
 import os
@@ -42,6 +43,104 @@ class LASWriteResult(typing.NamedTuple):
 LAS_DATETIME_FORMAT_UTC = '%Y-%m-%d %H:%M:%S.%f UTC'
 #: Format for time as text
 LAS_DATE_FORMAT_TEXT = 'YYYY-mm-dd HH MM SS.us UTC'
+
+# # RP66V1
+# def write_las_header(input_file: str,
+#                      logical_file: LogicalFile.LogicalFile,
+#                      logical_file_number: int,
+#                      frame_array_ident: str,
+#                      ostream: typing.TextIO) -> None:
+#     """Writes the LAS opening such as::
+#
+#         ~Version Information Section
+#         VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
+#         WRAP.           NO                            : One Line per depth step
+#         PROD.           TotalDepth                    : LAS Producer
+#         PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
+#         CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
+#         DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hhmm]
+#         SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
+#         FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
+#         LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+#         FRAME-ARRAY.    60B                           : Identity of the Frame Array in the Logical File
+#
+#     Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
+#     """
+#     now = datetime.datetime.utcnow()
+#     date_time = logical_file.defining_origin[b'CREATION-TIME'].value[0]
+#     dt = date_time.as_datetime()
+#     fhlr: EFLR.ExplicitlyFormattedLogicalRecord = logical_file.file_header_logical_record
+#     file_id = fhlr.objects[0][b'ID'].value[0].decode('ascii').strip()
+#     table: typing.List[typing.List[str]] = [
+#         ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
+#         ['WRAP.', 'NO', ': One Line per depth step'],
+#         ['PROD.', 'TotalDepth', ': LAS Producer'],
+#         ['PROG.', f'TotalDepth.RP66V1.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
+#         ['CREA.', f'{now.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'],
+#         ['SOURCE.', f'{os.path.basename(input_file)}', ': DLIS File Name'],
+#         ['FILE-ID.', f'{file_id}', ': File Identification Number'],
+#         [
+#             f'DLIS_CREA.',
+#             f'{dt.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': DLIS Creation date and time [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'
+#         ],
+#         ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the DLIS file'],
+#     ]
+#     if frame_array_ident:
+#         table.append(
+#             ['FRAME-ARRAY.', f'{frame_array_ident}', ': Identity of the Frame Array in the Logical File'],
+#         )
+#     write_table(table, '~Version Information Section', ostream)
+
+
+
+# LIS
+def write_las_header(input_file: str,
+                     logical_file_number: int,
+                     las_producer_program: str,
+                     las_producer_version: str,
+                     table_extend: typing.List[typing.List[str]],
+                     ostream: typing.TextIO,
+                     ) -> None:
+    """Writes the LAS opening such as::
+
+        ~Version Information Section
+        VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
+        WRAP.           NO                            : One Line per depth step
+        PROD.           TotalDepth                    : LAS Producer
+        PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
+        CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
+        SOURCE.         SOME-FILE-NAME.dlis           : LIS File Name
+        LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+
+    Or, with extensions:
+        ~Version Information Section
+        VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
+        WRAP.           NO                            : One Line per depth step
+        PROD.           TotalDepth                    : LAS Producer
+        PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
+        CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
+        DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hhmm]
+        SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
+        LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+        FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
+        FRAME-ARRAY.    60B                           : Identity of the Frame Array in the Logical File
+
+    Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
+    """
+    now = datetime.datetime.utcnow()
+    table: typing.List[typing.List[str]] = [
+        ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
+        ['WRAP.', 'NO', ': One Line per depth step'],
+        ['PROD.', 'TotalDepth', ': LAS Producer'],
+        ['PROG.', f'{las_producer_program} {las_producer_version}', ': LAS Program name and version'],
+        ['CREA.', f'{now.strftime(LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{LAS_DATE_FORMAT_TEXT}]'],
+        ['SOURCE.', f'{os.path.basename(input_file)}', ': LIS File Name'],
+        ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the LIS file'],
+    ]
+    table.extend(table_extend)
+    write_table(table, '~Version Information Section', ostream)
+
+
 
 
 class UnitValueDescription(typing.NamedTuple):

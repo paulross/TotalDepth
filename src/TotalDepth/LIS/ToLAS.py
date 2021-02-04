@@ -48,37 +48,6 @@ logger = logging.getLogger(__file__)
 LAS_PRODUCER_VERSION = '0.1.1'
 
 
-def write_las_header(input_file: str,
-                     # logical_file: LogicalFile.LogicalFile,
-                     logical_file_number: int,
-                     # frame_array_ident: str,
-                     ostream: typing.TextIO) -> None:
-    """Writes the LAS opening such as::
-
-        ~Version Information Section
-        VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
-        WRAP.           NO                            : One Line per depth step
-        PROD.           TotalDepth                    : LAS Producer
-        PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
-        CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
-        SOURCE.         SOME-FILE-NAME.dlis           : LIS File Name
-        LOGICAL-FILE.   3                             : Logical File number in the DLIS file
-
-    Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
-    """
-    now = datetime.datetime.utcnow()
-    table: typing.List[typing.List[str]] = [
-        ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
-        ['WRAP.', 'NO', ': One Line per depth step'],
-        ['PROD.', 'TotalDepth', ': LAS Producer'],
-        ['PROG.', f'TotalDepth.LIS.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
-        ['CREA.', f'{now.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'],
-        ['SOURCE.', f'{os.path.basename(input_file)}', ': LIS File Name'],
-        ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the LIS file'],
-    ]
-    WriteLAS.write_table(table, '~Version Information Section', ostream)
-
-
 class LisLogicalFile:
     """Contains a representation of a LIS Logical File which is a series of indexes followed by a Log Pass"""
     def __init__(self):
@@ -283,7 +252,8 @@ def write_las_file(path_in: str,
     logger.info(f'Writing to LAS {output_file}')
     with open(output_file, 'w') as out_stream:
         # Write the LAS header.
-        write_las_header(path_in, logical_file_index, out_stream)
+        WriteLAS.write_las_header(path_in, logical_file_index, 'TotalDepth.LIS.ToLAS', LAS_PRODUCER_VERSION, [],
+                                  out_stream)
         # Write the well information
         if lis_logical_file.last_log_pass:
             write_well_information_section(lis_logical_file, frame_slice, float_format, out_stream)

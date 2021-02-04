@@ -64,30 +64,23 @@ def write_las_header(input_file: str,
 
     Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
     """
-    now = datetime.datetime.utcnow()
     date_time = logical_file.defining_origin[b'CREATION-TIME'].value[0]
     dt = date_time.as_datetime()
     fhlr: EFLR.ExplicitlyFormattedLogicalRecord = logical_file.file_header_logical_record
     file_id = fhlr.objects[0][b'ID'].value[0].decode('ascii').strip()
-    table: typing.List[typing.List[str]] = [
-        ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
-        ['WRAP.', 'NO', ': One Line per depth step'],
-        ['PROD.', 'TotalDepth', ': LAS Producer'],
-        ['PROG.', f'TotalDepth.RP66V1.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
-        ['CREA.', f'{now.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'],
+    table_extend = [
         [
             f'DLIS_CREA.',
-            f'{dt.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': DLIS Creation date and time [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'
+            f'{dt.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}',
+            f': DLIS Creation date and time [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'
         ],
-        ['SOURCE.', f'{os.path.basename(input_file)}', ': DLIS File Name'],
         ['FILE-ID.', f'{file_id}', ': File Identification Number'],
-        ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the DLIS file'],
     ]
     if frame_array_ident:
-        table.append(
+        table_extend.append(
             ['FRAME-ARRAY.', f'{frame_array_ident}', ': Identity of the Frame Array in the Logical File'],
         )
-    WriteLAS.write_table(table, '~Version Information Section', ostream)
+    WriteLAS.write_las_header(input_file, logical_file_number, 'TotalDepth.RP66V1.ToLAS', LAS_PRODUCER_VERSION, table_extend, ostream)
 
 
 #: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic.
