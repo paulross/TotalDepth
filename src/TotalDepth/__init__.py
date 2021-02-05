@@ -64,6 +64,7 @@ entry_points_console_scripts_dict = {
     'tdrp66v1indexxml': 'TotalDepth.RP66V1.IndexXML:main',
     # BIT
     'tdbitread': 'TotalDepth.BIT.ReadBIT:main',
+    'tdbittolas': 'TotalDepth.BIT.ToLAS:main',
 }
 
 ENTRY_POINTS_CONSOLE_SCRIPTS = [

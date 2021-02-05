@@ -47,7 +47,7 @@ def write_las_header(input_file: str,
                      logical_file: LogicalFile.LogicalFile,
                      logical_file_number: int,
                      frame_array_ident: str,
-                     ostream: typing.TextIO) -> None:
+                     output_stream: typing.TextIO) -> None:
     """Writes the LAS opening such as::
 
         ~Version Information Section
@@ -80,7 +80,9 @@ def write_las_header(input_file: str,
         table_extend.append(
             ['FRAME-ARRAY.', f'{frame_array_ident}', ': Identity of the Frame Array in the Logical File'],
         )
-    WriteLAS.write_las_header(input_file, logical_file_number, 'TotalDepth.RP66V1.ToLAS', LAS_PRODUCER_VERSION, table_extend, ostream)
+    WriteLAS.write_las_header(
+        input_file, logical_file_number, 'TotalDepth.RP66V1.ToLAS', LAS_PRODUCER_VERSION, table_extend, output_stream
+    )
 
 
 #: Mapping of DLIS ``EFLR`` Type and Object Name to ``LAS WELL INFORMATION`` section and Mnemonic.
@@ -468,34 +470,11 @@ reset
 
 def main() -> int:
     """Main entry point."""
+    print('Cmd: %s' % ' '.join(sys.argv))
     description = """usage: %(prog)s [options] file
 Reads RP66V1 file(s) and writes them out as LAS files."""
-    print('Cmd: %s' % ' '.join(sys.argv))
-
-    parser = TotalDepth.common.cmn_cmd_opts.path_in_out(
-        description, prog='TotalDepth.RP66V1.ToLAS.main', version=__version__, epilog=__rights__
-    )
-    TotalDepth.common.cmn_cmd_opts.add_log_level(parser, level=20)
-    TotalDepth.common.cmn_cmd_opts.add_multiprocessing(parser)
-    TotalDepth.common.Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
-    TotalDepth.common.process.add_process_logger_to_argument_parser(parser)
-    gnuplot.add_gnuplot_to_argument_parser(parser)
-    parser.add_argument(
-        '--array-reduction', type=str,
-        help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
-        default='first',
-        choices=list(sorted(TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS)),
-        )
-    parser.add_argument(
-        '--channels', type=str,
-        help='Comma separated list of channels to write out (X axis is always included).'
-             ' Use \'?\' to see what channels exist without writing anything. [default: "%(default)s"]',
-        default='',
-        )
-    parser.add_argument('--field-width', type=int,
-                        help='Field width for array data [default: %(default)s].', default=16)
-    parser.add_argument('--float-format', type=str,
-                        help='Floating point format for array data [default: "%(default)s"].', default='.3f')
+    parser = WriteLAS.las_writer_command_line_arguments(description, prog='TotalDepth.RP66V1.ToLAS.main',
+                                                        version=__version__, epilog=__rights__)
     args = parser.parse_args()
     TotalDepth.common.cmn_cmd_opts.set_log_level(args)
     # Your code here
@@ -506,20 +485,7 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
         clk_start = time.perf_counter()
         result: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_rp66v1_file_to_las)
         clk_exec = time.perf_counter() - clk_start
-        # Report output
-        ret_val = WriteLAS.report_las_write_results(result, args.gnuplot)
-        print(f'Writing results returned: {ret_val}')
-        size_input, size_output = WriteLAS.las_size_input_output(result)
-        print('Execution time = %8.3f (S)' % clk_exec)
-        if size_input > 0:
-            ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
-            ratio = size_output / size_input
-        else:
-            ms_mb = 0.0
-            ratio = 0.0
-        print(f'Out of  {len(result):,d} processed {len(result):,d} files of total size {size_input:,d} input bytes')
-        print(f'Wrote {size_output:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
-        print(f'Execution time: {clk_exec:.3f} (s)')
+        _failed_file_count = WriteLAS.report_las_write_results_and_performance(result, clk_exec, args.gnuplot, include_ignored=False)
     print('Bye, bye!')
     return ret_val
 

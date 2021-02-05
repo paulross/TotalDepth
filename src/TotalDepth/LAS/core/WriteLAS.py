@@ -4,12 +4,13 @@ import logging
 import multiprocessing
 import os
 import re
+import sys
 import typing
 
 import numpy as np
 
 import TotalDepth.common
-from TotalDepth.common import data_table, Slice
+from TotalDepth.common import data_table, Slice, cmn_cmd_opts, process
 from TotalDepth.common.LogPass import FrameArray
 from TotalDepth.util import DirWalk, gnuplot
 
@@ -28,7 +29,7 @@ class LASWriteArguments(typing.NamedTuple):
 
 
 class LASWriteResult(typing.NamedTuple):
-    """Holds the result of processing a RP66V1 file to LAS."""
+    """Holds the result of processing a file to LAS."""
     path_input: str
     binary_file_type: str
     size_input: int
@@ -44,62 +45,13 @@ LAS_DATETIME_FORMAT_UTC = '%Y-%m-%d %H:%M:%S.%f UTC'
 #: Format for time as text
 LAS_DATE_FORMAT_TEXT = 'YYYY-mm-dd HH MM SS.us UTC'
 
-# # RP66V1
-# def write_las_header(input_file: str,
-#                      logical_file: LogicalFile.LogicalFile,
-#                      logical_file_number: int,
-#                      frame_array_ident: str,
-#                      ostream: typing.TextIO) -> None:
-#     """Writes the LAS opening such as::
-#
-#         ~Version Information Section
-#         VERS.           2.0                           : CWLS Log ASCII Standard - VERSION 2.0
-#         WRAP.           NO                            : One Line per depth step
-#         PROD.           TotalDepth                    : LAS Producer
-#         PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
-#         CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
-#         DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hhmm]
-#         SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
-#         FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
-#         LOGICAL-FILE.   3                             : Logical File number in the DLIS file
-#         FRAME-ARRAY.    60B                           : Identity of the Frame Array in the Logical File
-#
-#     Reference: [LAS2.0 Las2_Update_Feb2017.pdf Section 5.3 ~V (Version Information)]
-#     """
-#     now = datetime.datetime.utcnow()
-#     date_time = logical_file.defining_origin[b'CREATION-TIME'].value[0]
-#     dt = date_time.as_datetime()
-#     fhlr: EFLR.ExplicitlyFormattedLogicalRecord = logical_file.file_header_logical_record
-#     file_id = fhlr.objects[0][b'ID'].value[0].decode('ascii').strip()
-#     table: typing.List[typing.List[str]] = [
-#         ['VERS.', '2.0', ': CWLS Log ASCII Standard - VERSION 2.0'],
-#         ['WRAP.', 'NO', ': One Line per depth step'],
-#         ['PROD.', 'TotalDepth', ': LAS Producer'],
-#         ['PROG.', f'TotalDepth.RP66V1.ToLAS {LAS_PRODUCER_VERSION}', ': LAS Program name and version'],
-#         ['CREA.', f'{now.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'],
-#         ['SOURCE.', f'{os.path.basename(input_file)}', ': DLIS File Name'],
-#         ['FILE-ID.', f'{file_id}', ': File Identification Number'],
-#         [
-#             f'DLIS_CREA.',
-#             f'{dt.strftime(WriteLAS.LAS_DATETIME_FORMAT_UTC)}', f': DLIS Creation date and time [{WriteLAS.LAS_DATE_FORMAT_TEXT}]'
-#         ],
-#         ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the DLIS file'],
-#     ]
-#     if frame_array_ident:
-#         table.append(
-#             ['FRAME-ARRAY.', f'{frame_array_ident}', ': Identity of the Frame Array in the Logical File'],
-#         )
-#     write_table(table, '~Version Information Section', ostream)
 
-
-
-# LIS
 def write_las_header(input_file: str,
                      logical_file_number: int,
                      las_producer_program: str,
                      las_producer_version: str,
                      table_extend: typing.List[typing.List[str]],
-                     ostream: typing.TextIO,
+                     output_stream: typing.TextIO,
                      ) -> None:
     """Writes the LAS opening such as::
 
@@ -109,8 +61,8 @@ def write_las_header(input_file: str,
         PROD.           TotalDepth                    : LAS Producer
         PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
         CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
-        SOURCE.         SOME-FILE-NAME.dlis           : LIS File Name
-        LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+        SOURCE.         SOME-FILE-NAME.dlis           : Source File Name
+        LOGICAL-FILE.   3                             : Logical File number in the Source file
 
     Or, with extensions:
         ~Version Information Section
@@ -120,8 +72,8 @@ def write_las_header(input_file: str,
         PROG.           TotalDepth.RP66V1.ToLAS 0.1.1 : LAS Program name and version
         CREA.           2012-11-14 10:50              : LAS Creation date [YYYY-MMM-DD hh:mm]
         DLIS_CREA.      2012-11-10 22:06              : DLIS Creation date and time [YYYY-MMM-DD hhmm]
-        SOURCE.         SOME-FILE-NAME.dlis           : DLIS File Name
-        LOGICAL-FILE.   3                             : Logical File number in the DLIS file
+        SOURCE.         SOME-FILE-NAME.dlis           : Source File Name
+        LOGICAL-FILE.   3                             : Logical File number in the Source file
         FILE-ID.        SOME-FILE-ID                  : File Identification from the FILE-HEADER Logical Record
         FRAME-ARRAY.    60B                           : Identity of the Frame Array in the Logical File
 
@@ -134,13 +86,11 @@ def write_las_header(input_file: str,
         ['PROD.', 'TotalDepth', ': LAS Producer'],
         ['PROG.', f'{las_producer_program} {las_producer_version}', ': LAS Program name and version'],
         ['CREA.', f'{now.strftime(LAS_DATETIME_FORMAT_UTC)}', f': LAS Creation date [{LAS_DATE_FORMAT_TEXT}]'],
-        ['SOURCE.', f'{os.path.basename(input_file)}', ': LIS File Name'],
-        ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the LIS file'],
+        ['SOURCE.', f'{os.path.basename(input_file)}', ': Source File Name'],
+        ['LOGICAL-FILE.', f'{logical_file_number:d}', ': Logical File number in the Source file'],
     ]
     table.extend(table_extend)
-    write_table(table, '~Version Information Section', ostream)
-
-
+    write_table(table, '~Version Information Section', output_stream)
 
 
 class UnitValueDescription(typing.NamedTuple):
@@ -296,7 +246,8 @@ def las_size_input_output(result: typing.Dict[str, LASWriteResult]) -> typing.Tu
     return size_input, size_output
 
 
-def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: str) -> int:
+def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: str, include_ignored=True,
+                             out_stream: typing.TextIO = sys.stdout) -> int:
     """Print output returning the number of failed files"""
     size_index = size_input = 0
     files_failed = files_processed = 0
@@ -306,6 +257,8 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
         ]
         for path in sorted(result.keys()):
             las_result = result[path]
+            if las_result.ignored and not include_ignored:
+                continue
             if las_result.size_input > 0:
                 ms_mb = las_result.time * 1000 / (las_result.size_input / 1024 ** 2)
                 ratio = las_result.size_output / las_result.size_input
@@ -328,7 +281,8 @@ def report_las_write_results(result: typing.Dict[str, LASWriteResult], gnuplot: 
                 if las_result.exception:
                     files_failed += 1
         for row in TotalDepth.common.data_table.format_table(table, pad=' ', heading_underline='-'):
-            print(row)
+            out_stream.write(row)
+            out_stream.write('\n')
         try:
             if gnuplot:
                 plot_gnuplot(result, gnuplot)
@@ -539,8 +493,13 @@ def write_array_section_header_to_las(
     if len(channel_name_sub_set):
         original_channels = ','.join(_stringify(channel.ident) for channel in frame_array.channels)
         out_stream.write(f'# Original channels in Frame Array [{len(frame_array.channels):4d}]: {original_channels}\n')
+        # write this out in order
+        out_channels = []
+        for channel in frame_array:
+            if channel.ident in channel_name_sub_set:
+                out_channels.append(channel.ident)
         out_stream.write(
-            f'# Requested Channels this LAS file [{len(channel_name_sub_set):4d}]: {",".join(channel_name_sub_set)}\n'
+            f'# Requested Channels in this LAS file [{len(out_channels):4d}]: {",".join(out_channels)}\n'
         )
     else:
         out_stream.write(f'# All [{len(frame_array.channels)}] original channels reproduced here.\n')
@@ -686,3 +645,54 @@ def write_curve_and_array_section_to_las(
 
 
 # =================== END: Writing a Frame Array to LAS ===================
+
+
+def las_writer_command_line_arguments(description: str, **kwargs) -> argparse.PARSER:
+    """Creates a common command line argument parser for converting files to LAS."""
+    parser = cmn_cmd_opts.path_in_out(
+        description, **kwargs,
+    )
+    cmn_cmd_opts.add_log_level(parser, level=20)
+    cmn_cmd_opts.add_multiprocessing(parser)
+    Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
+    process.add_process_logger_to_argument_parser(parser)
+    gnuplot.add_gnuplot_to_argument_parser(parser)
+    parser.add_argument(
+        '--array-reduction', type=str,
+        help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
+        default='first',
+        choices=list(sorted(ARRAY_REDUCTIONS)),
+        )
+    parser.add_argument(
+        '--channels', type=str,
+        help='Comma separated list of channels to write out (X axis is always included).'
+             ' Use \'?\' to see what channels exist without writing anything. [default: "%(default)s"]',
+        default='',
+        )
+    parser.add_argument('--field-width', type=int,
+                        help='Field width for array data [default: %(default)s].', default=16)
+    parser.add_argument('--float-format', type=str,
+                        help='Floating point format for array data [default: "%(default)s"].', default='.3f')
+    return parser
+
+
+def report_las_write_results_and_performance(results: typing.Dict[str, LASWriteResult], clock_exec: float,
+                                             gnuplot: bool = False, include_ignored: bool = True,
+                                             out_stream: typing.TextIO = sys.stdout) -> int:
+    """Writes out the results of converting files to LAS."""
+    ret_val = report_las_write_results(results, gnuplot, include_ignored=include_ignored)
+    out_stream.write(f'Writing results returned: {ret_val} files failed.\n')
+    size_input, size_output = las_size_input_output(results)
+    out_stream.write('Execution time = %8.3f (S)\n' % clock_exec)
+    if size_input > 0:
+        ms_mb = clock_exec * 1000 / (size_input / 1024 ** 2)
+        ratio = size_output / size_input
+    else:
+        ms_mb = 0.0
+        ratio = 0.0
+    out_stream.write(
+        f'Out of {len(results):,d} processed {len(results):,d} files of total size {size_input:,d} input bytes.\n'
+    )
+    out_stream.write(f'Wrote {size_output:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb.\n')
+    out_stream.write(f'Execution time: {clock_exec:.3f} (s).\n')
+    return ret_val

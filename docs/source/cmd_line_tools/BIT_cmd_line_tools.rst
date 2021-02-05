@@ -233,3 +233,244 @@ Adding the ``--summary`` flag for the frame data gives the following:
     Result:       119276        0.097      848.759 data/DresserAtlasBIT/special/29_10-_3Z/DWL_FILE/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
     Execution time =    0.097 (S)
     Bye, bye!
+
+
+.. _cmd_line_tools_bit_tdbittolas:
+
+Converting BIT Files to LAS Files with ``tdbittolas``
+===================================================================
+
+This takes a BIT file or directory of them and writes out a set of LAS files.
+A single LAS file is written for each Log Pass so a single BIT file produces one or more LAS files.
+
+The frames in the log pass can be sub-sampled by using ``--frame-slice`` which speeds things up when processing large files.
+The ``--channels`` option can be used to limit channels.
+
+BIT does not allow multiple values per channel.
+
+As BIT files contain very little other than the frame data the generated LAS files are very simple and are missing what many processors would regard as essential data such as well name.
+These LAS files may have to be edited with data from other sources than the original BIT file to be useful.
+
+LAS File Naming Convention
+--------------------------
+
+One BIT file produces one or more LAS files.
+LAS file names are of the form::
+
+    {BIT_File}_{logical_file_number:04d}.las
+
+Processing a Single BIT File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given the path out the LAS files will be named ``{path_out}_{logical_file_number}.las``
+
+For example ``tdbittolas foo.bit bar/baz`` might create::
+
+    bar/baz.bit_0000.las
+    bar/baz.bit_0001.las
+
+and so on.
+
+Processing a Directory of BIT Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given the path out the LAS files will be named:
+
+    ``{path_out}/{BIT_File}_{logical_file_number}.las``
+
+For example ``tdbittolas foo/ bar/baz`` might create::
+
+    bar/baz.bit_0000.las
+    bar/baz.bit_0001.las
+
+and so on.
+
+The output directory structure will mirror the input directory structure.
+
+Arguments
+-----------
+
+The first argument is the path to a BIT file or directory.
+The second argument is the path to write the output to.
+
+Options
+-------
+
+    -h, --help          show this help message and exit
+    --version           show program's version number and exit
+    -k, --keep-going    Keep going as far as sensible. Default: False.
+    -v, --verbose       Increase verbosity, additive [default: 0]
+    -r, --recurse       Process the input recursively. Default: False.
+    -l LOG_LEVEL, --log-level LOG_LEVEL
+                        Log Level as an integer or symbol. (0<->NOTSET,
+                        10<->DEBUG, 20<->INFO, 30<->WARNING, 40<->ERROR,
+                        50<->CRITICAL) [default: 20]
+    -j JOBS, --jobs JOBS  Max processes when multiprocessing.Zero uses number of
+                        native CPUs [8]. Negative value disables
+                        multiprocessing code. Default: -1.
+    --frame-slice FRAME_SLICE
+                        Do not process all frames but sample or slice the
+                        frames. SAMPLE: Sample is of the form "N" so a maximum
+                        of N frames, roughly regularly spaced, will be
+                        processed. N must be +ve, non-zero integer. Example:
+                        "64" - process a maximum of 64 frames. SLICE: Slice
+                        the frames is of the form start,stop,step as a comma
+                        separated list. Values can be absent or "None".
+                        Examples: ",," - every frame, ",,2" - every other
+                        frame, ",10," - frames 0 to 9, "4,10,2" - frames 4, 6,
+                        8, "40,-1,4" - every fourth frame from 40 to the end.
+                        Results will be truncated by frame array length. Use
+                        '?' to see what frames are available [default: ",,"
+                        i.e. all frames]
+    --log-process LOG_PROCESS
+                        Writes process data such as memory usage as a log INFO
+                        line every LOG_PROCESS seconds. If 0.0 no process data
+                        is logged. [default: 0.0]
+    --gnuplot GNUPLOT     Directory to write the gnuplot data.
+    --array-reduction ARRAY_REDUCTION
+                        Method to reduce multidimensional channel data to a
+                        single value. One of {first,max,mean,median,min} [default: first]
+    --channels CHANNELS   Comma separated list of channels to write out (X axis
+                        is always included). Use '?' to see what channels
+                        exist without writing anything. [default: ""]
+    --field-width FIELD_WIDTH
+                        Field width for array data [default: 16].
+    --float-format FLOAT_FORMAT
+                        Floating point format for array data [default: ".3f"].
+                        
+
+
+Examples
+-----------
+
+
+Finding out what Channels and Frames Exist:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use ``--channels=?`` and/or ``--frame-slice=?`` to see what channels and frames exist in the original BIT file.
+
+.. code-block:: console
+
+    $ tdbittolas --channels=? --frame-slice=? example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit example_data/BIT/LIS
+    ======= File example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit =======
+    
+      Frame Array: 0
+      Channels: "X   ","COND","SN  ","SP  ","GR  ","CAL ","TEN ","SPD ","ACQ ","AC  ","RT  "
+      X axis: <FrameChannel: 'X   ' "Computed X-axis" units: 'b''' count: 1 dimensions: (1,) frames: 1472>
+      Frames: 1472 from 14950.000891089492 to 14582.250869169884 interval -0.2500000149011612 [b'']
+
+      Frame Array: 1
+      Channels: "X   ","COND","SN  ","SP  ","GR  ","CAL ","TEN ","SPD ","ACQ ","AC  ","RT  "
+      X axis: <FrameChannel: 'X   ' "Computed X-axis" units: 'b''' count: 1 dimensions: (1,) frames: 1440>
+      Frames: 1440 from 14948.000890970283 to 14588.250869527512 interval -0.2500000149011612 [b'']    
+    
+    
+    ===== END File example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit =====
+
+
+Processing a Single File
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+    $ tdbittolas example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    Cmd: /Users/paulross/pyenvs/TotalDepth_3.8_v0.3/bin/tdbittolas example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    gnuplot version: "b'gnuplot 5.4 patchlevel 1'"
+    2021-02-05 12:58:18,749 - WriteLAS.py      -  191 - 28222 - (MainThread) - INFO     - process_to_las(): Namespace(array_reduction='first', channels='', field_width=16, float_format='.3f', frame_slice=',,', gnuplot=None, jobs=-1, keepGoing=False, log_level=20, log_process=0.0, path_in='example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit', path_out='example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit', recurse=False, verbose=0)
+    2021-02-05 12:58:18,749 - WriteLAS.py      -  167 - 28222 - (MainThread) - INFO     - index_dir_or_file(): "example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit" to "example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit" recurse: False
+    2021-02-05 12:58:18,750 - ToLAS.py         -  117 - 28222 - (MainThread) - INFO     - Found file type BIT on path example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    2021-02-05 12:58:18,750 - ToLAS.py         -  119 - 28222 - (MainThread) - INFO     - Reading BIT file example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    2021-02-05 12:58:18,846 - ToLAS.py         -  125 - 28222 - (MainThread) - INFO     - Writing frame array 0 to example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit_0000.las
+    2021-02-05 12:58:18,848 - WriteLAS.py      -  521 - 28222 - (MainThread) - INFO     - Writing array section with 1,472 frames, 11 channels and 11 values per frame, total: 16,192 input values.
+    2021-02-05 12:58:18,994 - ToLAS.py         -  125 - 28222 - (MainThread) - INFO     - Writing frame array 1 to example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit_0001.las
+    2021-02-05 12:58:18,995 - WriteLAS.py      -  521 - 28222 - (MainThread) - INFO     - Writing array section with 1,440 frames, 11 channels and 11 values per frame, total: 15,840 input values.
+      Input     Type  Output LAS Count  Time  Ratio  ms/Mb Exception                                                       Path
+    ------- -------- ------- --------- ----- ------ ------ --------- ----------------------------------------------------------
+    119,276 BIT      549,613         2 0.370 460.8% 3249.8     False "example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit"
+    Writing results returned: 0 files failed.
+    Execution time =    0.370 (S)
+    Out of 1 processed 1 files of total size 119,276 input bytes
+    Wrote 549,613 output bytes, ratio: 460.791% at 3256.2 ms/Mb
+    Execution time: 0.370 (s)
+    Bye, bye!
+
+The LAS files look like this:
+
+.. code-block:: console
+
+    ~Version Information Section
+    VERS.           2.0                                 : CWLS Log ASCII Standard - VERSION 2.0
+    WRAP.           NO                                  : One Line per depth step
+    PROD.           TotalDepth                          : LAS Producer
+    PROG.           TotalDepth.BIT.ToLAS 0.1.1          : LAS Program name and version
+    CREA.           2021-02-05 12:58:18.847493 UTC      : LAS Creation date [YYYY-mm-dd HH MM SS.us UTC]
+    SOURCE.         29_10-_3Z_dwl_DWL_WIRE_1644659.bit  : Source File Name
+    LOGICAL-FILE.   0                                   : Logical File number in the Source file
+    SOURCE_FORMAT.  WESTERN ATLAS BIT FORMAT            : File format of Source file.
+    #
+    # Binary block A: b'SHELL EXPRO U.K.      24 OCT 84      MANSFIELD/DODDS                    '
+    # Binary block B: b'T  2 9 / 1 0 - 3                                                           '
+    # BIT Log Pass (claimed): LogPassRange(depth_from=14950.000891089492, depth_to=14590.000869631818, spacing=0.2500000149011621, unknown_a=0.0, unknown_b=16.000000953674373)
+    #
+    ~Well Information Section
+    #MNEM.UNIT  DATA                 DESCRIPTION
+    #----.----  ----                 -----------
+    STRT.       14950.000891089492   : START
+    STOP.       14582.250869169884   : STOP
+    STRP.       -0.2500000149011612  : STEP
+    ~Curve Information Section
+    #MNEM.UNIT  Curve Description
+    #---------  -----------------
+    X   .       : Computed X-axis Dimensions (1,)
+    COND.       : COND Dimensions (1,)
+    SN  .       : SN   Dimensions (1,)
+    SP  .       : SP   Dimensions (1,)
+    GR  .       : GR   Dimensions (1,)
+    CAL .       : CAL  Dimensions (1,)
+    TEN .       : TEN  Dimensions (1,)
+    SPD .       : SPD  Dimensions (1,)
+    ACQ .       : ACQ  Dimensions (1,)
+    AC  .       : AC   Dimensions (1,)
+    RT  .       : RT   Dimensions (1,)
+    # Array processing information:
+    # Frame Array: ID: 0 description: b'SHELL EXPRO U.K.      24 OCT 84      MANSFIELD/DODDS                    '
+    # All [11] original channels reproduced here.
+    # Where a channel has multiple values the reduction method is by "first" value.
+    # Maximum number of original frames: 1472
+    # Requested frame slicing: <Slice on length=1472 start=0 stop=1472 step=1>, total number of frames presented here: 1472
+    ~A          X                COND             SN               SP               GR               CAL              TEN              SPD              ACQ              AC               RT
+           14950.001         1015.693           16.050         -249.709           81.887           -2.410         3220.477           28.997            0.000           37.434            0.985
+           14949.751         1015.693           16.050         -249.709           81.887           -2.410         3220.477           28.997            0.000           37.434            0.985
+           14949.501         1015.693           16.050         -249.709           81.887           -2.410         3220.477           28.997            0.000           37.434            0.985
+           14949.251         1015.693           16.050         -249.709           81.887           -2.410         3220.477           28.997            0.000           37.434            0.985
+
+Processing a Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the ``-r`` option to process recursively. The output directory will mirror the input directory.
+
+.. code-block:: console
+
+    $ tdbittolas -r example_data/BIT/data example_data/BIT/LAS
+    Cmd: /Users/paulross/pyenvs/TotalDepth_3.8_v0.3/bin/tdbittolas -r example_data/BIT/data example_data/BIT/LAS
+    gnuplot version: "b'gnuplot 5.4 patchlevel 1'"
+    2021-02-05 13:00:32,879 - WriteLAS.py      -  191 - 28324 - (MainThread) - INFO     - process_to_las(): Namespace(array_reduction='first', channels='', field_width=16, float_format='.3f', frame_slice=',,', gnuplot=None, jobs=-1, keepGoing=False, log_level=20, log_process=0.0, path_in='example_data/BIT/data', path_out='example_data/BIT/LAS', recurse=True, verbose=0)
+    2021-02-05 13:00:32,879 - WriteLAS.py      -  167 - 28324 - (MainThread) - INFO     - index_dir_or_file(): "example_data/BIT/data" to "example_data/BIT/LAS" recurse: True
+    2021-02-05 13:00:32,880 - ToLAS.py         -  117 - 28324 - (MainThread) - INFO     - Found file type BIT on path example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    2021-02-05 13:00:32,880 - ToLAS.py         -  119 - 28324 - (MainThread) - INFO     - Reading BIT file example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit
+    2021-02-05 13:00:32,962 - ToLAS.py         -  125 - 28324 - (MainThread) - INFO     - Writing frame array 0 to example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit_0000.las
+    2021-02-05 13:00:32,964 - WriteLAS.py      -  521 - 28324 - (MainThread) - INFO     - Writing array section with 1,472 frames, 11 channels and 11 values per frame, total: 16,192 input values.
+    2021-02-05 13:00:33,076 - ToLAS.py         -  125 - 28324 - (MainThread) - INFO     - Writing frame array 1 to example_data/BIT/LAS/29_10-_3Z_dwl_DWL_WIRE_1644659.bit_0001.las
+    2021-02-05 13:00:33,076 - WriteLAS.py      -  521 - 28324 - (MainThread) - INFO     - Writing array section with 1,440 frames, 11 channels and 11 values per frame, total: 15,840 input values.
+      Input     Type  Output LAS Count  Time  Ratio  ms/Mb Exception                                                       Path
+    ------- -------- ------- --------- ----- ------ ------ --------- ----------------------------------------------------------
+    119,276 BIT      549,613         2 0.300 460.8% 2634.7     False "example_data/BIT/data/29_10-_3Z_dwl_DWL_WIRE_1644659.bit"
+    Writing results returned: 0 files failed.
+    Execution time =    0.301 (S)
+    Out of 1 processed 1 files of total size 119,276 input bytes
+    Wrote 549,613 output bytes, ratio: 460.791% at 2644.1 ms/Mb
+    Execution time: 0.301 (s)
+    Bye, bye!
+
+
+

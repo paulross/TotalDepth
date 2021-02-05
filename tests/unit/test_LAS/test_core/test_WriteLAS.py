@@ -172,7 +172,7 @@ GR  .GAPI   : Gamma Ray Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: IDENT description: Test FrameArray
 # Original channels in Frame Array [   2]: DEPT,GR  
-# Requested Channels this LAS file [   1]: GR  
+# Requested Channels in this LAS file [   1]: GR  
 # Where a channel has multiple values the reduction method is by "first" value.
 # Maximum number of original frames: 4
 # Requested frame slicing: <Slice on length=4 start=0 stop=4 step=1>, total number of frames presented here: 4
@@ -182,8 +182,9 @@ GR  .GAPI   : Gamma Ray Dimensions (1,)
              2.0              2.0
              1.0              3.0
 """
-    # print(out_stream.getvalue())
-    assert out_stream.getvalue() == expected
+    result = out_stream.getvalue()
+    # print(result)
+    assert result == expected
 
 
 def test_las_write_partial_int64():
@@ -207,7 +208,7 @@ GR  .GAPI   : Gamma Ray Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: IDENT description: Test FrameArray
 # Original channels in Frame Array [   2]: DEPT,GR  
-# Requested Channels this LAS file [   1]: GR  
+# Requested Channels in this LAS file [   1]: GR  
 # Where a channel has multiple values the reduction method is by "first" value.
 # Maximum number of original frames: 4
 # Requested frame slicing: <Slice on length=4 start=0 stop=4 step=1>, total number of frames presented here: 4
@@ -217,5 +218,6 @@ GR  .GAPI   : Gamma Ray Dimensions (1,)
              2.0                2
              1.0                3
 """
-    # print(out_stream.getvalue())
-    assert out_stream.getvalue() == expected
+    result = out_stream.getvalue()
+    # print(result)
+    assert result == expected

@@ -270,16 +270,27 @@ def test_tdrp66v1scan_file(args):
     subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_BASIC_FILE,])
 
 
-@pytest.mark.xfail(reason='Not sure why this is failing, it seems pretty innocuous.')
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
         ['-r', '-V'],
-        ['-r', '-j 2'],
     )
 )
 def test_tdrp66v1scan_dir(tmpdir, args):
+    cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
+    subprocess.check_call(cmd_args)
+
+
+@pytest.mark.xfail(reason='Not sure why this is failing, it seems pretty innocuous.')
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-r', '-j 2'],
+    )
+)
+def test_tdrp66v1scan_dir_with_two_jobs(tmpdir, args):
     cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
     subprocess.check_call(cmd_args)
 
@@ -518,5 +529,50 @@ def test_tdbitread_dir(args):
 )
 def test_tdbitread_file(args):
     subprocess.check_call(['tdbitread',] + args + [EXAMPLE_DATA_FILE_BIT])
+
+
+# -------- tdbittolas --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v'],
+        ['-v', '-k'],
+        ['--log-process=1.0',],
+        ['--frame-slice=64',],
+        ['--frame-slice=,,2',],
+        ['--frame-slice=?',],
+        ['--channels=?',],
+        ['--channels=TENS,ETIM',],
+        ['--field-width=32',],
+        ['--float-format=.6f',],
+    )
+)
+def test_tdbittolas_basic_file(tmpdir, args):
+    subprocess.check_call(['tdbittolas',] + args + [EXAMPLE_DATA_FILE_BIT, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-j 0'],
+        ['-r', '--frame-slice=?', ],
+        ['-r', '--channels=?', ],
+    )
+)
+def test_tdbittolas_dir(tmpdir, args):
+    subprocess.check_call(['tdbittolas',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
+
+@pytest.mark.slow
+def test_tdbittolas_gnuplot(tmpdir):
+    subprocess.check_call(['tdbittolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
+# -------- END: tdbittolas --------
 
 #======================== END: BIT ==================

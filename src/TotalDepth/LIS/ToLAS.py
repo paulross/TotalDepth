@@ -370,34 +370,11 @@ def _dump_frames_and_or_channels(path_in: str, recurse: bool, frame_slice: str, 
 
 
 def main():
-    description = """usage: %(prog)s [options] file
-    Reads RP66V1 file(s) and writes them out as LAS files."""
     print('Cmd: %s' % ' '.join(sys.argv))
-
-    parser = TotalDepth.common.cmn_cmd_opts.path_in_out_required(
-        description, prog='TotalDepth.RP66V1.ToLAS.main', version=__version__, epilog=__rights__
-    )
-    TotalDepth.common.cmn_cmd_opts.add_log_level(parser, level=20)
-    TotalDepth.common.cmn_cmd_opts.add_multiprocessing(parser)
-    TotalDepth.common.Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
-    TotalDepth.common.process.add_process_logger_to_argument_parser(parser)
-    gnuplot.add_gnuplot_to_argument_parser(parser)
-    parser.add_argument(
-        '--array-reduction', type=str,
-        help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
-        default='first',
-        choices=list(sorted(TotalDepth.LAS.core.WriteLAS.ARRAY_REDUCTIONS)),
-    )
-    parser.add_argument(
-        '--channels', type=str,
-        help='Comma separated list of channels to write out (X axis is always included).'
-             ' Use \'?\' to see what channels exist without writing anything. [default: "%(default)s"]',
-        default='',
-    )
-    parser.add_argument('--field-width', type=int,
-                        help='Field width for array data [default: %(default)s].', default=16)
-    parser.add_argument('--float-format', type=str,
-                        help='Floating point format for array data [default: "%(default)s"].', default='.3f')
+    description = """usage: %(prog)s [options] file
+    Reads LIS file(s) and writes them out as LAS files."""
+    parser = WriteLAS.las_writer_command_line_arguments(description, prog='TotalDepth.LIS.ToLAS.main',
+                                                        version=__version__, epilog=__rights__)
     args = parser.parse_args()
     TotalDepth.common.cmn_cmd_opts.set_log_level(args)
     # Your code here
@@ -408,21 +385,7 @@ def main():
         clk_start = time.perf_counter()
         results: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_lis_file_to_las)
         clk_exec = time.perf_counter() - clk_start
-        # Report output
-        failed_files = WriteLAS.report_las_write_results(results, args.gnuplot)
-        print(f' Total files: {len(results)}')
-        print(f'Failed files: {failed_files}')
-        size_input, size_output = WriteLAS.las_size_input_output(results)
-        print('Execution time = %8.3f (S)' % clk_exec)
-        if size_input > 0:
-            ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
-            ratio = size_output / size_input
-        else:
-            ms_mb = 0.0
-            ratio = 0.0
-        print(f'Out of  {len(results):,d} processed {len(results):,d} files of total size {size_input:,d} input bytes')
-        print(f'Wrote {size_output:,d} output bytes, ratio: {ratio:8.3%} at {ms_mb:.1f} ms/Mb')
-        print(f'Execution time: {clk_exec:.3f} (s)')
+        _failed_file_count = WriteLAS.report_las_write_results_and_performance(results, clk_exec, args.gnuplot, include_ignored=False)
     print('Bye, bye!')
     return ret_val
 

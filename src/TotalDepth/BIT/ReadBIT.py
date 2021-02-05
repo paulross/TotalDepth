@@ -600,7 +600,7 @@ def create_bit_frame_array_from_file(file: typing.BinaryIO) -> typing.List[BITFr
                 try:
                     bit_frame_array.add_block(tif_block.payload)
                 except ExceptionTotalDepthBITDataBlocks as err:
-                    logger.warning(f'{str(err)} at tell={file.tell()}. Ignoring rest of file.')
+                    logger.warning(f'{str(err)} at tell=0x{file.tell():x}. Ignoring rest of file.')
                     break
             elif tif_block.tif_type == TifType.END_LOG_PASS:
                 bit_frame_array.complete()

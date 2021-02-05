@@ -17,9 +17,8 @@ There is a tutorial here: :ref:`cmd_line_tools_bit_tdbitread`
 I'd like to convert BIT files to LAS format files
 ---------------------------------------------------------------------
 
-todo::
 
-    Create conversion of BIT to LAS.
+There is a tutorial here : :ref:`cmd_line_tools_bit_tdbittolas`.
     
 
 Getting the Frame Data as a ``numpy`` Array
