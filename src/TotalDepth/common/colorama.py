@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 2020 Paul Ross
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
