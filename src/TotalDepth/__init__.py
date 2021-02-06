@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
 # Copyright (C) 1999-2012 Paul Ross
 # 
@@ -19,11 +19,11 @@
 # Paul Ross: apaulross@gmail.com
 """TotalDepth - a suite of Petrophysical software."""
 
-__all__ = ['LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
+__all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
 
-__version__ = '0.3.2rc0'
+__version__ = '0.4.0rc0'
 
-VERSION = (0, 3, 2, 'rc0')
+VERSION = (0, 4, 0, 'rc0')
 
 RELEASE_NOTES = [
     """
