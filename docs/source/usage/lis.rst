@@ -171,6 +171,15 @@ Note the last line ``Frame set: None``, this is because the log pass is a lightw
 
     >>> log_passes[0].logPass.setFrameSet(lis_file)
     
+.. note::
+
+    The call to ``setFrameSet()`` will raise an Exception if there is no frame data in the Log Pass.
+    The call should be wrapped in a check for frame data::
+    
+        if log_passes[0].logPass.totalFrames > 0:
+            log_passes[0].logPass.setFrameSet(lis_file)
+            # Your code here...
+    
 Now the frame set is fully populated::
 
     >>> print(list(log_passes[0].logPass.genFrameSetScNameUnit()))

@@ -71,7 +71,16 @@ Now, if you are familiar with numpy then all normal operations are possible, for
 
     >>> sp.min()
     -2.49709030e+02
-    
+
+.. note::
+
+    The ``LogPass.FrameArray`` is universal, but BIT can only represent one value per frame per channel.
+    To access that value you need to use ``array[frame_index][0]``.
+
+
+
+
+
 References:
 
 BITFrameArray: :py:class:`TotalDepth.BIT.ReadBIT.BITFrameArray`

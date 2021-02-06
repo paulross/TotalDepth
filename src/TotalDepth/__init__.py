@@ -55,6 +55,7 @@ entry_points_console_scripts_dict = {
     'tdlistablehistogram': 'TotalDepth.LIS.TableHistogram:main',
     # LAS
     'tdlasreadlasfiles': 'TotalDepth.LAS.ReadLASFiles:main',
+    'tdlastohtml': 'TotalDepth.LAS.LASToHTML:main',
     # RP66V1
     'tdrp66v1scan': 'TotalDepth.RP66V1.Scan:main',
     'tdrp66v1tolas': 'TotalDepth.RP66V1.ToLAS:main',

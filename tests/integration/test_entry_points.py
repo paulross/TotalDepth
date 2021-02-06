@@ -133,6 +133,50 @@ def test_tdcopybinfiles_no_paths(args):
 # -------- END: tdcopybinfiles --------
 
 
+# ================ LAS ==================
+EXAMPLE_DATA_DIRECTORY_LAS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data',)
+LAS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY_LAS, 'BASIC_FILE_0_50.las')
+
+
+def test_las_basic_file_exists():
+    assert os.path.isfile(LAS_BASIC_FILE)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+    )
+)
+def test_tdlastohtml(tmpdir, args):
+    subprocess.check_call(['tdlastohtml',] + args + [EXAMPLE_DATA_DIRECTORY_LAS, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-m'],
+        ['-r', '-c'],
+        ['-r', '-u'],
+        ['-r', '-w'],
+        ['-r', '-p'],
+        ['-r', '-s'],
+        ['-r', '-a'],
+        ['-r', '-avk'],
+    )
+)
+def test_tdlasreadlasfiles(args):
+    subprocess.check_call(['tdlasreadlasfiles',] + args + [EXAMPLE_DATA_DIRECTORY_LAS, ])
+
+# ================ END: LAS ==================
+
+
 # ================ LIS ==================
 LIS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY_LIS, 'DILLSON-1_WELL_LOGS_FILE-049.LIS')
 

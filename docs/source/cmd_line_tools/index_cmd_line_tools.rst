@@ -15,5 +15,6 @@ All the command line tools start with ``td``.
    
     TD_cmd_line_tools
     BIT_cmd_line_tools
+    LAS_cmd_line_tools
     LIS_cmd_line_tools
     RP66V1_cmd_line_tools
