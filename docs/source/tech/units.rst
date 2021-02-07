@@ -50,7 +50,7 @@ So conversion from, say DEGC to DEGF of 0.0 is::
     ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
 
 
-Units code
+Unit Code
 ----------------
 
 The unit is uniquely identified by the code, for example 'DEGC'.
@@ -69,6 +69,19 @@ For 'degC' this is::
     DEGC    'degree celsius'          degC            Temperature 1                   -273.15
     deg C   'degree celsius'          degC            Temperature 1                   -273.15
     oC      'GeoFrame legacy unit'    degC            Temperature 1                   -273.15
+
+
+Internal Representation of the Data
+------------------------------------------
+
+Each unit conversion is represented by a Unit class: :py:class:`TotalDepth.common.units.Unit`.
+The entire conversion table is represented internally by a ``Dict[str, Unit]`` where the key is the Unit Code.
+At runtime the OSDD web page is read, parsed and the internal data structure cached.
+This happens the first time any of the APIs is accessed.
+On demand a data structure ``typing.Dict[str, typing.List[str]]`` mapping Standard Form to a list of Unit Codes is created and cached.
+
+If the OSDD web page can not be read, perhaps because the user is offline, the code falls back to reading a static JSON file at ``src/TotalDepth/common/data/osdd_units.json`` that contains the last version of the OSDD.\
+This file is refreshed every time the integration test :py:func:`tests.integration.common.test_units.test_slb_units_write_to_json` is run.
 
 
 Units Conversion
