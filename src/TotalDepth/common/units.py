@@ -37,6 +37,7 @@ import typing
 from functools import lru_cache
 
 from bs4 import BeautifulSoup
+import numpy as np
 
 
 from TotalDepth import ExceptionTotalDepth
@@ -275,3 +276,8 @@ def convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
 def convert_function(unit_from: Unit, unit_to: Unit) -> typing.Callable:
     """Return a partial function to convert from one units to another."""
     return functools.partial(convert, unit_from=unit_from, unit_to=unit_to)
+
+
+def convert_array(array: np.ndarray, unit_from: Unit, unit_to: Unit) -> np.ndarray:
+    """Convert an array of values."""
+    return ((array - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset

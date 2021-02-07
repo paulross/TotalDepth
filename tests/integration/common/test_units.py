@@ -1,6 +1,7 @@
 import json
 import math
 
+import numpy as np
 import pytest
 
 from TotalDepth.common import units
@@ -50,7 +51,7 @@ def test_slb_units_cache():
 
 
 @pytest.mark.slow
-def test_slb_unit_standard_form_to_unit_code():
+def test_slb_unit_standard_form_to_unit_code_degc():
     # TODO: Move this to code that specifically handles units rather than lookups.
     result = units.slb_standard_form_to_unit_code('degC')
     assert result == [
@@ -60,6 +61,23 @@ def test_slb_unit_standard_form_to_unit_code():
                    scale=1.0, offset=-273.15),
         units.Unit(code='oC', name='GeoFrame legacy unit', standard_form='degC', dimension='Temperature',
                    scale=1.0, offset=-273.15)
+    ]
+
+
+@pytest.mark.slow
+def test_slb_unit_standard_form_to_unit_code_m():
+    result = units.slb_standard_form_to_unit_code('m')
+    assert result == [
+        units.Unit(code='METERS', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='METER', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='METRES', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='METRE', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='G_LN', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='S_LN', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='M.', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='MT', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='M', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0),
+        units.Unit(code='m', name='meter', standard_form='m', dimension='Length', scale=1.0, offset=0.0)
     ]
 
 
@@ -108,6 +126,7 @@ def test_convert(value, unit_from_code, unit_to_code, expected):
         (1, 'FEET', 'METRE', 0.3048),
         (0.3048, 'METRE', 'FEET', 1.0),
         (0.0, 'DEGC', 'DEGF', 32.0),
+        (100.0, 'DEGC', 'DEGF', 212.0),
         (32.0, 'DEGF', 'DEGC', 0.0),
     )
 )
@@ -144,3 +163,12 @@ def test_convert_function_fails():
         " are not the same dimension."
     )
 
+
+@pytest.mark.slow
+def test_convert_array():
+    unit_from = units.slb_units('DEGC')
+    unit_to = units.slb_units('DEGF')
+    array = np.array([0.0, 100.0])
+    result = units.convert_array(array, unit_from, unit_to)
+    for a, b in zip(result, [32.0, 212.0]):
+        assert math.isclose(a, b, abs_tol=1e-9)
