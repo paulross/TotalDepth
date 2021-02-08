@@ -623,7 +623,7 @@ def test_rp66v1_scan_ff01():
 #======================== END: BIT ==================
 
 EXAMPLE_DATA_DIRECTORY_BIT = os.path.join(
-    TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data', 'BIT', 'data',
+    EXAMPLE_DATA_DIRECTORY, 'BIT', 'data',
 )
 
 def test_example_data_directory_bit_exists():
