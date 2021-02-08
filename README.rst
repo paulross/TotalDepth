@@ -47,7 +47,6 @@ Accessing Frame Data as a ``numpy`` Array
 Here is an example of accessing RP66V1 (DLIS) data as a numpy array and using ``np.describe()`` to describe each array:
 
 .. code-block:: python
-    :emphasize-lines: 7-18
 
     import numpy as np
 
@@ -137,24 +136,20 @@ To install TotalDepth, run this command in your terminal:
 
     $ pip install TotalDepth
 
-This is the preferred method to install TotalDepth, as it will always install the most recent stable release.
+This is the preferred method to install TotalDepth, as it will always install the most recent stable release from PyPi.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
 
-.. _pip: https://pip.pypa.io
-.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
-
-
 From sources
 --------------------------------------
 
-If you are using a virtual environment in your :file:`{<PYTHONVENVS>}`, say :file:`{~/pyvenvs}`:
+If you are using a virtual environment in your virtual environment directory, for example ``~/pyvenvs``:
 
 .. code-block:: console
 
-    $ python3 -m venv <PYTHONVENVS>/TotalDepth
-    $ . <PYTHONVENVS>/TotalDepth/bin/activate
+    $ python3 -m venv ~/pyvenvs/TotalDepth
+    $ source ~/pyvenvs/TotalDepth/bin/activate
     (TotalDepth) $
 
 Or if you have a Conda environment (here using Python 3.8, adjust as necessary):
@@ -209,7 +204,6 @@ Install the test dependencies and run TotalDepth's tests:
     (TotalDepth) $ pip install pytest-runner
     (TotalDepth) $ python setup.py test
 
-
 Credits
 ---------
 
@@ -218,3 +212,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 
+.. _pip: https://pip.pypa.io
+.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+
+.. _Github repo: https://github.com/paulross/TotalDepth
+.. _tarball: https://github.com/paulross/TotalDepth/tarball/master
