@@ -18,7 +18,12 @@ def test_tmdir_fixture(tmpdir):
 
 TOTAL_DEPTH_SOURCE_ROOT = os.path.dirname(TotalDepth.__file__)
 
+# If python setup.py develop is used.
 EXAMPLE_DATA_DIRECTORY = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data')
+# if not os.path.isdir(EXAMPLE_DATA_DIRECTORY):
+#     # If python setup.py install is used.
+#     EXAMPLE_DATA_DIRECTORY = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, 'example_data')
+
 
 def test_example_data_directory_exists():
     assert os.path.isdir(EXAMPLE_DATA_DIRECTORY)
