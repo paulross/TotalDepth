@@ -629,7 +629,7 @@ Generates plot(s) from input LIS file or directory to an output destination."""
         print(myFg.longStr())
         while '?' in opts.LgFormat:
             opts.LgFormat.remove('?')
-        return 1
+        return 0
     if len(args) != 2:
         optParser.print_help()
         optParser.error("I can't do much without an input path to LIS file(s) and an output path.")

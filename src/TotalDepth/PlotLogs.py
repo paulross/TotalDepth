@@ -728,8 +728,8 @@ def main():
                       help="File match pattern. Default: %(default)s.")
     # parser.add_argument("-f", "--file-type", choices=['LAS', 'LIS', 'AUTO'],
     #        help="File format to assume for the input, AUTO will do it's best. [default: \"AUTO\"].")
-    parser.add_argument("-s", "--scale", action="append", type=int, dest="scale", default=0,
-            help="Scale of X axis to use (an integer). [default: 0].")
+    parser.add_argument("-s", "--scale", type=int, dest="scale", default=0,
+                        help="Scale of X axis to use (an integer). [default: 0].")
     args = parser.parse_args()
     # Initialise logging etc.
     cmn_cmd_opts.set_log_level(args)
@@ -743,20 +743,20 @@ def main():
         myFg = FILMCfgXML.FilmCfgXMLRead()
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
         print(myFg.longStr(''.join(args.LgFormat).count('?')))
-        return 1
+        return 0
     if cmn_cmd_opts.multiprocessing_requested(args):
+        myResult = plotLogPassesMP(
+            args.path_in,
+            args.path_out,
+            args,
+        )
+    else:
         myPlp = PlotLogPasses(
             args.path_in,
             args.path_out,
             args,
         )
         myResult = myPlp.plotLogInfo
-    else:
-        myResult = plotLogPassesMP(
-            args.path_in,
-            args.path_out,
-            args,
-        )
     if os.path.isdir(args.path_out):
         myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in)
     print('plotLogInfo', str(myResult))

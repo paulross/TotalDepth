@@ -1254,9 +1254,8 @@ class Plot(object):
         curvIdSet = set()
         for anO in self._retOutputChIDs(theFilmID):
             if self._presCfg.usesOutpChannel(theFilmID, anO):
-                print(type(theLp), dir(theLp))
-                if theLp is None \
-                or theLp.hasOutpMnem(anO):
+                # print(type(theLp), dir(theLp))
+                if theLp is None or theLp.hasOutpMnem(anO):
                     for cur in self._presCfg.outpCurveIDs(theFilmID, anO):
                         curvIdSet.add(cur)
                 else:

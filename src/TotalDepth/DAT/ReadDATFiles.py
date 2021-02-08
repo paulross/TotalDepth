@@ -182,7 +182,7 @@ def main() -> int:
     description = """Scans a DAT file or directory and reads any DAT files."""
     print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in(
-        description, prog='TotalDepth.RP66V1.ScanHTML.main', version=__version__, epilog=__rights__
+        description, prog='TotalDepth.DAT.ReadDATFIles.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
     cmn_cmd_opts.add_multiprocessing(parser)

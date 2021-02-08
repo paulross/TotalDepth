@@ -133,6 +133,49 @@ def test_tdcopybinfiles_no_paths(args):
 # -------- END: tdcopybinfiles --------
 
 
+# -------- tdplotlogs --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-x?'],
+    )
+)
+def test_tdplotlogs(args):
+    subprocess.check_call(['tdplotlogs',] + args + [LIS_BASIC_FILE, ])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-v', '-x HDT', ],
+        ['-v', '-x HDT', '-k', ],
+        ['-v', '-x HDT', '-A', ],
+        ['-v', '-x HDT', '-s 200', ],
+        ['-v', '-X 4', ],
+    )
+)
+def test_tdplotlogs_file(tmpdir, args):
+    subprocess.check_call(['tdplotlogs',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-r', '-X 4', '-v'],
+        ['-r', '-X 4', '-k'],
+        ['-r', '-X 4', '-j 4'],
+    )
+)
+def test_tdplotlogs_dir(tmpdir, args):
+    subprocess.check_call(['tdplotlogs',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+
+
+# -------- END: tdplotlogs --------
+
+
 # ================ LAS ==================
 EXAMPLE_DATA_DIRECTORY_LAS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data',)
 LAS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY_LAS, 'BASIC_FILE_0_50.las')
@@ -241,6 +284,48 @@ def test_tdlistolas_gnuplot(tmpdir):
     subprocess.check_call(['tdlistolas', EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
 # -------- END: tdlistolas --------
+
+
+# -------- tdlisplotlogpasses --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-x?'],
+    )
+)
+def test_tdlisplotlogpasses(args):
+    subprocess.check_call(['tdlisplotlogpasses',] + args + [LIS_BASIC_FILE, ])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        ['-x HDT', ],
+        ['-x HDT', '-k', ],
+        ['-x HDT', '-A', ],
+    )
+)
+def test_tdlisplotlogpasses_file(tmpdir, args):
+    subprocess.check_call(['tdlisplotlogpasses',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+
+
+# @pytest.mark.slow
+# @pytest.mark.parametrize(
+#     'args',
+#     (
+#         ['-r', '-x HDT',],
+#         ['-r', '-x HDT', '-k'],
+#         ['-r', '-x HDT', '-j 4'],
+#     )
+# )
+# def test_tdlisplotlogpasses_dir(tmpdir, args):
+#     subprocess.check_call(['tdlisplotlogpasses',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+
+
+# -------- END: tdlisplotlogpasses --------
+
 
 #======================== END: LIS ==================
 
