@@ -18,29 +18,27 @@
 #
 # Paul Ross: apaulross@gmail.com
 """
-Support for EBCDIC
+Support for EBCDIC character encoding.
 
 References:
 
 https://en.wikipedia.org/wiki/EBCDIC
+
 https://www.ibm.com/support/knowledgecenter/SSGH4D_16.1.0/com.ibm.xlf161.aix.doc/language_ref/asciit.html
 
-https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_71/rzaat/rzaate.htm
+From: https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_71/rzaat/rzaate.htm
+
 "EBCDIC single-byte encoding scheme
 An 8-bit-per-byte structure. The EBCDIC single-byte structure has a valid code-point range for 00 to FF
 Control characters have a range from 00 to 3F.
 Graphic characters have a range from 41 to FE.
 The space character is 40."
-
 """
-
-# From https://en.wikipedia.org/wiki/EBCDIC
-# Also seems to be confirmed by:
-# https://www.ibm.com/support/knowledgecenter/SSGH4D_16.1.0/com.ibm.xlf161.aix.doc/language_ref/asciit.html
+import string
 import typing
 
-# From https://en.wikipedia.org/wiki/EBCDIC
-
+#: EBCDIC all character points.
+#: From https://en.wikipedia.org/wiki/EBCDIC
 EBCDIC_ALL = (
     set(range(0x0, 0x30))
     |
@@ -77,16 +75,34 @@ EBCDIC_ALL = (
     {0xff}
 )
 
-# Lower bound <=
-EBCDIC_PRINTABLE_ORDINAL_LOW = 0x40
-# Upper bound <
-EBCDIC_PRINTABLE_ORDINAL_HIGH = 0xfa
+# #: Lower bound <=
+# EBCDIC_PRINTABLE_ORDINAL_LOW = 0x40
+# #: Upper bound <
+# EBCDIC_PRINTABLE_ORDINAL_HIGH = 0xfa
 
-# From: https://en.wikipedia.org/wiki/EBCDIC
-EBCDIC_PRINTABLE = set(range(EBCDIC_PRINTABLE_ORDINAL_LOW, EBCDIC_PRINTABLE_ORDINAL_HIGH)) & EBCDIC_ALL
+# EBCDIC_PRINTABLE_EXTRA = {
+#     5,  # Tab, ASCII 9.
+#     240, 241, 242, 243, 244, 245, 246, 247, 248, 249, # 0 to 9
+#     250,  # Vertical line '|'
+# }
+# EBCDIC_PRINTABLE = set(range(EBCDIC_PRINTABLE_ORDINAL_LOW, EBCDIC_PRINTABLE_ORDINAL_HIGH)) & EBCDIC_ALL & EBCDIC_PRINTABLE_EXTRA
+
+#: Printable range. This is obtained by using cp500::
+#:
+#:      string.printable.encode('cp500')
+#:
+#: Which gives::
+#:
+#:  EBCDIC_PRINTABLE = {5, 11, 12, 13, 37, 64, 74, 75, 76, 77, 78, 79, 80, 90, 91, 92, 93, 94, 95, 96, 97, 107, 108, 109,
+#:  110, 111, 121, 122, 123, 124, 125, 126, 127, 129, 130, 131, 132, 133, 134, 135, 136, 137, 145, 146,
+#:  147, 148, 149, 150, 151, 152, 153, 161, 162, 163, 164, 165, 166, 167, 168, 169, 187, 192, 193, 194,
+#:  195, 196, 197, 198, 199, 200, 201, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 224, 226, 227,
+#:  228, 229, 230, 231, 232, 233, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249}
+EBCDIC_PRINTABLE = set(string.printable.encode('cp500'))
 
 
 class EbcdicAsciiTableEntry(typing.NamedTuple):
+    """A single entry in the EBCDIC table."""
     decimal_str: str
     hex_str: str
     ctrl_char: str
@@ -97,6 +113,7 @@ class EbcdicAsciiTableEntry(typing.NamedTuple):
 
     @property
     def value(self) -> int:
+        """Returns the decimal value of the entry."""
         return int(self.decimal_str)
 
     # @property
@@ -105,20 +122,24 @@ class EbcdicAsciiTableEntry(typing.NamedTuple):
 
     @property
     def is_ctrl(self) -> bool:
+        """Returns True if this is a control character, False otherwise."""
         return self.ctrl_char != ''
 
     @property
     def ctrl_symbol(self) -> str:
-        """The single control character or ''."""
+        """The single control character or ''. For example decimal value 3 returns 'C'."""
         return self.ctrl_char[len('Ctrl-'):]
 
     @property
     def ebcdic_printable(self) -> bool:
-        return EBCDIC_PRINTABLE_ORDINAL_LOW <= self.value < EBCDIC_PRINTABLE_ORDINAL_HIGH and self.ebcdic != ''
+        """Returns True if this is a printable character, False otherwise."""
+        return self.value in EBCDIC_PRINTABLE
 
 
-# From: https://www.ibm.com/support/knowledgecenter/SSGH4D_16.1.0/com.ibm.xlf161.aix.doc/language_ref/asciit.html
-# ('Decimal Value', 'Hex Value', 'Control Character', 'ASCII Symbol', 'Meaning', 'EBCDIC Symbol', 'Meaning'),
+#: The explanation of each character.
+#: ('Decimal Value', 'Hex Value', 'Control Character', 'ASCII Symbol', 'Meaning', 'EBCDIC Symbol', 'Meaning'),
+#:
+#: From: https://www.ibm.com/support/knowledgecenter/SSGH4D_16.1.0/com.ibm.xlf161.aix.doc/language_ref/asciit.html
 EBCDIC_ASCII_TABLE = {
     int(row[0]): EbcdicAsciiTableEntry(*row) for row in [
         ('0', '00', 'Ctrl-@', 'NUL', 'null', 'NUL', 'null'),
@@ -388,14 +409,17 @@ def ebcdic_all_printable(byt: bytes) -> bool:
 
 
 def ebcdic_ascii_description(byt: bytes) -> EbcdicAsciiTableEntry:
+    """Look up the first character in the given bytes and return the EBCDIC table entry."""
     return EBCDIC_ASCII_TABLE[byt[0]]
 
 
 def ebcdic_to_ascii(byt: bytes) -> str:
+    """Convert EBCDIC to ASCII."""
     ret = byt.decode('cp500')
     return ret
 
 
 def ascii_to_ebcdic(ascii_str: str) -> bytes:
+    """Convert ASCII to EBCDIC."""
     ret = ascii_str.encode('cp500')
     return ret

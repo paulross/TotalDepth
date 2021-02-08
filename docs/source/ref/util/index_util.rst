@@ -15,6 +15,7 @@ Contents:
     copybinfiles
     DictTree
     DirWalk
+    EBCDIC
     ExecTimer
     FileBuffer
     FileStatus

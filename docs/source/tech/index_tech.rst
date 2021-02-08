@@ -26,3 +26,4 @@ Contents:
     process_monitoring
     gnuplot
     units
+    lookup_mnemonic

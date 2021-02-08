@@ -22,15 +22,15 @@
 Created on Nov 29, 2011
 
 """
-
-__author__  = 'Paul Ross'
-__date__    = '2011-11-29'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
-
 import collections
 
-class Histogram(object):
+__author__ = 'Paul Ross'
+__date__ = '2011-11-29'
+__version__ = '0.1.0'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
+
+
+class Histogram:
     """A histogram class."""
     def __init__(self, pre_load=None):
         self._h = collections.defaultdict(int)
@@ -55,7 +55,7 @@ class Histogram(object):
         
         valTitle - The title to use for values.
         
-        inclCount - Include tha tacture count for each value?
+        inclCount - Include the actual count for each value?
         """
         spacer = ' | '
         maxCount = max(self._h.values())
