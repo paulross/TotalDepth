@@ -141,7 +141,9 @@ data_files = [
     # Static units data
     (
         os.path.join('TotalDepth', 'common', 'data',),
-        os.path.join('src', 'TotalDepth', 'common', 'data', 'osdd_units.json'),
+        (
+            os.path.join('src', 'TotalDepth', 'common', 'data', 'osdd_units.json'),
+        ),
     ),
 ]
 
