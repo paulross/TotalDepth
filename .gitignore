@@ -77,8 +77,8 @@ tests/integration/test_LIS/test_core/binary_files
 benchmarks/TotalDepth/LIS/core/binary_files/
 
 # Binary test data
-data/
-!src/TotalDepth/common/data/
+/data
+#!src/TotalDepth/common/data/
 
 # Binary Pickle files
 *.pkl
