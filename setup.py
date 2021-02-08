@@ -102,17 +102,37 @@ XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 
 data_files = [
     (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
-    (os.path.join('example_data', 'BIT', 'data'), '29_10-_3Z_dwl_DWL_WIRE_1644659.bit'),
-    (os.path.join('example_data', 'LAS', 'data'), ('1000079714.las',
-                                                   '206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las',
-                                                   'BASIC_FILE_0_50.las')),
-    (os.path.join('example_data', 'LIS', 'data'), ('DILLSON-1_WELL_LOGS_FILE-013.LIS',
-                                                   'DILLSON-1_WELL_LOGS_FILE-037.LIS',
-                                                   'DILLSON-1_WELL_LOGS_FILE-049.LIS')),
-    (os.path.join('example_data', 'RP66V1', 'data'), ('206_05a-_3_DWL_DWL_WIRE_258276498.DLIS',
-                                                      'BASIC_FILE.dlis',
-                                                      'BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis',
-                                                      'MINIMAL_FILE.dlis')),
+    (
+        os.path.join('example_data', 'BIT', 'data'),
+        (
+            '29_10-_3Z_dwl_DWL_WIRE_1644659.bit',
+        ),
+    ),
+    (
+        os.path.join('example_data', 'LAS', 'data'),
+        (
+            '1000079714.las',
+            '206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las',
+            'BASIC_FILE_0_50.las',
+        ),
+    ),
+    (
+        os.path.join('example_data', 'LIS', 'data'),
+        (
+            'DILLSON-1_WELL_LOGS_FILE-013.LIS',
+            'DILLSON-1_WELL_LOGS_FILE-037.LIS',
+            'DILLSON-1_WELL_LOGS_FILE-049.LIS',
+        ),
+    ),
+    (
+        os.path.join('example_data', 'RP66V1', 'data'),
+        (
+            '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS',
+            'BASIC_FILE.dlis',
+            'BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis',
+            'MINIMAL_FILE.dlis',
+        ),
+    ),
 ]
 
 # ext_modules = cythonize(
