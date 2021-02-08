@@ -101,7 +101,12 @@ XML_FORMAT_FILES = [
 XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 
 data_files = [
-    (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
+    # XML Format files
+    (
+        os.path.join('TotalDepth', 'util', 'plot', 'formats'),
+        XML_FORMAT_FILES
+    ),
+    # Example data
     (
         os.path.join('TotalDepth', 'example_data', 'BIT', 'data'),
         (
@@ -132,6 +137,11 @@ data_files = [
             os.path.join('example_data', 'RP66V1', 'data', 'BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis'),
             os.path.join('example_data', 'RP66V1', 'data', 'MINIMAL_FILE.dlis'),
         ),
+    ),
+    # Static units data
+    (
+        os.path.join('TotalDepth', 'common', 'data',),
+        os.path.join('src', 'TotalDepth', 'common', 'data', 'osdd_units.json'),
     ),
 ]
 
