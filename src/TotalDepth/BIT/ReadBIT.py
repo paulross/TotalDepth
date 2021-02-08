@@ -631,50 +631,13 @@ class FileSizeTime(typing.NamedTuple):  # pragma: no cover
 
 def print_summarise_frame_array(frame_array: BITFrameArray) -> None:
     """Summarise all the channels in the Frame Array."""
-    print(
-        f'{"ID":4}',
-        f'{"Length":>6}',
-        f'{"Shape":>14}',
-        f'{"Count":>6}',
-        f'{"Min":>12}',
-        f'{"Max":>12}',
-        f'{"Mean":>12}',
-        f'{"Std.Dev.":>12}',
-        f'{"Median":>12}',
-        f'{"Equal":>6}',
-        f'{"Inc.":>6}',
-        f'{"Dec.":>6}',
-        f'{"Activity":>12}',
-        f'{"Drift":>12}',
-        f'{"First":>12}',
-        f'->',
-        f'{"Last":>12}',
-    )
+    print(f'{"ID":4}', np_summary.ArraySummary.str_header())
     for channel in frame_array.frame_array.channels:
         summary = np_summary.summarise_array(channel.array)
-        # print(summary)
         if summary is None:
             print(f'{channel.ident:4} No Summary.')
         else:
-            print(
-                f'{channel.ident:4}',
-                f'{summary.len:>6d}',
-                f'{str(summary.shape):>14}',
-                f'{summary.count:>6d}',
-                f'{summary.min:>12g}',
-                f'{summary.max:>12g}',
-                f'{summary.mean:>12g}',
-                f'{summary.std:>12g}',
-                f'{summary.median:>12g}',
-                f'{summary.count_eq:>6d}',
-                f'{summary.count_inc:>6d}',
-                f'{summary.count_dec:>6d}',
-                f'{summary.activity:>12g}',
-                f'{summary.drift:>12g}',
-                f'{channel.array[0][0]:12g}',
-                f'->',
-                f'{channel.array[-1][0]:12g}',
-            )
+            print(f'{channel.ident:4}', summary.str())
 
 
 def print_process_file(file_path: str, verbose: int, summary: bool) -> FileSizeTime:  # pragma: no cover

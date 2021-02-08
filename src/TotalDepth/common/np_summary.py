@@ -40,12 +40,62 @@ class ArraySummary(typing.NamedTuple):
     count_dec: int
     count_inc: int
     activity: float
-    drift: float  # (last - first) / length
+    first: float
+    last: float
 
     @property
     def span(self) -> float:
         """The max - min value."""
         return self.max - self.min
+    
+    @property
+    def drift(self) -> float:
+        return (self.last - self.first) / (self.len - 1)
+
+    @staticmethod
+    def str_header() -> str:
+        return ' '.join(
+            [
+                f'{"Length":>6}',
+                f'{"Shape":>14}',
+                f'{"Count":>6}',
+                f'{"Min":>12}',
+                f'{"Max":>12}',
+                f'{"Mean":>12}',
+                f'{"Std.Dev.":>12}',
+                f'{"Median":>12}',
+                f'{"Equal":>6}',
+                f'{"Inc.":>6}',
+                f'{"Dec.":>6}',
+                f'{"Activity":>12}',
+                f'{"Drift":>12}',
+                f'{"First":>12}',
+                f'->',
+                f'{"Last":>12}',
+            ]
+        )
+    
+    def str(self) -> str:
+        return ' '.join(
+            [
+                f'{self.len:>6d}',
+                f'{str(self.shape):>14}',
+                f'{self.count:>6d}',
+                f'{self.min:>12g}',
+                f'{self.max:>12g}',
+                f'{self.mean:>12g}',
+                f'{self.std:>12g}',
+                f'{self.median:>12g}',
+                f'{self.count_eq:>6d}',
+                f'{self.count_inc:>6d}',
+                f'{self.count_dec:>6d}',
+                f'{self.activity:>12g}',
+                f'{self.drift:>12g}',
+                f'{self.first:12g}',
+                f'->',
+                f'{self.last:12g}',
+            ]
+        )
 
 
 def count_eq(array: np.array, flatten: bool = True) -> int:
@@ -128,6 +178,7 @@ def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
             counts[1],
             counts[2],
             activity(array),
-            (array[-1] - array[0]) / (count_of_values - 1),
+            array[0],
+            array[-1],
         )
         return result
