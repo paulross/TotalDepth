@@ -5,6 +5,7 @@ import pytest
 
 from TotalDepth.BIT import ReadBIT
 
+
 ISINGL_EXAMPLES = (
     # From RP666V2
     (153.0, b'\x42\x99\x00\x00'),
@@ -13,8 +14,10 @@ ISINGL_EXAMPLES = (
     # https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point
     # Example: -118.625 -> b'\xc2\x76\xa0\x00'.
     (-118.625, b'\xc2\x76\xa0\x00'),
+    # Positive version of same value, just the sign bit changes.
+    (118.625, b'\x42\x76\xa0\x00'),
     # +7.2370051 × 10**75
-    (7.2370051e75, b'\x7f\xff\xff\xff'),
+    (7.2370051e75, b'\x7f\xff\xff\xfe'),
     # +5.397605 × 10−79
     (5.397605668656396e-79, b'\x00\x10\x00\x00'),
     (9.999999615829415e-05, b'\x3d\x68\xdb\x8b'),
@@ -24,7 +27,6 @@ ISINGL_EXAMPLES = (
     (14950.0, b'\x44\x3a\x66\x00'),
     (14590.0, b'\x44\x38\xfe\x00'),
     (0.25, b'\x40\x40\x00\x00'),
-    (0.0, b'\x00\x00\x00\x00'),
     (16.0, b'\x42\x10\x00\x00'),
     (1375640257504053.0, b'\x4d\x4e\x32\x33'),
     (1.0786716607821755e-09, b'\x39\x4a\x20\x31'),
@@ -43,13 +45,22 @@ def test_isingl_bytes_to_float(float_value, bytes_value):
 @pytest.mark.parametrize(
     'bytes_value, expected',
     (
-            (b'', "Need at least 4 bytes not b''."),
+        (b'', "Need at least 4 bytes not b''."),
     )
 )
 def test_bytes_to_float_raises(bytes_value, expected):
     with pytest.raises(ValueError) as err:
         ReadBIT.bytes_to_float(bytes_value)
     assert err.value.args[0] == expected
+
+
+@pytest.mark.parametrize(
+    'float_value, bytes_value',
+    ISINGL_EXAMPLES
+)
+def test_isingl_float_to_bytes(float_value, bytes_value):
+    result = ReadBIT.float_to_bytes(float_value)
+    assert result == bytes_value
 
 
 def test_binary_data_end():

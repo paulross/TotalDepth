@@ -170,6 +170,7 @@ The 0.0001 figure is actually 9.999999615829415e-05 or b'\x3d\x68\xdb\x8b'
 """
 import enum
 import logging
+import math
 import os
 import string
 import struct
@@ -235,10 +236,51 @@ def bytes_to_float(b: bytes) -> float:
     mantissa = b[1] << 16
     mantissa |= b[2] << 8
     mantissa |= b[3]
-    m = mantissa / 0xffffff
+    m = mantissa / 0x1000000
     ret = m * 16**(exp - 64)
     if sign:
         return -ret
+    return ret
+
+
+def float_to_bytes(f: float) -> bytes:
+    """Returns four bytes from a float.
+
+    https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point
+
+    Example: b'\xc2\x76\xa0\x00' -> -118.625
+
+    NOTE: This is the same as RP66V1 ISINGL (5) Representation Code.
+    """
+    if math.isnan(f):
+        raise ValueError('Can not represent a NaN.')
+    # # From RP66V2 documentation: "Bits 8-5 of byte 2 may not be all zero except for true zero.
+    # if b[1] & 0xf0 == 0 and b != b'\x00\x00\x00\x00':
+    #     raise ValueError(f'Bytes representation {b} is illegal.')
+
+    # >>> math.frexp(-118.625)
+    # (-0.9267578125, 7)
+    m, e = math.frexp(f)
+    # TODO: Get rid of this loop for performance.
+    while e % 4:
+        m /= 2
+        e += 1
+    # diff_power_16 = e % 4
+    # mantissa = int(0x1000000 * abs(m) / 2**diff_power_16)
+    mantissa = int(0x1000000 * abs(m))
+    if mantissa != 0:
+        # exponent = (e + diff_power_16) // 4 + 64
+        exponent = e // 4 + 64
+        if exponent < 0:
+            exponent = 0
+        if exponent > 0x7f:
+            exponent = 0x7f
+        # Sign bit
+        if m < 0:
+            exponent |= 0x80
+    else:
+        exponent = 0
+    ret = bytes([exponent, mantissa >> 16 & 0xff, mantissa >> 8 & 0xff, mantissa & 0xff, ])
     return ret
 
 
