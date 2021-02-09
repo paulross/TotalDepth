@@ -689,14 +689,16 @@ def numpy_dtype(rep_code: int):
 
 
 class NumericCategory(enum.Enum):
-    """Categories of Representation Codes. Useful for deciding absent value."""
+    """Categories of Representation Codes. Useful for deciding absent value.
+    NOTE: Compound types are category NONE as they do not have a single absent value.
+    """
     NONE = 0
     INTEGER = 1
     FLOAT = 2
 
 #: Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
 REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
-    # 1: FSHORT,
+    # 1: NumericCategory.FLOAT,  # FSHORT,
     2: NumericCategory.FLOAT,  # FSINGL,
     # 3: NumericCategory.NONE,  # FSING1,
     # 4: NumericCategory.NONE,  # FSING2,
