@@ -258,18 +258,16 @@ def float_to_bytes(f: float) -> bytes:
     # if b[1] & 0xf0 == 0 and b != b'\x00\x00\x00\x00':
     #     raise ValueError(f'Bytes representation {b} is illegal.')
 
-    # >>> math.frexp(-118.625)
-    # (-0.9267578125, 7)
+    # >>> math.frexp(-118.625) is (-0.9267578125, 7)
     m, e = math.frexp(f)
-    # TODO: Get rid of this loop for performance.
-    while e % 4:
-        m /= 2
-        e += 1
-    # diff_power_16 = e % 4
-    # mantissa = int(0x1000000 * abs(m) / 2**diff_power_16)
+    if e % 4:
+        # Round to power of 16 (2**4)
+        power = 4 - (e % 4)
+        m /= 2**power
+        e += power
     mantissa = int(0x1000000 * abs(m))
     if mantissa != 0:
-        # exponent = (e + diff_power_16) // 4 + 64
+        assert e % 4 == 0
         exponent = e // 4 + 64
         if exponent < 0:
             exponent = 0
