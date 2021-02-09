@@ -479,7 +479,7 @@ class PhysRecRead(PhysRecBase):
                 self.startOfLr = self.startPrPos
                 #print('Set start of LR:', self.startOfLr)
             if not self.isLrStart and not self._hasPredecessor():
-                logging.warning('Physical record at 0x%X is successor but has no predecessor bit set.', self.startPrPos)
+                logging.debug('Physical record at 0x%X is successor but has no predecessor bit set.', self.startPrPos)
             # Index into logical data for this PR
             self._ldIndex = 0
             # Compute the length of logical data in _this_ PR

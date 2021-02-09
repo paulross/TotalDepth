@@ -251,15 +251,16 @@ def best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.
     Typically 38Mb file with 46276 Physical Records processed in 0.380 (s) so 10ms/Mb or 100Mb/s.
     This is proportionate so if limited to 100 records this would be around 0.001 (s)
     """
-    logging.info(f'Finding best PR settings for: {file_path_or_object}')
+    logging.debug('Finding best PR settings for: %s', file_path_or_object)
     pad_opts_to_prs = scan_file_with_different_padding(file_path_or_object, keep_going=True, pr_limit=pr_limit)
     logging.debug('PR count for different padding options, pr_limit=%d:\n%s', pr_limit, pprint.pformat(pad_opts_to_prs))
     best_pad_opts = ret_padding_options_with_max_records(pad_opts_to_prs)
     if len(best_pad_opts) and pad_opts_to_prs[best_pad_opts[0]] > 0:
         ret = best_pad_opts[0]
-        logging.info('Best pad options, first of %d: %s giving %d Physical Records.', len(best_pad_opts), ret, pad_opts_to_prs[ret])
+        logging.debug('Best pad options, first of %d: %s giving %d Physical Records.', len(best_pad_opts), ret,
+                      pad_opts_to_prs[ret])
         return ret
-    logging.info('No best pad options.')
+    logging.debug('No best pad options.')
 
 
 def file_read_with_best_physical_record_pad_settings(file_path_or_object: typing.Union[str, io.BytesIO],
