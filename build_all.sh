@@ -27,7 +27,7 @@ create_virtual_environments() {
   deactivate_virtual_environment
   for version in ${PYTHON_VERSIONS[*]}; do
     echo "---> For Python version ${version}"
-    venv_path="${PYTHON_VENV_ROOT}/SkipList_${version}"
+    venv_path="${PYTHON_VENV_ROOT}/TotalDepth_${version}"
     if [ ! -d "${venv_path}" ]; then
       # Control will enter here if directory not exists.
       echo "---> Creating virtual environment at: ${venv_path}"
@@ -40,7 +40,7 @@ remove_virtual_environments() {
   deactivate_virtual_environment
   for version in ${PYTHON_VERSIONS[*]}; do
     echo "---> For Python version ${version}"
-    venv_path="${PYTHON_VENV_ROOT}/SkipList_${version}"
+    venv_path="${PYTHON_VENV_ROOT}/TotalDepth_${version}"
     if [ -d "${venv_path}" ]; then
       # Control will enter here if directory exists.
       echo "---> Removing virtual environment at: ${venv_path}"
@@ -54,7 +54,7 @@ create_bdist_wheel() {
   for version in ${PYTHON_VERSIONS[*]}; do
     echo "---> For Python version ${version}"
     deactivate_virtual_environment
-    venv_path="${PYTHON_VENV_ROOT}/SkipList_${version}"
+    venv_path="${PYTHON_VENV_ROOT}/TotalDepth_${version}"
     if [ ! -d "${venv_path}" ]; then
       # Control will enter here if directory doesn't exist.
       echo "---> Creating virtual environment at: ${venv_path}"
@@ -85,7 +85,7 @@ show_results_of_dist() {
   echo "---> dist/:"
   ls -l "dist"
   # Test from Test PyPi
-  # pip install -i https://test.pypi.org/simple/orderedstructs
+  # pip install -i https://test.pypi.org/simple/TotalDepth
   echo "---> Ready for upload to test PyPi:"
   echo "---> pip install twine"
   echo "---> twine upload --repository testpypi dist/*"

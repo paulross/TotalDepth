@@ -1254,6 +1254,18 @@ class EntryBlock(collections.namedtuple('EntryBlock', 'type size repCode value')
             r.extend(RepCode.writeBytes(self.value, self.repCode))
         return r
 
+
+def create_entry_block(theFile):
+    t, s, r = theFile.unpack(STRUCT_ENTRY_BLOCK_PREAMBLE)
+    if s == 0:
+        # Special case when size is 0
+        rep_code = None
+    else:
+        rep_code = RepCode.readRepCode(r, theFile, s)
+    eb = EntryBlock(t, s, r, rep_code)
+    return eb
+
+
 class EntryBlockSet(object):
     """Represents the set of Entry Blocks in a DFSR."""
     #: Map of supported attributes i.e. those that are 'interesting'
@@ -1426,13 +1438,7 @@ class EntryBlockSet(object):
         """Reads from a File object. NOTE: theFile.hasLd() must be True so
         the Logical Record Header must have been read already."""
         while theFile.hasLd():
-            t, s, r = theFile.unpack(STRUCT_ENTRY_BLOCK_PREAMBLE)
-            if s == 0:
-                # Special case when size is 0
-                rep_code = None
-            else:
-                rep_code= RepCode.readRepCode(r, theFile, s)
-            eb = EntryBlock(t, s, r, rep_code)
+            eb = create_entry_block(theFile)
             try:
                 self.setEntryBlock(eb)
             except ExceptionEntryBlock as err:

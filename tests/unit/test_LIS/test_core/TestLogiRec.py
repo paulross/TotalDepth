@@ -2029,7 +2029,7 @@ class TestEntryBlock(TestLrBase):
     def test_00(self):
         """TestEntryBlock.test_00(): Simple test."""
         myF = self._retFileSinglePr(bytes([4, 1, 66, 1]))
-        myEb = LogiRec.EntryBlockRead(myF)
+        myEb = LogiRec.create_entry_block(myF)
         self.assertEqual(myEb.type, 4)
         self.assertEqual(myEb.size, 1)
         self.assertEqual(myEb.repCode, 66)
@@ -2041,27 +2041,27 @@ class TestEntryBlock(TestLrBase):
         myF = self._retFileSinglePr(
             bytes([12, 4, 68]) + b'\xba\x83\x18\x00'
         )
-        myEb = LogiRec.EntryBlockRead(myF)
+        myEb = LogiRec.create_entry_block(myF)
         self.assertEqual(myEb.type, 12)
         self.assertEqual(myEb.size, 4)
         self.assertEqual(myEb.repCode, 68)
         self.assertEqual(myEb.value, -999.25)
         self.assertEqual(
             str(myEb),
-            'EntryBlockRead(type=12, size=4, repCode=68, value=-999.25)',
+            'EntryBlock(type=12, size=4, repCode=68, value=-999.25)',
         )
 
     def test_02(self):
         """TestEntryBlock.test_02(): Zero size."""
         myF = self._retFileSinglePr(bytes([0, 0, 66]))
-        myEb = LogiRec.EntryBlockRead(myF)
+        myEb = LogiRec.create_entry_block(myF)
         self.assertEqual(myEb.type, 0)
         self.assertEqual(myEb.size, 0)
         self.assertEqual(myEb.repCode, 66)
         self.assertTrue(myEb.value is None)
         self.assertEqual(
             str(myEb),
-            'EntryBlockRead(type=0, size=0, repCode=66, value=None)'
+            'EntryBlock(type=0, size=0, repCode=66, value=None)'
         )
 
 class TestEntryBlockSet(TestLrBase):
