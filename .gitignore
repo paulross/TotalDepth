@@ -61,6 +61,8 @@ TotalDepth.egg-info/
 .coverage
 .coverage.*
 htmlcov/
+htmlcov_common/
+htmlcov_util/
 
 # The contents is created when testing and have data that is randomly generated.
 tests/unit/test_util/test_plot/test_svg/*

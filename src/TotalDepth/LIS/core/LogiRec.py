@@ -1254,15 +1254,6 @@ class EntryBlock(collections.namedtuple('EntryBlock', 'type size repCode value')
             r.extend(RepCode.writeBytes(self.value, self.repCode))
         return r
 
-class EntryBlockRead(EntryBlock):
-    """An entry block read from a LIS file."""
-    def __new__(self, theFile):
-        t, s, r = theFile.unpack(STRUCT_ENTRY_BLOCK_PREAMBLE)
-        if s == 0:
-            # Special case when size is 0
-            return super(EntryBlockRead, self).__new__(self, t, s, r, None)
-        return super(EntryBlockRead, self).__new__(self, t, s, r, RepCode.readRepCode(r, theFile, s))
-
 class EntryBlockSet(object):
     """Represents the set of Entry Blocks in a DFSR."""
     #: Map of supported attributes i.e. those that are 'interesting'
@@ -1350,10 +1341,9 @@ class EntryBlockSet(object):
     
     def __getattr__(self, name):
         """Returns the Entry Block corresponding to the name."""
-        try:
+        if name in self.ATTR_MAP:
             return self._ebS[self.ATTR_MAP[name]].value
-        except KeyError or IndexError as err:
-            raise AttributeError(str(err))
+        raise AttributeError(f'{name} not in self._ATTR_MAP')
     
     def __getitem__(self, key):
         """This returns an Entry block by integer index."""
@@ -1436,7 +1426,13 @@ class EntryBlockSet(object):
         """Reads from a File object. NOTE: theFile.hasLd() must be True so
         the Logical Record Header must have been read already."""
         while theFile.hasLd():
-            eb = EntryBlockRead(theFile)
+            t, s, r = theFile.unpack(STRUCT_ENTRY_BLOCK_PREAMBLE)
+            if s == 0:
+                # Special case when size is 0
+                rep_code = None
+            else:
+                rep_code= RepCode.readRepCode(r, theFile, s)
+            eb = EntryBlock(t, s, r, rep_code)
             try:
                 self.setEntryBlock(eb)
             except ExceptionEntryBlock as err:

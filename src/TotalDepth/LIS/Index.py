@@ -168,14 +168,18 @@ def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
                 print(' Plot Records DONE '.center(75, '='))
             #print('CPU time = %8.3f (S)' % timeS[-1])
             if t == 0:
-                pikBy = pickle.dumps(myIdx)
+                # Pickle/unpickle first time around
+                pickle_str = pickle.dumps(myIdx)
+                un_pickled_object = pickle.loads(pickle_str)
+                if myIdx.lrTypeS != un_pickled_object.lrTypeS:
+                    raise RuntimeError(f'Pickle failed {myIdx.lrTypeS} != {un_pickled_object.lrTypeS}')
                 #print('Pickled: file={:10d} size={:10d} {:8.3f}%'.format(
                 #    os.path.getsize(fp),
                 #    len(pikBy),
                 #    len(pikBy)*100/os.path.getsize(fp)
                 #    )
                 #)
-                myLenPickle = len(pikBy)
+                myLenPickle = len(pickle_str)
                 #print('{:d}\t{:d}\t{:.3f} #Pickled'.format(os.path.getsize(fp), len(pikBy), len(pikBy)*100/os.path.getsize(fp)))
                 if convertJson:
                     jsonObj = myIdx.jsonObject()

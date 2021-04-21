@@ -26,6 +26,7 @@ __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
 import os
+import pickle
 import sys
 import time
 import logging
@@ -352,6 +353,25 @@ class TestIndex_genPlotRecords(TestFileIndexerBase):
         print('')
         print('Index pass[0].logPass.longStr():')
         print(myPasses[0].logPass.longStr())
+
+    def test_01(self):
+        """Test pickle/un-pickle with EntryBlocks."""
+        myBa = bytearray(self._retFileHead())
+        # Add a log pass
+        myLp = self._retLogPassGen()
+        # Stick the DFSR on the array
+        myBa += self.retPrS(myLp.lrBytesDFSR())
+        # Add some logical records
+        for i in range(4):
+            myBa += self.retPrS(myLp.lrBytes(i*100, 100))
+        myBa += self._retFileTail()
+        myFile, lis_index = self._retFileIndexSingleChannel()
+        # lis_index = FileIndexer.FileIndex(myFile)
+        pickled_index = pickle.dumps(lis_index)
+        # print(pickled_index)
+        new_index = pickle.loads(pickled_index)
+        # print(new_index)
+        self.assertEqual(lis_index.lrTypeS, new_index.lrTypeS)
 
 class Special(unittest.TestCase):
     """Special tests."""
