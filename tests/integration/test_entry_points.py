@@ -280,9 +280,9 @@ def test_tdrp66v1indexpickle_dir(tmpdir, args):
     subprocess.check_call(['tdrp66v1indexpickle',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
-@pytest.mark.slow
-def test_tdrp66v1indexpickle_gnuplot(tmpdir):
-    subprocess.check_call(['tdrp66v1indexpickle', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+# @pytest.mark.slow
+# def test_tdrp66v1indexpickle_gnuplot(tmpdir):
+#     subprocess.check_call(['tdrp66v1indexpickle', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
 
 # -------- END: tdrp66v1indexpickle --------
 
