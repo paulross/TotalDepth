@@ -72,7 +72,7 @@ create_bdist_wheel() {
 #    echo "---> Running tests:"
 #    pytest tests
     echo "---> Running setup for bdist_wheel:"
-    python setup.py bdist_wheel
+    MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py bdist_wheel
   done
 }
 

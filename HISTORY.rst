@@ -2,13 +2,13 @@
 History
 ***********
 
-0.3.4 (2021-04-21)
+0.3.5 (2021-04-21)
 ====================
 
-* Fix pickling issue with the LIS Indexer.
+* Fix pickling issue #24 with the LIS Indexer.
 
-0.3.3 (2021-04-21)
-====================
+0.3.3, 0.3.4 (2021-04-21)
+=========================
 
 * Not released.
 
