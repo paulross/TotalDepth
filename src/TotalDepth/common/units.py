@@ -28,6 +28,9 @@ The fallback, secondary source, is from our static snapshot of that page which l
 When running tests with ``--runslow`` the ``tests.integration.common.test_units.test_slb_units_write_to_json`` test will
 re-populate that static data file.
 
+This included currencies that all have zero offset and unit scale.
+Currencies: https://en.wikipedia.org/wiki/ISO_4217
+ISO 4217 official currency codes in XML: https://www.currency-iso.org/dam/downloads/lists/list_one.xml
 """
 import functools
 import json
