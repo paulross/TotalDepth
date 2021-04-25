@@ -189,6 +189,7 @@ class TestLrWithDateField(unittest.TestCase):
         self.assertEqual(myLr.date, b'        ')
         self.assertTrue(myLr.ymd is None)
 
+    @pytest.mark.skipif(sys.version_info[:3] == (3, 9, 0), reason="Python 3.9.0 gives 'Bus Error: 10")
     def test_01(self):
         """TestLrWithDateField.test_01(): LrFileHead.ymd '  /  /  ' fails."""
         myBy = io.BytesIO(
@@ -205,8 +206,10 @@ class TestLrWithDateField(unittest.TestCase):
         self.assertEqual(myLr.date, b'  /  /  ')
         self.assertTrue(myLr.ymd is None)
 
+    @pytest.mark.skipif(sys.version_info[:3] == (3, 9, 0), reason="Python 3.9.0 gives 'Bus Error: 10")
     def test_02(self):
         """TestLrWithDateField.test_02(): LrFileHead.ymd with garbage characters fails."""
+        print('AA')
         myBy = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + 58) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(0) \
