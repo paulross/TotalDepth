@@ -75,7 +75,7 @@ create_bdist_wheel() {
     echo "---> Result of pip install:"
     pip list
     echo "---> Running python setup.py develop:"
-    python setup.py develop
+    MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py develop
     echo "---> Running tests:"
     # Fail fast with -x
     pytest tests -x
