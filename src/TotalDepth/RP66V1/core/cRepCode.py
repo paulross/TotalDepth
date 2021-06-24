@@ -17,3 +17,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Paul Ross: apaulross@gmail.com
+
+# This is a placeholder can be replaced by 'TotalDepth/RP66V1/core/cRepCode.so'
+#     Extension(
+#         'TotalDepth.RP66V1.core.cRepCode',
+#         sources=[
+#             'src/TotalDepth/RP66V1/core/src/cpy/cRepCode.cpp',
+#             'src/TotalDepth/RP66V1/core/src/cpp/RepCode.cpp',
+#         ],
+#         extra_compile_args=extra_compile_args + [
+#             '-Isrc/TotalDepth/RP66V1/core/src/cpp',
+#             '-std=c++14',
+#         ],
+#     ),
+
+# Information about floats
+# Struct unpack double uses:
+# See _PyFloat_Unpack8 in floatobject.c
+# That does a simple memcpy if it is IEEE reversing it if the endianness is different.
+# Can find out what Python is built with by:
+# >>> float.__getformat__('double')
+# 'IEEE, little-endian'
+# RP66V1 FSINGL and FDOUBL are big endian however so there is a small reversing cost but we probably can't do better.

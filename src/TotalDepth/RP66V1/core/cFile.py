@@ -17,3 +17,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Paul Ross: apaulross@gmail.com
+
+# This is a placeholder that can be replaced by 'TotalDepth/RP66V1/core/cFile.so'
+#     Extension(
+#         'TotalDepth.RP66V1.core.cFile',
+#         sources=[
+#             'src/TotalDepth/RP66V1/core/src/cpy/cFile.cpp',
+#             'src/TotalDepth/RP66V1/core/src/cpp/File.cpp',
+#         ],
+#         extra_compile_args=extra_compile_args + [
+#             '-Isrc/TotalDepth/RP66V1/core/src/cpp',
+#             '-std=c++14',
+#         ],
+#     ),
