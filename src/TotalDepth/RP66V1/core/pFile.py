@@ -314,7 +314,8 @@ class LogicalRecordSegmentHeader:
             record_type = read_one_byte(fobj)
         except ExceptionEOF:
             raise ExceptionLogicalRecordSegmentHeaderEOF(f'LogicalRecordSegmentHeader EOF at 0x{position:x}')
-        return position, length, attributes, record_type
+        else:
+            return position, length, attributes, record_type
 
     def read(self, fobj: typing.BinaryIO) -> None:
         """Read a new Logical Record Segment Header.
