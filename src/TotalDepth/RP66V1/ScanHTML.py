@@ -195,12 +195,12 @@ def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_
     html_write_table(table, xhtml_stream, class_style='sul')
 
 
-def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream, sort: bool) -> None:
         eflr = eflr_position.eflr
         if eflr.is_key_value():
-            table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=True)
+            table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=sort)
         else:
-            table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=True)
+            table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=sort)
         html_write_table(table_as_strings, xhtml_stream, class_style='eflr',
                          id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
 
@@ -456,6 +456,7 @@ def html_write_body(
         logical_file_sequence: LogicalFile.LogicalIndex,
         frame_slice: Slice.Slice,
         xhtml_stream: XmlWrite.XhtmlStream,
+        sort_eflr: bool
     ) -> HTMLBodySummary:
     """Write out the <body> of the document."""
     with XmlWrite.Element(xhtml_stream, 'h1'):
@@ -502,7 +503,7 @@ def html_write_body(
                     xhtml_stream.characters(
                         f'Logical File Defining Origin "{obj.name.I.decode("ascii")}" O: {obj.name.O} C: {obj.name.C}:'
                     )
-            html_write_EFLR_as_table(eflr_position, xhtml_stream)
+            html_write_EFLR_as_table(eflr_position, xhtml_stream, sort=sort_eflr)
         with XmlWrite.Element(xhtml_stream, 'h3'):
             xhtml_stream.characters('Log Pass')
         if logical_file.has_log_pass:
@@ -524,7 +525,7 @@ def html_write_body(
 
 
 def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_process: bool,
-                                       frame_slice: Slice.Slice) -> HTMLBodySummary:
+                                       frame_slice: Slice.Slice, sort_eflr: bool) -> HTMLBodySummary:
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
@@ -556,13 +557,13 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                ret = html_write_body(logical_index, frame_slice, xhtml_stream)
+                ret = html_write_body(logical_index, frame_slice, xhtml_stream, sort_eflr)
     logger.info(f'html_scan_RP66V1_file_data_content(): Done "{os.path.basename(path_in)}"')
     return ret
 
 
 def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
-                       frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> HTMLResult:
+                       frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> HTMLResult:
     """Scan a single file and write out an HTML summary."""
     file_path_out = path_out + '.html'
     logger.debug(f'Scanning "{path_in}" to "{file_path_out}"')
@@ -579,10 +580,10 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                     os.makedirs(out_dir, exist_ok=True)
                 with open(file_path_out, 'w') as fout:
                     logger.info(f'scan_a_single_file() target: "{os.path.basename(file_path_out)}"')
-                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice)
+                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice, sort_eflr)
                 len_scan_output = os.path.getsize(file_path_out)
             else:
-                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice)
+                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice, sort_eflr)
                 len_scan_output = -1
             result = HTMLResult(
                 path_in,
@@ -849,7 +850,7 @@ def _write_top_level_index_table_body(index_file_path: str,
 
 
 def scan_dir_multiprocessing(dir_in, dir_out, jobs,
-                             frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
+                             frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -858,7 +859,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [
-        (t.filePathIn, t.filePathOut, False, frame_slice) for t in DirWalk.dirWalk(
+        (t.filePathIn, t.filePathOut, False, frame_slice, sort_eflr) for t in DirWalk.dirWalk(
             dir_in, dir_out, theFnMatch='', recursive=True, bigFirst=True
         )
     ]
@@ -876,7 +877,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
 
 def scan_dir_or_file(path_in: str, path_out: str,
                      recursive: bool, label_process: bool,
-                     frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
+                     frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
     """Scans a directory or file putting the results in path_out.
     Returns a dict of {path_in : HTMLResult, ...}
     """
@@ -892,7 +893,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
         if not recursive:
             for file_in_out in DirWalk.dirWalk(path_in, path_out, theFnMatch='', recursive=recursive, bigFirst=False):
                 result = scan_a_single_file(
-                    file_in_out.filePathIn, file_in_out.filePathOut, label_process, frame_slice
+                    file_in_out.filePathIn, file_in_out.filePathOut, label_process, frame_slice, sort_eflr
                 )
                 ret[file_in_out.filePathIn] = result
                 if not result.exception and not result.ignored:
@@ -910,7 +911,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
                     # Respect sub-directories in root
                     # root_rel_to_path_in.append(file)
                     file_path_out = os.path.join(dir_out, file)
-                    result = scan_a_single_file(file_path_in, file_path_out, label_process, frame_slice)
+                    result = scan_a_single_file(file_path_in, file_path_out, label_process, frame_slice, sort_eflr)
                     ret[file_path_in] = result
                     if not result.exception and not result.ignored:
                         index_map_global[result.path_output] = result
@@ -918,7 +919,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
                 process.add_message_to_queue('Writing Indexes.')
             _write_indexes(path_out, index_map_global)
     else:
-        ret[path_in] = scan_a_single_file(path_in, path_out, label_process, frame_slice)
+        ret[path_in] = scan_a_single_file(path_in, path_out, label_process, frame_slice, sort_eflr)
     return ret
 
 
@@ -1037,6 +1038,10 @@ def main() -> int:
         '-e', '--encrypted', action='store_true',
         help='Output encrypted Logical Records as well. [default: %(default)s]',
     )
+    parser.add_argument(
+        '--sort-eflr', action='store_true',
+        help='Sorts the rows of EFLRs. [default: %(default)s]',
+    )
     Slice.add_frame_slice_to_argument_parser(parser)
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
@@ -1054,6 +1059,7 @@ def main() -> int:
                 args.recurse,
                 label_process=True,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
     else:
         if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
@@ -1062,6 +1068,7 @@ def main() -> int:
                 args.path_out,
                 args.jobs,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
         else:
             result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
@@ -1070,6 +1077,7 @@ def main() -> int:
                 args.recurse,
                 label_process=False,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing HTML Complete.')
