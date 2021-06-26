@@ -128,7 +128,7 @@ LIS Improvements
       - :strike:`Full XNAM direct support for LIS-A.`
       - :strike:`0`
       - :strike:`3`
-      - :strike:`No. These only occur in a small number from a minority producer using specialised software. They do not occur in the huge majority of LIS files.`
+      - :strike:`No. These only occur in a small number from a minority producer using specialised software. They do not occur in mainstream LIS files.`
     * - LIS.index_c
       - Merge fast indexer in C for 100x performance.
       - 2

@@ -39,3 +39,8 @@
 # >>> float.__getformat__('double')
 # 'IEEE, little-endian'
 # RP66V1 FSINGL and FDOUBL are big endian however so there is a small reversing cost but we probably can't do better.
+#
+# Might be worth doing an experiment: Reading large binary files of int/long/float/double with Python struct and
+# C++ os >> foo to establish some bound of the maximum throughput of Python and C++.
+# Try also with endian conversion.
+# If the performance is very similar then there is no reason to have a C++ version.

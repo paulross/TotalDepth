@@ -31,4 +31,8 @@
 #         ],
 #     ),
 
-# NOTE: Most likely there is no performance advantage in implementing this in C/C++.
+# NOTE: Although, most likely there is no performance advantage in implementing this in C/C++ it is used in pFile
+# so will have to be implemented in C/C++ if cFile is implemented. In that case move the Python code around and delete
+# *StorageUnitLable.py before moving to C++.
+# To avoid having to use a Capsule move the StorageUnitLabel (+tests) into RP66V1.core.File as that is the only place
+# it is used.
