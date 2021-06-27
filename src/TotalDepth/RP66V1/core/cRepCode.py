@@ -44,3 +44,45 @@
 # C++ os >> foo to establish some bound of the maximum throughput of Python and C++.
 # Try also with endian conversion.
 # If the performance is very similar then there is no reason to have a C++ version.
+
+# Intermediate Index - Contains the initial fields of EFLR and IFLR.
+#
+# If we have an intermediate index (the initial fields of each EFLR and IFLR).
+# EFLR:
+# -----
+# The initial bytes go into a Set object.
+#
+# class Set:
+#     """Class that represents a component set. See [RP66V1 3.2.2.1 Component Descriptor]"""
+#     def __init__(self, ld: LogicalData):
+#         ld_index = ld.index
+#         component_descriptor = ComponentDescriptor(ld.read())
+#         if not component_descriptor.is_set_group:
+#             raise ExceptionEFLRSet(f'Component Descriptor does not represent a set but a {component_descriptor.type}.')
+#         self.type: bytes = RepCode.IDENT(ld)
+#         self.name: bytes = ComponentDescriptor.CHARACTERISTICS_AND_COMPONENT_FORMAT_SET_MAP['N'].global_default
+#         if component_descriptor.has_set_N:
+#             self.name = RepCode.IDENT(ld)
+#         self.logical_data_consumed = ld.index - ld_index
+#
+# So we need ComponentDescriptor that takes a single byte.
+# TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor.ComponentDescriptor could easily be implemented in C/C++.
+# And two IDENTs (Pascal strings).
+#
+# IFLR:
+# -----
+# IFLR needs OBNAME and UVARI:
+#         # [RP66V1 Section 3.3 Indirectly Formatted Logical Record]
+#         self.object_name: RepCode.ObjectName = RepCode.OBNAME(ld)
+#         # [RP66V1 Section 5.6.1 Frames]
+#         self.frame_number = RepCode.UVARI(ld)
+#
+# OBNAME is:
+#     o = ORIGIN(ld)
+#     c = USHORT(ld)
+#     i = IDENT(ld)
+#
+# ORIGIN is UVARI
+#
+# So, as a minimum implement ComponentDescriptor and Representation Codes IDENT (std::string), UVARI (uint_32) and
+# USHORT (uint_8).
