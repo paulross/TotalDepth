@@ -27,10 +27,10 @@ import copy
 import hashlib
 import io
 import logging
+import re
 import typing
 
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.util.bin_file_type import format_bytes
 
 
@@ -117,6 +117,136 @@ def write_two_bytes_big_endian(value: int, fobj: typing.BinaryIO) -> None:
 
 # ---------------- END: Low Level File Read Functions ------------------
 
+# ---------------- Storage Unit Label ------------------------------
+class ExceptionStorageUnitLabel(ExceptionTotalDepthRP66V1):
+    """Exception specialisation for this module."""
+    pass
+
+#: The first one must be StorageUnitLabel.SIZE + TIF_SIZE = 92 or 0x5c little endian
+#: 0000 0000 0000 0000 5c00 0000
+#: This is here just to raise and exception for TIF marked RP66V1 files.
+TIF_FILE_PREFIX = b'\x00' * 4 + b'\x00' * 4 + b'x5c\x00\x00\x00'
+
+
+class StorageUnitLabel:
+    """
+    The Storage Unit Label that must be at the beginning of a file.
+    See [RP66V1 Section 2.3.2 Storage Unit Label (SUL)].
+
+    Unique Storage Unit Labels seen in practice::
+
+        $ grep -rIh StorageUnitLabel <XML indexes> | sort | uniq -c
+          16   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="16384" sequence_number="1"
+                storage_set_identifier="CUSTOMER                                                    "
+                storage_unit_structure="RECORD"/>
+           2   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="16384" sequence_number="1"
+                storage_set_identifier="PRODUCER                                                    "
+                storage_unit_structure="RECORD"/>
+           1   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1"
+                storage_set_identifier="                                                            "
+                storage_unit_structure="RECORD"/>
+          34   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1"
+                storage_set_identifier="DLIS ATLAS 1                                                "
+                storage_unit_structure="RECORD"/>
+         537   <StorageUnitLabel dlis_version="V1.00" maximum_record_length="8192" sequence_number="1"
+                storage_set_identifier="Default Storage Set                                         "
+                storage_unit_structure="RECORD"/>
+    """
+    SIZE = 80
+    RE_STORAGE_UNIT_SEQUENCE_NUMBER = re.compile(b'^[0 ]*([1-9]+)$')
+    RE_DLIS_VERSION                 = re.compile(b'^(V1.\\d\\d)$')
+    RE_STORAGE_UNIT_STRUCTURE       = re.compile(b'^(RECORD)$')
+    RE_MAXIMUM_RECORD_LENGTH        = re.compile(b'^[0 ]*([1-9]+)$')
+
+    def __init__(self, by: bytes):
+        if len(by) != self.SIZE:
+            raise ExceptionStorageUnitLabel(f'Expected {self.SIZE} bytes, got {len(by)}')
+        # FIXME: Make this the responsibility of FileRead
+        # We do not support TIF markers.
+        if by[len(TIF_FILE_PREFIX):] == TIF_FILE_PREFIX:  # pragma: no cover
+            raise ExceptionStorageUnitLabel(f'This file appears to have TIF markers, de-TIF the file to read it.')
+        # Now the fields, storage_unit_sequence_number and maximum_record_length are converted to int
+        # the rest are kept as bytes.
+        m = self.RE_STORAGE_UNIT_SEQUENCE_NUMBER.match(by[:4])
+        if m is None:
+            raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on {by[:4]}')
+        self.storage_unit_sequence_number: int = int(m.group(1))
+        m = self.RE_DLIS_VERSION.match(by[4:9])
+        if m is None:
+            raise ExceptionStorageUnitLabel(f'Can not match RE_DLIS_VERSION on {by[4:9]}')
+        self.dlis_version: bytes = m.group(1)
+        m = self.RE_STORAGE_UNIT_STRUCTURE.match(by[9:15])
+        if m is None:
+            raise ExceptionStorageUnitLabel(f'Can not match RE_STORAGE_UNIT_STRUCTURE on {by[9:15]}')
+        self.storage_unit_structure: bytes = m.group(1)
+        m = self.RE_MAXIMUM_RECORD_LENGTH.match(by[15:20])
+        if m is None:
+            raise ExceptionStorageUnitLabel(f'Can not match RE_MAXIMUM_RECORD_LENGTH on {by[15:20]}')
+        self.maximum_record_length: int = int(m.group(1))
+        # TODO: Currently no enforcement here. Could check that this is printable ASCII.
+        # [RP66V1 Section 2.3.2 Comment 5.]
+        self.storage_set_identifier: bytes = by[20:]
+
+    def as_bytes(self) -> bytes:
+        """Returns the bytes that encode this Storage Unit Label."""
+        by = _create_bytes(
+            self.storage_unit_sequence_number,
+            self.dlis_version,
+            self.maximum_record_length,
+            self.storage_set_identifier,
+        )
+        return by
+
+    def __str__(self) -> str:
+        return '\n'.join(
+            [
+                'StorageUnitLabel:',
+                f'  Storage Unit Sequence Number: {self.storage_unit_sequence_number}',
+                f'                  DLIS Version: {self.dlis_version}',
+                f'        Storage Unit Structure: {self.storage_unit_structure}',
+                f'         Maximum Record Length: {self.maximum_record_length}',
+                f'        Storage Set Identifier: {self.storage_set_identifier}',
+            ]
+        )
+
+
+def _create_bytes(storage_unit_sequence_number: int,
+                  dlis_version: bytes,
+                  maximum_record_length: int,
+                  storage_set_identifier: bytes,
+                  ) -> bytes:
+    """Create bytes from the given field values."""
+    fields: typing.List[typing.Tuple[int, bytes]] = [
+        (4, f'{storage_unit_sequence_number:04d}'.encode('ascii')),
+        (5, dlis_version),
+        (6, b'RECORD'),
+        (5, f'{maximum_record_length:05}'.encode('ascii')),
+        (60, storage_set_identifier),
+    ]
+    bya = bytearray()
+    for length, field in fields:
+        if len(field) != length:
+            raise ExceptionStorageUnitLabel(f'{field} expected length {length} but got {len(field)}')
+        bya.extend(field)
+    assert len(bya) == StorageUnitLabel.SIZE
+    return bytes(bya)
+
+
+def create_storage_unit_label(storage_unit_sequence_number: int,
+                              dlis_version: bytes,
+                              maximum_record_length: int,
+                              storage_set_identifier: bytes,
+                              ) -> StorageUnitLabel:
+    """Create a StorageUnitLabel from the given values."""
+    by = _create_bytes(
+        storage_unit_sequence_number,
+        dlis_version,
+        maximum_record_length,
+        storage_set_identifier,
+    )
+    return StorageUnitLabel(by)
+
+# ---------------- END: Storage Unit Label ------------------------------
 
 # Some constants
 LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE = 16
@@ -383,9 +513,9 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
     Record."""
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         # Check VisibleRecord
-        if vr.position < StorageUnitLabel.StorageUnitLabel.SIZE:
+        if vr.position < StorageUnitLabel.SIZE:
             raise ValueError(
-                f'VisibleRecord at 0x{lrsh.position:x} must be >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE:x}'
+                f'VisibleRecord at 0x{lrsh.position:x} must be >= 0x{StorageUnitLabel.SIZE:x}'
             )
         assert vr.length >= LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
             f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x}'
@@ -395,9 +525,9 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
             )
         # Check LogicalRecordSegmentHeader
-        assert lrsh.position >= StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES, (
+        assert lrsh.position >= StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
-                f' >= 0x{StorageUnitLabel.StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
+                f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
             )
         assert lrsh.position <= vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
@@ -610,8 +740,8 @@ class FileRead:
             self.file.seek(0)
         # Read the Storage Unit Label, see [RP66V1] 2.3.2
         try:
-            self.sul = StorageUnitLabel.StorageUnitLabel(self.file.read(StorageUnitLabel.StorageUnitLabel.SIZE))
-        except StorageUnitLabel.ExceptionStorageUnitLabel as err:
+            self.sul = StorageUnitLabel(self.file.read(StorageUnitLabel.SIZE))
+        except ExceptionStorageUnitLabel as err:
             raise ExceptionFileRead(f'FileRead can not construct SUL: {str(err)}')
         # TODO: It is acceptable that a file just has a SUL, no Visible or Logical records (we have one example).
         #   We need to handle that rare case.
@@ -636,7 +766,7 @@ class FileRead:
         return False
 
     def _set_file_and_read_first_visible_record(self) -> None:
-        self.file.seek(StorageUnitLabel.StorageUnitLabel.SIZE)
+        self.file.seek(StorageUnitLabel.SIZE)
         self.visible_record.read(self.file)
 
     def _set_file_and_read_first_logical_record_segment_header(self) -> None:

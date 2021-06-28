@@ -6,10 +6,83 @@ import typing
 import pytest
 
 from TotalDepth.RP66V1.core import File
-from TotalDepth.RP66V1.core import StorageUnitLabel
 
 # from . import test_data
 from tests.unit.RP66V1.core import test_data
+
+IDENTIFIER = b' ' * 60
+SIMPLE_SUL_BYTES = b'0001V1.00RECORD08192                                                            '
+
+def _create_simple_sul():
+    sul = File.create_storage_unit_label(1, b'V1.00', 8192, IDENTIFIER)
+    return sul
+
+
+def test_simple_sul():
+    sul = _create_simple_sul()
+    assert sul.storage_unit_sequence_number == 1
+    assert sul.dlis_version == b'V1.00'
+    assert sul.maximum_record_length == 8192
+    assert sul.storage_unit_structure == b'RECORD'
+    assert sul.storage_set_identifier == IDENTIFIER
+
+
+def test_simple_sul_as_bytes():
+    sul = _create_simple_sul()
+    # print(sul.as_bytes())
+    expected = SIMPLE_SUL_BYTES
+    assert sul.as_bytes() == expected
+
+
+def test_simple_sul_str():
+    sul = _create_simple_sul()
+    # print(sul)
+    expected = """StorageUnitLabel:
+  Storage Unit Sequence Number: 1
+                  DLIS Version: b'V1.00'
+        Storage Unit Structure: b'RECORD'
+         Maximum Record Length: 8192
+        Storage Set Identifier: b'                                                            '"""
+    assert str(sul) == expected
+
+
+def test_sul_ctor():
+    sul = File.StorageUnitLabel(SIMPLE_SUL_BYTES)
+    assert sul.as_bytes() == SIMPLE_SUL_BYTES
+
+
+@pytest.mark.parametrize(
+    'by, expected',
+    (
+        # Size wrong
+        (b'', 'Expected 80 bytes, got 0'),
+        (SIMPLE_SUL_BYTES + b' ', 'Expected 80 bytes, got 81'),
+        # storage_unit_sequence_number not a number
+        (
+            b'A001V1.00RECORD08192                                                            ',
+            "Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on b'A001'",
+        ),
+        # dlis_version incorrect
+        (
+            b'0001V2.00RECORD08192                                                            ',
+            "Can not match RE_DLIS_VERSION on b'V2.00'",
+        ),
+        # storage_unit_structure incorrect
+        (
+            b'0001V1.00REXORD08192                                                            ',
+            "Can not match RE_STORAGE_UNIT_STRUCTURE on b'REXORD'",
+        ),
+        # maximum_record_length incorrect
+        (
+            b'0001V1.00RECORDxxxxx                                                            ',
+            "Can not match RE_MAXIMUM_RECORD_LENGTH on b'xxxxx'",
+        ),
+    )
+)
+def test_sul_ctor_raises(by, expected):
+    with pytest.raises(File.ExceptionStorageUnitLabel) as err:
+        File.StorageUnitLabel(by)
+    assert err.value.args[0] == expected
 
 
 def test_read_one_bytes():
@@ -526,12 +599,12 @@ def test_LRSH_attribute_str(by, expected):
 def test_LogicalRecordPosition_ctor():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x9f\x01',  # LRSH: position=4, length=128, attributes=0x9f, type=1
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     assert fobj.read() == b''
@@ -543,12 +616,12 @@ def test_LogicalRecordPosition_ctor():
 def test_LogicalRecordPosition_str():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x9f\x01',  # LRSH: position=4, length=128, attributes=0x9f, type=1
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     assert fobj.read() == b''
@@ -559,12 +632,12 @@ def test_LogicalRecordPosition_str():
 def test_LogicalRecordPosition_eq():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x9f\x01',  # LRSH: position=4, length=128, attributes=0x9f, type=1
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     assert fobj.read() == b''
@@ -590,7 +663,7 @@ def test_LogicalRecordPosition_eq():
 )
 def test_LogicalRecordPosition_ctor_raises(sul_length, vr_bytes, lrsh_bytes, expected):
     if sul_length is None:
-        sul_length = StorageUnitLabel.StorageUnitLabel.SIZE
+        sul_length = File.StorageUnitLabel.SIZE
     fobj = io.BytesIO(
         b''.join([
             b'\x00' * sul_length,  # Simulated Storage Unit Label
@@ -732,13 +805,13 @@ def test_logical_data_getitem(index, item):
 def test_FileLogicalData_ctor():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             # b'\x00\x80\x9f\x01',  # LRSH: position=4, length=128, attributes=0x9f, type=1
             b'\x00\x80\x80\x01',
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
@@ -755,12 +828,12 @@ def test_FileLogicalData_ctor():
 def test_FileLogicalData_add_bytes():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x80\x01',  # LRSH
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
@@ -778,12 +851,12 @@ def test_FileLogicalData_add_bytes():
 def test_FileLogicalData_add_bytes_and_seal():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x80\x01',  # LRSH
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
@@ -806,12 +879,12 @@ def test_FileLogicalData_add_bytes_and_seal():
 def test_FileLogicalData_seal_raises():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x80\x01',  # LRSH
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
@@ -825,12 +898,12 @@ def test_FileLogicalData_seal_raises():
 def test_FileLogicalData_str():
     fobj = io.BytesIO(
         b''.join([
-            b'\x00' * StorageUnitLabel.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
+            b'\x00' * File.StorageUnitLabel.SIZE,  # Simulated Storage Unit Label
             b'\x01\x00\xff\x01',  # Visible record: position=0, length=256, type=0xff01),
             b'\x00\x80\x80\x01',  # LRSH
         ])
     )
-    sul = fobj.read(StorageUnitLabel.StorageUnitLabel.SIZE)
+    sul = fobj.read(File.StorageUnitLabel.SIZE)
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
