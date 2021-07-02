@@ -1,3 +1,5 @@
+import io
+
 import numpy as np
 import pytest
 
@@ -171,7 +173,7 @@ def test_XAxis_append_summary(position_xvalues, exp_summary):
     x_values = []
     for frame_number, (vr_postion, lrsh_position, x_value) in enumerate(position_xvalues):
         xaxis.append(
-            File.LogicalRecordPositionBase(vr_postion, lrsh_position),
+            None, #File.LogicalRecordPosition(vr_postion, lrsh_position),
             frame_number + 1,
             x_value
         )
@@ -194,7 +196,7 @@ def test_XAxis_append_summary(position_xvalues, exp_summary):
                 (0x0, 0xff, 1.0),
             ],
             [
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0xff),
+                XAxis.IFLRReference(logical_record_position=None, #File.LogicalRecordPosition(0x0, 0xff),
                                     frame_number=1, x_axis=1.0),
             ],
         ),
@@ -204,9 +206,9 @@ def test_XAxis_append_summary(position_xvalues, exp_summary):
                 (0x2, 0x2ff, 2.0),
             ],
             [
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x0, 0xff),
+                XAxis.IFLRReference(logical_record_position=None, #File.LogicalRecordPosition(0x0, 0xff),
                                     frame_number=1, x_axis=1.0),
-                XAxis.IFLRReference(logical_record_position=File.LogicalRecordPositionBase(0x2, 0x2ff),
+                XAxis.IFLRReference(logical_record_position=None, #File.LogicalRecordPosition(0x2, 0x2ff),
                                     frame_number=2, x_axis=2.0),
             ],
         ),
@@ -217,7 +219,7 @@ def test_XAxis_getitem(position_xvalues, expected):
     x_values = []
     for frame_number, (vr_postion, lrsh_position, x_value) in enumerate(position_xvalues):
         x_axis.append(
-            File.LogicalRecordPositionBase(vr_postion, lrsh_position),
+            None, #File.LogicalRecordPosition(vr_postion, lrsh_position),
             frame_number + 1,
             x_value
         )

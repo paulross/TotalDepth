@@ -492,23 +492,7 @@ class LogicalRecordSegmentHeader:
         return ret
 
 
-class LogicalRecordPositionBase:
-    """Simple base class with little error checking."""
-    def __init__(self, vr_position: int, lrsh_position: int):
-        assert vr_position + VisibleRecord.NUMBER_OF_HEADER_BYTES <= lrsh_position
-        self.vr_position: int = vr_position
-        self.lrsh_position: int = lrsh_position
-
-    def __str__(self):
-        return f'LogicalRecordPosition: VR: 0x{self.vr_position:08x} LRSH: 0x{self.lrsh_position:08x}'
-
-    def __eq__(self, other):
-        if self.__class__ == other.__class__:
-            return self.vr_position == other.vr_position and self.lrsh_position == other.lrsh_position
-        return NotImplemented
-
-
-class LogicalRecordPosition(LogicalRecordPositionBase):
+class LogicalRecordPosition:
     """Class that contains the file position of the Logical Record Segment Header and the immediately prior Visible
     Record."""
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
@@ -543,7 +527,18 @@ class LogicalRecordPosition(LogicalRecordPositionBase):
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
                 f' <= 0x{vr.length - VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
             )
-        super().__init__(vr.position, lrsh.position)
+        # Was in the Simple base class with little error checking."""
+        assert vr.position + VisibleRecord.NUMBER_OF_HEADER_BYTES <= lrsh.position
+        self.vr_position: int = vr.position
+        self.lrsh_position: int = lrsh.position
+
+    def __str__(self):
+        return f'LogicalRecordPosition: VR: 0x{self.vr_position:08x} LRSH: 0x{self.lrsh_position:08x}'
+
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return self.vr_position == other.vr_position and self.lrsh_position == other.lrsh_position
+        return NotImplemented
 
 
 class LogicalDataDescription(typing.NamedTuple):
@@ -930,7 +925,7 @@ class FileRead:
                 else:
                     previous_lrsh_is_last = lrsh.attributes.is_last
 
-    def get_file_logical_data(self, position: LogicalRecordPositionBase,
+    def get_file_logical_data(self, position: LogicalRecordPosition,
                               offset: int = 0, length: int = -1) -> FileLogicalData:
         """
         Returns a FileLogicalData object from the Logic Record position (Visible Record Position and Logical Record

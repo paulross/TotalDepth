@@ -121,8 +121,8 @@ class LogicalRecordIndex:
         position: File.LogicalRecordPosition = self.lr_pos_desc[index].position
         return self.rp66v1_file.get_file_logical_data(position, offset, length)
 
-    def get_file_logical_data_at_position(self, position: File.LogicalRecordPositionBase,
-                                          offset: int = 0, length: int = -1):
+    def get_file_logical_data_at_position(self, position: File.LogicalRecordPosition,
+                                          offset: int = 0, length: int = -1) -> File.FileLogicalData:
         """
         Returns a FileLogicalData object from the Logical Record position.
 
