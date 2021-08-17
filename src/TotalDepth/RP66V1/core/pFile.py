@@ -548,7 +548,7 @@ class FileLogicalData:
         assert self._invariants()
         self._bytes.extend(by)
 
-    def seal(self):
+    def seal(self) -> None:
         """All of the Logical Record has been read into this class so seal it to prevent any more data being added.
         This also creates a LogicalData object that encapsulates the logical data."""
         assert self._invariants()
@@ -687,6 +687,7 @@ class FileRead:
         Iterate across the Visible Record yielding the Logical Record Segments and the Logical Data fragment as
         (LogicalRecordSegmentHeader, bytes) objects.
         This leaves the file positioned at the next Visible Record or EOF.
+        TODO: Drop this from pFile/cFile as it is only used in one rare case in Scan.py?
         """
         self.file.seek(vr_given.position)
         self.visible_record.read(self.file)
