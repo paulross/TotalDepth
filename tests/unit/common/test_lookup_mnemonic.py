@@ -119,5 +119,5 @@ def test__decompose_table_to_key_value():
 )
 def test__decompose_table_by_header_row(table_text, table_id, expected):
     table = BeautifulSoup(table_text, features='lxml')
-    result = lookup_mnemonic._decompose_table_by_header_row(table, table_id)
+    result = lookup_mnemonic.decompose_table_by_header_row(table, table_id)
     assert result == expected

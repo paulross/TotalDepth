@@ -76,27 +76,36 @@ class Unit(typing.NamedTuple):
         DEGK    'kelvin'            K               Temperature 1                   0
         DEGR    'degree rankine'    degR            Temperature 0.555555555555556   0
 
+    There will also be an entry for RP66V1 files::
+
+        degF    'degree fahrenheit' "5/9 degC +32"  Temperature 0.555555555555556   -459.67
+
     So conversion from, say DEGC to DEGF is::
 
         ((value - DEGC.offset) * DEGC.scale) / DEGF.scale + DEGF.offset
 
         ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
     """
-    code: str
-    name: str
+    code: str  # This is how the units are identified in LIS or RP66V1 files.
+    name: str  # Human comprehensible name such as 'degree fahrenheit'. Usually lower case.
     standard_form: str  # This is how the units are identified in RP66V1 files.
-    dimension: str
+    dimension: str  # Class of units, example "Temperature"
     scale: float
     offset: float
 
     @property
     def is_primary(self) -> bool:
+        """True if this is looks like a primary unit."""
         return self.offset == 0.0 and self.scale == 1.0
+
+    def has_offset(self) -> bool:
+        """True if this has an offset, for example DEGC. False otherwise, for example metres."""
+        return self.offset != 0.0
 
 
 def _slb_units_from_parse_tree(parse_tree: BeautifulSoup) -> typing.Dict[str, Unit]:
     """Parse the OSDD Units page for units."""
-    raw_units = lookup_mnemonic._decompose_table_by_header_row(parse_tree, 'main_GridView1')
+    raw_units = lookup_mnemonic.decompose_table_by_header_row(parse_tree, 'main_GridView1')
     ret: typing.Dict[str, Unit] = {}
     for raw_unit in raw_units:
         unit = Unit(
@@ -283,4 +292,7 @@ def convert_function(unit_from: Unit, unit_to: Unit) -> typing.Callable:
 
 def convert_array(array: np.ndarray, unit_from: Unit, unit_to: Unit) -> np.ndarray:
     """Convert an array of values."""
-    return ((array - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+    if unit_from.has_offset() or unit_to.has_offset():
+        return ((array - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+    # Minor optimisation by ignoring offsets where possible.
+    return (array * unit_from.scale) / unit_to.scale
