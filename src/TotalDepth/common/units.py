@@ -261,7 +261,10 @@ def _convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
 
         ((0.0 - -273.15) * 1.0) / 0.555555555555556 + -459.67 == 32.0
     """
-    return ((value - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+    if unit_from.has_offset() or unit_to.has_offset():
+        return ((value - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
+    # Minor optimisation by ignoring offsets where possible.
+    return value * unit_from.scale / unit_to.scale
 
 
 def convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
@@ -287,7 +290,9 @@ def convert(value: float, unit_from: Unit, unit_to: Unit) -> float:
 
 def convert_function(unit_from: Unit, unit_to: Unit) -> typing.Callable:
     """Return a partial function to convert from one units to another."""
-    return functools.partial(convert, unit_from=unit_from, unit_to=unit_to)
+    if not same_dimension(unit_from, unit_to):
+        raise ExceptionUnitsDimension(f'Units {unit_from} and {unit_to} are not the same dimension.')
+    return functools.partial(_convert, unit_from=unit_from, unit_to=unit_to)
 
 
 def convert_array(array: np.ndarray, unit_from: Unit, unit_to: Unit) -> np.ndarray:
@@ -295,4 +300,16 @@ def convert_array(array: np.ndarray, unit_from: Unit, unit_to: Unit) -> np.ndarr
     if unit_from.has_offset() or unit_to.has_offset():
         return ((array - unit_from.offset) * unit_from.scale) / unit_to.scale + unit_to.offset
     # Minor optimisation by ignoring offsets where possible.
-    return (array * unit_from.scale) / unit_to.scale
+    return array * (unit_from.scale / unit_to.scale)
+
+
+def convert_array_inplace(array: np.ndarray, unit_from: Unit, unit_to: Unit) -> None:
+    """Convert an array of values in-place."""
+    if unit_from.has_offset() or unit_to.has_offset():
+        array -= unit_from.offset
+        array *= unit_from.scale
+        array /= unit_to.scale
+        array += unit_to.offset
+    else:
+        # Minor optimisation by ignoring offsets where possible.
+        array *= unit_from.scale / unit_to.scale

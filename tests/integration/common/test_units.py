@@ -152,9 +152,8 @@ def test_has_slb_units():
 def test_convert_function_fails():
     unit_from = units.slb_units('FEET')
     unit_to = units.slb_units('DEGC')
-    convert_function = units.convert_function(unit_from, unit_to)
     with pytest.raises(units.ExceptionUnitsDimension) as err:
-        convert_function(1.0)
+        units.convert_function(unit_from, unit_to)
     assert err.value.args[0] == (
         "Units"
         " Unit(code='FEET', name='foot', standard_form='ft', dimension='Length', scale=0.3048, offset=0.0)"
