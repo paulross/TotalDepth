@@ -66,6 +66,8 @@ entry_points_console_scripts_dict = {
     # BIT
     'tdbitread': 'TotalDepth.BIT.ReadBIT:main',
     'tdbittolas': 'TotalDepth.BIT.ToLAS:main',
+    # DAT
+    'tddatread': 'TotalDepth.DAT.ReadDATFiles:main',
 }
 
 ENTRY_POINTS_CONSOLE_SCRIPTS = [

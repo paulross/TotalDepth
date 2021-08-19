@@ -73,6 +73,8 @@ def test_slice_first(init, length, expected):
         ((None, None, 64), 921, 895),
         ((None, None, 64), 3181, 3135),
         ((None, None, 64), 3012, 3007),
+        ((None, None, 64), 3012, 3007),
+        ((2, 8, 2), 4, 3),
     )
 )
 def test_slice_last(init, length, expected):

@@ -620,7 +620,7 @@ def test_rp66v1_scan_ff01():
 #======================== END: RP66V1 ==================
 
 
-#======================== END: BIT ==================
+#======================== BIT ==================
 
 EXAMPLE_DATA_DIRECTORY_BIT = os.path.join(
     EXAMPLE_DATA_DIRECTORY, 'BIT', 'data',
@@ -710,3 +710,50 @@ def test_tdbittolas_gnuplot(tmpdir):
 # -------- END: tdbittolas --------
 
 #======================== END: BIT ==================
+
+
+#======================== DAT ==================
+
+EXAMPLE_DATA_DIRECTORY_DAT = os.path.join(
+    EXAMPLE_DATA_DIRECTORY, 'DAT', 'data',
+)
+
+
+def test_example_data_directory_dat_exists():
+    assert os.path.isdir(EXAMPLE_DATA_DIRECTORY_DAT)
+
+
+EXAMPLE_DATA_FILE_DAT = os.path.join(EXAMPLE_DATA_DIRECTORY_DAT, 'example.dat')
+
+
+def test_example_data_file_dat_exists():
+    assert os.path.isfile(EXAMPLE_DATA_FILE_DAT)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-v'],
+    )
+)
+def test_tddatread_dir(args):
+    subprocess.check_call(['tddatread',] + args + [EXAMPLE_DATA_DIRECTORY_DAT])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-v'],
+    )
+)
+def test_tddatread_file(args):
+    subprocess.check_call(['tddatread',] + args + [EXAMPLE_DATA_FILE_BIT])
+
+
+#======================== END: DAT ==================

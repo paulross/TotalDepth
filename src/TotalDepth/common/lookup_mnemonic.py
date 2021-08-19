@@ -280,7 +280,8 @@ def _decompose_table_to_key_value(parse_tree: BeautifulSoup, table_id: str) -> t
     return ret
 
 
-def _decompose_table_by_header_row(parse_tree: BeautifulSoup, table_id: str) -> typing.List[typing.Dict[str, str]]:
+def decompose_table_by_header_row(parse_tree: BeautifulSoup, table_id: str) -> typing.List[typing.Dict[str, str]]:
+    """Return a list of rows from an HTML table of given ID."""
     tables = parse_tree.find_all('table', id=table_id)
     if len(tables) != 1:  # pragma: no cover
         raise ExceptionLookupMnemonicTable('Multiple tables')
@@ -325,14 +326,14 @@ class Channel(typing.NamedTuple):
 
 
 def _get_product_description(parse_tree: BeautifulSoup, table_id: str) -> typing.Tuple[ProductDescription]:
-    raw_products = _decompose_table_by_header_row(parse_tree, table_id)
+    raw_products = decompose_table_by_header_row(parse_tree, table_id)
     ret = tuple(ProductDescription(d['Product'], d['Description']) for d in raw_products)
     return ret
 
 
 def _slb_data_channel(parse_tree: BeautifulSoup) -> Channel:
     details_dict = _decompose_table_to_key_value(parse_tree, 'main_DetailsView1')
-    raw_related_tools = _decompose_table_by_header_row(parse_tree, 'main_GridView1')
+    raw_related_tools = decompose_table_by_header_row(parse_tree, 'main_GridView1')
     related_tools_list = tuple(ToolDescription(d['Tool'], d['Description']) for d in raw_related_tools)
     related_products = _get_product_description(parse_tree, 'main_GridView2')
     ret = Channel(
@@ -391,7 +392,7 @@ class ChannelDescription(typing.NamedTuple):
 
 
 def _get_channel_description(parse_tree: BeautifulSoup, table_id: str) -> typing.Tuple[ChannelDescription]:
-    raw_chaannels = _decompose_table_by_header_row(parse_tree, table_id)
+    raw_chaannels = decompose_table_by_header_row(parse_tree, table_id)
     ret = tuple(ChannelDescription(d['Channel'], d['Description']) for d in raw_chaannels)
     return ret
 
@@ -402,7 +403,7 @@ class ParameterDescription(typing.NamedTuple):
 
 
 def _get_parameter_description(parse_tree: BeautifulSoup, table_id: str) -> typing.Tuple[ParameterDescription]:
-    raw_channels = _decompose_table_by_header_row(parse_tree, table_id)
+    raw_channels = decompose_table_by_header_row(parse_tree, table_id)
     ret = tuple(ParameterDescription(d['Parameter'], d['Description']) for d in raw_channels)
     return ret
 

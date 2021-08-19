@@ -256,7 +256,10 @@ def main() -> int:
     print(f'     Success: {files_ok:16,d}')
     print(f'    Failures: {files_fail:16,d}')
     print(f' Total input: {total_input:16,d} bytes')
-    print(f'Average size: {int(total_input / (files_fail+files_ok)):16,d} bytes')
+    if files_fail + files_ok:
+        print(f'Average size: {int(total_input / (files_fail+files_ok)):16,d} bytes')
+    else:
+        print(f'Average size: {"N/A":16} bytes')
     print(f'Total frames: {total_frames:16,d}')
     print(f'  Total time: {total_time:16.3f} (s)')
     print(f'        Rate: {ms_mb:16.1f} ms/Mb')
