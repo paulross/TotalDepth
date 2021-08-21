@@ -58,6 +58,7 @@ def test_entry_point_help_help(entry_point):
     subprocess.check_call([entry_point, '--help'])
 
 
+# -------- tddetif --------
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
@@ -70,6 +71,7 @@ def test_entry_point_help_help(entry_point):
 def test_tddetif(tmpdir, args):
     subprocess.check_call(['tddetif',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
+# -------- END: tddetif --------
 
 # -------- tdarchive --------
 @pytest.mark.slow
@@ -233,6 +235,39 @@ def test_lis_basic_file_exists():
     assert os.path.isfile(LIS_BASIC_FILE)
 
 
+# -------- tdlisdumpframeset --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-k', ],
+        ['-no-frames'],
+        ['-no-frames'],
+        ['-summary'],
+        ['-c', "'C1  '"],
+    )
+)
+def test_tdlisindex_file(tmpdir, args):
+    subprocess.check_call(['tdlisdumpframeset', ] + args + [LIS_BASIC_FILE, ])
+
+# -------- END: tdlisdumpframeset --------
+
+# -------- tdlisindex --------
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-v', ],
+        ['-v', '-s'],
+        ['-s', '-t 3'],
+    )
+)
+def test_tdlisindex_file(tmpdir, args):
+    subprocess.check_call(['tdlisindex', ] + args + [LIS_BASIC_FILE, ])
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
@@ -240,10 +275,51 @@ def test_lis_basic_file_exists():
         [],
         ['-r'],
         ['-r', '-j 2'],
+        ['-r', '-v'],
+        ['-r', '-s'],
+        ['-r', '-t 3'],
     )
 )
-def test_tdlistohtml(tmpdir, args):
-    subprocess.check_call(['tdlistohtml',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+def test_tdlisindex_dir(args):
+    subprocess.check_call(['tdlisindex', ] + args + [EXAMPLE_DATA_DIRECTORY_LIS, ])
+
+
+# -------- END: tdlisindex --------
+
+# -------- tdlistohtml --------
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+        ['-r'],
+        ['-r', '-j 2'],
+        ['-r', '-k'],
+    )
+)
+def test_tdlistohtml_dir(tmpdir, args):
+    subprocess.check_call(['tdlistohtml', ] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    'args',
+    (
+        [],
+    )
+)
+def test_tdlistohtml_file(tmpdir, args):
+    file_path = os.path.join(str(tmpdir), os.path.basename(LIS_BASIC_FILE))
+    subprocess.check_call(['tdlistohtml', ] + args + [LIS_BASIC_FILE, file_path])
+
+
+@pytest.mark.slow
+def test_tdlistohtml_gnuplot(tmpdir):
+    subprocess.check_call(['tdlistohtml', EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
+
+# -------- END: tdlistohtml --------
 
 # -------- tdlistolas --------
 @pytest.mark.slow
@@ -398,6 +474,7 @@ RP66V1_FILES = [
         ['--LR', '--frame-slice=,,64'],
         # Test data
         ['-T'],
+        ['--LRSH-consistency'],
     )
 )
 def test_tdrp66v1scan_file(args):
@@ -414,6 +491,12 @@ def test_tdrp66v1scan_file(args):
 def test_tdrp66v1scan_dir(tmpdir, args):
     cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
     subprocess.check_call(cmd_args)
+
+
+@pytest.mark.slow
+def test_tdrp66v1scan_gnuplot(tmpdir):
+    subprocess.check_call(['tdrp66v1scan', RP66V1_DATA_DIR, '-r', '-V', f'--gnuplot={str(tmpdir)}'])
+
 
 
 @pytest.mark.xfail(reason='Not sure why this is failing, it seems pretty innocuous.')

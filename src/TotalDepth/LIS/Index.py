@@ -157,6 +157,22 @@ class IndexTimer:
     def add_time(self, t):
         self.times.append(t)
 
+    @staticmethod
+    def header() -> str:
+        ret = (
+            f'{"Er":2}'
+            f' {"File Size":>12}'
+            f' {"Len Pickle":>12}'
+            f' {"Len Json":>12}'
+            f' {"Time Min":>8}'
+            f' {"Time Avg":>8}'
+            f' {"Time Max":>8}'
+            f' {"Time Med":>8}'
+            f' {"Rate Med":>8}'
+            # f' {self.path}'
+        )
+        return ret
+
 
 def index_file(file_path: str, num_times: int, verbose: int, keepGoing) -> IndexTimer:
     logging.info('Index.indexFile(): {:s}'.format(os.path.abspath(file_path)))
@@ -235,16 +251,13 @@ def index_dir_multi_process(directory, recursive, num_times, verbose, keepGoing,
     logging.info('indexDirMultiProcess(): Setting MP jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [(fp, num_times, verbose, keepGoing) for fp in generate_file_paths(directory, recursive)]
-    result = IndexTimer()
+    # result = IndexTimer(directory)
     results = [
         r.get() for r in [
             pool.apply_async(index_file, t) for t in tasks
         ]
     ]
-    ret: typing.Dict[str, IndexTimer] = {}
-    for result in results:
-        for path in result:
-            ret[path] = result
+    ret: typing.Dict[str, IndexTimer] = {v.path: v for v in results}
     return ret
 
 ################################
@@ -321,10 +334,12 @@ Indexes LIS files recursively."""
         common_prefix_len = len(os.path.commonpath([v.path for v in results.values()]))
         # Separate non-error indexes from error indexes
         print(f'Indexes completed without error [{len(results) - error_count}]:')
+        print(IndexTimer.header())
         for k in sorted(results.keys()):
             if results[k].error_count == 0:
                 print(results[k], results[k].path[common_prefix_len:])
         print(f'Indexes completed with error [{error_count}]:')
+        print(IndexTimer.header())
         for k in sorted(results.keys()):
             if results[k].error_count != 0:
                 print(results[k], results[k].path[common_prefix_len:])

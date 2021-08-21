@@ -65,7 +65,9 @@ def dump_frame_sets(fp, keep_going, output_frames: bool, output_summary: bool, c
                             indexes.append(i)
                 else:
                     headers.extend([
-                        '{:s} [{:s}]'.format(m.decode('ascii'), u.decode('ascii')) for m, u in aLp.logPass.genFrameSetHeadings()
+                        # '{:s} [{:s}]'.format(m.decode('ascii'), u.decode('ascii')) for m, u in aLp.logPass.genFrameSetHeadings()
+                        # '{:s} [{:s}]'.format(str(m), str(u.decode('ascii'))) for m, u in aLp.logPass.genFrameSetHeadings()
+                        '{:s} [{:s}]'.format(str(m), str(u)) for m, u in aLp.logPass.genFrameSetHeadings()
                     ])
                 if len(channels) and len(indexes) == len(channels):
                     logging.warning(
