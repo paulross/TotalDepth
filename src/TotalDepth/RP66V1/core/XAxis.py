@@ -128,7 +128,7 @@ class XAxisSummary(typing.NamedTuple):
 
 class IFLRReference(typing.NamedTuple):
     """POD class that represents the position of the IFLR in the file."""
-    logical_record_position: File.LogicalRecordPositionBase
+    logical_record_position: File.LogicalRecordPosition
     frame_number: int  # TODO: Omit this  as it is implicit in the XAxis class?
     x_axis: typing.Union[int, float]
 
@@ -145,7 +145,7 @@ class XAxis:
         self._data: typing.List[IFLRReference] = []
         self._summary: typing.Union[None, XAxisSummary] = None
 
-    def append(self, position: File.LogicalRecordPositionBase, frame_number: int, x_axis: typing.Union[int, float]) -> None:
+    def append(self, position: File.LogicalRecordPosition, frame_number: int, x_axis: typing.Union[int, float]) -> None:
         """Add a IFLRReference to the XAxis."""
         # TODO: Verify the data position, frame number increasing etc.
         self._summary = None
