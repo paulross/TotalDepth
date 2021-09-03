@@ -44,7 +44,7 @@ An example of a High Resolution Dipmeter plotted at 1:25 scale:
 Accessing Frame Data as a ``numpy`` Array
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here is an example of accessing RP66V1 (DLIS) data as a numpy array and using ``np.describe()`` to describe each array:
+Here is an example of accessing RP66V1 (DLIS) data as a numpy array and using ``np.info()`` to describe each array:
 
 .. code-block:: python
 

@@ -19,6 +19,8 @@ This describes the command line tools that are available for processing BIT file
       - Description
     * - ``tdbitread``
       - Generates a summary of an archive of BIT file(s). :ref:`Link <cmd_line_tools_bit_tdbitread>`
+    * - ``tdbittolas``
+      - Converts BIT file(s) to LAS file(s). :ref:`Link <cmd_line_tools_bit_tdbittolas>`
 
 
 .. _cmd_line_tools_bit_tdbitread:
