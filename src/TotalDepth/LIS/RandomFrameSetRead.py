@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """
 Created on 25 Feb 2011
@@ -116,27 +116,14 @@ class ResultS(object):
         return 'NO results.'
 
 def _loadFrameSetAndAccumulate(theF, theLp, theFrameSlice, theChList):
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        tS = time.perf_counter()
-    else:
-        tS = time.clock()
+    tS = time.perf_counter()
     theLp.setFrameSet(theF, theFrSl=theFrameSlice, theChList=theChList)
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        tE_load = time.perf_counter() - tS
-    else:
-        tE_load = time.clock() - tS
-
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        tS = time.perf_counter()
-    else:
-        tS = time.clock()
+    tE_load = time.perf_counter() - tS
+    tS = time.perf_counter()
     #print('theFrameSlice', theFrameSlice)
     myAcc = theLp.frameSet.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean,])
     #print(myAcc)
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        tE_acc = time.perf_counter() - tS
-    else:
-        tE_acc = time.clock() - tS
+    tE_acc = time.perf_counter() - tS
     numVals = theLp.frameSet.numValues
     mbRead = numVals * 4 / 2**20
     loadCost = 1000 * tE_load / mbRead
@@ -306,16 +293,10 @@ def processFile(f, tests, keepGoing, resultMap):
         myFi = File.FileRead(f, theFileId=f, keepGoing=keepGoing)
         #a = r'W:\LISTestData\logPassStd256MB.lis'
         #myFi = File.FileRead(a, theFileId=a)
-        if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-            clkStart = time.perf_counter()
-        else:
-            clkStart = time.clock()
+        clkStart = time.perf_counter()
         myIdx = FileIndexer.FileIndex(myFi)
         #print(myIdx.longDesc())
-        if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-            print('Index time: {:.3f}'.format(time.perf_counter() - clkStart))
-        else:
-            print('Index time: {:.3f}'.format(time.clock() - clkStart))
+        print('Index time: {:.3f}'.format(time.perf_counter() - clkStart))
     except Exception as err:
         logging.error(str(err))
         traceback.print_exc()
@@ -391,10 +372,7 @@ E - Random frames, random channels.
     opts, args = optParser.parse_args()
     global LOOPS_TO_TEST
     LOOPS_TO_TEST = opts.numTests
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        clkStart = time.perf_counter()
-    else:
-        clkStart = time.clock()
+    clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -422,10 +400,7 @@ E - Random frames, random channels.
         optParser.print_help()
         optParser.error("Wrong number of arguments, I need one only.")
         return 1
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        clkExec = time.perf_counter() - clkStart
-    else:
-        clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

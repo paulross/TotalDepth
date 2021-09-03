@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Provides analysis and navigation along the X axis of RP66V1 logs.
 """
@@ -109,7 +128,7 @@ class XAxisSummary(typing.NamedTuple):
 
 class IFLRReference(typing.NamedTuple):
     """POD class that represents the position of the IFLR in the file."""
-    logical_record_position: File.LogicalRecordPositionBase
+    logical_record_position: File.LogicalRecordPosition
     frame_number: int  # TODO: Omit this  as it is implicit in the XAxis class?
     x_axis: typing.Union[int, float]
 
@@ -126,7 +145,7 @@ class XAxis:
         self._data: typing.List[IFLRReference] = []
         self._summary: typing.Union[None, XAxisSummary] = None
 
-    def append(self, position: File.LogicalRecordPositionBase, frame_number: int, x_axis: typing.Union[int, float]) -> None:
+    def append(self, position: File.LogicalRecordPosition, frame_number: int, x_axis: typing.Union[int, float]) -> None:
         """Add a IFLRReference to the XAxis."""
         # TODO: Verify the data position, frame number increasing etc.
         self._summary = None

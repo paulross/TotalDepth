@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Indexes LIS files and reports performance.
 
@@ -81,6 +81,9 @@ TIF  True >:  0x       0  0x   3c218  0x   3ca08  PR: 0x   3c610    1004  0x8002
 [ 1] TotalDepth.LIS.core.pRepCode.ExceptionRepCodeUnknown: Unknown representation code: 0
 Fixed by being a bit more cautious about dealing with DSB blocks that are 'null'.
 """
+import math
+import typing
+
 
 __author__  = 'Paul Ross'
 __date__    = '2010-08-02'
@@ -103,143 +106,134 @@ from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import FileIndexer
 
-class IndexTimer(object):
-    def __init__(self):
-        self._errCount = 0
-        # List of pairs (size, time)
-        self._sizeTime = []
+
+class IndexTimer:
+    def __init__(self, path: str):
+        self.path = path
+        self.file_size = os.path.getsize(self.path)
+        self.error_count = 0
+        self.len_pickle = -1
+        self.len_json = -1
+        self.times = []
     
-    @property
-    def errCount(self):
-        return self._errCount
-    
-    def __iadd__(self, other):
-        self._errCount += other._errCount
-        self._sizeTime.extend(other._sizeTime)
-        return self
+    # def __iadd__(self, other):
+    #     self.error_count += other._errCount
+    #     self.times.extend(other._sizeTime)
+    #     return self
 
     def __len__(self):
-        return len(self._sizeTime)
+        return len(self.times)
         
     def __str__(self):
-        l = ['Size(kb)\tTime(s)\tRate(ms/MB)']
-        l += ['{:.3f}\t{:.6f}\t{:.3f}'.format(s/1024, t, t * 1000 / (s / 1024**2)) for s, t in self._sizeTime]
-        l.append('\nFiles: {:d}\nErrors: {:d}'.format(self._errCount+len(self._sizeTime), self._errCount))
-        return '\n'.join(l)
-        
-    def addErr(self):
-        self._errCount += 1
+        if len(self.times):
+            time_min = min(self.times)
+            time_max = max(self.times)
+            time_mean = sum(self.times) / len(self.times)
+            if len(self.times) > 1:
+                sorted_times = sorted(self.times)
+                time_median = sorted_times[((len(sorted_times) + 1) // 2) - 1]
+            else:
+                time_median = self.times[0]
+        else:
+            time_min = time_max = time_mean = time_median = math.nan
+        median_rate = time_median * 1000 / (self.file_size / 1024**2)
+        ret = (
+            f'{self.error_count:2d}'
+            f' {self.file_size:12,d}'
+            f' {self.len_pickle:12,d}'
+            f' {self.len_json:12,d}'
+            f' {time_min:8.3f}'
+            f' {time_mean:8.3f}'
+            f' {time_max:8.3f}'
+            f' {time_median:8.3f}'
+            f' {median_rate:8.3f}'
+            # f' {self.path}'
+        )
+        return ret
+
+    def inc_error_count(self):
+        self.error_count += 1
     
-    def addSizeTime(self, s, t):
-        self._sizeTime.append((s,t))
+    def add_time(self, t):
+        self.times.append(t)
 
-def indexFile(fp, numTimes, verbose, keepGoing, convertJson):
-    logging.info('Index.indexFile(): {:s}'.format(fp))
-    assert(os.path.isfile(fp))
-    retIt = IndexTimer()
+    @staticmethod
+    def header() -> str:
+        ret = (
+            f'{"Er":2}'
+            f' {"File Size":>12}'
+            f' {"Len Pickle":>12}'
+            f' {"Len Json":>12}'
+            f' {"Time Min":>8}'
+            f' {"Time Avg":>8}'
+            f' {"Time Max":>8}'
+            f' {"Time Med":>8}'
+            f' {"Rate Med":>8}'
+            # f' {self.path}'
+        )
+        return ret
+
+
+def index_file(file_path: str, num_times: int, verbose: int, keepGoing) -> IndexTimer:
+    logging.info('Index.indexFile(): {:s}'.format(os.path.abspath(file_path)))
+    assert(os.path.isfile(file_path))
+    ret = IndexTimer(file_path)
     try:
-        myLenPickle = -1
-        myLenJson = -1
-        timeS = []
-        for t in range(numTimes):
-            if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-                clkStart = time.perf_counter()
-            else:
-                clkStart = time.clock()
-            myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
-            try:
-                myIdx = FileIndexer.FileIndex(myFi)
-            except ExceptionTotalDepthLIS as err:
-                logging.error('{:s}'.format(str(err)))
-                continue
-            if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-                timeS.append(time.perf_counter() - clkStart)
-            else:
-                timeS.append(time.clock() - clkStart)
-            if verbose:
-                print(myIdx.longDesc())
-                print(' All records '.center(75, '='))
-                for aLr in myIdx.genAll():
-                    print(str(aLr))
-                print(' All records DONE '.center(75, '='))
-                print(' Log Passes '.center(75, '='))
-                for aLp in myIdx.genLogPasses():
-                    print('LogPass', aLp.logPass.longStr())
-                    print()
-                print(' Log Passes DONE '.center(75, '='))
-                print(' Plot Records '.center(75, '='))
-                for aPlotRec in myIdx.genPlotRecords():
-                    print('Plot Record:', aPlotRec)
-                    print()
-                print(' Plot Records DONE '.center(75, '='))
-            #print('CPU time = %8.3f (S)' % timeS[-1])
+        for t in range(num_times):
+            clk_start = time.perf_counter()
+            lis_file  = File.file_read_with_best_physical_record_pad_settings(file_path, file_path, pr_limit=100)
+            if lis_file is None:
+                raise ExceptionTotalDepthLIS('Can not find valid PR pad settings for {:s}'.format(file_path))
+            # May raise an ExceptionTotalDepthLIS
+            lis_idx = FileIndexer.FileIndex(lis_file)
+            ret.add_time(time.perf_counter() - clk_start)
             if t == 0:
-                pikBy = pickle.dumps(myIdx)
-                #print('Pickled: file={:10d} size={:10d} {:8.3f}%'.format(
-                #    os.path.getsize(fp),
-                #    len(pikBy),
-                #    len(pikBy)*100/os.path.getsize(fp)
-                #    )
-                #)
-                myLenPickle = len(pikBy)
-                #print('{:d}\t{:d}\t{:.3f} #Pickled'.format(os.path.getsize(fp), len(pikBy), len(pikBy)*100/os.path.getsize(fp)))
-                if convertJson:
-                    jsonObj = myIdx.jsonObject()
-                    # pprint.pprint(jsonObj)
-                    jsonBytes = json.dumps(jsonObj, sort_keys=True, indent=4)
-                    myLenJson = len(jsonBytes)
-                    if verbose:
-                        print(' JSON [{:d}] '.format(myLenJson).center(75, '='))
-                        print(jsonBytes)
-                        print(' JSON DONE '.center(75, '='))
-        if len(timeS) > 0:
-            refTime = sum(timeS)/len(timeS)
-            if verbose:
-                print('   Min: {:.3f} (s)'.format(min(timeS)))
-                print('   Max: {:.3f} (s)'.format(max(timeS)))
-                print('  Mean: {:.3f} (s)'.format(refTime))
-            if len(timeS) > 2:
-                timeS = sorted(timeS)
-                #print(timeS)
-                refTime = timeS[((len(timeS)+1)//2)-1]
+                ret.len_pickle = len(pickle.dumps(lis_idx))
+                json_object = lis_idx.jsonObject()
+                json_bytes = json.dumps(json_object, sort_keys=True, indent=4)
+                ret.len_json = len(json_bytes)
                 if verbose:
-                    print('Median: {:.3f} (s)'.format(refTime))
-            #print(os.path.getsize(fp), refTime)
-            mySiz = os.path.getsize(fp)
-            sizemb = mySiz / 2**20
-            rate = refTime * 1000 / sizemb
-            print('File size: {:d} ({:.3f} MB) Reference Time: {:.6f} (s), rate {:.3f} ms/MB file: {:s} pickleLen={:d} jsonLen={:d}'.format(
-                    mySiz,
-                    sizemb,
-                    refTime,
-                    rate,
-                    fp,
-                    myLenPickle,
-                    myLenJson,
-                )
-            )
-            retIt.addSizeTime(mySiz, refTime)
+                    print(lis_idx.longDesc())
+                    print(' All records '.center(75, '='))
+                    for aLr in lis_idx.genAll():
+                        print(str(aLr))
+                    print(' All records DONE '.center(75, '='))
+                    print(' Log Passes '.center(75, '='))
+                    for aLp in lis_idx.genLogPasses():
+                        print('LogPass', aLp.logPass.longStr())
+                        print()
+                    print(' Log Passes DONE '.center(75, '='))
+                    print(' Plot Records '.center(75, '='))
+                    for aPlotRec in lis_idx.genPlotRecords():
+                        print('Plot Record:', aPlotRec)
+                        print()
+                    print(' Plot Records DONE '.center(75, '='))
     except ExceptionTotalDepthLIS as err:
-        retIt.addErr()
-        traceback.print_exc()
-    return retIt
+        ret.inc_error_count()
+        logging.exception('Could not index %s', file_path)
+    return ret
 
-def indexDirSingleProcess(d, r, t, v, k, j):
+
+def index_dir_single_process(d, r, t, v, k) -> typing.Dict[str, IndexTimer]:
     """Recursively process a directory using a single process."""
     assert(os.path.isdir(d))
-    retIt = IndexTimer()
+    ret: typing.Dict[str, IndexTimer] = {}
     for n in os.listdir(d):
         fp = os.path.join(d, n)
         if os.path.isfile(fp):
-            retIt += indexFile(fp, t, v, k, j)
+            ret[fp] = index_file(fp, t, v, k)
         elif os.path.isdir(fp) and r:
-            retIt += indexDirSingleProcess(fp, r, t, v, k, j)
-    return retIt
+            result_map = index_dir_single_process(fp, r, t, v, k)
+            for fp in result_map:
+                ret[fp] = result_map[fp]
+    return ret
 
 ################################
 # Section: Multiprocessing code.
 ################################
-def genFp(d, r):
+
+
+def generate_file_paths(d, r):
     """Generates file paths, recursive if necessary."""
     assert(os.path.isdir(d))
     for n in os.listdir(d):
@@ -247,28 +241,29 @@ def genFp(d, r):
         if os.path.isfile(fp):
             yield fp
         elif os.path.isdir(fp) and r:
-            for aFp in genFp(fp, r):
+            for aFp in generate_file_paths(fp, r):
                 yield aFp
 
-def indexDirMultiProcess(dir, recursive, numT, verbose, keepGoing, convertJson, jobs):
+
+def index_dir_multi_process(directory, recursive, num_times, verbose, keepGoing, jobs) -> typing.Dict[str, IndexTimer]:
     if jobs < 1:
         jobs = multiprocessing.cpu_count()
     logging.info('indexDirMultiProcess(): Setting MP jobs to %d' % jobs)
-    myPool = multiprocessing.Pool(processes=jobs)
-    myTaskS = [(fp, numT, verbose, keepGoing, convertJson) for fp in genFp(dir, recursive)]
-    retResult = IndexTimer()
-    #print('myTaskS', myTaskS)
-    myResults = [
+    pool = multiprocessing.Pool(processes=jobs)
+    tasks = [(fp, num_times, verbose, keepGoing) for fp in generate_file_paths(directory, recursive)]
+    # result = IndexTimer(directory)
+    results = [
         r.get() for r in [
-            myPool.apply_async(indexFile, t) for t in myTaskS
+            pool.apply_async(index_file, t) for t in tasks
         ]
     ]
-    for r in myResults:
-        retResult += r
-    return retResult
+    ret: typing.Dict[str, IndexTimer] = {v.path: v for v in results}
+    return ret
+
 ################################
 # End: Multiprocessing code.
 ################################
+
 
 def main():
     usage = """usage: %prog [options] path
@@ -302,21 +297,17 @@ Indexes LIS files recursively."""
                       help="Verbose Output. [default: %default]")
     optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
                       help="Process input recursively. [default: %default]")
-    optParser.add_option("-J", "--JSON", action="store_true", dest="json", default=False,
-                      help="Convert index to JSON, if verbose then dump it out as well. [default: %default]")
+    # optParser.add_option("-J", "--JSON", action="store_true", dest="json", default=False,
+    #                   help="Convert index to JSON, if verbose then dump it out as well. [default: %default]")
     opts, args = optParser.parse_args()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    format='%(asctime)s %(filename)24s %(lineno)4d %(levelname)-8s %(message)s',
                     #datefmt='%y-%m-%d % %H:%M:%S',
                     stream=sys.stdout)
     # Your code here
     #print('opts', opts)
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        clkStart = time.perf_counter()
-    else:
-        clkStart = time.clock()
-    myIt = IndexTimer()
+    clk_start = time.perf_counter()
     if len(args) != 1:
         optParser.print_help()
         optParser.error("I can't do much without a path to the LIS file(s).")
@@ -326,30 +317,40 @@ Indexes LIS files recursively."""
         return 1
     if os.path.isfile(args[0]):
         # Single file so always single process code
-        myIt += indexFile(args[0], opts.times, opts.verbose, opts.keepGoing, opts.json)
+        results = {args[0]:  index_file(args[0], opts.times, opts.verbose, opts.keepGoing)}
     elif os.path.isdir(args[0]):
         if opts.jobs == -1:
             # Single process code
-            myIt += indexDirSingleProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.json)
+            results = index_dir_single_process(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing)
         else:
             # Multiprocess code 
-            myIt += indexDirMultiProcess(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.json, opts.jobs)
+            results = index_dir_multi_process(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.jobs)
+    else:
+        logging.error(f'Path {args[0]} does not exist!')
+        return 1
     print('Summary:')
+    error_count = sum([r.error_count > 0 for r in results.values()])
     if opts.statistics:
-        print(myIt)
+        common_prefix_len = len(os.path.commonpath([v.path for v in results.values()]))
+        # Separate non-error indexes from error indexes
+        print(f'Indexes completed without error [{len(results) - error_count}]:')
+        print(IndexTimer.header())
+        for k in sorted(results.keys()):
+            if results[k].error_count == 0:
+                print(results[k], results[k].path[common_prefix_len:])
+        print(f'Indexes completed with error [{error_count}]:')
+        print(IndexTimer.header())
+        for k in sorted(results.keys()):
+            if results[k].error_count != 0:
+                print(results[k], results[k].path[common_prefix_len:])
     else:
-        print('Results: {:8d}'.format(len(myIt)))
-        print(' Errors: {:8d}'.format(myIt.errCount))
-        print('  Total: {:8d}'.format(len(myIt)+myIt.errCount))
-
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        clkExec = time.perf_counter() - clkStart
-    else:
-        clkExec = time.clock() - clkStart
-    print('CPU time = %8.3f (S)' % clkExec)
+        print('Results: {:8d}'.format(len(results)))
+        print(' Errors: {:8d}'.format(error_count))
+    clk_exec = time.perf_counter() - clk_start
+    print('CPU time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')
     return 0
 
+
 if __name__ == '__main__':
-    multiprocessing.freeze_support()
     sys.exit(main())

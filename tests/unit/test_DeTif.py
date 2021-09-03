@@ -46,10 +46,9 @@ def test_scan_empty_file_and_stringify():
     fobj = io.BytesIO(TIF_EMPTY_FILE)
     tifs = DeTif.tif_scan_file_object(fobj)
     result = '\n'.join(str(t) for t in tifs)
-    # print(tifs)
-    expected = """TifMarker: 0x00000000 Type: 0x00000000 Prev: 0x00000000 Next: 0x0000000c
-TifMarker: 0x0000000c Type: 0x00000001 Prev: 0x00000000 Next: 0x00000018
-TifMarker: 0x00000018 Type: 0x00000001 Prev: 0x0000000c Next: 0x00000024"""
+    expected = """TifMarker: 0x00000000 Type: 0x00000000 Prev: 0x00000000 Next: 0x0000000c Length: 0x0000000c Payload: 0x00000000
+TifMarker: 0x0000000c Type: 0x00000001 Prev: 0x00000000 Next: 0x00000018 Length: 0x0000000c Payload: 0x00000000
+TifMarker: 0x00000018 Type: 0x00000001 Prev: 0x0000000c Next: 0x00000024 Length: 0x0000000c Payload: 0x00000000"""
     assert result == expected
 
 
@@ -64,9 +63,8 @@ def test_is_tif_start_error():
     fobj = io.BytesIO(b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x0c\x00\x00\x00')
     with pytest.raises(DeTif.DeTifExceptionRead) as err:
         DeTif.tif_scan_file_object(fobj)
-    exp = 'Initial TIF marker is wrong type: TifMarker: 0x00000000 Type: 0x00000001 Prev: 0x00000000 Next: 0x0000000c'
+    exp = 'Initial TIF marker is wrong type: TifMarker: 0x00000000 Type: 0x00000001 Prev: 0x00000000 Next: 0x0000000c Length: 0x0000000c Payload: 0x00000000'
     assert err.value.args[0] == exp
-
 
 
 @pytest.mark.parametrize(

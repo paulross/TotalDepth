@@ -1,39 +1,42 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2012 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Produces histograms.
 
 Created on Nov 29, 2011
 
 """
-
-__author__  = 'Paul Ross'
-__date__    = '2011-11-29'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
-
 import collections
 
-class Histogram(object):
+__author__ = 'Paul Ross'
+__date__ = '2011-11-29'
+__version__ = '0.1.0'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
+
+
+class Histogram:
     """A histogram class."""
-    def __init__(self):
+    def __init__(self, pre_load=None):
         self._h = collections.defaultdict(int)
+        if pre_load:
+            for value in pre_load:
+                self._h[value] = 0
         
     def add(self, x, count=1):
         """Increments the count of value x by count (default 1)."""
@@ -52,7 +55,7 @@ class Histogram(object):
         
         valTitle - The title to use for values.
         
-        inclCount - Include tha tacture count for each value?
+        inclCount - Include the actual count for each value?
         """
         spacer = ' | '
         maxCount = max(self._h.values())

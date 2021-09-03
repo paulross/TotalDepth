@@ -1,6 +1,22 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """The setup script.
 copyright 2010-2020, Paul Ross
 """
@@ -29,10 +45,13 @@ with open('HISTORY.rst') as history_file:
 
 install_requirements = [
     'Cython',
-    'numpy',
-    'lxml',
+    'Pillow',
+    'beautifulsoup4',
     'colorama',
+    'lxml',
+    'numpy',
     'psutil',
+    'requests',
 ]
 
 setup_requirements = [
@@ -81,6 +100,53 @@ XML_FORMAT_FILES = [
 
 XML_FORMAT_FILES = [os.path.join(*p.split('/')) for p in XML_FORMAT_FILES]
 
+data_files = [
+    # XML Format files
+    (
+        os.path.join('TotalDepth', 'util', 'plot', 'formats'),
+        XML_FORMAT_FILES
+    ),
+    # Example data
+    (
+        os.path.join('TotalDepth', 'example_data', 'BIT', 'data'),
+        (
+            os.path.join('example_data', 'BIT', 'data', '29_10-_3Z_dwl_DWL_WIRE_1644659.bit'),
+        ),
+    ),
+    (
+        os.path.join('TotalDepth', 'example_data', 'LAS', 'data'),
+        (
+            os.path.join('example_data', 'LAS', 'data', '1000079714.las'),
+            os.path.join('example_data', 'LAS', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498_0_2000T.las'),
+            os.path.join('example_data', 'LAS', 'data', 'BASIC_FILE_0_50.las'),
+        ),
+    ),
+    (
+        os.path.join('TotalDepth', 'example_data', 'LIS', 'data'),
+        (
+            os.path.join('example_data', 'LIS', 'data', 'DILLSON-1_WELL_LOGS_FILE-013.LIS'),
+            os.path.join('example_data', 'LIS', 'data', 'DILLSON-1_WELL_LOGS_FILE-037.LIS'),
+            os.path.join('example_data', 'LIS', 'data', 'DILLSON-1_WELL_LOGS_FILE-049.LIS'),
+        ),
+    ),
+    (
+        os.path.join('TotalDepth', 'example_data', 'RP66V1', 'data'),
+        (
+            os.path.join('example_data', 'RP66V1', 'data', '206_05a-_3_DWL_DWL_WIRE_258276498.DLIS'),
+            os.path.join('example_data', 'RP66V1', 'data', 'BASIC_FILE.dlis'),
+            os.path.join('example_data', 'RP66V1', 'data', 'BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS.dlis'),
+            os.path.join('example_data', 'RP66V1', 'data', 'MINIMAL_FILE.dlis'),
+        ),
+    ),
+    # Static units data
+    (
+        os.path.join('TotalDepth', 'common', 'data',),
+        (
+            os.path.join('src', 'TotalDepth', 'common', 'data', 'osdd_units.json'),
+        ),
+    ),
+]
+
 # ext_modules = cythonize(
 #     module_list="src/TotalDepth/LIS/core/*.pyx",
 # )
@@ -120,8 +186,8 @@ ext_modules = [
 
 setup(
     name='TotalDepth',
-    version='0.3.2rc0',
-    description="TotalDepth is a software collection that can process petrophysical data such as wireline logs and seismic data.",
+    version='0.4.0rc0',
+    description="TotalDepth is a software collection that can process petrophysical data such as wireline logs.",
     long_description=readme + '\n\n' + history,
     author="Paul Ross",
     author_email='apaulross@gmail.com',
@@ -129,9 +195,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'' : 'src'},
     # package_data={'' : ['TotalDepth/util/plot/formats/*.xml']},
-    data_files= [
-        (os.path.join('TotalDepth', 'util', 'plot', 'formats'), XML_FORMAT_FILES),
-    ],
+    data_files=data_files,
     entry_points={
         'console_scripts': ENTRY_POINTS_CONSOLE_SCRIPTS,
     },
@@ -147,6 +211,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     test_suite='tests',
     setup_requires=setup_requirements,

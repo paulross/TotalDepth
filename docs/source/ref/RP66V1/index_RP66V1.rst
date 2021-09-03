@@ -16,7 +16,6 @@ Contents:
     core/LogPass
     core/LogicalFile
     core/RepCode
-    core/StorageUnitLabel
     core/Units
     core/XAxis
     core/stringify
@@ -30,9 +29,10 @@ Contents:
     
     IndexPickle
     IndexXML
-    IndexXMLRead
     LogRecIndex
     Scan
     ScanHTML
     SearchFF01
     ToLAS
+
+    util/index_rp66v1_util

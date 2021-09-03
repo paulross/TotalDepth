@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # 
 # Paul Ross: apaulross@gmail.com
+import math
 
 __author__  = 'Paul Ross'
 __date__    = '2009-09-25'
@@ -28,18 +29,35 @@ paulross@L071183 /cygdrive/d/wip/small_projects/PlotTree/src/python
 $ python c:/Python26/Lib/site-packages/coverage.py -x test/TestCoord.py
 """
 
-#import os
-import sys
 import logging
-#import StringIO
+import sys
+import unittest
 
-#sys.path.append(os.path.join(os.pardir + os.sep))
+
+import pytest
+
 from TotalDepth.util.plot import Coord
 
 ######################
 # Section: Unit tests.
 ######################
-import unittest
+
+
+@pytest.mark.parametrize(
+    'units_a, units_b, expected',
+    (
+        ('px', 'pt', True),
+        ('pt', 'px', True),
+        ('pc', 'pt', True),
+        ('pt', 'pc', True),
+        ('in', 'cm', False),
+        ('cm', 'in', False),
+    )
+)
+def test_exactConversion(units_a, units_b, expected):
+    result = Coord.exactConversion(units_a, units_b)
+    assert result == expected
+
 
 # Define unit test classes
 class TestCoordDim(unittest.TestCase):
@@ -183,6 +201,11 @@ class TestCoordDim(unittest.TestCase):
         self.assertTrue(myObj_0 < myObj_1)
         self.assertFalse(myObj_0 > myObj_1)
 
+    def testCmp_int_not_implemented(self):
+        myObj_0 = Coord.Dim(1, 'in')
+        self.assertFalse(myObj_0 == 1)
+        self.assertTrue(myObj_0 != 1)
+
     def testMax_00(self):
         """Dim() max(...) [00]."""
         myObj_0 = Coord.Dim(71, 'px')
@@ -206,6 +229,103 @@ class TestCoordDim(unittest.TestCase):
             self.fail('TypeError not raised')
         except TypeError:
             pass
+
+
+@pytest.mark.parametrize(
+    'fmt, expected',
+    (
+        ('{:.3f}', '72.000px'),
+        ('{:.0f}', '72px'),
+        ('{:d}', '72px'),
+    )
+)
+def test_dim_format(fmt, expected):
+    dim = Coord.Dim(72, 'px')
+    assert fmt.format(dim) == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
+        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
+        (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
+    )
+)
+def test_dim_mul(dim, factor, expected):
+    result = dim * factor
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
+        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
+        (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
+    )
+)
+def test_dim_imul(dim, factor, expected):
+    dim *= factor
+    assert dim == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
+        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
+    )
+)
+def test_dim_div(dim, factor, expected):
+    result = dim / factor
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+    )
+)
+def test_dim_div_raises(dim, factor, expected):
+    with pytest.raises(ZeroDivisionError) as err:
+        dim / factor
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
+        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
+    )
+)
+def test_dim_idiv(dim, factor, expected):
+    dim /= factor
+    assert dim == expected
+
+
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+        (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+    )
+)
+def test_dim_idiv_raises(dim, factor, expected):
+    with pytest.raises(ZeroDivisionError) as err:
+        dim /= factor
+    assert err.value.args[0] == expected
+
+
+def test_dim_in():
+    result = Coord.dimIn(1)
+    assert result == Coord.Dim(1, 'in')
+
 
 class TestCoordPoint(unittest.TestCase):
     """Tests the Coord.Pt class."""
@@ -425,6 +545,85 @@ class TestCoordHelperFunctions(unittest.TestCase):
         self.assertEqual('in', newPt.y.units)
         self.assertEqual(Coord.Dim(1, 'in'), newPt.x)
         self.assertEqual(Coord.Dim(1, 'in'), newPt.y)
+
+
+@pytest.mark.parametrize(
+    'origin, radius, angle, expected',
+    (
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(0, 'in'),
+            0.0,
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in'))
+        ),
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(4.0, 'in'),
+            0.0,
+            Coord.Pt(Coord.Dim(4.0, 'in'), Coord.Dim(0.0, 'in'))
+        ),
+        # The four optimisations
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(4.0, 'in'),
+            math.pi / 2.0,
+            Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(4.0, 'in'))
+        ),
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(4.0, 'in'),
+            math.pi,
+            Coord.Pt(Coord.Dim(-4.0, 'in'), Coord.Dim(0.0, 'in'))
+        ),
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(4.0, 'in'),
+            math.pi * 3.0 / 2.0,
+            Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(-4.0, 'in'))
+        ),
+        # 45 degrees
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(4.0, 'in'),
+            math.pi / 4.0,
+            Coord.Pt(Coord.Dim(4.0 * math.cos(math.pi / 4), 'in'), Coord.Dim(4.0 * math.sin(math.pi / 4), 'in'))
+        ),
+    )
+)
+def test_to_cartesian(origin, radius, angle, expected):
+    result = Coord.to_cartesian(origin, radius, angle)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    'pt_a, pt_b, expected_radius, expected_angle',
+    (
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Pt(Coord.Dim(1, 'in'), Coord.Dim(0, 'in')),
+            Coord.Dim(1, 'in'),
+            0.0,
+        ),
+        (
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(1, 'in')),
+            Coord.Dim(1, 'in'),
+            math.pi / 2.0,
+        ),
+    )
+)
+def test_to_polar(pt_a, pt_b, expected_radius, expected_angle):
+    radius, angle = Coord.to_polar(pt_a, pt_b)
+    assert radius == expected_radius
+    assert angle == expected_angle
+
+
+def test_to_polar_raises():
+    pt_a = Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in'))
+    with pytest.raises(ValueError) as err:
+        Coord.to_polar(pt_a, pt_a)
+    assert err.value.args[0] == 'to_polar() called with identical points.'
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCoordDim)

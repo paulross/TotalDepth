@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """The FrameSet module provides a means of representing LIS frame data.
 
@@ -810,6 +810,11 @@ class FrameSet(object):
         chIdxInt = self.internalChIdx(chIdxExt)
         return self._frames[:,self._sliceTree[chIdxInt][sc]]
     
+    def frame_channel_sub_channel_values(self, frame_index, channel_index, sub_channel_index):
+        """Returns a numpy array that is a view of the values for the frame, external channel and sub channel."""
+        channel_index_internal = self.internalChIdx(channel_index)
+        return self._frames[frame_index][self._sliceTree[channel_index_internal][sub_channel_index]]
+
 #    def _value(self, fr, chInt, sc, sa, bu):
 #        """Returns a single value from an: internal fr, external ch, sc, sa, bu."""
 #        i = self._intChValIdxS[chInt]
@@ -1101,7 +1106,7 @@ class FrameSet(object):
         If chIsExt is True then ch is the external channel index otherwise
         it is the internal index."""
         assert(0)
-        if self.numFrames > 0 and len(theChScS) > 0:
+        if self.number_of_frames > 0 and len(theChScS) > 0:
             if chIsExt:
                 # Internalise channel index
                 myChScS = [(self.internalChIdx(cs[0]), cs[1]) for cs in theChScS]
@@ -1238,6 +1243,7 @@ class FrameSet(object):
 #########################################
 class AccMin(object):
     """Accumulates the minimum value."""
+    title = 'Min'
     def __init__(self):
         self.min = None
     
@@ -1252,6 +1258,7 @@ class AccMin(object):
 
 class AccMax(object):
     """Accumulates the maximum value."""
+    title = 'Max'
     def __init__(self):
         self.max = None
     
@@ -1266,10 +1273,11 @@ class AccMax(object):
 
 class AccMean(object):
     """Accumulates the mean value."""
+    title = 'Mean'
     def __init__(self):
         self.sum = 0.0
         self.cntr = 0
-    
+
     def add(self, v):
         """Add a new value."""
         self.sum += v
@@ -1282,11 +1290,12 @@ class AccMean(object):
 
 class AccStDev(object):
     """Accumulates the standard deviation."""
+    title = 'StdDev'
     def __init__(self):
         self.sum = 0.0
         self.sumSq = 0.0
         self.cntr = 0
-    
+
     def add(self, v):
         """Add a new value."""
         self.sum += v
@@ -1304,9 +1313,10 @@ class AccStDev(object):
 
 class AccCount(object):
     """Accumulates the number of values."""
+    title = 'Count'
     def __init__(self):
         self.cntr = 0
-    
+
     def add(self, v):
         """Add a new value."""
         self.cntr += 1
@@ -1321,7 +1331,7 @@ class AccDelta(object):
     def __init__(self):
         self.cntr = 0
         self.prev = None
-    
+
     def add(self, v):
         """Add a new value."""
         raise NotImplementedError
@@ -1333,6 +1343,7 @@ class AccDelta(object):
 
 class AccInc(AccDelta):
     """Counting how many values are an increase from the previous value."""
+    title = '++'
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1344,6 +1355,7 @@ class AccInc(AccDelta):
 
 class AccEq(AccDelta):
     """Counting how many values are equal to the previous value."""
+    title = '=='
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1354,7 +1366,8 @@ class AccEq(AccDelta):
 
 
 class AccDec(AccDelta):
-    """Counting how many values are less than the previous value."""    
+    """Counting how many values are less than the previous value."""
+    title = '--'
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1367,10 +1380,11 @@ class AccDec(AccDelta):
 class AccBias(AccDelta):
     """Measures increment, equal, decrement and computes bias which is:
     (inc - dec) / total."""
+    title = 'Bias'
     def __init__(self):
         super().__init__()
         self.cntrInc = self.cntrEq = self.cntrDec = 0
-    
+
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1389,11 +1403,12 @@ class AccBias(AccDelta):
 
 class AccDrift(AccDelta):
     """Measures drift i.e. the movement between the first and the last value."""
+    title = 'Drift'
     def __init__(self):
         super().__init__()
         self.first = None
         self.last = None
-    
+
     def add(self, v):
         """Add a new value."""
         if self.first is None:
@@ -1409,11 +1424,12 @@ class AccDrift(AccDelta):
 
 class AccActivity(AccDelta):
     """Measures curve activity."""
+    title = 'Activity'
     def __init__(self):
         super().__init__()
         self.prevExp = None
         self.actSum = 0.0
-    
+
     def add(self, v):
         """Add a new value."""
         myMant, exp = math.frexp(v)

@@ -45,6 +45,9 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
+
+import pytest
+
 class TestFrameSet_SuChArTe(BaseTestClasses.TestBaseFile):
     """Tests FrameSet SuChArTe class"""
     def setUp(self):
@@ -1955,6 +1958,38 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print((expVal == myFs.frame(0)))
         self.assertEqual(expVal.shape, myArray.shape)
         self.assertTrue((expVal == myArray).all())
+
+
+# @pytest.mark.parametrize(
+#     'cls, expected',
+#     (
+#         (FrameSet.AccDec, numpy.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,]])),
+#     )
+# )
+# def test_frame_set_accumulators(cls, expected):
+#     """8 frames of 5 channels, using accumulate() dec/eq/inc - all increasing."""
+#     numCh = 5
+#     numFr = 8
+#     myFile = self._createFileDFSROnly(numCh, 1, 1)
+#     myDfsr = LogiRec.LrDFSRRead(myFile)
+#     myFs = FrameSet.FrameSet(myDfsr, slice(numFr))
+#     v = 0.0
+#     # Load the FrameSet
+#     for f in range(numFr):
+#         fBy = bytearray()
+#         for ch in range(numCh):
+#             fBy.extend(RepCode.writeBytes68(v))
+#             v += 1.0
+#         myFs.setFrameBytes(by=fBy, fr=f, chFrom=0, chTo=numCh-1)
+#
+#     myArray = myFs.accumulate([cls])
+#     expVal = numpy.arange(float(numCh * numFr)).reshape((numFr, numCh))
+#
+#     assert expVal.shape == myFs.frames.shape
+#     assert expVal == myFs.frames.all()
+#     assert expected.shape == myArray.shape
+#     assert expected == myArray.all()
+
 
 class TestFrameSetgenChScValues(BaseTestClasses.TestBaseLogPass):
     """Test the FrameSet genChScValues()."""

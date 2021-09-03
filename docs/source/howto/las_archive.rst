@@ -7,14 +7,28 @@
 Working with LAS Data
 ==================================
 
-I have an archive of LAS data and I want to plot it
+
+I have an archive of data and I'd like a summary in HTML
 ---------------------------------------------------------------------
 
+There is a command line tool :ref:`tdlastohtml <cmd_line_tools_las_tdlastohtml>`  (a wrapper around  :py:mod:`TotalDepth.LAS.LASToHtml`) which can generate an HTML summary of a body of LAS files.
+There is a tutorial here: :ref:`cmd_line_tools_las_tdlastohtml`
+
+
+I have an archive of LAS data and I want to plot it
+---------------------------------------------------------------------
 
 There is a generalised well log plotting command line tool ``tdplotlogs`` that supports LAS described here: :ref:`TotalDepth-cmdline-PlotLogs` (references :py:mod:`TotalDepth.PlotLogs`).
 
 LAS files do not contain an internal plot specification.
 For files needing an external plot specification there is some background information on plotting in a technical note here :ref:`TotalDepth-tech-plotting-external`.
+
+
+Getting the Frame Data as a ``numpy`` Array
+---------------------------------------------------
+
+TotalDepth's LAS represents the channel data as Numpy arrays.
+There is a tutorial here on writing code that allows you to access the Numpy channel data directly: :ref:`total_depth.processing_las_files.numpy_arrays`
 
 
 I have some troublesome LAS files
@@ -30,27 +44,3 @@ The advantage, of course, with LAS files is that the can be hacked around with a
 This will often fix small local problems.
    
 Feel free to contact the author for advice.
-
-Getting the Frame Data as a ``numpy`` Array
-----------------------------------------------------
-
-TotalDepth's LAS parser does not support Numpy as of version 0.3.0 (and you are looking at version |version|).
-Later versions of the TotalDepth LAS parser may use the universal Frame Array which does support Numpy.
-
-For example::
-
-    from TotalDepth.LAS.core import LASRead
-    from TotalDepth.LIS.core import Mnem
-
-    with open("LAS.las") as file_object:
-        las_file = LASRead.LASRead(file_object, 'LAS.las')
-        # las_file.numFrames() gives the number of frames
-        # las_file.numDataPoints() gives the total number of values
-        # las_file.curveMnems() gives a list of curves
-        # however if you  want a specific curve such as 'GR' you can iterate through the X axis and value pairs:
-        for x, v in las_file.genOutpPoints(Mnem.Mnem('GR')):
-            # x, v is:
-            #    (1700.0, -999.25),
-            #    (1700.5, 40.7909),
-            #    (1701.0, 44.0165),
-            #    ...

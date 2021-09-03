@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2012 Paul Ross
+# Copyright (C) 2011-2021 Paul Ross
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -245,7 +245,7 @@ class PlotLogInfo(object):
 
     def _writeIndexTableRows(self, theS, theTrie, theFilePath):
         # Write the rowspan/colspan data
-        for anEvent in theTrie.genColRowEvents():
+        for anEvent in theTrie.gen_row_column_events():
             if anEvent == theTrie.ROW_OPEN:
                 # Write out the '<tr>' element
                 theS.startElement('tr', {})
@@ -419,7 +419,7 @@ class PlotLogPasses(object):
         logging.info('PlotLogPasses._processFileLAS(): Starting LAS file {:s}'.format(fpIn))
         assert(os.path.isfile(fpIn))
         assert(os.path.exists(os.path.dirname(fpOut)))
-        if not TotalDepth.LAS.core.LASRead.hasLASExtension(fpIn):
+        if not TotalDepth.LAS.core.LASRead.has_las_extension(fpIn):
             return False
         if self.usesInternalRecords:
             # LAS logs do not have internal records that can describe plots
@@ -638,8 +638,8 @@ class PlotLogPasses(object):
             if myPlot.hasDataToPlotLAS(theLasFile, aUniqueId):
                 myCurvIDs, numPoints = myPlot.plotLogPassLAS(
                     theLasFile,
-                    theLasFile.xAxisStart,
-                    theLasFile.xAxisStop,
+                    theLasFile.x_axis_start,
+                    theLasFile.x_axis_stop,
                     aUniqueId,
                     myOutFilePath,
                     frameStep=1,
@@ -657,8 +657,8 @@ class PlotLogPasses(object):
                     0,
                     aUniqueId,
                     myPlot.xScale(aUniqueId),
-                    theLasFile.xAxisStart,
-                    theLasFile.xAxisStop,
+                    theLasFile.x_axis_start,
+                    theLasFile.x_axis_stop,
                     theCurveS=myCurvIDs,
                     ptsPlotted=numPoints)
     #=======================================================
@@ -728,17 +728,14 @@ def main():
                       help="File match pattern. Default: %(default)s.")
     # parser.add_argument("-f", "--file-type", choices=['LAS', 'LIS', 'AUTO'],
     #        help="File format to assume for the input, AUTO will do it's best. [default: \"AUTO\"].")
-    parser.add_argument("-s", "--scale", action="append", type=int, dest="scale", default=0,
-            help="Scale of X axis to use (an integer). [default: 0].")
+    parser.add_argument("-s", "--scale", type=int, dest="scale", default=0,
+                        help="Scale of X axis to use (an integer). [default: 0].")
     args = parser.parse_args()
     # Initialise logging etc.
     cmn_cmd_opts.set_log_level(args)
     # print('args', args)
     # return 0
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        start_clock = time.perf_counter()
-    else:
-        start_clock = time.clock()
+    start_clock = time.perf_counter()
     start_time = time.time()
     # Your code here
     if '?' in ''.join(args.LgFormat):
@@ -746,27 +743,24 @@ def main():
         myFg = FILMCfgXML.FilmCfgXMLRead()
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
         print(myFg.longStr(''.join(args.LgFormat).count('?')))
-        return 1
+        return 0
     if cmn_cmd_opts.multiprocessing_requested(args):
+        myResult = plotLogPassesMP(
+            args.path_in,
+            args.path_out,
+            args,
+        )
+    else:
         myPlp = PlotLogPasses(
             args.path_in,
             args.path_out,
             args,
         )
         myResult = myPlp.plotLogInfo
-    else:
-        myResult = plotLogPassesMP(
-            args.path_in,
-            args.path_out,
-            args,
-        )
     if os.path.isdir(args.path_out):
         myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in)
     print('plotLogInfo', str(myResult))
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        print('  CPU time = %8.3f (S)' % (time.perf_counter() - start_clock))
-    else:
-        print('  CPU time = %8.3f (S)' % (time.clock() - start_clock))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - start_clock))
     print('Exec. time = %8.3f (S)' % (time.time() - start_time))
     print('Bye, bye!')
     return 0

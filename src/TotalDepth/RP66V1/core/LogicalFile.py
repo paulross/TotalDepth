@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Represents a RP66V1 file as a 'logical' level.
 
@@ -240,13 +259,13 @@ class LogicalFile:
             frame_array.x_axis.array.mean(),
         )
 
-    def num_frames(self, frame_array: LogPass.FrameArray) -> int:
+    def num_frames(self, frame_array: LogPass.RP66V1FrameArray) -> int:
         """Return the number of frames in the FrameArray"""
         return len(self.iflr_position_map[frame_array.ident])
 
     def populate_frame_array(
             self,
-            frame_array: LogPass.FrameArray,
+            frame_array: LogPass.RP66V1FrameArray,
             frame_slice: typing.Union[Slice.Slice, Slice.Sample, None] = None,
             channels: typing.Union[typing.Set[typing.Hashable], None] = None,
     ) -> int:

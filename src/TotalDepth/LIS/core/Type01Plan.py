@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Given a DFSR the FrameSetPlan gives offsets to any part of the Logical Record
 for any frame and channel.
@@ -125,7 +125,7 @@ class FrameSetPlan(object):
         myLen = recLen - self._indirectSize
         if myLen % self._frameSize != 0:
             raise ExceptionFrameSetPlan(
-                'Can not fit integer number of frames length {:d} into LR length {:d}, modulo {:d} [indirect size {:d}].'.format(
+                'Can not fit integer number of frames length {:d} into LR length {:d}, remainder {:d} [indirect size {:d}].'.format(
                         self._frameSize, myLen, myLen % self._frameSize, self._indirectSize)
                 )
         return myLen // self._frameSize

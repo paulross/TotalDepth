@@ -1,41 +1,48 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 '''
 Created on Jun 14, 2011
 
 @author: paulross
 '''
-__author__  = 'Paul Ross'
-__date__    = '2011-06-14'
-__version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
 
 import os
 import logging
 import multiprocessing
 
+from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.util import DirWalk
 
-class ProcLISPathBase(object):
+__author__  = 'Paul Ross'
+__date__    = '2011-06-14'
+__version__ = '0.1.0'
+__rights__  = 'Copyright (c) Paul Ross'
+
+
+class ExceptionProcLisPath(ExceptionTotalDepthLIS):
+    pass
+
+
+class ProcLISPathBase:
     """Takes an input path, output path and processes LIS files."""
     def __init__(self, fpIn, fpOut, recursive, keepGoing):
         self._fpIn = fpIn
@@ -64,14 +71,19 @@ class ProcLISPathBase(object):
             elif os.path.isfile(myPath):
                 self._processFile(myPath, outPath)
         
-    def _retLisFileAndIndex(self, fpIn):
+    def _retLisFileAndIndex(self, path_in):
         """Returns a LisFile.LisFile() and a FileIndexer.FileIndex() from fpIn.
         May raises an ExceptionTotalDepthLIS."""
-        assert(os.path.isfile(fpIn))
-        logging.info('ProcLISPathBase._retLisFileAndIndex(): Reading LIS file {:s}'.format(fpIn))
-        myFi = File.FileRead(fpIn, theFileId=fpIn, keepGoing=self._keepGoing)
-        myIdx = FileIndexer.FileIndex(myFi)
-        return myFi, myIdx
+        assert(os.path.isfile(path_in))
+        logging.info('ProcLISPathBase._retLisFileAndIndex(): Reading LIS file {:s}'.format(path_in))
+        if self._keepGoing:
+            lis_file = File.file_read_with_best_physical_record_pad_settings(path_in, file_id=path_in, pr_limit=1000)
+        else:
+            lis_file = File.FileRead(path_in, theFileId=path_in, keepGoing=self._keepGoing)
+        if lis_file is not None:
+            lis_index = FileIndexer.FileIndex(lis_file)
+            return lis_file, lis_index
+        raise ExceptionTotalDepthLIS(f'Can not read LIS file from {path_in}')
 
     def processFile(self, fpIn, fpOut):
         raise NotImplementedError
@@ -99,12 +111,14 @@ def procLISPath(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, resultOb
         return procLISPathSP(dIn, dOut, fnMatch, recursive, keepGoing, fileFn, resultObj)
     return procLISPathMP(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, resultObj)
 
+
 def procLISPathSP(dIn, dOut, fnMatch, recursive, keepGoing, fileFn, resultObj=None):
     for fpIn, fpOut in DirWalk.dirWalk(dIn, dOut, fnMatch, recursive):
         result = fileFn(fpIn, fpOut, keepGoing)
         if result is not None and resultObj is not None:
             resultObj += result
     return resultObj
+
 
 def procLISPathMP(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, resultObj=None):
     """Multiprocessing code to process LIS files.

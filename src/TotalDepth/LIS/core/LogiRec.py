@@ -1,34 +1,31 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Handles LIS Logical Records.
-
-
 """
-
-
 
 __author__  = 'Paul Ross'
 __date__    = '29 Dec 2010'
 __version__ = '0.8.0'
 __rights__  = 'Copyright (c) Paul Ross'
 
+import codecs
 import struct
 import logging
 import collections
@@ -38,7 +35,7 @@ from TotalDepth.LIS.core import Units
 from TotalDepth.LIS.core import EngVal
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.LIS.core.File import ExceptionFileRead
+from TotalDepth.LIS.core import File
 
 class ExceptionLr(ExceptionTotalDepthLIS):
     """Specialisation of exception for Logical Records."""
@@ -61,53 +58,53 @@ LR_HEADER_LENGTH = 2
 #
 # Group 0 - Data records
 # ----------------------
-LR_TYPE_NORMAL_DATA             = 0    #: Normal data record containing log data
-LR_TYPE_ALTERNATE_DATA          = 1    #: Alternate data.
+LR_TYPE_NORMAL_DATA             = 0    #: 0x00 Normal data record containing log data
+LR_TYPE_ALTERNATE_DATA          = 1    #: 0x01 Alternate data.
 #
 # Group 1 Information records
 # ---------------------------
-LR_TYPE_JOB_ID                  = 32    #: Job identification
-LR_TYPE_WELL_DATA               = 34    #: Well site data
-LR_TYPE_TOOL_INFO               = 39    #: Tool string info
-LR_TYPE_ENCRYPTED_TABLE         = 42    #: Encrypted table dump
-LR_TYPE_TABLE_DUMP              = 47    #: Table dump
+LR_TYPE_JOB_ID                  = 32    #: 0x20 Job identification
+LR_TYPE_WELL_DATA               = 34    #: 0x22 Well site data
+LR_TYPE_TOOL_INFO               = 39    #: 0x27 Tool string info
+LR_TYPE_ENCRYPTED_TABLE         = 42    #: 0x2a Encrypted table dump
+LR_TYPE_TABLE_DUMP              = 47    #: 0x2f Table dump
 #
 # Group 2 Data format specification records
 # -----------------------------------------
-LR_TYPE_DATA_FORMAT             = 64    #: Data format specification record
-LR_TYPE_DATA_DESCRIPTOR         = 65    #: Data descriptor (not defined in the LIS79 Description Reference Manual)
+LR_TYPE_DATA_FORMAT             = 64    #: 0x40 Data format specification record
+LR_TYPE_DATA_DESCRIPTOR         = 65    #: 0x41 Data descriptor (not defined in the LIS79 Description Reference Manual)
 #
 # Group 3 Program records (CSU only)
 # ----------------------------------
-LR_TYPE_TU10_BOOT               = 95    #: TU10 software boot
-LR_TYPE_BOOTSTRAP_LOADER        = 96    #: Bootstrap loader
-LR_TYPE_CP_KERNEL               = 97    #: CP-kernel loader boot
-LR_TYPE_PROGRAM_FILE_HEAD       = 100    #: Program file header
-LR_TYPE_PROGRAM_OVER_HEAD       = 101    #: Program overlay header
-LR_TYPE_PROGRAM_OVER_LOAD       = 102    #: Program overlay load
+LR_TYPE_TU10_BOOT               = 95    #: 0x5f TU10 software boot
+LR_TYPE_BOOTSTRAP_LOADER        = 96    #: 0x60 Bootstrap loader
+LR_TYPE_CP_KERNEL               = 97    #: 0x61 CP-kernel loader boot
+LR_TYPE_PROGRAM_FILE_HEAD       = 100   #: 0x64 Program file header
+LR_TYPE_PROGRAM_OVER_HEAD       = 101   #: 0x65 Program overlay header
+LR_TYPE_PROGRAM_OVER_LOAD       = 102   #: 0x66 Program overlay load
 #
 # Group 4 Delimiters
 # ------------------
-LR_TYPE_FILE_HEAD               = 128    #: File header
-LR_TYPE_FILE_TAIL               = 129    #: File trailer
-LR_TYPE_TAPE_HEAD               = 130    #: Tape header
-LR_TYPE_TAPE_TAIL               = 131    #: Tape trailer
-LR_TYPE_REEL_HEAD               = 132    #: Reel header
-LR_TYPE_REEL_TAIL               = 133    #: Reel trailer
-LR_TYPE_EOF                     = 137    #: Logical EOF (end of file)
-LR_TYPE_BOT                     = 138    #: Logical BOT (beginning of tape)
-LR_TYPE_EOT                     = 139    #: Logical EOT (end of tape)
-LR_TYPE_EOM                     = 141    #: Logical EOM (end of medium)
+LR_TYPE_FILE_HEAD               = 128    #: 0x80 File header
+LR_TYPE_FILE_TAIL               = 129    #: 0x81 File trailer
+LR_TYPE_TAPE_HEAD               = 130    #: 0x82 Tape header
+LR_TYPE_TAPE_TAIL               = 131    #: 0x83 Tape trailer
+LR_TYPE_REEL_HEAD               = 132    #: 0x84 Reel header
+LR_TYPE_REEL_TAIL               = 133    #: 0x85 Reel trailer
+LR_TYPE_EOF                     = 137    #: 0x89 Logical EOF (end of file)
+LR_TYPE_BOT                     = 138    #: 0x8a Logical BOT (beginning of tape)
+LR_TYPE_EOT                     = 139    #: 0x8b Logical EOT (end of tape)
+LR_TYPE_EOM                     = 141    #: 0x8d Logical EOM (end of medium)
 #
 # Group 7 Miscellaneous records
 # -----------------------------
-LR_TYPE_OPERATOR_INPUT          = 224    #: Operator command inputs
-LR_TYPE_OPERATOR_RESPONSE       = 225    #: Operator response inputs
-LR_TYPE_SYSTEM_OUTPUT           = 227    #: System outputs to operator
-LR_TYPE_FLIC_COMMENT            = 232    #: FLIC comment
-LR_TYPE_BLANK_RECORD            = 234    #: Blank record/CSU comment
-LR_TYPE_PICTURE                 = 85     #: Picture
-LR_TYPE_IMAGE                   = 86     #: Image
+LR_TYPE_OPERATOR_INPUT          = 224    #: 0xe0 Operator command inputs
+LR_TYPE_OPERATOR_RESPONSE       = 225    #: 0xe1 Operator response inputs
+LR_TYPE_SYSTEM_OUTPUT           = 227    #: 0xe3 System outputs to operator
+LR_TYPE_FLIC_COMMENT            = 232    #: 0xe8 FLIC comment
+LR_TYPE_BLANK_RECORD            = 234    #: 0xea Blank record/CSU comment
+LR_TYPE_PICTURE                 = 85     #: 0x55 Picture
+LR_TYPE_IMAGE                   = 86     #: 0x56 Image
 #
 # Collections
 # -----------
@@ -163,6 +160,23 @@ LR_TYPE_DELIMITER = LR_TYPE_DELIMITER_START + LR_TYPE_DELIMITER_END
 LR_TYPE_MARKER = (LR_TYPE_EOF, LR_TYPE_BOT, LR_TYPE_EOT, LR_TYPE_EOM)
 #: Logical Records Types for all delimiter and marker records.
 LR_TYPE_DELIMITER_MARKER = LR_TYPE_DELIMITER + LR_TYPE_MARKER
+
+#: Table of fixed format Logical Record types and their fixed length in bytes.
+LR_FIXED_FORMAT = {
+    LR_TYPE_TU10_BOOT: 594,
+    # In the LIS standard but 'This shows a typical implementation of this type.'
+    LR_TYPE_PROGRAM_OVER_HEAD: 52,
+    LR_TYPE_FILE_HEAD: 58,
+    LR_TYPE_FILE_TAIL: 58,
+    LR_TYPE_TAPE_HEAD: 128,
+    LR_TYPE_TAPE_TAIL: 128,
+    LR_TYPE_REEL_HEAD: 128,
+    LR_TYPE_REEL_TAIL: 128,
+    LR_TYPE_EOF: 0,
+    LR_TYPE_BOT: 0,
+    LR_TYPE_EOT: 0,
+    LR_TYPE_EOM: 0,
+}
 
 # Global function for detecting delimiter records
 def isDelimiter(theType):
@@ -293,7 +307,7 @@ class LrBase(object):
     
     def __str__(self):
         """String representation."""
-        return '{:s}: "{:s}"'.format(repr(self), self.desc)
+        return '{:s}: Type: {} "{:s}"'.format(repr(self), self.type, self.desc)
     
     @property
     def desc(self):
@@ -618,6 +632,8 @@ class LrReelTailRead(LrReelTail):
 ############################################################################
 # Section: Misc Logical records - these have no interpreted internal format.
 ############################################################################
+
+
 class LrMisc(LrBase):
     """Miscellaneous Logical Record."""
     def __init__(self, theType, theAttr):
@@ -626,12 +642,33 @@ class LrMisc(LrBase):
             'Illegal LR type of %d for a LrMisc' % self.type
         self.bytes = b''
     
+
 class LrMiscRead(LrMisc):
     """Miscellaneous Logical Record read from a LIS file."""
-    def __init__(self, theFile):
+    def __init__(self, theFile: File.FileRead):
         t, a = self._typeAttrUnpack(theFile)
         super().__init__(t, a)
-        self.bytes = theFile.readLrBytes()  
+        self.bytes: bytes = theFile.readLrBytes()
+        # Set to beginning of LR as we have consumed the complete LR and the caller is most likely to call skipToNextLr.
+        theFile.seekCurrentLrStart()
+
+
+class LrUnknown(LrBase):
+    """Logical Record that does not fall into any other category."""
+    def __init__(self, theType, theAttr):
+        super().__init__(theType, theAttr)
+        self.bytes = b''
+
+
+class LrUnkownRead(LrUnknown):
+    """Logical Record that does not fall into any other category."""
+    """Miscellaneous Logical Record read from a LIS file."""
+    def __init__(self, theFile: File.FileRead):
+        t, a = self._typeAttrUnpack(theFile)
+        super().__init__(t, a)
+        self.bytes: bytes = theFile.readLrBytes()
+        # Set to beginning of LR as we have consumed the complete LR and the caller is most likely to call skipToNextLr.
+        theFile.seekCurrentLrStart()
 
 ############################################################################
 # End: Misc Logical records - these have no interpreted internal format.
@@ -928,8 +965,8 @@ class TableRow(object):
             self._cellMnemMap = {}
             for i, c in enumerate(self._blocks):
                 if c.mnem in self._cellMnemMap:
-                    logging.error('Ignoring duplicate mnemonic {!s:s}'
-                                  ' in row {!s:s}'.format(c.mnem, self._blocks[0].mnem))
+                    logging.warning('Ignoring duplicate mnemonic {!s:s}'
+                                    ' in row {!s:s}'.format(c.mnem, self._blocks[0].mnem))
                 else:
                     self._cellMnemMap[c.mnem] = i
         # Could raise KeyError here
@@ -999,14 +1036,17 @@ class LrTable(LrBase):
             for v in valS:
                 yield v
 
-    def retRowByMnem(self, m):
+    def retRowByMnem(self, m: Mnem.Mnem) -> TableRow:
         """Returns the TableRow from a Mnem.Mnem object. i.e. the table row that has a b'MNEM'
         column whose value matches m.
         May raise a KeyError. Note: an IndexError would mean that self.__mnemRowIndex is corrupt."""
         try:
             return self._rows[self._mnemRowIndex[m]]
         except IndexError as err:
-            raise ExceptionLrTableInternaStructuresCorrupt('self._mnemRowIndex[m] is index {:d} but number of rows is {:d}'.format(self._mnemRowIndex[m], len(self._rows)))
+            raise ExceptionLrTableInternaStructuresCorrupt(
+                'self._mnemRowIndex[m] is index {:d} but number of rows is {:d}'.format(self._mnemRowIndex[m],
+                                                                                        len(self._rows))
+            )
     
     @property
     def isSingleParam(self):
@@ -1023,7 +1063,6 @@ class LrTable(LrBase):
         """If key is an integer or slice this returns block by index(es).
         If key is a bytes() object then this returns row by label.
         May raise a KeyError or IndexError."""
-#        print('TRACE: __getitem__()', repr(key))
         if isinstance(key, int) or isinstance(key, slice):
             return self._rows[key]
         elif isinstance(key, bytes):
@@ -1085,19 +1124,20 @@ class LrTable(LrBase):
                 'COMPONENT_BLOCK_DATUM_BLOCK_ENTRY with no COMPONENT_BLOCK_DATUM_BLOCK_START in table Logical Record.')
         # Add new cell and add name to column super-set
         self._incColMnem(self._rows[-1].addCb(theCbEv))
-        
+
     def _indexLastRowOrDiscard(self):
         # Check if the last row is unique, if not discard it
         if len(self._rows) > 0:
             if self._rows[-1].value in self._tableRowIndex:
                 myRow = self._rows.pop()
                 logging.warning(
-                'LrTableRead(): Discarding duplicate row {:s} in table {:s}'.format(
-                    str(myRow.value), str(self.value)
-                ))
+                    'LrTableRead(): Discarding duplicate row {:s} in table {:s}'.format(
+                        str(myRow.value), str(self.value)
+                    ))
             else:
                 # Add last row to index
-                self._tableRowIndex[self._rows[-1].value] = len(self._rows) - 1
+                row_key = self._rows[-1].value
+                self._tableRowIndex[row_key] = len(self._rows) - 1
                 # If last row has a b'MNEM' column then add the value to the Mnem map
                 try:
                     myMnem = Mnem.Mnem(self._rows[-1][b'MNEM'].value)
@@ -1145,7 +1185,7 @@ class LrTableRead(LrTable):
             except ExceptionCbEngValInit as err:
                 logging.error('LrTableRead.__init__(): Can not construct CB block: {:s}'.format(str(err)))
                 break
-            except ExceptionFileRead as err:
+            except File.ExceptionFileRead as err:
                 # Will happen if there is spurious extra bytes not enough to
                 # create a block
                 logging.warning('LrTableRead.__init__(): Tell: 0x{:x} LD index: 0x{:x} Error: {:s}'.format(theFile.tellLr(), theFile.ldIndex(), str(err)))
@@ -1202,7 +1242,6 @@ class LrTableWrite(LrTable):
                 else:
                     self.addDatumBlock(myCbEv)
             self._indexLastRowOrDiscard()
-#        print('TRACE:', self._rows)
 
 ############################
 # End: Table logical records
@@ -1730,13 +1769,19 @@ class LrFactoryRead(LrFactory):
         appropriate Logical Record object or None."""
         # Read from file
         # First read a single byte
-        myLtype = theFile.readLrBytes(1)[0]
+        logical_record_type = theFile.readLrBytes(1)[0]
         # Now rewind and re-read. This causes duplicate PR readHead() calls.
-        #print('Logical record type', myLtype)
-        t = self._lrMap[myLtype]
-        if t is not None:
+        if logical_record_type not in self._lrMap:
+            logging.info(f'Using LrUnkown Logical Record Handler for type {logical_record_type}')
             theFile.seekCurrentLrStart()
-            return self._lrMap[myLtype](theFile)
+            return LrUnkownRead(theFile)
+        else:
+            t = self._lrMap[logical_record_type]
+            if t is not None:
+                theFile.seekCurrentLrStart()
+                return self._lrMap[logical_record_type](theFile)
+            elif logical_record_type != 0:
+                logging.error(f'No Logical Record Handler for type {logical_record_type}')
 
 ###################################
 # End: Indirect Logical Records

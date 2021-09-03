@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2012 Paul Ross
+# Copyright (C) 2011-2021 Paul Ross
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
 # Paul Ross: apaulross@gmail.com
 """TotalDepth - a suite of Petrophysical software."""
 
-__all__ = ['LAS', 'LIS', 'RP66V1', 'util',]
+__all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
 
-__version__ = '0.3.2rc0'
+__version__ = '0.4.0rc0'
 
-VERSION = (0, 3, 2, 'rc0')
+VERSION = (0, 4, 0, 'rc0')
 
 RELEASE_NOTES = [
     """
@@ -46,6 +46,7 @@ entry_points_console_scripts_dict = {
     'tdlisdumpframeset': 'TotalDepth.LIS.DumpFrameSet:main',
     'tdlisindex': 'TotalDepth.LIS.Index:main',
     'tdlistohtml': 'TotalDepth.LIS.LisToHtml:main',
+    'tdlistolas': 'TotalDepth.LIS.ToLAS:main',
     'tdlisplotlogpasses': 'TotalDepth.LIS.PlotLogPasses:main',
     # 'tdXlisrandomframesetread': 'TotalDepth.LIS.RandomFrameSetRead:main',
     'tdlisscanlogidata': 'TotalDepth.LIS.ScanLogiData:main',
@@ -54,6 +55,7 @@ entry_points_console_scripts_dict = {
     'tdlistablehistogram': 'TotalDepth.LIS.TableHistogram:main',
     # LAS
     'tdlasreadlasfiles': 'TotalDepth.LAS.ReadLASFiles:main',
+    'tdlastohtml': 'TotalDepth.LAS.LASToHTML:main',
     # RP66V1
     'tdrp66v1scan': 'TotalDepth.RP66V1.Scan:main',
     'tdrp66v1tolas': 'TotalDepth.RP66V1.ToLAS:main',
@@ -61,11 +63,17 @@ entry_points_console_scripts_dict = {
     'tdrp66v1logrecindex': 'TotalDepth.RP66V1.LogRecIndex:main',
     'tdrp66v1indexpickle': 'TotalDepth.RP66V1.IndexPickle:main',
     'tdrp66v1indexxml': 'TotalDepth.RP66V1.IndexXML:main',
+    # BIT
+    'tdbitread': 'TotalDepth.BIT.ReadBIT:main',
+    'tdbittolas': 'TotalDepth.BIT.ToLAS:main',
+    # DAT
+    'tddatread': 'TotalDepth.DAT.ReadDATFiles:main',
 }
 
 ENTRY_POINTS_CONSOLE_SCRIPTS = [
     f'{k}={v}' for k, v in entry_points_console_scripts_dict.items()
 ]
+
 
 class ExceptionTotalDepth(Exception):
     """Specialisation of an exception class for TotalDepth package."""

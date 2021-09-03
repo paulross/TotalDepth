@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Created on 28 Feb 2011
 
@@ -791,7 +791,7 @@ class Plot(object):
     def hasDataToPlotLAS(self, theLasFile, theFilmId):
         """Returns True if a call to plotLogPassLIS() is likely to lead to some
         plot data being produced."""
-        if theLasFile.numFrames() == 0:
+        if theLasFile.number_of_frames() == 0:
             # No frames no data...
             logging.info('Plot.hasDataToPlotLAS(): No frames no data...')
             return False
@@ -808,14 +808,14 @@ class Plot(object):
             str(sorted(list(myOutS)))
         ))
         logging.debug('Plot.hasDataToPlotLAS(): Available curves:\n{:s}'.format(
-            str(sorted(list(theLasFile.curveMnems())))
+            str(sorted(list(theLasFile.curve_mnemonics())))
         ))
         for anO in myOutS:
             logging.debug(
                 'Plot.hasDataToPlotLAS(): Testing output "{:s}"'.format(repr(anO))
             )
             # If an output is in the LogPass we are good to go
-            if theLasFile.hasOutpMnem(anO):
+            if theLasFile.has_output_mnemonic(anO):
                 return True
         logging.info(
             'Plot.hasDataToPlotLAS():'
@@ -888,7 +888,7 @@ class Plot(object):
             myHeadDepth,
             # theTailDepth
             Coord.Dim(0.0, 'in'),
-            plotUp=not theLasFile.logDown(),
+            plotUp=not theLasFile.is_log_down(),
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch)
         logging.info(
@@ -939,7 +939,7 @@ class Plot(object):
             retVal = self._plotCurves(theFilmId, theLasFile, myPlRo, xS)
             self._insertCommentInSVG(xS, ' Plot Curves END ', 0)
             # End timer
-            self._incTimers(timerS, theLasFile.numDataPoints() * 6, None)
+            self._incTimers(timerS, theLasFile.number_of_data_points() * 6, None)
         return retVal
     
     def _incTimers(self, theTim, theSize=0, theNewMsg=None):
@@ -1254,8 +1254,8 @@ class Plot(object):
         curvIdSet = set()
         for anO in self._retOutputChIDs(theFilmID):
             if self._presCfg.usesOutpChannel(theFilmID, anO):
-                if theLp is None \
-                or theLp.hasOutpMnem(anO):
+                # print(type(theLp), dir(theLp))
+                if theLp is None or theLp.hasOutpMnem(anO):
                     for cur in self._presCfg.outpCurveIDs(theFilmID, anO):
                         curvIdSet.add(cur)
                 else:

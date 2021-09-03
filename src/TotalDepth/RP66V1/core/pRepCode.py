@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Python implementation of the RP66V1 Representation Codes ('Rep Codes') [RP66V1 Appendix B]
 
@@ -101,7 +120,7 @@ REP_CODES_SUPPORTED = {
     # 1, # - Not found in practice.
     2,
     # 3, 4, # - Not found in practice.
-    # 5, # - Antiquated types, rarely if ever found.
+    5, # - Antiquated types, rarely if ever found, see Western Atlas BIT files.
     6,
     7,
     # 8, 9, # - Not found in practice.
@@ -116,7 +135,7 @@ REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
     2: 'FSINGL',
     # 3: 'FSING1',
     # 4: 'FSING2',
-    # 5: 'ISINGL',
+    5: 'ISINGL', # See ReadBIT.bytes_to_float()
     6: 'VSINGL',
     7: 'FDOUBL',
     # 8: 'FDOUB1',
@@ -218,6 +237,20 @@ def FSINGL(ld: LogicalData) -> float:
     by = ld.chunk(4)
     value = struct.unpack('>f', by)
     return value[0]
+
+
+def ISINGL(ld: LogicalData) -> float:
+    """Representation code 5, IBM 360 single precision floating point.
+    See also TotalDepth.BIT.ReadBIT.bytes_to_float()"""
+    b = ld.chunk(4)
+    sign = b[0] & 0x80
+    exp = b[0] & 0x7f
+    mantissa = b[1] << 16 | b[2] << 8 | b[3]
+    m = mantissa / 0x1000000
+    ret = m * 16**(exp - 64)
+    if sign:
+        return -ret
+    return ret
 
 
 def VSINGL(ld: LogicalData) -> float:
@@ -604,7 +637,7 @@ REP_CODE_MAP = {
     2: FSINGL,
     # 3: FSING1,
     # 4: FSING2,
-    # 5: ISINGL,
+    5: ISINGL,
     6: VSINGL,
     7: FDOUBL,
     # 8: FDOUB1,
@@ -644,6 +677,7 @@ def code_read(rep_code: int, ld: LogicalData):
 REP_CODE_NUMPY_TYPE_MAP = {
     2: np.float32,
 
+    5: np.float32,  # ISINGL
     6: np.float32,
     7: np.float64,
 
@@ -670,18 +704,20 @@ def numpy_dtype(rep_code: int):
 
 
 class NumericCategory(enum.Enum):
-    """Categories of Representation Codes. Useful for deciding absent value."""
+    """Categories of Representation Codes. Useful for deciding absent value.
+    NOTE: Compound types are category NONE as they do not have a single absent value.
+    """
     NONE = 0
     INTEGER = 1
     FLOAT = 2
 
 #: Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
 REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
-    # 1: FSHORT,
+    # 1: NumericCategory.FLOAT,  # FSHORT,
     2: NumericCategory.FLOAT,  # FSINGL,
     # 3: NumericCategory.NONE,  # FSING1,
     # 4: NumericCategory.NONE,  # FSING2,
-    # 5: NumericCategory.FLOAT,  # ISINGL,
+    5: NumericCategory.FLOAT,  # ISINGL,
     6: NumericCategory.FLOAT,  # VSINGL,
     7: NumericCategory.FLOAT,  # FDOUBL,
     # 8: NumericCategory.NONE,  # FDOUB1,

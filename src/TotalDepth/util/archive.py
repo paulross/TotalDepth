@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Extract summary data from archives of log files.
 
@@ -7,6 +26,7 @@ import collections
 import datetime
 import functools
 import logging
+import multiprocessing
 import os
 import pprint
 import shutil
@@ -52,6 +72,18 @@ class FileBase:
                 f'{self.path}',
             ]
         )
+
+    def __eq__(self, other):
+        try:
+            return self.path == other.path
+        except AttributeError:
+            return NotImplemented
+
+    def __lt__(self, other):
+        try:
+            return self.path < other.path
+        except AttributeError:
+            return NotImplemented
 
 
 class FileOnDisc(FileBase):
@@ -224,9 +256,10 @@ def analyse_archive(files: typing.List[FileBase],
     """Take a list of FileBase and write out the analysis."""
     if len(files) == 0:
         return
+    files.sort()
     summary: ArchiveSummary = ArchiveSummary()
-    common_prefix = os.path.commonpath(file.path for file in files)
-    common_prefix = common_prefix[:1 + common_prefix.rfind(os.sep)]
+    common_prefix = os.path.commonpath([file.path for file in files]) + os.sep
+    common_prefix_len = len(common_prefix)
     print(f'Common prefix: {common_prefix}')
     for file in files:
         if len(file_types) == 0 or file.bin_type in file_types:
@@ -237,7 +270,7 @@ def analyse_archive(files: typing.List[FileBase],
             ]
             if num_bytes:
                 fields.append(TotalDepth.util.bin_file_type.format_bytes(file.bytes))
-            fields.append(f'{file.path[len(common_prefix):]}')
+            fields.append(f'{file.path[common_prefix_len:]}')
             print(' '.join(fields))
     for file in files:
         summary.add(file)
@@ -260,37 +293,70 @@ def analyse_archive(files: typing.List[FileBase],
                 f' from {archive_count.size_min:,d} to  {archive_count.size_max:,d}')
             if include_size_histogram:
                 print('\n'.join(archive_count.histogram_power_of_2()))
-                print()
+            print()
+
+    uncatalogued_files = [file for file in  files if file.bin_type == ""]
+    print(f'Uncatalogued files: [{len(uncatalogued_files)}]')
+    print('File extension count of uncatalogued files:')
+    file_ext_counter = collections.Counter([os.path.splitext(file.path)[1] for file in uncatalogued_files])
+    for k in sorted(file_ext_counter.keys()):
+        print(f'{k:12} : {file_ext_counter[k]:6d}')
+    print(f'File size and path of uncatalogued files [{len(uncatalogued_files)}]:')
+    for file in uncatalogued_files:
+        print(f'{file.size:12,d} {file.path[common_prefix_len:]}')
 
 
 EXCLUDE_FILENAMES = ('.DS_Store', '.DS_STORE',)
 
 
-def _process_file(dir_name: str, file_name: str, result: typing.List[FileBase]) -> None:
-    if file_name not in EXCLUDE_FILENAMES:
+def _process_file(dir_name: str, file_name: str) -> typing.Union[FileBase, None]:
+    # if file_name not in EXCLUDE_FILENAMES:
+    if not file_name.startswith('.'):
         path = os.path.join(dir_name, file_name)
+        logger.info(f'Examining: {path}')
         if os.path.isfile(path):
             # If this is a ZIP archive then open it a process the contents.
             if zipfile.is_zipfile(path):
-                # result.extend(process_zip_path(path))
-                result.append(FileZip(path))
+                return FileZip(path)
             else:
-                result.append(FileOnDisc(path))
+                return FileOnDisc(path)
 
 
-def explore_tree(path: str, recurse: bool) -> typing.List[FileBase]:
-    result: typing.List[FileBase] = []
+def _gen_dirs_and_files(path: str, recurse: bool) -> typing.Sequence[typing.Tuple[str, str]]:
+    """Yield pairs of (directory, file)."""
     if os.path.isdir(path):
         if recurse:
             for root, dirs, files in os.walk(path):
                 for file in files:
-                    _process_file(root, file, result)
+                    yield root, file
         else:
             for file_name in sorted(os.listdir(path)):
-                _process_file(path, file_name, result)
+                yield path, file_name
     else:
-        _process_file(os.path.dirname(path), os.path.basename(path), result)
+        yield os.path.dirname(path), os.path.basename(path)
+
+
+def explore_tree_single_process(path: str, recurse: bool) -> typing.List[FileBase]:
+    """Single process code to scan an archive."""
+    print(f'Analysing archive with a single processes.')
+    result: typing.List[FileBase] = []
+    for directory, file_name in _gen_dirs_and_files(path, recurse):
+        file_result = _process_file(directory, file_name)
+        if file_result is not None:
+            result.append(file_result)
     return result
+
+
+def explore_tree_multi_process(path: str, recurse: bool, jobs: int) -> typing.List[FileBase]:
+    """Multiprocessing code to scan an archive."""
+    if jobs < 1:
+        jobs = multiprocessing.cpu_count()
+    print(f'Analysing archive with a {jobs} processes.')
+    logging.info('explore_tree_multi_process(): Setting multi-processing jobs to %d' % jobs)
+    pool = multiprocessing.Pool(processes=jobs)
+    tasks = ((directory, file_name) for directory, file_name in _gen_dirs_and_files(path, recurse))
+    results = [r.get() for r in [pool.apply_async(_process_file, t) for t in tasks]]
+    return [r for r in results if r is not None]
 
 
 def copy_tree(path_from: str, path_to: str, recurse: bool,
@@ -310,7 +376,6 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
         if not nervous:
             os.makedirs(path_to)
     common_prefix = os.path.commonpath([path_from, path_to])
-    common_prefix = common_prefix[:1 + common_prefix.rfind(os.sep)]
     logger.info(f'copy_tree(): common prefix: {common_prefix}')
     file_type_count: typing.Dict[str, int] = {}
     byte_count = 0
@@ -408,6 +473,7 @@ will be copied across."""
         description, prog='TotalDepth.util.archive.main', version=__version__, epilog=__rights__
     )
     cmn_cmd_opts.add_log_level(parser, level=20)
+    cmn_cmd_opts.add_multiprocessing(parser)
     file_types = ', '.join(sorted(TotalDepth.util.bin_file_type.BINARY_FILE_TYPES_SUPPORTED))
     parser.add_argument(
         '--file-type', default=[], action='append',
@@ -426,34 +492,44 @@ will be copied across."""
     # print(args.path_out)
     # return 0
     cmn_cmd_opts.set_log_level(args)
-    t_start = time.perf_counter()
-    FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
-    num_files = 0
-    byte_count = 0
-    if args.path_out:
-        print('Copying tree.')
-        copy_dict, byte_count = copy_tree(
-            args.path_in, args.path_out, args.recurse, args.file_type, args.nervous, args.over_write
-        )
-        print(f'File types copied [{sum(copy_dict.values())}]:')
-        pprint.pprint(copy_dict)
-        num_files = sum(copy_dict.values())
-    else:
-        if args.expand_and_delete:
-            print('Expanding and deleting archive.')
-            num_files, byte_count = expand_and_delete_archives(args.path_in, args.nervous)
+    if os.path.exists(args.path_in):
+        t_start = time.perf_counter()
+        FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
+        num_files = 0
+        file_size_count =  0
+        byte_count = 0
+        if args.path_out:
+            print('Copying tree.')
+            copy_dict, byte_count = copy_tree(
+                args.path_in, args.path_out, args.recurse, args.file_type, args.nervous, args.over_write
+            )
+            print(f'File types copied [{sum(copy_dict.values())}]:')
+            pprint.pprint(copy_dict)
+            num_files = sum(copy_dict.values())
         else:
-            print('Analysing archive.')
-            files: typing.List[FileBase] = explore_tree(args.path_in, args.recurse)
-            analyse_archive(files, args.file_type, args.bytes, args.histogram)
-            num_files = len(files)
-            byte_count = sum(len(f.bytes) for f in files)
-    t_exec = time.perf_counter() - t_start
-    print(f'Execution time: {t_exec:.3f} (s)')
-    print(f'         Files: {num_files:,d} rate {num_files / t_exec:,.1f} (files/s)')
-    print(f'         Bytes: {byte_count:,d} rate {byte_count / t_exec:,.1f} (bytes/s)')
-    print('Bye, bye!')
-    return 0
+            if args.expand_and_delete:
+                print('Expanding and deleting archive.')
+                num_files, byte_count = expand_and_delete_archives(args.path_in, args.nervous)
+            else:
+                print('Analysing archive.')
+                if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
+                    files: typing.List[FileBase] = explore_tree_multi_process(args.path_in, args.recurse, args.jobs)
+                else:
+                    files: typing.List[FileBase] = explore_tree_single_process(args.path_in, args.recurse)
+                analyse_archive(files, args.file_type, args.bytes, args.histogram)
+                num_files = len(files)
+                byte_count = sum(len(f.bytes) for f in files)
+                file_size_count = sum(f.size for f in files)
+        t_exec = time.perf_counter() - t_start
+        print(f'Execution time: {t_exec:.3f} (s)')
+        print(f'         Files: {num_files:18,d} rate: {num_files / t_exec:16,.1f} (files/s)')
+        print(f'         Bytes: {byte_count:18,d} rate: {byte_count / t_exec:16,.1f} (bytes/s)')
+        print(f'     File size: {file_size_count:18,d} rate: {file_size_count / t_exec:16,.1f} (bytes/s)')
+        print('Bye, bye!')
+        return 0
+    else:
+        logger.error(f'Path {args.path_in} does not exist.')
+        return 1
 
 
 if __name__ == '__main__':

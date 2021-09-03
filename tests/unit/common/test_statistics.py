@@ -11,6 +11,50 @@ def test_length_dict():
     assert ld.count == 8
 
 
+def test_length_dict_len():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    assert len(ld) == 8
+
+
+def test_length_dict_min():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    assert ld.min == 0
+
+
+def test_length_dict_max():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    assert ld.max == 7
+
+
+def test_length_dict_keys():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    assert list(ld.keys()) == list(range(8))
+
+
+def test_length_dict_getitem():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    assert ld[0] == 1
+
+
+def test_length_dict_getitem_raises():
+    ld = statistics.LengthDict()
+    for i in range(8):
+        ld.add(i)
+    with pytest.raises(KeyError) as err:
+        ld[-1]
+    assert err.value.args[0] == -1
+
+
 def test_length_dict_zero_count():
     ld = statistics.LengthDict()
     for i in range(8):

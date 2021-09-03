@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Logs process information, such as memory usage, to a log as JSON. Example with ('memory_info', 'cpu_times')::
 
@@ -119,21 +138,36 @@ def extract_json(istream: typing.TextIO) -> typing.List[typing.Dict[str, typing.
     return ret
 
 
-def extract_labels_from_json(json_data: typing.List[typing.Dict[str, typing.Any]]) -> typing.List[typing.Dict[str, typing.Any]]:
+def extract_labels_from_json(json_data: typing.List[typing.Dict[str, typing.Any]]) \
+        -> typing.List[typing.Dict[str, typing.Any]]:
     """Returns a list of dicts of JSON data where 'label' is a key'."""
     return [v for v in json_data if KEY_LABEL in v]
 
 
-def extract_json_as_table(json_data: typing.List[typing.Dict[int, typing.Any]]) \
+def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) \
         -> typing.Tuple[
-            typing.Dict[str, typing.List[typing.List[str]]],
-            typing.Dict[str, float],
-            typing.Dict[str, float],
-            typing.Dict[str, float],
-            typing.Dict[str, float],
+            typing.Dict[int, typing.List[typing.List[str]]],
+            typing.Dict[int, float],
+            typing.Dict[int, float],
+            typing.Dict[int, float],
+            typing.Dict[int, float],
         ]:
-    """Create a table from JSON suitable for a Gnuplot ``.dat`` file."""
-    HEADER = [
+    """Create a table from JSON suitable for a Gnuplot ``.dat`` file.
+
+    Returns:
+
+        - { process_id : [rows of data, ...], ...}
+        - { process_id : t min, ...}
+        - { process_id : t max, ...}
+        - { process_id : RSS min, ...}
+        - { process_id : RSS max, ...}
+
+    A row of data is:
+
+        time, RSS, PageFaults, User, Mean CPU, Insantanous CPU, Timestamp, PID, Label
+
+    """
+    header = [
             f'{"#t(s)":12}',
             f'{"RSS":>12}',
             f'{"PageFaults/s":>12}',
@@ -154,7 +188,7 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[int, typing.Any]]) 
     rss_max = {}
     for record in json_data:
         if record[KEY_PROCESS_ID] not in ret:
-            ret[record[KEY_PROCESS_ID]] = [HEADER[:]]
+            ret[record[KEY_PROCESS_ID]] = [header[:]]
             prev_cpu[record[KEY_PROCESS_ID]] = 0.0
             prev_elapsed_time[record[KEY_PROCESS_ID]] = 0.0
             prev_page_faults[record[KEY_PROCESS_ID]] = 0
@@ -163,9 +197,11 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[int, typing.Any]]) 
             rss_min[record[KEY_PROCESS_ID]] = sys.float_info.max
             rss_max[record[KEY_PROCESS_ID]] = sys.float_info.min
         mean_cpu_user = record["cpu_times"]["user"] / record[KEY_ELAPSED_TIME]
-        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu[record[KEY_PROCESS_ID]]) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
+        inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu[record[KEY_PROCESS_ID]]) \
+            / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         # record["memory_info"]["pfaults"] is the cumulative total.
-        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults[record[KEY_PROCESS_ID]]) / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
+        inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults[record[KEY_PROCESS_ID]]) \
+            / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         label = record[KEY_LABEL] if KEY_LABEL in record else ''
         ret[record[KEY_PROCESS_ID]].append(
             [
@@ -232,12 +268,17 @@ def add_message_to_queue(msg: str) -> None:
 class ProcessLoggingThread(threading.Thread):
     """Thread that regularly logs out process parameters."""
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+        """Constructor.
+        args[0], or interval=... must be the reporting interval in seconds, default 1.0.
+        args[1], or log_level=... must be the log level to report with, default logging.INFO.
+        """
         if name is None:
             name = 'ProcMon'
         super().__init__(group=group, target=target, name=name, daemon=daemon)
         self.args = args
         self.kwargs = kwargs
-        self._interval = args[0] if len(args) else kwargs['interval']
+        self._interval = args[0] if len(args) else kwargs.get('interval', 1.0)
+        self._log_level = args[1] if len(args) > 1 else kwargs.get('log_level', logging.INFO)
         self._process = psutil.Process()
         self._run = True
 
@@ -262,11 +303,11 @@ class ProcessLoggingThread(threading.Thread):
         """Write process data to log flushing message queue if necessary."""
         if self._run:
             if process_queue.empty():
-                logger.info(f'{prefix} {json.dumps(self._get_process_data())}')
+                logger.log(self._log_level, f'{prefix} {json.dumps(self._get_process_data())}')
             else:
                 while not process_queue.empty():
                     msg = process_queue.get()
-                    logger.info(f'{prefix} {json.dumps(self._get_process_data(label=msg))}')
+                    logger.log(self._log_level, f'{prefix} {json.dumps(self._get_process_data(label=msg))}')
 
     def run(self) -> None:
         """thread.run(). Write to log then sleep."""
@@ -324,7 +365,7 @@ def main() -> int:
             for i in range(8):
                 size = random.randint(128, 128 + 256) * 1024 ** 2
                 add_message_to_queue(f'String of {size:,d} bytes')
-                s = ' ' * (size)
+                s = ' ' * size
                 # time.sleep(.8)
                 time.sleep(0.5 + random.random())
                 del s

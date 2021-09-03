@@ -3,6 +3,10 @@
 
 .. Summary of TODO stuff
 
+
+.. role:: strike
+    :class: strike
+
 **************************
 TODO's
 **************************
@@ -23,7 +27,7 @@ TotalDepth Improvements (General)
 
 
 .. list-table:: **TotalDepth Improvements (General)**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -51,11 +55,11 @@ TotalDepth Improvements (General)
       - 1
       - 4
       - 
-    * - TD.test.slow
-      - Move slow LIS test to tests/integration/ or mark as @slow.
-      - 1
-      - 1
-      - DONE: v0.3.0
+    * - :strike:`TD.test.slow`
+      - :strike:`Move slow LIS test to tests/integration/ or mark as @slow.`
+      - :strike:`1`
+      - :strike:`1`
+      - :strike:`DONE: v0.3.0`
     * - TD.test.benchmark
       - Move benchmarking tests to benchmark/.
       - 1
@@ -67,7 +71,7 @@ LAS Improvements
 ===========================
 
 .. list-table:: **LAS Improvements**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -107,7 +111,7 @@ LIS Improvements
 
 
 .. list-table:: **LIS Improvements**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -120,11 +124,11 @@ LIS Improvements
       - 2
       - 3
       - 
-    * - LIS.XNAM
-      - Full XNAM direct support for LIS-A.
-      - 2
-      - 3
-      - 
+    * - :strike:`LIS.XNAM`
+      - :strike:`Full XNAM direct support for LIS-A.`
+      - :strike:`0`
+      - :strike:`3`
+      - :strike:`No. These only occur in a small number from a minority producer using specialised software. They do not occur in mainstream LIS files.`
     * - LIS.index_c
       - Merge fast indexer in C for 100x performance.
       - 2
@@ -140,17 +144,17 @@ LIS Improvements
       - 1
       - 1
       - 
-    * - LIS.test.slow
-      - Move slow LIS test to tests/integration/ or mark as @slow.
-      - 1
-      - 1
-      - DONE: v0.3.0
+    * - :strike:`LIS.test.slow`
+      - :strike:`Move slow LIS test to tests/integration/ or mark as @slow.`
+      - :strike:`1`
+      - :strike:`1`
+      - :strike:`DONE: v0.3.0`
 
 RP66V1 Improvements
 =====================
 
 .. list-table:: **RP66V1 Improvements**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -208,7 +212,7 @@ Plotting Improvements
 =====================
 
 .. list-table:: **Plotting Improvements**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -254,7 +258,7 @@ File Formats
 
 
 .. list-table:: **File Format Support**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID
@@ -272,13 +276,13 @@ File Formats
       - 0
       - N/A
       - 
-    * - Format.ATLAS
-      - Legacy. No publicly available examples.
-      - 0
-      - N/A
-      - 
+    * - :strike:`Format.ATLAS_BIT`
+      - :strike:`Legacy format.`
+      - :strike:`1`
+      - :strike:`1`
+      - :strike:`DONE v0.4.0`
     * - Format.SEGY
-      - Other FOSS project specialise in this.
+      - Other FOSS projects specialise in this.
       - 0
       - N/A
       - 
@@ -287,12 +291,17 @@ File Formats
       - 0
       - N/A
       - 
+    * - :strike:`Format.DAT`
+      - :strike:`An informal format used for mud logs.`
+      - :strike:`1`
+      - :strike:`1`
+      - :strike:`DONE v0.4.0`
 
 Frame Array Improvements
 =========================
 
 .. list-table:: **Frame Array Improvements**
-    :widths: 20 60 10 10 10
+    :widths: 20 40 15 10 40
     :header-rows: 1
     
     * - ID

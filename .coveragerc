@@ -17,7 +17,8 @@ omit =
 
     # RP66V1 command line tools
     src/TotalDepth/RP66V1/SearchFF01.py
-    src/TotalDepth/RP66V1/IndexXMLRead.py
+    src/TotalDepth/RP66V1/util/XMLReadUnits.py
+    src/TotalDepth/RP66V1/util/IndexXMLRead.py
 
     # LIS command line tools
     src/TotalDepth/LIS/ProcLISPath.py

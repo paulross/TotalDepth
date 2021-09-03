@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Creates a particular set of LIS files using LisGen.
 
@@ -293,10 +293,7 @@ Counts files and sizes."""
                          default='', 
                          help="Output directory. [default: %default]")
     opts, args = optParser.parse_args()
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        clkStart = time.perf_counter()
-    else:
-        clkStart = time.clock()
+    clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -307,10 +304,7 @@ Counts files and sizes."""
         os.makedirs(opts.outdir)
     myGlf = GenLisFiles(opts.outdir)
     print(myGlf)
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        clkExec = time.perf_counter() - clkStart
-    else:
-        clkExec = time.clock() - clkStart
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

@@ -1,31 +1,31 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """A dictionary that takes a list of hashables as a key and behaves like a tree."""
 import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-15'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-15'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
 class ExceptionDictTree(ExceptionTotalDepthLIS):
@@ -33,178 +33,213 @@ class ExceptionDictTree(ExceptionTotalDepthLIS):
     pass
 
 
+class ExceptionDictTreeHtmlTable(ExceptionDictTree):
+    """Exception when handling a DictTreeHtmlTable object."""
+    pass
+
+
 class DictTree:
-    """A dictionary that takes a list of hashables as a key and behaves like a tree."""
+    """A dictionary that takes a list of hashables as a key and behaves like a tree.
+    A node can have multiple values represented as a set or list."""
     INDENT_STR = '  '
-    ITERABLE_TYPE = (None, 'list', 'set')
+    ITERABLE_TYPES = (None, 'list', 'set')
     # HTML table events
     ROW_OPEN = (None, 0, 0)
     ROW_CLOSE = (None, -1, -1)
 
-    def __init__(self, valIterable=None):
-        if valIterable not in self.ITERABLE_TYPE:
-            raise ExceptionDictTree('"%s" not in acceptable range: %s' \
-                                    % (valIterable, self.ITERABLE_TYPE))
-        self._vI = valIterable
-        # Otherwise a dictionary
-        self._ir = None
-        # Otherwise anything
-        self._v = None
+    def __init__(self, value_iterable=None):
+        if value_iterable not in self.ITERABLE_TYPES:
+            raise ExceptionDictTree('"%s" not in acceptable range: %s' % (value_iterable, self.ITERABLE_TYPES))
+        # non-None if the value is iterable.
+        self.value_iterable = value_iterable
+        # A dictionary of hashable to a node
+        self.internal_tree: typing.Optional[typing.Dict[typing.Hashable, typing.Union[DictTree, DictTreeHtmlTable]]] = None
+        # Node 'value' can be anything
+        self.internal_value: typing.Any = None
 
     def __iadd__(self, other):
-        if self._vI != other._vI:
-            raise ExceptionDictTree('Can not += mixed values {:s} and {:s}'.format(self._vI, other._vI))
-        for k in other.keys():
-            self.add(k, other.value(k))
-        return self
+        if issubclass(other.__class__, self.__class__):
+            if self.value_iterable != other.value_iterable:
+                raise ExceptionDictTree(
+                    f'Can not += mixed values {self.value_iterable} and {other.value_iterable}'
+                )
+            for k in other.keys():
+                self.add(k, other.value(k))
+            return self
+        return NotImplemented
 
-    def retNewInstance(self):
-        return DictTree(valIterable=self._vI)
+    def new_instance(self):
+        return DictTree(value_iterable=self.value_iterable)
 
-    def add(self, k, v):
+    def add(self, key: typing.Sequence[typing.Hashable], value: typing.Any) -> None:
         """Add a key/value. k is a list of hashables."""
-        if self._vI not in self.ITERABLE_TYPE:
-            raise ExceptionDictTree('"%s" not in acceptble range: %s' \
-                                    % (self._vI, self.ITERABLE_TYPE))
-        if len(k) == 0:
-            if self._vI is None:
-                self._v = v
-            elif self._vI == 'list':
-                if self._v is None:
-                    self._v = [v]
+        if self.value_iterable not in self.ITERABLE_TYPES:
+            raise ExceptionDictTree(f'"{self.value_iterable}" not in acceptable range: {self.ITERABLE_TYPES}')
+        if len(key) == 0:
+            if self.value_iterable is None:
+                self.internal_value = value
+            elif self.value_iterable == 'list':
+                if self.internal_value is None:
+                    self.internal_value = [value]
                 else:
-                    self._v.append(v)
-            elif self._vI == 'set':
-                if self._v is None:
-                    self._v = set()
-                self._v.add(v)
+                    self.internal_value.append(value)
+            elif self.value_iterable == 'set':
+                if self.internal_value is None:
+                    self.internal_value = set()
+                self.internal_value.add(value)
         else:
-            if self._ir is None:
-                self._ir = {}
-            if k[0] not in self._ir:
-                self._ir[k[0]] = self.retNewInstance()
-            self._ir[k[0]].add(k[1:], v)
+            if self.internal_tree is None:
+                self.internal_tree = {}
+            if key[0] not in self.internal_tree:
+                self.internal_tree[key[0]] = self.new_instance()
+            self.internal_tree[key[0]].add(key[1:], value)
             
-    def remove(self, k, v=None):
-        """Remove a key/value. k is a list of hashables."""
-        assert(self._vI in self.ITERABLE_TYPE)
-        if len(k) == 0:
-            if self._vI is None:
-                self._v = None
-            elif self._vI == 'list':
-                if v is None:
-                    self._v = None
+    def remove(self, key: typing.Sequence[typing.Hashable], value: typing.Any = None) -> None:
+        """Remove a key/value."""
+        assert(self.value_iterable in self.ITERABLE_TYPES)
+        if len(key) == 0:
+            if self.value_iterable is None:
+                self.internal_value = None
+            elif self.value_iterable == 'list':
+                if value is None:
+                    self.internal_value = None
                 else:
-                    if self._v is not None:
+                    if self.internal_value is not None:
                         try:
-                            self._v.remove(v)
-                        except ValueError:#, err:
-                            raise ExceptionDictTree('%s not in list %s' % (v, self._v))
+                            self.internal_value.remove(value)
+                        except ValueError:
+                            raise ExceptionDictTree('%s not in list %s' % (value, self.internal_value))
                     else:
                         raise ExceptionDictTree('Value of key is None')
-            elif self._vI == 'set':
-                if v is None:
-                    self._v = None
+            elif self.value_iterable == 'set':
+                if value is None:
+                    self.internal_value = None
                 else:
-                    if self._v is not None:
+                    if self.internal_value is not None:
                         try:
-                            self._v.remove(v)
-                        except KeyError:#, err:
-                            raise ExceptionDictTree('%s not in set %s' % (v, self._v))
+                            self.internal_value.remove(value)
+                        except KeyError:
+                            raise ExceptionDictTree('%s not in set %s' % (value, self.internal_value))
                     else:
                         raise ExceptionDictTree('Value of key is None')
-        elif self._ir is not None:
-            if k[0] in self._ir:
-                self._ir[k[0]].remove(k[1:], v)
+        elif self.internal_tree is not None:
+            if key[0] in self.internal_tree:
+                self.internal_tree[key[0]].remove(key[1:], value)
             else:
-                raise ExceptionDictTree('No key: %s' % (k[0]))
+                raise ExceptionDictTree(f'No key: {key[0]}')
         else:
-            raise ExceptionDictTree('No key tree: %s' % (k))
+            raise ExceptionDictTree(f'No key tree: {key}')
 
-    def value(self, k):
+    def value(self, key: typing.Sequence[typing.Hashable]) -> typing.Optional[typing.Any]:
         """Value corresponding to a key or None. k is a list of hashables."""
-        if len(k) == 0:
-            return self._v
-        if self._ir is None:
+        if len(key) == 0:
+            return self.internal_value
+        if self.internal_tree is None:
             return None
         try:
-            return self._ir[k[0]].value(k[1:])
+            return self.internal_tree[key[0]].value(key[1:])
         except KeyError:
             pass
         return None
     
-    def __contains__(self, k):
-        return self.value(k) is not None
+    def __contains__(self, key: typing.Sequence[typing.Hashable]) -> bool:
+        return self.value(key) is not None
 
-    def values(self):
+    def values(self) -> typing.List[typing.Any]:
         """Returns a list of all values."""
-        retV = []
-        self._values(retV)
-        return retV
+        ret = []
+        self._values(ret)
+        return ret
     
-    def _values(self, theVs):
-        if self._v is not None:
-            theVs.append(self._v)
-        if self._ir is not None:
-            for k in self._ir.keys():
-                self._ir[k]._values(theVs)
+    def _values(self, value_list) -> None:
+        """Finds values recursively."""
+        if self.internal_value is not None:
+            value_list.append(self.internal_value)
+        if self.internal_tree is not None:
+            for k in self.internal_tree.keys():
+                self.internal_tree[k]._values(value_list)
                 
-    def keys(self):
+    def keys(self) -> typing.List[typing.Hashable]:
         """Return a list of keys where each key is a list of hashables."""
-        retK = []
-        kStk = []
-        self._keys(retK, kStk)
-        assert(len(kStk) == 0)
-        return retK
+        ret_keys: typing.List[typing.Hashable] = []
+        key_stack: typing.List[typing.Hashable] = []
+        self._keys(ret_keys, key_stack)
+        assert(len(key_stack) == 0)
+        return ret_keys
     
-    def _keys(self, kS, kStk):
-        if self._v is not None:
-            kS.append(kStk[:])
-        if self._ir is not None:
-            for k in self._ir.keys():
-                kStk.append(k)
-                self._ir[k]._keys(kS, kStk)
-                kStk.pop()
+    def _keys(self, key_list: typing.Sequence[typing.Hashable], key_stack: typing.Sequence[typing.Hashable]) -> None:
+        """Recursive method to get all keys."""
+        if self.internal_value is not None:
+            key_list.append(key_stack[:])
+        if self.internal_tree is not None:
+            for key in self.internal_tree.keys():
+                key_stack.append(key)
+                self.internal_tree[key]._keys(key_list, key_stack)
+                key_stack.pop()
 
-    def __len__(self):
+    def items(self) -> typing.Sequence[typing.Tuple[typing.Sequence[typing.Hashable], typing.Any]]:
+        """Yields a sequence of key, value pairs."""
+        key_stack: typing.List[typing.Hashable] = []
+        yield from self._items(key_stack)
+        assert(len(key_stack) == 0)
+
+    def _items(self, key_stack: typing.Sequence[typing.Hashable]) \
+            -> typing.Sequence[typing.Tuple[typing.List[typing.Hashable], typing.Any]]:
+        """Recursively yields a sequence of key, value pairs."""
+        if self.internal_tree is not None:
+            for key in self.internal_tree.keys():
+                key_stack.append(key)
+                value = self.internal_tree[key].internal_value
+                if value is not None:
+                    yield key_stack[:], value
+                yield from self.internal_tree[key]._items(key_stack)
+                key_stack.pop()
+
+    def __len__(self) -> int:
         """Returns the number of keys."""
         return len(self.keys())
 
-    def depth(self):
+    def depth(self) -> int:
         """Returns the maximum tree depth as an integer."""
         return self._depth(0)
 
-    def _depth(self, theD):
+    def _depth(self, depth_given: int) -> int:
         """Recursively returns the maximum tree depth as an integer."""
-        #print 'theDepth', theDepth
-        myD = theD
-        if self._ir is not None:
-            for k in self._ir.keys():
-                myD = max(myD, self._ir[k]._depth(theD+1))
-        return myD
+        depth_local = depth_given
+        if self.internal_tree is not None:
+            for k in self.internal_tree.keys():
+                depth_local = max(depth_local, self.internal_tree[k]._depth(depth_given + 1))
+        return depth_local
 
-    def indentedStr(self):
-        retL = []
-        kStk = []
-        self._indentedStr(retL, kStk)
-        assert(len(kStk) == 0)
-        return '\n'.join(retL)
+    def indented_string(self) -> str:
+        """Returns an indented string."""
+        ret_list: typing.List[str] = []
+        key_stack: typing.List[typing.Hashable] = []
+        self._indented_string(ret_list, key_stack)
+        assert(len(key_stack) == 0)
+        return '\n'.join(ret_list)
         
-    def _indentedStr(self, theL, kStk):
-        if self._v is not None:
-            theL.append('%s%s' % (self.INDENT_STR*len(kStk), self._v))
-        if self._ir is not None:
-            kS = sorted(self._ir.keys())
-            for k in kS:
-                theL.append('%s%s' % (self.INDENT_STR*len(kStk), k))
-                kStk.append(k)
-                self._ir[k]._indentedStr(theL, kStk)
-                kStk.pop()
+    def _indented_string(self, return_list: typing.List[str], key_stack: typing.Sequence[typing.Hashable]) -> None:
+        """Recursively accumulate an indented string."""
+        if self.internal_value is not None:
+            return_list.append('%s%s' % (self.INDENT_STR * len(key_stack), self.internal_value))
+        if self.internal_tree is not None:
+            for key in sorted(self.internal_tree.keys()):
+                return_list.append('%s%s' % (self.INDENT_STR * len(key_stack), key))
+                key_stack.append(key)
+                self.internal_tree[key]._indented_string(return_list, key_stack)
+                key_stack.pop()
                 
 
 class DictTreeTableEvent(typing.NamedTuple):
+    """POD class that contains the data needed for a HTML table entry.
+    branch - the data route to this node.
+    node - the columns of the table entry.
+    row_span - the HTML rowspan attribute for the <td>.
+    col_span - the HTML colspan attribute for the <td>.
+    """
     branch: typing.List[typing.Any]
-    node: typing.Union[None, typing.Any]
+    node: typing.Any
     row_span: int
     col_span: int
 
@@ -310,57 +345,71 @@ class DictTreeHtmlTable(DictTree):
                 <td>CAA</td>
             </tr>
         </table>
-    
     """
-    # HTML table events
+    #: HTML table event: open row with <tr ...>
     ROW_OPEN = DictTreeTableEvent([], None, 0, 0)
+    #: HTML table event: close row with </tr>
     ROW_CLOSE = DictTreeTableEvent([], None, -1, -1)
 
-    def __init__(self, *args):
-        super(DictTreeHtmlTable, self).__init__(*args)
-        self._colSpan = self._rowSpan = 1
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_span = self.row_span = 1
+        self._has_valid_row_col_span = False
 
-    def retNewInstance(self):
-        return DictTreeHtmlTable(self._vI)
+    def is_row_open(self, event: DictTreeTableEvent) -> bool:
+        """Return True if the event I have generated is a ROW_OPEN event."""
+        return event == self.ROW_OPEN
 
-    @property
-    def colSpan(self):
-        return self._colSpan
+    def is_row_close(self, event: DictTreeTableEvent) -> bool:
+        """Return True if the event I have generated is a ROW_CLOSE event."""
+        return event == self.ROW_CLOSE
 
-    @property
-    def rowSpan(self):
-        return self._rowSpan
+    # Overload mutating methods
+    def add(self, key: typing.Sequence[typing.Hashable], value: typing.Any) -> None:
+        """Add a key/value."""
+        self._has_valid_row_col_span = False
+        return super().add(key, value)
 
-    def setColRowSpan(self):
+    def remove(self, key: typing.Sequence[typing.Hashable], value: typing.Any = None):
+        """Remove a key/value."""
+        self._has_valid_row_col_span = False
+        return super().remove(key, value)
+
+    def new_instance(self):
+        return DictTreeHtmlTable(self.value_iterable)
+
+    def set_row_column_span(self) -> None:
         """Top level call that sets colspan and rowspan attributes."""
-        self._setRowSpan()
-        maxDepth = self.depth()
-        self._setColSpan(maxDepth, -1)
+        if not self._has_valid_row_col_span:
+            self._set_row_span()
+            max_depth = self.depth()
+            self._set_column_span(max_depth, -1)
+            self._has_valid_row_col_span = True
 
-    def _setColSpan(self, mD, d):
-        """"""
-        if self._ir is None:
+    def _set_column_span(self, max_depth: int, depth: int) -> None:
+        """Traverses the tree setting the columns span."""
+        if self.internal_tree is None:
             # Leaf node
-            self._colSpan = mD- d
+            self.column_span = max_depth - depth
         else:
             # Non-leaf
-            self._colSpan = 1
-            for aTree in self._ir.values():
-                aTree._setColSpan(mD, d+1)
+            self.column_span = 1
+            for tree in self.internal_tree.values():
+                tree._set_column_span(max_depth, depth + 1)
+                tree._has_valid_row_col_span = True
     
-    def _setRowSpan(self):
-        """Sets self._rowSpan recursively."""
-#        retVal = 1
-        if self._ir is None:
-            self._rowSpan = 1
+    def _set_row_span(self) -> int:
+        """Sets self.row_span recursively."""
+        if self.internal_tree is None:
+            self.row_span = 1
         else:
             # Non-leaf node
-            self._rowSpan = 0
-            for aTree in self._ir.values():
-                self._rowSpan += aTree._setRowSpan()
-        return self._rowSpan
+            self.row_span = 0
+            for tree in self.internal_tree.values():
+                self.row_span += tree._set_row_span()
+        return self.row_span
 
-    def genColRowEvents(self):
+    def gen_row_column_events(self) -> typing.Sequence[DictTreeTableEvent]:
         """Returns a set of events that are quadruples.
         (key_branch, value, rowspan_int, colspan_int)
         The branch is a list of keys the from the branch of the tree.
@@ -368,49 +417,110 @@ class DictTreeHtmlTable(DictTree):
         At the start of the a <tr> there will be a ROW_OPEN
         and at row end (</tr> a ROW_CLOSE will be yielded
         """
-        self.setColRowSpan()
-        hasYielded = False
-        for anEvent in self._genColRowEvents([]):
-            if not hasYielded:
+        self.set_row_column_span()
+        has_yielded = False
+        for anEvent in self._gen_row_column_events([]):
+            if not has_yielded:
                 yield self.ROW_OPEN
-                hasYielded = True
+                has_yielded = True
             yield anEvent
-        if hasYielded:
+        if has_yielded:
             yield self.ROW_CLOSE
-    
-    def _genColRowEvents(self, keyBranch) -> typing.Iterable[DictTreeTableEvent]:
-        """Returns a set of events that are a tuple of quadruples.
+
+    def _gen_row_column_events(self, key_branch: typing.Sequence[typing.Hashable]) \
+            -> typing.Sequence[DictTreeTableEvent]:
+        """Recursively yields a set of events that are a tuple of quadruples.
         (key_branch, value, rowspan_integer, colspan_integer)
         For example: (['a', 'b'], 'c', 3, 7)
         At the start of the a <tr> there will be a ROW_OPEN
-        and at row end (</tr> a ROW_CLOSE will be yielded
+        and at row end (</tr>) a ROW_CLOSE will be yielded
         """
-        if self._ir is not None:
+        # set_column_row_span() is a NOP if the internal data has not changed.
+        self.set_row_column_span()
+        if self.internal_tree is not None:
             # Non-leaf
-            keyS = sorted(self._ir.keys())
-            for i, k in enumerate(keyS):
-                keyBranch.append(k)
+            keys = sorted(self.internal_tree.keys())
+            for i, k in enumerate(keys):
+                key_branch.append(k)
                 if i != 0:
                     yield self.ROW_CLOSE
                     yield self.ROW_OPEN
-                yield DictTreeTableEvent(keyBranch[:], self._ir[k]._v, self._ir[k].rowSpan, self._ir[k].colSpan)
+                yield DictTreeTableEvent(key_branch[:], self.internal_tree[k].internal_value,
+                                         self.internal_tree[k].row_span, self.internal_tree[k].column_span)
                 # Recurse
-                for anEvent in self._ir[k]._genColRowEvents(keyBranch):
+                for anEvent in self.internal_tree[k]._gen_row_column_events(key_branch):
                     yield anEvent
-                keyBranch.pop()
+                key_branch.pop()
 
-    def walkColRowSpan(self) -> str:
-        dMax = self.depth()
-        #print 'dMax=%d' % dMax
-        return self._walkColRowSpan(0, dMax)
+    def gen_row_column_events_from_branch(self, key_branch: typing.List[typing.Hashable]) \
+            -> typing.Sequence[DictTreeTableEvent]:
+        """Yields a set of events that are a tuple of quadruples.
+        (key_branch, value, rowspan_integer, colspan_integer)
+        For example: (['a', 'b'], 'c', 3, 7)
+        At the start of the a <tr> there will be a ROW_OPEN
+        and at row end (</tr>) a ROW_CLOSE will be yielded
+        """
+        # print('TRACE: XX key_branch', key_branch)
+        # Find the sub-tree from the key_branch
+        sub_tree = self
+        for key in key_branch:
+            # print('TRACE: XX sub_tree.internal_tree', sub_tree.internal_tree.keys())
+            sub_tree = sub_tree.internal_tree[key]
+        # yield the events from the sub-tree.
+        has_yielded = False
+        for event in sub_tree._gen_row_column_events_from_branch([]):
+            if not has_yielded:
+                yield self.ROW_OPEN
+                has_yielded = True
+            yield event
+        if has_yielded:
+            yield self.ROW_CLOSE
 
-    def _walkColRowSpan(self, d, dMax) -> str:
-        #print '%srow=%d col=%d "%s"' \
-        #    % ('  '*d, self.rowSpan(), dMax-self.colSpan(), self._v)
-        retVal = ""
-        if self._ir is not None:
-            kS = sorted(self._ir.keys())
-            for k in kS:
-                retVal += '%s%s r=%d, c=%d\n' % ('  '*d, k, self._ir[k].rowSpan, self._ir[k].colSpan)
-                retVal += self._ir[k]._walkColRowSpan(d+1, dMax)
-        return retVal
+    def _gen_row_column_events_from_branch(self, key_branch: typing.List[typing.Hashable]) \
+            -> typing.Sequence[DictTreeTableEvent]:
+        # set_column_row_span() is a NOP if the internal data has not changed.
+        self.set_row_column_span()
+        if self.internal_tree is not None:
+            # Non-leaf
+            keys = sorted(self.internal_tree.keys())
+            for i, key in enumerate(keys):
+                key_branch.append(key)
+                if i != 0:
+                    yield self.ROW_CLOSE
+                    yield self.ROW_OPEN
+                event = DictTreeTableEvent(
+                    key_branch,
+                    self.internal_tree[key].internal_value,
+                    self.internal_tree[key].row_span,
+                    self.internal_tree[key].column_span,
+                )
+                yield event
+                # Recurse
+                sub_tree = self.internal_tree[key]
+                yield from sub_tree._gen_row_column_events_from_branch(key_branch)
+                key_branch.pop()
+
+    def depth_from_branch(self, key_branch: typing.Sequence[typing.Hashable]) -> int:
+        """Finds the remainder of depth from the branch."""
+        # Find the sub-tree from the key_branch
+        sub_tree = self
+        for key in key_branch:
+            sub_tree = sub_tree.internal_tree[key]
+        return sub_tree.depth()
+
+    def walk_row_col_span(self) -> str:
+        """Return the internal tree as a string."""
+        max_depth = self.depth()
+        return self._walk_row_column_span(0, max_depth)
+
+    def _walk_row_column_span(self, depth: int, max_depth: int) -> str:
+        ret_list = []
+        if self.internal_tree is not None:
+            for k in sorted(self.internal_tree.keys()):
+                ret_list.append(
+                    '%s%s r=%d, c=%d\n' % (
+                        '  ' * depth, k, self.internal_tree[k].row_span, self.internal_tree[k].column_span
+                    )
+                )
+                ret_list.append(self.internal_tree[k]._walk_row_column_span(depth + 1, max_depth))
+        return ''.join(ret_list)

@@ -19,13 +19,14 @@ Small Test Set
 Medium Test Set
 ----------------------------
 
-The Medium Size Test Set is 20,000+ files (100Gb+) of typical oilfield data.
+The Medium Size Test Set is 20,000+ files (130Gb+) of typical oilfield data.
 Here is the approximate breakdown of the test set:
 
 
 =============== =========== =========== =====================================================================================
 File Type       Files       Total Size  Notes
 =============== =========== =========== =====================================================================================
+BIT             ~500        ~1.5Gb      Largest file is around 6Mb.
 LAS v1.2        ~500        ~1Gb        Largest file is around 16Mb.
 LAS v2.0        ~20,000     ~30Gb       Largest file is around 250Mb (RP66V1 converted files are much larger).
 LAS v3.0        A few       ~0          Rarely present, their absence is not considered significant. 

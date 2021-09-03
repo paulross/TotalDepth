@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """The LogPass module contains a single class LogPass that is fundamental to the
 way that TotalDepth handles LIS binary data.
@@ -36,6 +36,7 @@ import logging
 #import array
 #import numpy
 #import pprint
+import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import Type01Plan
@@ -246,29 +247,24 @@ class LogPass(object):
         else:
             strS.append('   Channels: {:s}'.format(str([b.mnem for b in self._dfsr.dsbBlocks])))
         strS.append('        RLE: {:s}'.format(str(self._rle)))
-        if self._rle.hasXaxisData:
-#            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} units={:s}'.format(
-#                        self._rle.xAxisFirst(),
-#                        self._rle.xAxisLast(),
-#                        self._rle.totalFrames(),
-#                        self._rle.frameSpacing(),
-#                        self._rle.xAxisUnits,
-#                        ))
-            strS.append('     X axis: first={:.3f} last={:.3f} frames={:d} overall spacing={:.4f} in optical units={!s:s} (actual units={!s:s})'.format(
-                        self.xAxisFirstValOptical,
-                        self.xAxisLastValOptical,
-                        self._rle.totalFrames(),
-                        self.xAxisSpacingOptical,
-                        self.xAxisUnitsOptical,
-                        self._rle.xAxisUnits,
-                        ))
-        else:
-            strS.append('     X axis: No data.')
+        strS.append(f'     {self.x_axis_str()}')
         strS.append('  Frame set: {:s}'.format(str(self._frameSet)))
         return '\n'.join(strS)
-    
+
     __str__ = longStr
-    
+
+    def x_axis_str(self) -> str:
+        if self._rle.hasXaxisData:
+            return (
+                f'X axis:'
+                f' first={self.xAxisFirstValOptical:.3f}'
+                f' last={self.xAxisLastValOptical:.3f}'
+                f' frames={self._rle.totalFrames():d}'
+                f' overall spacing={self.xAxisSpacingOptical:.4f}'
+                f' in optical units={self.xAxisUnitsOptical!s:s} (actual units={self._rle.xAxisUnits!s:s})'
+            )
+        return 'X axis: No data.'
+
     def frameSetLongStr(self):
         """Returns a long (multiline) descriptive string of the Frame Set or N/A if not initialised."""
         if self._frameSet is None:
@@ -497,6 +493,37 @@ class LogPass(object):
                     else:
                         yield myDsb.subChMnem(aScIdx), myDsb.units
         
+    def genFrameSetChIndexScNameUnit(self, toAscii=True):
+        """This generates an index, name and units for sub-channel in a frame in the
+        current frame set.
+        Like genFrameSetScNameUnit() but with the channel index as well.
+        """
+        if self._frameSet is None:
+            raise ExceptionLogPassNoFrameSet('LogPass has no FrameSet')
+        for extChIdx in self._frameSet.genExtChIndexes():
+            myDsb = self._dfsr.dsbBlocks[extChIdx]
+            if myDsb.repCode in RepCode.DIPMETER_REP_CODES:
+                # Dipmeter is a special case
+                # Type 130
+                numVals = RepCode.DIPMETER_NUM_FAST_CHANNELS
+                if myDsb.repCode == RepCode.DIPMETER_CSU_FIELD_TAPE_REP_CODE:
+                    # Type 234
+                    numVals += RepCode.DIPMETER_NUM_SLOW_CHANNELS
+                for i in range(numVals):
+                    if toAscii:
+                        yield extChIdx, self._toAscii(RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[i][0]), \
+                            self._toAscii(myDsb.units)
+                    else:
+                        yield extChIdx, RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[i][0], \
+                            myDsb.units
+            else:
+                for aScIdx in range(myDsb.subChannels):
+                    if toAscii:
+                        yield extChIdx, self._toAscii(myDsb.subChMnem(aScIdx)), \
+                            self._toAscii(myDsb.units)
+                    else:
+                        yield extChIdx, myDsb.subChMnem(aScIdx), myDsb.units
+
     #=============================================
     # End: Mapping of MNEM to channel indices.
     #=============================================
@@ -684,6 +711,14 @@ class LogPass(object):
             d['Xaxis'] = None
         return d
 
+    def gen_mnemonic_units(self) -> typing.Sequence[typing.Tuple[bytes, bytes]]:
+        """
+        Yields a sequence of (mnemonic, units) for each of the recorded Datum Specification Blocks.
+        This does not include sub-channels.
+        """
+        dsb_block: LogiRec.DatumSpecBlock
+        for dsb_block in self._dfsr.dsbBlocks:
+            yield dsb_block.mnem, dsb_block.units
 ##############
 # End: LogPass
 ##############

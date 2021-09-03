@@ -2,6 +2,48 @@
 History
 ***********
 
+0.4.0 (2021-08-31)
+====================
+
+* General
+    * Add SLB parameter and unit online lookup.
+    * Add detection of CFBF, EBCDIC, RCD, SEG-Y, STK, PDS binary file types.
+
+* Specific File formats
+
+    * BIT
+
+        * Support Western Atlas BIT files.
+        * Add BIT file conversion to LAS.
+        * BIT float to bytes (ISINGL) encoding.
+
+    * DAT
+
+        * Add DAT file support using the common FrameArray.
+
+    * LAS
+
+        * Add tdlastohtml as an entry point.
+        * Parser improvements.
+        * LAS reader now ignores duplicate channels if requested.
+        * Add LAS variants to binary_file_type.
+        * LAS FrameArray writing now in TotalDepth.common.LogPass
+
+    * LIS
+
+        * Add LIS to LAS conversion.
+        * Kill off XNAM LIS support.
+        * Better handling of LIS Physical Record padding.
+        * Fix for LIS indexer when the DFSR is missing.
+        * Adds generation of AREA patterns in SVG.
+        * Creates PNG pattern files from XML data. Provides an API to pattern files and Data URI Scheme inline implementations.
+
+    * RP66V1
+
+        *  Prepare for RP66V1 C/C++ code. Update to Python 3.8, 3.9, 3.10.
+        * Add units conversion.
+
+
 0.3.1 (2020-06-15)
 ====================
 

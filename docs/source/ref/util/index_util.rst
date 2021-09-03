@@ -3,9 +3,9 @@
 
 .. TotalDepth API reference.
 
-******************************
-Utility Package Reference
-******************************
+*********************************************
+TotalDepth.util - Utility Package Reference
+*********************************************
 
 Contents:
 
@@ -15,6 +15,7 @@ Contents:
     copybinfiles
     DictTree
     DirWalk
+    EBCDIC
     ExecTimer
     FileBuffer
     FileStatus

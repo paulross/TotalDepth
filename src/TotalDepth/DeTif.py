@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Strip TIF markers from a file or scan a file and reporting errors in TIF markers.
 """
@@ -47,7 +66,8 @@ class TifMarker(typing.NamedTuple):
     next: int
 
     def __str__(self) -> str:
-        return f'TifMarker: 0x{self.tell:08x} Type: 0x{self.type:08x} Prev: 0x{self.prev:08x} Next: 0x{self.next:08x}'
+        return f'TifMarker: 0x{self.tell:08x} Type: 0x{self.type:08x} Prev: 0x{self.prev:08x} Next: 0x{self.next:08x}' \
+               f' Length: 0x{self.next - self.tell:08x} Payload: 0x{self.next - self.tell - TIF_TRIPLET_NUM_BYTES:08x}'
 
     @property
     def is_tif_start(self) -> bool:
@@ -105,6 +125,13 @@ def tif_scan_file_object(fobj: typing.BinaryIO) -> typing.List[TifMarker]:
         raise DeTifExceptionRead(f'Initial TIF marker is wrong type: {tifs[-1]}')
     logger.debug(f'[{len(tifs):8,d}] {tifs[-1]}')
     while True:
+        # NOTE: It is OK if tifs[-1].next == fobj.tell() as that just means there is no payload.
+        if tifs[-1].next < fobj.tell():
+            logger.error(
+                f'TIF marker suggest going backwards.'
+                f' Next: {tifs[-1].next} 0x{tifs[-1].next:x} <= Tell: {fobj.tell()} 0x{fobj.tell():x}'
+            )
+            return tifs
         fobj.seek(tifs[-1].next)
         try:
             tifs.append(_read_tifs(fobj))

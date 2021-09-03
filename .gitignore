@@ -61,6 +61,7 @@ TotalDepth.egg-info/
 .coverage
 .coverage.*
 htmlcov/
+htmlcov_*/
 
 # The contents is created when testing and have data that is randomly generated.
 tests/unit/test_util/test_plot/test_svg/*
@@ -76,7 +77,8 @@ tests/integration/test_LIS/test_core/binary_files
 benchmarks/TotalDepth/LIS/core/binary_files/
 
 # Binary test data
-data/
+/data
+#!src/TotalDepth/common/data/
 
 # Binary Pickle files
 *.pkl
@@ -87,4 +89,6 @@ private/
 # Sphinx documentation
 docs/publish/_build/*
 
-
+# Log files from pymemtrace
+*.log
+*.log.tgz

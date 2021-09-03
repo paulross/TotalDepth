@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 import datetime
 import io
 import logging
@@ -103,7 +122,7 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
             pass
 
 
-def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
+def frame_channel_to_XML(channel: LogPass.RP66V1FrameChannel, xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML Channel node suitable for RP66V1.
 
     Example:
@@ -113,13 +132,13 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
         <Channel C="0" I="DEPTH" O="35" count="1" dimensions="1" long_name="Depth Channel" rep_code="7" units="m"/>
     """
     channel_attrs = {
-        'O': f'{channel.ident.O}',
-        'C': f'{channel.ident.C}',
-        'I': f'{channel.ident.I.decode("ascii")}',
+        'O': f'{channel._ident.O}',
+        'C': f'{channel._ident.C}',
+        'I': f'{channel._ident.I.decode("ascii")}',
         'long_name': f'{channel.long_name.decode("ascii")}',
         'rep_code': f'{channel.rep_code:d}',
         'units': f'{channel.units.decode("ascii")}',
-        'dimensions': ','.join(f'{v:d}' for v in channel.dimensions),
+        'shape': ','.join(f'{v:d}' for v in channel.shape),
         'count': f'{channel.count:d}',
     }
     with XmlWrite.Element(xml_stream, 'Channel', channel_attrs):
@@ -127,7 +146,7 @@ def frame_channel_to_XML(channel: LogPass.FrameChannel, xml_stream: XmlWrite.Xml
 
 
 
-def frame_array_to_XML(frame_array: LogPass.FrameArray,
+def frame_array_to_XML(frame_array: LogPass.RP66V1FrameArray,
                        iflr_data: typing.Sequence[IFLRReference],
                        xml_stream: XmlWrite.XmlStream) -> None:
     """Writes a XML FrameArray node suitable for RP66V1.
@@ -163,14 +182,14 @@ def frame_array_to_XML(frame_array: LogPass.FrameArray,
         'C': f'{frame_array.ident.C}',
         'I': f'{frame_array.ident.I.decode("ascii")}',
         'description': frame_array.description.decode('ascii'),
-        'x_axis' : frame_array.channels[0].ident.I.decode("ascii"),
+        'x_axis' : frame_array.channels[0].ident,
         'x_units' : frame_array.channels[0].units.decode("ascii"),
     }
 
     with XmlWrite.Element(xml_stream, 'FrameArray', frame_array_attrs):
         with XmlWrite.Element(xml_stream, 'Channels', {'count': f'{len(frame_array)}'}):
             for channel in frame_array.channels:
-                    frame_channel_to_XML(channel, xml_stream)
+                frame_channel_to_XML(channel, xml_stream)
         with XmlWrite.Element(xml_stream, 'IFLR', {'count' : f'{len(iflr_data)}'}):
             # Frame number output
             rle = Rle.create_rle(v.frame_number for v in iflr_data)
@@ -471,7 +490,7 @@ def main() -> int:
     args = parser.parse_args()
     # print('args:', args)
     # return 0
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     # Your code here
     clk_start = time.perf_counter()
     ret_val = 0
@@ -484,7 +503,7 @@ def main() -> int:
         )
     else:
         if args.log_process > 0.0:
-            with process.log_process(args.log_process):
+            with process.log_process(args.log_process, log_level):
                 result: typing.Dict[str, IndexResult] = index_dir_or_file(
                     args.path_in,
                     args.path_out,

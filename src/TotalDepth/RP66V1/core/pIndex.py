@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 RP66V1 file indexer at the level of Visible Records and the first Logical Record Segment Header.
 
@@ -102,8 +121,8 @@ class LogicalRecordIndex:
         position: File.LogicalRecordPosition = self.lr_pos_desc[index].position
         return self.rp66v1_file.get_file_logical_data(position, offset, length)
 
-    def get_file_logical_data_at_position(self, position: File.LogicalRecordPositionBase,
-                                          offset: int = 0, length: int = -1):
+    def get_file_logical_data_at_position(self, position: File.LogicalRecordPosition,
+                                          offset: int = 0, length: int = -1) -> File.FileLogicalData:
         """
         Returns a FileLogicalData object from the Logical Record position.
 

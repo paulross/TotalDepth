@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 import abc
 import argparse
 import typing
@@ -20,46 +39,38 @@ class SliceABC(abc.ABC):
     @abc.abstractmethod
     def first(self, length: int) -> int:
         """The index of the first element of a sequence of length."""
-        pass
 
     @abc.abstractmethod
     def last(self, length: int) -> int:
         """The index of the last element of a sequence of length."""
-        pass
 
     @abc.abstractmethod
     def step(self, length: int) -> int:
         """The sequence of length step."""
-        pass
 
     @abc.abstractmethod
     def count(self, length: int) -> int:
         """Returns the number of values that will result if the slice is applied to a sequence of given length."""
-        pass
 
     @abc.abstractmethod
     def gen_indices(self, length: int) -> range:
         """Generates the indices for the sequence of the given length."""
-        pass
 
     @abc.abstractmethod
     def indices(self, length: int) -> typing.List[int]:
         """Returns a fully composed list of indices for the sequence of the given length."""
-        pass
 
     @abc.abstractmethod
     def __eq__(self, other) -> bool:
         """Mostly used for testing."""
-        pass
 
     @abc.abstractmethod
     def long_str(self, length: int) -> str:
         """Return a long string."""
-        pass
 
     @abc.abstractmethod
     def __str__(self) -> str:
-        pass
+        """String representation."""
 
 
 class Slice(SliceABC):
@@ -123,7 +134,7 @@ class Slice(SliceABC):
 class Sample(SliceABC):
     """This has the same API as Slice but takes a single integer.
 
-    NOTE: This may not p[roduce a regular sequence. For example sampling 7 items out  of a 12 element list has the
+    NOTE: This may not produce a regular sequence. For example sampling 7 items out  of a 12 element list gives the
     indices [0, 1, 3, 5, 6, 8, 10]
     """
     def __init__(self, sample_size: int):
@@ -209,7 +220,7 @@ def create_slice_or_sample(slice_string: str) -> typing.Union[Slice, Sample]:
 
 
 def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
-                                       help_prefix: str = '', use_what: bool = False) -> None:
+                                       help_prefix: str = '', use_what: bool = False) -> None: # pragma: no cover
     help_list = []
     if help_prefix:
         help_list.append(f'{help_prefix}')

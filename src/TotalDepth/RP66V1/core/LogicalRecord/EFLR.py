@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Implements the Explicitly Formatted Logical Record (EFFLR) [RP66V1 Section 3 Logical Record Syntax]
 
@@ -180,9 +199,12 @@ class Template:
     def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
+        self.logical_data_consumed = 0
+
 
     def read(self, ld: LogicalData):
         """Populate the template with the Logical Data."""
+        ld_index = ld.index
         while True:
             component_descriptor = ComponentDescriptor(ld.read())
             if not component_descriptor.is_attribute_group:
@@ -200,6 +222,7 @@ class Template:
             next_component_descriptor = ComponentDescriptor(ld.peek())
             if next_component_descriptor.is_object:
                 break
+        self.logical_data_consumed = ld.index
 
     def __len__(self) -> int:
         """Return the number of columns described by this Template."""

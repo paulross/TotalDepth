@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """The RawStream handler provides low-level stream I/O functionality."""
 
@@ -103,7 +103,7 @@ class RawStream(object):
         try:
             return self._stream.read(theLen)
         except ValueError as err:
-            raise ExceptionRawStreamEOF(str(err))
+            raise ExceptionRawStreamEOF(f'{str(err)} at tell: 0x{self._stream.tell():08x}')
         
     def write(self, theB):
         """Writes theB bytes."""
@@ -120,8 +120,11 @@ class RawStream(object):
         theStruct - A formated instance of struct.Struct()."""
         myBuf = self._stream.read(theStruct.size)
         if len(myBuf) < theStruct.size:
-            raise ExceptionRawStreamEOF('RawStream.readAndUnpack(): EOF; read %s but need %d bytes' \
-                                     % (myBuf, theStruct.size))
+            raise ExceptionRawStreamEOF(
+                f'RawStream.readAndUnpack(): EOF at 0x{self._stream.tell():08x}'
+                f' read {myBuf}'
+                f' but need {theStruct.size} bytes'
+            )
         return theStruct.unpack(myBuf)
 #===============================================================================
 #        try:

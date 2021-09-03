@@ -1,48 +1,51 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2011 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """
 Created on 10 Nov 2010
 
 @author: p2ross
 """
+import logging
+import sys
+import time
+import typing
+
+from TotalDepth.LIS import lis_cmn_cmd_opts
+from TotalDepth.LIS.core import PhysRec
+from TotalDepth.common import cmn_cmd_opts
+from TotalDepth.util import Histogram
+
+
 __author__  = 'Paul Ross'
 __date__    = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__  = 'Copyright (c) 2010-2020 Paul Ross'
 
-import time
-import sys
-import logging
-from optparse import OptionParser
-import struct
-
-from TotalDepth.LIS.core import PhysRec
-from TotalDepth.util import Histogram
 
 # How much of the logical data to display
 LEN_TRUNCATE = 32
 
-def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
-#    print(dumpTellS)
+
+def scan_file(file_path, verbose, keepGoing, pad_modulo, pad_non_null, dump_tell_list, theS=sys.stdout):
     try:
-        myPrh = PhysRec.PhysRecRead(fp, fp, keepGoing)
+        myPrh = PhysRec.PhysRecRead(file_path, file_path, keepGoing, pad_modulo, pad_non_null)
     except PhysRec.ExceptionPhysRec as err:
         print('Can not open file, error: %s' % str(err))
         return
@@ -67,8 +70,8 @@ def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
                     myHistLen.add(len(myLdSigma))
                     myHistTyp.add(lrType)
                 theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
-                if myOffs not in dumpTellS \
-                and not isVerbose and len(myLdSigma) > LEN_TRUNCATE:
+                if myOffs not in dump_tell_list \
+                and not verbose and len(myLdSigma) > LEN_TRUNCATE:
                     theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
                 else:
                     theS.write('  {!r:s}\n'.format(myLdSigma))
@@ -77,8 +80,8 @@ def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
         myLdSigma += myLd
     if len(myLdSigma) > 0:
         theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
-        if myOffs not in dumpTellS \
-        and not isVerbose and len(myLdSigma) > LEN_TRUNCATE:
+        if myOffs not in dump_tell_list \
+        and not verbose and len(myLdSigma) > LEN_TRUNCATE:
             theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
         else:
             theS.write('  {:s}\n'.format(myLdSigma))
@@ -90,10 +93,10 @@ def scanFile(fp, isVerbose, keepGoing, dumpTellS, theS=sys.stdout):
     theS.write('\n')
     
 
-def retIntDumpList(theStr):
+def ret_int_dump_list(arg_string: str) -> typing.List[int]:
     """Splits a string and returns a list of integers from hex/dec."""
-    r = []
-    for w in theStr.split():
+    r: typing.List[int] = []
+    for w in arg_string.split():
         try:
             if w.startswith('0x'):
                 r.append(int(w[2:], 16))
@@ -103,50 +106,29 @@ def retIntDumpList(theStr):
             logging.error('Can not understand integer {:s}: {:s}'.format(w, err))
     return r
 
+
 def main():
     usage = """usage: %prog [options] file
 Scans a LIS79 file and dumps logical record data."""
     print('Cmd: %s' % ' '.join(sys.argv))
-    optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. [default: %default]")
-    optParser.add_option(
+    arg_parser = cmn_cmd_opts.path_in(usage, prog='TotalDepth.LIS.ScanPhysRec', version='%(prog)s ' + __version__)
+    lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
+    cmn_cmd_opts.add_log_level(arg_parser, level=20)
+    arg_parser.add_argument(
             "-d", "--dump",
-            type="str",
+            type=str,
             dest="dump",
             default='',
-            help="Dump complete data at these integer positions (ws separated, hex/dec). [default: %default]"
-        )      
-    optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=20,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
-    optParser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, 
-                      help="Verbose Output. [default: %default]")
-    opts, args = optParser.parse_args()
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        clkStart = time.perf_counter()
-    else:
-        clkStart = time.clock()
+            help="Dump complete data at these integer positions (ws separated, hex/dec). [default: %(default)s]"
+    )
+    args = arg_parser.parse_args()
+    print(args)
     # Initialise logging etc.
-    logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+    cmn_cmd_opts.set_log_level(args)
     # Your code here
-    if len(args) == 1:
-        scanFile(args[0], opts.verbose, opts.keepGoing, retIntDumpList(opts.dump))
-    else:
-        optParser.print_help()
-        optParser.error("Wrong number of arguments, I need one only.")
-        return 1
-    if ((sys.version_info.major >= 3) and (sys.version_info.minor >= 3)):
-        clkExec = time.perf_counter() - clkStart
-    else:
-        clkExec = time.clock() - clkStart
+    clkStart = time.perf_counter()
+    scan_file(args.path_in, args.verbose, args.keepGoing, args.pad_modulo, args.pad_non_null, ret_int_dump_list(args.dump))
+    clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0

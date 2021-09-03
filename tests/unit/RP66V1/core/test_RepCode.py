@@ -125,6 +125,44 @@ def test_FSINGL(ld, expected):
     assert ld.remain == 0
 
 
+ISINGL_EXAMPLES = (
+    # From RP666V2
+    (153.0, b'\x42\x99\x00\x00'),
+    (-153.0, b'\xc2\x99\x00\x00'),
+    (0.0, b'\x00\x00\x00\x00'),
+    # https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point
+    # Example: -118.625 -> b'\xc2\x76\xa0\x00'.
+    (-118.625, b'\xc2\x76\xa0\x00'),
+    # Positive version of same value, just the sign bit changes.
+    (118.625, b'\x42\x76\xa0\x00'),
+    # +7.2370051 × 10**75
+    (7.237004714613969e+75, b'\x7f\xff\xff\xfe'),
+    # +5.397605 × 10−79
+    (5.397605346934028e-79, b'\x00\x10\x00\x00'),
+    (9.99999901978299e-05, b'\x3d\x68\xdb\x8b'),
+    # 443a 6600 4438 fe00          D:f.D8..
+    # 0000010c: 4040 0000 0000 0000 4210 0000 4d4e 3233  @@......B...MN23
+    # 0000011c: 394a 2031
+    (14950.0, b'\x44\x3a\x66\x00'),
+    (14590.0, b'\x44\x38\xfe\x00'),
+    (0.25, b'\x40\x40\x00\x00'),
+    (16.0, b'\x42\x10\x00\x00'),
+    (1375640175509504.0, b'\x4d\x4e\x32\x33'),
+    (1.0786715964883342e-09, b'\x39\x4a\x20\x31'),
+)
+
+
+@pytest.mark.parametrize(
+    'float_value, bytes_value',
+    ISINGL_EXAMPLES
+)
+def test_ISINGL(float_value, bytes_value):
+    ld = LogicalData(bytes_value)
+    result = RepCode.ISINGL(ld)
+    assert result == float_value
+    assert ld.remain == 0
+
+
 @pytest.mark.parametrize(
     'ld, expected',
     (

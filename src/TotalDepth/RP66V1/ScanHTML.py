@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Scans a RP66V1 file an writes out the summary in HTML.
 """
@@ -10,19 +29,19 @@ import typing
 
 import colorama
 
+import TotalDepth.common.AbsentValue
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
-from TotalDepth.RP66V1.core import AbsentValue
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
-from TotalDepth.RP66V1.core import RepCode
-from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
-from TotalDepth.common import Slice
+from TotalDepth.common import Slice, np_summary
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.common import process
+from TotalDepth.common.ToHTML import HTMLFrameArraySummary, HTMLLogicalFileSummary, HTMLBodySummary, HTMLResult, \
+    html_write_table
 from TotalDepth.util import DirWalk
 from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot, XmlWrite, DictTree
@@ -37,7 +56,6 @@ __rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 logger = logging.getLogger(__file__)
-
 
 # Examples:
 # https://jrgraphix.net/r/Unicode/
@@ -162,7 +180,7 @@ for (i = 0; i < toggler.length; i++) {
 """
 
 
-def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def html_write_storage_unit_label(sul: File.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('Storage Unit Label')
     table = [
@@ -176,42 +194,14 @@ def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_
     html_write_table(table, xhtml_stream, class_style='sul')
 
 
-def html_write_table(table_as_strings: typing.List[typing.List[str]],
-                     xhtml_stream: XmlWrite.XhtmlStream,
-                     class_style,
-                     **kwargs) -> None:
-    if len(table_as_strings):
-        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}.update(kwargs)):
-            with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                for cell in table_as_strings[0]:
-                    with XmlWrite.Element(xhtml_stream, 'th', {'class': class_style}):
-                        xhtml_stream.characters(cell)
-            for row in table_as_strings[1:]:
-                with XmlWrite.Element(xhtml_stream, 'tr', {}):
-                    for cell in row:
-                        with XmlWrite.Element(xhtml_stream, 'td', {'class': class_style}):
-                            assert isinstance(cell, str), f'{cell} is not a string but {type(cell)}'
-                            xhtml_stream.charactersWithBr(cell)
-
-
-def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream, sort: bool) -> None:
         eflr = eflr_position.eflr
         if eflr.is_key_value():
-            table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=True)
+            table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=sort)
         else:
-            table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=True)
+            table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=sort)
         html_write_table(table_as_strings, xhtml_stream, class_style='eflr',
                          id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
-
-
-class HTMLFrameArraySummary(typing.NamedTuple):
-    ident: bytes
-    num_frames: int
-    channels: typing.Tuple[bytes]
-    x_start: float
-    x_stop: float
-    x_units: bytes
-    href: str
 
 
 def _write_log_pass_content_in_html(
@@ -302,7 +292,7 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
 
 def _write_frame_array_in_html(
         logical_file: LogicalFile.LogicalFile,
-        frame_array: LogPass.FrameArray,
+        frame_array: LogPass.RP66V1FrameArray,
         frame_slice: typing.Union[Slice.Slice, Slice.Sample],
         anchor: str,
         xhtml_stream: XmlWrite.XhtmlStream,
@@ -353,33 +343,37 @@ def _write_frame_array_in_html(
             )
         with XmlWrite.Element(xhtml_stream, 'p'):
             xhtml_stream.characters(
-                f'RP66V1 Frame size {frame_array.len_input_bytes} (bytes/frame))'
+                f'RP66V1 Frame size {frame_array.sizeof_array} (bytes))'
                 f' represented internally as {frame_array.sizeof_frame} (bytes/frame).'
             )
         frame_table = [
-            ['Channel', 'O', 'C', 'Rep Code', 'Dims', 'Count', 'Units', 'Long Name',
-             'Size', 'Absent', 'Min', 'Mean', 'Std.Dev.', 'Max', 'dtype'],
+            ['Channel',
+             'Dims', 'Count', 'Units', 'Long Name',
+             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++',  'Activity', 'dtype'],
         ]
         for channel in frame_array.channels:
             # arr = channel.array
-            arr = AbsentValue.mask_absent_values(channel.array)
+            arr = TotalDepth.common.AbsentValue.mask_absent_values(channel.array)
+            array_summary = np_summary.summarise_array(arr)
             frame_table.append(
                 [
-                    channel.ident.I.decode("ascii"),
-                    f'{channel.ident.O}',
-                    f'{channel.ident.C}',
-                    f'{channel.rep_code:d} ({RepCode.REP_CODE_INT_TO_STR[channel.rep_code]})',
+                    channel.ident,
                     stringify.stringify_object_by_type(channel.dimensions),
                     stringify.stringify_object_by_type(channel.count),
                     stringify.stringify_object_by_type(channel.units),
                     stringify.stringify_object_by_type(channel.long_name),
                     f'{arr.size:d}',
                     # NOTE: Not the masked array!
-                    f'{AbsentValue.count_of_absent_values(channel.array):d}',
-                    f'{arr.min():.3f}',
-                    f'{arr.mean():.3f}',
-                    f'{arr.std():.3f}',
-                    f'{arr.max():.3f}',
+                    f'{TotalDepth.common.AbsentValue.count_of_absent_values(channel.array):d}',
+                    f'{array_summary.min:.3f}',
+                    f'{array_summary.mean:.3f}',
+                    f'{array_summary.median:.3f}',
+                    f'{array_summary.std:.3f}',
+                    f'{array_summary.max:.3f}',
+                    f'{array_summary.count_dec:d}',
+                    f'{array_summary.count_eq:d}',
+                    f'{array_summary.count_inc:d}',
+                    f'{array_summary.activity:.3f}',
                     f'{arr.dtype}',
                 ]
             )
@@ -391,9 +385,9 @@ def _write_frame_array_in_html(
             xhtml_stream.characters('No frames.')
         x_axis_start = x_axis_stop = 0.0
     return HTMLFrameArraySummary(
-        frame_array.ident.I,
+        frame_array.ident,
         len(iflrs),
-        tuple(c.ident.I for c in frame_array.channels),
+        tuple(c.ident for c in frame_array.channels),
         x_axis_start,
         x_axis_stop,
         frame_array.x_axis.units,
@@ -457,34 +451,11 @@ def html_write_file_info(path_in: str, xhtml_stream: XmlWrite.XhtmlStream) -> No
     html_write_table(table, xhtml_stream, class_style='monospace')
 
 
-class HTMLLogicalFileSummary(typing.NamedTuple):
-    """Contains the result of a Logical File as HTML."""
-    eflr_types: typing.Tuple[bytes]
-    frame_arrays: typing.Tuple[HTMLFrameArraySummary]
-
-
-class HTMLBodySummary(typing.NamedTuple):
-    """Contains the result of processing the body of the HTML."""
-    link_text: str
-    logical_files: typing.Tuple[HTMLLogicalFileSummary]
-
-
-class HTMLResult(typing.NamedTuple):
-    """Contains the result of processing a RP66V1 file to HTML."""
-    path_input: str
-    path_output: str
-    size_input: int
-    size_output: int
-    time: float
-    exception: bool
-    ignored: bool
-    html_summary: typing.Union[HTMLBodySummary, None]
-
-
 def html_write_body(
         logical_file_sequence: LogicalFile.LogicalIndex,
         frame_slice: Slice.Slice,
         xhtml_stream: XmlWrite.XhtmlStream,
+        sort_eflr: bool
     ) -> HTMLBodySummary:
     """Write out the <body> of the document."""
     with XmlWrite.Element(xhtml_stream, 'h1'):
@@ -531,7 +502,7 @@ def html_write_body(
                     xhtml_stream.characters(
                         f'Logical File Defining Origin "{obj.name.I.decode("ascii")}" O: {obj.name.O} C: {obj.name.C}:'
                     )
-            html_write_EFLR_as_table(eflr_position, xhtml_stream)
+            html_write_EFLR_as_table(eflr_position, xhtml_stream, sort=sort_eflr)
         with XmlWrite.Element(xhtml_stream, 'h3'):
             xhtml_stream.characters('Log Pass')
         if logical_file.has_log_pass:
@@ -553,7 +524,7 @@ def html_write_body(
 
 
 def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_process: bool,
-                                       frame_slice: Slice.Slice) -> HTMLBodySummary:
+                                       frame_slice: Slice.Slice, sort_eflr: bool) -> HTMLBodySummary:
     """
     Scans all of every EFLR and IFLR in the file and writes to HTML.
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
@@ -585,13 +556,13 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
                 with XmlWrite.Element(xhtml_stream, 'style'):
                     xhtml_stream.literal(CSS_RP66V1)
             with XmlWrite.Element(xhtml_stream, 'body'):
-                ret = html_write_body(logical_index, frame_slice, xhtml_stream)
+                ret = html_write_body(logical_index, frame_slice, xhtml_stream, sort_eflr)
     logger.info(f'html_scan_RP66V1_file_data_content(): Done "{os.path.basename(path_in)}"')
     return ret
 
 
 def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
-                       frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> HTMLResult:
+                       frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> HTMLResult:
     """Scan a single file and write out an HTML summary."""
     file_path_out = path_out + '.html'
     logger.debug(f'Scanning "{path_in}" to "{file_path_out}"')
@@ -608,16 +579,17 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                     os.makedirs(out_dir, exist_ok=True)
                 with open(file_path_out, 'w') as fout:
                     logger.info(f'scan_a_single_file() target: "{os.path.basename(file_path_out)}"')
-                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice)
+                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice, sort_eflr)
                 len_scan_output = os.path.getsize(file_path_out)
             else:
-                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice)
+                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice, sort_eflr)
                 len_scan_output = -1
             result = HTMLResult(
                 path_in,
                 file_path_out,
                 os.path.getsize(path_in),
                 len_scan_output,
+                binary_file_type,
                 time.perf_counter() - t_start,
                 False,
                 False,
@@ -625,13 +597,15 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
             )
         except ExceptionTotalDepthRP66V1:
             logger.exception(f'Failed to index with ExceptionTotalDepthRP66V1: {path_in}')
-            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
+                                None)
         except Exception:
             logger.exception(f'Failed to index with Exception: {path_in}')
-            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, 0.0, True, False, None)
+            result = HTMLResult(path_in, file_path_out, os.path.getsize(path_in), 0, binary_file_type, 0.0, True, False,
+                                None)
     else:
         logger.debug(f'Ignoring file type "{binary_file_type}" at {path_in}')
-        result = HTMLResult(path_in, file_path_out, 0, 0, 0.0, False, True, None)
+        result = HTMLResult(path_in, file_path_out, 0, 0, binary_file_type, 0.0, False, True, None)
     return result
 
 
@@ -841,7 +815,7 @@ def _write_top_level_index_table_body(index_file_path: str,
                                       dict_tree: DictTree.DictTreeHtmlTable,
                                       xhtml_stream: XmlWrite.XhtmlStream) -> None:
     strip_out_path = len(os.path.dirname(index_file_path)) + 1
-    for event in dict_tree.genColRowEvents():
+    for event in dict_tree.gen_row_column_events():
         if event == dict_tree.ROW_OPEN:
             # Write out the '<tr>' element
             xhtml_stream.startElement('tr', {'class': 'filetable'})
@@ -875,7 +849,7 @@ def _write_top_level_index_table_body(index_file_path: str,
 
 
 def scan_dir_multiprocessing(dir_in, dir_out, jobs,
-                             frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
+                             frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -884,7 +858,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
     logging.info('scan_dir_multiprocessing(): Setting multi-processing jobs to %d' % jobs)
     pool = multiprocessing.Pool(processes=jobs)
     tasks = [
-        (t.filePathIn, t.filePathOut, False, frame_slice) for t in DirWalk.dirWalk(
+        (t.filePathIn, t.filePathOut, False, frame_slice, sort_eflr) for t in DirWalk.dirWalk(
             dir_in, dir_out, theFnMatch='', recursive=True, bigFirst=True
         )
     ]
@@ -902,7 +876,7 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
 
 def scan_dir_or_file(path_in: str, path_out: str,
                      recursive: bool, label_process: bool,
-                     frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> typing.Dict[str, HTMLResult]:
+                     frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
     """Scans a directory or file putting the results in path_out.
     Returns a dict of {path_in : HTMLResult, ...}
     """
@@ -918,7 +892,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
         if not recursive:
             for file_in_out in DirWalk.dirWalk(path_in, path_out, theFnMatch='', recursive=recursive, bigFirst=False):
                 result = scan_a_single_file(
-                    file_in_out.filePathIn, file_in_out.filePathOut, label_process, frame_slice
+                    file_in_out.filePathIn, file_in_out.filePathOut, label_process, frame_slice, sort_eflr
                 )
                 ret[file_in_out.filePathIn] = result
                 if not result.exception and not result.ignored:
@@ -936,7 +910,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
                     # Respect sub-directories in root
                     # root_rel_to_path_in.append(file)
                     file_path_out = os.path.join(dir_out, file)
-                    result = scan_a_single_file(file_path_in, file_path_out, label_process, frame_slice)
+                    result = scan_a_single_file(file_path_in, file_path_out, label_process, frame_slice, sort_eflr)
                     ret[file_path_in] = result
                     if not result.exception and not result.ignored:
                         index_map_global[result.path_output] = result
@@ -944,7 +918,7 @@ def scan_dir_or_file(path_in: str, path_out: str,
                 process.add_message_to_queue('Writing Indexes.')
             _write_indexes(path_out, index_map_global)
     else:
-        ret[path_in] = scan_a_single_file(path_in, path_out, label_process, frame_slice)
+        ret[path_in] = scan_a_single_file(path_in, path_out, label_process, frame_slice, sort_eflr)
     return ret
 
 
@@ -1063,23 +1037,28 @@ def main() -> int:
         '-e', '--encrypted', action='store_true',
         help='Output encrypted Logical Records as well. [default: %(default)s]',
     )
+    parser.add_argument(
+        '--sort-eflr', action='store_true',
+        help='Sorts the rows of EFLRs. [default: %(default)s]',
+    )
     Slice.add_frame_slice_to_argument_parser(parser)
     process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     args = parser.parse_args()
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     # print('args:', args)
     # return 0
     clk_start = time.perf_counter()
     # Your code here
     if args.log_process > 0.0:
-        with process.log_process(args.log_process):
+        with process.log_process(args.log_process, log_level):
             result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
                 args.path_in,
                 args.path_out,
                 args.recurse,
                 label_process=True,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
     else:
         if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
@@ -1088,6 +1067,7 @@ def main() -> int:
                 args.path_out,
                 args.jobs,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
         else:
             result: typing.Dict[str, HTMLResult] = scan_dir_or_file(
@@ -1096,6 +1076,7 @@ def main() -> int:
                 args.recurse,
                 label_process=False,
                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                sort_eflr=args.sort_eflr,
             )
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing HTML Complete.')

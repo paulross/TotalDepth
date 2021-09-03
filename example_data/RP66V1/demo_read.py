@@ -161,6 +161,7 @@ def demo_numpy_describe():
                         f'Loaded {frame_count} frames and {len(frame_array)} channels'
                         f' from {frame_array.ident} using {frame_array.sizeof_array} bytes.'
                     )
+                    print()
                     for channel in frame_array.channels:
                         print(channel)
                         # channel.array is a numpy array
@@ -219,9 +220,9 @@ def main() -> int:
     # demo_logical_files()
     # demo_eflr()
     # demo_eflr_contents()
-    # demo_numpy_describe()
+    demo_numpy_describe()
     # demo_numpy_access()
-    demo_numpy_access_partial()
+    # demo_numpy_access_partial()
     return 0
 
 

@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Paul Ross: apaulross@gmail.com
 """
 Exercises the LogicalRecordIndex on real files.
 """
@@ -243,7 +262,7 @@ def main() -> int:
     args = parser.parse_args()
     # print('args:', args)
     # return 0
-    cmn_cmd_opts.set_log_level(args)
+    log_level = cmn_cmd_opts.set_log_level(args)
     # Your code here
     exec_timer = ExecTimer.Timer('LogRecIndex')
     if os.path.isdir(args.path_in) and cmn_cmd_opts.multiprocessing_requested(args):
@@ -257,7 +276,7 @@ def main() -> int:
         )
     else:
         if args.log_process > 0.0:
-            with process.log_process(args.log_process):
+            with process.log_process(args.log_process, log_level):
                 result: typing.Dict[str, IndexResult] = index_dir_or_file(
                     args.path_in,
                     args.path_out,

@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-# Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 1999-2012 Paul Ross
-# 
+#!/usr/bin/env python3
+# Part of TotalDepth: Petrophysical data processing and presentation.
+# Copyright (C) 2011-2021 Paul Ross
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# 
+#
 # Paul Ross: apaulross@gmail.com
 """Searches for runs of data in binary files.
 
@@ -221,10 +221,7 @@ def main():
     op.add_argument('infile', type=argparse.FileType('rb'), help='The file to search')
     args = op.parse_args()
 #    print('TRACE: args', args)
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        clkStart = time.perf_counter()
-    else:
-        clkStart = time.clock()
+    clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=args.loglevel,
@@ -242,10 +239,7 @@ def main():
 #    reportIDENT(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
 #    reportSLB(args.infile, showTell=args.show_tell)
     reportTOOL(args.infile, showTell=args.show_tell)
-    if (sys.version_info.major >= 3 and sys.version_info.minor >= 3):
-        print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
-    else:
-        print('  CPU time = %8.3f (S)' % (time.clock() - clkStart))
+    print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0
