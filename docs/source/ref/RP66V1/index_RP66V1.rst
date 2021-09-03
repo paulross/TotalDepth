@@ -16,7 +16,6 @@ Contents:
     core/LogPass
     core/LogicalFile
     core/RepCode
-    core/StorageUnitLabel
     core/Units
     core/XAxis
     core/stringify

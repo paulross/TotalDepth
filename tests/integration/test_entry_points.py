@@ -677,11 +677,15 @@ def test_tdrp66v1tolas_gnuplot(tmpdir):
     (
         [],
         ['-r'],
+        ['-r', '--verbose', ],
+        ['-r', '--keep-going', ],
         ['-r', '-j 2'],
         ['-r', '-j 0'],
-        ['-r', '--log-process=1.0', ],
+        ['-r', '--encrypted', ],
+        ['-r', '--sort-eflr', ],
         ['-r', '--frame-slice=64', ],
         ['-r', '--frame-slice=,,2', ],
+        ['-r', '--log-process=1.0', ],
     )
 )
 def test_tdrp66v1scanhtml_dir(tmpdir, args):

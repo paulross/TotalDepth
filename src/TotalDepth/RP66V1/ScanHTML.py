@@ -34,7 +34,6 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core import LogPass
 from TotalDepth.RP66V1.core import LogicalFile
-from TotalDepth.RP66V1.core import StorageUnitLabel
 from TotalDepth.RP66V1.core import XAxis
 from TotalDepth.RP66V1.core import stringify
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
@@ -181,7 +180,7 @@ for (i = 0; i < toggler.length; i++) {
 """
 
 
-def html_write_storage_unit_label(sul: StorageUnitLabel.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def html_write_storage_unit_label(sul: File.StorageUnitLabel, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'h2'):
         xhtml_stream.characters('Storage Unit Label')
     table = [
