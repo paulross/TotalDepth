@@ -11,8 +11,7 @@ set -o errexit  # abort on nonzero exitstatus
 set -o nounset  # abort on unbound variable
 set -o pipefail # don't hide errors within pipes
 
-#PYTHON_VERSIONS=('3.6')
-PYTHON_VERSIONS=('3.6' '3.7' '3.8' '3.9')
+PYTHON_VERSIONS=('3.7' '3.8' '3.9')
 PYTHON_VENV_ROOT="${HOME}/pyenvs"
 # Used for venvs
 PROJECT_NAME="TotalDepth"
@@ -69,6 +68,8 @@ create_bdist_wheel() {
     set +u
     source "${venv_path}/bin/activate"
     set -u
+    echo "---> Python version:"
+    python -VV
     echo "---> Installing everything via pip:"
     pip install -U pip setuptools wheel
     pip install -r requirements.txt
@@ -91,6 +92,29 @@ create_sdist() {
   python setup.py sdist
 }
 
+report_all_versions_and_setups() {
+  echo "---> Reporting all versions..."
+  for version in ${PYTHON_VERSIONS[*]}; do
+    echo "---> For Python version ${version}"
+    deactivate_virtual_environment
+    venv_path="${PYTHON_VENV_ROOT}/${PROJECT_NAME}_${version}"
+    if [ ! -d "${venv_path}" ]; then
+      # Control will enter here if directory doesn't exist.
+      echo "---> Creating virtual environment at: ${venv_path}"
+      "python${version}" -m venv "${venv_path}"
+    fi
+      echo "---> Virtual environment at: ${venv_path}"
+    # https://stackoverflow.com/questions/42997258/virtualenv-activate-script-wont-run-in-bash-script-with-set-euo
+    set +u
+    source "${venv_path}/bin/activate"
+    set -u
+    echo "---> Python version:"
+    python -VV
+    echo "---> pip list:"
+    pip list
+  done
+}
+
 show_results_of_dist() {
   echo "---> dist/:"
   ls -l "dist"
@@ -109,7 +133,7 @@ rm -rf -- "build" "dist"
 create_virtual_environments
 create_bdist_wheel
 create_sdist
-create_docs_html
+report_all_versions_and_setups
 show_results_of_dist
 #pip install twine
 echo "===> All done"
