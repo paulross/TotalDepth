@@ -79,6 +79,8 @@ create_bdist_wheel() {
     echo "---> Running tests:"
     # Fail fast with -x
     pytest tests -x
+    # Run all tests (slow).
+    pytest tests --runslow
     echo "---> Running setup for bdist_wheel:"
     python setup.py bdist_wheel
   done
@@ -107,6 +109,7 @@ rm -rf -- "build" "dist"
 create_virtual_environments
 create_bdist_wheel
 create_sdist
+create_docs_html
 show_results_of_dist
 #pip install twine
 echo "===> All done"
