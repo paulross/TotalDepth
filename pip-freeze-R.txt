@@ -21,6 +21,6 @@ requests==2.22.0
 six==1.13.0
 soupsieve==2.0.1
 -e git+https://github.com/paulross/TotalDepth.git@3347a1ec4fc19bfa4382226a5c734a5807af0ca2#egg=TotalDepth
-urllib3==1.25.11
+urllib3==1.26.5
 wcwidth==0.1.7
 zipp==0.6.0
