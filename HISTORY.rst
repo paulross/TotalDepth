@@ -8,6 +8,7 @@ History
 * General
     * Add SLB parameter and unit online lookup.
     * Add detection of CFBF, EBCDIC, RCD, SEG-Y, STK, PDS binary file types.
+    * Python 3.6 no longer supported, although it will most likely work.
 
 * Specific File formats
 
