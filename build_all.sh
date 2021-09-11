@@ -48,7 +48,8 @@ remove_virtual_environments() {
     if [ -d "${venv_path}" ]; then
       # Control will enter here if directory exists.
       echo "---> Removing virtual environment at: ${venv_path}"
-      rm --recursive --force -- "${venv_path}"
+      #rm --recursive --force -- "${venv_path}"
+      rm -rf -- "${venv_path}"
     fi
   done
 }
@@ -118,6 +119,8 @@ report_all_versions_and_setups() {
 show_results_of_dist() {
   echo "---> dist/:"
   ls -l "dist"
+  echo "---> twine check dist/*:"
+  twine check dist/*
   # Test from Test PyPi
   # pip install -i https://test.pypi.org/simple/orderedstructs
   echo "---> Ready for upload to test PyPi:"
@@ -130,6 +133,7 @@ show_results_of_dist() {
 echo "===> Removing build/ and dist/"
 #rm --recursive --force -- "build" "dist"
 rm -rf -- "build" "dist"
+remove_virtual_environments
 create_virtual_environments
 create_bdist_wheel
 create_sdist

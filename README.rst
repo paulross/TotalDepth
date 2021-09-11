@@ -1,6 +1,6 @@
-==========
+********************
 TotalDepth
-==========
+********************
 
 .. image:: https://img.shields.io/pypi/v/TotalDepth.svg
         :target: https://pypi.python.org/pypi/TotalDepth
@@ -18,7 +18,7 @@ Petrophysical software capable of processing wireline logs.
 * Documentation: https://TotalDepth.readthedocs.io
 
 Features
---------
+========================
 
 * Reads LIS, LAS (1.2, 2.0), RP66V1 (DLIS), Western Atlas BIT, and DAT Mud Log file formats for analysis or conversion to other formats.
 * Creates Numpy arrays of log data.
@@ -29,7 +29,7 @@ Features
 * Special indexing techniques are used to be able to randomly access sequential files.
 
 Wireline Plots
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 Here is an example of a LAS file plotted with the Tripple Combo plot format as seen in a browser which includes the API header:
 
@@ -42,7 +42,7 @@ An example of a High Resolution Dipmeter plotted at 1:25 scale:
         :alt: High Resolution Dipmeter
 
 Accessing Frame Data as a ``numpy`` Array
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------
 
 Here is an example of accessing RP66V1 (DLIS) data as a numpy array and using ``np.info()`` to describe each array:
 
@@ -135,7 +135,6 @@ The output will be something like:
     ...
 
 
-===================================
 Installing TotalDepth
 ===================================
 
