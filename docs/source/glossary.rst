@@ -356,7 +356,7 @@ Glossary
 		Used to indicate the relation between successive Logical Record Segments. If two Logical Record Segments belong to the same Logical Record, then one of them — the one that comes first — is a Predecessor of the other. The first Logical Record Segment of a Logical Record has no Predecessor.
 
 	RP66V1.Private
-		A Logical Record with Type ≥ 128 is said to be Private. In particular, the semantic content of such a Logical Record is decided upon solely by the Producer and not via any public standardization process. Private Logical Records are available to consumers in general, unless encrypted. The fact that a Logical Record is Private does not imply that it is also encrypted.
+		A Logical Record with Type >= 128 is said to be Private. In particular, the semantic content of such a Logical Record is decided upon solely by the Producer and not via any public standardization process. Private Logical Records are available to consumers in general, unless encrypted. The fact that a Logical Record is Private does not imply that it is also encrypted.
 
 	RP66V1.Producer
 		The system or application program or company that records information under the DLIS Logical  Format. The Producer writes what the Consumer reads.
