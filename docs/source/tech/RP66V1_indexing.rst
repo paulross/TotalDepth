@@ -45,7 +45,7 @@ Execution Time
 
 Here is the execution time(s) for creating, persisting and reading back the persisted index compared to RP66V1 files size:
 
-.. image:: images/LogRecIndex.py_times.svg
+.. image:: images/LogRecIndex.py_times.svg.png
     :align: center
 
 While there is quite a variation by a factor of 10 the *average* *asymptotic* execution time trends to:
@@ -60,7 +60,7 @@ Index Size
 The pickled index size compared to the original file size is shown here.
 The green line shows where the index size would be equal to the input file size:
 
-.. image:: images/LogRecIndex.py_size.svg
+.. image:: images/LogRecIndex.py_size.svg.png
     :align: center
 
 This index size trends to around 10% of the file size.
@@ -72,7 +72,7 @@ Memory and CPU Usage
 
 Indexing the test set makes this memory and CPU demands:
 
-.. image:: images/LogRecIndex.py.log.svg
+.. image:: images/LogRecIndex.py.log.svg.png
     :align: center
 
 The extra spikes at the end of indexing are due to Python's pickle module that pickles in-memory (even if pickling to a file).
@@ -88,7 +88,7 @@ Each index is independent so multi-processing can speed up index creation enormo
 The number of simultaneous processes can be specified with the ``--jobs=`` option.
 Here is the same test data set being indexed including pickling the index to disk with a different number of simultaneous processes.
 
-.. image:: images/LogRecIndex_MP.svg
+.. image:: images/LogRecIndex_MP.svg.png
     :align: center
 
 As expected beyond four processes the improvement is marginal.
@@ -113,7 +113,7 @@ Execution Time
 
 Firstly time to create, persist and read back the persisted index:
 
-.. image:: images/IndexPickle.py_times.svg
+.. image:: images/IndexPickle.py_times.svg.png
     :align: center
 
 While there is quite a variation by a factor of 10 the *average* *asymptotic* execution time trends to:
@@ -125,7 +125,7 @@ While there is quite a variation by a factor of 10 the *average* *asymptotic* ex
 Index Size
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: images/IndexPickle.py_size.svg
+.. image:: images/IndexPickle.py_size.svg.png
     :align: center
 
 The index is roughly twice the size of the low-level index (although that ratio will increase dramatically when the C/C++ low-level index  code is merged).
@@ -135,7 +135,7 @@ Memory and CPU Usage
 
 Indexing the test set makes this memory and CPU demands:
 
-.. image:: images/IndexPickle.py.log.svg
+.. image:: images/IndexPickle.py.log.svg.png
     :align: center
 
 Multiprocessing
@@ -143,7 +143,7 @@ Multiprocessing
 
 Here is the same test data set being indexed including pickling the index to disk with a different number of simultaneous processes.
 
-.. image:: images/IndexPickle_MP.svg
+.. image:: images/IndexPickle_MP.svg.png
     :align: center
 
 Because the I/O is so much higher the improvement is more limited, at best x3 faster with 4 cores but still useful.

@@ -134,9 +134,9 @@ In the output directory there is the log data extracted as ``.dat`` file, the Gn
 
 Here is :file:`process_C.log.svg`:
 
-.. `Yet another Gnuplot example <../_static/gnuplot/process_C.log.svg>`_
+.. `Yet another Gnuplot example <../_static/gnuplot/process_C.log.svg.png>`_
 
-.. image:: ../copy_to_html/gnuplot/process_C.log.svg
+.. image:: ../copy_to_html/gnuplot/process_C.log.svg.png
 
 
 Adding Events as Graph Labels
@@ -175,9 +175,9 @@ Adds that label into the JSON on the next write:
 
 When plotted these labels appear on the plot:
 
-.. `Yet another Gnuplot example <../_static/gnuplot/process_D.log.svg>`_
+.. `Yet another Gnuplot example <../_static/gnuplot/process_D.log.svg.png>`_
 
-.. image:: ../copy_to_html/gnuplot/process_D.log.svg
+.. image:: ../copy_to_html/gnuplot/process_D.log.svg.png
 
 
 A Real World Example
@@ -192,10 +192,10 @@ Here is an example of running :py:mod:`TotalDepth.RP66V1.ScanHTML` on four files
 
 The start points of these operations are labeled on the graph.
 
-.. `Another Gnuplot example <../_static/gnuplot/ScanHTML.py.log.svg>`_
+.. `Another Gnuplot example <../_static/gnuplot/ScanHTML.py.log.svg.png>`_
 
 
-.. image:: ../copy_to_html/gnuplot/ScanHTML.py.log.svg
+.. image:: ../copy_to_html/gnuplot/ScanHTML.py.log.svg.png
 
 The graphs clearly shows that for the last file reading the index is very quick but writing the HTML is comparatively slow.
 This is because that is an unusual file that deserves further investigation.

@@ -166,7 +166,7 @@ The 12 bytes read after every 640 bytes look like this: 4 nulls, two values unkn
 two nulls.
 These are TIF markers.
 
-The 0.0001 figure is actually 9.999999615829415e-05 or b'\x3d\x68\xdb\x8b'
+The 0.0001 figure is actually 9.999999615829415e-05 or 0x3d 0x68 0xdb 0x8b
 """
 import enum
 import logging

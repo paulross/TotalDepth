@@ -37,19 +37,19 @@ By default this processes every byte of the file so can take a long time with la
 Here is the execution time for processing all frames by RP66V1 file size and the size of each HTML file produced.
 
 
-.. image:: images/RP66V1_ScanHTML_time_size.svg
+.. image:: images/RP66V1_ScanHTML_time_size.svg.png
     :align: center
     :width: 500px
-    :target: images/RP66V1_ScanHTML_time_size.svg
+    :target: images/RP66V1_ScanHTML_time_size.svg.png
 
 The asymptotic processing rate is around 800 ms/Mb.
 
 And here is the memory and CPU usage:
 
-.. image:: images/RP66V1_ScanHTML_process.svg
+.. image:: images/RP66V1_ScanHTML_process.svg.png
     :align: center
     :width: 500px
-    :target: images/RP66V1_ScanHTML_process.svg
+    :target: images/RP66V1_ScanHTML_process.svg.png
 
 Performance Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -116,20 +116,20 @@ Here is the time taken to process each file plotted against the RP66V1 file size
 Also plotted on the right scale is the total size of the LAS file(s).
 This is converting every frame to LAS (click to see the original):
 
-.. image:: images/tdrp66v1tolas_time_size_1.svg
+.. image:: images/tdrp66v1tolas_time_size_1.svg.png
     :align: center
     :width: 500px
-    :target: images/tdrp66v1tolas_time_size_1.svg
+    :target: images/tdrp66v1tolas_time_size_1.svg.png
     
 The asymptotic processing rate is around 1230 ms/Mb.
 LAS files (in this test set) below 10Mb tend to be larger than the original, above 100Mb they tend to be around 20% smaller.
 
 And this is the memory usage (click to see the original):
 
-.. image:: images/tdrp66v1tolas_process_1.svg
+.. image:: images/tdrp66v1tolas_process_1.svg.png
     :align: center
     :width: 500px
-    :target: images/tdrp66v1tolas_process_1.svg
+    :target: images/tdrp66v1tolas_process_1.svg.png
 
 The peaks are caused by the multi-gigabyte Numpy arrays needed for some files.
 
@@ -138,17 +138,17 @@ Sub-sampling
 
 Here is the performance of the same data with ``--frame-slice=64`` that just writes every 64th frame to LAS (click to see the original):
 
-.. image:: images/tdrp66v1tolas_time_size_64.svg
+.. image:: images/tdrp66v1tolas_time_size_64.svg.png
     :align: center
     :width: 500px
-    :target: images/tdrp66v1tolas_time_size_64.svg
+    :target: images/tdrp66v1tolas_time_size_64.svg.png
 
 And this is the memory usage (click to see the original):
 
-.. image:: images/tdrp66v1tolas_process_64.svg
+.. image:: images/tdrp66v1tolas_process_64.svg.png
     :align: center
     :width: 500px
-    :target: images/tdrp66v1tolas_process_64.svg
+    :target: images/tdrp66v1tolas_process_64.svg.png
 
 This is vastly reduced from the every frame case.
 
@@ -156,10 +156,10 @@ This is vastly reduced from the every frame case.
 Frame slicing can improve the performance dramatically.
 Here is the time to process the test archive and the size of the finished LAS archive by slice, for example 64 on the X-axis is write only every 64th frame:
 
-.. image:: images/tdrp66v1tolas_time_size_by_frame.svg
+.. image:: images/tdrp66v1tolas_time_size_by_frame.svg.png
     :align: center
     :width: 500px
-    :target: images/tdrp66v1tolas_time_size_by_frame.svg
+    :target: images/tdrp66v1tolas_time_size_by_frame.svg.png
 
 Multi-Processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
