@@ -26,7 +26,7 @@ I'd like to create some well plots from RP66V1 data
 
 Unlike LIS and like LAS, RP66V1 files do not specify a plot format.
 Some producers include some producer specific information in private EFLRs.
-TotalDepth version 0.4.0 will provide a simpler, universal, way of specifying plot formats in SVG from LAS, LIS and RP66V1 data.
+TotalDepth version 0.5.0 will provide a simpler, universal, way of specifying plot formats in SVG from LAS, LIS and RP66V1 data.
 
 I'd like to convert RP66V1 files to LAS format files
 ---------------------------------------------------------------------

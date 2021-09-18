@@ -18,6 +18,20 @@ Wireline Plots
 
 TotalDepth produced these time honoured plots from LIS and LAS wireline logs in SVG format that can be viewed in most browsers [#]_.
 
+Plot Examples
+----------------------
+
+Here is an example of a LAS file plotted with the Triple Combo plot format including the API header:
+
+.. image:: ../images/TrippleCombo.png
+        :alt: Tripple Combo
+
+An example of a High Resolution Dipmeter plotted at 1:25 scale:
+
+.. image:: ../images/HDT_25_no_hdr.png
+        :alt: High Resolution Dipmeter
+
+
 Plotting from LIS
 -----------------
 
@@ -25,6 +39,10 @@ Some examples of plots generated from LIS79 files:
 
 * A `collection <../_static/plots_LIS/index.html>`_ of 9 LIS files where TotalDepth used their internal plot specifications to generate 22 separate plots.
 * A `High Resolution Dipmeter <../_static/plots/HDT_Example.svg>`_ plot on a scale of 1:25 with an API header. Fast channel FC0 (red) overlaid on FC1.
+
+.. note::
+
+    These may not be available in the PDF version of the documentation.
 
 Plotting From LAS
 -----------------
@@ -41,10 +59,18 @@ This shows plots of a single LAS file that has 200 feet of 15 curves. TotalDepth
 
 The original LAS file is `here <../_static/plots/1001178923.las.txt>`_.
 
+.. note::
+
+    These may not be available in the PDF version of the documentation.
+
 A Collection of LAS Plots
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here is a `directory of six LAS files <../_static/plots_LAS/index.html>`_ that was used to make 31 individual plots complete with an index that summarises them. For each LAS file the plotting program automatically choose from 29 plot formats the formats that produce useful plots [#]_.
+
+.. note::
+
+    These may not be available in the PDF version of the documentation.
 
 Making LAS Plots
 ^^^^^^^^^^^^^^^^
@@ -93,6 +119,9 @@ RP66V1 Log HTML Summaries
 
 The program ``ScanHtml.py`` takes RP66V1 file(s) and generates an `RP66V1 HTML summary <../_static/RP66V1/example.html>`_ for each one.
 
+.. note::
+
+    These may not be available in the PDF version of the documentation.
 
 
 .. rubric:: Footnotes

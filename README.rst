@@ -31,7 +31,7 @@ Features
 Wireline Plots
 --------------------------
 
-Here is an example of a LAS file plotted with the Tripple Combo plot format as seen in a browser which includes the API header:
+Here is an example of a LAS file plotted with the Triple Combo plot format as seen in a browser which includes the API header:
 
 .. image:: images/TrippleCombo.png
         :alt: Tripple Combo

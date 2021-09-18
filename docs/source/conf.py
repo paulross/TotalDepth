@@ -58,7 +58,7 @@ copyright = '2010-2021, Paul Ross'
 # built documents.
 #
 # The short X.Y version.
-version = '0.4.0rc0'
+version = '0.4.0'
 # The full version, including alpha/beta/rc tags.
 release = '0.4.0'
 
@@ -211,6 +211,7 @@ latex_documents = [
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
+# Appears to have no effect.
 #latex_use_parts = False
 
 # If true, show page references after internal links.
