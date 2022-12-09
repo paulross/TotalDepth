@@ -1,6 +1,6 @@
 attrs==21.2.0
 beautifulsoup4==4.9.3
-certifi==2021.5.30
+certifi==2022.12.7
 charset-normalizer==2.0.4
 colorama==0.4.4
 Cython==0.29.24
