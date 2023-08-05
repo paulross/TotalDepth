@@ -17,5 +17,5 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Paul Ross: apaulross@gmail.com
-from . import cmn_cmd_opts, colorama, data_table, LogPass, lookup_mnemonic, process, Rle, Slice, statistics, xml, xxd
-__all__ = [cmn_cmd_opts, colorama, data_table, LogPass, lookup_mnemonic, process, Rle, Slice, statistics, xml, xxd]
+from . import cmn_cmd_opts, colorama, data_table, LogPass, lookup_mnemonic, process, Rle, Slice, statistics, xml, xxd, XAxis
+__all__ = [cmn_cmd_opts, colorama, data_table, LogPass, lookup_mnemonic, process, Rle, Slice, statistics, xml, xxd, XAxis]
