@@ -18,7 +18,7 @@
 #
 # Paul Ross: apaulross@gmail.com
 """
-Provides analysis and navigation along the X axis of RP66V1 logs.
+Provides analysis and navigation along the X axis of logs.
 """
 import math
 import typing
