@@ -53,7 +53,7 @@ class ProcLISPathBase:
 
     def _processPath(self):
         if os.path.isfile(self._fpIn):
-            if not os.path.exists(os.path.dirname(self._fpOut)):
+            if self._fpOut and not os.path.exists(os.path.dirname(self._fpOut)):
                 os.makedirs(os.path.dirname(self._fpOut), exist_ok=True)
             self.processFile(self._fpIn, self._fpOut)
         elif os.path.isdir(self._fpIn):
@@ -75,7 +75,7 @@ class ProcLISPathBase:
         """Returns a LisFile.LisFile() and a FileIndexer.FileIndex() from fpIn.
         May raises an ExceptionTotalDepthLIS."""
         assert(os.path.isfile(path_in))
-        logging.info('ProcLISPathBase._retLisFileAndIndex(): Reading LIS file {:s}'.format(path_in))
+        logging.debug('ProcLISPathBase._retLisFileAndIndex(): Reading LIS file {:s}'.format(path_in))
         if self._keepGoing:
             lis_file = File.file_read_with_best_physical_record_pad_settings(path_in, file_id=path_in, pr_limit=1000)
         else:

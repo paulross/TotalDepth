@@ -812,7 +812,6 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
 
 def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
     """Used by the multiprocessing code."""
-    logger.info(f'processFile(): {fpIn} -> {fpOut}')
     if not os.path.exists(os.path.dirname(fpOut)):
         try:
             os.makedirs(os.path.dirname(fpOut))
@@ -820,7 +819,7 @@ def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
             # TODO: Check specifically for: OSError: [Errno 17] File exists: '...'
             pass
     file_type = bin_file_type.binary_file_type_from_path(fpIn)
-    logger.info(f'File type: "{file_type}"')
+    logger.info(f'processFile(): Type: "{file_type}" {fpIn} -> {fpOut}')
     if bin_file_type.is_lis_file_type(file_type):
         try:
             myPlp = LisToHtml(fpIn, fpOut+'.html', recursive=False, keepGoing=keepGoing)

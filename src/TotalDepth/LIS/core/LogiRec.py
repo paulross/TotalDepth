@@ -30,6 +30,8 @@ import struct
 import logging
 import collections
 
+import typing
+
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import Units
 from TotalDepth.LIS.core import EngVal
@@ -1009,7 +1011,7 @@ class LrTable(LrBase):
             'Illegal LR type of %d for a Logical Record Table' % self.type
         self.tableCbEv = None
         # List of TableRow
-        self._rows = []
+        self._rows: typing.List[TableRow] = []
         # {row_name : index, ...}
         self._tableRowIndex = {}
         # Map of rows that have b'MNEM' column
