@@ -118,9 +118,9 @@ RE_DATE_STYLE_B = re.compile(r'^(\d+)-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|N
 
 #: Map of numpy dtype from the name/units.
 NAME_UNITS_TYPE_MAP = {
-    ('UTIM', 'sec'): np.object,
-    ('DATE', 'ddmmyy'): np.object,
-    ('TIME', 'hhmmss'): np.object,
+    ('UTIM', 'sec'): object,
+    ('DATE', 'ddmmyy'): object,
+    ('TIME', 'hhmmss'): object,
 }
 
 

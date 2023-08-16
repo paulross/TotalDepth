@@ -494,7 +494,7 @@ class PlotLogPasses(object):
         try:
             myIdx = FileIndexer.FileIndex(myFi)
         except ExceptionTotalDepthLIS as err:
-            logging.error('Can not create index: for "{:s}", error: {:s}'.format(fpIn, err))
+            logging.exception('Can not create index: for "{:s}", error: {:s}'.format(fpIn, err))
             return
         # Iterate through the PlotRecordSet objects
         for lpIdx, aPrs in enumerate(myIdx.genPlotRecords()):
@@ -638,7 +638,7 @@ Generates plot(s) from input LIS file or directory to an output destination."""
         myPlp = PlotLogPasses(args[0], args[1], opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader)
         myResult = myPlp.plotLogInfo
     else:
-        myResult = plotLogPassesMP(args[0], args[1], None, opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader, opts.jobs)
+        myResult = plotLogPassesMP(args[0], args[1], [], opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader, opts.jobs)
     myResult.writeHTML(os.path.join(args[1], 'index.html'), args[0])
     print('plotLogInfo', str(myResult))
     print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))

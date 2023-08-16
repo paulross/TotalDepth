@@ -124,10 +124,10 @@ class FrameSetPlan(object):
             raise ExceptionFrameSetPlanNegLen('FrameSetPlan.numFrames(): recLen {:d} negative'.format(recLen))
         myLen = recLen - self._indirectSize
         if myLen % self._frameSize != 0:
-            raise ExceptionFrameSetPlan(
-                'Can not fit integer number of frames length {:d} into LR length {:d}, remainder {:d} [indirect size {:d}].'.format(
-                        self._frameSize, myLen, myLen % self._frameSize, self._indirectSize)
-                )
+            exec_str = 'Can not fit integer number of frames length {:d} into LR length {:d}, remainder {:d} [indirect size {:d}].'.format(
+                        self._frameSize, myLen, myLen % self._frameSize, self._indirectSize
+            )
+            raise ExceptionFrameSetPlan(exec_str)
         return myLen // self._frameSize
     
     def _chOffset(self, f, c):

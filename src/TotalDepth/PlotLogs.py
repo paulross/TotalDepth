@@ -687,7 +687,7 @@ def plotLogPassesMP(dIn, dOut, opts):
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [
         (t.filePathIn, t.filePathOut, opts) \
-            for t in DirWalk.dirWalk(dIn, dOut, opts.glob, opts.recurse, bigFirst=True)
+            for t in DirWalk.dirWalk(dIn, dOut, opts.glob.split(), opts.recurse, bigFirst=True)
     ]
     retResult = PlotLogInfo()
     myResults = [
@@ -724,8 +724,8 @@ def main():
             "-X", "--XML", type=int, dest="LgFormat_min", default=0,
             help="Use any LgFormat XML plots that use n or more outputs. If -x option present limited by those LgFormats [default: 0]" 
         )
-    parser.add_argument("-g", "--glob", action="store_true", dest="glob", default=None,
-                      help="File match pattern. Default: %(default)s.")
+    parser.add_argument("-g", "--glob", type=str, dest="glob", default="",
+                        help="Space separated list of file match patterns. Default: \"%(default)s\"")
     # parser.add_argument("-f", "--file-type", choices=['LAS', 'LIS', 'AUTO'],
     #        help="File format to assume for the input, AUTO will do it's best. [default: \"AUTO\"].")
     parser.add_argument("-s", "--scale", type=int, dest="scale", default=0,

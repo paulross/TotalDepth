@@ -98,6 +98,8 @@ BACKUP_FROM_MODE_MAP = {
 #: Taken from the ``<WrapCount>`` element.
 BACKUP_FROM_COUNT_MAP = {
     None                : PRESCfg.BACKUP_ALL, # Default
+    '-1'                : PRESCfg.BACKUP_LEFT,
+    '0'                 : PRESCfg.BACKUP_NONE,
     '1'                 : PRESCfg.BACKUP_ONCE,
     '2'                 : PRESCfg.BACKUP_TWICE,
 }

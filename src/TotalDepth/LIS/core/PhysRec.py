@@ -239,6 +239,7 @@ class PhysRecBase:
         rS.append('  FilNum')
         rS.append('  ChkSum')
         if inc_attributes_short:
+            # PSRFC is Predesessor/Successor/Recort Number/File Number/Checksum
             rS.append('  PSRFC')
         return ''.join(rS)
     

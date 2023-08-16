@@ -173,7 +173,7 @@ def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
             array.max(),
             array.mean(),
             array.std(),
-            np.median(array),
+            np.ma.median(array),
             counts[0],
             counts[1],
             counts[2],

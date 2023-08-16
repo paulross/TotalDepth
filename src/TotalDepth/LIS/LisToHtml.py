@@ -917,7 +917,7 @@ Generates HTML from input LIS file or directory to an output destination."""
     TotalDepth.common.process.add_process_logger_to_argument_parser(parser)
     gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument("-g", "--glob", type=str, dest="glob", default="",
-                        help="Space separated list of file match patterns. [default: %default]")
+                        help="Space separated list of file match patterns. default: %(default)s")
     # By default ignore Logical Records that are in LR_TYPE_UNKNOWN_INTERNAL_FORMAT
     parser.add_argument("--include-unknown-internal-format", action="store_true", default=False,
                         help="Include the output of Logical records that are of types in"

@@ -89,7 +89,7 @@ class TestDirWalk(unittest.TestCase):
     def test_02(self):
         """TestDirWalk.test_02(): Input and output, no globbing or recursion."""
         # print()
-        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch=None, recursive=False):
+        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch=(), recursive=False):
             pass
             # print(v)
 
@@ -97,7 +97,7 @@ class TestDirWalk(unittest.TestCase):
     def test_03(self):
         """TestDirWalk.test_03(): Input only, *.py and recursion."""
         # print()
-        for v in DirWalk.dirWalk('.', theFnMatch='*.py', recursive=True):
+        for v in DirWalk.dirWalk('.', theFnMatch=('*.py',), recursive=True):
             pass
             # print(v)
 
@@ -105,7 +105,7 @@ class TestDirWalk(unittest.TestCase):
     def test_04(self):
         """TestDirWalk.test_04(): Input and output, *.py and recursion."""
         # print()
-        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch='*.py', recursive=True):
+        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch=('*.py',), recursive=True):
             pass
             # print(v)
 
@@ -113,7 +113,7 @@ class TestDirWalk(unittest.TestCase):
     def test_05(self):
         """TestDirWalk.test_05(): Input and output, *.py, recursion and biggest first."""
         # print()
-        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch='*.py', recursive=True, bigFirst=True):
+        for v in DirWalk.dirWalk('.', theOut='spam', theFnMatch=('*.py',), recursive=True, bigFirst=True):
             pass
             # print('{:8d}: {!r:s}'.format(os.path.getsize(v.filePathIn), v))
 
@@ -121,7 +121,7 @@ class TestDirWalk(unittest.TestCase):
     def test_06(self):
         """TestDirWalk.test_06(): Input only, *.py, recursion and biggest first."""
         # print()
-        for v in DirWalk.dirWalk('.', theOut='', theFnMatch='*.py', recursive=True, bigFirst=True):
+        for v in DirWalk.dirWalk('.', theOut='', theFnMatch=('*.py',), recursive=True, bigFirst=True):
             pass
             # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 

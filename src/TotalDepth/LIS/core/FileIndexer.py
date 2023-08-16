@@ -59,7 +59,14 @@ class IndexObjBase:
         self._typ = lrType
         self._fileId = theF.fileId
         self._lr = None
-        
+        # TODO: Set the file to the tell with theF.file.seek(tell) or assert theF.file.tell() == tell
+        # TODO: Get rid of isinstance.
+        if not isinstance(theF.file, str):
+            tell_diff =theF.file.tell() - tell
+            # 18 since bin_file_type uses it.
+            assert tell_diff in {0, 6, 18}, \
+                'theF.file.tell() = %d but tell = %d Diff = %d' % (theF.file.tell(), tell, tell_diff)
+
     def __str__(self):
         return self._strPrefix() + ' ' + self._strSuffix()
         #return 'tell: 0x{:08x} type={:3d} {:s}'.format(self._tell, self._typ, repr(self))
