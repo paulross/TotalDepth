@@ -817,7 +817,7 @@ class ExceptionCbEngValInit(ExceptionLrTable):
 class CbEngVal(object):
     """Contains the data from a Component Block and has an EngVal"""
     #: Allowable Component Block types
-    CB_TYPES = (73, 0, 69)
+    CB_TYPES = (COMPONENT_BLOCK_TABLE, COMPONENT_BLOCK_DATUM_BLOCK_START, COMPONENT_BLOCK_DATUM_BLOCK_ENTRY)
     def __init__(self):
         self.type       = None # 73, 0, 69
         self.rc         = None
@@ -869,7 +869,7 @@ class CbEngVal(object):
 
 class CbEngValRead(CbEngVal):
     """Contains the data from a Component Block and has an EngVal read from a file."""
-    def __init__(self, theFile):
+    def __init__(self, the_file: File.FileRead):
         """Initialise. This will raise a TypeError if theFile.unpack returns None
         i.e. when not enough data to create a Component Block."""
         super(CbEngValRead, self).__init__()
@@ -880,11 +880,11 @@ class CbEngValRead(CbEngVal):
                 self.size,
                 self.category,
                 self.mnem,
-                self.units) = theFile.unpack(STRUCT_COMPONENT_BLOCK_PREAMBLE)
+                self.units) = the_file.unpack(STRUCT_COMPONENT_BLOCK_PREAMBLE)
             if self.rc == RepCode.RC_TYPE_TEXT:
-                myVal = RepCode.readRepCode(self.rc, theFile, self.size)
+                myVal = RepCode.readRepCode(self.rc, the_file, self.size)
             else:
-                myVal = RepCode.readRepCode(self.rc, theFile)
+                myVal = RepCode.readRepCode(self.rc, the_file)
             self.setValue(myVal)
         except (RepCode.ExceptionRepCode, TypeError) as err:
             # RepCode.ExceptionRepCode caused by rep code 105 for example
@@ -1225,7 +1225,7 @@ class LrTableWrite(LrTable):
         if theType not in LR_TYPE_TABLE_DATA:
             raise ExceptionLrTableInit('Unacceptable table type {:d}'.format(theType))
         super().__init__(theType, 0)
-        self.tableCbEv = CbEngValWrite(73, theName, b'TYPE', units=b'    ')
+        self.tableCbEv = CbEngValWrite(COMPONENT_BLOCK_TABLE, theName, b'TYPE', units=b'    ')
         for row in theTable:
             if len(row) != len(theMnemS):
                 raise ExceptionLrTableCompose('LrTableWrite: Row length {:d} does not match MNEM list length {:d}'.format(len(row), len(theMnemS)))
@@ -1235,9 +1235,9 @@ class LrTableWrite(LrTable):
                 else:
                     uom = Units.MT_UNIT
                 if c == 0:
-                    myType = 0
+                    myType = COMPONENT_BLOCK_DATUM_BLOCK_START
                 else:
-                    myType = 69
+                    myType = COMPONENT_BLOCK_DATUM_BLOCK_ENTRY
                 myCbEv = CbEngValWrite(myType, val, theMnemS[c], units=uom)
                 if c == 0:
                     self.startNewRow(myCbEv)
