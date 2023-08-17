@@ -92,3 +92,6 @@ docs/publish/_build/*
 # Log files from pymemtrace
 *.log
 *.log.tgz
+
+# Cython
+src/TotalDepth/LIS/core/src/cython/*.c
