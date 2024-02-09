@@ -321,8 +321,8 @@ class Channel(typing.NamedTuple):
     description: str  # 'Description'
     unit_quantity: str  # 'Unit quantity'
     property: str  # Property
-    related_tools: typing.Tuple[ToolDescription]
-    related_products: typing.Tuple[ProductDescription]
+    related_tools: typing.Tuple[ToolDescription, ...]
+    related_products: typing.Tuple[ProductDescription, ...]
 
 
 def _get_product_description(parse_tree: BeautifulSoup, table_id: str) -> typing.Tuple[ProductDescription]:
