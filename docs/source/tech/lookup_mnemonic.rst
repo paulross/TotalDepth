@@ -5,9 +5,8 @@
 
 .. _TotalDepth-lookup_mnemonic:
 
-*********************************************************************
 Schlumberger Mnemonics
-*********************************************************************
+**********************
 
 TotalDepth provides a Python API to the `Schlumberger’s Oilfield Services Data Dictionary (OSDD) <https://www.apps.slb.com/cmd>`_
 

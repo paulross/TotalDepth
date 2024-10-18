@@ -5,7 +5,6 @@
 
 .. _TotalDepth-examples:
 
-*******************************
 TotalDepth Example Outputs
 *******************************
 

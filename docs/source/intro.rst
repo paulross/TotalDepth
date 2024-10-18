@@ -5,7 +5,6 @@
 
 .. _TotalDepth-intro:
 
-**************************
 Introduction to TotalDepth
 **************************
 

@@ -2,12 +2,8 @@
 
 .. _licence_text:
 
-*************************
 Licence
 *************************
-
-.. toctree::
-   :maxdepth: 2
 
 OpenSource Licence
 ==========================

@@ -3,9 +3,8 @@
 
 .. How to do various tasks with TotalDepth
 
-##########################################
 HOWTOs: What TotalDepth can do for you
-##########################################
+**************************************
 
 This describes how TotalDepth can help you with various tasks when dealing with petrophysical data.
 

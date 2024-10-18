@@ -5,7 +5,6 @@
 
 .. _cmd_line_tools_bit:
 
-***************************
 BIT Command Line Tools
 ***************************
 

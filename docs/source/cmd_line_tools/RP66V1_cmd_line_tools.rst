@@ -3,7 +3,6 @@
 
 .. Description of RP66V1 command line tools
 
-***************************
 RP66V1 Command Line Tools
 ***************************
 

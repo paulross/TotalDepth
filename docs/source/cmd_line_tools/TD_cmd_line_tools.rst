@@ -3,7 +3,6 @@
 
 .. Description of command line tools at TotalDepth root level.
 
-*****************************
 TotalDepth Command Line Tools
 *****************************
 

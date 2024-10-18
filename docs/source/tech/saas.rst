@@ -1,8 +1,7 @@
 .. Description of client/server SaaS operation.	
 
-###############################
 TotalDepth and SaaS
-###############################
+*******************
 
 This design shows the potential for running TotalDepth as *Software as a Service* (SaaS) or, if you prefer, *Cloud Computing*.
 
@@ -17,15 +16,13 @@ Network speed (i.e. latency+bandwidth) is crucial to the performance of this sys
 
 TotalDepth accommodates all of these.
 
-****************************************************
 Processing Server Side Files
-****************************************************
+====================================================
 
 There is no particular challenge here as the server has all it needs to process any client instruction. The big disadvantage is that the client has to upload the file to the server before they can do anything. For small jobs on large files that can impose an disproportionate cost.
 
-****************************************************
 Processing Files that Remain on the Client's Device
-****************************************************
+====================================================
 
 The real challenge is: the client has a (very large?) file and wants to do something small (or at least incremental) with it, for example "Plot curves XYZ from 5840 to 5600 feet using format ABC" and the server only needs a tiny fraction of that file. Regardless of the network connection there should be some cunning in extracting the data that the client needs in minimal time. TotalDepth's indexing technique makes this possible.
 
@@ -36,19 +33,19 @@ The design is illustrated below, the client is on the left:
 .. image:: images/Slide12.png
 
 Starting the session
-======================================
+---------------------
 
 The session is initialised by the user requesting the client to operate on a particular file on the clients device. The client passes basic file information to the server and receives a unique session ID.
 
 The Session ID
------------------
+^^^^^^^^^^^^^^
 
 The session ID could be a portable file ID, such as a checksum. Thus two users using the same file could benefit from each others read transactions. This would require copy-on-write and session ID modification.
 
 Another optimisation when using a checksum is that if the server already has an exact copy of the file (using the checksum as a proxy for that) then the server could provide data from its own copy of the file without the user having to transfer any data to the server at all.
 
 Session Bootstrapping
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 Given a valid session ID the client code reads the minimum structural information for the server to comprehend (and mirror) the file structure. This will vary according to the file format (and will vary according to file size).
 
@@ -89,12 +86,11 @@ Data Persistence
 
 It is possible for the server to persist the virtual file image over any number of sessions, this would improve the performance even further.
 
-****************************************************
 SaaS Pros and Cons
-****************************************************
+======================
 
 Advantages
-==================
+------------
 
 * Low barrier to use: browser based, no installation.
 * Cross Platform: desktop, tablet, mobile etc.
@@ -106,7 +102,7 @@ Advantages
 * All usage data is available on server logs.
 
 Disadvantages
-========================
+---------------
 
 * Requires network connection (could have a server version running locally).
 * User agent variability.

@@ -1,6 +1,5 @@
 .. TotalDepth API reference.
 
-**********************
 Glossary
 **********************
 

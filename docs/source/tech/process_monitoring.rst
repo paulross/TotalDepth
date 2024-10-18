@@ -5,7 +5,6 @@
 
 .. _TotalDepth-tech-process:
 
-*******************************************************************
 Process Monitoring with :py:mod:`TotalDepth.common.process`
 *******************************************************************
 

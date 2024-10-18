@@ -8,7 +8,7 @@ Contents:
 
 .. toctree::
     :maxdepth: 2
-    
+
     detif
     plotlogs
     BIT/index_BIT

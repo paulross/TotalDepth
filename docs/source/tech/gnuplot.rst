@@ -5,7 +5,6 @@
 
 .. _TotalDepth-tech-gnuplot:
 
-*********************************************************************
 Performance Graphs via Gnuplot with :py:mod:`TotalDepth.util.gnuplot`
 *********************************************************************
 

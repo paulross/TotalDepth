@@ -2,7 +2,6 @@
 .. sectionauthor:: Paul Ross <apaulross@gmail.com>
 
 
-******************************
 TotalDepth.LIS API Reference
 ******************************
 

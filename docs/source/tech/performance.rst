@@ -8,13 +8,11 @@
    
 .. _TotalDepth-tech-performance:
 
-####################################
 Performance of TotalDepth
-####################################
+*************************
 
 This technical note presents the results of some actual performance tests on TotalDepth.
 
-************************************
 Measuring Performance
 ************************************
 
