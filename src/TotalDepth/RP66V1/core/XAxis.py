@@ -46,7 +46,7 @@ class XAxis:
         self.long_name = long_name
         self.units = units
         self._data: typing.List[IFLRReference] = []
-        self._summary: typing.Union[None, XAxis.XAxisSummary] = None
+        self._summary: typing.Union[None, TotalDepth.common.XAxis.XAxisSummary] = None
 
     def append(self, position: File.LogicalRecordPosition, frame_number: int, x_axis: typing.Union[int, float]) -> None:
         """Add a IFLRReference to the XAxis."""
