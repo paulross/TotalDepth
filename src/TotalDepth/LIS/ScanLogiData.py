@@ -84,7 +84,7 @@ def scan_file(file_path, verbose, keepGoing, pad_modulo, pad_non_null, dump_tell
         and not verbose and len(myLdSigma) > LEN_TRUNCATE:
             theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
         else:
-            theS.write('  {:s}\n'.format(myLdSigma))
+            theS.write('  {!r:s}\n'.format(myLdSigma))
     theS.write('Histogram of Logical Data lengths:\n')
     theS.write(myHistLen.strRep(100, valTitle='Bytes', inclCount=True))
     theS.write('\n')
