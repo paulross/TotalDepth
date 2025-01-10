@@ -593,6 +593,8 @@ class LogicalData:
 
     def seek(self, length: int) -> None:
         """Increments the index. There is no error checking."""
+        # TODO: This looks dodgy as it increments the index rather than setting it.
+        # TODO: Change this to inc() and create a seek(index, whence) and tests.
         self.index += length
 
     def view_remaining(self, length: int) -> bytes:
