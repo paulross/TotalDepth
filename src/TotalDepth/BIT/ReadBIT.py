@@ -168,6 +168,8 @@ These are TIF markers.
 
 The 0.0001 figure is actually 9.999999615829415e-05 or 0x3d 0x68 0xdb 0x8b
 """
+import collections
+import dataclasses
 import enum
 import logging
 import math
@@ -183,13 +185,10 @@ import numpy as np
 from TotalDepth.common import LogPass, cmn_cmd_opts, np_summary
 from TotalDepth.util import DirWalk
 
-
-__rights__  = 'Copyright (c) 2021 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2021 Paul Ross. All rights reserved.'
 __version__ = '0.1.0'
 
-
 logger = logging.getLogger(__file__)
-
 
 from TotalDepth import ExceptionTotalDepth
 
@@ -237,7 +236,7 @@ def bytes_to_float(b: bytes) -> float:
     mantissa |= b[2] << 8
     mantissa |= b[3]
     m = mantissa / 0x1000000
-    ret = m * 16**(exp - 64)
+    ret = m * 16 ** (exp - 64)
     if sign:
         return -ret
     return ret
@@ -263,7 +262,7 @@ def float_to_bytes(f: float) -> bytes:
     if e % 4:
         # Round to power of 16 (2**4)
         power = 4 - (e % 4)
-        m /= 2**power
+        m /= 2 ** power
         e += power
     mantissa = int(0x1000000 * abs(m))
     if mantissa != 0:
@@ -424,7 +423,7 @@ class LogPassRange(typing.NamedTuple):
 
     @property
     def frames(self) -> int:
-        return 1 + int( 0.5 + abs(self.depth_from - self.depth_to) / abs(self.spacing))
+        return 1 + int(0.5 + abs(self.depth_from - self.depth_to) / abs(self.spacing))
 
     @property
     def is_increasing(self) -> bool:
@@ -447,6 +446,7 @@ class BITFrameArray:
     This has a number of fields, some are BIT specific but ``self.frame_array`` is a
     :py:class:`TotalDepth.common.LogPass.FrameArray`.
     """
+
     def __init__(self, ident: str, tif_block: TifMarkedBytes):
         """Example initial block, length 0x114, 276 bytes:
 
@@ -555,7 +555,6 @@ class BITFrameArray:
         ]
         return '\n'.join(ret)
 
-
     @property
     def len_channels(self) -> int:
         return len(self.channel_names)
@@ -565,7 +564,8 @@ class BITFrameArray:
         if self.len_channels == 0:
             logger.warning(f'Ignoring block of length {len(block)} when no channels.')
         else:
-            assert len(self.channel_names) == len(self._temporary_frames), f'{len(self.channel_names)} != {len(self._temporary_frames)}'
+            assert len(self.channel_names) == len(
+                self._temporary_frames), f'{len(self.channel_names)} != {len(self._temporary_frames)}'
             if len(block) % self.len_channels:
                 raise ExceptionTotalDepthBITDataBlocks(
                     f'The block length {len(block)} does not have equal data for the channels {self.len_channels}.'
@@ -587,7 +587,8 @@ class BITFrameArray:
                     break
                 # Note: frame_number = i % num_frames
                 channel_number = i // num_frames
-                assert channel_number < len(self._temporary_frames), f'{channel_number} >= {len(self._temporary_frames)} byte len={len(block)} i={i} channels={self.len_channels} num_frames={num_frames}'
+                assert channel_number < len(
+                    self._temporary_frames), f'{channel_number} >= {len(self._temporary_frames)} byte len={len(block)} i={i} channels={self.len_channels} num_frames={num_frames}'
                 self._temporary_frames[channel_number].append(value)
             self.frame_count += num_frames
 
@@ -666,7 +667,7 @@ class FileSizeTime(typing.NamedTuple):  # pragma: no cover
     time: float
 
     def __str__(self):
-        return f'{self.size:12d} {self.time:12.3f} {self.time * 1000 / (self.size / 1024**2):12.3f} {self.name}'
+        return f'{self.size:12d} {self.time:12.3f} {self.time * 1000 / (self.size / 1024 ** 2):12.3f} {self.name}'
 
 
 def print_summarise_frame_array(frame_array: BITFrameArray) -> None:
@@ -727,6 +728,104 @@ def print_process_directory(directory: str,
     return ret
 
 
+@dataclasses.dataclass
+class UnknownFieldCounters:
+    unknown_head: collections.Counter
+    unknown_a: collections.Counter
+    unknown_b: collections.Counter
+    unknown_c: collections.Counter
+    unknown_tail: collections.Counter
+    log_pass_range_unknown_a: collections.Counter
+    log_pass_range_unknown_b: collections.Counter
+
+
+def new_unknown_field_counter() -> UnknownFieldCounters:
+    return UnknownFieldCounters(
+        collections.Counter(),
+        collections.Counter(),
+        collections.Counter(),
+        collections.Counter(),
+        collections.Counter(),
+        collections.Counter(),
+        collections.Counter(),
+    )
+
+
+def print_counter(ctr: collections.Counter, omit_single_values: bool) -> None:
+    print(f'Total values: {sum(ctr.values())}')
+    print(f'{"Count":6s}: {"Value"}')
+    single_values = 0
+    for k, v in ctr.most_common():
+        if v != 1 or not omit_single_values:
+            print(f'{v:6d}: {k}')
+        else:
+            single_values += 1
+    if single_values:
+        print(f'Plus {single_values} unique values omitted here.')
+
+
+def print_unknown_field_counter(ufc: UnknownFieldCounters) -> None:
+    print(' Unknown Field Counters '.center(75, '='))
+    for field in dataclasses.fields(ufc):
+        print(f' {field.name} '.center(75, '-'))
+        ctr = getattr(ufc, field.name)
+        print_counter(ctr, True)
+        print(f' {field.name} DONE '.center(75, '-'))
+    print(' Unknown Field Counters DONE '.center(75, '='))
+
+
+def process_file_statistics_on_unknown_fields(file_path: str,
+                                              field_counters: UnknownFieldCounters) -> int:  # pragma: no cover
+    """Process a BIT file and updates unknown field counters.
+    Returns the number of non-None frame arrays."""
+    frame_arrays = create_bit_frame_array_from_path(file_path)
+    ret = 0
+    for i, frame_array in enumerate(frame_arrays):
+        if frame_array.frame_array is not None:
+            field_counters.unknown_head.update([frame_array.unknown_head])
+            field_counters.unknown_a.update([frame_array.unknown_a])
+            field_counters.unknown_b.update([frame_array.unknown_b])
+            field_counters.unknown_c.update([frame_array.unknown_c])
+            field_counters.unknown_tail.update([frame_array.unknown_tail])
+            field_counters.log_pass_range_unknown_a.update([frame_array.bit_log_pass_range.unknown_a])
+            field_counters.log_pass_range_unknown_b.update([frame_array.bit_log_pass_range.unknown_b])
+            ret += 1
+    return ret
+
+
+def process_directory_statistics_on_unknown_fields(directory: str) -> None:  # pragma: no cover
+    """Gather statistics on unknown fields and print them out."""
+    count_error = 0
+    error_files = []
+    successful_files = 0
+    frame_arrays = 0
+    not_bit_files = 0
+    unknown_field_counters = new_unknown_field_counter()
+    for file_in_out in DirWalk.dirWalk(directory, theFnMatch=tuple(), recursive=True, bigFirst=False):
+        if is_bit_file_from_path(file_in_out.filePathIn):
+            logger.info(f'Processing: {file_in_out.filePathIn} ')
+            try:
+                frame_arrays += process_file_statistics_on_unknown_fields(file_in_out.filePathIn,
+                                                                          unknown_field_counters)
+                successful_files += 1
+            except Exception as err:
+                logger.error(f'ERROR: in {file_in_out.filePathIn} {err}')
+                count_error += 1
+                error_files.append(file_in_out.filePathIn)
+        else:
+            if not file_in_out.filePathIn.endswith('.DS_Store'):
+                logger.info('Not a BIT file: %s', file_in_out.filePathIn)
+                not_bit_files += 1
+    print_unknown_field_counter(unknown_field_counters)
+    logger.info(f'File count of success={successful_files} errors={count_error} not BIT files={not_bit_files}')
+    logger.info(f'Total frame arrays={frame_arrays}')
+    if len(error_files):
+        logger.info(' Error files '.center(75, '-'))
+        for file in error_files:
+            logger.info(file)
+        logger.info(' DONE Error files '.center(75, '-'))
+
+
 def main() -> int:  # pragma: no cover
     """Main entry point."""
     description = """usage: %(prog)s [options] file
@@ -738,6 +837,8 @@ Scans a file or directory for BIT files and summarises them."""
     cmn_cmd_opts.add_log_level(parser, level=20)
     parser.add_argument("--summary", action="store_true", default=False,
                         help="Display summary of channel data. [default: %(default)s]")
+    parser.add_argument("--unknown", action="store_true", default=False,
+                        help="Run statistics on unknown field values (directories only). [default: %(default)s]")
     args = parser.parse_args()
     # print('args:', args)
     # return 0
@@ -748,16 +849,20 @@ Scans a file or directory for BIT files and summarises them."""
         result = print_process_file(args.path_in, args.verbose, args.summary)
         print(f'Result: {result}')
     else:
-        result = print_process_directory(args.path_in, args.recurse, args.verbose, args.summary)
-        print(f'{"Size":>12} {"Time (s)":>12} {"Rate (ms/Mb)":>12} {"File":<12}')
-        total_size = total_time = 0
-        for key in sorted(result.keys()):
-            print(f'{result[key]}')
-            total_size += result[key].size
-            total_time += result[key].time
-        print(f'Total size {total_size} bytes, total time {total_time:.3f} (s)')
-        if total_size and total_time:
-            print(f'Rate {total_time * 1000 / (total_size / 1024**2):.3f} (ms/MB) {total_size / total_time / 1024**2:.3f} Mb/s')
+        if args.unknown:
+            process_directory_statistics_on_unknown_fields(args.path_in)
+        else:
+            result = print_process_directory(args.path_in, args.recurse, args.verbose, args.summary)
+            print(f'{"Size":>12} {"Time (s)":>12} {"Rate (ms/Mb)":>12} {"File":<12}')
+            total_size = total_time = 0
+            for key in sorted(result.keys()):
+                print(f'{result[key]}')
+                total_size += result[key].size
+                total_time += result[key].time
+            print(f'Total size {total_size} bytes, total time {total_time:.3f} (s)')
+            if total_size and total_time:
+                print(
+                    f'Rate {total_time * 1000 / (total_size / 1024 ** 2):.3f} (ms/MB) {total_size / total_time / 1024 ** 2:.3f} Mb/s')
     if args.verbose == 0:
         print('Use -v, --verbose to see more information about each BIT file.')
     clk_exec = time.perf_counter() - clk_start
