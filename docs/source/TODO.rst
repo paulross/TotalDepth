@@ -49,11 +49,11 @@ TotalDepth Improvements (General)
       - 1
       - 3
       - 
-    * - TD.svfs
-      - Merge Sparse Virtual File System C/C++ code.
-      - 1
-      - 4
-      - 
+    * - :strike:`TD.svfs`
+      - :strike:`Merge Sparse Virtual File System C/C++ code.`
+      - :strike:`1`
+      - :strike:`4`
+      - :strike:`DONE: v0.5.0`
     * - :strike:`TD.test.slow`
       - :strike:`Move slow LIS test to tests/integration/ or mark as @slow.`
       - :strike:`1`

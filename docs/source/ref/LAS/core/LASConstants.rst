@@ -8,6 +8,5 @@ TotalDepth.LAS.core.LASConstants
 	:member-order: bysource
 	:members:
 	:special-members:
-	:exclude-members: PARAMETER_MNEM_DESCRIPTION
-	:exclude-members: CURVE_MNEM_DESCRIPTIONS
+	:exclude-members: PARAMETER_MNEM_DESCRIPTION, CURVE_MNEM_DESCRIPTIONS
 
