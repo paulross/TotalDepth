@@ -120,6 +120,8 @@ report_all_versions_and_setups() {
 
 show_results_of_dist() {
   echo "---> dist/:"
+  echo "---> pip install twine"
+  pip install twine
   ls -l "dist"
   echo "---> twine check dist/*:"
   twine check dist/*
