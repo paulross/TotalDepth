@@ -46,7 +46,7 @@ def las_is_effectively_the_same(a, b):
     equal_pre = a_pre == b_pre
     equal_post = a_post == b_post
 
-    ret =  equal_pre and equal_post
+    ret = equal_pre and equal_post
     if not ret:
         print('Differences:')
         # print_differences(a, b)
@@ -334,8 +334,8 @@ def test_bit_file_to_las(frame_slice, channels, field_width, float_format, expec
             result = las_file.getvalue()
             # print()
             # print(frame_array.long_str())
-            print()
-            print(result)
+            # print()
+            # print(result)
             # print_differences(expected, result)
             assert las_is_effectively_the_same(result, expected)
 
