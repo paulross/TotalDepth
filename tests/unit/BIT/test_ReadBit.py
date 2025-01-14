@@ -43,6 +43,18 @@ def test_isingl_bytes_to_float(float_value, bytes_value):
 
 
 @pytest.mark.parametrize(
+    'float_value, bytes_value',
+    (
+            (0.0, b'\x00\x00\x00\x00\x00\x00\x00\x00'),
+            (2.0243542373857818e-79, b'\x00\x06\x001\x00\x19\x00\x00'),
+    )
+)
+def test_bytes_to_float64(float_value, bytes_value):
+    result = ReadBIT.bytes_to_float64(bytes_value)
+    assert math.isclose(result, float_value, rel_tol=1e-7)
+
+
+@pytest.mark.parametrize(
     'bytes_value, expected',
     (
         (b'', "Need at least 4 bytes not b''."),

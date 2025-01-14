@@ -232,10 +232,11 @@ def bytes_to_float(b: bytes) -> float:
     #     raise ValueError(f'Bytes representation {b} is illegal.')
     sign = b[0] & 0x80
     exp = b[0] & 0x7f
+    # 24 bit mantissa, three bytes.
     mantissa = b[1] << 16
     mantissa |= b[2] << 8
     mantissa |= b[3]
-    m = mantissa / 0x1000000
+    m = mantissa / (1 << 24)
     ret = m * 16 ** (exp - 64)
     if sign:
         return -ret
@@ -278,6 +279,32 @@ def float_to_bytes(f: float) -> bytes:
     else:
         exponent = 0
     ret = bytes([exponent, mantissa >> 16 & 0xff, mantissa >> 8 & 0xff, mantissa & 0xff, ])
+    return ret
+
+
+LEN_FLOAT64_BYTES = 8
+
+def bytes_to_float64(b: bytes) -> float:
+    """Returns a float from eight bytes.
+
+    https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point
+    """
+    if len(b) < LEN_FLOAT64_BYTES:
+        raise ValueError(f'Need at least 8 bytes not {b}.')
+    sign = b[0] & 0x80
+    exp = b[0] & 0x7f
+    # 56 bit mantissa, 7 bytes.
+    mantissa = b[1] << (6 * 8)
+    mantissa |= b[2] << (5 * 8)
+    mantissa |= b[3] << (4 * 8)
+    mantissa |= b[4] << (3 * 8)
+    mantissa |= b[5] << (2 * 8)
+    mantissa |= b[6] << (1 * 8)
+    mantissa |= b[7]
+    m = mantissa / (1 << 56)
+    ret = m * 16 ** (exp - 64)
+    if sign:
+        return -ret
     return ret
 
 
@@ -542,11 +569,11 @@ class BITFrameArray:
         frame_array_str = '\n'.join(f'      {v}' for v in str(self.frame_array).split('\n'))
         ret = [
             f'BITFrameArray: ident="{self.ident}"',
-            f'   Unknown head: {self.unknown_head}',
+            f'   Unknown head: {self.unknown_head} as float: {bytes_to_float(self.unknown_head)}',
             f'    Description: {self.description}',
             f'      Unknown A: {self.unknown_a}',
             f'      Unknown B: {self.unknown_b}',
-            f'      Unknown C: {self.unknown_c}',
+            f'      Unknown C: {self.unknown_c} as floats: {bytes_to_float(self.unknown_c[:4])} -> {bytes_to_float(self.unknown_c[4:8])}',
             f'  Channels [{len(self.channel_names):2}]: {self.channel_names}',
             f'   BIT Log Pass: {self.bit_log_pass_range}',
             f'   Unknown tail: {self.unknown_tail}',
@@ -751,13 +778,18 @@ def new_unknown_field_counter() -> UnknownFieldCounters:
     )
 
 
-def print_counter(ctr: collections.Counter, omit_single_values: bool) -> None:
+def print_counter(ctr: collections.Counter, omit_single_values: bool, add_as_float: int) -> None:
     print(f'Total values: {sum(ctr.values())}')
     print(f'{"Count":6s}: {"Value"}')
     single_values = 0
     for k, v in ctr.most_common():
         if v != 1 or not omit_single_values:
-            print(f'{v:6d}: {k}')
+            if add_as_float == 1:
+                print(f'{v:6d}: {k!r:20} {bytes_to_float(k):32}')
+            elif add_as_float == 2:
+                print(f'{v:6d}: {k!r:40} {bytes_to_float(k[:4]):32} -> {bytes_to_float(k[4:8]):32}')
+            else:
+                print(f'{v:6d}: {k}')
         else:
             single_values += 1
     if single_values:
@@ -769,7 +801,12 @@ def print_unknown_field_counter(ufc: UnknownFieldCounters) -> None:
     for field in dataclasses.fields(ufc):
         print(f' {field.name} '.center(75, '-'))
         ctr = getattr(ufc, field.name)
-        print_counter(ctr, True)
+        if field.name == 'unknown_head':
+            print_counter(ctr, False, 1)
+        elif field.name == 'unknown_c':
+            print_counter(ctr, False, 2)
+        else:
+            print_counter(ctr, True, 0)
         print(f' {field.name} DONE '.center(75, '-'))
     print(' Unknown Field Counters DONE '.center(75, '='))
 
@@ -808,6 +845,9 @@ def process_directory_statistics_on_unknown_fields(directory: str) -> None:  # p
                 frame_arrays += process_file_statistics_on_unknown_fields(file_in_out.filePathIn,
                                                                           unknown_field_counters)
                 successful_files += 1
+                if successful_files >= 50:
+                    print(f'BREAKING ON successful_files={successful_files}')
+                    break
             except Exception as err:
                 logger.error(f'ERROR: in {file_in_out.filePathIn} {err}')
                 count_error += 1
