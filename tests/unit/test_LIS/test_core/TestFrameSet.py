@@ -31,7 +31,7 @@ import time
 import logging
 import pprint
 
-import numpy
+import numpy as np
 
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import FrameSet
@@ -1305,7 +1305,7 @@ class TestFrameSet_setFrameBytes(BaseTestClasses.TestBaseFile):
             + b'\x00\x00\x01\x00\x00\x00\x01\x01'
         myFs.setFrameBytes(by, 0, 0, 4)
         #print('myFs.frame(0)\n', myFs.frame(0), type(myFs.frame(0)))
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 153., 153., 153., 153., 153., 153.,
                 0., 1., 2., 3., 4., 5., 6., 7., 
@@ -1398,7 +1398,7 @@ class TestFrameSet_setFrameBytes_Indirect(BaseTestClasses.TestBaseFile):
             + b'\x00\x00\x01\x00\x00\x00\x01\x01'
         myFs.setFrameBytes(by, 0, None, 3)
         #print('myFs.frame(0)\n', myFs.frame(0))
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 153., 153., 153., 153., 153.,
                 0., 1., 2., 3., 4., 5., 6., 7., 
@@ -1470,7 +1470,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print(myFs.frame(0))
         #print()
         #print(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [  0.,   1.,   2.,   3.,   4.,],
                 [  5.,   6.,   7.,   8.,   9.,],
@@ -1486,7 +1486,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         self.assertTrue((expVal == myFs.frames).all())
         #print()
         #pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [0.,    17.5,   35.,],
                 [1.,    18.5,   36.,],
@@ -1535,7 +1535,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
             dep -= 0.5
         #print()
         #pprint.pprint(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [1000.,     0.,     1.,     2.,     3.,     4.,     5.,     6.,
                   7.,     8.,     9.,    10.,    11.,    12.,    13.,    14.,
@@ -1558,7 +1558,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print()
         #print(myArray)
         #pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [ 1000. ,  1000. ,  1000. ],
                 [    0. ,    37.5,    75. ],
@@ -1622,7 +1622,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print()
         #print(myArray)
         #pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [  872.5 ,   936.25,  1000. ],
                 [    0.  ,   127.5 ,   255.  ],
@@ -1699,7 +1699,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
             dep -= 60
         #print()
         #pprint.pprint(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [   0.,    1.,    2.,    3.,    4.,    5.,    6.,    7.,    8.,
                      9.,   10.,   11.,   12.,   13.,   14.,   15.,   16.,   17.,
@@ -1750,7 +1750,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print()
         ##print(myArray)
         #pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [   0.      ,  104.765625,  250.      ],
                 [   1.      ,  105.765625,  251.      ],
@@ -1773,7 +1773,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         self.assertTrue((expVal == myArray).all())
         #print()
         #pprint.pprint(myFs._indrXVector)
-        expVal = numpy.array([ 120000.,  119940.,  119880.,  119820.])
+        expVal = np.array([ 120000.,  119940.,  119880.,  119820.])
         self.assertEqual(expVal.shape, myFs._indrXVector.shape)
         self.assertTrue((expVal == myFs._indrXVector).all())
 
@@ -1830,7 +1830,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print(myFs.frame(0))
 #        print()
 #        print(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [  0.,  -1.,  -2.,  -3.,  -4.,],
                 [ -5.,  -6.,  -7.,  -8.,  -9.,],
@@ -1846,7 +1846,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         self.assertTrue((expVal == myFs.frames).all())
 #        print()
 #        pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [ 7.,  0.,  0.],
                 [ 7.,  0.,  0.],
@@ -1880,7 +1880,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print(myFs.frame(0))
         #print()
         #print(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [  0.,   0.,   0.,   0.,   0.,],
                 [  0.,   0.,   0.,   0.,   0.,],
@@ -1896,7 +1896,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         self.assertTrue((expVal == myFs.frames).all())
 #        print()
 #        pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [ 0.,  7.,  0.],
                 [ 0.,  7.,  0.],
@@ -1930,7 +1930,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         #print(myFs.frame(0))
         #print()
         #print(myFs._frames)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [  0.,   1.,   2.,   3.,   4.,],
                 [  5.,   6.,   7.,   8.,   9.,],
@@ -1946,7 +1946,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
         self.assertTrue((expVal == myFs.frames).all())
 #        print()
 #        pprint.pprint(myArray)
-        expVal = numpy.array(
+        expVal = np.array(
             [
                 [ 0.,  0.,  7.],
                 [ 0.,  0.,  7.],
@@ -1963,7 +1963,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
 # @pytest.mark.parametrize(
 #     'cls, expected',
 #     (
-#         (FrameSet.AccDec, numpy.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,]])),
+#         (FrameSet.AccDec, np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,]])),
 #     )
 # )
 # def test_frame_set_accumulators(cls, expected):
@@ -1983,7 +1983,7 @@ class TestFrameSetAccumulate(BaseTestClasses.TestBaseLogPass):
 #         myFs.setFrameBytes(by=fBy, fr=f, chFrom=0, chTo=numCh-1)
 #
 #     myArray = myFs.accumulate([cls])
-#     expVal = numpy.arange(float(numCh * numFr)).reshape((numFr, numCh))
+#     expVal = np.arange(float(numCh * numFr)).reshape((numFr, numCh))
 #
 #     assert expVal.shape == myFs.frames.shape
 #     assert expVal == myFs.frames.all()
@@ -4549,7 +4549,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
                 ]
             )
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
-        myArray = numpy.array(myFs.accumulate([FrameSet.AccMean,]))
+        myArray = np.array(myFs.accumulate([FrameSet.AccMean,]))
 #        print()
 #        print(myArray)
 #        print(myArrayNp)
@@ -4579,7 +4579,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
                 ]
             )
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
-        myArray = numpy.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
+        myArray = np.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
 #        print()
 #        print(myArray)
 #        print(myArrayNp)
@@ -4608,13 +4608,13 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
                     myFs.frames[:,ch].max(),
                     myFs.frames[:,ch].std(),
                     myFs.frames[:,ch].var(),
-                    myFs.frames[:,ch].ptp(),
+                    np.ptp(myFs.frames[:,ch]),
                     myFs.frames[:,ch].argmax(),
                     myFs.frames[:,ch].argmax(),
                 ]
             )
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
-#        myArray = numpy.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
+#        myArray = np.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
 #        print()
 #        print(myArray)
 #        print(myArrayNp)
@@ -4644,13 +4644,13 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
                     npView.max(),
                     npView.std(),
                     npView.var(),
-                    npView.ptp(),
+                    np.ptp(npView),
                     npView.argmin(),
                     npView.argmax(),
                 ]
             )
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
-#        myArray = numpy.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
+#        myArray = np.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
 #        print()
 #        print(myArray)
 #        print(myArrayNp)
@@ -4732,7 +4732,7 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
                 cFrameSet.decEqInc(npView),
             )
         self.writeCostToStderr(tS, lisLen, 'LIS MB', lisLen // (1024**2))
-#        myArray = numpy.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
+#        myArray = np.array(myFs.accumulate([FrameSet.AccMin, FrameSet.AccMax, FrameSet.AccMean]))
 #        print()
 #        print(myArray)
 #        print(myArrayNp)

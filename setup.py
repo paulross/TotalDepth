@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Part of TotalDepth: Petrophysical data processing and presentation
-# Copyright (C) 2011-2021 Paul Ross
+# Copyright (C) 2011-2025 Paul Ross
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -187,8 +187,8 @@ ext_modules = [
 
 setup(
     name='TotalDepth',
-    version='0.4.0',
-    description="TotalDepth is a software collection that can process petrophysical data such as wireline logs.",
+    version='0.5.0-rc.1',
+    description="TotalDepth is a software collection that can process Petro-physical data such as wireline logs.",
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/x-rst',
     author="Paul Ross",
@@ -211,9 +211,12 @@ setup(
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
     ],
     test_suite='tests',
     setup_requires=setup_requirements,

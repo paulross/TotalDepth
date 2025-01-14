@@ -11,8 +11,8 @@ set -o errexit  # abort on nonzero exitstatus
 set -o nounset  # abort on unbound variable
 set -o pipefail # don't hide errors within pipes
 
-PYTHON_VERSIONS=('3.8' '3.9' '3.10')
-#PYTHON_VERSIONS=('3.11')
+PYTHON_VERSIONS=('3.8' '3.9' '3.10' '3.11' '3.12' '3.13')
+#PYTHON_VERSIONS=('3.9')
 PYTHON_VENV_ROOT="${HOME}/pyenvs"
 # Used for venvs
 PROJECT_NAME="TotalDepth"
@@ -74,7 +74,7 @@ create_bdist_wheel() {
     python -VV
     echo "---> Installing everything via pip:"
     pip install -U pip setuptools wheel
-    pip install -r requirements.txt
+    pip install -r requirements-basic.txt
     echo "---> Result of pip install:"
     pip list
     echo "---> Running python setup.py develop:"
