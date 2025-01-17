@@ -122,9 +122,9 @@ Total is:
 
 Or, alternatively:
 72 (4 * 16 + 8) bytes of ASCII.
-Then six bytes: 000a 0018 0054 - This corresponds to the date (0, 10, 0, 24, 0, 84) So 1984-10-24
-Then 74 bytes of ASCII: 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
-Then 8 bytes of stuff: 0012 000b 0006 2020
+Then eight bytes: 000a 0018 0054 0000 - This corresponds to the date (0, 10, 0, 24, 0, 84, 0, 0) So 1984-10-24
+Then 72 bytes of ASCII: 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
+Then 8 bytes: 0012 000b 0006 0000 - This corresponds to time (0, 18, 0, 11, 0, 6, 0, 0) So 18:11:06.
 Total is:
 72 + 6 + 74 + 8 == 160
 
@@ -167,6 +167,32 @@ two nulls.
 These are TIF markers.
 
 The 0.0001 figure is actually 9.999999615829415e-05 or 0x3d 0x68 0xdb 0x8b
+
+The BIT File, Pictorially
+-------------------------
+
+.. code-block:: text
+
+    TIF Marker              3 * 4   12
+        # Introduction block
+        unknown_head        1 * 4    4  Usually an ISINGLE float.
+        Description         1 * 72  72  Usually ASCII
+        unknown_a           1 * 8    8  Date. For example: 000a 0018 0054 0000 - Values (0, 10, 0, 24, 0, 84, 0, 0) So 1984-10-24
+        unknown_b           1 * 72  72  This looks like the well name.
+        unknown_c           1 * 8    8  Time. For example: 0012 000b 0006 0000 - Values (0, 18, 0, 11, 0, 6, 0, 0) So 18:11:06.
+        Channel count       1 * 2    2  As big endian two byte format '>H' or '>h' (short). Maximum value 20.
+        A two byte null     1 * 2    2
+        Channel names       20 * 4  80  4 bytes each, up to 20 channels.
+        X Range             5 * 4   20  Five 4 byte floats: (start, stop, step, 0.0, ???). The last value is usually 32, 16, 4.
+        Unknown tail        1 * 8    8  Unknown, generally ASCII.
+    TIF Marker              3 * 4   12
+        # Frames.
+        # The number of frames is len(payload) // (4 * channel count).
+        # The frame order is from the X range above.
+        # The X value (depth) is generated from: start + frame number * step
+    TIF Marker              3 * 4   12
+        # Frames.
+        ...
 """
 import collections
 import dataclasses
@@ -186,7 +212,7 @@ import numpy as np
 from TotalDepth.common import LogPass, cmn_cmd_opts, np_summary
 from TotalDepth.util import DirWalk
 
-__rights__ = 'Copyright (c) 2021 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2021-2025 Paul Ross. All rights reserved.'
 __version__ = '0.1.0'
 
 logger = logging.getLogger(__file__)
@@ -576,7 +602,7 @@ class BITFrameArray:
             f'    Description: {self.description}',
             f'      Unknown A: {self.unknown_a} {tuple(self.unknown_a)} {self.date}',
             f'      Unknown B: {self.unknown_b}',
-            f'      Unknown C: {self.unknown_c} as floats: {bytes_to_float(self.unknown_c[:4])} -> {bytes_to_float(self.unknown_c[4:8])}',
+            f'      Unknown C: {self.unknown_c} {tuple(self.unknown_c)} {self.time}',
             f'  Channels [{len(self.channel_names):2}]: {self.channel_names}',
             f'   BIT Log Pass: {self.bit_log_pass_range}',
             f'   Unknown tail: {self.unknown_tail}',
@@ -592,7 +618,7 @@ class BITFrameArray:
     @property
     def date(self) -> datetime.date:
         """Extracts the date from self.unknown_a.
-        000a 0018 0054 - This corresponds to the date (0, 10, 0, 24, 0, 84) So 1984-10-24
+        000a 0018 0054 0000 - This corresponds to the date (0, 10, 0, 24, 0, 84, 0, 0) So 1984-10-24
         """
         assert len(self.unknown_a) == 8
         # Y2k hack
@@ -602,6 +628,14 @@ class BITFrameArray:
             year = 1900 + self.unknown_a[5]
         return datetime.date(year, self.unknown_a[1], self.unknown_a[3])
 
+
+    @property
+    def time(self) -> datetime.time:
+        """Extracts the time from self.unknown_c.
+        Unknown C: b'\x00\x11\x00/\x00\r  ' (0, 17, 0, 47, 0, 13, 32, 32) 17:47:13
+        """
+        assert len(self.unknown_c) == 8
+        return datetime.time(self.unknown_c[1], self.unknown_c[3], self.unknown_c[5],)
 
     def add_block(self, block: bytes) -> None:
         """Adds a data block of frame data to my temporary data structure(s)."""
@@ -821,7 +855,9 @@ def print_unknown_field_counter(ufc: UnknownFieldCounters) -> None:
         if field.name == 'unknown_head':
             print_counter(ctr, False, 1)
         elif field.name == 'unknown_c':
-            print_counter(ctr, False, 2)
+            print_counter(ctr, False, 0)
+        elif field.name == 'unknown_a':
+            print_counter(ctr, False, 0)
         else:
             print_counter(ctr, True, 0)
         print(f' {field.name} DONE '.center(75, '-'))
@@ -845,7 +881,8 @@ def process_file_statistics_on_unknown_fields(file_path: str,
             # field_counters.unknown_a.update([frame_array.unknown_a])
             field_counters.unknown_a.update([frame_array.date])
             field_counters.unknown_b.update([frame_array.unknown_b])
-            field_counters.unknown_c.update([frame_array.unknown_c])
+            # field_counters.unknown_c.update([frame_array.unknown_c])
+            field_counters.unknown_c.update([frame_array.time])
             field_counters.unknown_tail.update([frame_array.unknown_tail])
             field_counters.log_pass_range_unknown_a.update([frame_array.bit_log_pass_range.unknown_a])
             field_counters.log_pass_range_unknown_b.update([frame_array.bit_log_pass_range.unknown_b])
