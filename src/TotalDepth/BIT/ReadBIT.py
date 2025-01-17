@@ -122,11 +122,11 @@ Total is:
 
 Or, alternatively:
 72 (4 * 16 + 8) bytes of ASCII.
-Then five bytes: 000a 0018 00
-Then 75 bytes of ASCII: 54 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
+Then six bytes: 000a 0018 0054 - This corresponds to the date (0, 10, 0, 24, 0, 84) So 1984-10-24
+Then 74 bytes of ASCII: 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
 Then 8 bytes of stuff: 0012 000b 0006 2020
 Total is:
-72 + 5 + 75 + 8 == 160
+72 + 6 + 74 + 8 == 160
 
 Decoding the frames
 -------------------
@@ -170,6 +170,7 @@ The 0.0001 figure is actually 9.999999615829415e-05 or 0x3d 0x68 0xdb 0x8b
 """
 import collections
 import dataclasses
+import datetime
 import enum
 import logging
 import math
@@ -523,15 +524,17 @@ class BITFrameArray:
         # self.description, offset = read_bytes_from_offset(block, 160, offset)
 
         # 72 (4 * 16 + 8) bytes of ASCII.
-        # Then five bytes: 000a 0018 00
-        # Then 75 bytes of ASCII: 54 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
+        # Then six bytes: 000a 0018 0054
+        # Then 74 bytes of ASCII: 2020 3220 3920 2f20 3120 3020 2d20 3320 2020 ...
         # Then 8 bytes of stuff: 0012 000b 0006 2020
         # Total is:
-        # 72 + 5 + 75 + 8 == 160
+        # 72 + 8 + 72 + 8 == 160
 
         self.description, offset = read_bytes_from_offset(block, 72, offset)
-        self.unknown_a, offset = read_bytes_from_offset(block, 5, offset)
-        self.unknown_b, offset = read_bytes_from_offset(block, 75, offset)
+        # This looks like the date.
+        self.unknown_a, offset = read_bytes_from_offset(block, 8, offset)
+        # This looks like the well name.
+        self.unknown_b, offset = read_bytes_from_offset(block, 72, offset)
         self.unknown_c, offset = read_bytes_from_offset(block, 8, offset)
         assert offset == 160 + 4
 
@@ -571,7 +574,7 @@ class BITFrameArray:
             f'BITFrameArray: ident="{self.ident}"',
             f'   Unknown head: {self.unknown_head} as float: {bytes_to_float(self.unknown_head)}',
             f'    Description: {self.description}',
-            f'      Unknown A: {self.unknown_a}',
+            f'      Unknown A: {self.unknown_a} {tuple(self.unknown_a)} {self.date}',
             f'      Unknown B: {self.unknown_b}',
             f'      Unknown C: {self.unknown_c} as floats: {bytes_to_float(self.unknown_c[:4])} -> {bytes_to_float(self.unknown_c[4:8])}',
             f'  Channels [{len(self.channel_names):2}]: {self.channel_names}',
@@ -585,6 +588,20 @@ class BITFrameArray:
     @property
     def len_channels(self) -> int:
         return len(self.channel_names)
+
+    @property
+    def date(self) -> datetime.date:
+        """Extracts the date from self.unknown_a.
+        000a 0018 0054 - This corresponds to the date (0, 10, 0, 24, 0, 84) So 1984-10-24
+        """
+        assert len(self.unknown_a) == 8
+        # Y2k hack
+        if self.unknown_a[5] < 30:
+            year = 2000 + self.unknown_a[5]
+        else:
+            year = 1900 + self.unknown_a[5]
+        return datetime.date(year, self.unknown_a[1], self.unknown_a[3])
+
 
     def add_block(self, block: bytes) -> None:
         """Adds a data block of frame data to my temporary data structure(s)."""
@@ -819,8 +836,14 @@ def process_file_statistics_on_unknown_fields(file_path: str,
     ret = 0
     for i, frame_array in enumerate(frame_arrays):
         if frame_array.frame_array is not None:
+            # try:
+            #     log_date = frame_array.date
+            # except Exception as err:
+            #     pass
+            # print(f'TRACE: {tuple(frame_array.unknown_a)}')
             field_counters.unknown_head.update([frame_array.unknown_head])
-            field_counters.unknown_a.update([frame_array.unknown_a])
+            # field_counters.unknown_a.update([frame_array.unknown_a])
+            field_counters.unknown_a.update([frame_array.date])
             field_counters.unknown_b.update([frame_array.unknown_b])
             field_counters.unknown_c.update([frame_array.unknown_c])
             field_counters.unknown_tail.update([frame_array.unknown_tail])
@@ -849,7 +872,7 @@ def process_directory_statistics_on_unknown_fields(directory: str) -> None:  # p
                     print(f'BREAKING ON successful_files={successful_files}')
                     break
             except Exception as err:
-                logger.error(f'ERROR: in {file_in_out.filePathIn} {err}')
+                logger.error(f'ERROR: {type(err)} in {file_in_out.filePathIn} {err}')
                 count_error += 1
                 error_files.append(file_in_out.filePathIn)
         else:
