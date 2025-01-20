@@ -309,6 +309,12 @@ def float_to_bytes(f: float) -> bytes:
     return ret
 
 
+ABSENT_VALUE_BYTES = b'\x3d\x68\xdb\x8b'
+# The 0.0001 figure is actually 9.99999901978299e-05 or 0x3d 0x68 0xdb 0x8b
+ABSENT_VALUE_FLOAT = bytes_to_float(ABSENT_VALUE_BYTES)
+assert float_to_bytes(ABSENT_VALUE_FLOAT) == ABSENT_VALUE_BYTES, f'{float_to_bytes(ABSENT_VALUE_FLOAT)} != {ABSENT_VALUE_BYTES}'
+assert ABSENT_VALUE_FLOAT == 9.99999901978299e-05, f'{ABSENT_VALUE_FLOAT} != 9.99999901978299e-05'
+
 LEN_FLOAT64_BYTES = 8
 
 def bytes_to_float64(b: bytes) -> float:
@@ -605,7 +611,7 @@ class BITFrameArray:
             f'      Unknown C: {self.unknown_c} {tuple(self.unknown_c)} {self.time}',
             f'  Channels [{len(self.channel_names):2}]: {self.channel_names}',
             f'   BIT Log Pass: {self.bit_log_pass_range}',
-            f'   Unknown tail: {self.unknown_tail}',
+            f'   Unknown tail: {self.unknown_tail} {list(self.unknown_tail)}',
             f'    Frame count: {self.frame_count}',
             f'    Frame array: {frame_array_str}',
         ]
@@ -694,6 +700,9 @@ class BITFrameArray:
                 for i in range(len(self._temporary_frames[c])):
                     frame_channel[i] = self._temporary_frames[c][i]
                 self.frame_array.append(frame_channel)
+            # Apply mask for the absent value of around 0.0001
+            self.frame_array.mask_array(ABSENT_VALUE_FLOAT)
+            # Clear temporaries
             for data in self._temporary_frames:
                 data.clear()
             self._temporary_frames.clear()

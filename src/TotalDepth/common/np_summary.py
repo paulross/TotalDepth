@@ -25,6 +25,8 @@ import functools
 import numpy as np
 import typing
 
+from TotalDepth.LIS.core.FrameSet import AccActivity
+
 
 class ArraySummary(typing.NamedTuple):
     """Contains the summary of an array of numbers."""
@@ -76,6 +78,7 @@ class ArraySummary(typing.NamedTuple):
         )
     
     def str(self) -> str:
+        # print(f'TRACE: {type(self.drift)} {self.drift}')
         return ' '.join(
             [
                 f'{self.len:>6d}',
@@ -145,12 +148,17 @@ def activity(array: np.array, flatten: bool = True) -> float:
     """Returns array activity."""
     if flatten:
         array = array.flatten()
-    result = 0.0
-    if len(array) > 1:
-        log2_array = np.log2(array)
-        diff = log2_array[1:] - log2_array[:-1]
-        result = np.abs(diff).mean()
-    return result
+    # result = 0.0
+    # if len(array) > 1:
+    #     log2_array = np.log2(array)
+    #     diff = log2_array[1:] - log2_array[:-1]
+    #     result = np.abs(diff).mean()
+    # return result
+    # mant, exp = np.frexp(array)
+    activity_counter = AccActivity()
+    for i in range(len(array)):
+        activity_counter.add(array[i])
+    return activity_counter.value()
 
 
 def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:

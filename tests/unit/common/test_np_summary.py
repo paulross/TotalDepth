@@ -28,7 +28,7 @@ def test_activity_unmasked(array, expected):
 @pytest.mark.parametrize(
     'array, null_value, expected',
     (
-        (np.array([2.0**i for i in range(8)]), 4.0, 1.0),
+        (np.array([2.0**i for i in range(8)] + [91.0, 91.0]), 91.0, 1.0),
     )
 )
 def test_activity_masked(array, null_value, expected):
@@ -137,11 +137,11 @@ def test_counts_eq_dec_inc(array, expected):
                                     first=1.0, last=128.0)
         ),
         (
-            np.array([2.0 ** i for i in range(8)]),
-            4.0,
-            np_summary.ArraySummary(len=8, shape=(7,), count=7, min=1.0, max=128.0, mean=35.857142857142854,
-                                    std=42.809974042867864, median=16.0, count_eq=0, count_dec=0, count_inc=6,
-                                    activity=1.0 + 1 / 6, first=1.0, last=128.0)
+            np.array([2.0 ** i for i in range(8)] + [91.0, 91.0,]),
+            91.0,
+            np_summary.ArraySummary(len=10, shape=(8,), count=8, min=1.0, max=128.0, mean=31.875, std=41.40784195052913,
+                                    median=12.0, count_eq=0, count_dec=0, count_inc=7, activity=1.0,
+                                    first=1.0, last=128.0)
         ),
     )
 )

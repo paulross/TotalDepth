@@ -427,7 +427,7 @@ def test_create_bit_frame_array_from_file_temporary_frames_empty():
         ('frame_count', 128),
         ('ident', '0'),
         ('len_channels', 17),
-        ('unknown_b', b'U  15/17-12                                                                '),
+        ('unknown_b', b'15/17-12                                                                '),
     )
 )
 def test_create_bit_frame_array_from_file_attributes(attribute, expected):

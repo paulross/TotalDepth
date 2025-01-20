@@ -1432,17 +1432,18 @@ class AccActivity(AccDelta):
 
     def add(self, v):
         """Add a new value."""
-        myMant, exp = math.frexp(v)
-        myExp = exp + (2 * myMant) - 1.0
-        if self.cntr > 0:
-            self.actSum += (myExp - self.prevExp)**2
-        self.prevExp = myExp
-        self.cntr += 1
+        if not math.isnan(v):
+            myMant, exp = math.frexp(v)
+            myExp = exp + (2 * myMant) - 1.0
+            if self.cntr > 0:
+                self.actSum += (myExp - self.prevExp)**2
+            self.prevExp = myExp
+            self.cntr += 1
 
     def value(self):
         """Return the result."""
-        if self.cntr > 0:
-            return math.sqrt(self.actSum / self.cntr)
+        if self.cntr > 1:
+            return math.sqrt(self.actSum / (self.cntr - 1))
         return 0
 
 #########################################
