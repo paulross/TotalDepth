@@ -590,6 +590,54 @@ def plot_gnuplot(data: typing.Dict[str, LASFileResult], gnuplot_dir: str) -> Non
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
+def process_arguments(args, log_level):
+    if cmn_cmd_opts.number_multiprocessing_jobs(args) != 1:
+        # Multiprocessing.
+        if args.log_process > 0.0:
+            with process.log_process(args.log_process, log_level):
+                result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
+                    args.path_in,
+                    args.path_out,
+                    args.recurse,
+                    args.keepGoing,
+                    label_process=True,
+                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                    jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
+                )
+        else:
+            result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+                args.keepGoing,
+                label_process=False,
+                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
+            )
+    else:
+        # Single process
+        if args.log_process > 0.0:
+            with process.log_process(args.log_process, log_level):
+                result = scan_dir_or_file(
+                    args.path_in,
+                    args.path_out,
+                    args.recurse,
+                    args.keepGoing,
+                    label_process=False,
+                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+                )
+        else:
+            result = scan_dir_or_file(
+                args.path_in,
+                args.path_out,
+                args.recurse,
+                args.keepGoing,
+                label_process=False,
+                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
+            )
+    return result
+
+
 def main():
     description = """usage: %prog [options] in out
 Generates HTML from input LAS file or directory to an output destination."""
@@ -610,73 +658,18 @@ Generates HTML from input LAS file or directory to an output destination."""
     # print(args)
     if args.pause:
         input(f'Ready to start PID={os.getpid()} press any key: ')
-
     log_level = cmn_cmd_opts.set_log_level(args)
 
     clk_start = time.perf_counter()
+
     # Your code here
     if cmn_cmd_opts.multiprocessing_requested(args) and os.path.isdir(args.path_in):
-        if args.log_process > 0.0:
-            with process.log_process(args.log_process, log_level):
-                result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
-                    args.path_in,
-                    args.path_out,
-                    args.recurse,
-                    args.keepGoing,
-                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-                    label_process=True,
-                    jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
-                )
-        else:
-            result: typing.Dict[str, LASFileResult] = scan_dir_multiprocessing(
-                args.path_in,
-                args.path_out,
-                args.recurse,
-                args.keepGoing,
-                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-                label_process=False,
-                jobs=cmn_cmd_opts.number_multiprocessing_jobs(args),
-            )
+        result = process_arguments(args, log_level)
     else:
         # with cPyMemTrace.Profile():
-        #     if args.log_process > 0.0:
-        #         with process.log_process(args.log_process, log_level):
-        #             result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
-        #                 args.path_in,
-        #                 args.path_out,
-        #                 args.recurse,
-        #                 args.keepGoing,
-        #                 label_process=True,
-        #                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-        #             )
-        #     else:
-        #             result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
-        #                 args.path_in,
-        #                 args.path_out,
-        #                 args.recurse,
-        #                 args.keepGoing,
-        #                 label_process=False,
-        #                 frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-        #             )
-        if args.log_process > 0.0:
-            with process.log_process(args.log_process, log_level):
-                result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
-                    args.path_in,
-                    args.path_out,
-                    args.recurse,
-                    args.keepGoing,
-                    label_process=True,
-                    frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-                )
-        else:
-            result: typing.Dict[str, LASFileResult] = scan_dir_or_file(
-                args.path_in,
-                args.path_out,
-                args.recurse,
-                args.keepGoing,
-                label_process=False,
-                frame_slice=Slice.create_slice_or_sample(args.frame_slice),
-            )
+        #     result = process_arguments(args, log_level)
+        result = process_arguments(args, log_level)
+
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing HTML Complete.')
     clk_exec = time.perf_counter() - clk_start

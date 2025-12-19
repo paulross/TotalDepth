@@ -21,10 +21,12 @@
 Provides means of summarizing a numpy ndarray.
 """
 import functools
+import logging
 
 import numpy as np
 import typing
 
+logger = logging.getLogger(__file__)
 
 class ArraySummary(typing.NamedTuple):
     """Contains the summary of an array of numbers."""
@@ -147,9 +149,10 @@ def activity(array: np.array, flatten: bool = True) -> float:
         array = array.flatten()
     result = 0.0
     if len(array) > 1:
-        log2_array = np.log2(array)
-        diff = log2_array[1:] - log2_array[:-1]
-        result = np.abs(diff).mean()
+        if 0.0 not in array:
+            log2_array = np.log2(array)
+            diff = log2_array[1:] - log2_array[:-1]
+            result = np.abs(diff).mean()
     return result
 
 
@@ -182,3 +185,7 @@ def summarise_array(array: np.array, flatten: bool = True) -> ArraySummary:
             array[-1],
         )
         return result
+    logger.warning(
+        'Can not create array summary. len_array=%d count_of_values=%d masked=%s',
+        len_array, count_of_values, hasattr(array, 'mask')
+    )

@@ -347,24 +347,29 @@ def _write_frame_array_in_html(
                 f' represented internally as {frame_array.sizeof_frame} (bytes/frame).'
             )
         frame_table = [
-            ['Channel',
-             'Dims', 'Count', 'Units', 'Long Name',
-             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++',  'Activity', 'dtype'],
+            [
+                'Channel', 'Dims', 'Count', 'Units', 'Long Name', 'Size', 'Absent',
+                # If we can create a summary...
+                'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++',  'Activity',
+                'dtype',
+            ],
         ]
         for channel in frame_array.channels:
             # arr = channel.array
             arr = TotalDepth.common.AbsentValue.mask_absent_values(channel.array)
             array_summary = np_summary.summarise_array(arr)
-            frame_table.append(
-                [
-                    channel.ident,
-                    stringify.stringify_object_by_type(channel.dimensions),
-                    stringify.stringify_object_by_type(channel.count),
-                    stringify.stringify_object_by_type(channel.units),
-                    stringify.stringify_object_by_type(channel.long_name),
-                    f'{arr.size:d}',
-                    # NOTE: Not the masked array!
-                    f'{TotalDepth.common.AbsentValue.count_of_absent_values(channel.array):d}',
+            row = [
+                channel.ident,
+                stringify.stringify_object_by_type(channel.dimensions),
+                stringify.stringify_object_by_type(channel.count),
+                stringify.stringify_object_by_type(channel.units),
+                stringify.stringify_object_by_type(channel.long_name),
+                f'{arr.size:d}',
+                # NOTE: Not the masked array!
+                f'{TotalDepth.common.AbsentValue.count_of_absent_values(channel.array):d}',
+            ]
+            if array_summary is not None:
+                row += [
                     f'{array_summary.min:.3f}',
                     f'{array_summary.mean:.3f}',
                     f'{array_summary.median:.3f}',
@@ -374,9 +379,22 @@ def _write_frame_array_in_html(
                     f'{array_summary.count_eq:d}',
                     f'{array_summary.count_inc:d}',
                     f'{array_summary.activity:.3f}',
-                    f'{arr.dtype}',
                 ]
-            )
+            else:
+                logger.warning('Failed to create array summary for channel: %s', channel.ident)
+                row += [
+                    'N/A', #f'{array_summary.min:.3f}',
+                    'N/A', #f'{array_summary.mean:.3f}',
+                    'N/A', #f'{array_summary.median:.3f}',
+                    'N/A', #f'{array_summary.std:.3f}',
+                    'N/A', #f'{array_summary.max:.3f}',
+                    'N/A', #f'{array_summary.count_dec:d}',
+                    'N/A', #f'{array_summary.count_eq:d}',
+                    'N/A', #f'{array_summary.count_inc:d}',
+                    'N/A', #f'{array_summary.activity:.3f}',
+                ]
+            row.append(f'{arr.dtype}')
+            frame_table.append(row)
         html_write_table(frame_table, xhtml_stream, class_style='monospace')
         x_axis_start = iflrs[0].x_axis
         x_axis_stop = iflrs[-1].x_axis
@@ -530,9 +548,9 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
     Similar to TotalDepth.RP66V1.core.Scan.scan_RP66V1_file_data_content
     Returns the text to use as a link.
     """
+    # if label_process:
+    #     process.add_message_to_queue(f'Reading: {os.path.basename(path_in)}')
     with LogicalFile.LogicalIndex(path_in) as logical_index:
-        if label_process:
-            process.add_message_to_queue(os.path.basename(path_in))
         logger.info(
             f'html_scan_RP66V1_file_data_content(): Creating File.FileRead() from "{os.path.basename(path_in)}"'
         )
@@ -541,8 +559,8 @@ def html_scan_RP66V1_file_data_content(path_in: str, fout: typing.TextIO, label_
             f' from "{os.path.basename(path_in)}"'
         )
         logger.info(f'html_scan_RP66V1_file_data_content(): Writing HTML')
-        if label_process:
-            process.add_message_to_queue('Writing HTML')
+        # if label_process:
+        #     process.add_message_to_queue('Writing HTML')
         with XmlWrite.XhtmlStream(fout) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
                 with XmlWrite.Element(xhtml_stream, 'meta', {

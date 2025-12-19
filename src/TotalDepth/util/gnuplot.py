@@ -131,7 +131,7 @@ def write_test_file(path: str, typ: str) -> int:
         # proc.stdin.close()
         stdout, stderr = proc.communicate(timeout=1, )
     except subprocess.TimeoutExpired as err:
-        logger.exception()
+        logger.exception('WTF')
         proc.kill()
         stdout, stderr = proc.communicate()
     logging.info(f'gnuplot stdout: {stdout}')
