@@ -70,7 +70,7 @@ LOGICAL-FILE.   0                               : Logical File number in the Sou
 SOURCE_FORMAT.  WESTERN ATLAS BIT FORMAT        : File format of Source file.
 #
 # Binary block A: b'OCCIDENTAL PETROLEUM                                                    '
-# Binary block B: b'U  15/17-12                                                                '
+# Binary block B: b'15/17-12                                                                '
 # BIT Log Pass (claimed): LogPassRange(depth_from=11916.0, depth_to=0.0, spacing=0.25, unknown_a=0.0, unknown_b=32.0)
 #
 ~Well Information Section
@@ -249,7 +249,7 @@ LOGICAL-FILE.   0                               : Logical File number in the Sou
 SOURCE_FORMAT.  WESTERN ATLAS BIT FORMAT        : File format of Source file.
 #
 # Binary block A: b'OCCIDENTAL PETROLEUM                                                    '
-# Binary block B: b'U  15/17-12                                                                '
+# Binary block B: b'15/17-12                                                                '
 # BIT Log Pass (claimed): LogPassRange(depth_from=11916.0, depth_to=0.0, spacing=0.25, unknown_a=0.0, unknown_b=32.0)
 #
 ~Well Information Section
@@ -287,7 +287,7 @@ LOGICAL-FILE.   0                               : Logical File number in the Sou
 SOURCE_FORMAT.  WESTERN ATLAS BIT FORMAT        : File format of Source file.
 #
 # Binary block A: b'OCCIDENTAL PETROLEUM                                                    '
-# Binary block B: b'U  15/17-12                                                                '
+# Binary block B: b'15/17-12                                                                '
 # BIT Log Pass (claimed): LogPassRange(depth_from=11916.0, depth_to=0.0, spacing=0.25, unknown_a=0.0, unknown_b=32.0)
 #
 ~Well Information Section

@@ -1389,17 +1389,20 @@ class AccBias(AccDelta):
         """Add a new value."""
         if self.prev is None:
             self.prev = v
-        elif self.prev > v:
+        elif self.prev < v:
             self.cntrInc += 1
         elif self.prev == v:
             self.cntrEq += 1
-        elif self.prev < v:
+        elif self.prev > v:
             self.cntrDec += 1
         self.prev = v
 
     def value(self):
         """Return the result."""
-        return (self.cntrInc - self.cntrDec) / (self.cntrInc + self.cntrEq + self.cntrDec)
+        try:
+            return (self.cntrInc - self.cntrDec) / (self.cntrInc + self.cntrEq + self.cntrDec)
+        except ZeroDivisionError:
+            return math.nan
 
 class AccDrift(AccDelta):
     """Measures drift i.e. the movement between the first and the last value."""
@@ -1432,18 +1435,27 @@ class AccActivity(AccDelta):
 
     def add(self, v):
         """Add a new value."""
-        myMant, exp = math.frexp(v)
-        myExp = exp + (2 * myMant) - 1.0
-        if self.cntr > 0:
-            self.actSum += (myExp - self.prevExp)**2
-        self.prevExp = myExp
-        self.cntr += 1
+        if not math.isnan(v):
+            myMant, exp = math.frexp(v)
+            myExp = exp + (2 * myMant) - 1.0
+            if self.cntr > 0:
+                self.actSum += (myExp - self.prevExp)**2
+            self.prevExp = myExp
+            self.cntr += 1
 
     def value(self):
         """Return the result."""
-        if self.cntr > 0:
-            return math.sqrt(self.actSum / self.cntr)
+        if self.cntr > 1:
+            return math.sqrt(self.actSum / (self.cntr - 1))
         return 0
+
+
+class AccActivityMille(AccActivity):
+
+    def value(self):
+        v = super().value()
+        return v * 1000
+
 
 #########################################
 # Section: FrameSet accumulator functions
