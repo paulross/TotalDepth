@@ -433,7 +433,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         self._HTMLEntryBasic(theIe, theS)
         if theIe.logicalRecord is None:
             theIe.setLogicalRecord(theFi)
-        myLr = theIe.logicalRecord
+        myLr: LogiRec.LrTable = theIe.logicalRecord
         assert (myLr is not None)
         if myLr.tableCbEv is not None:
             # Write the table name and so on from tableCbEv
@@ -461,7 +461,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                     for aMnem in myLr.colLabels():
                         with XmlWrite.Element(theS, 'th', {'class': 'wsd'}):
                             theS.characters(aMnem.decode('ascii'))
-                for aRowName in myLr.genRowNames(sort=1):
+                for aRowName in myLr.genRowNames(sort=0):
                     with XmlWrite.Element(theS, 'tr', {}):
                         for aCell in myLr.genRowValuesInColOrder(aRowName):
                             if aCell is None:
@@ -726,6 +726,10 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                     FrameSet.AccDec,
                     FrameSet.AccEq,
                     FrameSet.AccInc,
+
+                    FrameSet.AccBias,
+                    FrameSet.AccDrift,
+                    FrameSet.AccActivityMille,
                 ]
             )
             #            print()
@@ -739,7 +743,9 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 myTable.append([str(x) for x in schNameS[scIdx]] + ['{:7g}'.format(v) for v in aRow])
             self._HTMLGeneralTable(
                 theS,
-                ['Sc Name', 'Units', 'Count', 'Min', 'Mean', 'Max', 'StdDev', '--', '==', '++'],
+                ['Sc Name', 'Units', 'Count', 'Min', 'Mean', 'Max', 'StdDev', '--', '==', '++',
+                 'Bias', 'Drift', 'mActivity'
+                 ],
                 myTable,
             )
         self._HTMLLinkToTop(theS)
