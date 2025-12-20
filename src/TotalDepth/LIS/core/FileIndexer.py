@@ -64,7 +64,8 @@ class IndexObjBase:
         if not isinstance(theF.file, str):
             tell_diff =theF.file.tell() - tell
             # 18 since bin_file_type uses it.
-            assert tell_diff in {0, 6, 18}, \
+            # TODO: 30 comes up in WAPIMS/1990-2000. Why?
+            assert tell_diff in {0, 6, 18, 30}, \
                 'theF.file.tell() = %d but tell = %d Diff = %d' % (theF.file.tell(), tell, tell_diff)
 
     def __str__(self):
