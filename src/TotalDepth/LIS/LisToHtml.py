@@ -40,6 +40,7 @@ from TotalDepth.LIS.core import FrameSet
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
 from TotalDepth.common import xxd
+from TotalDepth.common import XAxis
 from TotalDepth.util import XmlWrite, archive, bin_file_type, gnuplot
 
 __author__ = 'Paul Ross'
@@ -684,6 +685,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 last_x_optical = 'None'
                 interval = 'None'
                 spacing_optical = 'None'
+
             myFrInfo = [
                 ('From', '{:.3f} ({:s})'.format(myLp.xAxisFirstValOptical, myOptUnitStr)),
                 ('To', '{} ({:s})'.format(last_x_optical, myOptUnitStr)),
@@ -698,10 +700,31 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 theS.characters('No frames')
         if self._accCh and theIe.logPass.totalFrames > 0:
             with XmlWrite.Element(theS, 'h5', {}):
-                theS.characters('Frame Data')
+                theS.characters('X Axis Frame Spacing')
             # Accumulate the channel data then write it out
             theIe.logPass.setFrameSet(theFi, None, None)
             myFrSet = theIe.logPass.frameSet
+
+            # X spacing information
+            x_array = myFrSet.xAxisValues()
+            x_axis_spacing_summary = XAxis.compute_spacing(x_array)
+            # print(f'TRACE: x_axis_spacing_summary: {x_axis_spacing_summary}')
+            x_axis_spacing_summary_table = [
+                ('Spacing Minimum', '{:.3f} ({!r:s})'.format(x_axis_spacing_summary.min, myLp.xAxisUnits)),
+                ('Spacing Maximum', '{:.3f} ({!r:s})'.format(x_axis_spacing_summary.max, myLp.xAxisUnits)),
+                ('Spacing Mean', '{:.3f} ({!r:s})'.format(x_axis_spacing_summary.mean, myLp.xAxisUnits)),
+                ('Spacing Std. Dev.', '{:.3f} ({!r:s})'.format(x_axis_spacing_summary.std, myLp.xAxisUnits)),
+                ('Spacing Median', '{:.3f} ({!r:s})'.format(x_axis_spacing_summary.median, myLp.xAxisUnits)),
+                ('Spacing Counts', '{:d}'.format(x_axis_spacing_summary.counts.total)),
+                ('Spacing Count Normal', '{:d}'.format(x_axis_spacing_summary.counts.norm)),
+                ('Spacing Count Back', '{:d}'.format(x_axis_spacing_summary.counts.back)),
+                ('Spacing Count Duplicate', '{:d}'.format(x_axis_spacing_summary.counts.dupe)),
+                ('Spacing Count Skipped', '{:d}'.format(x_axis_spacing_summary.counts.skip)),
+            ]
+            self._HTMLKeyValTable(theS, x_axis_spacing_summary_table, fieldTitle='')
+
+            with XmlWrite.Element(theS, 'h5', {}):
+                theS.characters('Frame Data')
             #            # Print the channels and units
             #            hdrS = []
             #            if myFrSet.isIndirectX:
@@ -822,6 +845,7 @@ def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
     #     except OSError:
     #         # TODO: Check specifically for: OSError: [Errno 17] File exists: '...'
     #         pass
+    logger.info(f'processFile(): {fpIn}')
     file_type = bin_file_type.binary_file_type_from_path(fpIn)
     logger.info(f'processFile(): Type: "{file_type}" {fpIn} -> {fpOut}')
     if bin_file_type.is_lis_file_type(file_type):
@@ -842,6 +866,8 @@ def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
                 raise
         else:
             return myPlp.summary
+    else:
+        logger.info('Ignoring as file tyoe is not LIS')
 
 
 GNUPLOT_PLT = """set logscale x

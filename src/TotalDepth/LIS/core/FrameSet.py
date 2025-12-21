@@ -592,6 +592,14 @@ class FrameSet(object):
         # Direct X axis return chosen channel
         return self._frames[fr, self._xAxisFrOffs]
 
+    def xAxisValues(self):
+        """Returns all the X axis values for the frames."""
+        if self.isIndirectX:
+            assert(self._indrXVector is not None)
+            return self._indrXVector
+        # Direct X axis return chosen channel
+        return self._frames.T[self._xAxisFrOffs]
+
     def xAxisStep(self, numFr):
         """The distance stepped by numFr."""
         return numFr * self._frameSpacing
