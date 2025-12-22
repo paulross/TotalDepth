@@ -1128,7 +1128,9 @@ class LrTable(LrBase):
         self._incColMnem(self._rows[-1].addCb(theCbEv))
 
     def _indexLastRowOrDiscard(self):
-        # Check if the last row is unique, if not discard it
+        # Check if the last row is unique, if not discard it. Only for 2-D tables.
+        if self.isSingleParam:
+            return
         if len(self._rows) > 0:
             if self._rows[-1].value in self._tableRowIndex:
                 myRow = self._rows.pop()
