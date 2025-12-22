@@ -134,7 +134,13 @@ class LogPass(object):
         """Returns a map of {Mnem.Mnem(MNEM) : (extCh, sub_ch), ...}
         Warnings are produced for duplicates which are ignored. In principle
         as a PRES table (for example) can only identify a channel by MNEM
-        then we assume here that the MNEM is unique."""
+        then we assume here that the MNEM is unique.
+
+        An example where it is not unique is in:
+        1980-1990/W001545/WAPIMS/temp/migsdfi/tarnsfer/LIS/SOUTH_PEPPER_17_MWD_290_1924.TAP
+        There are duplicate 'DEVI' channels which have slightly different values.
+        The service order is the same.
+        """
         retMap = {}
         for ch, b in enumerate(self._dfsr.dsbBlocks):
             for sc in range(b.subChannels):
@@ -151,7 +157,10 @@ class LogPass(object):
         """Returns a map of {Mnem.Mnem(MNEM) : Mnem.Mnem(UNITS), ...}
         Warnings are produced for duplicates which are ignored. In principle
         as a PRES table (for example) can only identify a channel by MNEM
-        then we assume here that the MNEM is unique."""
+        then we assume here that the MNEM is unique.
+
+        See also the doc in _retChMap() about duplicate channels.
+        """
         retMap = {}
 #        for aDsb in self._dfsr.dsbBlocks:
 #            m = Mnem.Mnem(aDsb.mnem)
