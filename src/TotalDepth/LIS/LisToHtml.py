@@ -163,6 +163,23 @@ span.lrDescription {
     /* font-weight:    bold; */
     font-style:     italic;
 }
+
+p.error {
+color:              white;
+background:         red;
+font-family:        sans-serif;
+font-size:          10pt;
+font-style:         bold;
+margin:             6px;
+padding:            6px;
+}
+
+p.copyright {
+color:              black;
+font-family:        sans-serif;
+font-size:          9pt;
+font-style:         italic;
+}
 """
 
 CSS_CONTENT_INDEX = """body {
@@ -817,11 +834,18 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 self._writeHtmlToc(myFile, myIndex, myS)
                 for anIe in myIndex.genAll():
                     if anIe.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
-                        if anIe.lrType in self._despatchLrType:
-                            self._despatchLrType[anIe.lrType](anIe, myFile, myS)
-                        else:
-                            self._HTMLNonSpecific(anIe, myFile, myS)
-                        numEntries += 1
+                        try:
+                            if anIe.lrType in self._despatchLrType:
+                                self._despatchLrType[anIe.lrType](anIe, myFile, myS)
+                            else:
+                                self._HTMLNonSpecific(anIe, myFile, myS)
+                            numEntries += 1
+                        except LogiRec.ExceptionLr as err:
+                            err_str = 'LR at 0x{:08x}: {!r:}'.format(anIe.tell, err)
+                            logging.error(err_str)
+                            with XmlWrite.Element(myS, 'p', {'class': 'error'}):
+                                myS.characters(f'ERROR: {err_str}')
+
                 with XmlWrite.Element(myS, 'hr'):
                     pass
                 with XmlWrite.Element(myS, 'p', {'class': 'copyright'}):

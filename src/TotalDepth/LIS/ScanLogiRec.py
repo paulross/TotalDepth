@@ -125,7 +125,7 @@ def scan_file(fp, verbose, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout)
                 if verbose:
                     dump_logical_record(logical_record)
         except LogiRec.ExceptionLr as err:
-            logging.error('LR at 0x{:08x}: {:s}'.format(lr_tell, err))
+            logging.error('LR at 0x{:08x}: {!r:}'.format(lr_tell, err))
         myFile.skipToNextLr()
 
 
