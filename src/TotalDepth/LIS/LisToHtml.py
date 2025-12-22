@@ -761,6 +761,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                     FrameSet.AccCount,
                     FrameSet.AccMin,
                     FrameSet.AccMean,
+                    FrameSet.AccMedian,
                     FrameSet.AccMax,
                     FrameSet.AccStDev,
                     FrameSet.AccDec,
@@ -783,7 +784,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 myTable.append([str(x) for x in schNameS[scIdx]] + ['{:7g}'.format(v) for v in aRow])
             self._HTMLGeneralTable(
                 theS,
-                ['Sc Name', 'Units', 'Count', 'Min', 'Mean', 'Max', 'StdDev', '--', '==', '++',
+                ['Sc Name', 'Units', 'Count', 'Min', 'Mean', 'Median', 'Max', 'StdDev', '--', '==', '++',
                  'Bias', 'Drift', 'mActivity'
                  ],
                 myTable,

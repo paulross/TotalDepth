@@ -1296,6 +1296,28 @@ class AccMean(object):
         if self.cntr > 0:
             return self.sum / self.cntr
 
+
+class AccMedian(object):
+    """Accumulates the median value."""
+    title = 'Median'
+    def __init__(self):
+        self.values = []
+
+    def add(self, v):
+        """Add a new value."""
+        self.values.append(v)
+
+    def value(self):
+        """Return the result."""
+        self.values.sort()
+        if len(self.values):
+            if len(self.values) % 2 == 0:
+                # Even
+                return (self.values[len(self.values) // 2] + self.values[1 + len(self.values) // 2]) / 2.0
+            else:
+                # Odd
+                return self.values[len(self.values) // 2]
+
 class AccStDev(object):
     """Accumulates the standard deviation."""
     title = 'StdDev'
@@ -1459,6 +1481,7 @@ class AccActivity(AccDelta):
 
 
 class AccActivityMille(AccActivity):
+    title = 'mActivity'
 
     def value(self):
         v = super().value()
