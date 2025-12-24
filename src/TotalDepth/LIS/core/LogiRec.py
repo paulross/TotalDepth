@@ -640,8 +640,8 @@ class LrMisc(LrBase):
     """Miscellaneous Logical Record."""
     def __init__(self, theType, theAttr):
         super().__init__(theType, theAttr)
-        assert(self.type in LR_TYPE_UNKNOWN_INTERNAL_FORMAT), \
-            'Illegal LR type of %d for a LrMisc' % self.type
+        # assert(self.type in LR_TYPE_UNKNOWN_INTERNAL_FORMAT), \
+        #     'Illegal LR type of %d for a LrMisc' % self.type
         self.bytes = b''
     
 

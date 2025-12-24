@@ -357,6 +357,12 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
             LogiRec.LR_TYPE_TAPE_TAIL: self._HTMLTapeTail,
             LogiRec.LR_TYPE_REEL_HEAD: self._HTMLReelHead,
             LogiRec.LR_TYPE_REEL_TAIL: self._HTMLReelTail,
+
+            LogiRec.LR_TYPE_EOF: self._HTMLEmpty, # = 137  #: 0x89 Logical EOF (end of file)
+            LogiRec.LR_TYPE_BOT: self._HTMLEmpty, # = 138  #: 0x8a Logical BOT (beginning of tape)
+            LogiRec.LR_TYPE_EOT: self._HTMLEmpty, # = 139  #: 0x8b Logical EOT (end of tape)
+            LogiRec.LR_TYPE_EOM: self._HTMLEmpty, # = 141  #: 0x8d Logical EOM (end of medium)
+
             LogiRec.LR_TYPE_OPERATOR_INPUT: self._HTMLVerbatim,  # Operator command inputs
             LogiRec.LR_TYPE_OPERATOR_RESPONSE: self._HTMLVerbatim,  # Operator response inputs
             LogiRec.LR_TYPE_SYSTEM_OUTPUT: self._HTMLVerbatim,  # System outputs to operator
@@ -446,6 +452,12 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         with XmlWrite.Element(theS, 'pre', {'class': 'verbatim'}):
             ascii = codecs.decode(myLr.bytes, 'cp500')
             theS.characters(ascii)
+
+    def _HTMLEmpty(self, theIe, theFi, theS):
+        self._HTMLEntryBasic(theIe, theS)
+        theIe.setLogicalRecord(theFi)
+        myLr = theIe.logicalRecord
+        assert (myLr is not None)
 
     def _HTMLTable(self, theIe, theFi, theS):
         self._HTMLEntryBasic(theIe, theS)
