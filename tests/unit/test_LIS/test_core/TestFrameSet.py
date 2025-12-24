@@ -4739,6 +4739,209 @@ class TestFrameSet_Perf_Accumulate(BaseTestClasses.TestBaseLogPass):
 #        print(myArrayNp)
 #        self.assertTrue((myArray == myArrayNp).all())
 
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 2, 3], 1),
+    )
+)
+def test_accumulate_min(data, expected):
+    acc = FrameSet.AccMin()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 2, 3], 3),
+    )
+)
+def test_accumulate_max(data, expected):
+    acc = FrameSet.AccMax()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 2, 3], 2.0),
+    )
+)
+def test_accumulate_mean(data, expected):
+    acc = FrameSet.AccMean()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 2, 3], 2),
+            ([1, 2], 3 / 2),
+    )
+)
+def test_accumulate_median(data, expected):
+    acc = FrameSet.AccMedian()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 2, 3], 1.0),
+    )
+)
+def test_accumulate_stddev(data, expected):
+    acc = FrameSet.AccStDev()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], 0),
+            ([1, 2, 3], 3),
+    )
+)
+def test_accumulate_count(data, expected):
+    acc = FrameSet.AccCount()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], 0),
+            ([1, 1, 1], 0),
+            ([1, 2, 3], 2),
+            ([3, 2, 1,], 0),
+    )
+)
+def test_accumulate_inc(data, expected):
+    acc = FrameSet.AccInc()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], 0),
+            ([1, 1, 1], 2),
+            ([1, 2, 3], 0),
+            ([3, 2, 1,], 0),
+    )
+)
+def test_accumulate_eq(data, expected):
+    acc = FrameSet.AccEq()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], 0),
+            ([1, 1, 1], 0),
+            ([1, 2, 3], 0),
+            ([3, 2, 1,], 2),
+    )
+)
+def test_accumulate_dec(data, expected):
+    acc = FrameSet.AccDec()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1, 1, 1], 0),
+            ([1, 2, 3], 1.0),
+            ([3, 2, 1,], -1.0),
+    )
+)
+def test_accumulate_bias(data, expected):
+    acc = FrameSet.AccBias()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1,], None),
+            ([0, 4,], 4),
+            ([1, 1, 1], 0),
+            ([1, 2, 3], (3 - 1) / 2),
+            ([3, 2, 1,], (1 - 3) / 2),
+    )
+)
+def test_accumulate_drift(data, expected):
+    acc = FrameSet.AccDrift()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1,], None),
+            ([0, 4,], 4.0),
+            ([1, 1, 1], 0.0),
+            ([1, 2, 4], 1.0),
+            ([4, 2, 1,], 1.0),
+    )
+)
+def test_accumulate_activity(data, expected):
+    acc = FrameSet.AccActivity()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    (
+            ([], None),
+            ([1,], None),
+            ([0, 4,], 4000.0),
+            ([1, 1, 1], 0),
+            ([1, 2, 4], 1000.0),
+            ([4, 2, 1,], 1000.0),
+    )
+)
+def test_accumulate_activity_mille(data, expected):
+    acc = FrameSet.AccActivityMille()
+    for v in data:
+        acc.add(v)
+    assert acc.value() == expected
+
+
 
 class Special(BaseTestClasses.TestBaseFile):
     """Special tests."""

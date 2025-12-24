@@ -1249,6 +1249,9 @@ class FrameSet(object):
 #########################################
 # Section: FrameSet accumulator functions
 #########################################
+# TODO: Also include the position of min/max etc?
+
+
 class AccMin(object):
     """Accumulates the minimum value."""
     title = 'Min'
@@ -1311,12 +1314,13 @@ class AccMedian(object):
         """Return the result."""
         self.values.sort()
         if len(self.values):
+            index = len(self.values) // 2
             if len(self.values) % 2 == 0:
                 # Even
-                return (self.values[len(self.values) // 2] + self.values[1 + len(self.values) // 2]) / 2.0
+                return (self.values[index - 1] + self.values[index]) / 2.0
             else:
                 # Odd
-                return self.values[len(self.values) // 2]
+                return self.values[index]
 
 class AccStDev(object):
     """Accumulates the standard deviation."""
@@ -1357,7 +1361,7 @@ class AccCount(object):
 
 
 class AccDelta(object):
-    """Base class for acumulating a count of first order differences."""
+    """Base class for accumulating a count of first order differences."""
     def __init__(self):
         self.cntr = 0
         self.prev = None
@@ -1374,6 +1378,7 @@ class AccDelta(object):
 class AccInc(AccDelta):
     """Counting how many values are an increase from the previous value."""
     title = '++'
+
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1429,10 +1434,9 @@ class AccBias(AccDelta):
 
     def value(self):
         """Return the result."""
-        try:
+        if self.cntrInc + self.cntrEq + self.cntrDec:
             return (self.cntrInc - self.cntrDec) / (self.cntrInc + self.cntrEq + self.cntrDec)
-        except ZeroDivisionError:
-            return math.nan
+
 
 class AccDrift(AccDelta):
     """Measures drift i.e. the movement between the first and the last value."""
@@ -1451,9 +1455,9 @@ class AccDrift(AccDelta):
 
     def value(self):
         """Return the result."""
-        if self.first is not None and self.last is not None:
-            return (self.last - self.first) / self.cntr
-        return 0
+        if self.first is not None and self.last is not None and self.cntr > 1:
+            return (self.last - self.first) / (self.cntr - 1)
+
 
 class AccActivity(AccDelta):
     """Measures curve activity."""
@@ -1477,7 +1481,6 @@ class AccActivity(AccDelta):
         """Return the result."""
         if self.cntr > 1:
             return math.sqrt(self.actSum / (self.cntr - 1))
-        return 0
 
 
 class AccActivityMille(AccActivity):
@@ -1485,7 +1488,8 @@ class AccActivityMille(AccActivity):
 
     def value(self):
         v = super().value()
-        return v * 1000
+        if v is not None:
+            return v * 1000
 
 
 #########################################
