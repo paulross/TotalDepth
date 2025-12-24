@@ -21,9 +21,9 @@
 
 __all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
 
-__version__ = '0.5.0-rc.1'
+__version__ = '0.5.0-rc1'
 
-VERSION = (0, 5, 0, 'rc-1')
+VERSION = (0, 5, 0, 'rc1')
 
 RELEASE_NOTES = [
     """
