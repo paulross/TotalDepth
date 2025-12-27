@@ -611,7 +611,7 @@ class TestDictTreeHtmlTableBase(unittest.TestCase):
     def tearDown(self):
         pass
     
-    def _retHtmlTableString(self, cellContentsIsValue=False):
+    def _retHtmlTableString(self, cellContentsIsValue=False, cellContentsIsSequence=False):
         """If cellContentsIsValue then the value will be put in the cell if not
         None otherwise the tip of the key list."""
         htmlLineS = []
@@ -632,10 +632,13 @@ class TestDictTreeHtmlTableBase(unittest.TestCase):
                     myL.append(' rowspan="%d"' % r)
                 if c > 1:
                     myL.append(' colspan="%d"' % c)
+                myL.append('>%s</td>' % k[-1])
                 if cellContentsIsValue and v is not None:
-                    myL.append('>%s</td>' % v)
-                else:
-                    myL.append('>%s</td>' % k[-1])
+                    if cellContentsIsSequence:
+                        for item in v:
+                            myL.append('<td>%s</td>' % str(item))
+                    else:
+                        myL.append('<td>%s</td>' % str(v))
                 htmlLineS.append(''.join(myL))
         # Write: </table>
         htmlLineS.append('</table>')
@@ -826,6 +829,130 @@ Z
 </tr>
 </table>""",
             self._retHtmlTableString())
+
+    def test_03(self):
+        """TestDictTreeHtmlTable: test_02(): row and col span in an HTML table with a
+        tuple of three values that will be a single column of three values.
+        This uses cellContentsIsValue=True, cellContentsIsSequence=False
+
+        For example::
+
+            |-----------------------|---------------|
+            | A     | AA    | AAA   | '(1, 10, 100' |
+            |       |       |-------|---------------|
+            |       |       | AAB   | '(2, 20, 200' |
+            |       |       |-------|---------------|
+            |       |       | AAC   | '(3, 30, 300' |
+            |       |---------------|---------------|
+            |       | AB            | '(4, 40, 400' |
+            |       |---------------|---------------|
+            |       | AC    | ACA   | '(5, 50, 500' |
+            |-----------------------|---------------|
+            | B                     | '(6, 60, 600' |
+            |-----------------------|---------------|
+            | C     | CA    | CAA   | '(7, 70, 700' |
+            |-----------------------|---------------|
+        """
+        self._dt.add(('A', 'AA', 'AAA'), ('1', '10', '100'))
+        self._dt.add(('A', 'AA', 'AAB'), ('2', '20', '200'))
+        self._dt.add(('A', 'AA', 'AAC'), ('3', '30', '300'))
+        self._dt.add(('A', 'AB',), ('4', '40', '400'))
+        self._dt.add(('A', 'AC', 'ACA'), ('5', '50', '500'))
+        self._dt.add(('B',), ('6', '60', '600'))
+        self._dt.add(('C', 'CA', 'CAA'), ('7', '70', '700'))
+        print()
+        print(self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=False))
+        self.assertEqual("""<table border="2" width="100%">
+<tr>
+    <td rowspan="5">A</td>
+    <td rowspan="3">AA</td>
+    <td>AAA</td><td>('1', '10', '100')</td>
+</tr>
+<tr>
+    <td>AAB</td><td>('2', '20', '200')</td>
+</tr>
+<tr>
+    <td>AAC</td><td>('3', '30', '300')</td>
+</tr>
+<tr>
+    <td colspan="2">AB</td><td>('4', '40', '400')</td>
+</tr>
+<tr>
+    <td>AC</td>
+    <td>ACA</td><td>('5', '50', '500')</td>
+</tr>
+<tr>
+    <td colspan="3">B</td><td>('6', '60', '600')</td>
+</tr>
+<tr>
+    <td>C</td>
+    <td>CA</td>
+    <td>CAA</td><td>('7', '70', '700')</td>
+</tr>
+</table>""",
+            self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=False))
+
+    def test_04(self):
+        """TestDictTreeHtmlTable: test_04(): row and col span in an HTML table with a
+        tuple of three values that will be three columns.
+        This uses cellContentsIsValue=True, cellContentsIsSequence=False
+
+        For example::
+
+            |-----------------------|-----|-----|-----|
+            | A     | AA    | AAA   |  1  | 10  | 100 |
+            |       |       |-------|
+            |       |       | AAB   |  2  | 20  | 200 |
+            |       |       |-------|
+            |       |       | AAC   |  3  | 30  | 300 |
+            |       |---------------|
+            |       | AB            |  4  | 40  | 400 |
+            |       |---------------|
+            |       | AC    | ACA   |  5  | 50  | 500 |
+            |-----------------------|
+            | B                     |  6  | 60  | 600 |
+            |-----------------------|
+            | C     | CA    | CAA   |  7  | 70  | 700 |
+            |-----------------------|-----|-----|-----|
+        """
+        self._dt.add(('A', 'AA', 'AAA'), ('1', '10', '100'))
+        self._dt.add(('A', 'AA', 'AAB'), ('2', '20', '200'))
+        self._dt.add(('A', 'AA', 'AAC'), ('3', '30', '300'))
+        self._dt.add(('A', 'AB',), ('4', '40', '400'))
+        self._dt.add(('A', 'AC', 'ACA'), ('5', '50', '500'))
+        self._dt.add(('B',), ('6', '60', '600'))
+        self._dt.add(('C', 'CA', 'CAA'), ('7', '70', '700'))
+        print()
+        print(self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=True))
+        self.assertEqual("""<table border="2" width="100%">
+<tr>
+    <td rowspan="5">A</td>
+    <td rowspan="3">AA</td>
+    <td>AAA</td><td>1</td><td>10</td><td>100</td>
+</tr>
+<tr>
+    <td>AAB</td><td>2</td><td>20</td><td>200</td>
+</tr>
+<tr>
+    <td>AAC</td><td>3</td><td>30</td><td>300</td>
+</tr>
+<tr>
+    <td colspan="2">AB</td><td>4</td><td>40</td><td>400</td>
+</tr>
+<tr>
+    <td>AC</td>
+    <td>ACA</td><td>5</td><td>50</td><td>500</td>
+</tr>
+<tr>
+    <td colspan="3">B</td><td>6</td><td>60</td><td>600</td>
+</tr>
+<tr>
+    <td>C</td>
+    <td>CA</td>
+    <td>CAA</td><td>7</td><td>70</td><td>700</td>
+</tr>
+</table>""",
+            self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=True))
 
 class TestDictTreeHtmlTableFile(TestDictTreeHtmlTableBase):
     """Tests TestDictTreeHtmlTable simulating a file/line/column table."""
@@ -1300,94 +1427,90 @@ sf/
             ipscprlog.h
               <a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h">ipscprlog.h</a>""",
                          self._dt.indented_string())
-        #print
-        #print eventResult
-        #print
-        #print self._retHtmlTableString()
-        #print
-        #print self._retHtmlTableString(cellContentsIsValue=True)
+        print()
+        print(self._retHtmlTableString(cellContentsIsValue=True))
         self.assertEqual("""<table border="2" width="100%">
 <tr>
     <td rowspan="26">epoc32/</td>
     <td rowspan="26">include/</td>
-    <td colspan="5"><a href="epoc32/include/bldcodeline.hrh">bldcodeline.hrh</a></td>
+    <td colspan="5">bldcodeline.hrh</td><td><a href="epoc32/include/bldcodeline.hrh">bldcodeline.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/bldprivate.hrh">bldprivate.hrh</a></td>
+    <td colspan="5">bldprivate.hrh</td><td><a href="epoc32/include/bldprivate.hrh">bldprivate.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/bldpublic.hrh">bldpublic.hrh</a></td>
+    <td colspan="5">bldpublic.hrh</td><td><a href="epoc32/include/bldpublic.hrh">bldpublic.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/bldregional.hrh">bldregional.hrh</a></td>
+    <td colspan="5">bldregional.hrh</td><td><a href="epoc32/include/bldregional.hrh">bldregional.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/bldvariant.hrh">bldvariant.hrh</a></td>
+    <td colspan="5">bldvariant.hrh</td><td><a href="epoc32/include/bldvariant.hrh">bldvariant.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/defaultcaps.hrh">defaultcaps.hrh</a></td>
+    <td colspan="5">defaultcaps.hrh</td><td><a href="epoc32/include/defaultcaps.hrh">defaultcaps.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32base.h">e32base.h</a></td>
+    <td colspan="5">e32base.h</td><td><a href="epoc32/include/e32base.h">e32base.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32base.inl">e32base.inl</a></td>
+    <td colspan="5">e32base.inl</td><td><a href="epoc32/include/e32base.inl">e32base.inl</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32capability.h">e32capability.h</a></td>
+    <td colspan="5">e32capability.h</td><td><a href="epoc32/include/e32capability.h">e32capability.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32cmn.h">e32cmn.h</a></td>
+    <td colspan="5">e32cmn.h</td><td><a href="epoc32/include/e32cmn.h">e32cmn.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32cmn.inl">e32cmn.inl</a></td>
+    <td colspan="5">e32cmn.inl</td><td><a href="epoc32/include/e32cmn.inl">e32cmn.inl</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32const.h">e32const.h</a></td>
+    <td colspan="5">e32const.h</td><td><a href="epoc32/include/e32const.h">e32const.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32def.h">e32def.h</a></td>
+    <td colspan="5">e32def.h</td><td><a href="epoc32/include/e32def.h">e32def.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32des16.h">e32des16.h</a></td>
+    <td colspan="5">e32des16.h</td><td><a href="epoc32/include/e32des16.h">e32des16.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32des8.h">e32des8.h</a></td>
+    <td colspan="5">e32des8.h</td><td><a href="epoc32/include/e32des8.h">e32des8.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32err.h">e32err.h</a></td>
+    <td colspan="5">e32err.h</td><td><a href="epoc32/include/e32err.h">e32err.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32lang.h">e32lang.h</a></td>
+    <td colspan="5">e32lang.h</td><td><a href="epoc32/include/e32lang.h">e32lang.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32reg.h">e32reg.h</a></td>
+    <td colspan="5">e32reg.h</td><td><a href="epoc32/include/e32reg.h">e32reg.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32std.h">e32std.h</a></td>
+    <td colspan="5">e32std.h</td><td><a href="epoc32/include/e32std.h">e32std.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/e32std.inl">e32std.inl</a></td>
+    <td colspan="5">e32std.inl</td><td><a href="epoc32/include/e32std.inl">e32std.inl</a></td>
 </tr>
 <tr>
     <td>platform/</td>
-    <td colspan="4"><a href="epoc32/include/platform/cflog.h">cflog.h</a></td>
+    <td colspan="4">cflog.h</td><td><a href="epoc32/include/platform/cflog.h">cflog.h</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/privateruntimeids.hrh">privateruntimeids.hrh</a></td>
+    <td colspan="5">privateruntimeids.hrh</td><td><a href="epoc32/include/privateruntimeids.hrh">privateruntimeids.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/productvariant.hrh">productvariant.hrh</a></td>
+    <td colspan="5">productvariant.hrh</td><td><a href="epoc32/include/productvariant.hrh">productvariant.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="5"><a href="epoc32/include/publicruntimeids.hrh">publicruntimeids.hrh</a></td>
+    <td colspan="5">publicruntimeids.hrh</td><td><a href="epoc32/include/publicruntimeids.hrh">publicruntimeids.hrh</a></td>
 </tr>
 <tr>
     <td rowspan="2">variant/</td>
-    <td colspan="4"><a href="epoc32/include/variant/Symbian_OS.hrh">Symbian_OS.hrh</a></td>
+    <td colspan="4">Symbian_OS.hrh</td><td><a href="epoc32/include/variant/Symbian_OS.hrh">Symbian_OS.hrh</a></td>
 </tr>
 <tr>
-    <td colspan="4"><a href="epoc32/include/variant/platform_paths.hrh">platform_paths.hrh</a></td>
+    <td colspan="4">platform_paths.hrh</td><td><a href="epoc32/include/variant/platform_paths.hrh">platform_paths.hrh</a></td>
 </tr>
 <tr>
     <td rowspan="2">sf/</td>
@@ -1396,10 +1519,10 @@ sf/
     <td rowspan="2">networkcontrol/</td>
     <td rowspan="2">iptransportlayer/</td>
     <td rowspan="2">src/</td>
-    <td><a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.cpp">ipscprlog.cpp</a></td>
+    <td>ipscprlog.cpp</td><td><a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.cpp">ipscprlog.cpp</a></td>
 </tr>
 <tr>
-    <td><a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h">ipscprlog.h</a></td>
+    <td>ipscprlog.h</td><td><a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h">ipscprlog.h</a></td>
 </tr>
 </table>""",
             self._retHtmlTableString(cellContentsIsValue=True))
