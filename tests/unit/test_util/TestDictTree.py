@@ -18,14 +18,13 @@
 # 
 # Paul Ross: apaulross@gmail.com
 """Tests DictTree."""
-
+import io
 import os
 import unittest
 
 import pytest
 
-from TotalDepth.util import DictTree
-
+from TotalDepth.util import DictTree, XmlWrite
 
 __author__ = 'Paul Ross'
 __date__ = '2009-09-15'
@@ -1607,6 +1606,93 @@ def test_simple_file_system_walk():
         "DictTreeTableEvent(branch=['spam.h'], node=('A', 'B'), row_span=1, col_span=4)",
         'ROW_CLOSE',
     ]
+
+
+def test_simple_file_system_html_table():
+    dict_tree = _create_simple_file_system()
+    xhtml_file = io.StringIO()
+    with XmlWrite.XhtmlStream(xhtml_file) as xhtml_stream:
+        # Could have some CSS class here.
+        with XmlWrite.Element(xhtml_stream, 'table', {'border': '2', 'width': '100%'}):
+            # <th> elements
+            for i in range(dict_tree.depth()):
+                # Could have some CSS class here.
+                with XmlWrite.Element(xhtml_stream, 'th', {}):
+                    xhtml_stream.literal('&nbsp;')
+            # Could have some CSS class here.
+            with XmlWrite.Element(xhtml_stream, 'th', {}):
+                xhtml_stream.characters('Column A')
+            # Could have some CSS class here.
+            with XmlWrite.Element(xhtml_stream, 'th', {}):
+                xhtml_stream.characters('Column B')
+            # Table rows and cells.
+            for event in dict_tree.gen_row_column_events():
+                if event == dict_tree.ROW_OPEN:
+                    # Write out the '<tr>' element. Could have some CSS class here.
+                    xhtml_stream.startElement('tr', {})
+                elif event == dict_tree.ROW_CLOSE:
+                    # Write out the '</tr>' element
+                    xhtml_stream.endElement('tr')
+                else:
+                    # print('TRACE: event', event)
+                    # Could have some CSS class here.
+                    td_attrs = {}
+                    if event.row_span > 1:
+                        td_attrs['rowspan'] = f'{event.row_span}'
+                    if event.col_span > 1:
+                        td_attrs['colspan'] = f'{event.col_span}'
+                    with XmlWrite.Element(xhtml_stream, 'td', td_attrs):
+                        xhtml_stream.characters(event.branch[-1])
+                    if event.node is not None:
+                        for i in range(len(event.node)):
+                            # Could have some CSS class here.
+                            with XmlWrite.Element(xhtml_stream, 'td', {}):
+                                xhtml_stream.characters(event.node[i])
+        # Write: </table>
+    result = xhtml_file.getvalue()
+    print()
+    print(result)
+    assert result == """<?xml version='1.0' encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <table border="2" width="100%">
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>Column A</th>
+    <th>Column B</th>
+    <tr>
+      <td rowspan="4">spam</td>
+      <td colspan="3">cheese.h</td>
+      <td>E</td>
+      <td>F</td>
+    </tr>
+    <tr>
+      <td rowspan="2">eggs</td>
+      <td>chips</td>
+      <td>beans.h</td>
+      <td>I</td>
+      <td>J</td>
+    </tr>
+    <tr>
+      <td colspan="2">chips.h</td>
+      <td>G</td>
+      <td>H</td>
+    </tr>
+    <tr>
+      <td colspan="3">eggs.h</td>
+      <td>C</td>
+      <td>D</td>
+    </tr>
+    <tr>
+      <td colspan="4">spam.h</td>
+      <td>A</td>
+      <td>B</td>
+    </tr>
+  </table>
+</html>
+"""
 
 
 @pytest.mark.parametrize(

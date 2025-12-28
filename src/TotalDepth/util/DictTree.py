@@ -345,6 +345,12 @@ class DictTreeHtmlTable(DictTree):
                 <td>CAA</td>
             </tr>
         </table>
+
+    To see an more sophisticated example of generating HTML tables see
+    tests.unit.test_util.TestDictTree.test_simple_file_system_html_table
+
+
+
     """
     #: HTML table event: open row with <tr ...>
     ROW_OPEN = DictTreeTableEvent([], None, 0, 0)
