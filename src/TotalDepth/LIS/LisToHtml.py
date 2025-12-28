@@ -228,12 +228,13 @@ class FileInfo(typing.NamedTuple):
     pathOut: str
     lisSize: int
     numLr: int
+    num_log_passes: int
     cpuTime: float
     exception: bool
 
     def __str__(self):
-        return 'FileInfo: "%s" -> "%s" %d (kb) LR count=%d t=%.3f' \
-            % (self.pathIn, self.pathOut, self.lisSize / 1024, self.numLr, self.cpuTime)
+        return 'FileInfo: "%s" -> "%s" %d (kb) LR count=%d Log Passes= %d t=%.3f' \
+            % (self.pathIn, self.pathOut, self.lisSize / 1024, self.numLr, self.num_log_passes, self.cpuTime)
 
 
 class IndexSummary(object):
@@ -253,8 +254,8 @@ class IndexSummary(object):
     def __len__(self):
         return len(self.file_results)
 
-    def add(self, fpIn, fpOut, numLr, cpuTime, exception):
-        self.file_results.append(FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, cpuTime, exception))
+    def add(self, fpIn, fpOut, numLr, num_log_passes, cpuTime, exception):
+        self.file_results.append(FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, num_log_passes, cpuTime, exception))
 
     @property
     def lisSize(self):
@@ -871,7 +872,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                         )
                     )
         # Update the counter
-        self.summary.add(fpIn, fpOut, numEntries, time.perf_counter() - clkStart, False)
+        self.summary.add(fpIn, fpOut, numEntries, myIndex.numLogPasses(), time.perf_counter() - clkStart, False)
 
 
 def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
