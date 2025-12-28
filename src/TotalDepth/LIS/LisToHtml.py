@@ -266,6 +266,10 @@ class IndexSummary(object):
         return sum([fi.numLr for fi in self.file_results])
 
     @property
+    def num_log_passes(self):
+        return sum([fi.num_log_passes for fi in self.file_results])
+
+    @property
     def cpuTime(self):
         return sum([fi.cpuTime for fi in self.file_results])
 
@@ -306,6 +310,8 @@ class IndexSummary(object):
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('Record Entries')
                         with XmlWrite.Element(myS, 'th'):
+                            myS.characters('Log Passes')
+                        with XmlWrite.Element(myS, 'th'):
                             myS.characters('CPU Time (s)')
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('Rate (MB/s)')
@@ -328,6 +334,8 @@ class IndexSummary(object):
             theS.characters('{:.3f}'.format(theObj.lisSize / 1024 ** 2))
         with XmlWrite.Element(theS, 'td', {'align': 'right'}):
             theS.characters('{:d}'.format(theObj.numLr))
+        with XmlWrite.Element(theS, 'td', {'align': 'right'}):
+            theS.characters('{:d}'.format(theObj.num_log_passes))
         with XmlWrite.Element(theS, 'td', {'align': 'right'}):
             theS.characters('{:.3f}'.format(theObj.cpuTime))
         if theObj.cpuTime != 0:
