@@ -180,6 +180,45 @@ font-family:        sans-serif;
 font-size:          9pt;
 font-style:         italic;
 }
+
+/* The sidebar menu */
+.sidenav {
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+  width: 160px; /* Set the width of the sidebar */
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: 0;
+  background-color: white; /* #111 Black */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 6px;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 0px 6px 0px 6px;
+  text-decoration: none;
+  font-size: 10pt;
+  color: blue; /* #818181; */
+  display: block;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: sienna; /*#f1f1f1;*/
+}
+
+/* Style page content */
+.main {
+  margin-left: 160px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
 """
 
 CSS_CONTENT_INDEX = """body {
@@ -360,7 +399,7 @@ class IndexSummary(object):
                             myS.characters('Time (ms/MB)')
                     # Body of table
                     for event in dict_tree.gen_row_column_events():
-                        print(event)
+                        # print(f'TRACE: {event}')
                         if event == dict_tree.ROW_OPEN:
                             # Write out the '<tr>' element. Could have some CSS class here.
                             myS.startElement('tr', {})
@@ -414,6 +453,7 @@ class IndexSummary(object):
 class LisToHtml(ProcLISPath.ProcLISPathBase):
     """Takes an input path, output path and generates HTML file(s) form LIS."""
     CSS_FILE_PATH = 'TotalDepth.LIS.css'
+    SIDEBAR_MARGIN_LEFT = '20%'
 
     def __init__(self, fpIn, fpOut, recursive, keepGoing, accCh=True):
         """Write an HTML page about a LIS file.
@@ -463,17 +503,26 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         return 3
 
     def _writeHtmlToc(self, myFi, myIdx, theS):
-        """Write the table of contents at the top of the page."""
-        with XmlWrite.Element(theS, 'a', {'name': 'toc'}):
-            pass
-        with XmlWrite.Element(theS, 'h1', {}):
-            theS.characters('Logical records in {:s}'.format(myFi.fileId))
-        for anIdx in myIdx.genAll():
-            if anIdx.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
-                with XmlWrite.Element(theS, 'p', {}):
-                    theS.literal('&nbsp;' * 8 * self._retIndentDepth(anIdx))
-                    with XmlWrite.Element(theS, 'a', {'href': '#{:d}'.format(anIdx.tell)}):
-                        theS.characters(anIdx.tocStr())
+        """Write the table of contents at the top of the page.
+
+        We write this as a sidebar::
+
+            <div class="sidenav" style="width:20%">
+        """
+        with XmlWrite.Element(theS, 'div', {'class': 'sidenav', 'style': f'width:{self.SIDEBAR_MARGIN_LEFT}'}):
+            with XmlWrite.Element(theS, 'a', {'name': 'toc'}):
+                pass
+            with XmlWrite.Element(theS, 'p', {}):
+                with XmlWrite.Element(theS, 'a', {'href': '#Top'}):
+                    theS.characters('Top')
+            # All the index entries
+            for anIdx in myIdx.genAll():
+                if anIdx.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
+                    with XmlWrite.Element(theS, 'p', {}):
+                        # This tries to indent the index but it does not work that well with a sidebar.
+                        # theS.literal('&nbsp;' * 2 * self._retIndentDepth(anIdx))
+                        with XmlWrite.Element(theS, 'a', {'href': '#{:d}'.format(anIdx.tell)}):
+                            theS.characters(anIdx.tocStr())
 
     def _HTMLEntryBasic(self, theIe, theS):
         """Writes the basic entry for the index entry (we treat it as an
@@ -916,34 +965,57 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 with XmlWrite.Element(myS, 'title'):
                     myS.characters('LIS analysis of %s' % fpIn)
             with XmlWrite.Element(myS, 'body'):
-                with XmlWrite.Element(myS, 'a', {'name': 'top'}):
-                    pass
                 self._writeHtmlToc(myFile, myIndex, myS)
-                for anIe in myIndex.genAll():
-                    if anIe.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
-                        try:
-                            if anIe.lrType in self._despatchLrType:
-                                self._despatchLrType[anIe.lrType](anIe, myFile, myS)
-                            else:
-                                self._HTMLNonSpecific(anIe, myFile, myS)
-                            numEntries += 1
-                        except LogiRec.ExceptionLr as err:
-                            err_str = 'LR at 0x{:08x}: {!r:}'.format(anIe.tell, err)
-                            logging.error(err_str)
-                            with XmlWrite.Element(myS, 'p', {'class': 'error'}):
-                                myS.characters(f'ERROR: {err_str}')
+                # Body on the right of the sidebar.
+                # <div class="main" style="margin-left:20%">
+                #     <a name="top"/>
+                with XmlWrite.Element(
+                        myS,
+                        'div',
+                        {'class': 'main', 'style': f'margin-left:{self.SIDEBAR_MARGIN_LEFT}'}
+                ):
+                    with XmlWrite.Element(myS, 'a', {'name': 'top'}):
+                        pass
+                    with XmlWrite.Element(myS, 'h1', {}):
+                        myS.characters('Logical records in {:s}'.format(myFile.fileId))
+                    with XmlWrite.Element(myS, 'hr'):
+                        pass
 
-                with XmlWrite.Element(myS, 'hr'):
-                    pass
-                with XmlWrite.Element(myS, 'p', {'class': 'copyright'}):
-                    myS.characters(
-                        'Produced by LisToHtml version: {:s}, date: {:s}, rights: "{:s}" CPU time: {:.3f} (s)'.format(
-                            __version__,
-                            __date__,
-                            __rights__,
-                            time.perf_counter() - clkStart,
+                    # Duplicate the sidebar index with indentation.
+                    # All the index entries
+                    for anIdx in myIndex.genAll():
+                        if anIdx.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
+                            with XmlWrite.Element(myS, 'p', {}):
+                                myS.literal('&nbsp;' * 8 * self._retIndentDepth(anIdx))
+                                with XmlWrite.Element(myS, 'a', {'href': '#{:d}'.format(anIdx.tell)}):
+                                    myS.characters(anIdx.tocStr())
+
+                    # Iterate through the records.
+                    for anIe in myIndex.genAll():
+                        if anIe.lrType not in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT or INCLUDE_LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
+                            try:
+                                if anIe.lrType in self._despatchLrType:
+                                    self._despatchLrType[anIe.lrType](anIe, myFile, myS)
+                                else:
+                                    self._HTMLNonSpecific(anIe, myFile, myS)
+                                numEntries += 1
+                            except LogiRec.ExceptionLr as err:
+                                err_str = 'LR at 0x{:08x}: {!r:}'.format(anIe.tell, err)
+                                logging.error(err_str)
+                                with XmlWrite.Element(myS, 'p', {'class': 'error'}):
+                                    myS.characters(f'ERROR: {err_str}')
+
+                    with XmlWrite.Element(myS, 'hr'):
+                        pass
+                    with XmlWrite.Element(myS, 'p', {'class': 'copyright'}):
+                        myS.characters(
+                            'Produced by LisToHtml version: {:s}, date: {:s}, rights: "{:s}" CPU time: {:.3f} (s)'.format(
+                                __version__,
+                                __date__,
+                                __rights__,
+                                time.perf_counter() - clkStart,
+                            )
                         )
-                    )
         # Update the counter
         self.summary.add(fpIn, fpOut, numEntries, myIndex.numLogPasses(), time.perf_counter() - clkStart, False)
 
