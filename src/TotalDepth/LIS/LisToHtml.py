@@ -41,7 +41,7 @@ from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
 from TotalDepth.common import xxd
 from TotalDepth.common import XAxis
-from TotalDepth.util import XmlWrite, archive, bin_file_type, gnuplot
+from TotalDepth.util import XmlWrite, archive, bin_file_type, gnuplot, DictTree
 
 __author__ = 'Paul Ross'
 __date__ = '2020-08-23'
@@ -299,10 +299,53 @@ class IndexSummary(object):
                     myS.characters('LIS as HTML')
             cmnPrefix = os.path.commonprefix([os.path.normpath(aF.pathIn) for aF in self.file_results])
             lenCmnPrefixFpIn = cmnPrefix.rfind(os.sep) + 1
+            dict_tree = DictTree.DictTreeHtmlTable()
+            for file_result in self.file_results:
+                dict_tree.add(
+                    file_result.pathIn[lenCmnPrefixFpIn:].split(os.sep),
+                (
+                        os.path.abspath(file_result.pathOut),
+                        file_result.lisSize,
+                        file_result.numLr,
+                        file_result.num_log_passes,
+                        file_result.cpuTime,
+                        file_result.exception,
+                    )
+                )
+
             with XmlWrite.Element(myS, 'body'):
-                #
                 with XmlWrite.Element(myS, 'table'):
+                    # with XmlWrite.Element(myS, 'tr', {}):
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('LIS File')
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('Size (MB)')
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('Record Entries')
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('Log Passes')
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('CPU Time (s)')
+                    #     with XmlWrite.Element(myS, 'th'):
+                    #         myS.characters('Rate (MB/s)')
+                    # Body of table
+                    # for aF in sorted(set(self.file_results)):
+                    #     if not aF.exception:
+                    #         with XmlWrite.Element(myS, 'tr'):
+                    #             with XmlWrite.Element(myS, 'td'):
+                    #                 with XmlWrite.Element(myS, 'a', {'href': os.path.abspath(aF.pathOut)}):
+                    #                     myS.characters(aF.pathIn[lenCmnPrefixFpIn:])
+                    #             self._writeCols(myS, aF)
+                    # with XmlWrite.Element(myS, 'tr'):
+                    #     with XmlWrite.Element(myS, 'td'):
+                    #         myS.characters('Totals')
+                    #     self._writeCols(myS, self)
+                    # Header row
                     with XmlWrite.Element(myS, 'tr', {}):
+                        if dict_tree.depth() > 1:
+                            for i in range(dict_tree.depth() - 1):
+                                with XmlWrite.Element(myS, 'th'):
+                                    myS.literal('&nbsp;')
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('LIS File')
                         with XmlWrite.Element(myS, 'th'):
@@ -314,19 +357,41 @@ class IndexSummary(object):
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('CPU Time (s)')
                         with XmlWrite.Element(myS, 'th'):
-                            myS.characters('Rate (MB/s)')
+                            myS.characters('Time (ms/MB)')
                     # Body of table
-                    for aF in sorted(set(self.file_results)):
-                        if not aF.exception:
-                            with XmlWrite.Element(myS, 'tr'):
-                                with XmlWrite.Element(myS, 'td'):
-                                    with XmlWrite.Element(myS, 'a', {'href': os.path.abspath(aF.pathOut)}):
-                                        myS.characters(aF.pathIn[lenCmnPrefixFpIn:])
-                                self._writeCols(myS, aF)
+                    for event in dict_tree.gen_row_column_events():
+                        print(event)
+                        if event == dict_tree.ROW_OPEN:
+                            # Write out the '<tr>' element. Could have some CSS class here.
+                            myS.startElement('tr', {})
+                        elif event == dict_tree.ROW_CLOSE:
+                            # Write out the '</tr>' element
+                            myS.endElement('tr')
+                        else:
+                            # print('TRACE: event', event)
+                            # Could have some CSS class here.
+                            td_attrs = {}
+                            if event.row_span > 1:
+                                td_attrs['rowspan'] = f'{event.row_span}'
+                            if event.col_span > 1:
+                                td_attrs['colspan'] = f'{event.col_span}'
+                            with XmlWrite.Element(myS, 'td', td_attrs):
+                                if event.node is None:
+                                    myS.characters(event.branch[-1])
+                                else:
+                                    with XmlWrite.Element(myS, 'a', {'href': event.node[0]}):
+                                        myS.characters(event.branch[-1])
+                                    tmp_file_info = FileInfo('', '', event.node[1], event.node[2], event.node[3], event.node[4], False)
+                                    self._writeCols(myS, tmp_file_info)
                     with XmlWrite.Element(myS, 'tr'):
+                        if dict_tree.depth() > 1:
+                            for i in range(dict_tree.depth() - 1):
+                                with XmlWrite.Element(myS, 'td'):
+                                    myS.literal('&nbsp;')
                         with XmlWrite.Element(myS, 'td'):
                             myS.characters('Totals')
                         self._writeCols(myS, self)
+
 
     def _writeCols(self, theS, theObj):
         """Write the columns after the first one. theObj is expected to have certain attributes..."""
@@ -340,7 +405,7 @@ class IndexSummary(object):
             theS.characters('{:.3f}'.format(theObj.cpuTime))
         if theObj.cpuTime != 0:
             with XmlWrite.Element(theS, 'td', {'align': 'right'}):
-                theS.characters('{:.3f}'.format(theObj.lisSize / (theObj.cpuTime * 1024 ** 2)))
+                theS.characters('{:.3f}'.format(1000 * theObj.cpuTime / (theObj.lisSize / 1024 ** 2)))
         else:
             with XmlWrite.Element(theS, 'td', {'align': 'right'}):
                 theS.characters('N/A')
