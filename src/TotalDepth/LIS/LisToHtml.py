@@ -24,13 +24,11 @@ Created on Jun 14, 2011
 '''
 import codecs
 import logging
-import multiprocessing
 import os
 import sys
 import time
 import traceback
 import typing as typing
-from optparse import OptionParser
 
 import TotalDepth
 from TotalDepth.LIS import ExceptionTotalDepthLIS
@@ -39,9 +37,12 @@ from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.LIS.core import FrameSet
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.common import xxd
 from TotalDepth.common import XAxis
-from TotalDepth.util import XmlWrite, archive, bin_file_type, gnuplot, DictTree
+from TotalDepth.common import xxd
+from TotalDepth.util import DictTree
+from TotalDepth.util import XmlWrite
+from TotalDepth.util import bin_file_type
+from TotalDepth.util import gnuplot
 
 __author__ = 'Paul Ross'
 __date__ = '2020-08-23'
@@ -294,7 +295,8 @@ class IndexSummary(object):
         return len(self.file_results)
 
     def add(self, fpIn, fpOut, numLr, num_log_passes, cpuTime, exception):
-        self.file_results.append(FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, num_log_passes, cpuTime, exception))
+        self.file_results.append(
+            FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, num_log_passes, cpuTime, exception))
 
     @property
     def lisSize(self):
@@ -342,7 +344,7 @@ class IndexSummary(object):
             for file_result in self.file_results:
                 dict_tree.add(
                     file_result.pathIn[lenCmnPrefixFpIn:].split(os.sep),
-                (
+                    (
                         os.path.abspath(file_result.pathOut),
                         file_result.lisSize,
                         file_result.numLr,
@@ -420,7 +422,8 @@ class IndexSummary(object):
                                 else:
                                     with XmlWrite.Element(myS, 'a', {'href': event.node[0]}):
                                         myS.characters(event.branch[-1])
-                                    tmp_file_info = FileInfo('', '', event.node[1], event.node[2], event.node[3], event.node[4], False)
+                                    tmp_file_info = FileInfo('', '', event.node[1], event.node[2], event.node[3],
+                                                             event.node[4], False)
                                     self._writeCols(myS, tmp_file_info)
                     with XmlWrite.Element(myS, 'tr'):
                         if dict_tree.depth() > 1:
@@ -430,7 +433,6 @@ class IndexSummary(object):
                         with XmlWrite.Element(myS, 'td'):
                             myS.characters('Totals')
                         self._writeCols(myS, self)
-
 
     def _writeCols(self, theS, theObj):
         """Write the columns after the first one. theObj is expected to have certain attributes..."""
@@ -472,10 +474,10 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
             LogiRec.LR_TYPE_REEL_HEAD: self._HTMLReelHead,
             LogiRec.LR_TYPE_REEL_TAIL: self._HTMLReelTail,
 
-            LogiRec.LR_TYPE_EOF: self._HTMLEmpty, # = 137  #: 0x89 Logical EOF (end of file)
-            LogiRec.LR_TYPE_BOT: self._HTMLEmpty, # = 138  #: 0x8a Logical BOT (beginning of tape)
-            LogiRec.LR_TYPE_EOT: self._HTMLEmpty, # = 139  #: 0x8b Logical EOT (end of tape)
-            LogiRec.LR_TYPE_EOM: self._HTMLEmpty, # = 141  #: 0x8d Logical EOM (end of medium)
+            LogiRec.LR_TYPE_EOF: self._HTMLEmpty,  # = 137  #: 0x89 Logical EOF (end of file)
+            LogiRec.LR_TYPE_BOT: self._HTMLEmpty,  # = 138  #: 0x8a Logical BOT (beginning of tape)
+            LogiRec.LR_TYPE_EOT: self._HTMLEmpty,  # = 139  #: 0x8b Logical EOT (end of tape)
+            LogiRec.LR_TYPE_EOM: self._HTMLEmpty,  # = 141  #: 0x8d Logical EOM (end of medium)
 
             LogiRec.LR_TYPE_OPERATOR_INPUT: self._HTMLVerbatim,  # Operator command inputs
             LogiRec.LR_TYPE_OPERATOR_RESPONSE: self._HTMLVerbatim,  # Operator response inputs
