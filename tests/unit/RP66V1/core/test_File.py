@@ -978,36 +978,37 @@ def test_file_file_ctor_raises_with_lrsh_not_first():
             (
                     test_data.BASIC_FILE,
                     r"""StorageUnitLabel:
-          Storage Unit Sequence Number: 1
-                          DLIS Version: b'V1.00'
-                Storage Unit Structure: b'RECORD'
-                 Maximum Record Length: 8192
-                Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
+  Storage Unit Sequence Number: 1
+                  DLIS Version: b'V1.00'
+        Storage Unit Structure: b'RECORD'
+         Maximum Record Length: 8192
+        Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
             ),
             (
                     test_data.MINIMAL_FILE,
                     r"""StorageUnitLabel:
-          Storage Unit Sequence Number: 1
-                          DLIS Version: b'V1.00'
-                Storage Unit Structure: b'RECORD'
-                 Maximum Record Length: 8192
-                Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
+  Storage Unit Sequence Number: 1
+                  DLIS Version: b'V1.00'
+        Storage Unit Structure: b'RECORD'
+         Maximum Record Length: 8192
+        Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
             ),
             (
                     test_data.SMALL_FILE,
                     r"""StorageUnitLabel:
-          Storage Unit Sequence Number: 1
-                          DLIS Version: b'V1.00'
-                Storage Unit Structure: b'RECORD'
-                 Maximum Record Length: 8192
-                Storage Set Identifier: b'Default Storage Set                                         '"""
+  Storage Unit Sequence Number: 1
+                  DLIS Version: b'V1.00'
+        Storage Unit Structure: b'RECORD'
+         Maximum Record Length: 8192
+        Storage Set Identifier: b'Default Storage Set                                         '"""
             ),
     )
 )
 def test_file_basic_file_sul(file_bytes, sul_string):
     fobj = io.BytesIO(file_bytes)
     with File.FileRead(fobj) as file_read:
-        # print(str(file_read.sul))
+        print()
+        print(str(file_read.sul))
         assert str(file_read.sul) == sul_string
 
 
