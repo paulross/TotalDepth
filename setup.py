@@ -187,7 +187,7 @@ ext_modules = [
 
 setup(
     name='TotalDepth',
-    version='0.5.0-rc1',
+    version='0.5.0rc1',
     description="TotalDepth is a software collection that can process Petro-physical data such as wireline logs.",
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/x-rst',

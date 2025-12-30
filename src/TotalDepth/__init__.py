@@ -21,7 +21,7 @@
 
 __all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth', ]
 
-__version__ = '0.5.0-rc1'
+__version__ = '0.5.0rc1'
 
 VERSION = (0, 5, 0, 'rc1')
 
