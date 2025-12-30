@@ -180,28 +180,28 @@ def test_las_read_las_section():
             (
                     'V',
                     '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-        ''',
+''',
                     'Section "V" must have 2 entries not 1.',
             ),
             (
                     'V',
                     '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-        XXXX.                      NO: One line per depth step
-        ''',
+XXXX.                      NO: One line per depth step
+''',
                     'Section "V" must have entry[1]: "WRAP".',
             ),
             (
                     'V',
                     '''VERS.                     3.0: CWLS log ASCII Standard Version 3.00
-        WRAP.                      NO: One line per depth step
-        ''',
+WRAP.                      NO: One line per depth step
+''',
                     'Section "V" must have value for "VERS" converted to (1.2, 2.0) from "3.0".',
             ),
             (
                     'V',
                     '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-        WRAP.                      XX: One line per depth step
-        ''',
+WRAP.                      XX: One line per depth step
+''',
                     'Section "V" must have value for "WRAP" converted to (True, False) from "XX".',
             ),
     )
