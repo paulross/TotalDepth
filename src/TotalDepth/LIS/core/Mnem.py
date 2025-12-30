@@ -33,6 +33,7 @@ LEN_MNEM = 4
 # Pad character for replacement so that Mnem(b'GR  ') is equivalent to Mnem(b'GR \x00')
 PAD_CHAR = b'\x00'
 
+
 class Mnem(object):
     """Represents a four byte mnemonic where tailing nulls and spaces are not
     considered significant. This preserves original length but replaces trailing
@@ -50,6 +51,7 @@ class Mnem(object):
     significant and padding up to -1*len_mnem characters of m is 
     performed if m smaller than that.    
     """
+
     def __init__(self, m, len_mnem=LEN_MNEM):
         """Constructor that prunes trailing nulls and spaces."""
         if isinstance(m, str):
@@ -75,37 +77,37 @@ class Mnem(object):
             self._m = m[:i]
         else:
             self._m = m[:i] + PAD_CHAR * (len_mnem - i)
-        
+
     @property
     def m(self):
         """The raw bytes of the mnemonic."""
         return self._m
-    
+
     def __str__(self):
         """String representation."""
-        return self._m.decode('ascii')#.replace('\x00', ' ')
-    
+        return self._m.decode('ascii')  # .replace('\x00', ' ')
+
     def pStr(self, strip=False):
         """Returns a 'pretty' ascii string. If strip then trailing padding is removed."""
         if strip:
             return self._m.replace(PAD_CHAR, b'').decode('ascii')
         return self._m.replace(PAD_CHAR, b' ').decode('ascii')
-    
+
     def __repr__(self):
         """repr() representation."""
         return 'Mnem({!s:s})'.format(self._m)
-    
+
     def __hash__(self):
         """Hashing, this makes bytes() and Mnem() objects interchangeable."""
         return hash(self._m)
-    
+
     def __eq__(self, other):
         """True if self == other False otherwise.
         If other is not a Mnem it is coerced into one before the comparison is made.."""
         if isinstance(other, Mnem):
             return self._m == other._m
         return self._m == Mnem(other).m
-    
+
     def __ne__(self, other):
         """True if self != other False otherwise.
         If other is not a Mnem it is coerced into one before the comparison is made.."""
@@ -119,9 +121,8 @@ class Mnem(object):
         if isinstance(other, Mnem):
             return self._m < other._m
         return self._m < Mnem(other).m
-    
+
     def __iter__(self):
         """Byte by byte iteration."""
         for b in self._m:
             yield b
-    

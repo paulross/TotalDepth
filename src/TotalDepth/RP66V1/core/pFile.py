@@ -33,7 +33,6 @@ import typing
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.util.bin_file_type import format_bytes
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -122,6 +121,7 @@ class ExceptionStorageUnitLabel(ExceptionTotalDepthRP66V1):
     """Exception specialisation for this module."""
     pass
 
+
 #: The first one must be StorageUnitLabel.SIZE + TIF_SIZE = 92 or 0x5c little endian
 #: 0000 0000 0000 0000 5c00 0000
 #: This is here just to raise and exception for TIF marked RP66V1 files.
@@ -154,9 +154,9 @@ class StorageUnitLabel:
     """
     SIZE = 80
     RE_STORAGE_UNIT_SEQUENCE_NUMBER = re.compile(b'^[0 ]*([1-9]+)$')
-    RE_DLIS_VERSION                 = re.compile(b'^(V1.\\d\\d)$')
-    RE_STORAGE_UNIT_STRUCTURE       = re.compile(b'^(RECORD)$')
-    RE_MAXIMUM_RECORD_LENGTH        = re.compile(b'^[0 ]*([1-9]+)$')
+    RE_DLIS_VERSION = re.compile(b'^(V1.\\d\\d)$')
+    RE_STORAGE_UNIT_STRUCTURE = re.compile(b'^(RECORD)$')
+    RE_MAXIMUM_RECORD_LENGTH = re.compile(b'^[0 ]*([1-9]+)$')
 
     def __init__(self, by: bytes):
         if len(by) != self.SIZE:
@@ -245,6 +245,7 @@ def create_storage_unit_label(storage_unit_sequence_number: int,
         storage_set_identifier,
     )
     return StorageUnitLabel(by)
+
 
 # ---------------- END: Storage Unit Label ------------------------------
 
@@ -401,6 +402,7 @@ class LogicalRecordSegmentHeaderAttributes:
 class LogicalRecordSegmentHeader:
     """RP66V1 Logical Record Segment Header. See See [RP66V1 2.2.2.1]"""
     HEAD_LENGTH = 4
+
     # MIN_LENGTH = LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE
 
     def __init__(self, fobj: typing.BinaryIO):
@@ -464,7 +466,7 @@ class LogicalRecordSegmentHeader:
 
     def long_str(self) -> str:
         return f'LRSH: @ 0x{self.position:x} len=0x{self.length:x}' \
-            f' type={self.record_type:d} {self.attributes.attribute_str()}'
+               f' type={self.record_type:d} {self.attributes.attribute_str()}'
 
     @property
     def next_position(self) -> int:
@@ -475,7 +477,6 @@ class LogicalRecordSegmentHeader:
     def logical_data_position(self) -> int:
         """File position of the start of the Logical Data."""
         return self.position + self.HEAD_LENGTH
-
 
     @property
     def must_strip_padding(self) -> bool:
@@ -495,6 +496,7 @@ class LogicalRecordSegmentHeader:
 class LogicalRecordPosition:
     """Class that contains the file position of the Logical Record Segment Header and the immediately prior Visible
     Record."""
+
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         # Check VisibleRecord
         if vr.position < StorageUnitLabel.SIZE:
@@ -506,17 +508,17 @@ class LogicalRecordPosition:
             f' must be >= 0x{LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
         )
         assert vr.length <= VisibleRecord.MAX_LENGTH, (
-                f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
-            )
+            f'VisibleRecord at 0x{vr.position:x} length 0x{vr.length:x} must be <= 0x{VisibleRecord.MAX_LENGTH:x}'
+        )
         # Check LogicalRecordSegmentHeader
         assert lrsh.position >= StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES, (
-                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
-                f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
-            )
+            f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
+            f' >= 0x{StorageUnitLabel.SIZE + VisibleRecord.NUMBER_OF_HEADER_BYTES:x}'
+        )
         assert lrsh.position <= vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE, (
-                f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
-                f' <= 0x{vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
-            )
+            f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} must be'
+            f' <= 0x{vr.position + vr.length - LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:x}'
+        )
         if lrsh.length < LOGICAL_RECORD_SEGMENT_MINIMUM_SIZE:
             raise ValueError(
                 f'LogicalRecordSegmentHeader at 0x{lrsh.position:x} length 0x{lrsh.length:x} must be'
@@ -573,6 +575,7 @@ class LRPosDesc(typing.NamedTuple):
 
 class LogicalData:
     """Class that holds data bytes and can successively read them maintaining an index of what has been read."""
+
     def __init__(self, by: bytes):
         self.bytes: bytes = by
         self.index: int = 0
@@ -602,7 +605,7 @@ class LogicalData:
         Usage ``ld.view_remaining(ld.remain)`` to see all the remaining data."""
         if length < 0:
             raise IndexError(f'view_remaining length {length} must be >= 0')
-        return self.bytes[self.index:self.index+length]
+        return self.bytes[self.index:self.index + length]
 
     def chunk(self, length: int) -> bytes:
         """Return the next length bytes and increment the index.
@@ -647,7 +650,7 @@ class LogicalData:
 
     def __str__(self) -> str:
         """String representation."""
-        return f'<LogicalData Len: 0x{len(self.bytes):0x} Idx: 0x{self.index:0x}>'#' Bytes: {format_bytes(self.bytes[:16])}>'
+        return f'<LogicalData Len: 0x{len(self.bytes):0x} Idx: 0x{self.index:0x}>'  # ' Bytes: {format_bytes(self.bytes[:16])}>'
 
 
 class FileLogicalData:
@@ -657,6 +660,7 @@ class FileLogicalData:
     provided to the constructor.
     Eager evaluation is done with one or more add()'s followed by a seal().
     """
+
     def __init__(self, vr: VisibleRecord, lrsh: LogicalRecordSegmentHeader):
         self.position = LogicalRecordPosition(vr, lrsh)
         # self.visible_records = [vr]
@@ -705,13 +709,14 @@ class FileLogicalData:
         position = str(self.position)
         if self.logical_data is None:
             return f'<FileLogicalData {position} LR {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted}' \
-                f' PARTIAL READ: len 0x{len(self._bytes):04x}' \
-                f' Bytes: {format_bytes(bytes(self._bytes[:DUMP_BYTE_LEN]))}>'
+                   f' PARTIAL READ: len 0x{len(self._bytes):04x}' \
+                   f' Bytes: {format_bytes(bytes(self._bytes[:DUMP_BYTE_LEN]))}>'
         return f'<FileLogicalData {position} LR {self.lr_type:3d} {lr_is_eflr} {lr_is_encrypted} {self.logical_data}>'
 
 
 class FileRead:
     """RP66V1 file reader."""
+
     def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
         if isinstance(path_or_file, str):
             self.file = None
@@ -861,7 +866,8 @@ class FileRead:
             assert len(by) >= 1
             assert len(by) >= pad_len
             by = by[:-pad_len]
-            logger.debug(f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x} pad={pad_len}')
+            logger.debug(
+                f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x} pad={pad_len}')
         else:
             logger.debug(f'FileRead._read_full_logical_data(): tell=0x{self.file.tell():08x} read 0x{len(by):0x}')
         return by

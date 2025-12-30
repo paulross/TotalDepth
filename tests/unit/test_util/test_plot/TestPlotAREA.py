@@ -22,26 +22,17 @@ Tests plotting AREA patterns in SVG.
 """
 import typing
 
-__author__  = 'Paul Ross'
-__date__    = '2018-07-04'
+__author__ = 'Paul Ross'
+__date__ = '2018-07-04'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-import os
-import sys
-import time
-import logging
-#import math
-import pprint
-import io
-import random
-#import collections
+# import math
+# import collections
 # try:
 #     import xml.etree.cElementTree as etree
 # except ImportError:
 #     import xml.etree.ElementTree as etree
-
-import pytest
 
 # from TotalDepth.LIS.core import LogiRec
 # from TotalDepth.LIS.core import RepCode
@@ -51,7 +42,6 @@ import pytest
 # from TotalDepth.LIS.core import Mnem
 # # LAS
 # from TotalDepth.LAS.core import LASRead
-from TotalDepth.util import XmlWrite
 # # Plot
 from TotalDepth.util.plot import Coord, SVGWriter
 # #from TotalDepth.util.plot import XGrid
@@ -62,17 +52,15 @@ from TotalDepth.util.plot import AREACfg
 
 from . import TestPlotShared
 
-
-
 TEST_SVG_AREAS = {
-    1   : TestPlotShared.SVGTestOutput(
-            'Area_Patterns_Mono_Data_URI.svg',
-            "All the monochrome lithology patterns available in AREACfg as a Data URI Scheme."
-        ),
-    2   : TestPlotShared.SVGTestOutput(
-            'Area_Patterns_Rgb_Data_URI.svg',
-            "All the colour lithology patterns available in AREACfg as a Data URI Scheme."
-        ),
+    1: TestPlotShared.SVGTestOutput(
+        'Area_Patterns_Mono_Data_URI.svg',
+        "All the monochrome lithology patterns available in AREACfg as a Data URI Scheme."
+    ),
+    2: TestPlotShared.SVGTestOutput(
+        'Area_Patterns_Rgb_Data_URI.svg',
+        "All the colour lithology patterns available in AREACfg as a Data URI Scheme."
+    ),
 }
 
 
@@ -88,7 +76,7 @@ def _plot_all_lithology_patterns_uri(filename: str, area_dict: typing.Dict[str, 
     num_high = int(0.5 + num_patterns / num_wide)
     height = margin * 2.0 + panel_height * num_high + gap * (num_high - 1)
     viewPort = Coord.Box(width, height)
-    attrs_doc = { 'xmlns:xlink' : 'http://www.w3.org/1999/xlink' }
+    attrs_doc = {'xmlns:xlink': 'http://www.w3.org/1999/xlink'}
     with SVGWriter.SVGWriter(open(fp, 'w'), viewPort, attrs_doc) as xS:
         AREACfg.write_svg_defs(xS, area_dict)
         for i, pattern in enumerate(area_dict):
@@ -97,7 +85,7 @@ def _plot_all_lithology_patterns_uri(filename: str, area_dict: typing.Dict[str, 
             x = margin + (panel_width + margin) * idx_w
             y = margin + (panel_height + margin) * idx_h
             attrs_panel = {
-                'stroke' : 'black',
+                'stroke': 'black',
                 'stroke-width': '2.0',
                 'fill': 'url(#{})'.format(AREACfg.PATTERN_IDS[pattern])
             }
@@ -114,6 +102,6 @@ def _plot_all_lithology_patterns_uri(filename: str, area_dict: typing.Dict[str, 
 def test_plot_all_lithology_patterns_mono_data_uri():
     _plot_all_lithology_patterns_uri(TEST_SVG_AREAS[1].fileName, AREACfg.AREA_DATA_URI_SCHEME_MONO)
 
+
 def test_plot_all_lithology_patterns_rbg_data_uri():
     _plot_all_lithology_patterns_uri(TEST_SVG_AREAS[2].fileName, AREACfg.AREA_DATA_URI_SCHEME_RGB)
-

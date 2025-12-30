@@ -20,26 +20,27 @@
 """Tests Units module.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2 Nov 2010'
+__author__ = 'Paul Ross'
+__date__ = '2 Nov 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2010 Paul Ross.'
+__rights__ = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
-import sys
-import time
 import logging
 import random
-
-from TotalDepth.LIS.core import Units
-
+# import pprint
+import sys
+import time
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
+from TotalDepth.LIS.core import Units
+
+
 class TestInternals(unittest.TestCase):
     """Tests the internals of the Units module."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -51,11 +52,11 @@ class TestInternals(unittest.TestCase):
     def test_00(self):
         """TestInternals: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestInternals(): __UNIT_MAP."""
-        #print
-        #print Units.unitCategories()
+        # print
+        # print Units.unitCategories()
         self.assertEqual(
             sorted(Units.unitCategories()),
             sorted(
@@ -102,8 +103,10 @@ class TestInternals(unittest.TestCase):
             ),
         )
 
+
 class TestUnitsBasic(unittest.TestCase):
     """Simple tests for Units module."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -115,13 +118,15 @@ class TestUnitsBasic(unittest.TestCase):
     def test_00(self):
         """TestUnitsBasic: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestUnitsBasic.test_01(): Convert metres to feet."""
         self.assertEqual(Units.convert(1.0, b"M   ", b"FEET"), 1.0 / 0.3048)
 
+
 class TestUnitsMultiple(unittest.TestCase):
     """Tests Units module multiple times."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -133,7 +138,7 @@ class TestUnitsMultiple(unittest.TestCase):
     def test_00(self):
         """TestUnitsRandom: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestUnitsBasic.test_01(): 1e5 random units converted to and fro and tested to 10 Sig. Fig."""
         myCats = Units.unitCategories()
@@ -142,25 +147,25 @@ class TestUnitsMultiple(unittest.TestCase):
         tS = time.perf_counter()
         while cCount < 1e2:
             # Choose a category at random
-            iC = random.randint(0, len(myCats)-1)
+            iC = random.randint(0, len(myCats) - 1)
             myUnits = Units.units(myCats[iC])
-            #print 'Category: %s' % myCats[iC]
-            #print '   Units: %s' % ', '.join(myUnits)
+            # print 'Category: %s' % myCats[iC]
+            # print '   Units: %s' % ', '.join(myUnits)
             uCount = 0
             while uCount < 1e3:
-                iU_1 = random.randint(0, len(myUnits)-1)
-                iU_2 = random.randint(0, len(myUnits)-1)
+                iU_1 = random.randint(0, len(myUnits) - 1)
+                iU_2 = random.randint(0, len(myUnits) - 1)
                 val = random.random()
                 newVal = Units.convert(val, myUnits[iU_1], myUnits[iU_2])
                 oldVal = Units.convert(newVal, myUnits[iU_2], myUnits[iU_1])
-                #print
-                #print(oldVal)
+                # print
+                # print(oldVal)
                 self.assertAlmostEqual(oldVal, val, places=10)
-                #self.assertAlmostEqual(oldVal, val)
-                uCount +=1
-            cCount +=1
+                # self.assertAlmostEqual(oldVal, val)
+                uCount += 1
+            cCount += 1
         tE = time.perf_counter() - tS
-        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
+        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount) / (1024 * tE)))
 
     def test_03(self):
         """TestUnitsBasic.test_03(): 1e5  fixed units converted to and fro and tested to 10 Sig. Fig."""
@@ -170,10 +175,10 @@ class TestUnitsMultiple(unittest.TestCase):
         tS = time.perf_counter()
         while cCount < 1e2:
             # Choose a category at random
-            iC = random.randint(0, len(myCats)-1)
+            iC = random.randint(0, len(myCats) - 1)
             myUnits = Units.units(myCats[iC])
-            iU_1 = random.randint(0, len(myUnits)-1)
-            iU_2 = random.randint(0, len(myUnits)-1)
+            iU_1 = random.randint(0, len(myUnits) - 1)
+            iU_2 = random.randint(0, len(myUnits) - 1)
             val = random.random()
             uCount = 0
             while uCount < 1e3:
@@ -183,10 +188,10 @@ class TestUnitsMultiple(unittest.TestCase):
                     val,
                     places=10,
                 )
-                uCount +=1
-            cCount +=1
+                uCount += 1
+            cCount += 1
         tE = time.perf_counter() - tS
-        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
+        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount) / (1024 * tE)))
 
     def test_04(self):
         """TestUnitsBasic.test_04(): 1e5  fixed units converted to and fro untested."""
@@ -196,22 +201,24 @@ class TestUnitsMultiple(unittest.TestCase):
         tS = time.perf_counter()
         while cCount < 1e1:
             # Choose a category at random
-            iC = random.randint(0, len(myCats)-1)
+            iC = random.randint(0, len(myCats) - 1)
             myUnits = Units.units(myCats[iC])
-            iU_1 = random.randint(0, len(myUnits)-1)
-            iU_2 = random.randint(0, len(myUnits)-1)
+            iU_1 = random.randint(0, len(myUnits) - 1)
+            iU_2 = random.randint(0, len(myUnits) - 1)
             val = random.random()
             uCount = 0
             while uCount < 1e4:
                 newVal = Units.convert(val, myUnits[iU_1], myUnits[iU_2])
-                uCount +=1
-            cCount +=1
+                uCount += 1
+            cCount += 1
         tE = time.perf_counter() - tS
-        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount)/(1024*tE)))
+        sys.stderr.write('Time: %8.3f rate %10.3f k/S ' % (tE, (cCount * uCount) / (1024 * tE)))
+
 
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -220,6 +227,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestUnitsMultiple))
     myResult = unittest.TextTestRunner(descriptions=True, verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -244,6 +253,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -252,7 +262,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -270,14 +280,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

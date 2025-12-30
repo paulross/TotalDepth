@@ -24,22 +24,24 @@ Created on Jun 10, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = 'Jun 10, 2011'
+__author__ = 'Paul Ross'
+__date__ = 'Jun 10, 2011'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2011 paulross.'
+__rights__ = 'Copyright (c) 2011 paulross.'
 
-#import pprint
-import sys
-import os
-import time
 import logging
+# import pprint
+import sys
+import time
 import unittest
-#import io
 
 import pytest
 
 from TotalDepth.util import DirWalk
+
+
+# import io
+
 
 ######################
 # Section: Unit tests.
@@ -47,6 +49,7 @@ from TotalDepth.util import DirWalk
 
 class TestGenBigFirst(unittest.TestCase):
     """Tests gen_big_first"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -66,8 +69,10 @@ class TestGenBigFirst(unittest.TestCase):
             pass
             # print('{:8d}: {:s}'.format(os.path.getsize(v), v))
 
+
 class TestDirWalk(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -135,9 +140,11 @@ class TestDirWalk(unittest.TestCase):
         except DirWalk.ExceptionDirWalk:
             pass
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -145,6 +152,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestGenBigFirst))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -169,6 +178,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -177,7 +187,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -195,14 +205,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

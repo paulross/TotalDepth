@@ -1,29 +1,26 @@
 import datetime
 import io
-import pprint
 
 import pytest
 
-
 from TotalDepth.common import process
-
 
 
 @pytest.mark.parametrize(
     'line, expected',
     (
-        (
-            '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON-START {"timestamp": "2019-10-14 17:44:46.955519"}',
-            ('-START', '{"timestamp": "2019-10-14 17:44:46.955519"}'),
-        ),
-        (
-            '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON {"timestamp": "2019-10-14 17:44:46.955519"}',
-            (None, '{"timestamp": "2019-10-14 17:44:46.955519"}'),
-        ),
-        (
-            '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON-STOP {"timestamp": "2019-10-14 17:44:46.955519"}',
-            ('-STOP', '{"timestamp": "2019-10-14 17:44:46.955519"}'),
-        ),
+            (
+                    '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON-START {"timestamp": "2019-10-14 17:44:46.955519"}',
+                    ('-START', '{"timestamp": "2019-10-14 17:44:46.955519"}'),
+            ),
+            (
+                    '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON {"timestamp": "2019-10-14 17:44:46.955519"}',
+                    (None, '{"timestamp": "2019-10-14 17:44:46.955519"}'),
+            ),
+            (
+                    '2019-10-14 17:44:46,955 - 24098 - INFO     - process.py       - ProcessLoggingThread-JSON-STOP {"timestamp": "2019-10-14 17:44:46.955519"}',
+                    ('-STOP', '{"timestamp": "2019-10-14 17:44:46.955519"}'),
+            ),
     )
 )
 def test_re_log_line(line, expected):

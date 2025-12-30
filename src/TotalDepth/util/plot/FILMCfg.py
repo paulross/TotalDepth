@@ -226,17 +226,15 @@ DSCA::
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-03-21'
+__author__ = 'Paul Ross'
+__date__ = '2011-03-21'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
+# import time
+# import sys
 import logging
 import re
-#import collections
-#from optparse import OptionParser
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import LogiRec
@@ -244,17 +242,25 @@ from TotalDepth.LIS.core import Mnem
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import Track
 
+
+# import collections
+# from optparse import OptionParser
+
+
 class ExceptionFILMCfg(ExceptionTotalDepthLIS):
     """Specialisation of exception for this module."""
     pass
+
 
 class ExceptionPhysFilmCfg(ExceptionFILMCfg):
     """Specialisation of exception for PhysFilmCfg."""
     pass
 
+
 class ExceptionFilmCfgLISRead(ExceptionFILMCfg):
     """Specialisation of exception for FilmCfgLISRead in this module."""
     pass
+
 
 class PhysFilmCfg(object):
     """Contains the configuration equivalent to a single line in a FILM table.
@@ -281,32 +287,32 @@ class PhysFilmCfg(object):
         theX is an integer scale.
         """
         logging.debug('PhysFilmCfg: name="{!s:s}" {:d} tracks dest={!s:s} scale={:d}'.format(
-                theName, len(theTracks), theDest, theX,
+            theName, len(theTracks), theDest, theX,
         ))
         self._name = theName
         self._trackS = theTracks
         self._dest = theDest
         # Integer scale
         self._xScale = theX
-        
+
     @property
     def name(self):
         """Name of the FILM."""
         return self._name
-    
+
     @property
     def xScale(self):
         """The FILM X axis scale as a number."""
         return self._xScale
-    
+
     def __len__(self):
         """Number of Track.Track objects."""
         return len(self._trackS)
-    
+
     def __getitem__(self, i):
         """Returns the Track.Track object at position i."""
         return self._trackS[i]
-    
+
     def genTracks(self):
         """Generate all tracks."""
         for t in self._trackS:
@@ -325,7 +331,7 @@ class PhysFilmCfg(object):
         (the left position of T2, right of T2, 4, 2).
         
         Note: There is some fudging going on here"""
-        assert(theTracStr is not None)
+        assert (theTracStr is not None)
         # Matching on something like b'^(LH|RH)*([TF])(\d|D)(\d)*\s*$'
         # Gives:
         # 1. None | b'LH' | b'RH'
@@ -338,7 +344,7 @@ class PhysFilmCfg(object):
         # code for the moment.
         if mtch is None:
             raise ExceptionPhysFilmCfg('PhysFilmCfg.interpretTrac(): No TRAC match on {:s}'.format(str(theTracStr)))
-#        print(self, 'theTracStr', theTracStr, mtch.groups())
+        #        print(self, 'theTracStr', theTracStr, mtch.groups())
         tIdxFrom = 0
         # group(2) is mandatory b'D' or an integer
         if mtch.group(3) == b'D':
@@ -354,7 +360,7 @@ class PhysFilmCfg(object):
                 if tIdxFrom == 1:
                     tIdxFrom = 0
             else:
-                assert(mtch.group(2) == b'F')
+                assert (mtch.group(2) == b'F')
                 # tIdxFrom is OK 1..4
                 pass
         halfTrackStart = 2 * tIdxFrom
@@ -363,7 +369,8 @@ class PhysFilmCfg(object):
             pL = self[tIdxFrom].left
             pR = self[tIdxFrom].right
         except IndexError:
-            raise ExceptionPhysFilmCfg('PhysFilmCfg.interpretTrac(): No first TRAC found with {:s}'.format(str(theTracStr)))
+            raise ExceptionPhysFilmCfg(
+                'PhysFilmCfg.interpretTrac(): No first TRAC found with {:s}'.format(str(theTracStr)))
         if mtch.group(1) is not None:
             # LH or RH
             # Compute centre line of track
@@ -384,12 +391,14 @@ class PhysFilmCfg(object):
                     #  Extend right as Coord.Dim() objects
                     pR = self[tIdxTo].right
                 except IndexError:
-                    raise ExceptionPhysFilmCfg('PhysFilmCfg.interpretTrac(): No second TRAC found with {:s}'.format(str(theTracStr)))
+                    raise ExceptionPhysFilmCfg(
+                        'PhysFilmCfg.interpretTrac(): No second TRAC found with {:s}'.format(str(theTracStr)))
                 numHalfTracks = 2 * (tIdxTo + 1 - tIdxFrom)
             else:
                 numHalfTracks = 2
         # Return the left/right physical locations as Coord.Dim() objects
         return pL, pR, halfTrackStart, numHalfTracks
+
 
 class PhysFilmCfgLISRead(PhysFilmCfg):
     """Tracks from a LIS FILM table, essentially the pair of GCOD and GDEC
@@ -407,284 +416,285 @@ class PhysFilmCfgLISRead(PhysFilmCfg):
     # The map of FILM track descriptions [pair of (name, decades)] to internal track representations
     GCOD_GDEC_MAP = {
         # T23 is 4 decades
-        (b'E20 ', b'-4--') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLog10Decade2Start2
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLog10Decade2Start2
-                ),
-            ],
-        (b'E2E ', b'-1--') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLog10Decade1Start2
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
-        (b'E2E ', b'-2--') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLog10Decade2Start2
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
-        (b'E3E ', b'-3--') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLog10Decade3
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
-        (b'E4E ', b'-4--') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLog10Decade4
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
-        (b'EEE ', b'----') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
-        (b'EEB ', b'----') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=None
-                ),
-            ],
-        (b'EBE ', b'----') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=None
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
+        (b'E20 ', b'-4--'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLog10Decade2Start2
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLog10Decade2Start2
+            ),
+        ],
+        (b'E2E ', b'-1--'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLog10Decade1Start2
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
+        (b'E2E ', b'-2--'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLog10Decade2Start2
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
+        (b'E3E ', b'-3--'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLog10Decade3
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
+        (b'E4E ', b'-4--'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLog10Decade4
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
+        (b'EEE ', b'----'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
+        (b'EEB ', b'----'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=None
+            ),
+        ],
+        (b'EBE ', b'----'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=None
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
         # All blank
-        (b'BBB ', b'----') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(2.4, 'in'),
-                    gridGn=None
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.4, 'in'), 
-                    rightPos=Coord.Dim(3.2, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(3.2, 'in'), 
-                    rightPos=Coord.Dim(5.6, 'in'),
-                    gridGn=None
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(5.6, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=None
-                ),
-            ],
+        (b'BBB ', b'----'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(2.4, 'in'),
+                gridGn=None
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.4, 'in'),
+                rightPos=Coord.Dim(3.2, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(3.2, 'in'),
+                rightPos=Coord.Dim(5.6, 'in'),
+                gridGn=None
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(5.6, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=None
+            ),
+        ],
         # Four track. Depth 1in, 4 tracks at 1.75in
         # Alternate could be depth 0.5in, 4 tracks at 1.875in
-        (b'LLLL', b'1111') : [
-                Track.Track(
-                    leftPos=Coord.Dim(0.0, 'in'), 
-                    rightPos=Coord.Dim(1.0, 'in'),
-                    gridGn=None,
-                    plotXLines=False,
-                    plotXAlpha=True,
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(1.0, 'in'), 
-                    rightPos=Coord.Dim(2.75, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(2.75, 'in'), 
-                    rightPos=Coord.Dim(4.5, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(4.5, 'in'), 
-                    rightPos=Coord.Dim(6.25, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-                Track.Track(
-                    leftPos=Coord.Dim(6.25, 'in'), 
-                    rightPos=Coord.Dim(8, 'in'),
-                    gridGn=Track.genLinear10
-                ),
-            ],
+        (b'LLLL', b'1111'): [
+            Track.Track(
+                leftPos=Coord.Dim(0.0, 'in'),
+                rightPos=Coord.Dim(1.0, 'in'),
+                gridGn=None,
+                plotXLines=False,
+                plotXAlpha=True,
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(1.0, 'in'),
+                rightPos=Coord.Dim(2.75, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(2.75, 'in'),
+                rightPos=Coord.Dim(4.5, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(4.5, 'in'),
+                rightPos=Coord.Dim(6.25, 'in'),
+                gridGn=Track.genLinear10
+            ),
+            Track.Track(
+                leftPos=Coord.Dim(6.25, 'in'),
+                rightPos=Coord.Dim(8, 'in'),
+                gridGn=Track.genLinear10
+            ),
+        ],
     }
     # Alternate mappings that are deemed 'equivalent'
     GCOD_GDEC_ALT_MAP = {
         # Read from 2953.S13
-        (b'EEE ', b'EEE-') : GCOD_GDEC_MAP[(b'EEE ', b'----')],
+        (b'EEE ', b'EEE-'): GCOD_GDEC_MAP[(b'EEE ', b'----')],
         # Read from 12988.S3
-        (b'EEB ', b'EEE-') : GCOD_GDEC_MAP[(b'EEB ', b'----')],
+        (b'EEB ', b'EEE-'): GCOD_GDEC_MAP[(b'EEB ', b'----')],
         # Read from 200099.S07 - ignore for the moment
-        (b'EB0 ', b'----') : GCOD_GDEC_MAP[(b'EBE ', b'----')],
+        (b'EB0 ', b'----'): GCOD_GDEC_MAP[(b'EBE ', b'----')],
         #
-        (b'E1E ', b'-4--') : GCOD_GDEC_MAP[(b'E4E ', b'-4--')],
+        (b'E1E ', b'-4--'): GCOD_GDEC_MAP[(b'E4E ', b'-4--')],
         # Read from 300026.S01
-        (b'E40 ', b'-4--') : GCOD_GDEC_MAP[(b'E20 ', b'-4--')],
+        (b'E40 ', b'-4--'): GCOD_GDEC_MAP[(b'E20 ', b'-4--')],
     }
     #: X axis scale from a LIS FILM table
     #: DSCA codes from analysis above:
     #: b'D200', b'D500', b'DM  ', b'S5  '
     #: But we can guess some others...
     DSCA_MAP = {
-        b'D20 '     : 20,
-        b'D40 '     : 40,
-        b'D200'     : 200,
-        b'D240 '    : 240,
-        b'D500'     : 500,
-        b'DM  '     : 1000,
+        b'D20 ': 20,
+        b'D40 ': 40,
+        b'D200': 200,
+        b'D240 ': 240,
+        b'D500': 500,
+        b'DM  ': 1000,
         # 5 inches per 100 feet
-        b'S5  '     : 12*100//5,
+        b'S5  ': 12 * 100 // 5,
         # 2 inches per 100 feet
-        b'S2  '     : 12*100//2,
+        b'S2  ': 12 * 100 // 2,
     }
+
     def __init__(self, theRow):
         """Reads a LogiRec.TableRow object and populates a CurveCfg.
         
@@ -730,13 +740,15 @@ class PhysFilmCfgLISRead(PhysFilmCfg):
         """A list of supported film (name, decade) pairs."""
         return sorted(self.GCOD_GDEC_MAP.keys())
 
+
 class FilmCfg(object):
     """Contains the configuration equivalent to a complete FILM table."""
+
     def __init__(self):
         # Map of {mnem : PhysFilmCfg, ...}
         # i.e. a dictionary of lines in the FILM table
         self._plotCfgMap = {}
-        
+
     def add(self, k, thePfc):
         """Add a PhysFilmCfg object to the map with key k, typically a FILM
         mnemonic in bytes such as Mnem.Mnem(b'1   ') or
@@ -749,36 +761,36 @@ class FilmCfg(object):
     def keys(self):
         """All FILM Mnemonics."""
         return self._plotCfgMap.keys()
-    
+
     def __len__(self):
         """Number of unique film destination names."""
         return len(self._plotCfgMap)
-    
+
     def __getitem__(self, name):
         """Returns the PhysFilmCfg object corresponding to name - a Mnem() object.
         Will raise KeyError if not exact match. See retFilmDest() for an API that can
         handle curve destinations of BOTH, ALL etc."""
-        #print(self._plotCfgMap)
+        # print(self._plotCfgMap)
         return self._plotCfgMap[name]
-    
+
     def __contains__(self, name):
         """Membership test."""
         return name in self._plotCfgMap
-    
+
     def retAllFILMDestS(self, curveDestID):
         """Returns an unordered list of FILM destinations for a curve destination.
         For example if curveDestID is b'BOTH' this might return [b'2   ', b'1   ']
         """
         raise NotImplementedError()
-    
+
     def retFILMDest(self, filmDestID, curveDestID):
         """Returns a PhysFilmCfg object by matching curveDestID to the filmDestID.
         Returns None on failure. For LIS curveDestID can be 1, BOTH, ALL, NEIT etc.
         This is commonly used by the PRESCfg module so that interpretTrac() can
         be called on the result and thus build up a map of track positions for
         all possible logical film outputs."""
-        raise  NotImplementedError()
-                
+        raise NotImplementedError()
+
     def interpretTrac(self, filmDestID, curveDestID, trackStr):
         """Given a film destination ID and a curve destination (which could be
         b'ALL') and a track string (e.g. b'T23') this returns the left/right
@@ -793,8 +805,10 @@ class FilmCfg(object):
         if myPfc is not None:
             return myPfc.interpretTrac(trackStr)
 
+
 class FilmCfgLISRead(FilmCfg):
     """Interprets a FILM table from a LIS Logical Record."""
+
     def __init__(self, theLr):
         """Reads a LogiRec.Table object and creates a PhysFilmCfgLISRead for
         each row.
@@ -808,12 +822,14 @@ class FilmCfgLISRead(FilmCfg):
         """
         super().__init__()
         if theLr.type != LogiRec.LR_TYPE_WELL_DATA:
-            raise ExceptionFilmCfgLISRead('FilmCfgLISRead.__init__(): LR type={:d}, expected {:d}'.format(theLr.type, LogiRec.LR_TYPE_WELL_DATA))
+            raise ExceptionFilmCfgLISRead(
+                'FilmCfgLISRead.__init__(): LR type={:d}, expected {:d}'.format(theLr.type, LogiRec.LR_TYPE_WELL_DATA))
         if theLr.value != b'FILM':
-            raise ExceptionFilmCfgLISRead('FilmCfgLISRead.__init__(): LR Table not a CONS table type "FILM" but a {!r:s}.'.format(theLr.value))
+            raise ExceptionFilmCfgLISRead(
+                'FilmCfgLISRead.__init__(): LR Table not a CONS table type "FILM" but a {!r:s}.'.format(theLr.value))
         for aRow in theLr.genRows():
             self.add(Mnem.Mnem(aRow.value), PhysFilmCfgLISRead(aRow))
-        
+
     def retAllFILMDestS(self, curveDestID):
         """Returns an unordered list of FILM destinations for a curve destination.
         
@@ -834,7 +850,7 @@ class FilmCfgLISRead(FilmCfg):
                 if aMnem in self._plotCfgMap:
                     retList.append(aMnem)
         return retList
-    
+
     def retFILMDest(self, filmDestID, curveDestID):
         """Returns a PhysFilmCfg object by matching curveDestID to the filmDestID.
         Returns None on failure. curveDestID can be 1, BOTH, ALL, NEIT etc.
@@ -842,7 +858,8 @@ class FilmCfgLISRead(FilmCfg):
         This is commonly used by the PRESCfg module so that interpretTrac() can
         be called on the result and thus build up a map of track positions for
         all possible logical film outputs."""
-        assert(filmDestID in self._plotCfgMap), '{:s} not in {:s}'.format(filmDestID, [str(k) for k in self._plotCfgMap.keys()])
+        assert (filmDestID in self._plotCfgMap), '{:s} not in {:s}'.format(filmDestID,
+                                                                           [str(k) for k in self._plotCfgMap.keys()])
         if filmDestID in self.retAllFILMDestS(curveDestID):
             return self._plotCfgMap[filmDestID]
         return None

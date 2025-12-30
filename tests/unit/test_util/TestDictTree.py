@@ -112,35 +112,35 @@ def test_dict_tree_simple_add_contains(key, expected):
 @pytest.mark.parametrize(
     'key_values, expected',
     (
-        (
-            [
-                ([0, 1, 2], 'two'),
-            ],
-            [
-                [0, 1, 2]
-            ],
-        ),
-        (
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-            [
-                [0, 1, 2],
-                [0, 1, 2, 3],
-            ],
-        ),
-        # Reverse insert order check.
-        (
-            [
-                ([0, 1, 2, 3], 'three'),
-                ([0, 1, 2], 'two'),
-            ],
-            [
-                [0, 1, 2],
-                [0, 1, 2, 3],
-            ],
-        ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                    ],
+                    [
+                        [0, 1, 2]
+                    ],
+            ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+                    [
+                        [0, 1, 2],
+                        [0, 1, 2, 3],
+                    ],
+            ),
+            # Reverse insert order check.
+            (
+                    [
+                        ([0, 1, 2, 3], 'three'),
+                        ([0, 1, 2], 'two'),
+                    ],
+                    [
+                        [0, 1, 2],
+                        [0, 1, 2, 3],
+                    ],
+            ),
     )
 )
 def test_dict_tree_keys(key_values, expected):
@@ -153,27 +153,27 @@ def test_dict_tree_keys(key_values, expected):
 @pytest.mark.parametrize(
     'key_values, expected',
     (
-        (
-            [
-                ([0, 1, 2], 'two'),
-            ],
-            ['two', ],
-        ),
-        (
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-            ['two', 'three', ],
-        ),
-        # Reverse insert order check.
-        (
-            [
-                ([0, 1, 2, 3], 'three'),
-                ([0, 1, 2], 'two'),
-            ],
-            ['two', 'three', ],
-        ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                    ],
+                    ['two', ],
+            ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+                    ['two', 'three', ],
+            ),
+            # Reverse insert order check.
+            (
+                    [
+                        ([0, 1, 2, 3], 'three'),
+                        ([0, 1, 2], 'two'),
+                    ],
+                    ['two', 'three', ],
+            ),
     )
 )
 def test_dict_tree_values(key_values, expected):
@@ -186,35 +186,35 @@ def test_dict_tree_values(key_values, expected):
 @pytest.mark.parametrize(
     'key_values, expected',
     (
-        (
-            [
-                ([0, 1, 2], 'two'),
-            ],
-            [
-                ([0, 1, 2], 'two'),
-            ],
-        ),
-        (
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-        ),
-        # Reverse insert order check.
-        (
-            [
-                ([0, 1, 2, 3], 'three'),
-                ([0, 1, 2], 'two'),
-            ],
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-        ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                    ],
+                    [
+                        ([0, 1, 2], 'two'),
+                    ],
+            ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+            ),
+            # Reverse insert order check.
+            (
+                    [
+                        ([0, 1, 2, 3], 'three'),
+                        ([0, 1, 2], 'two'),
+                    ],
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+            ),
     )
 )
 def test_dict_tree_items(key_values, expected):
@@ -227,56 +227,56 @@ def test_dict_tree_items(key_values, expected):
 @pytest.mark.parametrize(
     'key_values, expected',
     (
-        (
-            [
-                ([0, 1, 2], 'two'),
-            ],
-            """0
-  1
-    2
-      two""",
-        ),
-        (
-            [
-                ([0, 1, 2], 'two'),
-                ([0, 1, 2, 3], 'three'),
-            ],
-            """0
-  1
-    2
-      two
-      3
-        three""",
-        ),
-        # Reverse insert order check.
-        (
-            [
-                ([0, 1, 2, 3], 'three'),
-                ([0, 1, 2], 'two'),
-            ],
-            """0
-  1
-    2
-      two
-      3
-        three""",
-        ),
-        (
-                [
-                    ([0, 1, ], 'one'),
-                    ([0, 1, 2, 3], 'three'),
-                    ([0, 1, 2, 3, 4, 5], 'five'),
-                ],
-                """0
-  1
-    one
-    2
-      3
-        three
-        4
-          5
-            five""",
-        ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                    ],
+                    """0
+          1
+            2
+              two""",
+            ),
+            (
+                    [
+                        ([0, 1, 2], 'two'),
+                        ([0, 1, 2, 3], 'three'),
+                    ],
+                    """0
+          1
+            2
+              two
+              3
+                three""",
+            ),
+            # Reverse insert order check.
+            (
+                    [
+                        ([0, 1, 2, 3], 'three'),
+                        ([0, 1, 2], 'two'),
+                    ],
+                    """0
+          1
+            2
+              two
+              3
+                three""",
+            ),
+            (
+                    [
+                        ([0, 1, ], 'one'),
+                        ([0, 1, 2, 3], 'three'),
+                        ([0, 1, 2, 3, 4, 5], 'five'),
+                    ],
+                    """0
+      1
+        one
+        2
+          3
+            three
+            4
+              5
+                five""",
+            ),
     )
 )
 def test_dict_tree_add_indented_string(key_values, expected):
@@ -292,10 +292,10 @@ def test_add_remove_and_stringise():
     dict_tree.add(list(range(4)), 'three')
     dict_tree.add(list(range(6)), 'five')
     assert dict_tree.keys() == [
-            list(range(2)),
-            list(range(4)),
-            list(range(6)),
-        ]
+        list(range(2)),
+        list(range(4)),
+        list(range(6)),
+    ]
     assert dict_tree.values() == ['one', 'three', 'five', ]
     assert len(dict_tree) == 3
     assert dict_tree.indented_string() == """0
@@ -309,9 +309,9 @@ def test_add_remove_and_stringise():
             five"""
     dict_tree.remove(list(range(4)))
     assert dict_tree.keys() == [
-            list(range(2)),
-            list(range(6)),
-        ]
+        list(range(2)),
+        list(range(6)),
+    ]
     assert dict_tree.values() == ['one', 'five', ]
     assert len(dict_tree) == 2
     assert dict_tree.indented_string() == """0
@@ -338,10 +338,10 @@ def _test_add_to_list_or_set(dict_tree: DictTree.DictTree) -> None:
     dict_tree.add(range(6), 'FIVE')
     assert 6 == dict_tree.depth()
     assert [
-            list(range(2)),
-            list(range(4)),
-            list(range(6)),
-        ] == dict_tree.keys()
+               list(range(2)),
+               list(range(4)),
+               list(range(6)),
+           ] == dict_tree.keys()
 
 
 def test_value_iterable_list_add_values_as_list_and_stringise():
@@ -349,10 +349,10 @@ def test_value_iterable_list_add_values_as_list_and_stringise():
     dict_tree = DictTree.DictTree(value_iterable='list')
     _test_add_to_list_or_set(dict_tree)
     assert [
-            ['one', 'One', 'ONE'],
-            ['three', 'Three', 'THREE'],
-            ['five', 'Five', 'FIVE']
-        ] == dict_tree.values()
+               ['one', 'One', 'ONE'],
+               ['three', 'Three', 'THREE'],
+               ['five', 'Five', 'FIVE']
+           ] == dict_tree.values()
     assert 3 == len(dict_tree)
     assert """0
   1
@@ -437,10 +437,10 @@ def test_value_iterable_set_add_values_as_set_and_stringise():
     dict_tree = DictTree.DictTree(value_iterable='set')
     _test_add_to_list_or_set(dict_tree)
     assert [
-            {'one', 'One', 'ONE'},
-            {'three', 'Three', 'THREE'},
-            {'five', 'Five', 'FIVE'}
-        ] == dict_tree.values()
+               {'one', 'One', 'ONE'},
+               {'three', 'Three', 'THREE'},
+               {'five', 'Five', 'FIVE'}
+           ] == dict_tree.values()
     assert 3 == len(dict_tree)
 
 
@@ -511,15 +511,16 @@ def test_value_iterable_set_remove_key_underrun_raises():
         dict_tree.remove(range(2), 'two')
     assert err.value.args[0] == 'Value of key is None'
 
-    
+
 def test_dict_tree_add_bespoke_list():
     """TestDictTreeAddBespokeList: test_00(): add value with bespoke list and stringise."""
+
     def add_key_value(dict_tree, key, value):
         if dict_tree.value(key) is None:
             dict_tree.add(key, [value, ])
         else:
             dict_tree.value(key).append(value)
-            
+
     dict_tree = DictTree.DictTree()
     add_key_value(dict_tree, range(2), 'one')
     add_key_value(dict_tree, range(2), 'One')
@@ -531,15 +532,15 @@ def test_dict_tree_add_bespoke_list():
     add_key_value(dict_tree, range(6), 'Five')
     add_key_value(dict_tree, range(6), 'FIVE')
     assert [
-            list(range(2)),
-            list(range(4)),
-            list(range(6)),
-        ] == dict_tree.keys()
+               list(range(2)),
+               list(range(4)),
+               list(range(6)),
+           ] == dict_tree.keys()
     assert [
-            ['one', 'One', 'ONE'],
-            ['three', 'Three', 'THREE'],
-            ['five', 'Five', 'FIVE']
-        ] == dict_tree.values()
+               ['one', 'One', 'ONE'],
+               ['three', 'Three', 'THREE'],
+               ['five', 'Five', 'FIVE']
+           ] == dict_tree.values()
     assert 3 == len(dict_tree)
     assert """0
   1
@@ -562,17 +563,17 @@ def test_iadd():
     dt_2.add(range(5), 'five')
     dt_2 += dt_1
     assert [
-            list(range(2)),
-            list(range(3)),
-            list(range(4)),
-            list(range(5)),
-        ] == dt_2.keys()
+               list(range(2)),
+               list(range(3)),
+               list(range(4)),
+               list(range(5)),
+           ] == dt_2.keys()
     assert [
-            'two',
-            'three',
-            'four',
-            'five',
-        ] == dt_2.values()
+               'two',
+               'three',
+               'four',
+               'five',
+           ] == dt_2.values()
     assert 4 == len(dt_2)
     assert 'spam' not in dt_2
     assert range(4) in dt_2
@@ -599,6 +600,7 @@ def test_iadd_raises_on_value_iterable():
 
 class TestDictTreeHtmlTableBase(unittest.TestCase):
     """Tests TestDictTreeHtmlTable row and col span functions."""
+
     def setUp(self):
         self._dt = DictTree.DictTreeHtmlTable()
         self.assertEqual([], self._dt.keys())
@@ -606,10 +608,10 @@ class TestDictTreeHtmlTableBase(unittest.TestCase):
         self.assertEqual(0, len(self._dt))
         self.assertTrue('spam' not in self._dt)
         self.assertFalse('spam' in self._dt)
-        
+
     def tearDown(self):
         pass
-    
+
     def _retHtmlTableString(self, cellContentsIsValue=False, cellContentsIsSequence=False):
         """If cellContentsIsValue then the value will be put in the cell if not
         None otherwise the tip of the key list."""
@@ -643,21 +645,22 @@ class TestDictTreeHtmlTableBase(unittest.TestCase):
         htmlLineS.append('</table>')
         return '\n'.join(htmlLineS)
 
-class TestDictTreeHtmlTable(TestDictTreeHtmlTableBase):    
+
+class TestDictTreeHtmlTable(TestDictTreeHtmlTableBase):
     def test_00(self):
         """TestDictTreeHtmlTable: test_00(): row and col span."""
-        self._dt.add(('X', 'XX', 'XXX'),    'Value XXX')
+        self._dt.add(('X', 'XX', 'XXX'), 'Value XXX')
         self.assertEqual(3, self._dt.depth())
-        self._dt.add(('X', 'XX', 'XXY'),    'Value XXY')
+        self._dt.add(('X', 'XX', 'XXY'), 'Value XXY')
         self.assertEqual(3, self._dt.depth())
-        self._dt.add(('X', 'XX', 'XXZ'),    'Value XXZ')
-        self._dt.add(('X', 'XY',),          'Value XY')
-        self._dt.add(('X', 'XZ', 'XZX'),    'Value XZX')
-        self._dt.add(('Y',),                'Value Y')
-        self._dt.add(('Z', 'ZX', 'ZXX'),    'Value ZXX')
+        self._dt.add(('X', 'XX', 'XXZ'), 'Value XXZ')
+        self._dt.add(('X', 'XY',), 'Value XY')
+        self._dt.add(('X', 'XZ', 'XZX'), 'Value XZX')
+        self._dt.add(('Y',), 'Value Y')
+        self._dt.add(('Z', 'ZX', 'ZXX'), 'Value ZXX')
         self.assertEqual(3, self._dt.depth())
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""X
   XX
     XXX
@@ -677,8 +680,8 @@ Z
   ZX
     ZXX
       Value ZXX""",
-            self._dt.indented_string()
-        )
+                         self._dt.indented_string()
+                         )
         expected = """X r=1, c=1
   XX r=1, c=1
     XXX r=1, c=1
@@ -696,55 +699,56 @@ Z r=1, c=1
         # print(self._dt.walk_row_col_span())
         # print(expected)
         self.assertEqual(expected, self._dt.walk_row_col_span())
-        #print 'genRowColEvents()'
-        #for anEvent in self._dt.genColRowEvents():
+        # print 'genRowColEvents()'
+        # for anEvent in self._dt.genColRowEvents():
         #    print anEvent
         eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
-        #print
-        #print eventResult
-#         self.assertEqual("""(None, 0, 0)
-# (['X'], None, 5, 1)
-# (['X', 'XX'], None, 3, 1)
-# (['X', 'XX', 'XXX'], 'Value XXX', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['X', 'XX', 'XXY'], 'Value XXY', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['X', 'XX', 'XXZ'], 'Value XXZ', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['X', 'XY'], 'Value XY', 1, 2)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['X', 'XZ'], None, 1, 1)
-# (['X', 'XZ', 'XZX'], 'Value XZX', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['Y'], 'Value Y', 1, 3)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['Z'], None, 1, 1)
-# (['Z', 'ZX'], None, 1, 1)
-# (['Z', 'ZX', 'ZXX'], 'Value ZXX', 1, 1)
-# (None, -1, -1)""",
-#             eventResult,
-#         )
+        # print
+        # print eventResult
+
+    #         self.assertEqual("""(None, 0, 0)
+    # (['X'], None, 5, 1)
+    # (['X', 'XX'], None, 3, 1)
+    # (['X', 'XX', 'XXX'], 'Value XXX', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['X', 'XX', 'XXY'], 'Value XXY', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['X', 'XX', 'XXZ'], 'Value XXZ', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['X', 'XY'], 'Value XY', 1, 2)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['X', 'XZ'], None, 1, 1)
+    # (['X', 'XZ', 'XZX'], 'Value XZX', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['Y'], 'Value Y', 1, 3)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['Z'], None, 1, 1)
+    # (['Z', 'ZX'], None, 1, 1)
+    # (['Z', 'ZX', 'ZXX'], 'Value ZXX', 1, 1)
+    # (None, -1, -1)""",
+    #             eventResult,
+    #         )
 
     def test_01(self):
         """TestDictTreeHtmlTable: test_01(): row and col span."""
-        self._dt.add(('X', 'XX',),    'Value XXX')
+        self._dt.add(('X', 'XX',), 'Value XXX')
         self.assertEqual(2, self._dt.depth())
-        self._dt.add(('X', 'XX',),    'Value XXY')
+        self._dt.add(('X', 'XX',), 'Value XXY')
         self.assertEqual(2, self._dt.depth())
-        self._dt.add(('X', 'XX',),    'Value XXZ')
-        self._dt.add(('X',),          'Value XY')
-        self._dt.add(('X', 'XZ',),    'Value XZX')
-        self._dt.add(tuple(),             'Value Y')
-        self._dt.add(('Z', 'ZX',),    'Value ZXX')
+        self._dt.add(('X', 'XX',), 'Value XXZ')
+        self._dt.add(('X',), 'Value XY')
+        self._dt.add(('X', 'XZ',), 'Value XZX')
+        self._dt.add(tuple(), 'Value Y')
+        self._dt.add(('Z', 'ZX',), 'Value ZXX')
         self.assertEqual(2, self._dt.depth())
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""Value Y
 X
   Value XY
@@ -756,29 +760,30 @@ Z
   ZX
     Value ZXX""",
                          self._dt.indented_string())
-        #print 'walkRowColSpan():'
-        #print self._dt.walkColRowSpan()
-        #print 'genRowColEvents()'
-        #for anEvent in self._dt.genColRowEvents():
+        # print 'walkRowColSpan():'
+        # print self._dt.walkColRowSpan()
+        # print 'genRowColEvents()'
+        # for anEvent in self._dt.genColRowEvents():
         #    print anEvent
         eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
-        #print
-        #print eventResult
-#         self.assertEqual("""(None, 0, 0)
-# (['X'], 'Value XY', 2, 1)
-# (['X', 'XX'], 'Value XXZ', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['X', 'XZ'], 'Value XZX', 1, 1)
-# (None, -1, -1)
-# (None, 0, 0)
-# (['Z'], None, 1, 1)
-# (['Z', 'ZX'], 'Value ZXX', 1, 1)
-# (None, -1, -1)""",
-#             eventResult,
-#         )
-        #print
-        #print self._retHtmlTableString()
+        # print
+        # print eventResult
+
+    #         self.assertEqual("""(None, 0, 0)
+    # (['X'], 'Value XY', 2, 1)
+    # (['X', 'XX'], 'Value XXZ', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['X', 'XZ'], 'Value XZX', 1, 1)
+    # (None, -1, -1)
+    # (None, 0, 0)
+    # (['Z'], None, 1, 1)
+    # (['Z', 'ZX'], 'Value ZXX', 1, 1)
+    # (None, -1, -1)""",
+    #             eventResult,
+    #         )
+    # print
+    # print self._retHtmlTableString()
 
     def test_02(self):
         """TestDictTreeHtmlTable: test_02(): row and col span in an HTML table."""
@@ -790,15 +795,15 @@ Z
         self._dt.add(('B',), None)
         self._dt.add(('C', 'CA', 'CAA'), None)
         eventResult = '\n'.join([str(e) for e in self._dt.gen_row_column_events()])
-        #print
-        #print 'self._dt.indentedStr()'
-        #print self._dt.indentedStr()
-        #print 'self._dt.walkColRowSpan()'
-        #print self._dt.walkColRowSpan()
-        #print 'eventResult'
-        #print eventResult
-        #print 'self._retHtmlTableString()'
-        #print self._retHtmlTableString()
+        # print
+        # print 'self._dt.indentedStr()'
+        # print self._dt.indentedStr()
+        # print 'self._dt.walkColRowSpan()'
+        # print self._dt.walkColRowSpan()
+        # print 'eventResult'
+        # print eventResult
+        # print 'self._retHtmlTableString()'
+        # print self._retHtmlTableString()
         self.assertEqual("""<table border="2" width="100%">
 <tr>
     <td rowspan="5">A</td>
@@ -827,7 +832,7 @@ Z
     <td>CAA</td>
 </tr>
 </table>""",
-            self._retHtmlTableString())
+                         self._retHtmlTableString())
 
     def test_03(self):
         """TestDictTreeHtmlTable: test_02(): row and col span in an HTML table with a
@@ -889,7 +894,7 @@ Z
     <td>CAA</td><td>('7', '70', '700')</td>
 </tr>
 </table>""",
-            self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=False))
+                         self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=False))
 
     def test_04(self):
         """TestDictTreeHtmlTable: test_04(): row and col span in an HTML table with a
@@ -951,10 +956,12 @@ Z
     <td>CAA</td><td>7</td><td>70</td><td>700</td>
 </tr>
 </table>""",
-            self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=True))
+                         self._retHtmlTableString(cellContentsIsValue=True, cellContentsIsSequence=True))
+
 
 class TestDictTreeHtmlTableFile(TestDictTreeHtmlTableBase):
     """Tests TestDictTreeHtmlTable simulating a file/line/column table."""
+
     def fnSplit(self, f, l=None):
         """Splits a file path. f is expected to have '/' as separator."""
         retVal = ['%s/' % d for d in f.split('/')[:-1]]
@@ -962,8 +969,8 @@ class TestDictTreeHtmlTableFile(TestDictTreeHtmlTableBase):
         if l is not None:
             retVal.append(l)
         return retVal
-        #return f.split('/') + [l,]
-        
+        # return f.split('/') + [l,]
+
     def test_00(self):
         """TestDictTreeHtmlTableFile.fnSplit()."""
         self.assertEqual(
@@ -975,6 +982,7 @@ class TestDictTreeHtmlTableFile(TestDictTreeHtmlTableBase):
             self.fnSplit('eggs.h', 12),
         )
 
+
 class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
     """Tests TestDictTreeHtmlTable simulating a file/line/column table."""
 
@@ -985,10 +993,10 @@ class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
         self.assertEqual(0, len(self._dt))
         self.assertTrue('spam' not in self._dt)
         self.assertFalse('spam' in self._dt)
-        
+
     def tearDown(self):
         pass
-    
+
     def test_00(self):
         """TestDictTreeHtmlTableFileLineCol: test_00(): Single file/line/column."""
         self._dt.add(('file_one', 12), 24)
@@ -1000,15 +1008,15 @@ class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
                 [24, 80],
             ],
             self._dt.values(),
-            )
+        )
         self.assertEqual(1, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""file_one
   12
     [24, 80]""",
                          self._dt.indented_string())
-        
+
     def test_01(self):
         """TestDictTreeHtmlTableFileLineCol: test_01(): Multiple file/line/column."""
         # Same line, different column
@@ -1025,14 +1033,14 @@ class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
         self._dt.add(('file_four', 14), 19)
         self.assertEqual(2, self._dt.depth())
         self.assertEqual(sorted([
-                          ['file_two', 1],
-                          ['file_two', 14],
-                          ['file_one', 12],
-                          ['file_four', 1],
-                          ['file_four', 14],
-                          ['file_three', 15]
-                        ]),
-                        sorted(self._dt.keys()))
+            ['file_two', 1],
+            ['file_two', 14],
+            ['file_one', 12],
+            ['file_four', 1],
+            ['file_four', 14],
+            ['file_three', 15]
+        ]),
+            sorted(self._dt.keys()))
         self.assertEqual(
             sorted([
                 [1],
@@ -1042,10 +1050,10 @@ class TestDictTreeHtmlTableFileLineCol(TestDictTreeHtmlTableFile):
                 [10, 10],
             ]),
             sorted(self._dt.values()),
-            )
+        )
         self.assertEqual(6, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""file_four
   1
     [19]
@@ -1063,7 +1071,7 @@ file_two
   14
     [75]""",
                          self._dt.indented_string())
-        
+
     def test_02(self):
         """TestDictTreeHtmlTableFileLineCol: test_02(): Single file/line/column with split on path."""
         # Same line, different column
@@ -1071,25 +1079,25 @@ file_two
         self._dt.add(self.fnSplit('spam/eggs/chips.h', 12), 80)
         self.assertEqual(4, self._dt.depth())
         self.assertEqual([
-                          ['spam/', 'eggs/', 'chips.h', 12],
-                        ],
-                        self._dt.keys())
+            ['spam/', 'eggs/', 'chips.h', 12],
+        ],
+            self._dt.keys())
         self.assertEqual(
             [
                 [24, 80],
             ],
             self._dt.values(),
-            )
+        )
         self.assertEqual(1, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""spam/
   eggs/
     chips.h
       12
         [24, 80]""",
                          self._dt.indented_string())
-        
+
     def test_03(self):
         """TestDictTreeHtmlTableFileLineCol: test_03(): Multiple file/line/column with split on path."""
         self._dt.add(self.fnSplit('spam.h', 12), 24)
@@ -1099,30 +1107,30 @@ file_two
         self._dt.add(self.fnSplit('spam/eggs/chips.h', 12), 24)
         self._dt.add(self.fnSplit('spam/eggs/chips/beans.h', 12), 24)
         self._dt.add(self.fnSplit('spam/eggs/chips/beans.h', 12), 80)
-        #print
-        #print self._retHtmlTableString()
+        # print
+        # print self._retHtmlTableString()
         self.assertEqual(5, self._dt.depth())
-        #print
-        #pprint.pprint(self._dt.keys())
+        # print
+        # pprint.pprint(self._dt.keys())
         self.assertEqual(
-                    sorted([
-                        ['spam/', 'eggs/', 'chips.h', 12],
-                        ['spam/', 'eggs/', 'chips/', 'beans.h', 12],
-                        ['spam/', 'cheese.h', 12],
-                        ['spam/', 'cheese.h', 14],
-                        ['spam/', 'eggs.h', 12],
-                        ['spam.h', 12],
-                    ]),
-                    sorted(self._dt.keys()))
+            sorted([
+                ['spam/', 'eggs/', 'chips.h', 12],
+                ['spam/', 'eggs/', 'chips/', 'beans.h', 12],
+                ['spam/', 'cheese.h', 12],
+                ['spam/', 'cheese.h', 14],
+                ['spam/', 'eggs.h', 12],
+                ['spam.h', 12],
+            ]),
+            sorted(self._dt.keys()))
         self.assertEqual(
             sorted([
                 [24], [24, 80], [24], [28], [24], [24],
             ]),
             sorted(self._dt.values()),
-            )
+        )
         self.assertEqual(6, len(self._dt))
-        #print
-        #print self._dt.indentedStr()
+        # print
+        # print self._dt.indentedStr()
         self.assertEqual("""spam.h
   12
     [24]
@@ -1144,8 +1152,8 @@ spam/
         12
           [24, 80]""",
                          self._dt.indented_string())
-        #print
-        #print self._retHtmlTableString()
+        # print
+        # print self._retHtmlTableString()
         expected = """<table border="2" width="100%">
 <tr>
     <td>spam.h</td>
@@ -1176,7 +1184,7 @@ spam/
 </table>"""
         result = self._retHtmlTableString()
         self.assertEqual(expected, result)
-        
+
     def test_04(self):
         """TestDictTreeHtmlTableFileLineCol: test_04(): Multiple file/line/column with split on path."""
         for aLine in """epoc32/include/bldcodeline.hrh 
@@ -1208,8 +1216,8 @@ epoc32/include/variant/platform_paths.hrh
 sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.cpp 
 sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h""".split('\n'):
             self._dt.add(self.fnSplit(aLine), None)
-        #print
-        #print self._retHtmlTableString()
+        # print
+        # print self._retHtmlTableString()
         self.assertEqual("""<table border="2" width="100%">
 <tr>
     <td rowspan="26">epoc32/</td>
@@ -1306,7 +1314,8 @@ sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h""".split('\n
     <td>ipscprlog.h</td>
 </tr>
 </table>""",
-            self._retHtmlTableString())
+                         self._retHtmlTableString())
+
 
 class TestDictTreeHtmlTableFileTree(TestDictTreeHtmlTableFile):
     """Tests TestDictTreeHtmlTableFileTree simulating a directory structure."""
@@ -1318,10 +1327,10 @@ class TestDictTreeHtmlTableFileTree(TestDictTreeHtmlTableFile):
         self.assertEqual(0, len(self._dt))
         self.assertTrue('spam' not in self._dt)
         self.assertFalse('spam' in self._dt)
-        
+
     def tearDown(self):
         pass
-    
+
     def test_01(self):
         """TestDictTreeHtmlTableFileTree: test_01(): Multiple file/line/column with split on path and links."""
         for aLine in """epoc32/include/bldcodeline.hrh 
@@ -1354,10 +1363,10 @@ sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.cpp
 sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h""".split('\n'):
             aLine = aLine.strip()
             self._dt.add(self.fnSplit(aLine), '<a href="%s">%s</a>' \
-                         % (aLine, os.path.basename(aLine)))#aLine.replace('/', '\\'))))
-#        eventResult = '\n'.join([str(e) for e in self._dt.genColRowEvents()])
-#        print()
-#        print(self._dt.indentedStr())
+                         % (aLine, os.path.basename(aLine)))  # aLine.replace('/', '\\'))))
+        #        eventResult = '\n'.join([str(e) for e in self._dt.genColRowEvents()])
+        #        print()
+        #        print(self._dt.indentedStr())
         self.maxDiff = None
         self.assertEqual("""epoc32/
   include/
@@ -1524,27 +1533,27 @@ sf/
     <td>ipscprlog.h</td><td><a href="sf/os/networkingsrv/networkcontrol/iptransportlayer/src/ipscprlog.h">ipscprlog.h</a></td>
 </tr>
 </table>""",
-            self._retHtmlTableString(cellContentsIsValue=True))
+                         self._retHtmlTableString(cellContentsIsValue=True))
 
 
 def _create_simple_file_system():
     # dict_tree = DictTree.DictTreeHtmlTable('list')
     dict_tree = DictTree.DictTreeHtmlTable()
     for file_path, columns in zip(
-        (
-            'spam.h',
-            'spam/eggs.h',
-            'spam/cheese.h',
-            'spam/eggs/chips.h',
-            'spam/eggs/chips/beans.h',
-        ),
-        (
-            ('A', 'B'),
-            ('C', 'D'),
-            ('E', 'F'),
-            ('G', 'H'),
-            ('I', 'J'),
-        )
+            (
+                    'spam.h',
+                    'spam/eggs.h',
+                    'spam/cheese.h',
+                    'spam/eggs/chips.h',
+                    'spam/eggs/chips/beans.h',
+            ),
+            (
+                    ('A', 'B'),
+                    ('C', 'D'),
+                    ('E', 'F'),
+                    ('G', 'H'),
+                    ('I', 'J'),
+            )
     ):
         dict_tree.add(file_path.split('/'), columns)
     return dict_tree
@@ -1703,10 +1712,10 @@ def test_simple_file_system_html_table():
 @pytest.mark.parametrize(
     'branch, expected',
     (
-        ([], 4),
-        (['spam',], 3),
-        (['spam', 'eggs'], 2),
-        (['spam', 'eggs', 'chips'], 1),
+            ([], 4),
+            (['spam', ], 3),
+            (['spam', 'eggs'], 2),
+            (['spam', 'eggs', 'chips'], 1),
     )
 )
 def test_simple_file_system_depth_from_branch(branch, expected):
@@ -1717,58 +1726,58 @@ def test_simple_file_system_depth_from_branch(branch, expected):
 @pytest.mark.parametrize(
     'branch, expected',
     (
-        ([], [
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['spam'], node=None, row_span=4, col_span=1)",
-            "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
-            'ROW_CLOSE',
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['spam', 'eggs'], node=None, row_span=2, col_span=1)",
-            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips'], node=None, row_span=1, col_span=1)",
-            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
-            'ROW_CLOSE',
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
-            'ROW_CLOSE',
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
-            'ROW_CLOSE',
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['spam.h'], node=('A', 'B'), row_span=1, col_span=4)",
-            'ROW_CLOSE',
-        ]),
-        (['spam', ],
-         [
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
-             'ROW_CLOSE',
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['eggs'], node=None, row_span=2, col_span=1)",
-             "DictTreeTableEvent(branch=['eggs', 'chips'], node=None, row_span=1, col_span=1)",
-             "DictTreeTableEvent(branch=['eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
-             'ROW_CLOSE',
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
-             'ROW_CLOSE',
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
-             'ROW_CLOSE'
-         ]),
-        (['spam', 'eggs', ],
-         [
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['chips'], node=None, row_span=1, col_span=1)",
-             "DictTreeTableEvent(branch=['chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
-             'ROW_CLOSE',
-             'ROW_OPEN',
-             "DictTreeTableEvent(branch=['chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
-             'ROW_CLOSE']
-         ),
-        (['spam', 'eggs', 'chips', ], [
-            'ROW_OPEN',
-            "DictTreeTableEvent(branch=['beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
-            'ROW_CLOSE'
-        ]),
+            ([], [
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['spam'], node=None, row_span=4, col_span=1)",
+                "DictTreeTableEvent(branch=['spam', 'cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['spam', 'eggs'], node=None, row_span=2, col_span=1)",
+                "DictTreeTableEvent(branch=['spam', 'eggs', 'chips'], node=None, row_span=1, col_span=1)",
+                "DictTreeTableEvent(branch=['spam', 'eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['spam', 'eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['spam', 'eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
+                'ROW_CLOSE',
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['spam.h'], node=('A', 'B'), row_span=1, col_span=4)",
+                'ROW_CLOSE',
+            ]),
+            (['spam', ],
+             [
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['cheese.h'], node=('E', 'F'), row_span=1, col_span=3)",
+                 'ROW_CLOSE',
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['eggs'], node=None, row_span=2, col_span=1)",
+                 "DictTreeTableEvent(branch=['eggs', 'chips'], node=None, row_span=1, col_span=1)",
+                 "DictTreeTableEvent(branch=['eggs', 'chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+                 'ROW_CLOSE',
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['eggs', 'chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+                 'ROW_CLOSE',
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['eggs.h'], node=('C', 'D'), row_span=1, col_span=3)",
+                 'ROW_CLOSE'
+             ]),
+            (['spam', 'eggs', ],
+             [
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['chips'], node=None, row_span=1, col_span=1)",
+                 "DictTreeTableEvent(branch=['chips', 'beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+                 'ROW_CLOSE',
+                 'ROW_OPEN',
+                 "DictTreeTableEvent(branch=['chips.h'], node=('G', 'H'), row_span=1, col_span=2)",
+                 'ROW_CLOSE']
+             ),
+            (['spam', 'eggs', 'chips', ], [
+                'ROW_OPEN',
+                "DictTreeTableEvent(branch=['beans.h'], node=('I', 'J'), row_span=1, col_span=1)",
+                'ROW_CLOSE'
+            ]),
     )
 )
 def test_simple_file_system_intermediate_walk(branch, expected):

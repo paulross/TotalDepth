@@ -40,39 +40,39 @@ import typing
 #: EBCDIC all character points.
 #: From https://en.wikipedia.org/wiki/EBCDIC
 EBCDIC_ALL = (
-    set(range(0x0, 0x30))
-    |
-    set(range(0x32, 0x3e))
-    |
-    set(range(0x3f, 0x41))
-    |
-    set(range(0x4a, 0x51))
-    |
-    set(range(0x5a, 0x62))
-    |
-    set(range(0x6a, 0x70))
-    |
-    set(range(0x79, 0x80))
-    |
-    set(range(0x81, 0x8a))
-    |
-    {0x8f}
-    |
-    set(range(0x91, 0x9a))
-    |
-    set(range(0xa1, 0xaa))
-    |
-    {0xb0, 0xba, 0xbb}
-    |
-    set(range(0xc0, 0xca))
-    |
-    set(range(0xd0, 0xda))
-    |
-    set(range(0xe0, 0xea))
-    |
-    set(range(0xf0, 0xfa))
-    |
-    {0xff}
+        set(range(0x0, 0x30))
+        |
+        set(range(0x32, 0x3e))
+        |
+        set(range(0x3f, 0x41))
+        |
+        set(range(0x4a, 0x51))
+        |
+        set(range(0x5a, 0x62))
+        |
+        set(range(0x6a, 0x70))
+        |
+        set(range(0x79, 0x80))
+        |
+        set(range(0x81, 0x8a))
+        |
+        {0x8f}
+        |
+        set(range(0x91, 0x9a))
+        |
+        set(range(0xa1, 0xaa))
+        |
+        {0xb0, 0xba, 0xbb}
+        |
+        set(range(0xc0, 0xca))
+        |
+        set(range(0xd0, 0xda))
+        |
+        set(range(0xe0, 0xea))
+        |
+        set(range(0xf0, 0xfa))
+        |
+        {0xff}
 )
 
 # #: Lower bound <=

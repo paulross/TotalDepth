@@ -41,8 +41,8 @@ def from49(int theWord):
         # Negative
         mant -= 0x10000
     # Divisor is 2^15 as right 4 bits are zero i.e. 2^11 * 2^4
-    return ldexp (mant / 32768.0, theWord & 0x0F)
-    
+    return ldexp(mant / 32768.0, theWord & 0x0F)
+
 #============================
 # End: Representation Code 49
 #============================
@@ -52,7 +52,7 @@ def from50(signed long long theWord):
     Value -153 is 0x0008B380"""
     cdef int mant = theWord & 0xFFFF
     # Only take 10 bits of exponent as significant as IEEE-754
-    cdef int exp = (theWord >> 16 )& 0x03FF
+    cdef int exp = (theWord >> 16) & 0x03FF
     # Need to divide mantissa by 1 << 15 or 32768 but
     # instead we reduce the exponent by 15
     exp -= 15
@@ -106,7 +106,7 @@ def to68(double v):
     cdef int exp = 0
     cdef double mant = frexp(v, &exp)
     # Overflow and underflow control
-    if exp <= -(128+23):
+    if exp <= -(128 + 23):
         # Set zero
         return 0x40000000
     elif exp > 127:
@@ -118,7 +118,7 @@ def to68(double v):
         return 0x7FFFFFFF
     # If exponent is <128 then reduce mantissa by excess 128
     if exp < -128:
-        mant /= 2**(-128 - exp)
+        mant /= 2 ** (-128 - exp)
         exp = -128
     # Set exponent as excess 128
     if v < 0.0:
@@ -133,7 +133,7 @@ def to68(double v):
     w |= exp & 0xFF
     # Shift for mantissa
     w <<= 23
-    w |= (<int> (mant * (1<<23))) & 0x007FFFFF
+    w |= (<int> (mant * (1 << 23))) & 0x007FFFFF
     return w
 #============================
 # End: Representation Code 68
@@ -148,7 +148,7 @@ def from70(unsigned int theWord):
 
 def from73(signed int theWord):
     """Returns a integer from a Rep code 73 word (a 32 bit integer)."""
-    return theWord#<signed int> theWord
+    return theWord  #<signed int> theWord
 
 def from77(unsigned char theWord):
     """Returns a integer from a Rep code 77 word (a 8 bit unsigned integer)."""
@@ -161,5 +161,3 @@ def from79(signed short int theWord):
 ########################################
 # End: Specific Representation Codes
 ########################################
-
-

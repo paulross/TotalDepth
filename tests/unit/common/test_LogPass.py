@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 from TotalDepth.common import LogPass
 
@@ -46,8 +46,8 @@ def test_log_pass_channel_set_get_array():
 @pytest.mark.parametrize(
     'shape, length, expected',
     (
-        ((1,), 8, (8, 1)),
-        ((5, 16), 4, (4, 5, 16)),
+            ((1,), 8, (8, 1)),
+            ((5, 16), 4, (4, 5, 16)),
     )
 )
 def test_log_pass_channel_array_shape(shape, length, expected):
@@ -59,8 +59,8 @@ def test_log_pass_channel_array_shape(shape, length, expected):
 @pytest.mark.parametrize(
     'shape, length, expected',
     (
-        ((1,), 8, 8),
-        ((5, 16), 4, 5 * 16 * 4),
+            ((1,), 8, 8),
+            ((5, 16), 4, 5 * 16 * 4),
     )
 )
 def test_log_pass_channel_array_size(shape, length, expected):
@@ -72,8 +72,8 @@ def test_log_pass_channel_array_size(shape, length, expected):
 @pytest.mark.parametrize(
     'shape, length, expected',
     (
-        ((1,), 8, 8 * 8),
-        ((5, 16), 4, 5 * 16 * 4 * 8),
+            ((1,), 8, 8 * 8),
+            ((5, 16), 4, 5 * 16 * 4 * 8),
     )
 )
 def test_log_pass_channel_sizeof_array(shape, length, expected):
@@ -85,8 +85,8 @@ def test_log_pass_channel_sizeof_array(shape, length, expected):
 @pytest.mark.parametrize(
     'shape, length, expected',
     (
-        ((1,), 8, 8),
-        ((5, 16), 4, 5 * 16 * 8),
+            ((1,), 8, 8),
+            ((5, 16), 4, 5 * 16 * 8),
     )
 )
 def test_log_pass_channel_sizeof_frame(shape, length, expected):
@@ -98,14 +98,14 @@ def test_log_pass_channel_sizeof_frame(shape, length, expected):
 @pytest.mark.parametrize(
     'shape, frame_number, expected_tuple',
     (
-        (
-            (1,), 7, ((7, 0,),),
-        ),
-        (
-            (2, 3),
-            7,
-            ((7, 0, 0), (7, 0, 1), (7, 0, 2), (7, 1, 0), (7, 1, 1), (7, 1, 2)),
-        ),
+            (
+                    (1,), 7, ((7, 0,),),
+            ),
+            (
+                    (2, 3),
+                    7,
+                    ((7, 0, 0), (7, 0, 1), (7, 0, 2), (7, 1, 0), (7, 1, 1), (7, 1, 2)),
+            ),
     )
 )
 def test_log_pass_channel_numpy_indexes(shape, frame_number, expected_tuple):
@@ -124,15 +124,15 @@ def test_log_pass_channel_numpy_indexes_raises():
 @pytest.mark.parametrize(
     'data, dtype, absent_value,  expected',
     (
-        (
-            (-999.25, -999.25, 50.0, 60.0,), np.dtype('float'), -999.25, 55.0,
-        ),
-        (
-            (-999, -999, 50, 60,), np.dtype('int'), -999, 55.0,
-        ),
-        (
-                (None, None, 50.0, 60.0,), np.dtype(object).type, None, 55.0,
-        ),
+            (
+                    (-999.25, -999.25, 50.0, 60.0,), np.dtype('float'), -999.25, 55.0,
+            ),
+            (
+                    (-999, -999, 50, 60,), np.dtype('int'), -999, 55.0,
+            ),
+            (
+                    (None, None, 50.0, 60.0,), np.dtype(object).type, None, 55.0,
+            ),
     ),
 )
 def test_log_pass_channel_mask_array(data, dtype, absent_value, expected):
@@ -179,7 +179,8 @@ def test_log_pass_frame_array_append_raises():
     frame_array = LogPass.FrameArray(ident='IDENT', description='Test FrameArray')
     frame_array.append(LogPass.FrameChannel('DEPT', 'Depth', 'FEET', shape=(1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
     with pytest.raises(LogPass.ExceptionFrameArray) as err:
-        frame_array.append(LogPass.FrameChannel('DEPT', 'Gamma Ray', 'GAPI', shape=(1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
+        frame_array.append(
+            LogPass.FrameChannel('DEPT', 'Gamma Ray', 'GAPI', shape=(1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
     assert err.value.args[0] == 'Duplicate channel identity "DEPT"'
 
 
@@ -215,8 +216,8 @@ def test_log_pass_frame_array_getitem_fails():
 @pytest.mark.parametrize(
     'shape, length, expected',
     (
-        ((1,), 8, [(8, 1,), (8, 1)]),
-        ((5, 16), 4, [(4, 1,), (4, 5, 16)]),
+            ((1,), 8, [(8, 1,), (8, 1)]),
+            ((5, 16), 4, [(4, 1,), (4, 5, 16)]),
     )
 )
 def test_log_pass_frame_array_init_arrays_shape(shape, length, expected):
@@ -241,42 +242,43 @@ def test_log_pass_frame_array_init_arrays_fails():
 @pytest.mark.parametrize(
     'length, channels, expected',
     (
-        (
-            8,
-            set(),
-            [(8, 1), (0, 1), (0, 4), (0, 5, 16)]
-        ),
-        (
-            8,
-            {'GR  '},
-            [(8, 1), (8, 1), (0, 4), (0, 5, 16)]
-        ),
-        (
-            4,
-            {'GR  '},
-            [(4, 1), (4, 1), (0, 4), (0, 5, 16)]
-        ),
-        (
-            4,
-            set(),
-            [(4, 1), (0, 1), (0, 4), (0, 5, 16)]
-        ),
-        (
-            4,
-            {'MSFL', 'HDT '},
-            [(4, 1), (0, 1), (4, 4), (4, 5, 16)]
-        ),
+            (
+                    8,
+                    set(),
+                    [(8, 1), (0, 1), (0, 4), (0, 5, 16)]
+            ),
+            (
+                    8,
+                    {'GR  '},
+                    [(8, 1), (8, 1), (0, 4), (0, 5, 16)]
+            ),
+            (
+                    4,
+                    {'GR  '},
+                    [(4, 1), (4, 1), (0, 4), (0, 5, 16)]
+            ),
+            (
+                    4,
+                    set(),
+                    [(4, 1), (0, 1), (0, 4), (0, 5, 16)]
+            ),
+            (
+                    4,
+                    {'MSFL', 'HDT '},
+                    [(4, 1), (0, 1), (4, 4), (4, 5, 16)]
+            ),
     )
 )
 def test_log_pass_frame_array_init_arrays_partial_shape(length, channels, expected):
     frame_array = LogPass.FrameArray(ident='IDENT', description='Test FrameArray')
     frame_array.append(LogPass.FrameChannel('DEPT', 'Depth', 'FEET', shape=(1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
     frame_array.append(LogPass.FrameChannel('GR  ', 'Gamma Ray', 'GAPI', (1,), np_dtype=LogPass.DEFAULT_NP_TYPE))
-    frame_array.append(LogPass.FrameChannel('MSFL', 'Micro-spherical', 'OHMM', shape=(4,), np_dtype=LogPass.DEFAULT_NP_TYPE))
-    frame_array.append(LogPass.FrameChannel('HDT ', 'High resolution Dipmeter', '    ', shape=(5, 16,), np_dtype=LogPass.DEFAULT_NP_TYPE))
+    frame_array.append(
+        LogPass.FrameChannel('MSFL', 'Micro-spherical', 'OHMM', shape=(4,), np_dtype=LogPass.DEFAULT_NP_TYPE))
+    frame_array.append(LogPass.FrameChannel('HDT ', 'High resolution Dipmeter', '    ', shape=(5, 16,),
+                                            np_dtype=LogPass.DEFAULT_NP_TYPE))
     frame_array.init_arrays_partial(length, channels)
     assert frame_array.shape == expected
-
 
 
 def test_log_pass_frame_array_init_arrays_partial_fails():
@@ -291,8 +293,8 @@ def test_log_pass_frame_array_init_arrays_partial_fails():
 @pytest.mark.parametrize(
     'shape, expected',
     (
-        ((1,), 2 * 8),
-        ((5, 16), 8 + (5 * 16 * 8)),
+            ((1,), 2 * 8),
+            ((5, 16), 8 + (5 * 16 * 8)),
     )
 )
 def test_log_pass_frame_array_sizeof_frame(shape, expected):
@@ -306,8 +308,8 @@ def test_log_pass_frame_array_sizeof_frame(shape, expected):
 @pytest.mark.parametrize(
     'shape, frames, expected',
     (
-        ((1,), 1, 2 * 8),
-        ((5, 16), 12, (8 + (5 * 16 * 8)) * 12),
+            ((1,), 1, 2 * 8),
+            ((5, 16), 12, (8 + (5 * 16 * 8)) * 12),
     )
 )
 def test_log_pass_frame_array_sizeof_array(shape, frames, expected):

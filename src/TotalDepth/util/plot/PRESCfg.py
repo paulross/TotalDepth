@@ -223,56 +223,65 @@ This seems to be the nomenclature for four track plots. For example::
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
-import logging
-#import re
-import math
-#import numbers
+# import numbers
 import collections
+# import time
+# import sys
+import logging
+# import re
+import math
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Mnem
-from TotalDepth.util.plot import Stroke
 from TotalDepth.util.plot import FILMCfg
+from TotalDepth.util.plot import Stroke
+
 
 class ExceptionPRESCfg(ExceptionTotalDepthLIS):
     """Specialisation of exception for this module."""
     pass
 
+
 class ExceptionLineTransBase(ExceptionTotalDepthLIS):
     """Specialisation of exception for LineTransBase and descendants."""
     pass
+
 
 class ExceptionLineTransBaseMath(ExceptionLineTransBase):
     """For LineTransBase and descendants where math errors occur."""
     pass
 
+
 class ExceptionPRESCfgLISRead(ExceptionPRESCfg):
     """Specialisation of exception for this module."""
     pass
+
 
 class ExceptionPresCfg(ExceptionPRESCfg):
     """Specialisation of exception for PresCfg."""
     pass
 
+
 class ExceptionCurveCfg(ExceptionPRESCfg):
     """Specialisation of exception for CurveCfg."""
     pass
+
 
 class ExceptionCurveCfgCtor(ExceptionPRESCfg):
     """Construction exception when making a CurveCfg object or descendant."""
     pass
 
+
 class ExceptionCurveCfgLISRead(ExceptionCurveCfg):
     """Specialisation of exception for CurveCfgLISRead and its travails."""
     pass
+
 
 ############################################
 # Section: Handling LIS codings and colours.
@@ -288,66 +297,67 @@ DEFAULT_HLINE_WIDTH_PX = 1.5
 #: If either value is None an SVG attribute is not needed i.e. default SVG behaviour
 LIS_CODI_MAP = {
     # Default
-    None        : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=None)),
-    b'LLIN'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=None)),
-    b'LSPO'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(2,2))),
-    b'LDAS'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(4,4))),
-    b'LGAP'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(6,2))),
-    b'HLIN'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=None)),
-    b'HSPO'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(2,2))),
-    b'HDAS'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(4,4))),
-    b'HGAP'     : (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(6,2))),
+    None: (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=None)),
+    b'LLIN': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=None)),
+    b'LSPO': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(2, 2))),
+    b'LDAS': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(4, 4))),
+    b'LGAP': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_LLINE_WIDTH_PX, coding=(6, 2))),
+    b'HLIN': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=None)),
+    b'HSPO': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(2, 2))),
+    b'HDAS': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(4, 4))),
+    b'HGAP': (Stroke.StrokeBlackSolid._replace(width=DEFAULT_HLINE_WIDTH_PX, coding=(6, 2))),
     # Non-LIS codes, these are really just for testing
     # Super-fine line, useful for dipmeter fast channels
-    b'SFLN'     : (Stroke.StrokeBlackSolid._replace(width=0.0625, coding=None)),
+    b'SFLN': (Stroke.StrokeBlackSolid._replace(width=0.0625, coding=None)),
     # Super-fine dash, useful for dipmeter fast channels
-    b'SFDA'     : (Stroke.StrokeBlackSolid._replace(width=0.0625, coding=(4,4))),
+    b'SFDA': (Stroke.StrokeBlackSolid._replace(width=0.0625, coding=(4, 4))),
 }
 
 # Maps LIS COLO mnemonics to CSS/SVG style colour specifications.
 # Statistics:
-#"(34, b'PRES', b'COLO', b'000 ')": 173,
-#"(34, b'PRES', b'COLO', b'002 ')": 3,
-#"(34, b'PRES', b'COLO', b'003 ')": 6,
-#"(34, b'PRES', b'COLO', b'004 ')": 33,
-#"(34, b'PRES', b'COLO', b'014 ')": 6,
-#"(34, b'PRES', b'COLO', b'020 ')": 9,
-#"(34, b'PRES', b'COLO', b'021 ')": 8,
-#"(34, b'PRES', b'COLO', b'030 ')": 34,
-#"(34, b'PRES', b'COLO', b'034 ')": 2,
-#"(34, b'PRES', b'COLO', b'044 ')": 6,
-#"(34, b'PRES', b'COLO', b'104 ')": 3,
-#"(34, b'PRES', b'COLO', b'134 ')": 14,
-#"(34, b'PRES', b'COLO', b'203 ')": 3,
-#"(34, b'PRES', b'COLO', b'221 ')": 3,
-#"(34, b'PRES', b'COLO', b'312 ')": 10,
-#"(34, b'PRES', b'COLO', b'400 ')": 44,
-#"(34, b'PRES', b'COLO', b'404 ')": 6,
-#"(34, b'PRES', b'COLO', b'420 ')": 9,
-#"(34, b'PRES', b'COLO', b'430 ')": 17,
-#"(34, b'PRES', b'COLO', b'AQUA')": 3,
-#"(34, b'PRES', b'COLO', b'BLAC')": 1260,
-#"(34, b'PRES', b'COLO', b'BLUE')": 8,
-#"(34, b'PRES', b'COLO', b'GREE')": 37,
-#"(34, b'PRES', b'COLO', b'RED ')": 12}
+# "(34, b'PRES', b'COLO', b'000 ')": 173,
+# "(34, b'PRES', b'COLO', b'002 ')": 3,
+# "(34, b'PRES', b'COLO', b'003 ')": 6,
+# "(34, b'PRES', b'COLO', b'004 ')": 33,
+# "(34, b'PRES', b'COLO', b'014 ')": 6,
+# "(34, b'PRES', b'COLO', b'020 ')": 9,
+# "(34, b'PRES', b'COLO', b'021 ')": 8,
+# "(34, b'PRES', b'COLO', b'030 ')": 34,
+# "(34, b'PRES', b'COLO', b'034 ')": 2,
+# "(34, b'PRES', b'COLO', b'044 ')": 6,
+# "(34, b'PRES', b'COLO', b'104 ')": 3,
+# "(34, b'PRES', b'COLO', b'134 ')": 14,
+# "(34, b'PRES', b'COLO', b'203 ')": 3,
+# "(34, b'PRES', b'COLO', b'221 ')": 3,
+# "(34, b'PRES', b'COLO', b'312 ')": 10,
+# "(34, b'PRES', b'COLO', b'400 ')": 44,
+# "(34, b'PRES', b'COLO', b'404 ')": 6,
+# "(34, b'PRES', b'COLO', b'420 ')": 9,
+# "(34, b'PRES', b'COLO', b'430 ')": 17,
+# "(34, b'PRES', b'COLO', b'AQUA')": 3,
+# "(34, b'PRES', b'COLO', b'BLAC')": 1260,
+# "(34, b'PRES', b'COLO', b'BLUE')": 8,
+# "(34, b'PRES', b'COLO', b'GREE')": 37,
+# "(34, b'PRES', b'COLO', b'RED ')": 12}
 
 #: Maps LIS COLO mnemonics to CSS/SVG style colour specifications.
 LIS_COLO_MAP = {
-    Mnem.Mnem(b'AQUA') : 'aqua',
-    Mnem.Mnem(b'BLAC') : 'black',
-    Mnem.Mnem(b'BLUE') : 'blue',
-    Mnem.Mnem(b'GREE') : 'green',
-    Mnem.Mnem(b'RED ') : 'red',
+    Mnem.Mnem(b'AQUA'): 'aqua',
+    Mnem.Mnem(b'BLAC'): 'black',
+    Mnem.Mnem(b'BLUE'): 'blue',
+    Mnem.Mnem(b'GREE'): 'green',
+    Mnem.Mnem(b'RED '): 'red',
     # Not detected in current LIS test cases but assumed
-    Mnem.Mnem(b'YELL') : 'yellow',
-    Mnem.Mnem(b'CYAN') : 'cyan',
-    Mnem.Mnem(b'MAGE') : 'magenta',
-    Mnem.Mnem(b'GREY') : 'grey',
+    Mnem.Mnem(b'YELL'): 'yellow',
+    Mnem.Mnem(b'CYAN'): 'cyan',
+    Mnem.Mnem(b'MAGE'): 'magenta',
+    Mnem.Mnem(b'GREY'): 'grey',
 }
+
 
 def lisColo(theMnem):
     """Returns a SVG colour as a string from a Mnem or None on failure."""
-#    print('lisColo({:s}):'.format(theMnem))
+    #    print('lisColo({:s}):'.format(theMnem))
     try:
         return LIS_COLO_MAP[theMnem]
     except KeyError:
@@ -360,15 +370,17 @@ def lisColo(theMnem):
         if i >= 3:
             break
         # Magic number 48 is ASCII '0'
-        v = int(255 * (aB-48) / 4)
-        if v >= 0 and v <=255:
+        v = int(255 * (aB - 48) / 4)
+        if v >= 0 and v <= 255:
             rbg[i] = v
     return 'rgb({:d},{:d},{:d})'.format(rbg[0], rbg[1], rbg[2])
+
 
 def coloStroke(theSt, theCm):
     """Takes a Stroke object and returns a new stroke object with the colour
     replaced with the Color Mnem looked up, or determined from, the LIS_COLO_MAP."""
     return theSt._replace(colour=lisColo(theCm))
+
 
 ########################################
 # End: Handling LIS codings and colours.
@@ -381,60 +393,63 @@ def coloStroke(theSt, theCm):
 # tracks.
 ################################################
 
-#========================
+# ========================
 # Section: Curve backups.
-#========================
+# ========================
 # Backup tuple examples
 
 #: No backup
-BACKUP_NONE     = (1, -1)
+BACKUP_NONE = (1, -1)
 #: Every backup i.e. 'wrap' Note: Plot.py has a way of limiting ludicrous
 #: backup lines to a sensible number; say 8
-BACKUP_ALL      = (0, 0)
+BACKUP_ALL = (0, 0)
 #: Single backup to left or right
-BACKUP_ONCE     = (-1, 1)
+BACKUP_ONCE = (-1, 1)
 #: Two backups to left or right
-BACKUP_TWICE    = (-2, 2)
+BACKUP_TWICE = (-2, 2)
 #: Single backup to left only
-BACKUP_LEFT     = (0, -1)
+BACKUP_LEFT = (0, -1)
 #: Single backup to right only
-BACKUP_RIGHT    = (1, 0)
+BACKUP_RIGHT = (1, 0)
 
-#LIS Statistics
-#======================== Count of all table entries =======================
-#{"(34, b'PRES', b'MODE', b'GRAD')": 245,
+# LIS Statistics
+# ======================== Count of all table entries =======================
+# {"(34, b'PRES', b'MODE', b'GRAD')": 245,
 # "(34, b'PRES', b'MODE', b'NB  ')": 2329,
 # "(34, b'PRES', b'MODE', b'SHIF')": 597,
 # "(34, b'PRES', b'MODE', b'SWF ')": 3,
 # "(34, b'PRES', b'MODE', b'VDLN')": 3,
 # "(34, b'PRES', b'MODE', b'WRAP')": 186,
 # "(34, b'PRES', b'MODE', b'X10 ')": 10}
-#====================== Count of all table entries END =====================
+# ====================== Count of all table entries END =====================
 
 #: Map of backup mode to internal representation
 BACKUP_FROM_MODE_MAP = {
-    None    : BACKUP_ALL, # Default
-    b'SHIF' : BACKUP_ONCE,
-    b'GRAD' : BACKUP_NONE,
-    b'NB  ' : BACKUP_NONE,
-    b'WRAP' : BACKUP_ALL,
+    None: BACKUP_ALL,  # Default
+    b'SHIF': BACKUP_ONCE,
+    b'GRAD': BACKUP_NONE,
+    b'NB  ': BACKUP_NONE,
+    b'WRAP': BACKUP_ALL,
 }
-#========================
-# End: Curve backups.
-#========================
 
-#===============================
+
+# ========================
+# End: Curve backups.
+# ========================
+
+# ===============================
 # Section: Line transformations.
-#===============================
+# ===============================
 class LineTransBase(object):
     """Base class for line generators."""
+
     def __init__(self, leftP, rightP, leftL, rightL, backup):
         """Ctor with values; leftP, rightP are physical positions as numbers.
         leftL, rightL are logical scales as numbers.
         backup is a pair (left, right).
         Will raise a ExceptionLineTransBase if leftP >= rightP.
         """
-        #if isinstance(leftP, numbers.Number):
+        # if isinstance(leftP, numbers.Number):
         #    self._lP = 
         if leftP >= rightP:
             raise ExceptionLineTransBase('Left physical {:s} is >= than right {:s}'.format(str(leftP), str(rightP)))
@@ -443,22 +458,22 @@ class LineTransBase(object):
         self._lL = leftL
         self._rL = rightL
         self._bu = backup
-    
+
     @property
     def leftL(self):
         """The left value of the curve scale as a number."""
         return self._lL
-    
+
     @property
     def rightL(self):
         """The right value of the curve scale as a number."""
         return self._rL
-    
+
     def __str__(self):
         return '{:s} lP={:f} rP={:f} lL={:f} rR={:f} backup={:s}'.format(
             repr(self), self._lP, self._rP, self._lL, self._rL, str(self._bu)
         )
-    
+
     def L2P(self, val):
         """Scale a given value to a dimension."""
         raise NotImplementedError()
@@ -469,7 +484,7 @@ class LineTransBase(object):
         pos is a float that is the physical plot position of the value.
         TODO: Benchmark this, it could be slow."""
         raise NotImplementedError()
-    
+
     def offScale(self, w):
         """Returns 0 if wrap integer is on scale depending on the backup setting.
         Returns -1 if off scale low, +1 if off scale high."""
@@ -487,15 +502,17 @@ class LineTransBase(object):
         """True is wrap integer is off-scale high according to the backup setting."""
         return self.offScale(w) == 1
 
+
 class LineTransLin(LineTransBase):
     """Linear grid."""
+
     def __init__(self, leftP, rightP, leftL, rightL, backup=BACKUP_ALL):
         """Ctor with values; leftP, rightP are physical positions as numbers.
         leftL, rightL are logical scales as numbers.
         backup is a pair (left, right).
         """
         super().__init__(leftP, rightP, leftL, rightL, backup)
-#        print('LineTransLin.__init__():', leftP, rightP, leftL, rightL, backup)
+        #        print('LineTransLin.__init__():', leftP, rightP, leftL, rightL, backup)
         # Do as much computation here rather than in L2P
         self._den = self._rL - self._lL
         self._pWidth = self._rP - self._lP
@@ -516,8 +533,10 @@ class LineTransLin(LineTransBase):
         f = self._lP + (p - w) * self._pWidth
         return w, f
 
+
 class LineTransLog10(LineTransBase):
     """Logrithmic grid."""
+
     def __init__(self, leftP, rightP, leftL, rightR, backup=BACKUP_ALL):
         """Ctor with values; leftP, rightP are physical positions as numbers.
         leftL, rightL are logical scales as numbers.
@@ -528,7 +547,7 @@ class LineTransLog10(LineTransBase):
         self._pWidth = self._rP - self._lP
         self._scale = self._pWidth / self._den
         self._offset = self._lP - self._scale * math.log10(self._lL)
-        
+
     def L2P(self, val):
         """Scale a given value to a dimension."""
         return self._offset + self._scale * math.log10(val)
@@ -540,18 +559,20 @@ class LineTransLog10(LineTransBase):
         TODO: Benchmark this, it could be slow."""
         if val <= 0.0:
             raise ExceptionLineTransBaseMath('Can not plot -ve or zero value {:f} on a log scale.'.format(val))
-#        try:
-#            p = math.log10(val / self._lL) / self._den
-#        except ValueError:
-#            print('Help:', val, self._lL, self._den)
-#            raise
+        #        try:
+        #            p = math.log10(val / self._lL) / self._den
+        #        except ValueError:
+        #            print('Help:', val, self._lL, self._den)
+        #            raise
         p = math.log10(val / self._lL) / self._den
         w = math.floor(p)
         r = self._lP + (p - w) * self._pWidth
         return w, r
-#===============================
+
+
+# ===============================
 # Section: Line transformations.
-#===============================
+# ===============================
 ################################################
 # End: Line transforms for linear/log grids.
 ################################################
@@ -561,9 +582,11 @@ class LineTransLog10(LineTransBase):
 #: halfTrackStart, halfTracks are integers
 TrackWidthData = collections.namedtuple('TrackWidthData', 'leftP rightP halfTrackStart halfTracks')
 
+
 class CurveCfg(object):
     """Contains the configuration of a single curve."""
     DEFAULT_FILT = 0.5
+
     def __init__(self):
         """Populate attribute with reasonable default values.
         Second stage is to set:
@@ -575,10 +598,10 @@ class CurveCfg(object):
         self.outp = None
         # True if can be plotted
         self.stat = True
-#        # Trac is a mnem
+        #        # Trac is a mnem
         self.trac = None
         self.codiStroke = Stroke.StrokeBlackSolid._replace(
-                            width=DEFAULT_LLINE_WIDTH_PX
+            width=DEFAULT_LLINE_WIDTH_PX
         )
         # Entry in a FILM table e.g. b'1    '
         self.dest = None
@@ -594,39 +617,41 @@ class CurveCfg(object):
         # This contains the left/right positions, left/right scales, a backup
         # mode and, implicitly, a moderating function
         self._filmTrackFnMap = {}
-        
+
     def longStr(self):
         """Returns a long descriptive string of the internal state."""
         return '\n'.join(
             [
                 'CurveCfg: mnem=%s outp=%s, stat=%s, trac==%s, dest=%s' \
-                    % (self.mnem, self.outp, str(self.stat), self.trac, self.dest),
+                % (self.mnem, self.outp, str(self.stat), self.trac, self.dest),
                 '  Coding: {:s}'.format(self.codiStroke)
             ]
         )
-    
+
     def tracWidthData(self, theFilmID):
         """Returns a TrackWidthData object for the film ID."""
         logging.debug(
             'CurveCfg.tracWidthData({!r:s}): keys: {!r:s}'.format(theFilmID, str(self._filmTrackWidthMap.keys()))
         )
-        assert(theFilmID in self._filmTrackWidthMap), \
+        assert (theFilmID in self._filmTrackWidthMap), \
             'theFilmID "{:s}" not in self._filmTrackWidthMap: {:s}'.format(
                 str(theFilmID),
                 str(self._filmTrackWidthMap.keys()),
             )
         return self._filmTrackWidthMap[theFilmID]
-    
+
     def tracValueFunction(self, theFilmID):
         """Given a FILM ID (a Mnem() object) this returns a LineTransBase or
         derivation that describes how this curve is plotted on that film.
         In particular the return value will have a function wrapPos() for
         generating track positions from a value."""
         return self._filmTrackFnMap[theFilmID]
-    
+
+
 class CurveCfgLISRead(CurveCfg):
     #: Default backup mode
     DEFAULT_MODE = b'WRAP'
+
     def __init__(self, theRow, theFILMCfg):
         """Reads a LogiRec.TableRow object from a PRES table and populates a
         CurveCfg. theFILMCfg is expected to be a FILMCfgLISRead object.
@@ -640,8 +665,8 @@ class CurveCfgLISRead(CurveCfg):
         or a tuple of those missing. 
         """
         super().__init__()
-        assert(isinstance(theFILMCfg, FILMCfg.FilmCfgLISRead))
-#        print('CurveCfgLISRead.__init__() keys for theRow={:s}:'.format(theRow.value), [c.mnem for c in theRow.genCells()])
+        assert (isinstance(theFILMCfg, FILMCfg.FilmCfgLISRead))
+        #        print('CurveCfgLISRead.__init__() keys for theRow={:s}:'.format(theRow.value), [c.mnem for c in theRow.genCells()])
         self.mnem = Mnem.Mnem(theRow[b'MNEM'].value)
         try:
             self.outp = Mnem.Mnem(theRow[b'OUTP'].value)
@@ -664,7 +689,7 @@ class CurveCfgLISRead(CurveCfg):
                                                                                                            self.filt)
             )
         # Interpret track, we need theFILMCfg to help us here
-        #print(self.mnem, self.dest)
+        # print(self.mnem, self.dest)
         # Set self.trac to an object derived from LineTransBase
         try:
             self.mode = theRow[b'MODE'].value
@@ -679,7 +704,8 @@ class CurveCfgLISRead(CurveCfg):
             myBackup = BACKUP_FROM_MODE_MAP[self.mode]
         except KeyError:
             logging.warning(
-                'CurveCfgLISRead.__init__(): No BACKUP_FROM_MODE_MAP entry for {!r:s}, assuming the default.'.format(self.mode)
+                'CurveCfgLISRead.__init__(): No BACKUP_FROM_MODE_MAP entry for {!r:s}, assuming the default.'.format(
+                    self.mode)
             )
             # Use default
             myBackup = BACKUP_FROM_MODE_MAP[None]
@@ -688,7 +714,8 @@ class CurveCfgLISRead(CurveCfg):
             self.codiStroke = LIS_CODI_MAP[myCodi]
         except KeyError:
             logging.warning(
-                'CurveCfgLISRead.__init__(): No LIS_CODI_MAP entry for {!r:s}, assuming the default.'.format(str(myCodi))
+                'CurveCfgLISRead.__init__(): No LIS_CODI_MAP entry for {!r:s}, assuming the default.'.format(
+                    str(myCodi))
             )
             # Use default
             self.codiStroke = LIS_CODI_MAP[None]
@@ -710,16 +737,16 @@ class CurveCfgLISRead(CurveCfg):
                 logging.error('CurveCfgLISRead.__init__(): can not get trac: {:s}'.format(str(err)))
             else:
                 # myIntTrac can be None if the destination is NEIT for example
-                if myIntTrac is None: 
+                if myIntTrac is None:
                     logging.warning('Get None from theFILMCfg.interpretTrac(FILM ID={!r:s},'
-                        ' PRES DEST={!r:s}, PRES TRAC={!r:s})'.format(
-                            aFilmId, self.dest, self.trac
-                        )
+                                    ' PRES DEST={!r:s}, PRES TRAC={!r:s})'.format(
+                        aFilmId, self.dest, self.trac
+                    )
                     )
                 else:
                     # Make a new instance of TrackWidthData from the four part iterable
                     myTw = TrackWidthData._make(myIntTrac)
-                    #print('myTw', myTw)
+                    # print('myTw', myTw)
                     self._filmTrackWidthMap[aFilmId] = myTw
                     # Raise if the LEDG and the REDG make no sense
                     # Example: 200099.S06
@@ -745,22 +772,24 @@ class CurveCfgLISRead(CurveCfg):
                             theRow[b'LEDG'].value,
                             theRow[b'REDG'].value,
                             myBackup)
-        
+
+
 class PresCfg(object):
     """Contains the configuration equivalent to a complete PRES table."""
+
     def __init__(self):
         # Map of {Mnem.Mnem(curve_id) : CurveCfg, ...}
         self._curveCfgMap = {}
         # Map of (Mnem.Mnem(dest) : {Mnem.Mnem(output_channel_id) : [curve_id, ...], ...}, ...}
-        self._destOutpToCurveIdMap = {} 
-        
+        self._destOutpToCurveIdMap = {}
+
     def add(self, theCurveCfg, theFilmDestS):
         """Adds to the IR. theCurveCfg is a CurvCfg object, theFilmDestS is a
         list of film destinations expanded from the FILM table e.g. if the
         destination is b'ALL' then all FILM destination mnemonics should be in
         the list."""
         m = theCurveCfg.mnem
-        #print('add()', m, theFilmDestS)
+        # print('add()', m, theFilmDestS)
         if m in self._curveCfgMap:
             # NOTE: This is not likely to happen as the Logical Table will discard duplicates
             logging.warning('PresCfg.add(): Ignoring duplicate curve MNEM="{:s}'.format(m))
@@ -772,27 +801,27 @@ class PresCfg(object):
                     self._destOutpToCurveIdMap[aDest][theCurveCfg.outp].append(m)
                 except KeyError:
                     try:
-                        self._destOutpToCurveIdMap[aDest][theCurveCfg.outp] = [m,]
+                        self._destOutpToCurveIdMap[aDest][theCurveCfg.outp] = [m, ]
                     except KeyError:
                         self._destOutpToCurveIdMap[aDest] = {}
-                        self._destOutpToCurveIdMap[aDest][theCurveCfg.outp] = [m,]
-    
+                        self._destOutpToCurveIdMap[aDest][theCurveCfg.outp] = [m, ]
+
     def keys(self):
         """Returns the curve mnemonics."""
         return self._curveCfgMap.keys()
-    
+
     def __len__(self):
         """Number of curves in this table."""
         return len(self._curveCfgMap)
-    
+
     def __getitem__(self, theCurvID):
         """Returns the CurveCfg object corresponding to curve ID, a Mnem.Mnem object."""
         return self._curveCfgMap[theCurvID]
-    
+
     def __contains__(self, theCurvID):
         """Returns True if I have an entry for the curve ID, a Mnem.Mnem object."""
         return theCurvID in self._curveCfgMap
-    
+
     def hasCurvesForDest(self, theDest):
         """Returns True if there are curves that go to theDest i.e. FILM ID."""
         return theDest in self._destOutpToCurveIdMap
@@ -806,14 +835,16 @@ class PresCfg(object):
         that feeds those curves. The curve data is accessible by __getitem__().
         Arguments should be Mnem.Mnem objects"""
         return self._destOutpToCurveIdMap[theDest][theOutp][:]
-    
+
     def usesOutpChannel(self, theDest, theOutp):
         """Returns True if this PRES table + FILM  destination uses theOutp ID.
         Arguments should be , a Mnem.Mnem objects."""
-        return theOutp in self._destOutpToCurveIdMap[theDest] 
+        return theOutp in self._destOutpToCurveIdMap[theDest]
+
 
 class PresCfgLISRead(PresCfg):
     """Information from a complete LIS PRES table."""
+
     def __init__(self, theLr, theFILMCfg):
         """Reads a LogiRec.Table object of type PRES and creates a
         CurveCfgLISRead for each row. theFILMCfg is expected to be a
@@ -829,14 +860,16 @@ class PresCfgLISRead(PresCfg):
         """
         super().__init__()
         if theLr.type != LogiRec.LR_TYPE_WELL_DATA:
-            raise ExceptionPRESCfgLISRead('FilmCfgLISRead.__init__(): LR type={:d}, expected {:d}'.format(theLr.type, LogiRec.LR_TYPE_WELL_DATA))
+            raise ExceptionPRESCfgLISRead(
+                'FilmCfgLISRead.__init__(): LR type={:d}, expected {:d}'.format(theLr.type, LogiRec.LR_TYPE_WELL_DATA))
         if theLr.value != b'PRES':
             raise ExceptionPRESCfgLISRead('FilmCfgLISRead.__init__(): LR Table not a CONS table type "PRES".')
         for aRow in theLr.genRows():
-            #print('aRow.value', aRow.value, theFILMCfg.retAllFILMDestS(aRow.value))
+            # print('aRow.value', aRow.value, theFILMCfg.retAllFILMDestS(aRow.value))
             # Special case; we only process destinations that are not b'NEIT'
             if aRow[b'DEST'].value != b'NEIT':
                 try:
                     self.add(CurveCfgLISRead(aRow, theFILMCfg), theFILMCfg.retAllFILMDestS(aRow[b'DEST'].value))
                 except ExceptionCurveCfgCtor as err:
-                    logging.error('PresCfgLISRead.__init__(): Can not add curve {:s}, error is: {:s}'.format(aRow[b'MNEM'], err))
+                    logging.error(
+                        'PresCfgLISRead.__init__(): Can not add curve {:s}, error is: {:s}'.format(aRow[b'MNEM'], err))

@@ -21,10 +21,10 @@
 """
 import pytest
 
-__author__  = 'Paul Ross'
-__date__    = '8 Nov 2010'
+__author__ = 'Paul Ross'
+__date__ = '8 Nov 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2010 Paul Ross.'
+__rights__ = 'Copyright (c) 2010 Paul Ross.'
 
 import os
 import sys
@@ -42,8 +42,10 @@ import BaseTestClasses
 ######################
 import unittest
 
+
 class TestPhysRecLowLevel(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         self._pr = PhysRec.PhysRecRead(theFile=io.BytesIO(b''), theFileId='MyFile', keepGoing=False)
@@ -56,7 +58,7 @@ class TestPhysRecLowLevel(unittest.TestCase):
     def test_00(self):
         """TestPhysRecLowLevel.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def _isAllClear(self):
         """retrusn true if all bits are clear."""
         for i in self._prBits:
@@ -82,9 +84,9 @@ class TestPhysRecLowLevel(unittest.TestCase):
     def test_02(self):
         """TestPhysRecLowLevel.test_02(): Clear each attribute bits and test."""
         for i in self._prBits:
-            #print('Was: i=', i, '{0:016b}'.format(self._pr.prAttr))
+            # print('Was: i=', i, '{0:016b}'.format(self._pr.prAttr))
             self._pr._clearAttrBit(i)
-            #print('Now: i=', i, '{0:016b}'.format(self._pr.prAttr))
+            # print('Now: i=', i, '{0:016b}'.format(self._pr.prAttr))
             self.assertTrue(self._pr._isAttrBitClear(i))
             self.assertFalse(self._pr._isAttrBitSet(i))
         self.assertTrue(self._isAllClear())
@@ -211,9 +213,11 @@ class TestPhysRecLowLevel(unittest.TestCase):
 
 class TestPhysRecSingleRead(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
-        myFi = io.BytesIO(b'\x00>\x00\x00\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        myFi = io.BytesIO(
+            b'\x00>\x00\x00\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         self._pr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
 
     def tearDown(self):
@@ -223,17 +227,18 @@ class TestPhysRecSingleRead(unittest.TestCase):
     def test_00(self):
         """TestPhysRecRead.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecRead.test_01(): Single physical record."""
         myLd = self._pr.readLrBytes()
         self.assertEqual(len(myLd), 58)
-        self.assertEqual(myLd, b'\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-#        try:
-#            self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        self.assertEqual(myLd,
+                         b'\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        #        try:
+        #            self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self._pr.skipToNextLr()
         self.assertTrue(self._pr.isEOF)
 
@@ -246,28 +251,32 @@ class TestPhysRecSingleRead(unittest.TestCase):
     def test_03(self):
         """TestPhysRecRead.test_03(): Single physical record __str__()."""
         myLd = self._pr.readLrBytes()
-        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False),
+                         'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
         self.assertEqual(str(self._pr), 'PR: 0x       0      62  0x   0      58  ------  ------  ------')
 
     def test_04(self):
         """TestPhysRecRead.test_04(): Single physical record __str__() at EOF."""
         myLd = self._pr.readLrBytes()
-        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False),
+                         'PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
         self.assertEqual(str(self._pr), 'PR: 0x       0      62  0x   0      58  ------  ------  ------')
         self.assertTrue(self._pr.readLrBytes() is None)
         self.assertEqual(str(self._pr), 'PR: EOF')
 
+
 class TestPhysRecSingleReadWithTif(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         myFi = io.BytesIO(
             # Opening TIF
-            b'\x00\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x4a\x00\x00\x00' \
+            b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x4a\x00\x00\x00' \
             + b'\x00>\x00\x00\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \
             # EOF
-            + b'\x01\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x56\x00\x00\x00' \
-            +b'\x01\x00\x00\x00'+b'\x4a\x00\x00\x00'+b'\x62\x00\x00\x00'
+            + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x56\x00\x00\x00' \
+            + b'\x01\x00\x00\x00' + b'\x4a\x00\x00\x00' + b'\x62\x00\x00\x00'
         )
         self._pr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
 
@@ -278,28 +287,31 @@ class TestPhysRecSingleReadWithTif(unittest.TestCase):
     def test_00(self):
         """TestPhysRecSingleReadWithTif.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecSingleReadWithTif.test_01(): Single physical record."""
         myLd = self._pr.readLrBytes()
         self.assertEqual(len(myLd), 58)
-        self.assertEqual(myLd, b'\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-#        try:
-#            self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        self.assertEqual(myLd,
+                         b'\x80\x00RUNONE.R01\x00\x00DATAZE                \x00 1024\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        #        try:
+        #            self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self._pr.skipToNextLr()
         self.assertTrue(self._pr.isEOF)
 
     def test_03(self):
         """TestPhysRecSingleReadWithTif.test_01(): Single physical record __str__()."""
         myLd = self._pr.readLrBytes()
-        #print
-        #print(self._pr.strHeader())
-        self.assertEqual(self._pr.strHeader(inc_attributes_short=False), 'TIF     ?  :        Type        Back        Next  PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
-        #print(self._pr)
-        self.assertEqual(str(self._pr), 'TIF  True >:  0x       0  0x       0  0x      4a  PR: 0x       0      62  0x   0      58  ------  ------  ------')
+        # print
+        # print(self._pr.strHeader())
+        self.assertEqual(self._pr.strHeader(inc_attributes_short=False),
+                         'TIF     ?  :        Type        Back        Next  PR:     tell()  Length    Attr  LD_len  RecNum  FilNum  ChkSum')
+        # print(self._pr)
+        self.assertEqual(str(self._pr),
+                         'TIF  True >:  0x       0  0x       0  0x      4a  PR: 0x       0      62  0x   0      58  ------  ------  ------')
 
     def test_04(self):
         """TestPhysRecSingleReadWithTif.test_01(): Single physical record, read one byte then seekCurrentLrStart()."""
@@ -309,8 +321,10 @@ class TestPhysRecSingleReadWithTif(unittest.TestCase):
         myLd = self._pr.readLrBytes(1)
         self.assertEqual(myLd, b'\x80')
 
+
 class TestPhysRecTrailer(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -322,7 +336,7 @@ class TestPhysRecTrailer(unittest.TestCase):
     def test_00(self):
         """TestPhysRecTrailer.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecTrailer.test_01(): No trailer, no logical data."""
         myFi = io.BytesIO(
@@ -341,7 +355,7 @@ class TestPhysRecTrailer(unittest.TestCase):
         """TestPhysRecTrailer.test_02(): trailer record number."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(6) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<9) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 9) \
             + b'\x00\xff'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -355,7 +369,7 @@ class TestPhysRecTrailer(unittest.TestCase):
         """TestPhysRecTrailer.test_03(): trailer file number."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(6) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<10) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 10) \
             + b'\x00\x0f'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -369,7 +383,7 @@ class TestPhysRecTrailer(unittest.TestCase):
         """TestPhysRecTrailer.test_04(): trailer checksum."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(6) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<12) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 12) \
             + b'\xff\xff'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -383,7 +397,7 @@ class TestPhysRecTrailer(unittest.TestCase):
         """TestPhysRecTrailer.test_05(): trailer record, file and checksum."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(10) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(11<<9) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(11 << 9) \
             + b'\x00\x01' \
             + b'\x00\x02' \
             + b'\x00\x03'
@@ -394,8 +408,10 @@ class TestPhysRecTrailer(unittest.TestCase):
         self.assertEqual(myPr.fileNum, 2)
         self.assertEqual(myPr.checksum, 3)
 
+
 class TestPhysRecFail(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -407,7 +423,7 @@ class TestPhysRecFail(unittest.TestCase):
     def test_00(self):
         """TestPhysRecFail.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecFail.test_01(): Single physical record with negative logical data length."""
         myFi = io.BytesIO(
@@ -427,7 +443,7 @@ class TestPhysRecFail(unittest.TestCase):
         myFi = io.BytesIO(
             # Length of 5 with record trailer is negative logical length
             PhysRec.PR_PRH_LEN_FORMAT.pack(5) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<9) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 9) \
             + b'\xff\xff'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -442,7 +458,7 @@ class TestPhysRecFail(unittest.TestCase):
         myFi = io.BytesIO(
             # Length of 5 with file number trailer is negative logical length
             PhysRec.PR_PRH_LEN_FORMAT.pack(5) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<10) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 10) \
             + b'\xff\xff'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -457,7 +473,7 @@ class TestPhysRecFail(unittest.TestCase):
         myFi = io.BytesIO(
             # Length of 5 with checksum trailer is negative logical length
             PhysRec.PR_PRH_LEN_FORMAT.pack(5) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<12) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 12) \
             + b'\xff\xff'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
@@ -471,7 +487,7 @@ class TestPhysRecFail(unittest.TestCase):
         """TestPhysRecFail.test_05(): Type 1 Physical Record raises exception."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(4) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_TYPE_BIT)
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << PhysRec.PR_TYPE_BIT)
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
         try:
@@ -503,8 +519,8 @@ class TestPhysRecFail(unittest.TestCase):
         """TestPhysRecTrailer.test_20(): trailer record number declared but absent."""
         myFi = io.BytesIO(
             PhysRec.PR_PRH_LEN_FORMAT.pack(10) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<9) \
-        )
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 9) \
+            )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
         try:
             myLd = myPr.readLrBytes()
@@ -538,7 +554,7 @@ class TestPhysRecFail(unittest.TestCase):
             + b'\x00'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
-        #self.assertEqual(b'\x00', myPr.readLrBytes())
+        # self.assertEqual(b'\x00', myPr.readLrBytes())
         try:
             myPr.readLrBytes()
             self.fail('PhysRec.ExceptionPhysRec not raised on preamature EOF')
@@ -572,7 +588,7 @@ class TestPhysRecFail(unittest.TestCase):
         myFi = io.BytesIO(
             # Length of 3 is negative logical length
             PhysRec.PR_PRH_LEN_FORMAT.pack(7) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<9) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 9) \
             + b'\x00'
             # Absent trailer
         )
@@ -589,7 +605,7 @@ class TestPhysRecFail(unittest.TestCase):
         myFi = io.BytesIO(
             # Length of 3 is negative logical length
             PhysRec.PR_PRH_LEN_FORMAT.pack(7) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<9) \
+            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1 << 9) \
             + b'\x00'
             # Absent trailer
         )
@@ -608,8 +624,10 @@ class TestPhysRecFail(unittest.TestCase):
         except PhysRec.ExceptionPhysRec:
             pass
 
+
 class TestPhysRecMultipleRead(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -621,12 +639,12 @@ class TestPhysRecMultipleRead(unittest.TestCase):
     def test_00(self):
         """TestPhysRecMultipleRead.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecMultipleRead.test_01(): Single physical record."""
-        #print()
-        #print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
-        #print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
+        # print()
+        # print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
+        # print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
         myFi = io.BytesIO(
             # First PR, has a single logical byte
             b'\x00\x05' \
@@ -637,19 +655,19 @@ class TestPhysRecMultipleRead(unittest.TestCase):
         myLd = myPr.readLrBytes()
         self.assertEqual(len(myLd), 1)
         self.assertEqual(myLd, b'\xff')
-#        try:
-#            myPr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myPr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         myPr.skipToNextLr()
         self.assertTrue(myPr.isEOF)
 
     def test_02(self):
         """TestPhysRecMultipleRead.test_02(): Single logical data, two physical records."""
-        #print()
-        #print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
-        #print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
+        # print()
+        # print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
+        # print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
@@ -667,11 +685,11 @@ class TestPhysRecMultipleRead(unittest.TestCase):
         myLd = myPr.readLrBytes()
         self.assertEqual(len(myLd), 4)
         self.assertEqual(myLd, b'\x00\x01\x02\x03')
-#        try:
-#            myPr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myPr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         myPr.skipToNextLr()
         self.assertTrue(myPr.isEOF)
 
@@ -695,11 +713,11 @@ class TestPhysRecMultipleRead(unittest.TestCase):
         myLd = myPr.readLrBytes()
         self.assertEqual(len(myLd), 4)
         self.assertEqual(myLd, b'\x00\x01\x02\x03')
-#        try:
-#            myPr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myPr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         myPr.skipToNextLr()
         self.assertTrue(myPr.isEOF)
 
@@ -716,40 +734,42 @@ class TestPhysRecMultipleRead(unittest.TestCase):
             + b'\x01\x02\x03'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
-        #print
-        #for i in range(4):
+        # print
+        # for i in range(4):
         #    print(myPr.readLrBytes(1))
-        #return
-        #assert(0)
+        # return
+        # assert(0)
         myLd = bytes()
         for i in range(4):
             myLd = myPr.readLrBytes(1, myLd)
         self.assertEqual(len(myLd), 4)
         self.assertEqual(myLd, b'\x00\x01\x02\x03')
         self.assertTrue(myPr.readLrBytes() is None)
-#        try:
-#            myPr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myPr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         myPr.skipToNextLr()
         self.assertTrue(myPr.isEOF)
 
+
 class TestPhysRecMultipleReadWithTif(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
-        #print()
-        #print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
-        #print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
+        # print()
+        # print(PhysRec.PR_PRH_LEN_FORMAT.pack(3))
+        # print(PhysRec.PR_PRH_ATTR_FORMAT.pack(1<<PhysRec.PR_SUCCESSOR_ATTRIBUTE_BIT)
         myFi = io.BytesIO(
             # Opening TIF
-            b'\x00\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x11\x00\x00\x00' \
+            b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x11\x00\x00\x00' \
             # First PR, has a single logical byte
             + b'\x00\x05\x00\x00\xff' \
             # EOF
-            + b'\x01\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x1d\x00\x00\x00' \
-            +b'\x01\x00\x00\x00'+b'\x11\x00\x00\x00'+b'\x29\x00\x00\x00'
+            + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x1d\x00\x00\x00' \
+            + b'\x01\x00\x00\x00' + b'\x11\x00\x00\x00' + b'\x29\x00\x00\x00'
         )
         self._pr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
 
@@ -760,22 +780,24 @@ class TestPhysRecMultipleReadWithTif(unittest.TestCase):
     def test_00(self):
         """TestPhysRecSingleReadWithTif.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecSingleReadWithTif.test_01(): Single physical record."""
         myLd = self._pr.readLrBytes()
         self.assertEqual(len(myLd), 1)
         self.assertEqual(myLd, b'\xff')
-#        try:
-#            myLd = self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myLd = self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self._pr.skipToNextLr()
         self.assertTrue(self._pr.isEOF)
 
+
 class TestPhysRecGenLd(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -787,23 +809,23 @@ class TestPhysRecGenLd(unittest.TestCase):
     def test_00(self):
         """TestPhysRecGenLd.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecGenLd.test_01(): Single physical record."""
         myFi = io.BytesIO(
             # Opening TIF
-            b'\x00\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x11\x00\x00\x00' \
+            b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x11\x00\x00\x00' \
             # First PR, has a single logical byte
             + b'\x00\x05' \
             + b'\x00\x00' \
             + b'\xff' \
             # EOF
-            + b'\x01\x00\x00\x00'+b'\x00\x00\x00\x00'+b'\x1d\x00\x00\x00' \
-            +b'\x01\x00\x00\x00'+b'\x11\x00\x00\x00'+b'\x62\x00\x00\x00'
+            + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x1d\x00\x00\x00' \
+            + b'\x01\x00\x00\x00' + b'\x11\x00\x00\x00' + b'\x62\x00\x00\x00'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
         for aLd in myPr.genLd():
-            #print(aLd)
+            # print(aLd)
             pass
         self.assertTrue(myPr.isEOF)
         try:
@@ -812,8 +834,10 @@ class TestPhysRecGenLd(unittest.TestCase):
         except PhysRec.ExceptionPhysRecEOF:
             pass
 
+
 class TestPhysRecMultipleSkip(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -825,7 +849,7 @@ class TestPhysRecMultipleSkip(unittest.TestCase):
     def test_00(self):
         """TestPhysRecMultipleSkip.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecMultipleSkip.test_01(): Single physical record."""
         myFi = io.BytesIO(
@@ -878,8 +902,10 @@ class TestPhysRecMultipleSkip(unittest.TestCase):
         except PhysRec.ExceptionPhysRecEOF:
             pass
 
+
 class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         # Suc no Pre: 1
@@ -903,17 +929,17 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
             # PR 2/3, has a seven logical bytes
             + b'\x00\x0B' \
             + b'\x00\x03' \
-            + bytes(range(6,6+7)) \
+            + bytes(range(6, 6 + 7)) \
             # PR 3/3, has a five logical bytes
             + b'\x00\x09' \
             + b'\x00\x02' \
-            + bytes(range(6+7,6+7+5)) \
+            + bytes(range(6 + 7, 6 + 7 + 5)) \
             # Second LD starts at position 38: eight bytes long
             # First PR, has a eight logical bytes
             + b'\x00\x0C' \
             + b'\x00\x00' \
-            + bytes(range(18,18+8))
-        ) 
+            + bytes(range(18, 18 + 8))
+        )
         myFi = io.BytesIO(myBytes)
         self._pr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
 
@@ -924,10 +950,10 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
     def test_00(self):
         """TestPhysRecRandomAccessLogicalData.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecRandomAccessLogicalData.test_01(): Three logical records, numerous physical records: use genLd()."""
-        #print()
+        # print()
         myLdS = [aLd for aLd in self._pr.genLd()]
         self.assertEqual(
             myLdS,
@@ -938,7 +964,7 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
                 (b'\x06\x07\x08\t\n\x0b\x0c', False),
                 (b'\r\x0e\x0f\x10\x11', False),
                 (b'\x12\x13\x14\x15\x16\x17\x18\x19', True),
-            ] 
+            ]
         )
         self.assertTrue(self._pr.isEOF)
         try:
@@ -949,11 +975,11 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
 
     def test_02(self):
         """TestPhysRecRandomAccessLogicalData.test_02(): tellLr() for each physical record."""
-        #print()
+        # print()
         myLdS = [self._pr.tellLr() for aLd in self._pr.genLd()]
         self.assertEqual(
             myLdS,
-            [0, 0, 12, 12, 12, 38] 
+            [0, 0, 12, 12, 12, 38]
         )
         self.assertTrue(self._pr.isEOF)
         try:
@@ -967,59 +993,59 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
         self.assertEqual(self._pr.tellLr(), 0)
         self.assertEqual(self._pr.readLrBytes(), bytes(range(4)))
         self.assertEqual(self._pr.tellLr(), 0)
-        self.assertEqual(self._pr.readLrBytes(), bytes(range(4,4+14)))
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
-        self.assertEqual(self._pr.readLrBytes(), bytes(range(4+14,4+14+8)))
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.readLrBytes(), bytes(range(4, 4 + 14)))
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
+        self.assertEqual(self._pr.readLrBytes(), bytes(range(4 + 14, 4 + 14 + 8)))
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self.assertTrue(self._pr.readLrBytes() is None)
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         try:
             self._pr.skipToNextLr()
             self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
         except PhysRec.ExceptionPhysRecEOF:
             pass
         self.assertTrue(self._pr.isEOF)
-        
+
     def test_04(self):
         """TestPhysRecRandomAccessLogicalData.test_04(): use skipLrBytes() and tellLr()."""
         self.assertEqual(self._pr.tellLr(), 0)
         self.assertEqual(self._pr.skipLrBytes(), 4)
         self.assertEqual(self._pr.tellLr(), 0)
         self.assertEqual(self._pr.skipLrBytes(), 14)
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
         self.assertEqual(self._pr.skipLrBytes(), 8)
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self.assertEqual(0, self._pr.skipLrBytes())
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         try:
             self._pr.skipToNextLr()
             self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
         except PhysRec.ExceptionPhysRecEOF:
             pass
         self.assertTrue(self._pr.isEOF)
-        
+
     def test_05(self):
         """TestPhysRecRandomAccessLogicalData.test_05(): use readLrBytes(2), skipLrBytes() and tellLr()."""
         self.assertEqual(self._pr.tellLr(), 0)
         # First logical record
         self.assertEqual(self._pr.readLrBytes(2), bytes(range(2)))
-        self.assertEqual(self._pr.skipLrBytes(), 4-2)
+        self.assertEqual(self._pr.skipLrBytes(), 4 - 2)
         self.assertEqual(self._pr.tellLr(), 0)
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4,4+2)))
-        self.assertEqual(self._pr.skipLrBytes(), 14-2)
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4+14,4+14+2)))
-        self.assertEqual(self._pr.skipLrBytes(), 8-2)
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4, 4 + 2)))
+        self.assertEqual(self._pr.skipLrBytes(), 14 - 2)
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4 + 14, 4 + 14 + 2)))
+        self.assertEqual(self._pr.skipLrBytes(), 8 - 2)
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self.assertTrue(self._pr.readLrBytes() is None)
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         try:
             self._pr.skipToNextLr()
             self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
         except PhysRec.ExceptionPhysRecEOF:
             pass
         self.assertTrue(self._pr.isEOF)
-        
+
     def test_06(self):
         """TestPhysRecRandomAccessLogicalData.test_06(): use readLrBytes(2), skipToNextLr() and tellLr()."""
         self.assertEqual(self._pr.tellLr(), 0)
@@ -1027,19 +1053,19 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
         self.assertEqual(self._pr.readLrBytes(2), bytes(range(2)))
         self.assertEqual(self._pr.tellLr(), 0)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4,4+2)))
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4, 4 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4+14,4+14+2)))
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4 + 14, 4 + 14 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self._pr.skipToNextLr()
-#        try:
-#            self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self.assertTrue(self._pr.isEOF)
-        
+
     def test_07(self):
         """TestPhysRecRandomAccessLogicalData.test_07(): use readLrBytes(2)/skipToNextLr()/tellLr() twice with seekLr(0)."""
         self.assertEqual(self._pr.tellLr(), 0)
@@ -1047,17 +1073,17 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
         self.assertEqual(self._pr.readLrBytes(2), bytes(range(2)))
         self.assertEqual(self._pr.tellLr(), 0)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4,4+2)))
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4, 4 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4+14,4+14+2)))
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4 + 14, 4 + 14 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self._pr.skipToNextLr()
-#        try:
-#            self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self.assertTrue(self._pr.isEOF)
         # All over again
         self._pr.seekLr(0)
@@ -1066,26 +1092,27 @@ class TestPhysRecRandomAccessLogicalData(unittest.TestCase):
         self.assertEqual(self._pr.readLrBytes(2), bytes(range(2)))
         self.assertEqual(self._pr.tellLr(), 0)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4,4+2)))
-        self.assertEqual(self._pr.tellLr(), 4*2 + 4)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4, 4 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 2 + 4)
         self._pr.skipToNextLr()
-        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4+14,4+14+2)))
-        self.assertEqual(self._pr.tellLr(), 4*5 + 4 + 14)
+        self.assertEqual(self._pr.readLrBytes(2), bytes(range(4 + 14, 4 + 14 + 2)))
+        self.assertEqual(self._pr.tellLr(), 4 * 5 + 4 + 14)
         self._pr.skipToNextLr()
-#        try:
-#            self._pr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            self._pr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         self.assertTrue(self._pr.isEOF)
 
 
 @pytest.mark.slow
 class TestPhysRecWriteRead_PerfBase(BaseTestClasses.TestBase):
     """Writes a PR then times how long it takes to read it."""
+
     def _writeToFile(self, prLen, lrLen, lrNum):
         myFi = io.BytesIO()
-        #myFi.write(b'asd')
+        # myFi.write(b'asd')
         myPrw = PhysRec.PhysRecWrite(
             myFi,
             theFileId='WriteFile',
@@ -1112,6 +1139,7 @@ class TestPhysRecWriteRead_PerfBase(BaseTestClasses.TestBase):
 @pytest.mark.slow
 class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
     """Writes a PR then times how long it takes to read it."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1123,16 +1151,16 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
     def test_00(self):
         """TestPhysRecWriteRead_Perf.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPhysRecWriteRead_Perf.test_01(): Write single logical record."""
         myFi = self._writeToFile(1024, 1024, 1)
-        #myPr.close()
-        #print()
-        #print('myFi.getvalue()', myFi.getvalue())
+        # myPr.close()
+        # print()
+        # print('myFi.getvalue()', myFi.getvalue())
         myPrr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
         myLd = myPrr.readLrBytes()
-        #print('myLd', myLd)
+        # print('myLd', myLd)
         self.assertEqual(b'\xff' * 1024, myLd)
 
     def test_02(self):
@@ -1144,7 +1172,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03(self):
         """TestPhysRecWriteRead_Perf.test_03(): 1k LRs that are 8kB."""
@@ -1155,7 +1183,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_01(self):
         """TestPhysRecWriteRead_Perf.test_03_01():  128 LRs that are 64kB, 128B PRs."""
@@ -1166,7 +1194,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_02(self):
         """TestPhysRecWriteRead_Perf.test_03_02():  128 LRs that are 64kB, 256B PRs."""
@@ -1177,7 +1205,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_03(self):
         """TestPhysRecWriteRead_Perf.test_03_03():  128 LRs that are 64kB, 512B PRs."""
@@ -1188,7 +1216,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_04(self):
         """TestPhysRecWriteRead_Perf.test_03_04():  128 LRs that are 64kB, 1kB PRs."""
@@ -1199,7 +1227,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_05(self):
         """TestPhysRecWriteRead_Perf.test_03_05():  128 LRs that are 64kB, 2kB PRs."""
@@ -1210,7 +1238,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_06(self):
         """TestPhysRecWriteRead_Perf.test_03_06():  128 LRs that are 64kB, 4kB PRs."""
@@ -1221,7 +1249,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_07(self):
         """TestPhysRecWriteRead_Perf.test_03_07():  128 LRs that are 64kB, 8kB PRs."""
@@ -1232,7 +1260,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_08(self):
         """TestPhysRecWriteRead_Perf.test_03_08():  128 LRs that are 64kB, 16kB PRs."""
@@ -1243,7 +1271,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_09(self):
         """TestPhysRecWriteRead_Perf.test_03_09():  128 LRs that are 64kB, 32kB PRs."""
@@ -1254,7 +1282,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_03_10(self):
         """TestPhysRecWriteRead_Perf.test_03_10():  128 LRs that are 64kB, 64kB PRs."""
@@ -1266,7 +1294,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
     def test_04(self):
         """TestPhysRecWriteRead_Perf.test_04(): 8k LRs that are 8kB."""
@@ -1277,7 +1305,7 @@ class TestPhysRecWriteRead_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
 
 @pytest.mark.slow
@@ -1285,28 +1313,28 @@ class Special_Perf(TestPhysRecWriteRead_PerfBase):
     """Special tests."""
     pass
 
-#    def test_01(self):
-#        """TestPhysRecWriteRead_Perf.test_01(): Write single logical record."""
-#        myFi = self._writeToFile(prLen=1024, lrLen=16, lrNum=1)
-#        #myPr.close()
-#        #print()
-#        #print('myFi.getvalue()', myFi.getvalue())
-#        #print('myFi.getvalue()', [x for x in myFi.getvalue()])
-#        myPrr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
-#        myLd = myPrr.readLrBytes()
-#        #print('myLd', myLd)
-#        self.assertEqual(b'\xff' * 16, myLd)
-#
-#    def test_03_01(self):
-#        """TestPhysRecWriteRead_Perf.test_03_01():  128 LRs that are 8kB, 128B PRs."""
-#        prLen = 128
-#        lrSize = 64 * 1024
-#        lrNum = 128
-#        myFi = self._writeToFile(prLen, lrSize, lrNum)
-#        tS = time.perf_counter()
-#        lrCount = self._readFile(myFi)
-#        self.assertEqual(lrNum, lrCount)
-#        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+    #    def test_01(self):
+    #        """TestPhysRecWriteRead_Perf.test_01(): Write single logical record."""
+    #        myFi = self._writeToFile(prLen=1024, lrLen=16, lrNum=1)
+    #        #myPr.close()
+    #        #print()
+    #        #print('myFi.getvalue()', myFi.getvalue())
+    #        #print('myFi.getvalue()', [x for x in myFi.getvalue()])
+    #        myPrr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
+    #        myLd = myPrr.readLrBytes()
+    #        #print('myLd', myLd)
+    #        self.assertEqual(b'\xff' * 16, myLd)
+    #
+    #    def test_03_01(self):
+    #        """TestPhysRecWriteRead_Perf.test_03_01():  128 LRs that are 8kB, 128B PRs."""
+    #        prLen = 128
+    #        lrSize = 64 * 1024
+    #        lrNum = 128
+    #        myFi = self._writeToFile(prLen, lrSize, lrNum)
+    #        tS = time.perf_counter()
+    #        lrCount = self._readFile(myFi)
+    #        self.assertEqual(lrNum, lrCount)
+    #        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
 
     def test_03_10(self):
         """TestPhysRecWriteRead_Perf.test_03_10():  128 LRs that are 64kB, 64kB PRs."""
@@ -1318,58 +1346,58 @@ class Special_Perf(TestPhysRecWriteRead_PerfBase):
         tS = time.perf_counter()
         lrCount = self._readFile(myFi)
         self.assertEqual(lrNum, lrCount)
-        self.writeCostToStderr(tS, lrSize*lrNum, 'PR len', prLen)
+        self.writeCostToStderr(tS, lrSize * lrNum, 'PR len', prLen)
 
 
 @pytest.mark.parametrize(
     'byt, pad_modulo, pad_non_null, expected_logical_data_lengths',
     (
-        (
             (
-                # 4 byte PRH.
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 132 in total.
-                b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 138 in total.
-                b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
-                # Two bytes to pad to 140 total (modulo 4)
-                b'\x00\x00'  # Padding
-                # 4 byte PRH to 144 total
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 272 total
-                b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 278 total, not modulo 4.
-                b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
-                # 2 pad bytes to 280 total, modulo 4.
-                b'\x00\x00'
+                    (
+                            # 4 byte PRH.
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 132 in total.
+                            b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 138 in total.
+                            b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
+                            # Two bytes to pad to 140 total (modulo 4)
+                            b'\x00\x00'  # Padding
+                            # 4 byte PRH to 144 total
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 272 total
+                            b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 278 total, not modulo 4.
+                            b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
+                            # 2 pad bytes to 280 total, modulo 4.
+                            b'\x00\x00'
+                    ),
+                    4,
+                    False,
+                    [128, 128]
             ),
-            4,
-            False,
-            [128, 128]
-        ),
-        (
             (
-                # 4 byte PRH.
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 132 in total.
-                b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 138 in total.
-                b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
-                # Two bytes to pad to 140 total (modulo 4)
-                b'\x00\xff'  # Padding
-                # 4 byte PRH to 144 total
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 272 total
-                b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 278 total, not modulo 4.
-                b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
-                # 2 pad bytes to 280 total, modulo 4.
-                b'\xff\x00'
+                    (
+                            # 4 byte PRH.
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 132 in total.
+                            b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 138 in total.
+                            b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
+                            # Two bytes to pad to 140 total (modulo 4)
+                            b'\x00\xff'  # Padding
+                            # 4 byte PRH to 144 total
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 272 total
+                            b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 278 total, not modulo 4.
+                            b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
+                            # 2 pad bytes to 280 total, modulo 4.
+                            b'\xff\x00'
+                    ),
+                    4,
+                    True,
+                    [128, 128]
             ),
-            4,
-            True,
-            [128, 128]
-        ),
     )
 )
 def test_consume_physical_record_padding(byt, pad_modulo, pad_non_null, expected_logical_data_lengths):
@@ -1391,52 +1419,52 @@ def test_consume_physical_record_padding(byt, pad_modulo, pad_non_null, expected
 @pytest.mark.parametrize(
     'byt, pad_modulo, pad_non_null, expected_error',
     (
-        (
             (
-                # 4 byte PRH.
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 132 in total.
-                b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 138 in total.
-                b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
-                # Two bytes to pad to 140 total (modulo 4)
-                b'\x00\x00'  # Padding
-                # 4 byte PRH to 144 total
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 272 total
-                b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 278 total, not modulo 4.
-                b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
-                # 2 pad bytes to 280 total, modulo 4.
-                b'\x00\x00'
+                    (
+                            # 4 byte PRH.
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 132 in total.
+                            b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 138 in total.
+                            b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
+                            # Two bytes to pad to 140 total (modulo 4)
+                            b'\x00\x00'  # Padding
+                            # 4 byte PRH to 144 total
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 272 total
+                            b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 278 total, not modulo 4.
+                            b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
+                            # 2 pad bytes to 280 total, modulo 4.
+                            b'\x00\x00'
+                    ),
+                    0,
+                    False,
+                    'PhysRecRead._readHead(): Illegal negative logical data length: -4',
             ),
-            0,
-            False,
-            'PhysRecRead._readHead(): Illegal negative logical data length: -4',
-        ),
-        (
             (
-                # 4 byte PRH.
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 132 in total.
-                b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 138 in total.
-                b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
-                # Two bytes to pad to 140 total (modulo 4)
-                b'\xff\xff'  # Padding
-                # 4 byte PRH to 144 total
-                b'\x00\x8a\x96\x00'
-                # 128 bytes to 272 total
-                b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
-                # 6 byte PRT to 278 total, not modulo 4.
-                b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
-                # 2 pad bytes to 280 total, modulo 4.
-                b'\xff\xff'
+                    (
+                            # 4 byte PRH.
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 132 in total.
+                            b'\x84\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 138 in total.
+                            b'\x00\x01\xa0\x86\xde\x07'  # trailer record number, file number, checksum
+                            # Two bytes to pad to 140 total (modulo 4)
+                            b'\xff\xff'  # Padding
+                            # 4 byte PRH to 144 total
+                            b'\x00\x8a\x96\x00'
+                            # 128 bytes to 272 total
+                            b'\x82\x00            89/08/20  CSU   MWA-801   00            SCHLUMBERGER WELL SERVICES CSU TAPE                                       '
+                            # 6 byte PRT to 278 total, not modulo 4.
+                            b'\x00\x02\xa0\x86\xe1\xff'  # trailer record number, file number, checksum
+                            # 2 pad bytes to 280 total, modulo 4.
+                            b'\xff\xff'
+                    ),
+                    4,
+                    False,
+                    'PhysRecRead.__readLdWithinPr() on EOF, wanted 65531 got 138',
             ),
-            4,
-            False,
-            'PhysRecRead.__readLdWithinPr() on EOF, wanted 65531 got 138',
-        ),
     )
 )
 def test_consume_physical_record_padding_fails(byt, pad_modulo, pad_non_null, expected_error):
@@ -1455,16 +1483,15 @@ def test_consume_physical_record_padding_fails(byt, pad_modulo, pad_non_null, ex
 @pytest.mark.parametrize(
     'value, value_min, value_max, expected',
     (
-        (0, 0, 127, 0),
-        (127, 0, 127, 127),
-        (128, 0, 127, 0),
-        (-128, 0, 127, 0),
+            (0, 0, 127, 0),
+            (127, 0, 127, 127),
+            (128, 0, 127, 0),
+            (-128, 0, 127, 0),
     )
 )
 def test_physrectail_normalise_integer(value, value_min, value_max, expected):
     result = PhysRec.PhysRecTail.normalise_integer(value, value_min, value_max)
     assert result == expected
-
 
 
 class Special(unittest.TestCase):
@@ -1484,28 +1511,29 @@ class Special(unittest.TestCase):
             + b'\x01\x02\x03'
         )
         myPr = PhysRec.PhysRecRead(theFile=myFi, theFileId='MyFile', keepGoing=False)
-        #print
-        #for i in range(4):
+        # print
+        # for i in range(4):
         #    print(myPr.readLrBytes(1))
-        #return
-        #assert(0)
+        # return
+        # assert(0)
         myLd = bytes()
         for i in range(4):
             myLd = myPr.readLrBytes(1, myLd)
         self.assertEqual(len(myLd), 4)
         self.assertEqual(myLd, b'\x00\x01\x02\x03')
         self.assertTrue(myPr.readLrBytes() is None)
-#        try:
-#            myPr.skipToNextLr()
-#            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
-#        except PhysRec.ExceptionPhysRecEOF:
-#            pass
+        #        try:
+        #            myPr.skipToNextLr()
+        #            self.fail('PhysRec.ExceptionPhysRec not raised on EOF')
+        #        except PhysRec.ExceptionPhysRecEOF:
+        #            pass
         myPr.skipToNextLr()
         self.assertTrue(myPr.isEOF)
 
+
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
-#    suite = unittest.TestLoader().loadTestsFromTestCase(Special_Perf)
+    #    suite = unittest.TestLoader().loadTestsFromTestCase(Special_Perf)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecLowLevel))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecSingleRead))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecTrailer))
@@ -1516,9 +1544,11 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecGenLd))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecMultipleSkip))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecRandomAccessLogicalData))
-#    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecWriteRead_Perf))
+    #    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhysRecWriteRead_Perf))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -1543,6 +1573,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -1551,7 +1582,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -1569,14 +1600,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

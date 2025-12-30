@@ -50,14 +50,12 @@ from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot
 from TotalDepth.util.DirWalk import dirWalk
 
-__author__  = 'Paul Ross'
-__date__    = '2019-04-10'
+__author__ = 'Paul Ross'
+__date__ = '2019-04-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 LAS_PRODUCER_VERSION = '0.1.2'
-
 
 logger = logging.getLogger(__file__)
 
@@ -125,7 +123,6 @@ DLIS_TO_WELL_INFORMATION_LAS_EFLR_MAPPING: typing.Dict[bytes, typing.Dict[bytes,
         b'LONG': 'LONG',
     },
 }
-
 
 #: [RP66V1 Section 5.2 Origin Logical Record (OLR)]
 WELL_INFORMATION_FROM_ORIGIN: typing.Dict[bytes, str] = {
@@ -216,7 +213,7 @@ def write_well_information_to_las(
         frame_array: typing.Union[LogPass.RP66V1FrameArray, None],
         frame_slice: typing.Union[TotalDepth.common.Slice.Slice, TotalDepth.common.Slice.Sample],
         ostream: typing.TextIO,
-    ) -> None:
+) -> None:
     """Writes the well information section.
 
     Reference: ``[LAS2.0 Las2_Update_Feb2017.pdf Section 5.4 ~W (Well Information)]``
@@ -239,12 +236,12 @@ def write_well_information_to_las(
                     # NOTE: Overwriting is possible here.
                     las_map[row_key.decode('ascii')] = WriteLAS.UnitValueDescription(units, value, descr)
     table = [
-        ['#MNEM.UNIT', 'DATA', 'DESCRIPTION',],
-        ['#----.----', '----', '-----------',],
+        ['#MNEM.UNIT', 'DATA', 'DESCRIPTION', ],
+        ['#----.----', '----', '-----------', ],
     ]
     for k in WriteLAS.WELL_INFORMATION_KEYS:
         if k in las_map:
-            row = [f'{k:4}.{las_map[k].unit:4}', f'{las_map[k].value}', f': {las_map[k].description}',]
+            row = [f'{k:4}.{las_map[k].unit:4}', f'{las_map[k].value}', f': {las_map[k].description}', ]
         else:
             row = [f'{k:4}.{"":4}', '', ':']
         table.append(row)
@@ -254,7 +251,7 @@ def write_well_information_to_las(
 def write_parameter_section_to_las(
         logical_file: LogicalFile.LogicalFile,
         ostream: typing.TextIO,
-    ) -> None:
+) -> None:
     """Write the ``PARAMETER`` tables to LAS."""
     las_mnem_map: typing.Dict[RepCode.ObjectName, WriteLAS.UnitValueDescription] = {}
     for position_eflr in logical_file.eflrs:
@@ -297,7 +294,7 @@ def _write_array_section_to_las(
         field_width: int,
         float_format: str,
         ostream: typing.TextIO,
-    ) -> None:
+) -> None:
     """Write the ``~Array Section`` to the LAS file, the actual log data"""
     # TODO: Could optimise memory by reading one frame at a time
     max_num_available_frames = logical_file.num_frames(frame_array)
@@ -504,7 +501,8 @@ Reads RP66V1 file(s) and writes them out as LAS files."""
         clk_start = time.perf_counter()
         result: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_rp66v1_file_to_las)
         clk_exec = time.perf_counter() - clk_start
-        _failed_file_count = WriteLAS.report_las_write_results_and_performance(result, clk_exec, args.gnuplot, include_ignored=False)
+        _failed_file_count = WriteLAS.report_las_write_results_and_performance(result, clk_exec, args.gnuplot,
+                                                                               include_ignored=False)
     print('Bye, bye!')
     return ret_val
 

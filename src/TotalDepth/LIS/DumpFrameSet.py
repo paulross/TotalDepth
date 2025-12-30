@@ -21,10 +21,10 @@
 
 Created on 25 Mar 2011
 """
-import time
-import sys
-import os
 import logging
+import os
+import sys
+import time
 from optparse import OptionParser
 
 from TotalDepth.LIS.core import File
@@ -37,11 +37,11 @@ __version__ = '0.1.0'
 __rights__ = 'Copyright (c) Paul Ross'
 
 
-def dump_frame_sets(fp, keep_going, output_frames: bool, output_summary: bool, channels, seperator: str=' '):
+def dump_frame_sets(fp, keep_going, output_frames: bool, output_summary: bool, channels, seperator: str = ' '):
     """Dump the frame values to stdout.
     channels is a set of Mnems, if non-empty then only these channels, if present, are written out."""
     logging.info('Index.indexFile(): {:s}'.format(fp))
-    assert(os.path.isfile(fp))
+    assert (os.path.isfile(fp))
     lis_file = File.FileRead(fp, theFileId=fp, keepGoing=keep_going)
     lis_index = FileIndexer.FileIndex(lis_file)
     for aLp in lis_index.genLogPasses():
@@ -87,21 +87,21 @@ def dump_frame_sets(fp, keep_going, output_frames: bool, output_summary: bool, c
             if output_summary:
                 # Accumulate min/mean/max
                 accumulate_classes = [
-                        FrameSet.AccCount,
-                        FrameSet.AccMin,
-                        FrameSet.AccMean,
-                        FrameSet.AccMax,
-                        FrameSet.AccStDev,
-                        FrameSet.AccDec,
-                        FrameSet.AccEq,
-                        FrameSet.AccInc,
-                        FrameSet.AccBias,
-                        FrameSet.AccDrift,
-                        FrameSet.AccActivity,
+                    FrameSet.AccCount,
+                    FrameSet.AccMin,
+                    FrameSet.AccMean,
+                    FrameSet.AccMax,
+                    FrameSet.AccStDev,
+                    FrameSet.AccDec,
+                    FrameSet.AccEq,
+                    FrameSet.AccInc,
+                    FrameSet.AccBias,
+                    FrameSet.AccDrift,
+                    FrameSet.AccActivity,
                 ]
                 accumulated_data = frame_set.accumulate(accumulate_classes)
                 print()
-                format_str = '{:12s} ' + (' {:>12s}'*len(accumulate_classes))
+                format_str = '{:12s} ' + (' {:>12s}' * len(accumulate_classes))
                 summary_header = ['Channel']
                 summary_header.extend(cls.title for cls in accumulate_classes)
                 print(format_str.format(*summary_header))
@@ -120,12 +120,12 @@ Reads a LIS file and writes out tab separated values of each frame."""
     option_parser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
                              help="Keep going as far as sensible. [default: %default]")
     option_parser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=20,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=20,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     option_parser.add_option("--no-frames", action="store_true", default=False,
                              help="Suppress the actual values of the frames. [default: %default]")
     option_parser.add_option("--summary", action="store_true", default=False,
@@ -143,7 +143,8 @@ Reads a LIS file and writes out tab separated values of each frame."""
         option_parser.print_help()
         option_parser.error("I can't do much without a path to the LIS file.")
         return 1
-    dump_frame_sets(args[0], opts.keepGoing, not opts.no_frames, opts.summary, set([v.encode('ascii') for v in opts.channels]))
+    dump_frame_sets(args[0], opts.keepGoing, not opts.no_frames, opts.summary,
+                    set([v.encode('ascii') for v in opts.channels]))
     clock_exec = time.perf_counter() - clock_start
     print('CPU time = %8.3f (S)' % clock_exec)
     print('Bye, bye!')

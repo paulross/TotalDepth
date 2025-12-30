@@ -312,10 +312,12 @@ def float_to_bytes(f: float) -> bytes:
 ABSENT_VALUE_BYTES = b'\x3d\x68\xdb\x8b'
 # The 0.0001 figure is actually 9.99999901978299e-05 or 0x3d 0x68 0xdb 0x8b
 ABSENT_VALUE_FLOAT = bytes_to_float(ABSENT_VALUE_BYTES)
-assert float_to_bytes(ABSENT_VALUE_FLOAT) == ABSENT_VALUE_BYTES, f'{float_to_bytes(ABSENT_VALUE_FLOAT)} != {ABSENT_VALUE_BYTES}'
+assert float_to_bytes(
+    ABSENT_VALUE_FLOAT) == ABSENT_VALUE_BYTES, f'{float_to_bytes(ABSENT_VALUE_FLOAT)} != {ABSENT_VALUE_BYTES}'
 assert ABSENT_VALUE_FLOAT == 9.99999901978299e-05, f'{ABSENT_VALUE_FLOAT} != 9.99999901978299e-05'
 
 LEN_FLOAT64_BYTES = 8
+
 
 def bytes_to_float64(b: bytes) -> float:
     """Returns a float from eight bytes.
@@ -634,14 +636,13 @@ class BITFrameArray:
             year = 1900 + self.unknown_a[5]
         return datetime.date(year, self.unknown_a[1], self.unknown_a[3])
 
-
     @property
     def time(self) -> datetime.time:
         """Extracts the time from self.unknown_c.
         Unknown C: b'\x00\x11\x00/\x00\r  ' (0, 17, 0, 47, 0, 13, 32, 32) 17:47:13
         """
         assert len(self.unknown_c) == 8
-        return datetime.time(self.unknown_c[1], self.unknown_c[3], self.unknown_c[5],)
+        return datetime.time(self.unknown_c[1], self.unknown_c[3], self.unknown_c[5], )
 
     def add_block(self, block: bytes) -> None:
         """Adds a data block of frame data to my temporary data structure(s)."""

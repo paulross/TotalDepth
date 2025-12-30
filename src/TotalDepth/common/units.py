@@ -42,7 +42,6 @@ from functools import lru_cache
 from bs4 import BeautifulSoup
 import numpy as np
 
-
 from TotalDepth import ExceptionTotalDepth
 from TotalDepth.common import lookup_mnemonic
 

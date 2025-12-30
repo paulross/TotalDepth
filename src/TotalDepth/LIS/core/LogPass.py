@@ -24,58 +24,65 @@ A Log Pass is defined as a single continuous recording of log data. "Main Log",
 "Repeat Section" are seperate examples of Log Pass(es).
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-01-10'
+__author__ = 'Paul Ross'
+__date__ = '2011-01-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
+# import time
+# import sys
 import logging
-#import collections
-#import array
-#import numpy
-#import pprint
+# import collections
+# import array
+# import numpy
+# import pprint
 import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
+from TotalDepth.LIS.core import EngVal
+from TotalDepth.LIS.core import FrameSet
+from TotalDepth.LIS.core import LogiRec
+from TotalDepth.LIS.core import Mnem
+from TotalDepth.LIS.core import RepCode
+from TotalDepth.LIS.core import Rle
 from TotalDepth.LIS.core import Type01Plan
 from TotalDepth.LIS.core import Units
-from TotalDepth.LIS.core import Rle
-from TotalDepth.LIS.core import RepCode
-from TotalDepth.LIS.core import LogiRec
-from TotalDepth.LIS.core import FrameSet
-from TotalDepth.LIS.core import EngVal
-from TotalDepth.LIS.core import Mnem
+
 
 class ExceptionLogPass(ExceptionTotalDepthLIS):
     """Specialisation of exception for LogPass."""
     pass
 
+
 class ExceptionLogPassCtor(ExceptionLogPass):
     """Specialisation of exception for LogPass __init__()."""
     pass
+
 
 class ExceptionLogPassNoType01Data(ExceptionLogPass):
     """Raised on access when there is no frame data loaded by addType01Data()."""
     pass
 
+
 class ExceptionLogPassNoFrameSet(ExceptionLogPass):
     """Raised when FrameSet access is required but there has been no call to setFrameSet()."""
     pass
+
 
 class ExceptionLogPassKeyError(ExceptionLogPass):
     """Raised when and internal KeyError is raised in a FrameSet access."""
     pass
 
+
 #: Event to seek to the start of a new Logical Record
-EVENT_SEEK_LR       = 'seekLr'
+EVENT_SEEK_LR = 'seekLr'
 #: Event to read bytes from  frame
-EVENT_READ          = Type01Plan.EVENT_READ
+EVENT_READ = Type01Plan.EVENT_READ
 #: Event to skip bytes in  frame
-EVENT_SKIP          = Type01Plan.EVENT_SKIP
+EVENT_SKIP = Type01Plan.EVENT_SKIP
 #: Event to extrapolate X axis
-EVENT_EXTRAPOLATE   = Type01Plan.EVENT_EXTRAPOLATE
+EVENT_EXTRAPOLATE = Type01Plan.EVENT_EXTRAPOLATE
+
 
 ##################
 # Section: LogPass
@@ -94,6 +101,7 @@ class LogPass(object):
 
     xAxisIndex - The index of the DSB block that describes the X axis, if indirect X this is ignored.
     """
+
     def __init__(self, theDfsr, theFileId, xAxisIndex=0):
         """Constructed with an EFLR i.e. a DFSR
         
@@ -109,7 +117,9 @@ class LogPass(object):
         if len(theDfsr.dsbBlocks) == 0:
             raise ExceptionLogPassCtor('LogPass.__init__(): xAxisIndex no channels to process')
         if xAxisIndex < 0 or xAxisIndex >= len(theDfsr.dsbBlocks):
-            raise ExceptionLogPassCtor('LogPass.__init__(): xAxisIndex {:s} out of range when number of DSB blocks={:d}'.format(str(xAxisIndex), len(theDfsr.dsbBlocks)))
+            raise ExceptionLogPassCtor(
+                'LogPass.__init__(): xAxisIndex {:s} out of range when number of DSB blocks={:d}'.format(
+                    str(xAxisIndex), len(theDfsr.dsbBlocks)))
         self._dfsr = theDfsr
         self._fileId = theFileId
         self._plan = Type01Plan.FrameSetPlan(self._dfsr)
@@ -127,7 +137,7 @@ class LogPass(object):
         if self.isIndirectX:
             self._rle = Rle.RLEType01(self._dfsr.ebs.depthUnits)
         else:
-            assert(self._xAxisIndex >= 0 and self._xAxisIndex < len(self._dfsr.dsbBlocks))
+            assert (self._xAxisIndex >= 0 and self._xAxisIndex < len(self._dfsr.dsbBlocks))
             self._rle = Rle.RLEType01(self._dfsr.dsbBlocks[self._xAxisIndex].units)
 
     def _retChMap(self):
@@ -146,7 +156,8 @@ class LogPass(object):
             for sc in range(b.subChannels):
                 m = b.subChMnem(sc)
                 if m is None:
-                    logging.warning('LogPass._retChMap() unknown mnemonic: for channel {:d}, sub-channel {:d}'.format(ch, sc))
+                    logging.warning(
+                        'LogPass._retChMap() unknown mnemonic: for channel {:d}, sub-channel {:d}'.format(ch, sc))
                 elif m in retMap:
                     logging.warning('LogPass._retChMap() ignoring duplicate mnemonic: {:s}'.format(str(m)))
                 else:
@@ -162,50 +173,51 @@ class LogPass(object):
         See also the doc in _retChMap() about duplicate channels.
         """
         retMap = {}
-#        for aDsb in self._dfsr.dsbBlocks:
-#            m = Mnem.Mnem(aDsb.mnem)
-#            if m in retMap:
-#                logging.warning('LogPass._retUnitMap() ignoring duplicate mnemonic: {:s}'.format(str(m)))
-#            else:
-#                retMap[m] = Mnem.Mnem(aDsb.units)
+        #        for aDsb in self._dfsr.dsbBlocks:
+        #            m = Mnem.Mnem(aDsb.mnem)
+        #            if m in retMap:
+        #                logging.warning('LogPass._retUnitMap() ignoring duplicate mnemonic: {:s}'.format(str(m)))
+        #            else:
+        #                retMap[m] = Mnem.Mnem(aDsb.units)
         for ch, aDsb in enumerate(self._dfsr.dsbBlocks):
             # All sub-channels take the same units
             u = aDsb.units
             for sc in range(aDsb.subChannels):
                 m = aDsb.subChMnem(sc)
                 if m is None:
-                    logging.warning('LogPass._retUnitMap() unknown mnemonic: for channel {:d}, sub-channel {:d}'.format(ch, sc))
+                    logging.warning(
+                        'LogPass._retUnitMap() unknown mnemonic: for channel {:d}, sub-channel {:d}'.format(ch, sc))
                 elif m in retMap:
                     logging.warning('LogPass._retUnitMap() ignoring duplicate mnemonic: {:s}'.format(str(m)))
                 else:
-                    retMap[Mnem.Mnem(m)] = u#Mnem.Mnem(u)
+                    retMap[Mnem.Mnem(m)] = u  # Mnem.Mnem(u)
         return retMap
 
     @property
     def dfsr(self):
         """The DFSR used for construction."""
         return self._dfsr
-    
+
     @property
     def type01Plan(self):
         """The Frame plan, a Type01Plan.FrameSetPlan() object."""
         return self._plan
-    
+
     @property
     def rle(self):
         """The Logical Record Run Length Encoding as a Rle.RLEType01() object."""
         return self._rle
-    
+
     @property
     def frameSet(self):
         """The Frame Set as a FrameSet.FrameSet() object or None if not initialised."""
         return self._frameSet
-    
+
     @property
     def iflrType(self):
         """Returns the IFLR type that this LogPass describes."""
         return self._dfsr.ebs.dataType
-    
+
     @property
     def xAxisIndex(self):
         """The channel index that corresponds to the X axis."""
@@ -216,9 +228,9 @@ class LogPass(object):
     def isIndirectX(self):
         """True if indirect X axis, False if explicit X axis channel."""
         retVal = self._dfsr.ebs.recordingMode == 1
-        assert(self._frameSet is None or self._frameSet.isIndirectX == retVal)
+        assert (self._frameSet is None or self._frameSet.isIndirectX == retVal)
         return retVal
-    
+
     @property
     def numBytes(self):
         """The number of bytes in the underlying frame set (i.e. LIS) representation for the curve data.
@@ -226,7 +238,7 @@ class LogPass(object):
         if self._frameSet is None:
             return None
         return self._frameSet.lisSize
-    
+
     @property
     def nullValue(self):
         """The NULL or absent value as specified in the DFSR."""
@@ -234,7 +246,7 @@ class LogPass(object):
 
     def longStr(self):
         """Returns a long (multiline) descriptive string."""
-        strS = ['{:s}: '.format(repr(self)),]
+        strS = ['{:s}: '.format(repr(self)), ]
         strS.append('       DFSR: {:s}'.format(str(self._dfsr)))
         strS.append(' Frame plan: {:s}'.format(str(self._plan)))
         if len(self._dfsr.dsbBlocks) > 8:
@@ -279,19 +291,19 @@ class LogPass(object):
         if self._frameSet is None:
             return 'N/A'
         return self._frameSet.longStr()
-    
+
     def curveUnitsAsStr(self, chMnem):
         """Given a curve as a Mnem.Mnem() this returns the units as a string."""
         return self._toAscii(self.curveUnits(chMnem))
-    
+
     def curveUnits(self, chMnem):
         """Given a curve as a Mnem.Mnem() this returns the units as a bytes object."""
         try:
             return self._unitMap[chMnem]
         except KeyError as err:
             raise ExceptionLogPassKeyError('LogPass.curveUnitsAsStr(): {:s}'.format(str(err)))
-    
-    #===========================================================================
+
+    # ===========================================================================
     # Section: X Axis values.
     # TODO: We need to come to some decision(s) about what
     # frame spacing really is. There are a number of candidates:
@@ -308,7 +320,7 @@ class LogPass(object):
     #    X (as implicit). Not necessarily OK for direct X.
     # 4. Mean/median or some other mathematical evaluation of all frame X axis
     #    values.
-    #===========================================================================
+    # ===========================================================================
     @property
     def xAxisFirstVal(self):
         """The numerical value of the X axis of the first frame."""
@@ -335,12 +347,12 @@ class LogPass(object):
         extreme range of X axis values divided by the number of frames - 1.
         This is +ve if the Xaxis increases, -ve if it decreases."""
         return self._rle.frameSpacing()
-    
-#    @property
-#    def xAxisIncreases(self):
-#        """Returns True if the xAxisSpacing is +ve, False otherwise.
-#        See xAxisSpacing for a description of how this is determined."""
-#        return self.xAxisSpacing > 0
+
+    #    @property
+    #    def xAxisIncreases(self):
+    #        """Returns True if the xAxisSpacing is +ve, False otherwise.
+    #        See xAxisSpacing for a description of how this is determined."""
+    #        return self.xAxisSpacing > 0
 
     @property
     def xAxisUnits(self):
@@ -359,7 +371,7 @@ class LogPass(object):
             self._rle.xAxisFirst(),
             self._rle.xAxisUnits,
             Units.opticalUnits(self._rle.xAxisUnits)
-            #self._dfsr.ebs.opticalLogScale
+            # self._dfsr.ebs.opticalLogScale
         )
 
     @property
@@ -369,9 +381,9 @@ class LogPass(object):
             self._rle.xAxisLastFrame(),
             self._rle.xAxisUnits,
             Units.opticalUnits(self._rle.xAxisUnits)
-            #self._dfsr.ebs.opticalLogScale
+            # self._dfsr.ebs.opticalLogScale
         )
-        
+
     @property
     def xAxisSpacingOptical(self):
         """The numerical value of the X axis frame spacing. This is is the
@@ -380,7 +392,7 @@ class LogPass(object):
             self._rle.frameSpacing(),
             self._rle.xAxisUnits,
             Units.opticalUnits(self._rle.xAxisUnits)
-            #self._dfsr.ebs.opticalLogScale
+            # self._dfsr.ebs.opticalLogScale
         )
 
     @property
@@ -388,7 +400,7 @@ class LogPass(object):
         """Returns the actual units to 'optical' i.e. user friendly units.
         For example if the Xaxis was in b'.1IN' the 'optical' units would be b'FEET"."""
         return Units.opticalUnits(self._rle.xAxisUnits)
-        #return self._dfsr.ebs.opticalLogScale
+        # return self._dfsr.ebs.opticalLogScale
 
     def frameFromX(self, theEv):
         """Returns the estimated frame number from the X axis, and EngValue."""
@@ -400,14 +412,14 @@ class LogPass(object):
                 ' EngVal={!s:s} results in frame index {:d}'
                 ' out of range 0->{:d}'.format(theEv, retVal, self._rle.totalFrames()))
         return retVal
-    #========================
-    # End: X Axis values.
-    #========================
 
-    
-    #=============================================
+    # ========================
+    # End: X Axis values.
+    # ========================
+
+    # =============================================
     # Section: Mapping of MNEM to channel indices.
-    #=============================================
+    # =============================================
     def _mnemToChSc(self, theMnem):
         """Returns a tuple of (extCh, subCh) for a given MNEM.
         May raise a ExceptionLogPassKeyError."""
@@ -415,31 +427,31 @@ class LogPass(object):
             return self._chMap[theMnem]
         except KeyError as err:
             raise ExceptionLogPassKeyError('LogPass._mnemToChSc(): {:s}'.format(str(err)))
-        
+
     def hasOutpMnem(self, theMnem):
         """Returns True is theMnem is in this LogPass (i.e. is in the DFSR)."""
         return theMnem in self._chMap
-            
+
     def outpMnemS(self):
         """Returns all of the OUTP Mnems in this LogPass (i.e. is in the DFSR)."""
         return self._chMap.keys()
-            
+
     def retExtChIndexList(self, theMnemS):
         """Returns a sorted, unique list of external channel indexes for a list
         of mnemonics. May raise a ExceptionLogPassKeyError."""
         logging.debug('LogPass.retExtChIndexList() self._chMap={:s}'.format(str(self._chMap)))
         mySet = set()
         for m in theMnemS:
-#            try:
-#                c = self._mnemToChSc(m)
-#            except ExceptionLogPassKeyError:
-#                logging.warning('LogPass.retChList(): No channel for mnem={:s}'.format(m))
-#            else:
-#                mySet.add(c[0])
+            #            try:
+            #                c = self._mnemToChSc(m)
+            #            except ExceptionLogPassKeyError:
+            #                logging.warning('LogPass.retChList(): No channel for mnem={:s}'.format(m))
+            #            else:
+            #                mySet.add(c[0])
             c = self._mnemToChSc(m)
             mySet.add(c[0])
         return sorted(list(mySet))
-    
+
     def genFrameSetHeadings(self):
         """This generates a name and units for each value in a frame in the
         current frame set. It is useful for heading up a frame dump."""
@@ -450,13 +462,13 @@ class LogPass(object):
             if myDsb.repCode in RepCode.DIPMETER_REP_CODES:
                 # Dipmeter is a special case
                 for valIdx in range(myDsb.values()):
-                    #print('valIdx', valIdx)
+                    # print('valIdx', valIdx)
                     sc, sa, bu = RepCode.DIPMETER_VALUE_MAPPER[valIdx]
                     yield '{!s:s} ({:d}, {:d})'.format(
-                            RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[sc][0],
-                            sa,
-                            bu), myDsb.units
-            else: 
+                        RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[sc][0],
+                        sa,
+                        bu), myDsb.units
+            else:
                 for aScIdx in range(myDsb.subChannels):
                     mnem = myDsb.subChMnem(aScIdx)
                     units = myDsb.units
@@ -468,11 +480,11 @@ class LogPass(object):
                                 yield '{!s:s} ({:d}, {:d})'.format(mnem, s, b), units
                     else:
                         yield mnem, units
-        
+
     def _toAscii(self, b):
         """Converts bytes to ASCII."""
         return b.decode('ascii').replace('\x00', ' ')
-    
+
     def genFrameSetScNameUnit(self, toAscii=True):
         """This generates a name and units for sub-channel in a frame in the
         current frame set. It is useful for heading up a accumulate() dump."""
@@ -494,14 +506,14 @@ class LogPass(object):
                     else:
                         yield RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[i][0], \
                             myDsb.units
-            else: 
+            else:
                 for aScIdx in range(myDsb.subChannels):
                     if toAscii:
                         yield self._toAscii(myDsb.subChMnem(aScIdx)), \
                             self._toAscii(myDsb.units)
                     else:
                         yield myDsb.subChMnem(aScIdx), myDsb.units
-        
+
     def genFrameSetChIndexScNameUnit(self, toAscii=True):
         """This generates an index, name and units for sub-channel in a frame in the
         current frame set.
@@ -533,9 +545,9 @@ class LogPass(object):
                     else:
                         yield extChIdx, myDsb.subChMnem(aScIdx), myDsb.units
 
-    #=============================================
+    # =============================================
     # End: Mapping of MNEM to channel indices.
-    #=============================================
+    # =============================================
 
     def addType01Data(self, tellLr, lrType, lrLen, xAxisVal):
         """Add an Type 0/1 logical record entry.
@@ -548,12 +560,14 @@ class LogPass(object):
         
         xAxisVal - the value of the X Axis of the first frame of the Logical Record.
         """
-        #logging.debug('LogPass.addType01Data(0x{:x} {:d} {:d} {:f}'.format(tellLr, lrType, lrLen, xAxisVal))
+        # logging.debug('LogPass.addType01Data(0x{:x} {:d} {:d} {:f}'.format(tellLr, lrType, lrLen, xAxisVal))
         if self.iflrType != lrType:
-            raise ExceptionLogPass('LogPass.setFrameSet(): mismatched IFLR type expected: {:s} got: {:s}'.format(str(self.iflrType), str(lrType)))
+            raise ExceptionLogPass(
+                'LogPass.setFrameSet(): mismatched IFLR type expected: {:s} got: {:s}'.format(str(self.iflrType),
+                                                                                              str(lrType)))
         # Add to RLE
         self._rle.add(tellLr, self._plan.numFrames(lrLen), xAxisVal)
-    
+
     def setFrameSetChX(self, theFi, theChS, Xstart, Xstop, frStep=1):
         """Loads a FramesSet using 'external' values from a File object.
         theChS is a list of channel mnemonics or None for all channels.
@@ -569,7 +583,7 @@ class LogPass(object):
         myFrSl = slice(self.frameFromX(Xstart), self.frameFromX(Xstop), frStep)
         # Populate the FrameSet
         return self.setFrameSet(theFi, theFrSl=myFrSl, theChList=myChIdxS)
-    
+
     def setFrameSet(self, theFile, theFrSl=None, theChList=None):
         """Populates the frames set.
         
@@ -584,9 +598,10 @@ class LogPass(object):
         to populate the frame set with (default all).
         """
         if self._fileId != theFile.fileId:
-            raise ExceptionLogPass('LogPass.setFrameSet(): mismatched file ID was: {:s} now: {:s}'.format(self._fileId, theFile.fileId))
+            raise ExceptionLogPass(
+                'LogPass.setFrameSet(): mismatched file ID was: {:s} now: {:s}'.format(self._fileId, theFile.fileId))
         # Default the inputs
-        #print('self._rle.totalFrames()', self._rle.totalFrames())
+        # print('self._rle.totalFrames()', self._rle.totalFrames())
         if self._rle.totalFrames() == 0:
             raise ExceptionLogPass('LogPass.setFrameSet(): no frames to load.')
         myFrSl = theFrSl or slice(0, self._rle.totalFrames(), 1)
@@ -603,12 +618,12 @@ class LogPass(object):
             return
         # Iterate through frame plane for this LR
         xVal = None
-        #print('setFrameSet.setFrameSet():')
+        # print('setFrameSet.setFrameSet():')
         # Note: We take the list of channel indexes from the frameSet as the
         # frameSet is free to add mandatory channels such as the X axis
         for ty, siz, frInt, chFrom, chTo in self._genFrameSetEvents(myFrSl, list(self._frameSet.genExtChIndexes())):
-            #print('LogPass.setFrameSet(): type={:s} siz={:s} frInt={:s} chFrom={:s} chTo={:s}'.format(ty, str(siz), str(frInt), str(chFrom), str(chTo)))
-            #print('LogPass.setFrameSet(): type={:s} frInt={:s}'.format(ty, str(frInt)))
+            # print('LogPass.setFrameSet(): type={:s} siz={:s} frInt={:s} chFrom={:s} chTo={:s}'.format(ty, str(siz), str(frInt), str(chFrom), str(chTo)))
+            # print('LogPass.setFrameSet(): type={:s} frInt={:s}'.format(ty, str(frInt)))
             # Note: fr is frame number in this LR
             if ty == EVENT_SEEK_LR:
                 theFile.seekLr(siz)
@@ -616,24 +631,25 @@ class LogPass(object):
                 myLrh = theFile.readLrBytes(LogiRec.LR_HEADER_LENGTH)
                 if myLrh[0] != self._dfsr.ebs.dataType:
                     raise ExceptionLogPass(
-                        'LogPass.setFrameSet() record at 0x{:x} is type {:d}, not type {:d}'.format(siz, myLrh[0], self._dfsr.ebs.dataType,
-                    ))
+                        'LogPass.setFrameSet() record at 0x{:x} is type {:d}, not type {:d}'.format(siz, myLrh[0],
+                                                                                                    self._dfsr.ebs.dataType,
+                                                                                                    ))
             elif ty == EVENT_EXTRAPOLATE:
                 # We have to pick up a previous X value and extrapolate it.
                 # If frInt > 0 then we read frInt-1, if frInt == 0 we take
                 # the [0] value, previously read, extrapolate and write it back.
                 # The latter can happen if we specify slice(>1, ..., ...).
-                assert(frInt >= 0), 'frInt={:d}'.format(frInt)
+                assert (frInt >= 0), 'frInt={:d}'.format(frInt)
                 if frInt == 0:
                     xVal = self._frameSet.xAxisValue(frInt)
                 else:
-                    xVal = self._frameSet.xAxisValue(frInt-1)
+                    xVal = self._frameSet.xAxisValue(frInt - 1)
                 xVal += self._frameSet.xAxisStep(siz)
                 self._frameSet.setIndirectX(frInt, xVal)
             elif ty == EVENT_SKIP:
                 theFile.skipLrBytes(siz)
             else:
-                assert(ty == EVENT_READ)
+                assert (ty == EVENT_READ)
                 self._frameSet.setFrameBytes(theFile.readLrBytes(siz), frInt, chFrom, chTo)
 
     def _rangeFromSlice(self, theSl):
@@ -646,11 +662,13 @@ class LogPass(object):
         if len(theL) == 0:
             raise ExceptionLogPass('LogPass._sliceFromList(): on empty list.')
         if len(theL) == 1:
-            return slice(theL[0], theL[0]+1, 1)
+            return slice(theL[0], theL[0] + 1, 1)
         myMin = theL[0]
-        myMax = theL[-1]+1
+        myMax = theL[-1] + 1
         myStep = (myMax - 1 - myMin) // (len(theL) - 1)
-        assert((myMax - 1 - myMin) % myStep == 0), 'LogPass._sliceFromList(): myMax={:d} myMin={:d} myStep={:d}'.format(myMax, myMin,  myStep)
+        assert ((
+                            myMax - 1 - myMin) % myStep == 0), 'LogPass._sliceFromList(): myMax={:d} myMin={:d} myStep={:d}'.format(
+            myMax, myMin, myStep)
         retVal = slice(myMin, myMax, myStep)
         return retVal
 
@@ -663,9 +681,9 @@ class LogPass(object):
             try:
                 rMap[lrSeek].append(fOffs)
             except KeyError:
-                rMap[lrSeek] = [fOffs,]
+                rMap[lrSeek] = [fOffs, ]
         return rMap
-    
+
     def _genFrameSetEvents(self, theFrSl, theChList):
         """Generate events that iterate through a frame slice and channel list.
         Events are a 5 member event tuple."""
@@ -673,20 +691,20 @@ class LogPass(object):
         frInt = 0
         for lrSeek in sorted(mySeFrMap.keys()):
             myBuf = mySeFrMap[lrSeek]
-            #logging.debug('LogPass._genFrameSetEvents(): A lrBuffer={:s}'.format(myBuf))
-            #logging.debug('LogPass._genFrameSetEvents(): A type="{:s}" siz={:d}'.format(EVENT_SEEK_LR, lrSeek))
+            # logging.debug('LogPass._genFrameSetEvents(): A lrBuffer={:s}'.format(myBuf))
+            # logging.debug('LogPass._genFrameSetEvents(): A type="{:s}" siz={:d}'.format(EVENT_SEEK_LR, lrSeek))
             yield (EVENT_SEEK_LR, lrSeek, None, None, None)
             myFrIntInLr = 0
             for ty, siz, frInLr, chFrom, chTo in self._plan.genEvents(self._sliceFromList(myBuf), theChList):
-                #logging.debug('LogPass._genFrameSetEvents(): A type="{:s}" siz={:s} frInLr={:s} chFrom={:s} chTo={:s}'.format(
+                # logging.debug('LogPass._genFrameSetEvents(): A type="{:s}" siz={:s} frInLr={:s} chFrom={:s} chTo={:s}'.format(
                 #    ty, str(siz), str(frInLr), str(chFrom), str(chTo))
-                #)
-                if myFrIntInLr+1 < len(myBuf) \
-                and myBuf[myFrIntInLr+1] == frInLr:
+                # )
+                if myFrIntInLr + 1 < len(myBuf) \
+                        and myBuf[myFrIntInLr + 1] == frInLr:
                     myFrIntInLr += 1
-                yield ty, siz, frInt+myFrIntInLr, chFrom, chTo
+                yield ty, siz, frInt + myFrIntInLr, chFrom, chTo
             frInt += len(myBuf)
-            
+
     def genOutpPoints(self, theMnem):
         """Wrapper around the frameset generator, in fact this returns exactly that generator."""
         fsCh, fsSc = self._mnemToChSc(theMnem)
@@ -696,25 +714,25 @@ class LogPass(object):
         """Return an Python object that can be JSON encoded."""
         d = {
             # TODO: Expand the DFSR.
-            'DFSR' : str(self._dfsr),
-            'Plan' : {
-                'IndirectSize' : self._plan.indirectSize,
-                'FrameSize' : self._plan.frameSize,
-                'NumChannels' : self._plan.numChannels,
-                'ChannelSizes' : [self._plan.channelSize(i) for i in range(self._plan.numChannels)]
+            'DFSR': str(self._dfsr),
+            'Plan': {
+                'IndirectSize': self._plan.indirectSize,
+                'FrameSize': self._plan.frameSize,
+                'NumChannels': self._plan.numChannels,
+                'ChannelSizes': [self._plan.channelSize(i) for i in range(self._plan.numChannels)]
             },
-            'Channels' : [str(b.mnem) for b in self._dfsr.dsbBlocks],
+            'Channels': [str(b.mnem) for b in self._dfsr.dsbBlocks],
             # TODO: add datum, stride, repeat
-            'RLE' : repr(self._rle),
+            'RLE': repr(self._rle),
         }
         if self._rle.hasXaxisData:
             d['Xaxis'] = {
-                'FirstValOptical' : self.xAxisFirstValOptical,
-                'LastValOptical' : self.xAxisLastValOptical,
-                'TotalFrames' : self._rle.totalFrames(),
-                'SpacingOptical' : self.xAxisSpacingOptical,
-                'UnitsOptical' : repr(self.xAxisUnitsOptical),
-                'Units' : repr(self._rle.xAxisUnits),
+                'FirstValOptical': self.xAxisFirstValOptical,
+                'LastValOptical': self.xAxisLastValOptical,
+                'TotalFrames': self._rle.totalFrames(),
+                'SpacingOptical': self.xAxisSpacingOptical,
+                'UnitsOptical': repr(self.xAxisUnitsOptical),
+                'Units': repr(self._rle.xAxisUnits),
             }
         else:
             d['Xaxis'] = None

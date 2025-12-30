@@ -24,10 +24,10 @@ Created on Oct 24, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-10-24'
+__author__ = 'Paul Ross'
+__date__ = '2011-10-24'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
 import sys
 import logging
@@ -61,7 +61,7 @@ def _retHistMatch(thePatt, theFile, theS=sys.stdout, showTell=False):
         c = theFile.read(1)
         if len(c) == 0:
             break
-#        print(ord(c), thePatt[pIdx])
+        #        print(ord(c), thePatt[pIdx])
         if ord(c) == thePatt[pIdx]:
             pIdx += 1
             if pIdx == len(thePatt):
@@ -93,7 +93,7 @@ def _retHistCharRuns(theCharS, theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_
                 if myTell - tellStart >= theMin:
                     if showTell:
                         theS.write('0x{0:08x} {1:6d} [0x{1:04x}]\n'.format(tellStart, myTell - tellStart))
-                    histRun[myTell-tellStart] += 1
+                    histRun[myTell - tellStart] += 1
                 tellStart = None
     return hist, histRun
 
@@ -104,16 +104,17 @@ def _pprintHist(theH, theS=sys.stdout):
         maxVal = max(theH.values())
         theS.write('Entries: {:d} values: {:d} max value: {:d}\n'.format(len(theH), sum(theH.values()), maxVal))
         keyWidth = max([len((str(k))) for k in theH.keys()])
-        scale = maxVal / (PRINT_WIDTH-11-keyWidth)
+        scale = maxVal / (PRINT_WIDTH - 11 - keyWidth)
         theS.write('Scale: {:f}\n'.format(scale))
         for k in sorted(theH.keys()):
             theS.write('{:{fw}s} [{:6d}]: {:s}\n'.format(
-                    str(k),
-                    theH[k],
-                    '+' * int(0.5 + theH[k] / scale),
-                    fw=keyWidth,
-                )
+                str(k),
+                theH[k],
+                '+' * int(0.5 + theH[k] / scale),
+                fw=keyWidth,
             )
+            )
+
 
 def _pprintResult(h, hr, theS=sys.stdout):
     """Pretty print the result."""
@@ -152,20 +153,20 @@ def reportSpaceRuns(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, sho
 
 def reportASCIIHigh(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII > 127 minimum length {:d}...\n'.format(theMin))
-    _pprintResult(*_retHistCharRuns(bytes(range(128,256)), theFile, theS, theMin, showTell))
+    _pprintResult(*_retHistCharRuns(bytes(range(128, 256)), theFile, theS, theMin, showTell))
 
 
 def reportASCII(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII letters {:d}...\n'.format(theMin))
-    charS = bytes([0,]) \
-        + bytes(
-            string.ascii_letters + string.digits + string.punctuation + string.whitespace, 'ascii')
+    charS = bytes([0, ]) \
+            + bytes(
+        string.ascii_letters + string.digits + string.punctuation + string.whitespace, 'ascii')
     _pprintResult(*_retHistCharRuns(charS, theFile, theS, theMin, showTell))
 
 
 def reportASCIILow(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for ASCII <= 127 minimum length {:d}...\n'.format(theMin))
-    _pprintResult(*_retHistCharRuns(bytes(range(0,128)), theFile, theS, theMin, showTell))
+    _pprintResult(*_retHistCharRuns(bytes(range(0, 128)), theFile, theS, theMin, showTell))
 
 
 def reportASCIIUppercase(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
@@ -179,16 +180,16 @@ def reportIDENT(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTel
     96 0x60 (`) and from 123 0x7b ({) to 126 0x7e (~) inclusive. This excludes all
     control characters, all "white space", and the lower-case alphabet."""
     theS.write('Searching for IDENT length >= {:d}...\n'.format(theMin))
-    charS = bytes([0,] + list(range(33,97)) + list(range(123,127)))
+    charS = bytes([0, ] + list(range(33, 97)) + list(range(123, 127)))
     _pprintResult(*_retHistCharRuns(charS, theFile, theS, theMin, showTell))
 
 
 def reportSLB(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell=False):
     theS.write('Searching for incidence of 21 03 53 4C 42 00  i.e. !.SLB.\n')
-#    h = _retHistMatch(b'\x21\x03\x53\x4C\x42\x00', theFile, theS, showTell)
+    #    h = _retHistMatch(b'\x21\x03\x53\x4C\x42\x00', theFile, theS, showTell)
     h = _retHistMatch(b'\x03\x53\x4C\x42', theFile, theS, showTell)
-#    print(h)
-#    _pprintHist(h)
+    #    print(h)
+    #    _pprintHist(h)
     theS.write(' Values '.center(PRINT_WIDTH, '='))
     theS.write('\n')
     _pprintHist(h, theS)
@@ -207,37 +208,37 @@ def reportTOOL(theFile, theS=sys.stdout, theMin=DEFAULT_MIN_RUN_LENGTH, showTell
 
 
 def main():
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     op = cmn_cmd_opts.retOptParser(
         desc='Searches for runs of data in binary files.',
         prog='PatternSearch ',
         version=__version__,
     )
-    op.add_argument("-s", "--show-tell", action="store_true", dest="show_tell", default=False, 
-                      help="Show file locations and lengths. Default: %(default)s.")
+    op.add_argument("-s", "--show-tell", action="store_true", dest="show_tell", default=False,
+                    help="Show file locations and lengths. Default: %(default)s.")
     op.add_argument("-n", "--number", dest="min_run_length",
-                    type=int, default=DEFAULT_MIN_RUN_LENGTH, 
+                    type=int, default=DEFAULT_MIN_RUN_LENGTH,
                     help="Size of the minimum run length. Default: %(default)s.")
     op.add_argument('infile', type=argparse.FileType('rb'), help='The file to search')
     args = op.parse_args()
-#    print('TRACE: args', args)
+    #    print('TRACE: args', args)
     clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=args.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
-#    reportAll(args.infile)
-#    report0x80(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportSpaceRuns(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportASCII(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportASCIIHigh(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportASCIILow(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportASCIIUppercase(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportIDENT(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
-#    reportSLB(args.infile, showTell=args.show_tell)
+    #    reportAll(args.infile)
+    #    report0x80(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportSpaceRuns(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportASCII(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportASCIIHigh(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportASCIILow(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportASCIIUppercase(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportIDENT(args.infile, theMin=args.min_run_length, showTell=args.show_tell)
+    #    reportSLB(args.infile, showTell=args.show_tell)
     reportTOOL(args.infile, showTell=args.show_tell)
     print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))

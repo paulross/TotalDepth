@@ -23,33 +23,37 @@ of the current position.
 Created on Oct 26, 2011
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-10-26'
+__author__ = 'Paul Ross'
+__date__ = '2011-10-26'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
+
 
 class ExceptionFileBuffer(Exception):
     """Specialisation of Exception for the FileBuffer module."""
     pass
 
+
 class ExceptionFileBufferEOF(ExceptionFileBuffer):
     """Specialisation of Exception for the FileBuffer EOF."""
     pass
 
+
 class FileBuffer(object):
     """Provides a buffer interface to a file where the user can look ahead
     any distance from the current position."""
+
     def __init__(self, f):
         self._file = f
         # List of bytes in the current buffer
         self._buf = []
         # Current file position
         self._tell = self._file.tell()
-        
+
     def tell(self):
         """Current file position."""
         return self._tell
-        
+
     def step(self):
         """Increment the file position by one byte, returns the byte just read."""
         b = self._file.read(1)
@@ -69,7 +73,7 @@ class FileBuffer(object):
             if len(b) == 0:
                 raise IndexError('EOF on index {:d}'.format(to))
             self._buf.append(b)
-        
+
     def __getitem__(self, i):
         """Get an arbitrary byte or slice."""
         if isinstance(i, int):
@@ -77,9 +81,9 @@ class FileBuffer(object):
             return self._buf[i][0]
         elif isinstance(i, slice):
             # Handle a slice object. Sadly we do not get a lot of help here from python!
-#            print('TRACE: xxx', i)
+            #            print('TRACE: xxx', i)
             minIdx = i.start if i.start is not None and i.start >= 0 else 0
-            maxIdx = i.stop if i.stop is not None and i.stop >= 0 else len(self._buf)-1
+            maxIdx = i.stop if i.stop is not None and i.stop >= 0 else len(self._buf) - 1
             try:
                 self._expandBuffer(max(minIdx, maxIdx))
             except IndexError:

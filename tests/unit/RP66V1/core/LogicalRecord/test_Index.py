@@ -17,8 +17,8 @@ def test_logical_record_index_ctor_empty():
 @pytest.mark.parametrize(
     'index, vr_position, lrsh_position, attributes, lr_type, ld_length',
     (
-        (0, 80, 84, 0x80, 0, 120),
-        (1, 80, 208, 0x81, 1, 504),
+            (0, 80, 84, 0x80, 0, 120),
+            (1, 80, 208, 0x81, 1, 504),
     )
 )
 def test_logical_record_index_minimal_file(index, vr_position, lrsh_position, attributes, lr_type, ld_length):
@@ -36,8 +36,8 @@ def test_logical_record_index_minimal_file(index, vr_position, lrsh_position, at
 @pytest.mark.parametrize(
     'index, offset, length, expected_bytes',
     (
-        (0, 0, 8, b'\xf0\x0bFILE-H'),
-        (1, 0, 8, b'\xf0\x06ORIGIN'),
+            (0, 0, 8, b'\xf0\x0bFILE-H'),
+            (1, 0, 8, b'\xf0\x06ORIGIN'),
     )
 )
 def test_logical_record_index_minimal_file_get_file_logical_data(index, offset, length, expected_bytes):
@@ -52,18 +52,19 @@ def test_logical_record_index_minimal_file_get_file_logical_data(index, offset, 
 @pytest.mark.parametrize(
     'index, vr_position, lrsh_position, attributes, lr_type, ld_length',
     (
-        (0, 80, 84, 0x80, 0, 120),
-        (1, 80, 208, 0x81, 1, 504),
-        (2, 80, 716, 0x81, 4, 200),
-        (3, 80, 920, 0x80, 5, 3032),
-        (4, 80, 3956, 0x80, 5, 846),
-        (5, 80, 4806, 0x80, 3, 378),
-        (6, 80, 5188, 0x80, 128, 158),
-        (7, 80, 5350, 0x81, 6, 1688),
-        (8, 80, 7042, 0xa0, 6, 1772),
+            (0, 80, 84, 0x80, 0, 120),
+            (1, 80, 208, 0x81, 1, 504),
+            (2, 80, 716, 0x81, 4, 200),
+            (3, 80, 920, 0x80, 5, 3032),
+            (4, 80, 3956, 0x80, 5, 846),
+            (5, 80, 4806, 0x80, 3, 378),
+            (6, 80, 5188, 0x80, 128, 158),
+            (7, 80, 5350, 0x81, 6, 1688),
+            (8, 80, 7042, 0xa0, 6, 1772),
     )
 )
-def test_logical_record_index_basic_file_with_two_vrs(index, vr_position, lrsh_position, attributes, lr_type, ld_length):
+def test_logical_record_index_basic_file_with_two_vrs(index, vr_position, lrsh_position, attributes, lr_type,
+                                                      ld_length):
     file = io.BytesIO(test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS)
     with Index.LogicalRecordIndex(file) as lr_index:
         assert len(lr_index) == 9
@@ -90,7 +91,7 @@ def test_logical_record_index_small_file_eflr_iflr_counts():
                 counts['EFLR'] += 1
             else:
                 counts['IFLR'] += 1
-        assert counts == {'EFLR': 5, 'IFLR': 83,}
+        assert counts == {'EFLR': 5, 'IFLR': 83, }
 
 
 def test_logical_record_index_basic_file():
@@ -126,17 +127,17 @@ def test_logical_record_index_file_256kb_eflr_iflr_counts():
                 counts['EFLR'] += 1
             else:
                 counts['IFLR'] += 1
-        assert counts == {'EFLR': 31, 'IFLR': 1852,}
+        assert counts == {'EFLR': 31, 'IFLR': 1852, }
 
 
 @pytest.mark.parametrize(
     'by, expected',
     (
-        (test_data.SMALL_FILE, 88,),
-        (test_data.MINIMAL_FILE, 2,),
-        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 9,),
-        (test_data.BASIC_FILE, 660,),
-        (test_data.FILE_256kb, 1883,),
+            (test_data.SMALL_FILE, 88,),
+            (test_data.MINIMAL_FILE, 2,),
+            (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 9,),
+            (test_data.BASIC_FILE, 660,),
+            (test_data.FILE_256kb, 1883,),
     )
 )
 def test_logical_record_index_all_files(by, expected):

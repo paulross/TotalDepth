@@ -25,7 +25,7 @@ import time
 import typing
 
 from TotalDepth.LAS.core import LASRead
-from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, AbsentValue, np_summary
+from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, np_summary
 from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
 # import cPyMemTrace
@@ -36,9 +36,7 @@ __date__ = '2020-09-05'
 __version__ = '0.1.0'
 __rights__ = 'Copyright (c) 2020 Paul Ross'
 
-
 logger = logging.getLogger(__file__)
-
 
 CSS_LAS = """/* CSS for LAS */
 body {
@@ -123,7 +121,6 @@ th.monospace, td.monospace {
 }
 """
 
-
 TOP = 'Top'
 
 
@@ -165,7 +162,8 @@ def _las_file_exception(path_in, binary_file_type) -> LASFileResult:
     )
 
 
-def las_section_members_to_html_table(members: typing.List[LASRead.SectLine], xhtml_stream: XmlWrite.XhtmlStream) -> None:
+def las_section_members_to_html_table(members: typing.List[LASRead.SectLine],
+                                      xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'table', {'class': 'las'}):
         with XmlWrite.Element(xhtml_stream, 'tr', {}):
             for col_name in ('Mnemonic', 'Units', 'Value', 'Description'):
@@ -189,7 +187,7 @@ def las_section_lines_to_html_table(members: typing.List[str], xhtml_stream: Xml
             xhtml_stream.characters(line)
 
 
-def las_section_to_html(las_section: LASRead.LASSection, xhtml_stream:XmlWrite.XhtmlStream) -> None:
+def las_section_to_html(las_section: LASRead.LASSection, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     with XmlWrite.Element(xhtml_stream, 'a', {'name': las_section.type}):
         pass
     with XmlWrite.Element(xhtml_stream, 'h2', {'class': 'las_h2'}):
@@ -206,7 +204,7 @@ def las_section_to_html(las_section: LASRead.LASSection, xhtml_stream:XmlWrite.X
     _write_link_to_top(xhtml_stream)
 
 
-def write_file_metadata(las_file_path: str, xhtml_stream:XmlWrite.XhtmlStream) -> None:
+def write_file_metadata(las_file_path: str, xhtml_stream: XmlWrite.XhtmlStream) -> None:
     table = [
         ['Field', 'Value'],
         ['Path', las_file_path],
@@ -234,7 +232,8 @@ def write_file_array(las_file: LASRead.LASRead, xhtml_stream: XmlWrite.XhtmlStre
             ['Channel',
              # 'Dims', 'Count',
              'Units', 'Long Name',
-             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', 'Span', '--', '==', '++', 'Activity', 'Drift',
+             'Size', 'Absent', 'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', 'Span', '--', '==', '++', 'Activity',
+             'Drift',
              'dtype'],
         ]
         for channel in las_file.frame_array.channels:
@@ -399,7 +398,7 @@ def stringify(obj: typing.Any, decimal_places: int) -> str:
 def write_indexes(result_map: typing.Dict[str, LASFileResult]) -> None:
     """Write all the index.html files for the output tree."""
     logger.info(f'_write_indexes(): result map size %d', len(result_map))
-    idx = ToHTML.IndexHTML(['File Type', 'Sections', 'Channels', 'Frames', 'STRT', 'STOP', 'STEP', 'Size', 'Time',])
+    idx = ToHTML.IndexHTML(['File Type', 'Sections', 'Channels', 'Frames', 'STRT', 'STOP', 'STEP', 'Size', 'Time', ])
     for path in result_map:
         if not (result_map[path].exception or result_map[path].ignored):
             idx.add(
@@ -641,7 +640,7 @@ def process_arguments(args, log_level):
 def main():
     description = """usage: %prog [options] in out
 Generates HTML from input LAS file or directory to an output destination."""
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     parser = cmn_cmd_opts.path_in_out_required(
         description, prog='TotalDepth.LAS.LASToHTML.main', version=__version__, epilog=__rights__
     )
@@ -653,7 +652,7 @@ Generates HTML from input LAS file or directory to an output destination."""
     parser.add_argument("-g", "--glob", action="store_true", dest="glob", default=None,
                         help="File match pattern. Default: %(default)s.")
     parser.add_argument("-p", "--pause", action="store_true", dest="pause", default=False,
-                      help="Pause before processing showing the PID. Default: %(default)s.")
+                        help="Pause before processing showing the PID. Default: %(default)s.")
     args = parser.parse_args()
     # print(args)
     if args.pause:
@@ -709,7 +708,7 @@ Generates HTML from input LAS file or directory to an output destination."""
         except IOError:
             logger.exception('Plotting with gnuplot failed.')
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input / 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
     else:
         ms_mb = 0.0
     print(f'Processed {len(result):,d} files and {size_input:,d} bytes in {clk_exec:.3f} s, {ms_mb:.1f} ms/Mb')

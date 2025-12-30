@@ -51,7 +51,6 @@ from TotalDepth.util import gnuplot
 
 logger = logging.getLogger(__file__)
 
-
 #: Unique string in the log line
 LOGGER_PREFIX = 'ProcessLoggingThread-JSON'
 LOGGER_PREFIX_START = f'{LOGGER_PREFIX}-START'
@@ -168,16 +167,16 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) 
 
     """
     header = [
-            f'{"#t(s)":12}',
-            f'{"RSS":>12}',
-            f'{"PageFaults/s":>12}',
-            f'{"User":>12}',
-            f'{"Mean_CPU%":>12}',
-            f'{"Inst_CPU%":>12}',
-            f'{"Timestamp":<26}',
-            f'{"PID":>6}',
-            f'{"Label"}',
-        ]
+        f'{"#t(s)":12}',
+        f'{"RSS":>12}',
+        f'{"PageFaults/s":>12}',
+        f'{"User":>12}',
+        f'{"Mean_CPU%":>12}',
+        f'{"Inst_CPU%":>12}',
+        f'{"Timestamp":<26}',
+        f'{"PID":>6}',
+        f'{"Label"}',
+    ]
     ret = {}
     prev_cpu = {}
     prev_elapsed_time = {}
@@ -198,10 +197,10 @@ def extract_json_as_table(json_data: typing.List[typing.Dict[str, typing.Any]]) 
             rss_max[record[KEY_PROCESS_ID]] = sys.float_info.min
         mean_cpu_user = record["cpu_times"]["user"] / record[KEY_ELAPSED_TIME]
         inst_cpu_user = (record["cpu_times"]["user"] - prev_cpu[record[KEY_PROCESS_ID]]) \
-            / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
+                        / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         # record["memory_info"]["pfaults"] is the cumulative total.
         inst_page_faults = (record["memory_info"]["pfaults"] - prev_page_faults[record[KEY_PROCESS_ID]]) \
-            / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
+                           / (record[KEY_ELAPSED_TIME] - prev_elapsed_time[record[KEY_PROCESS_ID]])
         label = record[KEY_LABEL] if KEY_LABEL in record else ''
         ret[record[KEY_PROCESS_ID]].append(
             [
@@ -240,7 +239,7 @@ def invoke_gnuplot(log_path: str, gnuplot_dir: str) -> int:
         log_name = f'{os.path.basename(log_path)}_{pid}'
         labels = extract_labels_from_json(json_data)
         label_lines = []
-        y_value = (0.5 * (rss_max[pid] - rss_min[pid])) / 1024**2
+        y_value = (0.5 * (rss_max[pid] - rss_min[pid])) / 1024 ** 2
         for label_dict in labels:
             t_value = label_dict[KEY_ELAPSED_TIME]
             label_lines.append(f'set arrow from {t_value},{y_value} to {t_value},0 lt -1 lw 1')
@@ -267,6 +266,7 @@ def add_message_to_queue(msg: str) -> None:
 
 class ProcessLoggingThread(threading.Thread):
     """Thread that regularly logs out process parameters."""
+
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
         """Constructor.
         args[0], or interval=... must be the reporting interval in seconds, default 1.0.

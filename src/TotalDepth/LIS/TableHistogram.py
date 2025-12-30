@@ -24,25 +24,24 @@ Created on May 24, 2011
 @author: paulross
 """
 
-import time
-import sys
-import os
-import logging
 import collections
+import logging
+import os
 import pprint
+import sys
+import time
 import typing
 from optparse import OptionParser
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
-from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import FileIndexer
+from TotalDepth.LIS.core import LogiRec
 
-
-__author__  = 'Paul Ross'
-__date__    = '2011-05-24'
+__author__ = 'Paul Ross'
+__date__ = '2011-05-24'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
 class TableHistogram:
@@ -56,10 +55,10 @@ class TableHistogram:
 
     def incAll(self, theMatcher, lrType, nameTable, nameRow, nameCol, v):
         self._cntrAll[theMatcher.key(lrType, nameTable, nameRow, nameCol, v)] += 1
-        
+
     def incRow(self, lrType, nameTable, nameRow):
         self._cntrRowMnem[(lrType, nameTable, nameRow)] += 1
-        
+
     def incCol(self, lrType, nameTable, nameCol):
         self._cntrColMnem[(lrType, nameTable, nameCol)] += 1
 
@@ -85,21 +84,21 @@ class TableMatcher(typing.NamedTuple):
 
     def lrTypeMatch(self, lrType):
         return self.lrType == 0 or self.lrType == lrType
-    
+
     def nameTableMatch(self, nameTable):
         return self.nameTable == b'' or self.nameTable == nameTable
-    
+
     def nameRowMatch(self, nameRow):
         return self.nameRow == b'' or self.nameRow == nameRow
 
     def nameColMatch(self, nameCol):
         return self.nameCol == b'' or self.nameCol == nameCol
-    
+
     def matches(self, lrType, nameTable, nameRow, nameCol):
         return self.lrType == b'' or self.lrType == lrType \
             and self.nameTable == b'' or self.nameTable == nameTable \
             and self.nameRow == b'' or self.nameRow == nameRow \
-            and self.nameCol == b'' or self.nameCol == nameCol \
+            and self.nameCol == b'' or self.nameCol == nameCol
 
     def key(self, lrType, nameTable, nameRow, nameCol, v):
         retL = []
@@ -117,9 +116,9 @@ class TableMatcher(typing.NamedTuple):
 
 
 def _processFile(fp, keepGoing, tabMtch, theCntr):
-    assert(os.path.isfile(fp))
+    assert (os.path.isfile(fp))
     logging.info('PlotLogPasses._processFile(): {:s}'.format(fp))
-    assert(os.path.isfile(fp))
+    assert (os.path.isfile(fp))
     try:
         # myFi = File.FileRead(fp, theFileId=fp, keepGoing=keepGoing)
         myFi = File.file_read_with_best_physical_record_pad_settings(fp, file_id=fp)
@@ -133,8 +132,8 @@ def _processFile(fp, keepGoing, tabMtch, theCntr):
         retVal = False
         for anIo in myIdx.genAll():
             if anIo.lrType in LogiRec.LR_TYPE_TABLE_DATA \
-            and tabMtch.lrTypeMatch(anIo.lrType) \
-            and tabMtch.nameTableMatch(anIo.name):
+                    and tabMtch.lrTypeMatch(anIo.lrType) \
+                    and tabMtch.nameTableMatch(anIo.name):
                 # Read the whole table logical record
                 myFi.seekLr(anIo.tell)
                 try:
@@ -159,8 +158,9 @@ def _processFile(fp, keepGoing, tabMtch, theCntr):
                                     )
         return retVal
 
+
 def _processDir(fp, keepGoing, recursive, tabMtch, theCntr):
-    assert(os.path.isdir(fp))
+    assert (os.path.isdir(fp))
     for myName in os.listdir(fp):
         myPath = os.path.join(fp, myName)
         if os.path.isdir(myPath) and recursive:
@@ -181,56 +181,56 @@ def processPath(p, keepGoing, recursive, tabMtch, theCntr):
 def main():
     usage = """usage: %prog [options] path
 Provides a count of elements in LIS tables."""
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. [default: %default]")
-    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
-                      help="Process input recursively. [default: %default]")
-    optParser.add_option("-s", "--structure", action="store_true", dest="structure", default=False, 
-                      help="Display table structure (row/col range). [default: %default]")
+    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
+                         help="Keep going as far as sensible. [default: %default]")
+    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
+                         help="Process input recursively. [default: %default]")
+    optParser.add_option("-s", "--structure", action="store_true", dest="structure", default=False,
+                         help="Display table structure (row/col range). [default: %default]")
     optParser.add_option(
-            "--type",
-            type="int",
-            dest="lrType",
-            default=34,
-            help="Logical record table type as an integer e.g. 34. [default: %default]"
-        )      
+        "--type",
+        type="int",
+        dest="lrType",
+        default=34,
+        help="Logical record table type as an integer e.g. 34. [default: %default]"
+    )
     optParser.add_option(
-            "--name",
-            type="str",
-            dest="name",
-            default='',
-            help="Logical record table name as a string e.g. PRES. [default: %default]"
-        )      
+        "--name",
+        type="str",
+        dest="name",
+        default='',
+        help="Logical record table name as a string e.g. PRES. [default: %default]"
+    )
     optParser.add_option(
-            "--row",
-            type="str",
-            dest="row",
-            default='',
-            help="Logical record table row as a string e.g. 'GR  '. [default: %default]"
-        )      
+        "--row",
+        type="str",
+        dest="row",
+        default='',
+        help="Logical record table row as a string e.g. 'GR  '. [default: %default]"
+    )
     optParser.add_option(
-            "--col",
-            type="str",
-            dest="col",
-            default='',
-            help="Logical record table column as a string e.g. 'LEDG'. [default: %default]"
-        )      
+        "--col",
+        type="str",
+        dest="col",
+        default='',
+        help="Logical record table column as a string e.g. 'LEDG'. [default: %default]"
+    )
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=20,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=20,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     opts, args = optParser.parse_args()
     clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
     if len(args) != 1:
         optParser.print_help()
@@ -260,6 +260,7 @@ Provides a count of elements in LIS tables."""
     print('Bye, bye!')
     return 0
 
+
 if __name__ == '__main__':
-    #multiprocessing.freeze_support()
+    # multiprocessing.freeze_support()
     sys.exit(main())

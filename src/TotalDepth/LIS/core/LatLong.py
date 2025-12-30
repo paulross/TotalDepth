@@ -35,7 +35,6 @@ class LatitudeLongitude:
         s = v
         return f'{+d} {m}\' {s:.0f}\"'
 
-
     def dm(self) -> str:
         """Returns the degrees, minutes as a string pre-pended with '+' or '-'."""
         v = math.degrees(abs(self.value_rad))

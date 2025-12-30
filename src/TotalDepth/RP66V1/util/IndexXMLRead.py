@@ -29,14 +29,12 @@ from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.common import xml, cmn_cmd_opts
 from TotalDepth.util.DirWalk import dirWalk
 
-__author__  = 'Paul Ross'
-__date__    = '2019-04-10'
+__author__ = 'Paul Ross'
+__date__ = '2019-04-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
-
 
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_index, time, exception, ignored, analysis')
 
@@ -214,7 +212,7 @@ Reads a RP66V1 index XML file and all the data."""
     analyse_result(result)
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
         ratio = size_index / size_input
     else:
         ms_mb = 0.0

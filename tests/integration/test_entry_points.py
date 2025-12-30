@@ -29,7 +29,7 @@ def test_example_data_directory_exists():
     assert os.path.isdir(EXAMPLE_DATA_DIRECTORY)
 
 
-EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LIS', 'data',)
+EXAMPLE_DATA_DIRECTORY_LIS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LIS', 'data', )
 
 
 def test_lis_example_data_directory_lis_exists():
@@ -40,7 +40,7 @@ def test_lis_example_data_directory_lis_exists():
 @pytest.mark.parametrize(
     'entry_point',
     (
-        TotalDepth.entry_points_console_scripts_dict.keys()
+            TotalDepth.entry_points_console_scripts_dict.keys()
     )
 )
 def test_entry_point_help_h(entry_point):
@@ -51,7 +51,7 @@ def test_entry_point_help_h(entry_point):
 @pytest.mark.parametrize(
     'entry_point',
     (
-        TotalDepth.entry_points_console_scripts_dict.keys()
+            TotalDepth.entry_points_console_scripts_dict.keys()
     )
 )
 def test_entry_point_help_help(entry_point):
@@ -63,13 +63,14 @@ def test_entry_point_help_help(entry_point):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-n'],
+            [],
+            ['-r'],
+            ['-r', '-n'],
     )
 )
 def test_tddetif(tmpdir, args):
-    subprocess.check_call(['tddetif',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tddetif', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+
 
 # -------- END: tddetif --------
 
@@ -78,34 +79,34 @@ def test_tddetif(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r', '-v'],
-        ['-r', '-v', '-k'],
-        ['-r', '-v', '-k'],
-        ['-r', '--expand-and-delete', '-n'],
-        ['-r', '--histogram'],
-        ['-r', '--bytes=20'],
+            [],
+            ['-r', '-v'],
+            ['-r', '-v', '-k'],
+            ['-r', '-v', '-k'],
+            ['-r', '--expand-and-delete', '-n'],
+            ['-r', '--histogram'],
+            ['-r', '--bytes=20'],
     )
 )
 def test_tdarchive_file_stdout(args):
-    subprocess.check_call(['tdarchive',] + args + [EXAMPLE_DATA_DIRECTORY])
+    subprocess.check_call(['tdarchive', ] + args + [EXAMPLE_DATA_DIRECTORY])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r', '-v'],
-        ['-r', '-v', '-k'],
-        ['-r', '-v', '-k'],
-        ['-r', '--expand-and-delete', '-n'],
-        ['-r', '--histogram'],
-        ['-r', '--bytes=20'],
+            [],
+            ['-r', '-v'],
+            ['-r', '-v', '-k'],
+            ['-r', '-v', '-k'],
+            ['-r', '--expand-and-delete', '-n'],
+            ['-r', '--histogram'],
+            ['-r', '--bytes=20'],
     )
 )
 def test_tdarchive_dir(tmpdir, args):
-    subprocess.check_call(['tdarchive',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdarchive', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 # -------- END: tdarchive --------
@@ -116,12 +117,12 @@ def test_tdarchive_dir(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        ['--file-types=?'],
-        ['--file-types=??'],
+            ['--file-types=?'],
+            ['--file-types=??'],
     )
 )
 def test_tdcopybinfiles_no_paths(args):
-    subprocess.check_call(['tdcopybinfiles',] + args + ['', ''])
+    subprocess.check_call(['tdcopybinfiles', ] + args + ['', ''])
 
 
 # @pytest.mark.slow
@@ -145,46 +146,46 @@ def test_tdcopybinfiles_no_paths(args):
 @pytest.mark.parametrize(
     'args',
     (
-        ['-x?'],
+            ['-x?'],
     )
 )
 def test_tdplotlogs(args):
-    subprocess.check_call(['tdplotlogs',] + args + [LIS_BASIC_FILE, ])
+    subprocess.check_call(['tdplotlogs', ] + args + [LIS_BASIC_FILE, ])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-v', '-x HDT', ],
-        ['-v', '-x HDT', '-k', ],
-        ['-v', '-x HDT', '-A', ],
-        ['-v', '-x HDT', '-s 200', ],
-        ['-v', '-X 4', ],
+            ['-v', '-x HDT', ],
+            ['-v', '-x HDT', '-k', ],
+            ['-v', '-x HDT', '-A', ],
+            ['-v', '-x HDT', '-s 200', ],
+            ['-v', '-X 4', ],
     )
 )
 def test_tdplotlogs_file(tmpdir, args):
-    subprocess.check_call(['tdplotlogs',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+    subprocess.check_call(['tdplotlogs', ] + args + [LIS_BASIC_FILE, str(tmpdir)])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-r', '-X 4', '-v'],
-        ['-r', '-X 4', '-k'],
-        ['-r', '-X 4', '-j 4'],
+            ['-r', '-X 4', '-v'],
+            ['-r', '-X 4', '-k'],
+            ['-r', '-X 4', '-j 4'],
     )
 )
 def test_tdplotlogs_dir(tmpdir, args):
-    subprocess.check_call(['tdplotlogs',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+    subprocess.check_call(['tdplotlogs', ] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
 
 
 # -------- END: tdplotlogs --------
 
 
 # ================ LAS ==================
-EXAMPLE_DATA_DIRECTORY_LAS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data',)
+EXAMPLE_DATA_DIRECTORY_LAS = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data', )
 LAS_BASIC_FILE = os.path.join(EXAMPLE_DATA_DIRECTORY_LAS, 'BASIC_FILE_0_50.las')
 
 
@@ -196,33 +197,34 @@ def test_las_basic_file_exists():
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
     )
 )
 def test_tdlastohtml(tmpdir, args):
-    subprocess.check_call(['tdlastohtml',] + args + [EXAMPLE_DATA_DIRECTORY_LAS, str(tmpdir)])
+    subprocess.check_call(['tdlastohtml', ] + args + [EXAMPLE_DATA_DIRECTORY_LAS, str(tmpdir)])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-m'],
-        ['-r', '-c'],
-        ['-r', '-u'],
-        ['-r', '-w'],
-        ['-r', '-p'],
-        ['-r', '-s'],
-        ['-r', '-a'],
-        ['-r', '-avk'],
+            [],
+            ['-r'],
+            ['-r', '-m'],
+            ['-r', '-c'],
+            ['-r', '-u'],
+            ['-r', '-w'],
+            ['-r', '-p'],
+            ['-r', '-s'],
+            ['-r', '-a'],
+            ['-r', '-avk'],
     )
 )
 def test_tdlasreadlasfiles(args):
-    subprocess.check_call(['tdlasreadlasfiles',] + args + [EXAMPLE_DATA_DIRECTORY_LAS, ])
+    subprocess.check_call(['tdlasreadlasfiles', ] + args + [EXAMPLE_DATA_DIRECTORY_LAS, ])
+
 
 # ================ END: LAS ==================
 
@@ -240,16 +242,17 @@ def test_lis_basic_file_exists():
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-k', ],
-        ['-no-frames'],
-        ['-no-frames'],
-        ['-summary'],
-        ['-c', "'C1  '"],
+            [],
+            ['-k', ],
+            ['-no-frames'],
+            ['-no-frames'],
+            ['-summary'],
+            ['-c', "'C1  '"],
     )
 )
 def test_tdlisindex_file(tmpdir, args):
     subprocess.check_call(['tdlisdumpframeset', ] + args + [LIS_BASIC_FILE, ])
+
 
 # -------- END: tdlisdumpframeset --------
 
@@ -258,10 +261,10 @@ def test_tdlisindex_file(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v', ],
-        ['-v', '-s'],
-        ['-s', '-t 3'],
+            [],
+            ['-v', ],
+            ['-v', '-s'],
+            ['-s', '-t 3'],
     )
 )
 def test_tdlisindex_file(tmpdir, args):
@@ -272,12 +275,12 @@ def test_tdlisindex_file(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-v'],
-        ['-r', '-s'],
-        ['-r', '-t 3'],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-v'],
+            ['-r', '-s'],
+            ['-r', '-t 3'],
     )
 )
 def test_tdlisindex_dir(args):
@@ -292,10 +295,10 @@ def test_tdlisindex_dir(args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-k'],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-k'],
     )
 )
 def test_tdlistohtml_dir(tmpdir, args):
@@ -306,7 +309,7 @@ def test_tdlistohtml_dir(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
+            [],
     )
 )
 def test_tdlistohtml_file(tmpdir, args):
@@ -326,43 +329,44 @@ def test_tdlistohtml_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0',],
-        ['--frame-slice=64',],
-        ['--frame-slice=,,2',],
-        ['--frame-slice=?',],
-        ['--array-reduction=median',],
-        ['--channels=?',],
-        ['--channels=TENS,ETIM',],
-        ['--field-width=32',],
-        ['--float-format=.6f',],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0', ],
+            ['--frame-slice=64', ],
+            ['--frame-slice=,,2', ],
+            ['--frame-slice=?', ],
+            ['--array-reduction=median', ],
+            ['--channels=?', ],
+            ['--channels=TENS,ETIM', ],
+            ['--field-width=32', ],
+            ['--float-format=.6f', ],
     )
 )
 def test_tdlistolas_basic_file(tmpdir, args):
-    subprocess.check_call(['tdlistolas',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+    subprocess.check_call(['tdlistolas', ] + args + [LIS_BASIC_FILE, str(tmpdir)])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--frame-slice=?', ],
-        ['-r', '--channels=?', ],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--frame-slice=?', ],
+            ['-r', '--channels=?', ],
     )
 )
 def test_tdlistolas_dir(tmpdir, args):
-    subprocess.check_call(['tdlistolas',] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
+    subprocess.check_call(['tdlistolas', ] + args + [EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdlistolas_gnuplot(tmpdir):
     subprocess.check_call(['tdlistolas', EXAMPLE_DATA_DIRECTORY_LIS, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdlistolas --------
 
@@ -372,24 +376,24 @@ def test_tdlistolas_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        ['-x?'],
+            ['-x?'],
     )
 )
 def test_tdlisplotlogpasses(args):
-    subprocess.check_call(['tdlisplotlogpasses',] + args + [LIS_BASIC_FILE, ])
+    subprocess.check_call(['tdlisplotlogpasses', ] + args + [LIS_BASIC_FILE, ])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-x HDT', ],
-        ['-x HDT', '-k', ],
-        ['-x HDT', '-A', ],
+            ['-x HDT', ],
+            ['-x HDT', '-k', ],
+            ['-x HDT', '-A', ],
     )
 )
 def test_tdlisplotlogpasses_file(tmpdir, args):
-    subprocess.check_call(['tdlisplotlogpasses',] + args + [LIS_BASIC_FILE, str(tmpdir)])
+    subprocess.check_call(['tdlisplotlogpasses', ] + args + [LIS_BASIC_FILE, str(tmpdir)])
 
 
 # @pytest.mark.slow
@@ -408,10 +412,10 @@ def test_tdlisplotlogpasses_file(tmpdir, args):
 # -------- END: tdlisplotlogpasses --------
 
 
-#======================== END: LIS ==================
+# ======================== END: LIS ==================
 
 
-#======================== RP66V1 ==================
+# ======================== RP66V1 ==================
 RP66V1_DATA_DIR = os.path.join(EXAMPLE_DATA_DIRECTORY, 'RP66V1', 'data')
 
 
@@ -436,60 +440,60 @@ RP66V1_FILES = [
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        # Visible Records
-        ['-V'],
-        ['-V', '-v'],
-        ['--VR'],
-        ['--VR', '-v'],
-        # Logical Record Segments
-        ['-L'],
-        ['-L', '-v'],
-        ['--LRSH'],
-        ['--LRSH', '-v'],
-        # Logical data
-        ['-D'],
-        ['-D', '-v'],
-        ['--LD'],
-        ['--LD', '-v'],
-        ['-D', '-v', '--dump-bytes=8'],
-        ['-D', '-v', '--dump-bytes=8', '--dump-raw-bytes'],
-        # Explicitly Formatted Logical Records
-        ['-E'],
-        ['-E', '-v'],
-        ['--EFLR'],
-        ['--EFLR', '-v'],
-        ['--EFLR', '--eflr-set-type=FRAME', '-v'],
-        # Indirectly Formatted Logical Records
-        ['-I'],
-        ['-I', '-v'],
-        ['--IFLR'],
-        ['--IFLR', '-v'],
-        # Logical Records
-        ['-R'],
-        ['-R', '-v'],
-        ['--LR'],
-        ['--LR', '-v'],
-        ['--LR', '--frame-slice=64'],
-        ['--LR', '--frame-slice=,,64'],
-        # Test data
-        ['-T'],
-        ['--LRSH-consistency'],
+            [],
+            # Visible Records
+            ['-V'],
+            ['-V', '-v'],
+            ['--VR'],
+            ['--VR', '-v'],
+            # Logical Record Segments
+            ['-L'],
+            ['-L', '-v'],
+            ['--LRSH'],
+            ['--LRSH', '-v'],
+            # Logical data
+            ['-D'],
+            ['-D', '-v'],
+            ['--LD'],
+            ['--LD', '-v'],
+            ['-D', '-v', '--dump-bytes=8'],
+            ['-D', '-v', '--dump-bytes=8', '--dump-raw-bytes'],
+            # Explicitly Formatted Logical Records
+            ['-E'],
+            ['-E', '-v'],
+            ['--EFLR'],
+            ['--EFLR', '-v'],
+            ['--EFLR', '--eflr-set-type=FRAME', '-v'],
+            # Indirectly Formatted Logical Records
+            ['-I'],
+            ['-I', '-v'],
+            ['--IFLR'],
+            ['--IFLR', '-v'],
+            # Logical Records
+            ['-R'],
+            ['-R', '-v'],
+            ['--LR'],
+            ['--LR', '-v'],
+            ['--LR', '--frame-slice=64'],
+            ['--LR', '--frame-slice=,,64'],
+            # Test data
+            ['-T'],
+            ['--LRSH-consistency'],
     )
 )
 def test_tdrp66v1scan_file(args):
-    subprocess.check_call(['tdrp66v1scan',] + args + [RP66V1_BASIC_FILE,])
+    subprocess.check_call(['tdrp66v1scan', ] + args + [RP66V1_BASIC_FILE, ])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-r', '-V'],
+            ['-r', '-V'],
     )
 )
 def test_tdrp66v1scan_dir(tmpdir, args):
-    cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
+    cmd_args = ['tdrp66v1scan', ] + args + [RP66V1_DATA_DIR, str(tmpdir)]
     subprocess.check_call(cmd_args)
 
 
@@ -498,17 +502,16 @@ def test_tdrp66v1scan_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1scan', RP66V1_DATA_DIR, '-r', '-V', f'--gnuplot={str(tmpdir)}'])
 
 
-
 @pytest.mark.xfail(reason='Not sure why this is failing, it seems pretty innocuous.')
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-r', '-j 2'],
+            ['-r', '-j 2'],
     )
 )
 def test_tdrp66v1scan_dir_with_two_jobs(tmpdir, args):
-    cmd_args = ['tdrp66v1scan',] + args + [RP66V1_DATA_DIR, str(tmpdir)]
+    cmd_args = ['tdrp66v1scan', ] + args + [RP66V1_DATA_DIR, str(tmpdir)]
     subprocess.check_call(cmd_args)
 
 
@@ -517,34 +520,35 @@ def test_tdrp66v1scan_dir_with_two_jobs(tmpdir, args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0'],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0'],
     )
 )
 def test_tdrp66v1logrecindex_file_stdout(args):
-    subprocess.check_call(['tdrp66v1logrecindex',] + args + [RP66V1_BASIC_FILE])
+    subprocess.check_call(['tdrp66v1logrecindex', ] + args + [RP66V1_BASIC_FILE])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--read-back'],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--read-back'],
     )
 )
 def test_tdrp66v1logrecindex_dir(tmpdir, args):
-    subprocess.check_call(['tdrp66v1logrecindex',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1logrecindex', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdrp66v1logrecindex_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1logrecindex', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdrp66v1logrecindex --------
 
@@ -554,34 +558,35 @@ def test_tdrp66v1logrecindex_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0'],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0'],
     )
 )
 def test_tdrp66v1indexpickle_file_stdout(args):
-    subprocess.check_call(['tdrp66v1indexpickle',] + args + [RP66V1_BASIC_FILE])
+    subprocess.check_call(['tdrp66v1indexpickle', ] + args + [RP66V1_BASIC_FILE])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--read-back'],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--read-back'],
     )
 )
 def test_tdrp66v1indexpickle_dir(tmpdir, args):
-    subprocess.check_call(['tdrp66v1indexpickle',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1indexpickle', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.skip(reason='Need to investigate gnuplot never achieving regression coefficient.')
 @pytest.mark.slow
 def test_tdrp66v1indexpickle_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1indexpickle', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdrp66v1indexpickle --------
 
@@ -591,34 +596,35 @@ def test_tdrp66v1indexpickle_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0'],
-        ['--encrypted'],
-        ['--private'],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0'],
+            ['--encrypted'],
+            ['--private'],
     )
 )
 def test_tdrp66v1indexxml_file_stdout(args):
-    subprocess.check_call(['tdrp66v1indexxml',] + args + [RP66V1_BASIC_FILE])
+    subprocess.check_call(['tdrp66v1indexxml', ] + args + [RP66V1_BASIC_FILE])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
     )
 )
 def test_tdrp66v1indexxml_dir(tmpdir, args):
-    subprocess.check_call(['tdrp66v1indexxml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1indexxml', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdrp66v1indexxml_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1indexxml', EXAMPLE_DATA_DIRECTORY, '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdrp66v1indexxml --------
 
@@ -628,43 +634,44 @@ def test_tdrp66v1indexxml_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0',],
-        ['--frame-slice=64',],
-        ['--frame-slice=,,2',],
-        ['--frame-slice=?',],
-        ['--array-reduction=median',],
-        ['--channels=?',],
-        ['--channels=TENS,ETIM',],
-        ['--field-width=32',],
-        ['--float-format=.6f',],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0', ],
+            ['--frame-slice=64', ],
+            ['--frame-slice=,,2', ],
+            ['--frame-slice=?', ],
+            ['--array-reduction=median', ],
+            ['--channels=?', ],
+            ['--channels=TENS,ETIM', ],
+            ['--field-width=32', ],
+            ['--float-format=.6f', ],
     )
 )
 def test_tdrp66v1tolas_basic_file(tmpdir, args):
-    subprocess.check_call(['tdrp66v1tolas',] + args + [RP66V1_BASIC_FILE, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1tolas', ] + args + [RP66V1_BASIC_FILE, str(tmpdir)])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--frame-slice=?', ],
-        ['-r', '--channels=?', ],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--frame-slice=?', ],
+            ['-r', '--channels=?', ],
     )
 )
 def test_tdrp66v1tolas_dir(tmpdir, args):
-    subprocess.check_call(['tdrp66v1tolas',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1tolas', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdrp66v1tolas_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1tolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdrp66v1tolas --------
 
@@ -675,26 +682,27 @@ def test_tdrp66v1tolas_gnuplot(tmpdir):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '--verbose', ],
-        ['-r', '--keep-going', ],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--encrypted', ],
-        ['-r', '--sort-eflr', ],
-        ['-r', '--frame-slice=64', ],
-        ['-r', '--frame-slice=,,2', ],
-        ['-r', '--log-process=1.0', ],
+            [],
+            ['-r'],
+            ['-r', '--verbose', ],
+            ['-r', '--keep-going', ],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--encrypted', ],
+            ['-r', '--sort-eflr', ],
+            ['-r', '--frame-slice=64', ],
+            ['-r', '--frame-slice=,,2', ],
+            ['-r', '--log-process=1.0', ],
     )
 )
 def test_tdrp66v1scanhtml_dir(tmpdir, args):
-    subprocess.check_call(['tdrp66v1scanhtml',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdrp66v1scanhtml', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdrp66v1scanhtml_gnuplot(tmpdir):
     subprocess.check_call(['tdrp66v1scanhtml', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
+
 
 # -------- END: tdrp66v1scanhtml --------
 
@@ -704,14 +712,15 @@ def test_rp66v1_scan_ff01():
     subprocess.check_call(['python', script, RP66V1_BASIC_FILE])
 
 
-#======================== END: RP66V1 ==================
+# ======================== END: RP66V1 ==================
 
 
-#======================== BIT ==================
+# ======================== BIT ==================
 
 EXAMPLE_DATA_DIRECTORY_BIT = os.path.join(
     EXAMPLE_DATA_DIRECTORY, 'BIT', 'data',
 )
+
 
 def test_example_data_directory_bit_exists():
     assert os.path.isdir(EXAMPLE_DATA_DIRECTORY_BIT)
@@ -728,28 +737,28 @@ def test_example_data_file_bit_exists():
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-v'],
-        ['-r', '-v', '--summary'],
+            [],
+            ['-r'],
+            ['-r', '-v'],
+            ['-r', '-v', '--summary'],
     )
 )
 def test_tdbitread_dir(args):
-    subprocess.check_call(['tdbitread',] + args + [EXAMPLE_DATA_DIRECTORY_BIT])
+    subprocess.check_call(['tdbitread', ] + args + [EXAMPLE_DATA_DIRECTORY_BIT])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-v'],
-        ['-r', '-v', '--summary'],
+            [],
+            ['-r'],
+            ['-r', '-v'],
+            ['-r', '-v', '--summary'],
     )
 )
 def test_tdbitread_file(args):
-    subprocess.check_call(['tdbitread',] + args + [EXAMPLE_DATA_FILE_BIT])
+    subprocess.check_call(['tdbitread', ] + args + [EXAMPLE_DATA_FILE_BIT])
 
 
 # -------- tdbittolas --------
@@ -757,49 +766,50 @@ def test_tdbitread_file(args):
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-v'],
-        ['-v', '-k'],
-        ['--log-process=1.0',],
-        ['--frame-slice=64',],
-        ['--frame-slice=,,2',],
-        ['--frame-slice=?',],
-        ['--channels=?',],
-        ['--channels=TENS,ETIM',],
-        ['--field-width=32',],
-        ['--float-format=.6f',],
+            [],
+            ['-v'],
+            ['-v', '-k'],
+            ['--log-process=1.0', ],
+            ['--frame-slice=64', ],
+            ['--frame-slice=,,2', ],
+            ['--frame-slice=?', ],
+            ['--channels=?', ],
+            ['--channels=TENS,ETIM', ],
+            ['--field-width=32', ],
+            ['--float-format=.6f', ],
     )
 )
 def test_tdbittolas_basic_file(tmpdir, args):
-    subprocess.check_call(['tdbittolas',] + args + [EXAMPLE_DATA_FILE_BIT, str(tmpdir)])
+    subprocess.check_call(['tdbittolas', ] + args + [EXAMPLE_DATA_FILE_BIT, str(tmpdir)])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-j 2'],
-        ['-r', '-j 0'],
-        ['-r', '--frame-slice=?', ],
-        ['-r', '--channels=?', ],
+            [],
+            ['-r'],
+            ['-r', '-j 2'],
+            ['-r', '-j 0'],
+            ['-r', '--frame-slice=?', ],
+            ['-r', '--channels=?', ],
     )
 )
 def test_tdbittolas_dir(tmpdir, args):
-    subprocess.check_call(['tdbittolas',] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
+    subprocess.check_call(['tdbittolas', ] + args + [EXAMPLE_DATA_DIRECTORY, str(tmpdir)])
 
 
 @pytest.mark.slow
 def test_tdbittolas_gnuplot(tmpdir):
     subprocess.check_call(['tdbittolas', EXAMPLE_DATA_DIRECTORY, str(tmpdir), '-r', f'--gnuplot={str(tmpdir)}'])
 
+
 # -------- END: tdbittolas --------
 
-#======================== END: BIT ==================
+# ======================== END: BIT ==================
 
 
-#======================== DAT ==================
+# ======================== DAT ==================
 
 EXAMPLE_DATA_DIRECTORY_DAT = os.path.join(
     EXAMPLE_DATA_DIRECTORY, 'DAT', 'data',
@@ -821,26 +831,25 @@ def test_example_data_file_dat_exists():
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-v'],
+            [],
+            ['-r'],
+            ['-r', '-v'],
     )
 )
 def test_tddatread_dir(args):
-    subprocess.check_call(['tddatread',] + args + [EXAMPLE_DATA_DIRECTORY_DAT])
+    subprocess.check_call(['tddatread', ] + args + [EXAMPLE_DATA_DIRECTORY_DAT])
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
     'args',
     (
-        [],
-        ['-r'],
-        ['-r', '-v'],
+            [],
+            ['-r'],
+            ['-r', '-v'],
     )
 )
 def test_tddatread_file(args):
-    subprocess.check_call(['tddatread',] + args + [EXAMPLE_DATA_FILE_BIT])
+    subprocess.check_call(['tddatread', ] + args + [EXAMPLE_DATA_FILE_BIT])
 
-
-#======================== END: DAT ==================
+# ======================== END: DAT ==================

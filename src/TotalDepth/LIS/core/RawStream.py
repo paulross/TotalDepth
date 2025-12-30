@@ -25,16 +25,20 @@ __version__ = '0.1.2'
 __copyright__ = '(c) 2010 Paul Ross.'
 
 import os
-#import struct
+
+# import struct
 from TotalDepth.LIS import ExceptionTotalDepthLIS
+
 
 class ExceptionRawStream(ExceptionTotalDepthLIS):
     """Specialisation of exception for RawStream."""
     pass
 
+
 class ExceptionRawStreamEOF(ExceptionRawStream):
     """RawStream premature EOF."""
     pass
+
 
 class RawStream(object):
     """Class that creates a I/O stream from a file path or file-like object
@@ -48,6 +52,7 @@ class RawStream(object):
     file name. If f is not a string then f.name is used with
     fileId as a fallback.
     """
+
     def __init__(self, f, mode='rb', fileId=None):
         """Construct with:
         f - A file like object or string, if the latter it assumed to be a path.
@@ -55,7 +60,7 @@ class RawStream(object):
         fileId - If f is a string is this is present then this is used as the
         file name. If f is not a string then f.name is used with
         fileId as a fallback.
-        """ 
+        """
         if type(f) == type(''):
             # Treat as file path
             if fileId is not None:
@@ -73,10 +78,10 @@ class RawStream(object):
     def __enter__(self):
         """Context Manager support."""
         return self
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         """Context manager finalisation, this closes the underlying stream."""
-        #self._stream.flush()
+        # self._stream.flush()
         self.close()
         return False
 
@@ -84,11 +89,11 @@ class RawStream(object):
     def stream(self):
         """Exposes the underlying stream."""
         return self._stream
-    
+
     def tell(self):
         """Return the file's current position, like stdio's ftell."""
         return self._stream.tell()
-    
+
     def seek(self, offset, whence=os.SEEK_SET):
         """Set the file's current position, like stdio's fseek. The whence
         argument is optional and defaults to os.SEEK_SET or 0 (absolute file
@@ -97,22 +102,22 @@ class RawStream(object):
         There is no return value.
         Not all file objects are seekable."""
         self._stream.seek(offset, whence)
-        
+
     def read(self, theLen):
         """Reads and returns theLen bytes."""
         try:
             return self._stream.read(theLen)
         except ValueError as err:
             raise ExceptionRawStreamEOF(f'{str(err)} at tell: 0x{self._stream.tell():08x}')
-        
+
     def write(self, theB):
         """Writes theB bytes."""
         self._stream.write(theB)
-        
+
     def close(self):
         """Closes the underlying stream."""
         self._stream.close()
-    
+
     def readAndUnpack(self, theStruct):
         """Reads from the stream and unpacks binary data according to the
         struct module format. This returns a tuple.
@@ -126,13 +131,14 @@ class RawStream(object):
                 f' but need {theStruct.size} bytes'
             )
         return theStruct.unpack(myBuf)
-#===============================================================================
-#        try:
-#            return theStruct.unpack(myBuf)
-#        except struct.error as err:
-#            raise ExceptionRawStream(str(err))
-#===============================================================================
-        
+
+    # ===============================================================================
+    #        try:
+    #            return theStruct.unpack(myBuf)
+    #        except struct.error as err:
+    #            raise ExceptionRawStream(str(err))
+    # ===============================================================================
+
     def packAndWrite(self, theStruct, *args):
         """Packs binary data from args and writes it to the stream.
 
@@ -141,10 +147,10 @@ class RawStream(object):
         args - The data to write."""
         b = theStruct.pack(*args)
         self._stream.write(b)
-#===============================================================================
+# ===============================================================================
 #        try:
 #            b = theStruct.pack(*args)
 #            self._stream.write(b)
 #        except struct.error as err:
 #            raise ExceptionRawStream(str(err))
-#===============================================================================
+# ===============================================================================

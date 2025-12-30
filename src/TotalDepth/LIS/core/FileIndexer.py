@@ -24,21 +24,21 @@ Created on 10 Feb 2011
 @author: p2ross
 """
 
-#import time
-#import sys
+# import time
+# import sys
 import logging
 import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-#from TotalDepth.LIS.core import EngVal
-from TotalDepth.LIS.core import RepCode
-from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import LogPass
+from TotalDepth.LIS.core import LogiRec
+# from TotalDepth.LIS.core import EngVal
+from TotalDepth.LIS.core import RepCode
 
-__author__  = 'Paul Ross'
-__date__    = '2011-02-10'
+__author__ = 'Paul Ross'
+__date__ = '2011-02-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
 class ExceptionFileIndex(ExceptionTotalDepthLIS):
@@ -54,6 +54,7 @@ class IndexObjBase:
     lrType - The Logical Record type as an integer.
     
     theF - The LIS File object. The file ID is recorded for later error checking."""
+
     def __init__(self, tell, lrType, theF):
         self._tell = tell
         self._typ = lrType
@@ -62,7 +63,7 @@ class IndexObjBase:
         # TODO: Set the file to the tell with theF.file.seek(tell) or assert theF.file.tell() == tell
         # TODO: Get rid of isinstance.
         if not isinstance(theF.file, str):
-            tell_diff =theF.file.tell() - tell
+            tell_diff = theF.file.tell() - tell
             # 18 since bin_file_type uses it.
             # TODO: 30 comes up in WAPIMS/1990-2000. Why?
             assert tell_diff in {0, 6, 18, 30}, \
@@ -70,14 +71,14 @@ class IndexObjBase:
 
     def __str__(self):
         return self._strPrefix() + ' ' + self._strSuffix()
-        #return 'tell: 0x{:08x} type={:3d} {:s}'.format(self._tell, self._typ, repr(self))
+        # return 'tell: 0x{:08x} type={:3d} {:s}'.format(self._tell, self._typ, repr(self))
 
     def _strPrefix(self):
         return 'tell: 0x{:08x} type={:3d}'.format(self._tell, self._typ)
 
     def _strSuffix(self):
         return '{:s}'.format(repr(self))
-    
+
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         return 'Type {:d} {:s}'.format(self.lrType, LogiRec.LR_DESCRIPTION_MAP[self.lrType])
@@ -86,22 +87,22 @@ class IndexObjBase:
     def tell(self):
         """The file offset of the Logical Record."""
         return self._tell
-    
+
     @property
     def lrType(self):
         """The Logical Record type, in integer."""
         return self._typ
-    
+
     @property
     def logicalRecord(self):
         """The underlying LogiRec object or None."""
         return self._lr
-    
+
     @property
     def isDelimiter(self):
         """True if this represents a delimiter record e.g. File Head/Tail."""
         return LogiRec.isDelimiter(self._typ)
-             
+
     def canAdd(self, iflrType):
         """Returns True if this can accumulate another IFLR."""
         return False
@@ -109,11 +110,11 @@ class IndexObjBase:
     def iflrType(self):
         """Returns the IFLR type that this EFLR can describe."""
         return -1
-    
+
     def setLogicalRecord(self, theFile):
         """Sets the logicalRecord property to an LogiRec object from theFile."""
         raise NotImplementedError
-    
+
     def _seekFile(self, theFile):
         """Sets theFile to the start of the Logical Record object."""
         theFile.seekLr(self.tell)
@@ -121,14 +122,15 @@ class IndexObjBase:
     def jsonObject(self):
         """Return an Python object that can be JSON encoded."""
         return {
-            'tell' : self._tell,
-            'lrtype' : self._typ,
+            'tell': self._tell,
+            'lrtype': self._typ,
             # 'fileID' : self._fileId,
         }
 
 
 class IndexNone(IndexObjBase):
     """NULL class just takes the LR information and skips to next LR."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF)
         theF.skipToNextLr()
@@ -142,8 +144,9 @@ class IndexNone(IndexObjBase):
 
 class IndexUnknownInternalFormat(IndexObjBase):
     """Binary verbatim class for things like encrypted records, images, raw table dumps and so on."""
+
     def __init__(self, tell, lrType, theF):
-        assert(lrType in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT)
+        assert (lrType in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT)
         super().__init__(tell, lrType, theF)
         theF.skipToNextLr()
 
@@ -154,10 +157,12 @@ class IndexUnknownInternalFormat(IndexObjBase):
             self._lr = LogiRec.LrMiscRead(theFile)
             theFile.skipToNextLr()
 
+
 class IndexLrFull(IndexObjBase):
     """Takes a full LR and assigns it to self._lr.
     
     theClass is a cls that is use to instantiate a Logical Record object at the current file position."""
+
     def __init__(self, tell, lrType, theF, theClass):
         super().__init__(tell, lrType, theF)
         theF.seekCurrentLrStart()
@@ -168,78 +173,98 @@ class IndexLrFull(IndexObjBase):
         """Sets the logicalRecord property to an LogiRec object from theFile."""
         # Nothing to do as we have already read this in full
         pass
-    
+
+
 class IndexFileHeadTail(IndexLrFull):
     """Indexes a File header or trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF, theClass):
         super().__init__(tell, lrType, theF, theClass)
-        
+
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         return '{:s} Name: "{:s}"'.format(super().tocStr(), self._lr.fileName.decode('ascii'))
-        
+
+
 class IndexFileHead(IndexFileHeadTail):
     """Indexes a File header. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrFileHeadRead)
-        
+
+
 class IndexFileTail(IndexFileHeadTail):
     """Indexes a File trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrFileTailRead)
-        
+
+
 class IndexTapeHeadTail(IndexLrFull):
     """Indexes a Tape header or trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF, theClass):
         super().__init__(tell, lrType, theF, theClass)
-        
+
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         return '{:s} Name: "{:s}"'.format(super().tocStr(), self._lr.name.decode('ascii', 'replace'))
-        
+
+
 class IndexTapeHead(IndexTapeHeadTail):
     """Indexes a Tape header. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrTapeHeadRead)
-        
+
+
 class IndexTapeTail(IndexTapeHeadTail):
     """Indexes a Tape trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrTapeTailRead)
-        
+
+
 class IndexReelHeadTail(IndexLrFull):
     """Indexes a Reel header or trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF, theClass):
         super().__init__(tell, lrType, theF, theClass)
-        
+
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         return '{:s} Name: "{:s}"'.format(super().tocStr(), self._lr.name.decode('ascii', 'replace'))
-        
+
+
 class IndexReelHead(IndexReelHeadTail):
     """Indexes a Reel header. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrReelHeadRead)
-        
+
+
 class IndexReelTail(IndexReelHeadTail):
     """Indexes a Reel trailer. The full Logical record is retained."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF, LogiRec.LrReelTailRead)
-        
+
+
 class IndexTable(IndexObjBase):
     """Table type logical records. Here we capture the first component block so
     that we know the name of the table."""
+
     def __init__(self, tell, lrType, theF):
         super().__init__(tell, lrType, theF)
         # Now read first component block
         self._cb = LogiRec.CbEngValRead(theF)
         theF.skipToNextLr()
-    
+
     @property
     def name(self):
         """The name of the table from the first component block."""
         return self._cb.value
-    
+
     def __str__(self):
         return self._strPrefix() \
             + ' name={:s} '.format(str(self.name)) \
@@ -252,12 +277,12 @@ class IndexTable(IndexObjBase):
                 self.lrType,
                 LogiRec.LR_DESCRIPTION_MAP[self.lrType],
                 self._cb.value.decode('ascii'),
-                )
+            )
         return 'Type {:d} {:s} "{:s}"'.format(
             self.lrType,
             LogiRec.LR_DESCRIPTION_MAP[self.lrType],
             str(self._cb.value),
-            )
+        )
 
     def setLogicalRecord(self, theFile):
         """Sets the logicalRecord property to an LogiRec.LrTable() object."""
@@ -265,36 +290,38 @@ class IndexTable(IndexObjBase):
             self._seekFile(theFile)
             self._lr = LogiRec.LrTableRead(theFile)
             theFile.skipToNextLr()
-    
+
     def jsonObject(self):
         """Return an Python object that can be JSON encoded."""
         d = super().jsonObject()
         d['tablename'] = repr(self.name)
         return d
 
+
 class IndexLogPass(IndexObjBase):
     """The index of a Log Pass. This contains a LogPass object.
     
     xAxisIndex is the channel index that is regarded as the X axis.
     This is the indirect axis if present or defaults to channel 0."""
+
     def __init__(self, tell, lrType, theF, xAxisIndex=0):
         super().__init__(tell, lrType, theF)
-        assert(self._typ == LogiRec.LR_TYPE_DATA_FORMAT)
+        assert (self._typ == LogiRec.LR_TYPE_DATA_FORMAT)
         # Have to rewind for DFSR creation
         theF.seekCurrentLrStart()
         # Create a DFSR and thus a Log Pass
         self._logPass = LogPass.LogPass(LogiRec.LrDFSRRead(theF), self._fileId, xAxisIndex)
         theF.skipToNextLr()
-    
+
     @property
     def logPass(self):
         """The LogPass object."""
         return self._logPass
-        
+
     def __str__(self):
         return str(self._logPass).replace('\n', '\n    ')
-        #+ str(self._logPass.rle.xAxisFirst()) + str(self._logPass.rle.xAxisLast())
-        
+        # + str(self._logPass.rle.xAxisFirst()) + str(self._logPass.rle.xAxisLast())
+
     def tocStr(self):
         """Returns a 'pretty' string suitable for a table of contents."""
         if self._logPass.totalFrames > 0:
@@ -311,7 +338,7 @@ class IndexLogPass(IndexObjBase):
         return 'Log Pass: {:d} channels, no frames'.format(
             len(self._logPass.dfsr.dsbBlocks),
         )
-        
+
     def canAdd(self, iflrType):
         """Returns the IFLR type that this EFLR can describe."""
         return iflrType == self._logPass.iflrType
@@ -322,8 +349,8 @@ class IndexLogPass(IndexObjBase):
 
     def add(self, tell, lrType, theF):
         """Add an IFLR."""
-        assert(self.canAdd(lrType))
-        #print('add()', tell, lrType, theF)
+        assert (self.canAdd(lrType))
+        # print('add()', tell, lrType, theF)
         # Read the nth word of the Logical record and treat this
         # as the X axis value.
         skip = 0
@@ -347,7 +374,7 @@ class IndexLogPass(IndexObjBase):
         skip += myLisSize
         skip += theF.skipToNextLr()
         self._logPass.addType01Data(tell, lrType, skip, myXval)
-        
+
     def jsonObject(self):
         """Return an Python object that can be JSON encoded."""
         d = super().jsonObject()
@@ -358,9 +385,10 @@ class IndexLogPass(IndexObjBase):
 class PlotRecordSet:
     """A POD class that can contain a set of references to the essential (plus
     optional) logical records for plotting."""
+
     def __init__(self):
         self.clear()
-        
+
     def clear(self):
         # File positions of logical records, the first two are essential, the
         # second two optional.
@@ -372,17 +400,17 @@ class PlotRecordSet:
         self.logPass = None
         # File position(s) of CONS records that can be used for the API header
         self.tellConsS = []
-                
+
     def _strVal(self, v):
         if v is None:
             return 'None'
         return '0x{:x}'.format(v)
-    
+
     def _strValS(self, l):
         if len(l) == 0:
             return 'None'
         return '[{:s}]'.format(', '.join([self._strVal(v) for v in l]))
-    
+
     def __str__(self):
         return 'film={:s} pres={:s} area={:s} pip={:s} cons={:s}\nLogPass={:s}'.format(
             self._strVal(self.tellFilm),
@@ -392,7 +420,7 @@ class PlotRecordSet:
             self._strValS(self.tellConsS),
             str(self.logPass),
         )
-    
+
     def canPlotFromInternalRecords(self):
         """True if I have a valid value that could be yielded, i.e. the minimum
         information from the file that allows a plot. In practice this means a
@@ -400,7 +428,7 @@ class PlotRecordSet:
         return self.tellFilm is not None \
             and self.tellPres is not None \
             and self.logPass is not None
-    
+
     def canPlotFromExternalRecords(self):
         """True if I have a valid value that could be yielded, i.e. the minimum
         information from the file that allows a plot using some external definition
@@ -413,6 +441,7 @@ class FileIndex:
     
     xAxisIndex is the channel index that is regarded as the X axis (default 0).
     This is currently ignored in the absence of a reasonable use case."""
+
     def __init__(self, theF, xAxisIndex=0):
         self._fileId = theF.fileId
         self._xAxisIndex = xAxisIndex
@@ -425,38 +454,38 @@ class FileIndex:
         self._despatchLrType = {
             # The first two should be handled by the LogPass, if not
             # we ignore them as we can't interpret them
-            LogiRec.LR_TYPE_NORMAL_DATA         : None,#IndexNone,
-            LogiRec.LR_TYPE_ALTERNATE_DATA      : None,#IndexNone,
-            LogiRec.LR_TYPE_JOB_ID              : IndexTable,
-            LogiRec.LR_TYPE_WELL_DATA           : IndexTable,
-            LogiRec.LR_TYPE_TOOL_INFO           : IndexTable,
-            LogiRec.LR_TYPE_ENCRYPTED_TABLE     : IndexNone,
-            LogiRec.LR_TYPE_TABLE_DUMP          : IndexNone,
-            LogiRec.LR_TYPE_DATA_FORMAT         : IndexLogPass,
-            LogiRec.LR_TYPE_DATA_DESCRIPTOR     : IndexNone,
-            LogiRec.LR_TYPE_TU10_BOOT           : IndexNone,
-            LogiRec.LR_TYPE_BOOTSTRAP_LOADER    : IndexNone,
-            LogiRec.LR_TYPE_CP_KERNEL           : IndexNone,
-            LogiRec.LR_TYPE_PROGRAM_FILE_HEAD   : IndexNone,
-            LogiRec.LR_TYPE_PROGRAM_OVER_HEAD   : IndexNone,
-            LogiRec.LR_TYPE_PROGRAM_OVER_LOAD   : IndexNone,
-            LogiRec.LR_TYPE_FILE_HEAD           : IndexFileHead,
-            LogiRec.LR_TYPE_FILE_TAIL           : IndexFileTail,
-            LogiRec.LR_TYPE_TAPE_HEAD           : IndexTapeHead,
-            LogiRec.LR_TYPE_TAPE_TAIL           : IndexTapeTail,
-            LogiRec.LR_TYPE_REEL_HEAD           : IndexReelHead,
-            LogiRec.LR_TYPE_REEL_TAIL           : IndexReelTail,
-            LogiRec.LR_TYPE_EOF                 : IndexNone,
-            LogiRec.LR_TYPE_BOT                 : IndexNone,
-            LogiRec.LR_TYPE_EOT                 : IndexNone,
-            LogiRec.LR_TYPE_EOM                 : IndexNone,
-            LogiRec.LR_TYPE_OPERATOR_INPUT      : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_OPERATOR_RESPONSE   : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_SYSTEM_OUTPUT       : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_FLIC_COMMENT        : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_BLANK_RECORD        : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_PICTURE             : IndexUnknownInternalFormat,
-            LogiRec.LR_TYPE_IMAGE               : IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_NORMAL_DATA: None,  # IndexNone,
+            LogiRec.LR_TYPE_ALTERNATE_DATA: None,  # IndexNone,
+            LogiRec.LR_TYPE_JOB_ID: IndexTable,
+            LogiRec.LR_TYPE_WELL_DATA: IndexTable,
+            LogiRec.LR_TYPE_TOOL_INFO: IndexTable,
+            LogiRec.LR_TYPE_ENCRYPTED_TABLE: IndexNone,
+            LogiRec.LR_TYPE_TABLE_DUMP: IndexNone,
+            LogiRec.LR_TYPE_DATA_FORMAT: IndexLogPass,
+            LogiRec.LR_TYPE_DATA_DESCRIPTOR: IndexNone,
+            LogiRec.LR_TYPE_TU10_BOOT: IndexNone,
+            LogiRec.LR_TYPE_BOOTSTRAP_LOADER: IndexNone,
+            LogiRec.LR_TYPE_CP_KERNEL: IndexNone,
+            LogiRec.LR_TYPE_PROGRAM_FILE_HEAD: IndexNone,
+            LogiRec.LR_TYPE_PROGRAM_OVER_HEAD: IndexNone,
+            LogiRec.LR_TYPE_PROGRAM_OVER_LOAD: IndexNone,
+            LogiRec.LR_TYPE_FILE_HEAD: IndexFileHead,
+            LogiRec.LR_TYPE_FILE_TAIL: IndexFileTail,
+            LogiRec.LR_TYPE_TAPE_HEAD: IndexTapeHead,
+            LogiRec.LR_TYPE_TAPE_TAIL: IndexTapeTail,
+            LogiRec.LR_TYPE_REEL_HEAD: IndexReelHead,
+            LogiRec.LR_TYPE_REEL_TAIL: IndexReelTail,
+            LogiRec.LR_TYPE_EOF: IndexNone,
+            LogiRec.LR_TYPE_BOT: IndexNone,
+            LogiRec.LR_TYPE_EOT: IndexNone,
+            LogiRec.LR_TYPE_EOM: IndexNone,
+            LogiRec.LR_TYPE_OPERATOR_INPUT: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_OPERATOR_RESPONSE: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_SYSTEM_OUTPUT: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_FLIC_COMMENT: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_BLANK_RECORD: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_PICTURE: IndexUnknownInternalFormat,
+            LogiRec.LR_TYPE_IMAGE: IndexUnknownInternalFormat,
         }
         while not theF.isEOF:
             # Grab the file position
@@ -482,7 +511,8 @@ class FileIndex:
                     fn = None
                 if fn is None:
                     logging.warning(
-                        'FileIndex.__init__(): Can not handle logical record type {:d} at 0x{:08x} so skipping it.'.format(lrTy, tell)
+                        'FileIndex.__init__(): Can not handle logical record type {:d} at 0x{:08x} so skipping it.'.format(
+                            lrTy, tell)
                     )
                     theF.skipToNextLr()
                 else:
@@ -510,13 +540,13 @@ class FileIndex:
 
     @staticmethod
     def _reset_log_pass_index_map() -> typing.Dict[int, None]:
-        return {0 : None, 1 : None}
+        return {0: None, 1: None}
 
     @property
     def lrTypeS(self) -> typing.Sequence[int]:
         """Returns a list of Logical Record types (integers) that is in the index."""
         return [l.lrType for l in self._idx]
-    
+
     def numLogPasses(self) -> int:
         """Returns the number of IndexLogPass objects in the index."""
         r = 0
@@ -524,7 +554,7 @@ class FileIndex:
             if isinstance(l, IndexLogPass):
                 r += 1
         return r
-    
+
     def genLogPasses(self) -> typing.Sequence[IndexLogPass]:
         """Yields all IndexLogPass objects in the index."""
         for l in self._idx:
@@ -569,11 +599,11 @@ class FileIndex:
             elif isinstance(iObj, IndexLogPass):
                 myPlotRecSet.logPass = iObj.logPass
                 prsHasChanged = True
-#            print('TRACE: myPlotRecSet.value()', myPlotRecSet.value())
+            #            print('TRACE: myPlotRecSet.value()', myPlotRecSet.value())
             if prsHasChanged and (
                     (fromInternalRecords and myPlotRecSet.canPlotFromInternalRecords())
                     or (not fromInternalRecords and myPlotRecSet.canPlotFromExternalRecords())
-                ):
+            ):
                 yield myPlotRecSet
                 prsHasChanged = False
                 # Do not call clear() on the PlotRecord set yet as there might
@@ -587,6 +617,6 @@ class FileIndex:
     def jsonObject(self) -> typing.Dict[str, typing.Any]:
         """Return an Python object that can be JSON encoded."""
         return {
-            'FileID' : self._fileId,
-            'LogicalRecords' : [obj.jsonObject() for obj in self._idx],
+            'FileID': self._fileId,
+            'LogicalRecords': [obj.jsonObject() for obj in self._idx],
         }

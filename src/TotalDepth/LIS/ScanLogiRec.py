@@ -32,11 +32,10 @@ from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.common import cmn_cmd_opts
 
-
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2010-2020 Paul Ross'
+__rights__ = 'Copyright (c) 2010-2020 Paul Ross'
 
 
 def dump_table(logical_record: LogiRec.LrTable, theS=sys.stdout):
@@ -52,29 +51,29 @@ def dump_table(logical_record: LogiRec.LrTable, theS=sys.stdout):
 
 def dump_dfsr(logical_record: LogiRec.LrDFSR, theS=sys.stdout):
     theS.write('{:3s} {:7s} {:9s} {:11s} {:7s} {:11s} {:4s} {:4s} {:4s} {:4s} {:4s}'.format(
-            '', 'Name', 'SrvID', 'SrvOrd', 'UoM', 'API Codes', 'Size', 'Samp', 'RC', 'Brst', 'SubC'
-        )
+        '', 'Name', 'SrvID', 'SrvOrd', 'UoM', 'API Codes', 'Size', 'Samp', 'RC', 'Brst', 'SubC'
+    )
     )
     theS.write('\n')
     for i, d in enumerate(logical_record.dsbBlocks):
         theS.write('%3d %s %s %s %s %2d-%2s-%2d-%1d %4d %4d %4d %4d %4d' % \
-            (
-                i,
-                d.mnem,
-                d.servId,
-                d.servOrd,
-                d.units,
-                d.apiLogType,
-                d.apiCurveType,
-                d.apiCurveClass,
-                d.apiModifier,
-                d.size,
-                d.samples(0),
-                d.repCode,
-                d.bursts(0),
-                d.subChannels,
-            )
-        )
+                   (
+                       i,
+                       d.mnem,
+                       d.servId,
+                       d.servOrd,
+                       d.units,
+                       d.apiLogType,
+                       d.apiCurveType,
+                       d.apiCurveClass,
+                       d.apiModifier,
+                       d.size,
+                       d.samples(0),
+                       d.repCode,
+                       d.bursts(0),
+                       d.subChannels,
+                   )
+                   )
         theS.write('\n')
 
 
@@ -90,16 +89,16 @@ def dump_logical_record_attributes(logical_record: LogiRec.LrBase, theS=sys.stdo
 
 def dump_logical_record(logical_record: LogiRec.LrBase, theS=sys.stdout):
     DUMP_MAP = {
-        LogiRec.LR_TYPE_JOB_ID      : dump_table,
-        LogiRec.LR_TYPE_WELL_DATA   : dump_table,
-        LogiRec.LR_TYPE_TOOL_INFO   : dump_table,
-        LogiRec.LR_TYPE_DATA_FORMAT : dump_dfsr,
-        LogiRec.LR_TYPE_REEL_HEAD   : dump_logical_record_attributes,
-        LogiRec.LR_TYPE_REEL_TAIL   : dump_logical_record_attributes,
-        LogiRec.LR_TYPE_TAPE_HEAD   : dump_logical_record_attributes,
-        LogiRec.LR_TYPE_TAPE_TAIL   : dump_logical_record_attributes,
-        LogiRec.LR_TYPE_FILE_HEAD   : dump_logical_record_attributes,
-        LogiRec.LR_TYPE_FILE_TAIL   : dump_logical_record_attributes,
+        LogiRec.LR_TYPE_JOB_ID: dump_table,
+        LogiRec.LR_TYPE_WELL_DATA: dump_table,
+        LogiRec.LR_TYPE_TOOL_INFO: dump_table,
+        LogiRec.LR_TYPE_DATA_FORMAT: dump_dfsr,
+        LogiRec.LR_TYPE_REEL_HEAD: dump_logical_record_attributes,
+        LogiRec.LR_TYPE_REEL_TAIL: dump_logical_record_attributes,
+        LogiRec.LR_TYPE_TAPE_HEAD: dump_logical_record_attributes,
+        LogiRec.LR_TYPE_TAPE_TAIL: dump_logical_record_attributes,
+        LogiRec.LR_TYPE_FILE_HEAD: dump_logical_record_attributes,
+        LogiRec.LR_TYPE_FILE_TAIL: dump_logical_record_attributes,
     }
     try:
         DUMP_MAP[logical_record.type](logical_record, theS)
@@ -146,6 +145,7 @@ Scans a LIS79 file and dumps Logical Records."""
     print('CPU time = %8.3f (S)' % clk_exec)
     print('Bye, bye!')
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())

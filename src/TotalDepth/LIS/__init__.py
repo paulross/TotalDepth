@@ -31,6 +31,7 @@ RELEASE_NOTES = [
 
 from TotalDepth import ExceptionTotalDepth
 
+
 class ExceptionTotalDepthLIS(ExceptionTotalDepth):
     """Simple specialisation of an exception class for TotalDepth.LIS."""
     pass

@@ -22,24 +22,26 @@
 That means only having Coord, Stroke, SVGWriter, XGrid? here.
 """
 __all__ = [
-'Coord',
-'Track',
-'XGrid',
-'Plot',
-'SVGWriter',
+    'Coord',
+    'Track',
+    'XGrid',
+    'Plot',
+    'SVGWriter',
 ]
 
 """Plotting code for TotalDepth."""
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 
+
 class ExceptionTotalDepthLISPlot(ExceptionTotalDepthLIS):
     """Exception for plotting."""
     pass
 
+
 from TotalDepth.util import ExceptionUtil
+
 
 class ExceptionUtilPlot(ExceptionUtil):
     """Exception class for util package."""
     pass
-

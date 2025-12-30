@@ -24,18 +24,18 @@ Created on Jan 21, 2012
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
-import sys
-import os
+import io
 import logging
+import os
+import pprint
+import sys
 import time
 import unittest
-import io
-import pprint
 
 try:
     import xml.etree.cElementTree as etree
@@ -106,7 +106,7 @@ class TestXMLMatches(unittest.TestCase):
         pprint.pprint(filmMap)
         self.assertEqual(1, len(filmMap))
         self.assertTrue('Triple_Combo' in filmMap)
-#        pprint.pprint(sorted([m.pStr() for m in filmMap['Triple_Combo']]))
+        #        pprint.pprint(sorted([m.pStr() for m in filmMap['Triple_Combo']]))
         self.assertEqual(
             [Mnem.Mnem(o) for o in ['CALI', 'DPHI', 'GR  ', 'ILD ', 'ILM ', 'NPHI', 'SFL ', 'SP  ', 'TNPH']],
             sorted(filmMap['Triple_Combo']),
@@ -115,6 +115,7 @@ class TestXMLMatches(unittest.TestCase):
 
 class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
     """Tests whether XML matches can be made with RHDT channel and a LIS LogPass."""
+
     def setUp(self):
         pass
 
@@ -133,52 +134,52 @@ class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
             # EB 4, up/down value 0 (down)
             + bytes([4, 1, 66, 0])
             # EB 12, absent value -153.0
-            + bytes([12, 4, 68])+b'\xbb\xb3\x80\x00'
+            + bytes([12, 4, 68]) + b'\xbb\xb3\x80\x00'
             # EB 0 terminates read
             + bytes([0, 1, 66, 0])
             #
             # Sensor 0
             # Mnemonic  Service ID  Serv ord No    Units   API 45,310,01,1       File No: 256
-            + b'DEPT' + b'ServID' + b'ServOrdN'+ b'FEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + b'DEPT' + b'ServID' + b'ServOrdN' + b'FEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
             # 4 LIS bytes     Pad      1 super  Rep code     Process indicators
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 1
-            + b'RHDT' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 90]) + b'000' + b'\x01'+ bytes([234,]) + bytes([0, 1, 2, 3, 4])
+            + b'RHDT' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 90]) + b'000' + b'\x01' + bytes([234, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 2
-            + b'P1AZ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'P1AZ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 3
-            + b'DEVI' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'DEVI' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 4
-            + b'HAZI' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'HAZI' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 5
-            + b'C1  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'C1  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 6
-            + b'C2  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'C2  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 7
-            + b'FEP ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'FEP ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 8
-            + b'RB  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'RB  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
         )
         myLp = LogPass.LogPass(LogiRec.LrDFSRRead(myF), 'FileID')
         myFilmCfg = FILMCfgXML.FilmCfgXMLRead('')
         myFilmCfg.addXMLRoot(etree.fromstring(TestLgFormatXMLData.LGFORMAT_HDT))
         filmMap = XMLMatches.fileCurveMapFromFILM(myLp, myFilmCfg)
-#        print()
-#        print('myLp._chMap:')
-#        pprint.pprint(myLp._chMap)
-#        print(myLp.longStr())
-#        pprint.pprint(sorted(myLp.outpMnemS()))
-#        print('filmMap:')
-#        pprint.pprint(filmMap)
-#        pprint.pprint(sorted(filmMap['HDT']))
+        #        print()
+        #        print('myLp._chMap:')
+        #        pprint.pprint(myLp._chMap)
+        #        print(myLp.longStr())
+        #        pprint.pprint(sorted(myLp.outpMnemS()))
+        #        print('filmMap:')
+        #        pprint.pprint(filmMap)
+        #        pprint.pprint(sorted(filmMap['HDT']))
         self.assertEqual(
             [
                 Mnem.Mnem(b'C1\x00\x00'),
@@ -225,7 +226,7 @@ class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
             ],
             sorted(filmMap['HDT'])
         )
-                
+
     def test_02(self):
         """TestXMLMatchesRHDT.test_01(): Which XML LgFormat files with RPS1 (RepCode 130, 80 bytes) channel and a LIS LogPass."""
         # DIPMETER_EDIT_TAPE_REP_CODE
@@ -235,77 +236,77 @@ class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
             # EB 4, up/down value 0 (down)
             + bytes([4, 1, 66, 0])
             # EB 12, absent value -153.0
-            + bytes([12, 4, 68])+b'\xbb\xb3\x80\x00'
+            + bytes([12, 4, 68]) + b'\xbb\xb3\x80\x00'
             # EB 0 terminates read
             + bytes([0, 1, 66, 0])
             #
             # Sensor 0
             # Mnemonic  Service ID  Serv ord No    Units   API 45,310,01,1       File No: 256
-            + b'DEPT' + b'ServID' + b'ServOrdN'+ b'FEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + b'DEPT' + b'ServID' + b'ServOrdN' + b'FEET' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
             # 4 LIS bytes     Pad      1 super  Rep code     Process indicators
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 1
-            + b'RPS1' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 80]) + b'000' + b'\x01'+ bytes([130,]) + bytes([0, 1, 2, 3, 4])
+            + b'RPS1' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 80]) + b'000' + b'\x01' + bytes([130, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 2
-            + b'P1AZ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'P1AZ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 3
-            + b'DEVI' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'DEVI' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 4
-            + b'HAZI' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'HAZI' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 5
-            + b'C1  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'C1  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 6
-            + b'C2  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'C2  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 7
-            + b'FEP ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'FEP ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
             # Sensor 8
-            + b'RB  ' + b'ServID' + b'ServOrdN'+ b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
-            + bytes([0, 4]) + b'000' + b'\x01'+ bytes([68,]) + bytes([0, 1, 2, 3, 4])
+            + b'RB  ' + b'ServID' + b'ServOrdN' + b'    ' + b'\x02\xb3\x60\x3b' + bytes([1, 0])
+            + bytes([0, 4]) + b'000' + b'\x01' + bytes([68, ]) + bytes([0, 1, 2, 3, 4])
         )
         myLp = LogPass.LogPass(LogiRec.LrDFSRRead(myF), 'FileID')
         myFilmCfg = FILMCfgXML.FilmCfgXMLRead('')
         myFilmCfg.addXMLRoot(etree.fromstring(TestLgFormatXMLData.LGFORMAT_HDT))
         filmMap = XMLMatches.fileCurveMapFromFILM(myLp, myFilmCfg)
-#        print()
-#        print('myLp._chMap:')
-#        pprint.pprint(myLp._chMap)
-#        print(myLp.longStr())
-#        pprint.pprint(sorted(myLp.outpMnemS()))
-#        print('filmMap:')
-#        pprint.pprint(filmMap)
-#        pprint.pprint(sorted(filmMap['HDT']))
+        #        print()
+        #        print('myLp._chMap:')
+        #        pprint.pprint(myLp._chMap)
+        #        print(myLp.longStr())
+        #        pprint.pprint(sorted(myLp.outpMnemS()))
+        #        print('filmMap:')
+        #        pprint.pprint(filmMap)
+        #        pprint.pprint(sorted(filmMap['HDT']))
         self.assertEqual(
             [
                 Mnem.Mnem(b'C1\x00\x00'),
                 Mnem.Mnem(b'C2\x00\x00'),
                 Mnem.Mnem(b'DEPT'),
                 Mnem.Mnem(b'DEVI'),
-#                Mnem.Mnem(b'EMEX'),
+                #                Mnem.Mnem(b'EMEX'),
                 Mnem.Mnem(b'FC0\x00'),
                 Mnem.Mnem(b'FC1\x00'),
                 Mnem.Mnem(b'FC2\x00'),
                 Mnem.Mnem(b'FC3\x00'),
                 Mnem.Mnem(b'FC4\x00'),
                 Mnem.Mnem(b'FEP\x00'),
-#                Mnem.Mnem(b'FEP1'),
-#                Mnem.Mnem(b'FEP2'),
+                #                Mnem.Mnem(b'FEP1'),
+                #                Mnem.Mnem(b'FEP2'),
                 Mnem.Mnem(b'HAZI'),
                 Mnem.Mnem(b'P1AZ'),
-#                Mnem.Mnem(b'PADP'),
-#                Mnem.Mnem(b'RAC1'),
-#                Mnem.Mnem(b'RAC2'),
+                #                Mnem.Mnem(b'PADP'),
+                #                Mnem.Mnem(b'RAC1'),
+                #                Mnem.Mnem(b'RAC2'),
                 Mnem.Mnem(b'RB\x00\x00'),
-#                Mnem.Mnem(b'REF\x00'),
-#                Mnem.Mnem(b'REFC'),
-#                Mnem.Mnem(b'STAT'),
-#                Mnem.Mnem(b'TEMP'),
+                #                Mnem.Mnem(b'REF\x00'),
+                #                Mnem.Mnem(b'REFC'),
+                #                Mnem.Mnem(b'STAT'),
+                #                Mnem.Mnem(b'TEMP'),
             ],
             sorted(myLp.outpMnemS()),
         )
@@ -327,10 +328,12 @@ class TestXMLMatchesHDT(BaseTestClasses.TestBaseFile):
             ],
             sorted(filmMap['HDT'])
         )
-                
+
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -338,6 +341,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestXMLMatchesHDT))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -362,6 +367,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -370,7 +376,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -388,14 +394,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

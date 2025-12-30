@@ -31,7 +31,7 @@ from TotalDepth.common import cmn_cmd_opts
 
 @pytest.mark.parametrize(
     'args',
-    (['-h',], ['--help',], ['--version',])
+    (['-h', ], ['--help', ], ['--version', ])
 )
 def test_basic(args):
     parser = cmn_cmd_opts.arg_parser("Description of the program", "Name of the program", "0.1.3rc4")

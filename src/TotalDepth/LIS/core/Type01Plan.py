@@ -21,44 +21,50 @@
 for any frame and channel.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-01-06'
+__author__ = 'Paul Ross'
+__date__ = '2011-01-06'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
-#import logging
-#import collections
+# import time
+# import sys
+# import logging
+# import collections
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import RepCode
+
 
 class ExceptionFrameSetPlan(ExceptionTotalDepthLIS):
     """Specialisation of exception for FrameSetPlan."""
     pass
 
+
 class ExceptionFrameSetPlanNegLen(ExceptionFrameSetPlan):
     """Specialisation of exception for negative/too small length arguments to FrameSetPlan."""
     pass
+
 
 class ExceptionFrameSetPlanOverrun(ExceptionFrameSetPlan):
     """Exception channel number greater than available."""
     pass
 
+
 #: Read event
-EVENT_READ          = 'read'
+EVENT_READ = 'read'
 #: Skip event
-EVENT_SKIP          = 'skip'
+EVENT_SKIP = 'skip'
 #: Extrapolate event
-EVENT_EXTRAPOLATE   = 'extrapolate'
+EVENT_EXTRAPOLATE = 'extrapolate'
+
 
 class FrameSetPlan(object):
     """Given a DFSR the FrameSetPlan gives offsets to any part of the frame set
     within a Logical Record.
     
     NOTE: All offsets, lengths etc. are relative to the end of the LRH
-    i.e. add LR_HEADER_LENGTH to get absolute Logical Data position."""            
+    i.e. add LR_HEADER_LENGTH to get absolute Logical Data position."""
+
     def __init__(self, dfsr):
         if dfsr.ebs.recordingMode:
             self._indirectSize = RepCode.lisSize(dfsr.ebs.depthRepCode)
@@ -81,12 +87,12 @@ class FrameSetPlan(object):
             self._skipToFrameEnd.append(toEnd)
             fromStart += b.size
         # Integrity checks
-        assert(toEnd == 0)
-        assert(len(self._channelSizes) == len(self._skipToChStart))
-        assert(len(self._channelSizes) == len(self._skipToFrameEnd))
-        assert(sum(self._channelSizes) == self._frameSize)
-        assert(fromStart == self._frameSize)
-    
+        assert (toEnd == 0)
+        assert (len(self._channelSizes) == len(self._skipToChStart))
+        assert (len(self._channelSizes) == len(self._skipToFrameEnd))
+        assert (sum(self._channelSizes) == self._frameSize)
+        assert (fromStart == self._frameSize)
+
     def __str__(self):
         return '{:s}: indr={:d} frame length={:d} channels={:d}'.format(
             repr(self),
@@ -94,12 +100,12 @@ class FrameSetPlan(object):
             self.frameSize,
             self.numChannels,
         )
-    
+
     @property
     def indirectSize(self):
         """The size, in bytes of the indirect X axis value. 0 for explicit X axis."""
         return self._indirectSize
-    
+
     @property
     def frameSize(self):
         """Frame size in bytes."""
@@ -125,16 +131,16 @@ class FrameSetPlan(object):
         myLen = recLen - self._indirectSize
         if myLen % self._frameSize != 0:
             exec_str = 'Can not fit integer number of frames length {:d} into LR length {:d}, remainder {:d} [indirect size {:d}].'.format(
-                        self._frameSize, myLen, myLen % self._frameSize, self._indirectSize
+                self._frameSize, myLen, myLen % self._frameSize, self._indirectSize
             )
             raise ExceptionFrameSetPlan(exec_str)
         return myLen // self._frameSize
-    
+
     def _chOffset(self, f, c):
         """Returns the offset into the LR (after LRH) to the start of a
         particular channel and frame. No range checking is performed."""
         return self._indirectSize + self._skipToChStart[c] + f * self._frameSize
-    
+
     def chOffset(self, frame, ch):
         """Returns the offset into the LR (after LRH) to the start of a particular channel and frame.
         
@@ -144,7 +150,7 @@ class FrameSetPlan(object):
         if frame < 0:
             raise ExceptionFrameSetPlanNegLen('FrameSetPlan.chOffset(): frame number {:d} negative'.format(frame))
         return self._chOffset(frame, ch)
-    
+
     def skipToEndOfFrame(self, ch):
         """Returns the skip distance into the LR to the end of frame after a
         particular channel."""
@@ -166,7 +172,7 @@ class FrameSetPlan(object):
                 'FrameSetPlan._checkChIdx(): Channels out of range in {:s}.'.format(str(theList))
             )
         return myList
-    
+
     def genOffsets(self, theChIndexS):
         """Yields an indefinite set of (frame, channel, offset) values for the
         set of channels.
@@ -191,7 +197,7 @@ class FrameSetPlan(object):
             raise ExceptionFrameSetPlanNegLen(
                 'FrameSetPlan: Negative frame step {:s}.'.format(str(fSlice.step))
             )
-    
+
     def _retFrameEvents(self, theChIndexS):
         """Return a tuple of events for a frame of the form:
         (
@@ -206,13 +212,13 @@ class FrameSetPlan(object):
         starts ends with a read event.
         Events are concatenated where the type is the same.
         """
-        assert(len(theChIndexS) > 0)
+        assert (len(theChIndexS) > 0)
         # Now generate canned events for a single frame
         # ('read' | 'skip', siz, None, chStart, chStop
         myFevts = []
         # Skip to first channel if necessary
         if theChIndexS[0] > 0:
-            myPre = (EVENT_SKIP, self._skipToChStart[theChIndexS[0]], 0, theChIndexS[0]-1)
+            myPre = (EVENT_SKIP, self._skipToChStart[theChIndexS[0]], 0, theChIndexS[0] - 1)
         else:
             myPre = None
         chStart = theChIndexS[0]
@@ -229,9 +235,9 @@ class FrameSetPlan(object):
                 if chStop >= chStart:
                     myFevts.append((EVENT_READ, siz, chStart, chStop))
                 # Now skip between channels
-                siz = self._skipToChStart[chIdx] - self._skipToChStart[chStop+1]
-                assert(siz > 0)
-                myFevts.append((EVENT_SKIP, siz, chStop+1, chIdx-1))
+                siz = self._skipToChStart[chIdx] - self._skipToChStart[chStop + 1]
+                assert (siz > 0)
+                myFevts.append((EVENT_SKIP, siz, chStop + 1, chIdx - 1))
                 chStart = chIdx
                 chStop = chIdx
                 siz = self._channelSizes[chIdx]
@@ -241,9 +247,9 @@ class FrameSetPlan(object):
         # Finally an optional skip to the end of the frame
         siz = self._skipToFrameEnd[theChIndexS[-1]]
         if siz > 0:
-            return myPre, myFevts, (EVENT_SKIP, siz, theChIndexS[-1]+1, self.numChannels-1)
+            return myPre, myFevts, (EVENT_SKIP, siz, theChIndexS[-1] + 1, self.numChannels - 1)
         return myPre, myFevts, None
-    
+
     def _retMergedPostFramePre(self, thePre, thePost, theFstep):
         # Make a merged single event that is post+pre
         siz = 0
@@ -268,7 +274,7 @@ class FrameSetPlan(object):
                 # No pre or post, may have frame skip event
                 if siz > 0:
                     return EVENT_SKIP, siz, None, None
-    
+
     def genEvents(self, theFSlice, theChIndexS):
         """For a single Logical Record type 0/1 this yields an set of events.
         
@@ -322,7 +328,7 @@ class FrameSetPlan(object):
         myChIndexS = self._checkChIdx(theChIndexS)
         self._raiseOnFrameSlice(fSlice)
         if len(myChIndexS) > 0 \
-        and fSlice.stop > fSlice.start:
+                and fSlice.stop > fSlice.start:
             # Get the inter-frame events
             myPreEvt, myFevts, myPostEvt = self._retFrameEvents(myChIndexS)
             # Make a merged single event that is post+pre or None
@@ -366,12 +372,12 @@ class FrameSetPlan(object):
                     if myIndrReadEvt is None:
                         yield typ, siz, f, chStart, chStop
                     else:
-                        assert(self._indirectSize > 0)
-                        assert(typ == EVENT_READ)
-                        assert(chStart == 0)
-                        assert(f == 0)
+                        assert (self._indirectSize > 0)
+                        assert (typ == EVENT_READ)
+                        assert (chStart == 0)
+                        assert (f == 0)
                         # Merge lazily evaluated event with this one
-                        yield typ, myIndrReadEvt[1]+siz, f, None, chStop
+                        yield typ, myIndrReadEvt[1] + siz, f, None, chStop
                         myIndrReadEvt = None
                 # Now at end of frame, increment to next frame
                 f += fSlice.step

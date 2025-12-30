@@ -24,10 +24,10 @@ Created on Jan 31, 2012
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2012-01-31'
+__author__ = 'Paul Ross'
+__date__ = '2012-01-31'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
 LGFORMAT_HDT = """<LgFormat UniqueId="HDT" xmlns="x-schema:LgSchema2.xml">
   <Description>High Definition Dipmeter</Description>

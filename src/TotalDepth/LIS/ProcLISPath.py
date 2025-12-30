@@ -23,19 +23,19 @@ Created on Jun 14, 2011
 @author: paulross
 '''
 
-import os
 import logging
 import multiprocessing
+import os
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
 from TotalDepth.LIS.core import FileIndexer
 from TotalDepth.util import DirWalk
 
-__author__  = 'Paul Ross'
-__date__    = '2011-06-14'
+__author__ = 'Paul Ross'
+__date__ = '2011-06-14'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
 class ExceptionProcLisPath(ExceptionTotalDepthLIS):
@@ -44,6 +44,7 @@ class ExceptionProcLisPath(ExceptionTotalDepthLIS):
 
 class ProcLISPathBase:
     """Takes an input path, output path and processes LIS files."""
+
     def __init__(self, fpIn, fpOut, recursive, keepGoing):
         self._fpIn = fpIn
         self._fpOut = fpOut
@@ -58,9 +59,9 @@ class ProcLISPathBase:
             self.processFile(self._fpIn, self._fpOut)
         elif os.path.isdir(self._fpIn):
             self._processDir(self._fpIn, self._fpOut)
-    
+
     def _processDir(self, fpIn, fpOut):
-        assert(os.path.isdir(fpIn))
+        assert (os.path.isdir(fpIn))
         if not os.path.isdir(fpOut):
             os.makedirs(fpOut)
         for myName in os.listdir(fpIn):
@@ -70,11 +71,11 @@ class ProcLISPathBase:
                 self._processDir(myPath, outPath)
             elif os.path.isfile(myPath):
                 self._processFile(myPath, outPath)
-        
+
     def _retLisFileAndIndex(self, path_in):
         """Returns a LisFile.LisFile() and a FileIndexer.FileIndex() from fpIn.
         May raises an ExceptionTotalDepthLIS."""
-        assert(os.path.isfile(path_in))
+        assert (os.path.isfile(path_in))
         logging.debug('ProcLISPathBase._retLisFileAndIndex(): Reading LIS file {:s}'.format(path_in))
         if self._keepGoing:
             lis_file = File.file_read_with_best_physical_record_pad_settings(path_in, file_id=path_in, pr_limit=1000)
@@ -142,7 +143,7 @@ def procLISPathMP(dIn, dOut, fnMatch, recursive, keepGoing, jobs, fileFn, result
     logging.info('procLISPathMP(): Setting multi-processing jobs to %d' % jobs)
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [(t.filePathIn, t.filePathOut, keepGoing) for t in DirWalk.dirWalk(dIn, dOut, fnMatch, recursive)]
-    #print('myTaskS', myTaskS)
+    # print('myTaskS', myTaskS)
     myResults = [
         r.get() for r in [
             myPool.apply_async(fileFn, t) for t in myTaskS

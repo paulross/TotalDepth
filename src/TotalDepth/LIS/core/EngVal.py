@@ -63,44 +63,47 @@ EngVal Reference
 -------------------
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2010-11-24'
+__author__ = 'Paul Ross'
+__date__ = '2010-11-24'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import logging
+# import logging
 import numbers
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
+from TotalDepth.LIS.core import Mnem
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import Units
-from TotalDepth.LIS.core import Mnem
 
 DIMENSIONLESS = Mnem.Mnem(b'    ')
+
 
 class ExceptionEngVal(ExceptionTotalDepthLIS):
     pass
 
+
 class EngVal(object):
     """Represents an engineering value that consists of a numeric value and a
     unit of measure (usually a string)."""
+
     def __init__(self, theVal, theUom=DIMENSIONLESS):
         self.value = theVal
         self.uom = theUom
-    
+
     def dimensionless(self):
         """Returns True if the measure is dimensionless."""
         return self.uom == DIMENSIONLESS
-    
+
     def __str__(self):
         """String representation."""
         if self.dimensionless():
             return 'EngVal: {:s}'.format(str(self.value))
         return 'EngVal: {:s} ({:s})'.format(str(self.value), self.uom.decode('ascii'))
-    
+
     def pStr(self):
         """Returns a 'pretty' ASCII string."""
-#        print(self.value, self.uom, self.dimensionless())
+        #        print(self.value, self.uom, self.dimensionless())
         if isinstance(self.value, bytes):
             myV = self.value.decode('ascii', 'replace')
         elif isinstance(self.value, str):
@@ -110,7 +113,7 @@ class EngVal(object):
         if self.dimensionless():
             return '{:s}'.format(myV)
         return '{:s} ({:s})'.format(myV, self.uom.decode('ascii', 'replace'))
-    
+
     def strFormat(self, theFormat, incPrefix=True):
         """Returns as as string with the value to the specified format (must be
         capable of handling floating point values."""
@@ -118,12 +121,12 @@ class EngVal(object):
             fmtStr = 'EngVal: {:s}'.format(theFormat)
         else:
             fmtStr = '{:s}'.format(theFormat)
-#        print('fmtStr', fmtStr, type(self.value))
+        #        print('fmtStr', fmtStr, type(self.value))
         if self.dimensionless():
             return fmtStr.format(self.value)
         fmtStr += ' ({:s})'
         return fmtStr.format(self.value, self.uom.decode('ascii'))
-    
+
     def __add__(self, other):
         """Overload self+other, returned result has the sum of self and other.
         other can be an EngVal or a Real number.
@@ -150,7 +153,7 @@ class EngVal(object):
         else:
             return NotImplemented
         return EngVal(self.value - myVal, self.uom)
-    
+
     def __rsub__(self, other):
         """Right value subtraction, see __sub__()."""
         return (self - other) * -1
@@ -162,7 +165,7 @@ class EngVal(object):
         elif isinstance(other, EngVal) and other.uom == DIMENSIONLESS:
             return EngVal(self.value * other.value, self.uom)
         return NotImplemented
-        
+
     def __rmul__(self, other):
         """Right value multiplication, see __mul__()."""
         return self * other
@@ -218,7 +221,7 @@ class EngVal(object):
             self.value *= other.value
             return self
         return NotImplemented
-        
+
     def __itruediv__(self, other):
         """Overload self /= other. other must be a real number or a dimensionless EngVal."""
         if isinstance(other, numbers.Real):
@@ -228,7 +231,7 @@ class EngVal(object):
             self.value /= other.value
             return self
         return NotImplemented
-        
+
     def __lt__(self, other):
         """True if self < other False otherwise.
         If other is an EngVal unit conversion is performed which may raise an ExceptionUnit.
@@ -288,7 +291,7 @@ class EngVal(object):
         elif isinstance(other, numbers.Real):
             return self.value >= other
         return NotImplemented
-    
+
     def convert(self, theUnits):
         """Convert my value to the supplied units in-place. May raise an ExceptionUnits."""
         if theUnits != self.uom:
@@ -316,22 +319,24 @@ class EngVal(object):
             return EngVal(self.value, self.uom)
         return EngVal(Units.convert(self.value, self.uom, myUnits), myUnits)
 
+
 class EngValRc(EngVal):
     """An engineering value with a integer Representation Code."""
+
     def __init__(self, theVal, theUom, theRc=None):
         super().__init__(theVal, theUom)
         self.rc = theRc
-    
+
     def __str__(self):
         """String representation."""
         if self.dimensionless():
             return 'EngValRc: {:s}'.format(str(self.value))
         return 'EngValRc: {:s} ({:s})'.format(str(self.value), self.uom.decode('ascii'))
-    
+
     def encode(self):
         """Encode my value to my RepCode returning a bytes object. May raise an ExceptionEngVal."""
         try:
             return RepCode.writeBytes(self.value, self.rc)
-            #return RepCode.toRepCode(self.rc, self.value)
+            # return RepCode.toRepCode(self.rc, self.value)
         except RepCode.ExceptionRepCode as err:
             raise ExceptionEngVal('EngVal.encode(): {:s}'.format(str(err)))

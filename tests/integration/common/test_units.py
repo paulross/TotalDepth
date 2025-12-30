@@ -93,8 +93,8 @@ def test_slb_unit_standard_form_to_unit_code_fails():
 @pytest.mark.parametrize(
     'standard_form, expected',
     (
-        ('degC', True),
-        ('XXX', False),
+            ('degC', True),
+            ('XXX', False),
     )
 )
 def test_has_slb_standard_form(standard_form, expected):
@@ -106,10 +106,10 @@ def test_has_slb_standard_form(standard_form, expected):
 @pytest.mark.parametrize(
     'value, unit_from_code, unit_to_code, expected',
     (
-        (1, 'FEET', 'METRE', 0.3048),
-        (0.3048, 'METRE', 'FEET', 1.0),
-        (0.0, 'DEGC', 'DEGF', 32.0),
-        (32.0, 'DEGF', 'DEGC', 0.0),
+            (1, 'FEET', 'METRE', 0.3048),
+            (0.3048, 'METRE', 'FEET', 1.0),
+            (0.0, 'DEGC', 'DEGF', 32.0),
+            (32.0, 'DEGF', 'DEGC', 0.0),
     )
 )
 def test_convert(value, unit_from_code, unit_to_code, expected):
@@ -123,11 +123,11 @@ def test_convert(value, unit_from_code, unit_to_code, expected):
 @pytest.mark.parametrize(
     'value, unit_from_code, unit_to_code, expected',
     (
-        (1, 'FEET', 'METRE', 0.3048),
-        (0.3048, 'METRE', 'FEET', 1.0),
-        (0.0, 'DEGC', 'DEGF', 32.0),
-        (100.0, 'DEGC', 'DEGF', 212.0),
-        (32.0, 'DEGF', 'DEGC', 0.0),
+            (1, 'FEET', 'METRE', 0.3048),
+            (0.3048, 'METRE', 'FEET', 1.0),
+            (0.0, 'DEGC', 'DEGF', 32.0),
+            (100.0, 'DEGC', 'DEGF', 212.0),
+            (32.0, 'DEGF', 'DEGC', 0.0),
     )
 )
 def test_convert_function(value, unit_from_code, unit_to_code, expected):

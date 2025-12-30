@@ -31,7 +31,6 @@ import zipfile
 
 from TotalDepth.util import DirWalk, bin_file_type
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -54,10 +53,12 @@ def _recurse_copy_zip_archive(
                         # Recurse
                         try:
                             ret.extend(
-                                _recurse_copy_zip_archive(zip_stream, os.path.dirname(file_path_out), binary_file_types, nervous)
+                                _recurse_copy_zip_archive(zip_stream, os.path.dirname(file_path_out), binary_file_types,
+                                                          nervous)
                             )
                         except zipfile.BadZipFile:
-                            logger.debug(f'_recurse_zip_archive(): Appears to be "{bin_type}" but _recurse_zip_archive() raises.')
+                            logger.debug(
+                                f'_recurse_zip_archive(): Appears to be "{bin_type}" but _recurse_zip_archive() raises.')
                     elif len(binary_file_types) == 0 or bin_type in binary_file_types:
                         file_path_out = os.path.join(path_out, zip_info.filename)
                         # Extract
@@ -65,7 +66,8 @@ def _recurse_copy_zip_archive(
                             print(
                                 f'_recurse_zip_archive(): Would extract {zip_info.filename} to "{file_path_out}"')
                         else:
-                            logger.debug(f'_recurse_zip_archive(): creating directory "{os.path.dirname(file_path_out)}"')
+                            logger.debug(
+                                f'_recurse_zip_archive(): creating directory "{os.path.dirname(file_path_out)}"')
                             os.makedirs(os.path.dirname(file_path_out), exist_ok=True)
                             logger.info(f'_recurse_zip_archive(): WRITING "{file_path_out}"')
                             with open(file_path_out, 'wb') as ostream:
@@ -88,7 +90,8 @@ def _recurse_copy_zip_archive(
 #             logger.exception('_recurse_zip_archive() FAILED')
 
 
-def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], move: bool, nervous: bool) -> typing.List[str]:
+def copy_files(path_in: str, path_out: str, binary_file_types: typing.Set[str], move: bool, nervous: bool) -> \
+typing.List[str]:
     """
     Copies binary files from path_in to path_out.
 
@@ -164,12 +167,12 @@ def main() -> int:
     )
     log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
     parser.add_argument(
-            "-l", "--log-level",
-            # type=int,
-            # dest="loglevel",
-            default=30,
-            help=log_level_help
-        )
+        "-l", "--log-level",
+        # type=int,
+        # dest="loglevel",
+        default=30,
+        help=log_level_help
+    )
     args = parser.parse_args()
     # print('args:', args)
 
@@ -181,7 +184,7 @@ def main() -> int:
     # Initialise logging etc.
     logging.basicConfig(level=log_level,
                         format='%(asctime)s %(levelname)-8s %(message)s',
-                        #datefmt='%y-%m-%d % %H:%M:%S',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
                         stream=sys.stdout)
     clk_start = time.perf_counter()
     bytes_done = 0

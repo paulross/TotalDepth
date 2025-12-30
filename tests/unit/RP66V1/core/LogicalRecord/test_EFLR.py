@@ -4,18 +4,18 @@ import typing
 import pytest
 
 import TotalDepth.RP66V1.core.LogicalRecord.Duplicates
+from TotalDepth.RP66V1.core import RepCode, stringify
 from TotalDepth.RP66V1.core.File import LogicalData
 from TotalDepth.RP66V1.core.LogicalRecord import EFLR
 from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDescriptor
-from TotalDepth.RP66V1.core import RepCode, stringify
 from TotalDepth.RP66V1.core.RepCode import ObjectName
 
 
 @pytest.mark.parametrize(
     'ld, expected_type, expected_name',
     (
-        (LogicalData(b'\xf0\x07CHANNEL'), b'CHANNEL', b''),
-        (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), b'CHANNEL', b'0'),
+            (LogicalData(b'\xf0\x07CHANNEL'), b'CHANNEL', b''),
+            (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), b'CHANNEL', b'0'),
     )
 )
 def test_Set(ld, expected_type, expected_name):
@@ -28,8 +28,8 @@ def test_Set(ld, expected_type, expected_name):
 @pytest.mark.parametrize(
     'ld, expected_type, expected_name',
     (
-        (LogicalData(b'\xf0\x07CHANNEL'), b'CHANNEL', b''),
-        (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), b'CHANNEL', b'0'),
+            (LogicalData(b'\xf0\x07CHANNEL'), b'CHANNEL', b''),
+            (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), b'CHANNEL', b'0'),
     )
 )
 def test_Set_eq(ld, expected_type, expected_name):
@@ -41,8 +41,8 @@ def test_Set_eq(ld, expected_type, expected_name):
 @pytest.mark.parametrize(
     'ld, expected',
     (
-        (LogicalData(b'\xf0\x07CHANNEL'), 9),
-        (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), 11),
+            (LogicalData(b'\xf0\x07CHANNEL'), 9),
+            (LogicalData(b'\xf8\x07CHANNEL\x01\x30'), 11),
     )
 )
 def test_Set_logical_data_consumed(ld, expected):
@@ -54,7 +54,7 @@ def test_Set_logical_data_consumed(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
-        (LogicalData(b'\x00\x07CHANNEL'), 'Component Descriptor does not represent a set but a Absent Attribute.'),
+            (LogicalData(b'\x00\x07CHANNEL'), 'Component Descriptor does not represent a set but a Absent Attribute.'),
     )
 )
 def test_Set_raises(ld, expected):
@@ -66,10 +66,10 @@ def test_Set_raises(ld, expected):
 @pytest.mark.parametrize(
     'ld, expected',
     (
-        (
-            LogicalData(b'\xf0\x07CHANNEL'),
-            'Component Descriptor does not represent a set but a Absent Attribute.',
-        ),
+            (
+                    LogicalData(b'\xf0\x07CHANNEL'),
+                    'Component Descriptor does not represent a set but a Absent Attribute.',
+            ),
     )
 )
 def test_Set_raises_logical_data(ld, expected):
@@ -82,9 +82,9 @@ def test_Set_raises_logical_data(ld, expected):
 @pytest.mark.parametrize(
     'cd, expected_label, expected_count, expected_rep_code, expected_units, expected_value',
     (
-        (ComponentDescriptor(0x00), b'', 1, 19, b'', None),
-        (ComponentDescriptor(0x20), b'', 1, 19, b'', None),
-        (ComponentDescriptor(0x40), b'', 1, 19, b'', None),
+            (ComponentDescriptor(0x00), b'', 1, 19, b'', None),
+            (ComponentDescriptor(0x20), b'', 1, 19, b'', None),
+            (ComponentDescriptor(0x40), b'', 1, 19, b'', None),
     )
 )
 def test_AttributeBase(cd, expected_label, expected_count, expected_rep_code, expected_units, expected_value):
@@ -99,10 +99,10 @@ def test_AttributeBase(cd, expected_label, expected_count, expected_rep_code, ex
 @pytest.mark.parametrize(
     'cd, expected',
     (
-        (ComponentDescriptor(0x70), 'Component Descriptor does not represent a attribute but a Object.'),
-        (ComponentDescriptor(0xb0), 'Component Descriptor does not represent a attribute but a Redundant Set.'),
-        (ComponentDescriptor(0xd0), 'Component Descriptor does not represent a attribute but a Replacement Set.'),
-        (ComponentDescriptor(0xf0), 'Component Descriptor does not represent a attribute but a Set.'),
+            (ComponentDescriptor(0x70), 'Component Descriptor does not represent a attribute but a Object.'),
+            (ComponentDescriptor(0xb0), 'Component Descriptor does not represent a attribute but a Redundant Set.'),
+            (ComponentDescriptor(0xd0), 'Component Descriptor does not represent a attribute but a Replacement Set.'),
+            (ComponentDescriptor(0xf0), 'Component Descriptor does not represent a attribute but a Set.'),
     )
 )
 def test_AttributeBase_raises(cd, expected):
@@ -114,8 +114,8 @@ def test_AttributeBase_raises(cd, expected):
 @pytest.mark.parametrize(
     'cd_a, cd_b, expected',
     (
-        (ComponentDescriptor(0x00), ComponentDescriptor(0x00), True),
-        (ComponentDescriptor(0x00), ComponentDescriptor(0x20), False),
+            (ComponentDescriptor(0x00), ComponentDescriptor(0x00), True),
+            (ComponentDescriptor(0x00), ComponentDescriptor(0x20), False),
     )
 )
 def test_AttributeBase_eq(cd_a, cd_b, expected):
@@ -128,9 +128,9 @@ def test_AttributeBase_eq(cd_a, cd_b, expected):
 @pytest.mark.parametrize(
     'cd, expected',
     (
-        (ComponentDescriptor(0x00), "CD: 000 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
-        (ComponentDescriptor(0x20), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
-        (ComponentDescriptor(0x40), "CD: 010 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+            (ComponentDescriptor(0x00), "CD: 000 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+            (ComponentDescriptor(0x20), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+            (ComponentDescriptor(0x40), "CD: 010 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
     )
 )
 def test_AttributeBase_str(cd, expected):
@@ -141,25 +141,25 @@ def test_AttributeBase_str(cd, expected):
 @pytest.mark.parametrize(
     'cd, ld, expected_label, expected_count, expected_rep_code, expected_units, expected_value',
     (
-        # All defaults
-        (ComponentDescriptor(0x20), LogicalData(b''), b'', 1, 19, b'', None),
-        # Label only
-        (ComponentDescriptor(0x30), LogicalData(b'\x09LONG-NAME'), b'LONG-NAME', 1, 19, b'', None),
-        # Count only
-        (ComponentDescriptor(0x28), LogicalData(b'\x7f'), b'', 127, 19, b'', None),
-        # RepCode only
-        (ComponentDescriptor(0x24), LogicalData(b'\x11'), b'', 1, 17, b'', None),
-        # Units only
-        (ComponentDescriptor(0x22), LogicalData(b'\x05METRE'), b'', 1, 19, b'METRE', None),
-        # Value only
-        (ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'), b'', 1, 19, b'', [b'VALUE']),
-        # Label and RepCode
-        (ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x11'), b'LONG-NAME', 1, 17, b'', None),
-        # All five Characteristics
-        (
-            ComponentDescriptor(0x3f),
-            LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
-            b'LONG-NAME', 2, 19, b'METRE', [b'VALUE1', b'VALUE2']),
+            # All defaults
+            (ComponentDescriptor(0x20), LogicalData(b''), b'', 1, 19, b'', None),
+            # Label only
+            (ComponentDescriptor(0x30), LogicalData(b'\x09LONG-NAME'), b'LONG-NAME', 1, 19, b'', None),
+            # Count only
+            (ComponentDescriptor(0x28), LogicalData(b'\x7f'), b'', 127, 19, b'', None),
+            # RepCode only
+            (ComponentDescriptor(0x24), LogicalData(b'\x11'), b'', 1, 17, b'', None),
+            # Units only
+            (ComponentDescriptor(0x22), LogicalData(b'\x05METRE'), b'', 1, 19, b'METRE', None),
+            # Value only
+            (ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'), b'', 1, 19, b'', [b'VALUE']),
+            # Label and RepCode
+            (ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x11'), b'LONG-NAME', 1, 17, b'', None),
+            # All five Characteristics
+            (
+                    ComponentDescriptor(0x3f),
+                    LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
+                    b'LONG-NAME', 2, 19, b'METRE', [b'VALUE1', b'VALUE2']),
     )
 )
 def test_TemplateAttribute(cd, ld, expected_label, expected_count, expected_rep_code, expected_units, expected_value):
@@ -175,43 +175,44 @@ def test_TemplateAttribute(cd, ld, expected_label, expected_count, expected_rep_
 @pytest.mark.parametrize(
     'cd, ld, expected',
     (
-        # All defaults
-        (ComponentDescriptor(0x20), LogicalData(b''), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
-        # Label only
-        (
-            ComponentDescriptor(0x30), LogicalData(b'\x09LONG-NAME'),
-            "CD: 001 10000 L: b'LONG-NAME' C: 1 R: 19 (IDENT) U: b'' V: None"
-        ),
-        # Count only
-        (ComponentDescriptor(0x28), LogicalData(b'\x7f'), "CD: 001 01000 L: b'' C: 127 R: 19 (IDENT) U: b'' V: None"),
-        # RepCode only
-        (ComponentDescriptor(0x24), LogicalData(b'\x11'), "CD: 001 00100 L: b'' C: 1 R: 17 (ULONG) U: b'' V: None"),
-        # Units only
-        (
-            ComponentDescriptor(0x22), LogicalData(b'\x05METRE'),
-            "CD: 001 00010 L: b'' C: 1 R: 19 (IDENT) U: b'METRE' V: None"
-        ),
-        # Value only
-        (
-            ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'),
-            "CD: 001 00001 L: b'' C: 1 R: 19 (IDENT) U: b'' V: [b'VALUE']"
-        ),
-        # Label and RepCode
-        (
-            ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x11'),
-            "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 17 (ULONG) U: b'' V: None"
-        ),
-        # Label and bad RepCode
-        (
-            ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x00'),
-            "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 0 (UNKNOWN) U: b'' V: None"
-        ),
-        # All five Characteristics
-        (
-            ComponentDescriptor(0x3f),
-            LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
-            "CD: 001 11111 L: b'LONG-NAME' C: 2 R: 19 (IDENT) U: b'METRE' V: [b'VALUE1', b'VALUE2']"
-        ),
+            # All defaults
+            (ComponentDescriptor(0x20), LogicalData(b''), "CD: 001 00000 L: b'' C: 1 R: 19 (IDENT) U: b'' V: None"),
+            # Label only
+            (
+                    ComponentDescriptor(0x30), LogicalData(b'\x09LONG-NAME'),
+                    "CD: 001 10000 L: b'LONG-NAME' C: 1 R: 19 (IDENT) U: b'' V: None"
+            ),
+            # Count only
+            (ComponentDescriptor(0x28), LogicalData(b'\x7f'),
+             "CD: 001 01000 L: b'' C: 127 R: 19 (IDENT) U: b'' V: None"),
+            # RepCode only
+            (ComponentDescriptor(0x24), LogicalData(b'\x11'), "CD: 001 00100 L: b'' C: 1 R: 17 (ULONG) U: b'' V: None"),
+            # Units only
+            (
+                    ComponentDescriptor(0x22), LogicalData(b'\x05METRE'),
+                    "CD: 001 00010 L: b'' C: 1 R: 19 (IDENT) U: b'METRE' V: None"
+            ),
+            # Value only
+            (
+                    ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'),
+                    "CD: 001 00001 L: b'' C: 1 R: 19 (IDENT) U: b'' V: [b'VALUE']"
+            ),
+            # Label and RepCode
+            (
+                    ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x11'),
+                    "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 17 (ULONG) U: b'' V: None"
+            ),
+            # Label and bad RepCode
+            (
+                    ComponentDescriptor(0x34), LogicalData(b'\x09LONG-NAME\x00'),
+                    "CD: 001 10100 L: b'LONG-NAME' C: 1 R: 0 (UNKNOWN) U: b'' V: None"
+            ),
+            # All five Characteristics
+            (
+                    ComponentDescriptor(0x3f),
+                    LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
+                    "CD: 001 11111 L: b'LONG-NAME' C: 2 R: 19 (IDENT) U: b'METRE' V: [b'VALUE1', b'VALUE2']"
+            ),
     )
 )
 def test_TemplateAttribute_str(cd, ld, expected):
@@ -223,20 +224,20 @@ def test_TemplateAttribute_str(cd, ld, expected):
 @pytest.mark.parametrize(
     'cd, ld, expected',
     (
-        # V: None
-        (ComponentDescriptor(0x20), LogicalData(b''), "-"),
-        # Units only
-        (ComponentDescriptor(0x22), LogicalData(b'\x05METRE'), "- [METRE]"),
-        # Value only as list with one entry, no units
-        (ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'), "VALUE"),
-        # Value as list with >1 element
-        (
-            ComponentDescriptor(0x3f),
-            LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
-            "[VALUE1, VALUE2] [METRE]"
-        ),
-        # Units only with b'\xb0' (degree symbol)
-        (ComponentDescriptor(0x22), LogicalData(b'\x01\xb0'), "- [°]"),
+            # V: None
+            (ComponentDescriptor(0x20), LogicalData(b''), "-"),
+            # Units only
+            (ComponentDescriptor(0x22), LogicalData(b'\x05METRE'), "- [METRE]"),
+            # Value only as list with one entry, no units
+            (ComponentDescriptor(0x21), LogicalData(b'\x05VALUE'), "VALUE"),
+            # Value as list with >1 element
+            (
+                    ComponentDescriptor(0x3f),
+                    LogicalData(b'\x09LONG-NAME\x02\x13\x05METRE\x06VALUE1\x06VALUE2'),
+                    "[VALUE1, VALUE2] [METRE]"
+            ),
+            # Units only with b'\xb0' (degree symbol)
+            (ComponentDescriptor(0x22), LogicalData(b'\x01\xb0'), "- [°]"),
     )
 )
 def test_TemplateAttribute_stringify_value(cd, ld, expected):
@@ -281,10 +282,11 @@ TEMPLATE_BYTES = (
     b'\x70'
 )
 
+
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(TEMPLATE_BYTES),
+            LogicalData(TEMPLATE_BYTES),
     )
 )
 def test_Template(ld):
@@ -305,7 +307,7 @@ def test_Template(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(TEMPLATE_BYTES),
+            LogicalData(TEMPLATE_BYTES),
     )
 )
 def test_Template_eq(ld):
@@ -318,7 +320,7 @@ def test_Template_eq(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(TEMPLATE_BYTES),
+            LogicalData(TEMPLATE_BYTES),
     )
 )
 def test_Template_header_as_strings(ld):
@@ -512,7 +514,7 @@ LOGICAL_BYTES_FROM_STANDARD_SINGLE_OBJECT = (
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
@@ -522,7 +524,7 @@ def test_ExplicitlyFormattedLogicalRecord_smoke_test(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_set(ld):
@@ -534,7 +536,7 @@ def test_ExplicitlyFormattedLogicalRecord_set(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_template(ld):
@@ -563,7 +565,7 @@ def test_ExplicitlyFormattedLogicalRecord_template(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_objects(ld):
@@ -694,7 +696,7 @@ def test_ExplicitlyFormattedLogicalRecord_objects(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
@@ -732,7 +734,7 @@ def test_ExplicitlyFormattedLogicalRecord_str_long(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LogicalData(LOGICAL_BYTES_FROM_STANDARD),
+            LogicalData(LOGICAL_BYTES_FROM_STANDARD),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_logical_data_consumed(ld):
@@ -781,7 +783,6 @@ LOGICAL_DATA_WITH_EXACT_DUPLICATE = LogicalData(
     # Attribute: V
     b'\x21\x01S'
 )
-
 
 # Example from [RP66V1 Section 3.2.3.2 Figure 3-8] but with a duplicate object.
 LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE = LogicalData(
@@ -882,7 +883,7 @@ def duplicate_object_strategy(strategy: TotalDepth.RP66V1.core.LogicalRecord.Dup
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+            LOGICAL_DATA_WITH_EXACT_DUPLICATE,
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_exact_default(ld):
@@ -908,8 +909,8 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_exact_default(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
-        LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+            LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+            LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_exact_ignore(ld):
@@ -940,7 +941,7 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_exact_ignore(ld):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_WITH_EXACT_DUPLICATE,
+            LOGICAL_DATA_WITH_EXACT_DUPLICATE,
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_exact_raise(ld):
@@ -956,14 +957,14 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_exact_raise(ld):
 @pytest.mark.parametrize(
     'ld, strategy',
     (
-        (
-            LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
-            TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE,
-        ),
-        (
-            LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
-            TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_IF_DIFFERENT,
-        ),
+            (
+                    LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+                    TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE,
+            ),
+            (
+                    LOGICAL_DATA_WITH_DIFFERENT_DUPLICATE,
+                    TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_IF_DIFFERENT,
+            ),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_diff_replace(ld, strategy):
@@ -994,13 +995,14 @@ def test_ExplicitlyFormattedLogicalRecord_dupe_diff_replace(ld, strategy):
 @pytest.mark.parametrize(
     'ld',
     (
-        LOGICAL_DATA_WITH_LATER_COPY_DUPLICATE,
+            LOGICAL_DATA_WITH_LATER_COPY_DUPLICATE,
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_dupe_later_copy(ld):
     """Hmm actually this should fail and only have one object there ???"""
     ld.rewind()
-    with duplicate_object_strategy(TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_LATER_COPY):
+    with duplicate_object_strategy(
+            TotalDepth.RP66V1.core.LogicalRecord.Duplicates.DuplicateObjectStrategy.REPLACE_LATER_COPY):
         eflr = EFLR.ExplicitlyFormattedLogicalRecord(3, ld)
         result = eflr.str_long()
         # print(result)
@@ -1079,27 +1081,30 @@ def test_ExplicitlyFormattedLogicalRecord_len():
     # print(result)
     assert len(eflr) == 3
 
+
 @pytest.mark.parametrize(
     'sort_order, expected',
     (
-        (
-            False,
-            [
-                ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION'],
-                ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
-                ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
-                ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
-            ],
-        ),
-        (
-            True,
-            [
-                ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS', 'DIMENSION'],
-                ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
-                ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
-                ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
-            ],
-        ),
+            (
+                    False,
+                    [
+                        ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS',
+                         'DIMENSION'],
+                        ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
+                        ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
+                        ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
+                    ],
+            ),
+            (
+                    True,
+                    [
+                        ['ObjectName IDENT', 'O', 'C', 'LONG-NAME', 'ELEMENT-LIMIT', 'REPRESENTATION-CODE', 'UNITS',
+                         'DIMENSION'],
+                        ['PAD-ARRAY', '1', '0', '3 (O: 0 C: 0)', '[8, 20]', '13', '-', '[8, 10]'],
+                        ['PRESSURE', '1', '0', '2 (O: 0 C: 0)', '1', '7', 'PSI', '1'],
+                        ['TIME', '0', '0', '1 (O: 0 C: 0)', '1', '2', 'S', '1'],
+                    ],
+            ),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_table_as_string(sort_order, expected):
@@ -1142,16 +1147,17 @@ def test_ExplicitlyFormattedLogicalRecord_key_value_raises():
 @pytest.mark.parametrize(
     'sort_order, expected',
     (
-        (
-            True,
-            [['KEY', 'VALUE'], ['DIMENSION', '1'], ['ELEMENT-LIMIT', '1'], ['LONG-NAME', '1 (O: 0 C: 0)'],
-             ['REPRESENTATION-CODE', '2'], ['UNITS', 'S']],
-        ),
-        (
-            False,
-            [['KEY', 'VALUE'], ['LONG-NAME', '1 (O: 0 C: 0)'], ['ELEMENT-LIMIT', '1'], ['REPRESENTATION-CODE', '2'],
-             ['UNITS', 'S'], ['DIMENSION', '1']],
-        ),
+            (
+                    True,
+                    [['KEY', 'VALUE'], ['DIMENSION', '1'], ['ELEMENT-LIMIT', '1'], ['LONG-NAME', '1 (O: 0 C: 0)'],
+                     ['REPRESENTATION-CODE', '2'], ['UNITS', 'S']],
+            ),
+            (
+                    False,
+                    [['KEY', 'VALUE'], ['LONG-NAME', '1 (O: 0 C: 0)'], ['ELEMENT-LIMIT', '1'],
+                     ['REPRESENTATION-CODE', '2'],
+                     ['UNITS', 'S'], ['DIMENSION', '1']],
+            ),
     )
 )
 def test_ExplicitlyFormattedLogicalRecord_key_values(sort_order, expected):

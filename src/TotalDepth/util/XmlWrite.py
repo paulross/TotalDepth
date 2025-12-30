@@ -19,15 +19,15 @@
 # Paul Ross: apaulross@gmail.com
 """Writes XML and XHTML."""
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-15'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-15'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import logging
 import traceback
-#import sys
-#import htmlentitydefs
+# import sys
+# import htmlentitydefs
 import base64
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 
@@ -35,15 +35,18 @@ from TotalDepth.LIS import ExceptionTotalDepthLIS
 # If True then this module may raise an ExceptionXml and that might mask other
 # exceptions. If False no ExceptionXml will be raised but a logging.error(...)
 # will be written. These will not mask other Excecptions. 
-RAISE_ON_ERROR = True#False
+RAISE_ON_ERROR = True  # False
+
 
 class ExceptionXml(ExceptionTotalDepthLIS):
     """Exception specialisation for the XML writer."""
     pass
 
+
 class ExceptionXmlEndElement(ExceptionXml):
     """Exception specialisation for end of element."""
     pass
+
 
 #####################################
 # Section: Encoding/decoding methods.
@@ -82,19 +85,21 @@ def encodeString(theS, theCharPrefix='_'):
     retVal = base64.b64encode(theS)
     # post-fix base64
     retVal = retVal.replace('+', '-') \
-                .replace('/', '.') \
-                .replace('=', '_')
+        .replace('/', '.') \
+        .replace('=', '_')
     # Lead with prefix
     return theCharPrefix + retVal
-    
+
+
 def decodeString(theS):
     """Returns a string that is the argument decoded. May raise a TypeError."""
     # pre-fix base64
     temp = theS[1:].replace('-', '+') \
-                    .replace('.', '/') \
-                    .replace('_', '=')
+        .replace('.', '/') \
+        .replace('_', '=')
     temp = base64.b64decode(temp)
     return temp
+
 
 def nameFromString(theStr):
     """Returns a name from a string.
@@ -107,6 +112,8 @@ def nameFromString(theStr):
     
     This also works for in namespaces as ':' is not used in the encoding."""
     return encodeString(theStr, 'Z')
+
+
 #################################
 # End: Encoding/decoding methods.
 #################################
@@ -118,12 +125,13 @@ class XmlStream(object):
     """Creates and maintains an XML output stream."""
     INDENT_STR = '  '
     ENTITY_MAP = {
-                  '<'   : '&lt;',
-                  '>'   : '&gt;',
-                  '&'   : '&amp;',
-                  "'"   : '&apos;', 
-                  '"'   : '&quot;',
-                  }
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        "'": '&apos;',
+        '"': '&quot;',
+    }
+
     def __init__(self, theFout, theEnc='utf-8', theDtdLocal=None, theId=0):
         """Initialise with a writable file like object or a file path.
         
@@ -149,13 +157,13 @@ class XmlStream(object):
         self._canIndentStk = []
         # An integer that represents a unique ID
         self._intId = theId
-    
+
     @property
     def id(self):
         """A unique ID in this stream. The ID is incremented on each call."""
         self._intId += 1
-        return '%d' % (self._intId-1)
-    
+        return '%d' % (self._intId - 1)
+
     @property
     def _canIndent(self):
         """Returns True if indentation is possible (no mixed content etc.)"""
@@ -163,12 +171,12 @@ class XmlStream(object):
             if not b:
                 return False
         return True
-    
+
     def _flipIndent(self, theBool):
-        assert(len(self._canIndentStk) > 0)
+        assert (len(self._canIndentStk) > 0)
         self._canIndentStk.pop()
         self._canIndentStk.append(theBool)
-        
+
     def xmlSpacePreserve(self):
         """Suspends indentation for this element and its descendants."""
         if len(self._canIndentStk) == 0:
@@ -177,7 +185,7 @@ class XmlStream(object):
                 raise ExceptionXml(errMsg)
             logging.error(errMsg)
         self._flipIndent(False)
-    
+
     def startElement(self, name, attrs):
         self._closeElemIfOpen()
         self._indent()
@@ -208,7 +216,7 @@ class XmlStream(object):
         self._closeElemIfOpen()
         self._file.write('<!--%s-->' % self._encode(theS))
         # mixed content - don't indent
-        #self._flipIndent(False)
+        # self._flipIndent(False)
 
     def pI(self, theS):
         """Writes a Processing Instruction to the output stream."""
@@ -236,7 +244,7 @@ class XmlStream(object):
             self._indent()
             self._file.write('</%s>' % name)
         self._canIndentStk.pop()
-        
+
     def writeECMAScript(self, theScript):
         """Writes the ECMA script.
         
@@ -248,19 +256,19 @@ class XmlStream(object):
             // ]]>
             </script>
         """
-        self.startElement('script', {'type' : "text/ecmascript"})
+        self.startElement('script', {'type': "text/ecmascript"})
         self._closeElemIfOpen()
         self.xmlSpacePreserve()
         self._file.write('\n//<![CDATA[\n')
         self._file.write(theScript)
         self._file.write('\n// ]]>\n')
         self.endElement('script')
-    
+
     def _indent(self, offset=0):
         if self._canIndent:
             self._file.write('\n')
-            self._file.write(self.INDENT_STR*(len(self._elemStk)-offset))
-        
+            self._file.write(self.INDENT_STR * (len(self._elemStk) - offset))
+
     def _closeElemIfOpen(self):
         if self._inElem:
             self._file.write('>')
@@ -275,21 +283,21 @@ class XmlStream(object):
                 retL.append(self.ENTITY_MAP[c])
             except KeyError:
                 # Python 2.x code
-                #u = unichr(ord(c))
-                #retL.append(u.encode('ascii', 'xmlcharrefreplace'))
+                # u = unichr(ord(c))
+                # retL.append(u.encode('ascii', 'xmlcharrefreplace'))
                 # Python 3.x code
                 if ord(c) < ord(' '):
                     retL.append(f'&#{ord(c):03d};')
                 else:
                     retL.append(c.encode('ascii', 'xmlcharrefreplace').decode(self._enc))
         return ''.join(retL)
-    
+
     def __enter__(self):
         """Context manager support."""
         self._file.write("<?xml version='1.0' encoding=\"%s\"?>" % self._enc)
         # Write local DTD?
         return self
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         """Context manager support."""
         while len(self._elemStk):
@@ -298,6 +306,8 @@ class XmlStream(object):
         if self._fileClose:
             self._file.close()
         return False
+
+
 #############################
 # End: XML Stream writer.
 #############################
@@ -309,15 +319,16 @@ class XhtmlStream(XmlStream):
     def __enter__(self):
         """Context manager support."""
         super(XhtmlStream, self).__enter__()
-        self._file.write("""\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">""")
+        self._file.write(
+            """\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">""")
         self.startElement(
-                'html',
-                {
-                    'xmlns'     : 'http://www.w3.org/1999/xhtml',
-                    'xml:lang'  : 'en',
-                    'lang'      : 'en',
-                }
-            )
+            'html',
+            {
+                'xmlns': 'http://www.w3.org/1999/xhtml',
+                'xml:lang': 'en',
+                'lang': 'en',
+            }
+        )
         return self
 
     def charactersWithBr(self, sIn):
@@ -328,10 +339,12 @@ class XhtmlStream(XmlStream):
                 self.characters(sIn[:i])
                 with Element(self, 'br'):
                     pass
-                sIn = sIn[i+1:]
+                sIn = sIn[i + 1:]
             else:
                 self.characters(sIn)
                 break
+
+
 ###############################
 # Section: XHTML Stream writer.
 ###############################
@@ -341,6 +354,7 @@ class XhtmlStream(XmlStream):
 ##################################
 class Element(object):
     """Represents an element in a markup stream."""
+
     def __init__(self, theXmlStream, theElemName, theAttrs=None):
         self._stream = theXmlStream
         self._name = theElemName
@@ -351,9 +365,9 @@ class Element(object):
         # Write element and attributes to the stream
         self._stream.startElement(self._name, self._attrs)
         return self
-    
+
     def __exit__(self, excType, excValue, tb):
         """Context manager support."""
         # Close element on the stream
         self._stream.endElement(self._name)
-        #return True
+        # return True

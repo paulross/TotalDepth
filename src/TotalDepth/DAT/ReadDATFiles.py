@@ -33,9 +33,8 @@ from TotalDepth.util import gnuplot, DirWalk, bin_file_type
 
 logger = logging.getLogger(__file__)
 
-
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
 
 
 class DATFileResult(typing.NamedTuple):
@@ -168,7 +167,7 @@ def plot_gnuplot(data: typing.Dict[str, DATFileResult], gnuplot_dir: str) -> Non
     table[0][0] = f'# {table[0][0]}'
     for k in sorted(data.keys()):
         if data[k].size_input > 0 and not data[k].exception:
-            table.append([data[k].size_input, data[k].time, k,])
+            table.append([data[k].size_input, data[k].time, k, ])
     name = 'ScanFileDAT'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:
@@ -246,18 +245,18 @@ def main() -> int:
         except IOError:
             logger.exception('Plotting with gnuplot failed.')
     if total_input > 0:
-        ms_mb = total_time * 1000 / (total_input / 1024**2)
+        ms_mb = total_time * 1000 / (total_input / 1024 ** 2)
     else:
         ms_mb = 0.0
     clk_exec = time.perf_counter() - clk_start
     print(f'Statistics:')
     print(f'   Processed: {len(results):16,d} total files')
-    print(f'    Of which: {files_fail+files_ok:16,d} are DAT files')
+    print(f'    Of which: {files_fail + files_ok:16,d} are DAT files')
     print(f'     Success: {files_ok:16,d}')
     print(f'    Failures: {files_fail:16,d}')
     print(f' Total input: {total_input:16,d} bytes')
     if files_fail + files_ok:
-        print(f'Average size: {int(total_input / (files_fail+files_ok)):16,d} bytes')
+        print(f'Average size: {int(total_input / (files_fail + files_ok)):16,d} bytes')
     else:
         print(f'Average size: {"N/A":16} bytes')
     print(f'Total frames: {total_frames:16,d}')

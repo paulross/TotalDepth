@@ -21,16 +21,15 @@
 """
 import pytest
 
-__author__  = 'Paul Ross'
-__date__    = '14 Feb 2011'
+__author__ = 'Paul Ross'
+__date__ = '14 Feb 2011'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import pprint
+# import pprint
 import sys
 import time
 import logging
-import pprint
 
 from TotalDepth.LIS.core import LisGen
 from TotalDepth.LIS.core import Units
@@ -42,8 +41,10 @@ from TotalDepth.LIS.core import RepCode
 ######################
 import unittest
 
+
 class TestLisGenBase(unittest.TestCase):
     """Base class for test cases in this module."""
+
     def _assertInRange(self, v, min, max):
         """Asserts v is in range min/max (inclusive) i.e. min <= v <= max."""
         self.assertTrue(v >= min, '{:s} not >= to {:s}'.format(str(v), str(min)))
@@ -54,6 +55,7 @@ class TestLisGenBase(unittest.TestCase):
 class TestRandom(TestLisGenBase):
     """Tests ..."""
     RANDOM_TEST_COUNT = 8 * 1024
+
     def setUp(self):
         """Set up."""
         pass
@@ -78,7 +80,7 @@ class TestRandom(TestLisGenBase):
         """TestRandom.test_00_01(): Random bytes, default length."""
         for i in range(self.RANDOM_TEST_COUNT // 1024):
             myM = LisGen.randomBytes()
-            self.assertTrue(len(myM) > 0 and len(myM) <= 32*1024)
+            self.assertTrue(len(myM) > 0 and len(myM) <= 32 * 1024)
             for c in myM:
                 self.assertTrue(c >= 0 and c < 256)
 
@@ -93,7 +95,7 @@ class TestRandom(TestLisGenBase):
             myM = LisGen.randomMnem()
             self.assertEqual(4, len(myM))
             for c in myM:
-                self.assertTrue(c >= 65 and c < 65+26)
+                self.assertTrue(c >= 65 and c < 65 + 26)
 
     def test_03_00(self):
         """TestRandom.test_03_00(): Random sting with randomString()."""
@@ -111,8 +113,10 @@ class TestRandom(TestLisGenBase):
             for c in myS:
                 self.assertTrue(c in LisGen.RANDOM_STRING_CHARS)
 
+
 class TestPhysRec(TestLisGenBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -133,19 +137,21 @@ class TestPhysRec(TestLisGenBase):
     def test_01(self):
         """TestPhysRec.test_01(): retPrS()."""
         self.assertEqual(
-              b'\x00\x0c\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07'
+            b'\x00\x0c\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07'
             + b'\x00\x0c\x00\x02\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f',
             LisGen.retPrS(bytes(list(range(16))), 8)
         )
         self.assertEqual(
-              b'\x00\x0c\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07'
+            b'\x00\x0c\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07'
             + b'\x00\x0c\x00\x03\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f'
             + b'\x00\x0c\x00\x02\x10\x11\x12\x13\x14\x15\x16\x17',
             LisGen.retPrS(bytes(list(range(24))), 8)
         )
 
+
 class TestFileTapeReel(TestLisGenBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -200,8 +206,10 @@ class TestFileTapeReel(TestLisGenBase):
             LisGen.retSinglePr(LisGen.TapeReelHeadTailDefault.lrBytesReelTail)
         )
 
+
 class TestTableGenCONS(TestLisGenBase):
     """Tests CONS table generation."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -216,19 +224,19 @@ class TestTableGenCONS(TestLisGenBase):
 
     def test_00(self):
         """TestTableGenCONS.test_00(): Simple CONS table."""
-        #print()
+        # print()
         myTg = LisGen.TableGen(
             34,
             b'CONS',
             [b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'],
             theTable=[
-                    [b'SPAM', b'ALLO', b'TINS', b'CANS', (16.0, b'TON ')],
-                    [b'EGGS', b'ALLO', b'CART', b'SHED', (12.5, b'    ')],
-                    [b'TEXT', b'ALLO', b'    ', b'    ', 'SOME STRING...'],
-                ],
+                [b'SPAM', b'ALLO', b'TINS', b'CANS', (16.0, b'TON ')],
+                [b'EGGS', b'ALLO', b'CART', b'SHED', (12.5, b'    ')],
+                [b'TEXT', b'ALLO', b'    ', b'    ', 'SOME STRING...'],
+            ],
         )
         myB = myTg.lrBytes()
-        #print(myB)
+        # print(myB)
         self.assertEqual(
             b'\x22\x00\x49\x41\x04\x00TYPECONS    '
             + b'\x00A\x04\x00MNEM    SPAMEA\x04\x00ALLO    ALLOEA\x04\x00PUNI    TINSEA\x04\x00TUNI    CANSED\x04\x00VALUTON B\xc0\x00\x00'
@@ -238,15 +246,15 @@ class TestTableGenCONS(TestLisGenBase):
         )
         myF = LisGen.retFileFromBytes(LisGen.retPrS(myB))
         myLr = LogiRec.LrTableRead(myF)
-        #print(myLr)
-        #print('myLr.colLabels()', myLr.colLabels())
-        #print('myLr.rowLabels()', myLr.rowLabels())
+        # print(myLr)
+        # print('myLr.colLabels()', myLr.colLabels())
+        # print('myLr.rowLabels()', myLr.rowLabels())
         self.assertEqual(5, len(myLr.colLabels()))
         self.assertEqual(3, len(myLr.rowLabels()))
 
     def test_01(self):
         """TestTableGenCONS.test_01(): Simple CONS table raises on empty."""
-        #print()
+        # print()
         myTg = LisGen.TableGen(
             34,
             b'CONS',
@@ -255,8 +263,10 @@ class TestTableGenCONS(TestLisGenBase):
         )
         self.assertRaises(LisGen.ExceptionLisGen, myTg.lrBytes)
 
+
 class TestTableGenRandomCONS(TestLisGenBase):
     """Tests random table generation."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -271,33 +281,33 @@ class TestTableGenRandomCONS(TestLisGenBase):
 
     def test_00(self):
         """TestTableGenRandomCONS.test_00(): 8 rows."""
-        #print()
+        # print()
         numRows = 8
         myTg = LisGen.TableGenRandomCONS(numRows)
         myB = myTg.lrBytes()
-        #print(myB)
-        #self.assertEqual(b'', myB)
+        # print(myB)
+        # self.assertEqual(b'', myB)
         myF = LisGen.retFileFromBytes(LisGen.retPrS(myB))
         myLr = LogiRec.LrTableRead(myF)
-        #print(myLr)
-        #print('myLr.colLabels()', myLr.colLabels())
-        #print('myLr.rowLabels()', myLr.rowLabels())
+        # print(myLr)
+        # print('myLr.colLabels()', myLr.colLabels())
+        # print('myLr.rowLabels()', myLr.rowLabels())
         self.assertEqual(5, len(myLr.colLabels()))
         self.assertEqual(numRows, len(myLr.rowLabels()))
 
     def test_01(self):
         """TestTableGenRandomCONS.test_01(): 256 rows."""
-        #print()
+        # print()
         numRows = 256
         myTg = LisGen.TableGenRandomCONS(numRows)
         myB = myTg.lrBytes()
-        #print(myB)
-        #self.assertEqual(b'', myB)
+        # print(myB)
+        # self.assertEqual(b'', myB)
         myF = LisGen.retFileFromBytes(LisGen.retPrS(myB))
         myLr = LogiRec.LrTableRead(myF)
-        #print(myLr)
-        #print('myLr.colLabels()', myLr.colLabels())
-        #print('myLr.rowLabels()', myLr.rowLabels())
+        # print(myLr)
+        # print('myLr.colLabels()', myLr.colLabels())
+        # print('myLr.rowLabels()', myLr.rowLabels())
         self.assertEqual(5, len(myLr.colLabels()))
         self.assertEqual({b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'}, myLr.colLabels())
         # NOTE: Problem here is that we might generate duplicate row names
@@ -307,22 +317,22 @@ class TestTableGenRandomCONS(TestLisGenBase):
 
     def test_02(self):
         """TestTableGenRandomCONS.test_02(): TableGenRandom() with unknown column, 8 rows."""
-        #print()
+        # print()
         numRows = 8
         myTg = LisGen.TableGenRandom(
             34,
             b'CONS',
-            [b'MNEM', b'UNKN',],
+            [b'MNEM', b'UNKN', ],
             numRows
         )
         myB = myTg.lrBytes()
-        #print(myB)
-        #self.assertEqual(b'', myB)
+        # print(myB)
+        # self.assertEqual(b'', myB)
         myF = LisGen.retFileFromBytes(LisGen.retPrS(myB))
         myLr = LogiRec.LrTableRead(myF)
-        #print(myLr)
-        #print('myLr.colLabels()', myLr.colLabels())
-        #print('myLr.rowLabels()', myLr.rowLabels())
+        # print(myLr)
+        # print('myLr.colLabels()', myLr.colLabels())
+        # print('myLr.rowLabels()', myLr.rowLabels())
         self.assertEqual(2, len(myLr.colLabels()))
         self.assertEqual({b'MNEM', b'UNKN'}, myLr.colLabels())
         self.assertEqual(numRows, len(myLr.rowLabels()))
@@ -331,7 +341,8 @@ class TestTableGenRandomCONS(TestLisGenBase):
 @pytest.mark.slow
 class TestChVals(TestLisGenBase):
     """Tests channel value generation."""
-    TESTS = 1024*8
+    TESTS = 1024 * 8
+
     def setUp(self):
         """Set up."""
         pass
@@ -344,187 +355,188 @@ class TestChVals(TestLisGenBase):
         """TestChVals: Tests setUp() and tearDown()."""
         myC = LisGen.ChValsBase()
         self.assertRaises(NotImplementedError, myC.val, 0)
-    
+
     def test_00_00(self):
         """TestChVals.test_00_00(): Constant value."""
         myCv = LisGen.ChValsConst(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=None)
-        #myCv = LisGen.ChValsConst(0, 1, 0, 1, 1, None)
+        # myCv = LisGen.ChValsConst(0, 1, 0, 1, 1, None)
         for i in range(self.TESTS):
             self.assertEqual(0, myCv.val(i))
-    
+
     def test_00_01(self):
         """TestChVals.test_00_01(): Constant value with noise."""
         myCv = LisGen.ChValsConst(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=0.5)
         for i in range(self.TESTS):
             self._assertInRange(myCv.val(i), -0.25, +0.25)
-    
+
     def test_01_00(self):
         """TestChVals.test_01_00(): Random value."""
         myCv = LisGen.ChValsRand(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=None)
-        #myCv = LisGen.ChValsConst(0, 1, 0, 1, 1, None)
+        # myCv = LisGen.ChValsConst(0, 1, 0, 1, 1, None)
         for i in range(self.TESTS):
             self._assertInRange(myCv.val(i), 0.0, 1.0)
-    
+
     def test_02_00(self):
         """TestChVals.test_02_00(): Random normal distribution."""
-        #print()
+        # print()
         myCv = LisGen.ChValsRandNormal(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=None)
         for i in range(self.TESTS):
             v = myCv.val(i)
-            #print(v)
-            #self._assertInRange(v, -0.25, +0.25)
-    
+            # print(v)
+            # self._assertInRange(v, -0.25, +0.25)
+
     def test_02_01(self):
         """TestChVals.test_02_01(): Random normal distribution with noise."""
-        #print()
+        # print()
         myCv = LisGen.ChValsRandNormal(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=0.5)
         for i in range(self.TESTS):
             v = myCv.val(i)
-            #print(v)
-            #self._assertInRange(v, -0.25, +0.25)
-    
+            # print(v)
+            # self._assertInRange(v, -0.25, +0.25)
+
     def test_03_00(self):
         """TestChVals.test_02_00(): Log normal distribution."""
-        #print()
+        # print()
         myCv = LisGen.ChValsRandLogNormal(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=None)
         for i in range(self.TESTS):
             v = myCv.val(i)
-            #print(v)
-            #self._assertInRange(v, -0.25, +0.25)
-    
+            # print(v)
+            # self._assertInRange(v, -0.25, +0.25)
+
     def test_03_01(self):
         """TestChVals.test_02_01(): Log normal distribution with noise."""
-        #print()
+        # print()
         myCv = LisGen.ChValsRandLogNormal(fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=0.5)
         for i in range(self.TESTS):
             v = myCv.val(i)
-            #print(v)
-            #self._assertInRange(v, -0.25, +0.25)
-    
+            # print(v)
+            # self._assertInRange(v, -0.25, +0.25)
+
     def test_04_00(self):
         """TestChVals.test_04_00(): sin curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsSin(fOffs=0, waveLen=4, mid=0.0, amp=2.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, -2.0, 2.0)
-    
+
     def test_04_01(self):
         """TestChVals.test_04_01(): sin curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsSin(fOffs=0, waveLen=4, mid=2.0, amp=2.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 4.0)
-    
+
     def test_04_02(self):
         """TestChVals.test_04_02(): sin curve, samples 1."""
-        #print()
+        # print()
         numSamples = 1
         myCv = LisGen.ChValsSin(fOffs=0, waveLen=16, mid=2.0, amp=2.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 4.0)
-    
+
     def test_05_00(self):
         """TestChVals.test_04_00(): cos curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsCos(fOffs=0, waveLen=4, mid=0.0, amp=2.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, -2.0, 2.0)
-    
+
     def test_05_01(self):
         """TestChVals.test_05_01(): cos curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsCos(fOffs=0, waveLen=4, mid=2.0, amp=2.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 4.0)
 
     def test_06_00(self):
         """TestChVals.test_06_00(): sawtooth curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsSaw(fOffs=0, waveLen=4, mid=1.0, amp=1.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 2.0)
-    
+
     def test_07_00(self):
         """TestChVals.test_07_00(): triangular curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsTriangular(fOffs=0, waveLen=4, mid=1.0, amp=1.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 2.0)
-    
+
     def test_08_00(self):
         """TestChVals.test_08_00(): square curve."""
-        #print()
+        # print()
         numSamples = 4
         myCv = LisGen.ChValsSquare(fOffs=0, waveLen=4, mid=1.0, amp=1.0, numSa=numSamples, noise=None)
         for i in range(self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-                #print(v)
+                # print(v)
                 self._assertInRange(v, 0.0, 2.0)
 
     def test_09_00(self):
         """TestChVals.test_09_00(): special sequence using ChValsSpecialSeqSqRoot."""
-#        print()
+        #        print()
         numSamples = 1
         myCv = LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=4, mid=0.0, amp=100.0, numSa=numSamples, noise=None)
-#        print('myCv', myCv)
-        for i in range(1024):#self.TESTS):
+        #        print('myCv', myCv)
+        for i in range(1024):  # self.TESTS):
             for s in range(numSamples):
                 v = myCv.val(i, s)
-#                print(v)
+                #                print(v)
                 self._assertInRange(v, 0.0, 900.0)
 
-#    def test_10_00(self):
-#        """TestChVals.test_10_00(): special sequence using ChValsSpecialSeqSquare."""
-#        print()
-#        numSamples = 1
-#        myCv = LisGen.ChValsSpecialSeqSquare(fOffs=0, waveLen=4, mid=1.0, amp=1.0, numSa=numSamples, noise=None)
-#        for i in range(256):#self.TESTS):
-#            for s in range(numSamples):
-#                v = myCv.val(i, s)
-#                print(v)
-##                self._assertInRange(v, 0.0, 9.0)
+    #    def test_10_00(self):
+    #        """TestChVals.test_10_00(): special sequence using ChValsSpecialSeqSquare."""
+    #        print()
+    #        numSamples = 1
+    #        myCv = LisGen.ChValsSpecialSeqSquare(fOffs=0, waveLen=4, mid=1.0, amp=1.0, numSa=numSamples, noise=None)
+    #        for i in range(256):#self.TESTS):
+    #            for s in range(numSamples):
+    #                v = myCv.val(i, s)
+    #                print(v)
+    ##                self._assertInRange(v, 0.0, 9.0)
 
     def test_20(self):
         """TestChVals.test_20(): sin curve, samples 1, __str__()."""
         myCv = LisGen.ChValsSin(fOffs=0, waveLen=16, mid=2.0, amp=2.0, numSa=1, noise=0.1)
-#        print(myCv)
+        #        print(myCv)
         self.assertEqual(
             'ChValsFrameBase: fOffs=0, waveLen=16, mid=2, amp=2, numSa=1, noise=0.1',
             str(myCv),
         )
-    
+
 
 @pytest.mark.slow
 class TestChValsX(TestLisGenBase):
     """Tests channel value X axis generation."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -537,13 +549,13 @@ class TestChValsX(TestLisGenBase):
         """TestChVals: Tests setUp() and tearDown()."""
         myC = LisGen.ChValsBase()
         self.assertRaises(NotImplementedError, myC.val, 0)
-    
+
     def test_00(self):
         """TestChValsX.test_00(): Decreasing X."""
         myCvx = LisGen.ChValsXaxis(xStart=10000.0, frameSpacing=0.5, xDec=True, noise=None)
         myValS = [myCvx.val(f) for f in range(8)]
-        #print()
-        #print(myValS)
+        # print()
+        # print(myValS)
         self.assertEqual(
             [10000.0, 9999.5, 9999.0, 9998.5, 9998.0, 9997.5, 9997.0, 9996.5],
             myValS
@@ -553,24 +565,24 @@ class TestChValsX(TestLisGenBase):
         """TestChValsX.test_00(): Increasing X."""
         myCvx = LisGen.ChValsXaxis(xStart=10000.0, frameSpacing=0.5, xDec=False, noise=None)
         myValS = [myCvx.val(f) for f in range(8)]
-        #print()
-        #print(myValS)
+        # print()
+        # print(myValS)
         self.assertEqual(
             [10000.0, 10000.5, 10001.0, 10001.5, 10002.0, 10002.5, 10003.0, 10003.5],
             myValS
         )
-    
+
     def test_02(self):
         """TestChValsX.test_02(): Increasing X but negative frame spacing gives decreasing X."""
         myCvx = LisGen.ChValsXaxis(xStart=10000.0, frameSpacing=-0.5, xDec=False, noise=None)
         myValS = [myCvx.val(f) for f in range(8)]
-        #print()
-        #print(myValS)
+        # print()
+        # print(myValS)
         self.assertEqual(
             [10000.0, 9999.5, 9999.0, 9998.5, 9998.0, 9997.5, 9997.0, 9996.5],
             myValS
         )
-       
+
     def test_03(self):
         """TestChValsX.test_03(): Decreasing X with noise."""
         numFrames = 1024
@@ -582,13 +594,14 @@ class TestChValsX(TestLisGenBase):
         self.assertEqual(numFrames, len(myValS))
         self.assertEqual(numFrames, len(myValNS))
         for f in range(numFrames):
-            self._assertInRange(myValNS[f], myValS[f]-noise/2, myValS[f]+noise/2)
-        #print()
-        #print(myValNS)
-    
+            self._assertInRange(myValNS[f], myValS[f] - noise / 2, myValS[f] + noise / 2)
+        # print()
+        # print(myValNS)
+
 
 class TestChannel(TestLisGenBase):
     """Tests channel value generation."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -600,13 +613,13 @@ class TestChannel(TestLisGenBase):
     def testSetUpTearDown(self):
         """TestChannel: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_00(self):
         """TestChannel.test_00(): Construction."""
-        #print()
+        # print()
         numSamples = 4
-        #b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
-        #((b'TEST', b'ServID', b'ServOrdN', b'FEET', 45310011, 256, 16, 4, 68)
+        # b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
+        # ((b'TEST', b'ServID', b'ServOrdN', b'FEET', 45310011, 256, 16, 4, 68)
         myCh = LisGen.Channel(
             LisGen.ChannelSpec(
                 b'TEST',
@@ -621,7 +634,7 @@ class TestChannel(TestLisGenBase):
             ),
             LisGen.ChValsSaw(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=numSamples, noise=None)
         )
-        #print(myCh.dsbBytes)
+        # print(myCh.dsbBytes)
         self.assertEqual(
             b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00',
             myCh.dsbBytes
@@ -629,10 +642,10 @@ class TestChannel(TestLisGenBase):
 
     def test_01(self):
         """TestChannel.test_01(): val()."""
-        #print()
+        # print()
         numSamples = 4
-        #b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
-        #((b'TEST', b'ServID', b'ServOrdN', b'FEET', 45310011, 256, 16, 4, 68)
+        # b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
+        # ((b'TEST', b'ServID', b'ServOrdN', b'FEET', 45310011, 256, 16, 4, 68)
         myCh = LisGen.Channel(
             LisGen.ChannelSpec(
                 b'TEST',
@@ -647,7 +660,7 @@ class TestChannel(TestLisGenBase):
             ),
             LisGen.ChValsSaw(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=numSamples, noise=None)
         )
-        #print(myCh.dsbBytes)
+        # print(myCh.dsbBytes)
         self.assertEqual(
             b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00',
             myCh.dsbBytes
@@ -656,7 +669,7 @@ class TestChannel(TestLisGenBase):
         for i in range(8):
             for s in range(numSamples):
                 v = myCh.val(i, s)
-                #print(v)
+                # print(v)
                 actVals.append(v)
         expVals = [
             0.8125,
@@ -696,7 +709,7 @@ class TestChannel(TestLisGenBase):
 
     def test_02(self):
         """TestChannel.test_02(): val()."""
-        #print()
+        # print()
         numSamples = 4
         myCh = LisGen.Channel(
             LisGen.ChannelSpec(
@@ -712,7 +725,7 @@ class TestChannel(TestLisGenBase):
             ),
             LisGen.ChValsSaw(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=numSamples, noise=None)
         )
-        #print(myCh.dsbBytes)
+        # print(myCh.dsbBytes)
         self.assertEqual(
             b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00',
             myCh.dsbBytes
@@ -720,9 +733,9 @@ class TestChannel(TestLisGenBase):
         actVals = []
         for i in range(8):
             v = myCh.frameBytes(i)
-            #print(v)
+            # print(v)
             actVals.append(v)
-        #print(actVals)
+        # print(actVals)
         expVals = [
             bytearray(b'@h\x00\x00@p\x00\x00@x\x00\x00@\x00\x00\x00'),
             bytearray(b'>\xc0\x00\x00?@\x00\x00?`\x00\x00?\xc0\x00\x00'),
@@ -735,8 +748,10 @@ class TestChannel(TestLisGenBase):
         ]
         self.assertEqual(expVals, actVals)
 
+
 class TestChannelDipmeter(TestLisGenBase):
     """Tests channel value generation for Dipmeter Rep Codes."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -748,7 +763,7 @@ class TestChannelDipmeter(TestLisGenBase):
     def testSetUpTearDown(self):
         """TestChannelDipmeter: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_00(self):
         """TestChannelDipmeter.test_00(): Construction of 130."""
         myDip = LisGen.ChGenDip130('constant')
@@ -756,12 +771,12 @@ class TestChannelDipmeter(TestLisGenBase):
     def test_00_00(self):
         """TestChannelDipmeter.test_00_00(): ChGenDipmenter.frameBytes() raises NotImplementedError."""
         myDip = LisGen.ChGenDipmenter(RepCode.DIPMETER_130_CHANNEL_NAME,
-            RepCode.DIPMETER_EDIT_TAPE_REP_CODE,
-            RepCode.DIPMETER_LIS_SIZE_130,
-            (None, None),
-        )
+                                      RepCode.DIPMETER_EDIT_TAPE_REP_CODE,
+                                      RepCode.DIPMETER_LIS_SIZE_130,
+                                      (None, None),
+                                      )
         self.assertRaises(NotImplementedError, myDip.frameBytes, 0)
-        
+
     def test_01(self):
         """TestChannelDipmeter.test_01(): 130 DSB bytes."""
         myDip = LisGen.ChGenDip130('constant')
@@ -769,18 +784,18 @@ class TestChannelDipmeter(TestLisGenBase):
             b'RPS1servIDservOrdr    \x02\xb3`;\x01\x00\x00P\x00\x00\x00\x01\x82\x00\x00\x00\x00\x00',
             myDip.dsbBytes,
         )
-        
+
     def test_02(self):
         """TestChannelDipmeter.test_02(): 130 frame bytes, 'constant'."""
-        #print()
+        # print()
         myDip = LisGen.ChGenDip130('constant')
         myB = myDip.frameBytes(0)
         sc = RepCode.DIPMETER_NUM_FAST_CHANNELS
         for s in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
-            #print([x for x in myB[s*5:s*5+5]])
-            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s*sc:s*sc+sc]])
+            # print([x for x in myB[s*5:s*5+5]])
+            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s * sc:s * sc + sc]])
         self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
-        #print(myB)
+        # print(myB)
         self.assertEqual(
             b'\x002d\x96\xc8\x002d\x96\xc8'
             + b'\x002d\x96\xc8\x002d\x96\xc8'
@@ -792,22 +807,22 @@ class TestChannelDipmeter(TestLisGenBase):
             + b'\x002d\x96\xc8\x002d\x96\xc8',
             myB,
         )
-        
+
     def test_03(self):
         """TestChannelDipmeter.test_03(): 130 frame bytes, 'sin'."""
-        #print()
+        # print()
         myDip = LisGen.ChGenDip130('sin')
         myB = myDip.frameBytes(0)
         myV = [x for x in myB]
         numSc = RepCode.DIPMETER_NUM_FAST_CHANNELS
         numSa = RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
-        #for sa in range(numSa):
+        # for sa in range(numSa):
         #    print([x for x in myB[sa*numSc:sa*numSc+numSc]])
         for sa in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
             for sc in range(numSc):
-                self._assertInRange(myV[sa*numSc+sc], 0, 255)
+                self._assertInRange(myV[sa * numSc + sc], 0, 255)
         self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
-        #print(myB)
+        # print(myB)
         self.assertEqual(
             [127, 9, 37, 176, 255]
             + [176, 37, 9, 127, 245]
@@ -827,10 +842,10 @@ class TestChannelDipmeter(TestLisGenBase):
             + [78, 0, 78, 217, 245],
             [x for x in myB],
         )
-        
+
     def test_04(self):
         """TestChannelDipmeter.test_04(): 130 frame bytes, 'random'."""
-        #print()
+        # print()
         min = None
         max = None
         myDip = LisGen.ChGenDip130('random')
@@ -839,11 +854,11 @@ class TestChannelDipmeter(TestLisGenBase):
             myV = [x for x in myB]
             numSc = RepCode.DIPMETER_NUM_FAST_CHANNELS
             numSa = RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
-            #for sa in range(numSa):
+            # for sa in range(numSa):
             #    print([x for x in myB[sa*numSc:sa*numSc+numSc]])
             for sa in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
                 for sc in range(numSc):
-                    v = myV[sa*numSc+sc]
+                    v = myV[sa * numSc + sc]
                     if min is None:
                         min = max = v
                     else:
@@ -853,46 +868,47 @@ class TestChannelDipmeter(TestLisGenBase):
                             max = v
                     self._assertInRange(v, 0, 255)
             self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
-        #print('Min/Max', min, max)
+        # print('Min/Max', min, max)
         self.assertEqual(0, min)
         self.assertEqual(255, max)
-#        print(myB)
-#        self.assertEqual(
-#            [127, 9, 37, 176, 255]
-#            + [176, 37, 9, 127, 245]
-#            + [217, 78, 0, 78, 217]
-#            + [245, 127, 9, 37, 176]
-#            + [255, 176, 37, 9, 127]
-#            + [245, 217, 78, 0, 78]
-#            + [217, 245, 127, 9, 37]
-#            + [176, 255, 176, 37, 9]
-#            + [127, 245, 217, 78, 0]
-#            + [78, 217, 245, 127, 9]
-#            + [37, 176, 255, 176, 37]
-#            + [9, 127, 245, 217, 78]
-#            + [0, 78, 217, 245, 127]
-#            + [9, 37, 176, 255, 176]
-#            + [37, 9, 127, 245, 217]
-#            + [78, 0, 78, 217, 245],
-#            [x for x in myB],
-#        )
-        
+
+    #        print(myB)
+    #        self.assertEqual(
+    #            [127, 9, 37, 176, 255]
+    #            + [176, 37, 9, 127, 245]
+    #            + [217, 78, 0, 78, 217]
+    #            + [245, 127, 9, 37, 176]
+    #            + [255, 176, 37, 9, 127]
+    #            + [245, 217, 78, 0, 78]
+    #            + [217, 245, 127, 9, 37]
+    #            + [176, 255, 176, 37, 9]
+    #            + [127, 245, 217, 78, 0]
+    #            + [78, 217, 245, 127, 9]
+    #            + [37, 176, 255, 176, 37]
+    #            + [9, 127, 245, 217, 78]
+    #            + [0, 78, 217, 245, 127]
+    #            + [9, 37, 176, 255, 176]
+    #            + [37, 9, 127, 245, 217]
+    #            + [78, 0, 78, 217, 245],
+    #            [x for x in myB],
+    #        )
+
     def test_05(self):
         """TestChannelDipmeter.test_05(): 130 frame bytes, 'linear'."""
-        #print()
+        # print()
         min = None
         max = None
         myDip = LisGen.ChGenDip130('linear')
-        for i in range(1):#28):
+        for i in range(1):  # 28):
             myB = myDip.frameBytes(i)
             myV = [x for x in myB]
             numSc = RepCode.DIPMETER_NUM_FAST_CHANNELS
             numSa = RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
-            #for sa in range(numSa):
+            # for sa in range(numSa):
             #    print([x for x in myB[sa*numSc:sa*numSc+numSc]])
             for sa in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
                 for sc in range(numSc):
-                    v = myV[sa*numSc+sc]
+                    v = myV[sa * numSc + sc]
                     if min is None:
                         min = max = v
                     else:
@@ -902,10 +918,10 @@ class TestChannelDipmeter(TestLisGenBase):
                             max = v
                     self._assertInRange(v, 0, 255)
             self.assertEqual(RepCode.DIPMETER_LIS_SIZE_130, len(myB))
-        #print('Min/Max', min, max)
-        #self.assertEqual(0, min)
-        #self.assertEqual(255, max)
-        #print(myB)
+        # print('Min/Max', min, max)
+        # self.assertEqual(0, min)
+        # self.assertEqual(255, max)
+        # print(myB)
         self.assertEqual(
             [0, 50, 100, 150, 200]
             + [16, 66, 116, 166, 216]
@@ -928,7 +944,7 @@ class TestChannelDipmeter(TestLisGenBase):
 
     def test_06(self):
         """TestChannelDipmeter.test_06(): 130 frame bytes, fails on 'unknown'."""
-        #print()
+        # print()
         myDip = LisGen.ChGenDip130('unknown')
         self.assertRaises(LisGen.ExceptionLisGen, myDip.frameBytes, 0)
 
@@ -945,7 +961,7 @@ class TestChannelDipmeter(TestLisGenBase):
             (None, None),
         )
         self.assertRaises(NotImplementedError, myDip.frameBytes, 0)
-        
+
     def test_11(self):
         """TestChannelDipmeter.test_01(): 234 DSB bytes."""
         myDip = LisGen.ChGenDip234(('constant', 'constant'))
@@ -953,10 +969,10 @@ class TestChannelDipmeter(TestLisGenBase):
             b'RHDTservIDservOrdr    \x02\xb3`;\x01\x00\x00Z\x00\x00\x00\x01\xea\x00\x00\x00\x00\x00',
             myDip.dsbBytes,
         )
-        
+
     def test_12(self):
         """TestChannelDipmeter.test_02(): 234 frame bytes, ('constant', 'constant')."""
-        #print()
+        # print()
         myDip = LisGen.ChGenDip234(('constant', 'constant'))
         myB = myDip.frameBytes(0)
         self.assertEqual(RepCode.DIPMETER_LIS_SIZE_234, len(myB))
@@ -964,14 +980,14 @@ class TestChannelDipmeter(TestLisGenBase):
             self._assertInRange(v, 0, 255)
         sc = RepCode.DIPMETER_NUM_FAST_CHANNELS
         for s in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
-            #print([x for x in myB[s*5:s*5+5]])
-            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s*sc:s*sc+sc]])
-        #print([x for x in myB[80:90]])
+            # print([x for x in myB[s*5:s*5+5]])
+            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s * sc:s * sc + sc]])
+        # print([x for x in myB[80:90]])
         self.assertEqual(
             [0, 25, 50, 75, 100, 125, 150, 175, 200, 225],
             [x for x in myB[RepCode.DIPMETER_SIZE_FAST_CHANNELS:RepCode.DIPMETER_LIS_SIZE_234]],
         )
-        #print(myB)
+        # print(myB)
         self.assertEqual(
             b'\x002d\x96\xc8\x002d\x96\xc8'
             + b'\x002d\x96\xc8\x002d\x96\xc8'
@@ -984,10 +1000,10 @@ class TestChannelDipmeter(TestLisGenBase):
             + b'\x00\x192Kd}\x96\xaf\xc8\xe1',
             myB,
         )
-        
+
     def test_13(self):
         """TestChannelDipmeter.test_02(): 234 frame bytes, ('constant', 'random')."""
-        #print()
+        # print()
         myDip = LisGen.ChGenDip234(('constant', 'random'))
         myB = myDip.frameBytes(0)
         self.assertEqual(RepCode.DIPMETER_LIS_SIZE_234, len(myB))
@@ -995,34 +1011,37 @@ class TestChannelDipmeter(TestLisGenBase):
             self._assertInRange(v, 0, 255)
         sc = RepCode.DIPMETER_NUM_FAST_CHANNELS
         for s in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
-            #print([x for x in myB[s*5:s*5+5]])
-            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s*sc:s*sc+sc]])
-        #print([x for x in myB[80:90]])
-#        self.assertEqual(
-#            [0, 25, 50, 75, 100, 125, 150, 175, 200, 225],
-#            [x for x in myB[RepCode.DIPMETER_SIZE_FAST_CHANNELS:RepCode.DIPMETER_LIS_SIZE_234]],
-#        )
-#        #print(myB)
-#        self.assertEqual(
-#            b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x002d\x96\xc8\x002d\x96\xc8'
-#            + b'\x00\x192Kd}\x96\xaf\xc8\xe1',
-#            myB,
-#        )
+            # print([x for x in myB[s*5:s*5+5]])
+            self.assertEqual([0, 50, 100, 150, 200], [x for x in myB[s * sc:s * sc + sc]])
+        # print([x for x in myB[80:90]])
+
+    #        self.assertEqual(
+    #            [0, 25, 50, 75, 100, 125, 150, 175, 200, 225],
+    #            [x for x in myB[RepCode.DIPMETER_SIZE_FAST_CHANNELS:RepCode.DIPMETER_LIS_SIZE_234]],
+    #        )
+    #        #print(myB)
+    #        self.assertEqual(
+    #            b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x002d\x96\xc8\x002d\x96\xc8'
+    #            + b'\x00\x192Kd}\x96\xaf\xc8\xe1',
+    #            myB,
+    #        )
 
     def test_14(self):
         """TestChannelDipmeter.test_14(): 234 frame bytes, fails on ('constant', 'unknown')."""
         myDip = LisGen.ChGenDip234(('constant', 'unknown'))
         self.assertRaises(LisGen.ExceptionLisGen, myDip.frameBytes, 0)
 
+
 class TestLogPassGen(TestLisGenBase):
     """Tests LogPassGen generation."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1034,16 +1053,16 @@ class TestLogPassGen(TestLisGenBase):
     def testSetUpTearDown(self):
         """TestLogPassGen: Tests setUp() and tearDown()."""
         pass
-    
+
     def test_00(self):
         """TestLogPassGen.test_00(): Construction, single channel."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -1060,29 +1079,29 @@ class TestLogPassGen(TestLisGenBase):
             xRepCode=68,
             xNoise=None,
         )
-        #print(lrBytesDFSR())
+        # print(lrBytesDFSR())
         expBy = (
-            bytearray(b'@\x00')
-            # Entry Blocks
-            + bytearray(b'\x01\x01B\x00')
-            + bytearray(b'\x02\x01B\x00')
-            + bytearray(b'\x03\x01B\x10')
-            + bytearray(b'\x04\x01B\x01')
-            + bytearray(b'\x05\x01B\x01')
-            + bytearray(b'\x06\x00B')
-            + bytearray(b'\x07\x04A.1IN')
-            + bytearray(b'\x08\x01B<')
-            + bytearray(b'\t\x04A.1IN')
-            + bytearray(b'\x0b\x00B')
-            + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
-            + bytearray(b'\r\x01B\x00')
-            + bytearray(b'\x0e\x04A.1IN')
-            + bytearray(b'\x0f\x01B\x00')
-            + bytearray(b'\x10\x01B\x00')
-            + bytearray(b'\x00\x01B\x01')
-            # DSB blocks
-            + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
-            + b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
+                bytearray(b'@\x00')
+                # Entry Blocks
+                + bytearray(b'\x01\x01B\x00')
+                + bytearray(b'\x02\x01B\x00')
+                + bytearray(b'\x03\x01B\x10')
+                + bytearray(b'\x04\x01B\x01')
+                + bytearray(b'\x05\x01B\x01')
+                + bytearray(b'\x06\x00B')
+                + bytearray(b'\x07\x04A.1IN')
+                + bytearray(b'\x08\x01B<')
+                + bytearray(b'\t\x04A.1IN')
+                + bytearray(b'\x0b\x00B')
+                + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
+                + bytearray(b'\r\x01B\x00')
+                + bytearray(b'\x0e\x04A.1IN')
+                + bytearray(b'\x0f\x01B\x00')
+                + bytearray(b'\x10\x01B\x00')
+                + bytearray(b'\x00\x01B\x01')
+                # DSB blocks
+                + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
+                + b'TESTServIDServOrdNFEET\x02\xb3`;\x01\x00\x00\x10\x00\x00\x00\x04D\x00\x00\x00\x00\x00'
         )
         self.assertEqual(
             list(expBy),
@@ -1091,13 +1110,13 @@ class TestLogPassGen(TestLisGenBase):
 
     def test_01(self):
         """TestLogPassGen.test_01(): Construction, Dipmeter 130."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 80))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -1108,29 +1127,29 @@ class TestLogPassGen(TestLisGenBase):
             xRepCode=68,
             xNoise=None,
         )
-        #print(myLp.lrBytesDFSR())
+        # print(myLp.lrBytesDFSR())
         expBy = (
-            bytearray(b'@\x00')
-            # Entry Blocks
-            + bytearray(b'\x01\x01B\x00')
-            + bytearray(b'\x02\x01B\x00')
-            + bytearray(b'\x03\x01B\x50')
-            + bytearray(b'\x04\x01B\x01')
-            + bytearray(b'\x05\x01B\x01')
-            + bytearray(b'\x06\x00B')
-            + bytearray(b'\x07\x04A.1IN')
-            + bytearray(b'\x08\x01B<')
-            + bytearray(b'\t\x04A.1IN')
-            + bytearray(b'\x0b\x00B')
-            + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
-            + bytearray(b'\r\x01B\x00')
-            + bytearray(b'\x0e\x04A.1IN')
-            + bytearray(b'\x0f\x01B\x00')
-            + bytearray(b'\x10\x01B\x00')
-            + bytearray(b'\x00\x01B\x01')
-            # DSB blocks
-            + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
-            + b'RPS1servIDservOrdr    \x02\xb3`;\x01\x00\x00P\x00\x00\x00\x01\x82\x00\x00\x00\x00\x00'
+                bytearray(b'@\x00')
+                # Entry Blocks
+                + bytearray(b'\x01\x01B\x00')
+                + bytearray(b'\x02\x01B\x00')
+                + bytearray(b'\x03\x01B\x50')
+                + bytearray(b'\x04\x01B\x01')
+                + bytearray(b'\x05\x01B\x01')
+                + bytearray(b'\x06\x00B')
+                + bytearray(b'\x07\x04A.1IN')
+                + bytearray(b'\x08\x01B<')
+                + bytearray(b'\t\x04A.1IN')
+                + bytearray(b'\x0b\x00B')
+                + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
+                + bytearray(b'\r\x01B\x00')
+                + bytearray(b'\x0e\x04A.1IN')
+                + bytearray(b'\x0f\x01B\x00')
+                + bytearray(b'\x10\x01B\x00')
+                + bytearray(b'\x00\x01B\x01')
+                # DSB blocks
+                + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
+                + b'RPS1servIDservOrdr    \x02\xb3`;\x01\x00\x00P\x00\x00\x00\x01\x82\x00\x00\x00\x00\x00'
         )
         self.assertEqual(
             expBy,
@@ -1139,13 +1158,13 @@ class TestLogPassGen(TestLisGenBase):
 
     def test_02(self):
         """TestLogPassGen.test_02(): Construction, single channel, normalAlternateData(2,0) fails."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -1167,115 +1186,115 @@ class TestLogPassGen(TestLisGenBase):
 
     def test_03(self):
         """TestLogPassGen.test_03(): Construction, DEPT channel, dipmeter and two LRs."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4+80))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 + 80))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
             [
-                LisGen.ChGenDip130('constant'),                
+                LisGen.ChGenDip130('constant'),
             ],
             xStart=10000.0,
             xRepCode=68,
             xNoise=None,
         )
-        #print(myLp.lrBytesDFSR())
+        # print(myLp.lrBytesDFSR())
         expBy = (
-            bytearray(b'@\x00')
-            # Entry Blocks
-            + bytearray(b'\x01\x01B\x00')
-            + bytearray(b'\x02\x01B\x00')
-            + bytearray(b'\x03\x01B\x54')
-            + bytearray(b'\x04\x01B\x01')
-            + bytearray(b'\x05\x01B\x01')
-            + bytearray(b'\x06\x00B')
-            + bytearray(b'\x07\x04A.1IN')
-            + bytearray(b'\x08\x01B<')
-            + bytearray(b'\t\x04A.1IN')
-            + bytearray(b'\x0b\x00B')
-            + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
-            + bytearray(b'\r\x01B\x00')
-            + bytearray(b'\x0e\x04A.1IN')
-            + bytearray(b'\x0f\x01B\x00')
-            + bytearray(b'\x10\x01B\x00')
-            + bytearray(b'\x00\x01B\x01')
-            # DSB blocks
-            + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
-            + b'RPS1servIDservOrdr    \x02\xb3`;\x01\x00\x00P\x00\x00\x00\x01\x82\x00\x00\x00\x00\x00'
+                bytearray(b'@\x00')
+                # Entry Blocks
+                + bytearray(b'\x01\x01B\x00')
+                + bytearray(b'\x02\x01B\x00')
+                + bytearray(b'\x03\x01B\x54')
+                + bytearray(b'\x04\x01B\x01')
+                + bytearray(b'\x05\x01B\x01')
+                + bytearray(b'\x06\x00B')
+                + bytearray(b'\x07\x04A.1IN')
+                + bytearray(b'\x08\x01B<')
+                + bytearray(b'\t\x04A.1IN')
+                + bytearray(b'\x0b\x00B')
+                + bytearray(b'\x0c\x04D\xba\x83\x18\x00')
+                + bytearray(b'\r\x01B\x00')
+                + bytearray(b'\x0e\x04A.1IN')
+                + bytearray(b'\x0f\x01B\x00')
+                + bytearray(b'\x10\x01B\x00')
+                + bytearray(b'\x00\x01B\x01')
+                # DSB blocks
+                + b'DEPTServIDServOrdN.1IN\x02\xb3`;\x01\x00\x00\x04\x00\x00\x00\x01D\x00\x00\x00\x00\x00'
+                + b'RPS1servIDservOrdr    \x02\xb3`;\x01\x00\x00P\x00\x00\x00\x01\x82\x00\x00\x00\x00\x00'
         )
         self.assertEqual(
             expBy,
             myLp.lrBytesDFSR()
         )
-        #print()
-        #print(myLp._normalAlternateData(0,2))
-        myB = myLp._normalAlternateData(0,2)
-        self.assertEqual(2*(4+80), len(myB))
-        #print(myB[:4])
-        #print(myB[4:80])
-        #print([myB[x:5+x] for x in range(4, 84, 5)])
-        #for x in range(4, 84, 5):
+        # print()
+        # print(myLp._normalAlternateData(0,2))
+        myB = myLp._normalAlternateData(0, 2)
+        self.assertEqual(2 * (4 + 80), len(myB))
+        # print(myB[:4])
+        # print(myB[4:80])
+        # print([myB[x:5+x] for x in range(4, 84, 5)])
+        # for x in range(4, 84, 5):
         #    print(myB[x:5+x])
-        #print(myB[84:88])
-        #print(myB[84:164])
-        #print([myB[x:5+x] for x in range(88, 168, 5)])
-        #for x in range(88, 168, 5):
+        # print(myB[84:88])
+        # print(myB[84:164])
+        # print([myB[x:5+x] for x in range(88, 168, 5)])
+        # for x in range(88, 168, 5):
         #    print(myB[x:5+x])
         expFrBy = (
-            bytearray(b'GN \x00')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'GM\xa8\x00')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
-            + bytearray(b'\x002d\x96\xc8')
+                bytearray(b'GN \x00')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'GM\xa8\x00')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
+                + bytearray(b'\x002d\x96\xc8')
         )
-        #for i in range(len(expFrBy)):
+        # for i in range(len(expFrBy)):
         #    if expFrBy[i] != myB[i]:
         #        print(i)
         self.assertEqual(expFrBy, myB)
 
     def test_04(self):
         """TestLogPassGen.test_04(): Construction, single channel, genNormalAlternateData(0, 1), direct X."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -1294,8 +1313,8 @@ class TestLogPassGen(TestLisGenBase):
         )
         # Test illogical number of frames
         myB = myLp.lrBytes(0, 1)
-        #print()
-        #print(myB)
+        # print()
+        # print(myB)
         self.assertEqual(
             b'\x00\x00'
             + b'GN \x00'
@@ -1308,12 +1327,12 @@ class TestLogPassGen(TestLisGenBase):
 
     def test_05(self):
         """TestLogPassGen.test_04(): Construction, single channel, genNormalAlternateData(0, 1), indirect X."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
         # Indirect X, integer RepCode 73
         # Block 4
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_UP_DOWN_FLAG,1, 66, 1))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_UP_DOWN_FLAG, 1, 66, 1))
         # Block 8
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         # Block 9
@@ -1324,8 +1343,8 @@ class TestLogPassGen(TestLisGenBase):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_DEPTH_UNITS, 4, 65, b'.1IN'))
         # Block 15
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_DEPTH_REP_CODE, 1, 66, 73))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -1338,13 +1357,13 @@ class TestLogPassGen(TestLisGenBase):
                     LisGen.ChValsConst(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=1, noise=None)
                 ),
             ],
-            xStart=10000*12*10,
+            xStart=10000 * 12 * 10,
             xRepCode=73,
             xNoise=None,
         )
         myB = myLp.lrBytes(0, 1)
-        #print()
-        #print(myB)
+        # print()
+        # print(myB)
         self.assertEqual(
             b'\x00\x00'
             # 18 << 16 | 79 << 8 | 128 = 1200000
@@ -1358,31 +1377,33 @@ class TestLogPassGen(TestLisGenBase):
 
     def test_06(self):
         """TestLogPassGen.test_06(): Construction fails with no (i.e. EBS default) frame spacing."""
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         self.assertRaises(LisGen.ExceptionLisGen, LisGen.LogPassGen,
-            myEbs,
-            # Channel list
-            [
-                LisGen.Channel(
-                    LisGen.ChannelSpec(
-                        b'TEST', b'ServID', b'ServOrdN', b'FEET',
-                        45310011, 256, 16, 4, 68
-                    ),
-                    LisGen.ChValsConst(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=1, noise=None),
-                ),
-            ],
-            xStart=10000.0,
-            xRepCode=68,
-            xNoise=None,
-        )
+                          myEbs,
+                          # Channel list
+                          [
+                              LisGen.Channel(
+                                  LisGen.ChannelSpec(
+                                      b'TEST', b'ServID', b'ServOrdN', b'FEET',
+                                      45310011, 256, 16, 4, 68
+                                  ),
+                                  LisGen.ChValsConst(fOffs=0, waveLen=4, mid=0.0, amp=1.0, numSa=1, noise=None),
+                              ),
+                          ],
+                          xStart=10000.0,
+                          xRepCode=68,
+                          xNoise=None,
+                          )
+
 
 class Special(TestLisGenBase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -1398,6 +1419,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLogPassGen))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -1422,6 +1445,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestClass.py script version "%s", dated %s' % (__version__, __date__))
@@ -1430,7 +1454,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -1448,14 +1472,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

@@ -1,17 +1,16 @@
 import hashlib
 import io
-import pprint
 import typing
 
 import pytest
 
 from TotalDepth.RP66V1.core import File
-
 # from . import test_data
 from tests.unit.RP66V1.core import test_data
 
 IDENTIFIER = b' ' * 60
 SIMPLE_SUL_BYTES = b'0001V1.00RECORD08192                                                            '
+
 
 def _create_simple_sul():
     sul = File.create_storage_unit_label(1, b'V1.00', 8192, IDENTIFIER)
@@ -54,29 +53,29 @@ def test_sul_ctor():
 @pytest.mark.parametrize(
     'by, expected',
     (
-        # Size wrong
-        (b'', 'Expected 80 bytes, got 0'),
-        (SIMPLE_SUL_BYTES + b' ', 'Expected 80 bytes, got 81'),
-        # storage_unit_sequence_number not a number
-        (
-            b'A001V1.00RECORD08192                                                            ',
-            "Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on b'A001'",
-        ),
-        # dlis_version incorrect
-        (
-            b'0001V2.00RECORD08192                                                            ',
-            "Can not match RE_DLIS_VERSION on b'V2.00'",
-        ),
-        # storage_unit_structure incorrect
-        (
-            b'0001V1.00REXORD08192                                                            ',
-            "Can not match RE_STORAGE_UNIT_STRUCTURE on b'REXORD'",
-        ),
-        # maximum_record_length incorrect
-        (
-            b'0001V1.00RECORDxxxxx                                                            ',
-            "Can not match RE_MAXIMUM_RECORD_LENGTH on b'xxxxx'",
-        ),
+            # Size wrong
+            (b'', 'Expected 80 bytes, got 0'),
+            (SIMPLE_SUL_BYTES + b' ', 'Expected 80 bytes, got 81'),
+            # storage_unit_sequence_number not a number
+            (
+                    b'A001V1.00RECORD08192                                                            ',
+                    "Can not match RE_STORAGE_UNIT_SEQUENCE_NUMBER on b'A001'",
+            ),
+            # dlis_version incorrect
+            (
+                    b'0001V2.00RECORD08192                                                            ',
+                    "Can not match RE_DLIS_VERSION on b'V2.00'",
+            ),
+            # storage_unit_structure incorrect
+            (
+                    b'0001V1.00REXORD08192                                                            ',
+                    "Can not match RE_STORAGE_UNIT_STRUCTURE on b'REXORD'",
+            ),
+            # maximum_record_length incorrect
+            (
+                    b'0001V1.00RECORDxxxxx                                                            ',
+                    "Can not match RE_MAXIMUM_RECORD_LENGTH on b'xxxxx'",
+            ),
     )
 )
 def test_sul_ctor_raises(by, expected):
@@ -102,12 +101,12 @@ def test_read_one_bytes_raises():
 @pytest.mark.parametrize(
     'by, expected',
     (
-        (b'\x00\x00', 0),
-        (b'\x00\x01', 1),
-        (b'\x00\xff', 255),
-        (b'\x01\x00', 0x100),
-        (b'\xff\x00', 0xff00),
-        (b'\xff\xff', 0xffff),
+            (b'\x00\x00', 0),
+            (b'\x00\x01', 1),
+            (b'\x00\xff', 255),
+            (b'\x01\x00', 0x100),
+            (b'\xff\x00', 0xff00),
+            (b'\xff\xff', 0xffff),
     )
 )
 def test_read_two_bytes_big_endian(by, expected):
@@ -127,12 +126,12 @@ def test_read_two_bytes_big_endian_raises(by):
 @pytest.mark.parametrize(
     'expected_by, value',
     (
-        (b'\x00\x00', 0),
-        (b'\x00\x01', 1),
-        (b'\x00\xff', 255),
-        (b'\x01\x00', 0x100),
-        (b'\xff\x00', 0xff00),
-        (b'\xff\xff', 0xffff),
+            (b'\x00\x00', 0),
+            (b'\x00\x01', 1),
+            (b'\x00\xff', 255),
+            (b'\x01\x00', 0x100),
+            (b'\xff\x00', 0xff00),
+            (b'\xff\xff', 0xffff),
     )
 )
 def test_two_bytes_big_endian(expected_by, value):
@@ -142,12 +141,12 @@ def test_two_bytes_big_endian(expected_by, value):
 @pytest.mark.parametrize(
     'expected_by, value',
     (
-        (b'\x00\x00', 0),
-        (b'\x00\x01', 1),
-        (b'\x00\xff', 255),
-        (b'\x01\x00', 0x100),
-        (b'\xff\x00', 0xff00),
-        (b'\xff\xff', 0xffff),
+            (b'\x00\x00', 0),
+            (b'\x00\x01', 1),
+            (b'\x00\xff', 255),
+            (b'\x01\x00', 0x100),
+            (b'\xff\x00', 0xff00),
+            (b'\xff\xff', 0xffff),
     )
 )
 def test_write_two_bytes_big_endian(expected_by, value):
@@ -159,8 +158,8 @@ def test_write_two_bytes_big_endian(expected_by, value):
 @pytest.mark.parametrize(
     'fobj, position, length, version',
     (
-        (None, 0, 0, 0),
-        (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
+            (None, 0, 0, 0),
+            (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
     )
 )
 def test_visible_record_ctor(fobj, position, length, version):
@@ -175,10 +174,10 @@ def test_visible_record_ctor(fobj, position, length, version):
 @pytest.mark.parametrize(
     'fobj, message',
     (
-        (io.BytesIO(b'\x01\x00\xff'), 'Visible Record EOF at 0x0'),
-        (io.BytesIO(b'\x01\x00\xff\x02'), 'Visible Record at 0x0 is 0xff02. Was expecting 0xff01'),
-        (io.BytesIO(b'\x00\x00\xff\x01'), 'Visible Record length 0 but minimum is 20'),
-        (io.BytesIO(b'\xff\xff\xff\x01'), 'Visible Record length 65535 but maximum is 16384'),
+            (io.BytesIO(b'\x01\x00\xff'), 'Visible Record EOF at 0x0'),
+            (io.BytesIO(b'\x01\x00\xff\x02'), 'Visible Record at 0x0 is 0xff02. Was expecting 0xff01'),
+            (io.BytesIO(b'\x00\x00\xff\x01'), 'Visible Record length 0 but minimum is 20'),
+            (io.BytesIO(b'\xff\xff\xff\x01'), 'Visible Record length 65535 but maximum is 16384'),
     )
 )
 def test_visible_record_ctor_raises(fobj, message):
@@ -190,7 +189,7 @@ def test_visible_record_ctor_raises(fobj, message):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (io.BytesIO(b'\x01\x00\xff\x01'), b'\x01\x00\xff\x01'),
+            (io.BytesIO(b'\x01\x00\xff\x01'), b'\x01\x00\xff\x01'),
     )
 )
 def test_visible_record_as_bytes(fobj, expected):
@@ -202,7 +201,7 @@ def test_visible_record_as_bytes(fobj, expected):
 @pytest.mark.parametrize(
     'fobj, next_position',
     (
-        (io.BytesIO(b'\x01\x00\xff\x01'), 256),
+            (io.BytesIO(b'\x01\x00\xff\x01'), 256),
     )
 )
 def test_visible_record_next_position(fobj, next_position):
@@ -214,7 +213,7 @@ def test_visible_record_next_position(fobj, next_position):
 @pytest.mark.parametrize(
     'fobj, position, length, version',
     (
-        (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
+            (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
     )
 )
 def test_visible_record_read_next(fobj, position, length, version):
@@ -229,8 +228,8 @@ def test_visible_record_read_next(fobj, position, length, version):
 @pytest.mark.parametrize(
     'fobj, position, length, version',
     (
-        (None, 0, 0, 0),
-        (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
+            (None, 0, 0, 0),
+            (io.BytesIO(b'\x01\x00\xff\x01'), 0, 256, 0xff01),
     )
 )
 def test_visible_record_eq(fobj, position, length, version):
@@ -243,7 +242,7 @@ def test_visible_record_eq(fobj, position, length, version):
 @pytest.mark.parametrize(
     'by',
     (
-        b'\x01\x00\xff\x01',
+            b'\x01\x00\xff\x01',
     )
 )
 def test_visible_record_eq(by):
@@ -256,9 +255,10 @@ def test_visible_record_eq(by):
 @pytest.mark.parametrize(
     'fobj, format, expected',
     (
-        (io.BytesIO(b'\x01\x00\xff\x01'), '', '<VisibleRecord: position=0x00000000 length=0x0100 version=0xff01>'),
-        (io.BytesIO(b'\x01\x00\xff\x01'), 'd', '<VisibleRecord: position=0 length=256 version=65281>'),
-        (io.BytesIO(b'\x01\x00\xff\x01'), '08,d', '<VisibleRecord: position=0,000,000 length=0,000,256 version=0,065,281>'),
+            (io.BytesIO(b'\x01\x00\xff\x01'), '', '<VisibleRecord: position=0x00000000 length=0x0100 version=0xff01>'),
+            (io.BytesIO(b'\x01\x00\xff\x01'), 'd', '<VisibleRecord: position=0 length=256 version=65281>'),
+            (io.BytesIO(b'\x01\x00\xff\x01'), '08,d',
+             '<VisibleRecord: position=0,000,000 length=0,000,256 version=0,065,281>'),
     )
 )
 def test_visible_record_format(fobj, format, expected):
@@ -270,7 +270,7 @@ def test_visible_record_format(fobj, format, expected):
 @pytest.mark.parametrize(
     'fobj_a, fobj_b, expected',
     (
-        (io.BytesIO(b'\x01\x00\xff\x01'), io.BytesIO(b'\x01\x00\xff\x01'), True),
+            (io.BytesIO(b'\x01\x00\xff\x01'), io.BytesIO(b'\x01\x00\xff\x01'), True),
     )
 )
 def test_visible_record_eq(fobj_a, fobj_b, expected):
@@ -285,8 +285,8 @@ def test_visible_record_eq(fobj_a, fobj_b, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, 'LRSH attr: 0x00'),
-        (255, 'LRSH attr: 0xff'),
+            (0, 'LRSH attr: 0x00'),
+            (255, 'LRSH attr: 0xff'),
     )
 )
 def test_logical_record_segment_header_attributes_str(byt, expected):
@@ -297,8 +297,8 @@ def test_logical_record_segment_header_attributes_str(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (-1, 'Attributes must be in the range of an unsigned char not 0x-1'),
-        (256, 'Attributes must be in the range of an unsigned char not 0x100'),
+            (-1, 'Attributes must be in the range of an unsigned char not 0x-1'),
+            (256, 'Attributes must be in the range of an unsigned char not 0x100'),
     )
 )
 def test_logical_record_segment_header_attributes_ctor_raises(byt, expected):
@@ -320,10 +320,10 @@ def test_logical_record_segment_header_attributes_eq():
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x80, True),
-        (0x7f, False),
-        (0xff, True),
+            (0, False),
+            (0x80, True),
+            (0x7f, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_is_eflr(byt, expected):
@@ -334,10 +334,10 @@ def test_logical_record_segment_header_attributes_is_eflr(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, True),
-        (0x40, False),
-        (0xbf, True),
-        (0xff, False),
+            (0, True),
+            (0x40, False),
+            (0xbf, True),
+            (0xff, False),
     )
 )
 def test_logical_record_segment_header_attributes_is_first(byt, expected):
@@ -348,10 +348,10 @@ def test_logical_record_segment_header_attributes_is_first(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, True),
-        (0x20, False),
-        (0xdf, True),
-        (0xff, False),
+            (0, True),
+            (0x20, False),
+            (0xdf, True),
+            (0xff, False),
     )
 )
 def test_logical_record_segment_header_attributes_is_last(byt, expected):
@@ -362,10 +362,10 @@ def test_logical_record_segment_header_attributes_is_last(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x10, True),
-        (0xef, False),
-        (0xff, True),
+            (0, False),
+            (0x10, True),
+            (0xef, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_is_encrypted(byt, expected):
@@ -376,10 +376,10 @@ def test_logical_record_segment_header_attributes_is_encrypted(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x08, True),
-        (0xf7, False),
-        (0xff, True),
+            (0, False),
+            (0x08, True),
+            (0xf7, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_has_encryption_packet(byt, expected):
@@ -390,10 +390,10 @@ def test_logical_record_segment_header_attributes_has_encryption_packet(byt, exp
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x04, True),
-        (0xfb, False),
-        (0xff, True),
+            (0, False),
+            (0x04, True),
+            (0xfb, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_has_checksum(byt, expected):
@@ -404,10 +404,10 @@ def test_logical_record_segment_header_attributes_has_checksum(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x02, True),
-        (0xfd, False),
-        (0xff, True),
+            (0, False),
+            (0x02, True),
+            (0xfd, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_has_trailing_length(byt, expected):
@@ -418,10 +418,10 @@ def test_logical_record_segment_header_attributes_has_trailing_length(byt, expec
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, False),
-        (0x01, True),
-        (0xfe, False),
-        (0xff, True),
+            (0, False),
+            (0x01, True),
+            (0xfe, False),
+            (0xff, True),
     )
 )
 def test_logical_record_segment_header_attributes_has_pad_bytes(byt, expected):
@@ -432,11 +432,11 @@ def test_logical_record_segment_header_attributes_has_pad_bytes(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (0, 'IFLR-first-last'),
-        (0x01, 'IFLR-first-last-padding'),
-        # TODO: Complete this?
-        (0xfe, 'EFLR-encrypted-checksum-trailing length'),
-        (0xff, 'EFLR-encrypted-checksum-trailing length-padding'),
+            (0, 'IFLR-first-last'),
+            (0x01, 'IFLR-first-last-padding'),
+            # TODO: Complete this?
+            (0xfe, 'EFLR-encrypted-checksum-trailing length'),
+            (0xff, 'EFLR-encrypted-checksum-trailing length-padding'),
     )
 )
 def test_logical_record_segment_header_attributes_attribute_str(byt, expected):
@@ -447,7 +447,7 @@ def test_logical_record_segment_header_attributes_attribute_str(byt, expected):
 @pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
-        (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
+            (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
     )
 )
 def test_LRSH_ctor(by, position, length, attributes, record_type):
@@ -472,7 +472,7 @@ def test_LRSH_ctor_raises():
 @pytest.mark.parametrize(
     'by, next_position, logical_data_position',
     (
-        (b'\x01\x00\xff\x01', 256, 4,),
+            (b'\x01\x00\xff\x01', 256, 4,),
     )
 )
 def test_LRSH_positions(by, next_position, logical_data_position):
@@ -486,13 +486,13 @@ def test_LRSH_positions(by, next_position, logical_data_position):
 @pytest.mark.parametrize(
     'by, is_first, is_last',
     (
-        (b'\x01\x00\x00\x01', True, True,),
-        (b'\x01\x00\x60\x01', False, False,),
-        (b'\x01\x00\xff\x01', False, False,),
-        (b'\x01\x00\x20\x01', True, False,),
-        (b'\x01\x00\x40\x01', False, True,),
-        (b'\x01\x00\x00\x01', True, True,),
-        (b'\x01\x00\x9f\x01', True, True,),
+            (b'\x01\x00\x00\x01', True, True,),
+            (b'\x01\x00\x60\x01', False, False,),
+            (b'\x01\x00\xff\x01', False, False,),
+            (b'\x01\x00\x20\x01', True, False,),
+            (b'\x01\x00\x40\x01', False, True,),
+            (b'\x01\x00\x00\x01', True, True,),
+            (b'\x01\x00\x9f\x01', True, True,),
     )
 )
 def test_LRSH_is_first_last(by, is_first, is_last):
@@ -506,10 +506,10 @@ def test_LRSH_is_first_last(by, is_first, is_last):
 @pytest.mark.parametrize(
     'by, has_checksum, has_trailing_length, logical_data_length',
     (
-        (b'\x01\x00\xf9\x01', False, False, 252,),  # No checksum, no trailing length
-        (b'\x01\x00\xfd\x01', True, False, 250,),  # Checksum, no trailing length
-        (b'\x01\x00\xfb\x01', False, True, 250,),  # No checksum, has trailing length
-        (b'\x01\x00\xff\x01', True, True, 248,),  # Both checksum and trailing length
+            (b'\x01\x00\xf9\x01', False, False, 252,),  # No checksum, no trailing length
+            (b'\x01\x00\xfd\x01', True, False, 250,),  # Checksum, no trailing length
+            (b'\x01\x00\xfb\x01', False, True, 250,),  # No checksum, has trailing length
+            (b'\x01\x00\xff\x01', True, True, 248,),  # Both checksum and trailing length
     )
 )
 def test_LRSH_logical_data_length(by, has_checksum, has_trailing_length, logical_data_length):
@@ -524,10 +524,10 @@ def test_LRSH_logical_data_length(by, has_checksum, has_trailing_length, logical
 @pytest.mark.parametrize(
     'by, is_encrypted, has_pad_bytes, must_strip_padding',
     (
-        (b'\x01\x00\xee\x01', False, False, False,),  # Not encrypted, no padding, no stripping.
-        (b'\x01\x00\xfe\x01', True, False, False,),  # Encrypted, no padding, no stripping.
-        (b'\x01\x00\xef\x01', False, True, True,),  # Not encrypted, with padding, must strip.
-        (b'\x01\x00\xff\x01', True, True, False,),  # Encrypted, with padding, no strip.
+            (b'\x01\x00\xee\x01', False, False, False,),  # Not encrypted, no padding, no stripping.
+            (b'\x01\x00\xfe\x01', True, False, False,),  # Encrypted, no padding, no stripping.
+            (b'\x01\x00\xef\x01', False, True, True,),  # Not encrypted, with padding, must strip.
+            (b'\x01\x00\xff\x01', True, True, False,),  # Encrypted, with padding, no strip.
     )
 )
 def test_LRSH_must_strip_padding(by, is_encrypted, has_pad_bytes, must_strip_padding):
@@ -542,21 +542,21 @@ def test_LRSH_must_strip_padding(by, is_encrypted, has_pad_bytes, must_strip_pad
 @pytest.mark.parametrize(
     'by, has_encryption_packet',
     (
-        (b'\x01\x00\x00\x01', False,),
-        (b'\x01\x00\x08\x01', True,),
+            (b'\x01\x00\x00\x01', False,),
+            (b'\x01\x00\x08\x01', True,),
     )
 )
 def test_LRSH_has_encryption_packet(by, has_encryption_packet):
     fobj = io.BytesIO(by)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
-    assert lrsh.attributes.has_encryption_packet== has_encryption_packet
+    assert lrsh.attributes.has_encryption_packet == has_encryption_packet
     assert fobj.read() == b''
 
 
 @pytest.mark.parametrize(
     'by, position, length, attributes, record_type',
     (
-        (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
+            (b'\x01\x00\xff\x01', 0, 256, File.LogicalRecordSegmentHeaderAttributes(255), 1,),
     )
 )
 def test_LRSH_ctor_then_read(by, position, length, attributes, record_type):
@@ -585,8 +585,8 @@ def test_LRSH_ctor_as_bytes():
 @pytest.mark.parametrize(
     'by, expected',
     (
-        (b'\x01\x00\xff\x01', "EFLR-encrypted-checksum-trailing length-padding",),
-        (b'\x01\x00\x00\x01', "IFLR-first-last",),
+            (b'\x01\x00\xff\x01', "EFLR-encrypted-checksum-trailing length-padding",),
+            (b'\x01\x00\x00\x01', "IFLR-first-last",),
     )
 )
 def test_LRSH_attribute_str(by, expected):
@@ -650,15 +650,15 @@ def test_LogicalRecordPosition_eq():
 @pytest.mark.parametrize(
     'sul_length, vr_bytes, lrsh_bytes, expected',
     (
-        # VR Prior to SUL
-        (79, b'\x01\x00\xff\x01', b'\x00\x80\x9f\x01', 'VisibleRecord at 0x53 must be >= 0x50'),
-        # TODO: Remove VR/LRSH checks, replace by asserts.
-        (None, b'\x01\x00\xff\x01', b'\x00\x0f\x9f\x01',
-         'LogicalRecordSegmentHeader at 0x54 length 0xf must be >= 0x10'),
-        (None, b'\x01\x00\xff\x01', b'\xff\xff\x9f\x01',
-         'LogicalRecordSegmentHeader at 0x54 length 0xffff must be <= 0xfc'),
-        # (None, b'\x01\x00\xff\x01', b'\x00\x80\x60\x01',
-        #  'LogicalRecordSegmentHeader at 0x54 must be the first in the sequence of segments.'),
+            # VR Prior to SUL
+            (79, b'\x01\x00\xff\x01', b'\x00\x80\x9f\x01', 'VisibleRecord at 0x53 must be >= 0x50'),
+            # TODO: Remove VR/LRSH checks, replace by asserts.
+            (None, b'\x01\x00\xff\x01', b'\x00\x0f\x9f\x01',
+             'LogicalRecordSegmentHeader at 0x54 length 0xf must be >= 0x10'),
+            (None, b'\x01\x00\xff\x01', b'\xff\xff\x9f\x01',
+             'LogicalRecordSegmentHeader at 0x54 length 0xffff must be <= 0xfc'),
+            # (None, b'\x01\x00\xff\x01', b'\x00\x80\x60\x01',
+            #  'LogicalRecordSegmentHeader at 0x54 must be the first in the sequence of segments.'),
     )
 )
 def test_LogicalRecordPosition_ctor_raises(sul_length, vr_bytes, lrsh_bytes, expected):
@@ -682,7 +682,7 @@ def test_LogicalRecordPosition_ctor_raises(sul_length, vr_bytes, lrsh_bytes, exp
 @pytest.mark.parametrize(
     'by, length',
     (
-        (b'\x00\x01\x02\x03', 4),
+            (b'\x00\x01\x02\x03', 4),
     )
 )
 def test_logical_data_ctor(by, length):
@@ -745,10 +745,10 @@ def test_logical_data_view_remaining_raises():
 @pytest.mark.parametrize(
     'reads, view_remaining',
     (
-        (0, b'\x00\x01\x02\x03'),
-        (1, b'\x01\x02\x03'),
-        (2, b'\x02\x03'),
-        (3, b'\x03'),
+            (0, b'\x00\x01\x02\x03'),
+            (1, b'\x01\x02\x03'),
+            (2, b'\x02\x03'),
+            (3, b'\x03'),
     )
 )
 def test_logical_data_view_remaining_remain(reads, view_remaining):
@@ -761,16 +761,16 @@ def test_logical_data_view_remaining_remain(reads, view_remaining):
 @pytest.mark.parametrize(
     'reads, len_chunk, chunk',
     (
-        (0, 1, b'\x00'),
-        (0, 2, b'\x00\x01'),
-        (0, 3, b'\x00\x01\x02'),
-        (0, 4, b'\x00\x01\x02\x03'),
-        (1, 1, b'\x01'),
-        (1, 2, b'\x01\x02'),
-        (1, 3, b'\x01\x02\x03'),
-        (2, 1, b'\x02'),
-        (2, 2, b'\x02\x03'),
-        (3, 1, b'\x03'),
+            (0, 1, b'\x00'),
+            (0, 2, b'\x00\x01'),
+            (0, 3, b'\x00\x01\x02'),
+            (0, 4, b'\x00\x01\x02\x03'),
+            (1, 1, b'\x01'),
+            (1, 2, b'\x01\x02'),
+            (1, 3, b'\x01\x02\x03'),
+            (2, 1, b'\x02'),
+            (2, 2, b'\x02\x03'),
+            (3, 1, b'\x03'),
     )
 )
 def test_logical_data_chunk(reads, len_chunk, chunk):
@@ -791,10 +791,10 @@ def test_logical_data_chunk_raises():
 @pytest.mark.parametrize(
     'index, item',
     (
-        (0, 0xf0),
-        (1, 0xf1),
-        (2, 0xf2),
-        (3, 0xf3),
+            (0, 0xf0),
+            (1, 0xf1),
+            (2, 0xf2),
+            (3, 0xf3),
     )
 )
 def test_logical_data_getitem(index, item):
@@ -907,11 +907,15 @@ def test_FileLogicalData_str():
     vr = File.VisibleRecord(fobj)
     lrsh = File.LogicalRecordSegmentHeader(fobj)
     fld = File.FileLogicalData(vr, lrsh)
-    assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0000 Bytes: >'
+    assert str(
+        fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0000 Bytes: >'
     fld.add_bytes(b'\x00\x00')
-    assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0002 Bytes: 0 0000                                    ..              >'
+    assert str(
+        fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n PARTIAL READ: len 0x0002 Bytes: 0 0000                                    ..              >'
     fld.seal()
-    assert str(fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n <LogicalData Len: 0x2 Idx: 0x0>>'
+    assert str(
+        fld) == '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   1 E n <LogicalData Len: 0x2 Idx: 0x0>>'
+
 
 # ==================== Test of FileRead ========================
 
@@ -919,9 +923,9 @@ def test_FileLogicalData_str():
 @pytest.mark.parametrize(
     'file_bytes',
     (
-        test_data.BASIC_FILE,
-        test_data.MINIMAL_FILE,
-        test_data.SMALL_FILE,
+            test_data.BASIC_FILE,
+            test_data.MINIMAL_FILE,
+            test_data.SMALL_FILE,
     )
 )
 def test_file_basic_file_ctor_with_file_object(file_bytes):
@@ -932,9 +936,9 @@ def test_file_basic_file_ctor_with_file_object(file_bytes):
 @pytest.mark.parametrize(
     'file_bytes',
     (
-        test_data.BASIC_FILE,
-        test_data.MINIMAL_FILE,
-        test_data.SMALL_FILE,
+            test_data.BASIC_FILE,
+            test_data.MINIMAL_FILE,
+            test_data.SMALL_FILE,
     )
 )
 def test_file_basic_file_ctor_with_path(tmpdir, file_bytes):
@@ -971,33 +975,33 @@ def test_file_file_ctor_raises_with_lrsh_not_first():
 @pytest.mark.parametrize(
     'file_bytes, sul_string',
     (
-        (
-            test_data.BASIC_FILE,
-            r"""StorageUnitLabel:
-  Storage Unit Sequence Number: 1
-                  DLIS Version: b'V1.00'
-        Storage Unit Structure: b'RECORD'
-         Maximum Record Length: 8192
-        Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
-        ),
-        (
-            test_data.MINIMAL_FILE,
-            r"""StorageUnitLabel:
-  Storage Unit Sequence Number: 1
-                  DLIS Version: b'V1.00'
-        Storage Unit Structure: b'RECORD'
-         Maximum Record Length: 8192
-        Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
-        ),
-        (
-            test_data.SMALL_FILE,
-            r"""StorageUnitLabel:
-  Storage Unit Sequence Number: 1
-                  DLIS Version: b'V1.00'
-        Storage Unit Structure: b'RECORD'
-         Maximum Record Length: 8192
-        Storage Set Identifier: b'Default Storage Set                                         '"""
-        ),
+            (
+                    test_data.BASIC_FILE,
+                    r"""StorageUnitLabel:
+          Storage Unit Sequence Number: 1
+                          DLIS Version: b'V1.00'
+                Storage Unit Structure: b'RECORD'
+                 Maximum Record Length: 8192
+                Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
+            ),
+            (
+                    test_data.MINIMAL_FILE,
+                    r"""StorageUnitLabel:
+          Storage Unit Sequence Number: 1
+                          DLIS Version: b'V1.00'
+                Storage Unit Structure: b'RECORD'
+                 Maximum Record Length: 8192
+                Storage Set Identifier: b'              +++TIF@C:\\INSITE\\Data\\ExpFiles\\VA2456~1.DLI+++'"""
+            ),
+            (
+                    test_data.SMALL_FILE,
+                    r"""StorageUnitLabel:
+          Storage Unit Sequence Number: 1
+                          DLIS Version: b'V1.00'
+                Storage Unit Structure: b'RECORD'
+                 Maximum Record Length: 8192
+                Storage Set Identifier: b'Default Storage Set                                         '"""
+            ),
     )
 )
 def test_file_basic_file_sul(file_bytes, sul_string):
@@ -1010,28 +1014,28 @@ def test_file_basic_file_sul(file_bytes, sul_string):
 @pytest.mark.parametrize(
     'file_bytes, expected',
     (
-        (
-            test_data.BASIC_FILE,
-            [
-                'VisibleRecord: position=0x50 length=0x2000 version=0xff01',
-                'VisibleRecord: position=0x2050 length=0x2000 version=0xff01',
-                'VisibleRecord: position=0x4050 length=0x2000 version=0xff01',
-                'VisibleRecord: position=0x6050 length=0x2000 version=0xff01',
-                'VisibleRecord: position=0x8050 length=0x2000 version=0xff01',
-                'VisibleRecord: position=0xa050 length=0x0f24 version=0xff01',
-            ]
-        ),
-        (
-            test_data.MINIMAL_FILE,
-            ['VisibleRecord: position=0x50 length=0x2000 version=0xff01']
-        ),
-        (
-            test_data.SMALL_FILE,
-            [
-                'VisibleRecord: position=0x50 length=0x1ffc version=0xff01',
-                'VisibleRecord: position=0x204c length=0x03f4 version=0xff01',
-            ]
-        ),
+            (
+                    test_data.BASIC_FILE,
+                    [
+                        'VisibleRecord: position=0x50 length=0x2000 version=0xff01',
+                        'VisibleRecord: position=0x2050 length=0x2000 version=0xff01',
+                        'VisibleRecord: position=0x4050 length=0x2000 version=0xff01',
+                        'VisibleRecord: position=0x6050 length=0x2000 version=0xff01',
+                        'VisibleRecord: position=0x8050 length=0x2000 version=0xff01',
+                        'VisibleRecord: position=0xa050 length=0x0f24 version=0xff01',
+                    ]
+            ),
+            (
+                    test_data.MINIMAL_FILE,
+                    ['VisibleRecord: position=0x50 length=0x2000 version=0xff01']
+            ),
+            (
+                    test_data.SMALL_FILE,
+                    [
+                        'VisibleRecord: position=0x50 length=0x1ffc version=0xff01',
+                        'VisibleRecord: position=0x204c length=0x03f4 version=0xff01',
+                    ]
+            ),
     )
 )
 def test_file_basic_file_visible_records(file_bytes, expected):
@@ -1045,129 +1049,129 @@ def test_file_basic_file_visible_records(file_bytes, expected):
 @pytest.mark.parametrize(
     'file_bytes, expected',
     (
-        (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
-            [
-                [
-                    'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
-                    'LRSH: @ 0xd0 len=0x1fc type=1 EFLR-first-last-padding',
-                    'LRSH: @ 0x2cc len=0xcc type=4 EFLR-first-last-padding',
-                    'LRSH: @ 0x398 len=0xbdc type=5 EFLR-first-last',
-                    'LRSH: @ 0xf74 len=0x352 type=5 EFLR-first-last',
-                    'LRSH: @ 0x12c6 len=0x17e type=3 EFLR-first-last',
-                    'LRSH: @ 0x1444 len=0xa2 type=128 EFLR-first-last',
-                    'LRSH: @ 0x14e6 len=0x69c type=6 EFLR-first-last-padding',
-                    'LRSH: @ 0x1b82 len=0x4ce type=6 EFLR-first',
-                ],
-                 ['LRSH: @ 0x2054 len=0x226 type=6 EFLR-last-padding']
-            ]
-        ),
-        (
-            test_data.MINIMAL_FILE,
-            [
-                [
-                    'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
-                    'LRSH: @ 0xd0 len=0x1fc type=1 EFLR-first-last-padding',
-                ]
-            ]
-        ),
-        (
-            test_data.SMALL_FILE,
-            [
-                [
-                    'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
-                    'LRSH: @ 0xd0 len=0x200 type=1 EFLR-first-last-padding',
-                    'LRSH: @ 0x2d0 len=0xe0c type=5 EFLR-first-last-padding',
-                    'LRSH: @ 0x10dc len=0x2c0 type=3 EFLR-first-last-padding',
-                    'LRSH: @ 0x139c len=0x110 type=4 EFLR-first-last',
-                    'LRSH: @ 0x14ac len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x14dc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x150c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x153c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x156c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x159c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x15cc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x15fc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x162c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x165c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x168c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x16bc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x16ec len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x171c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x174c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x177c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x17ac len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x17dc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x180c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x183c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x186c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x189c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x18cc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x18fc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x192c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x195c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x198c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x19bc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x19ec len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1a1c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1a4c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1a7c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1aac len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1adc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1b0c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1b3c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1b6c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1b9c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1bcc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1bfc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1c2c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1c5c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1c8c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1cbc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1cec len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1d1c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1d4c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1d7c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1dac len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1ddc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1e0c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1e3c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1e6c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1e9c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1ecc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1efc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1f2c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1f5c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1f8c len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1fbc len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x1fec len=0x30 type=0 IFLR-first-last-padding',
-                    'LRSH: @ 0x201c len=0x30 type=0 IFLR-first-last-padding',
-                ],
-                 [
-                     'LRSH: @ 0x2050 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2080 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x20b0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x20e0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2110 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2140 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2170 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x21a0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x21d0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2200 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2230 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2260 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2290 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x22c0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x22f0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2320 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2350 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2380 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x23b0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x23e0 len=0x30 type=0 IFLR-first-last-padding',
-                     'LRSH: @ 0x2410 len=0x30 type=0 IFLR-first-last-padding',
-                 ]
-             ]
-        ),
+            (
+                    test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
+                    [
+                        [
+                            'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
+                            'LRSH: @ 0xd0 len=0x1fc type=1 EFLR-first-last-padding',
+                            'LRSH: @ 0x2cc len=0xcc type=4 EFLR-first-last-padding',
+                            'LRSH: @ 0x398 len=0xbdc type=5 EFLR-first-last',
+                            'LRSH: @ 0xf74 len=0x352 type=5 EFLR-first-last',
+                            'LRSH: @ 0x12c6 len=0x17e type=3 EFLR-first-last',
+                            'LRSH: @ 0x1444 len=0xa2 type=128 EFLR-first-last',
+                            'LRSH: @ 0x14e6 len=0x69c type=6 EFLR-first-last-padding',
+                            'LRSH: @ 0x1b82 len=0x4ce type=6 EFLR-first',
+                        ],
+                        ['LRSH: @ 0x2054 len=0x226 type=6 EFLR-last-padding']
+                    ]
+            ),
+            (
+                    test_data.MINIMAL_FILE,
+                    [
+                        [
+                            'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
+                            'LRSH: @ 0xd0 len=0x1fc type=1 EFLR-first-last-padding',
+                        ]
+                    ]
+            ),
+            (
+                    test_data.SMALL_FILE,
+                    [
+                        [
+                            'LRSH: @ 0x54 len=0x7c type=0 EFLR-first-last',
+                            'LRSH: @ 0xd0 len=0x200 type=1 EFLR-first-last-padding',
+                            'LRSH: @ 0x2d0 len=0xe0c type=5 EFLR-first-last-padding',
+                            'LRSH: @ 0x10dc len=0x2c0 type=3 EFLR-first-last-padding',
+                            'LRSH: @ 0x139c len=0x110 type=4 EFLR-first-last',
+                            'LRSH: @ 0x14ac len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x14dc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x150c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x153c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x156c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x159c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x15cc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x15fc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x162c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x165c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x168c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x16bc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x16ec len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x171c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x174c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x177c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x17ac len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x17dc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x180c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x183c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x186c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x189c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x18cc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x18fc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x192c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x195c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x198c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x19bc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x19ec len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1a1c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1a4c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1a7c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1aac len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1adc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1b0c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1b3c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1b6c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1b9c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1bcc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1bfc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1c2c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1c5c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1c8c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1cbc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1cec len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1d1c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1d4c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1d7c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1dac len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1ddc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1e0c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1e3c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1e6c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1e9c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1ecc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1efc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1f2c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1f5c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1f8c len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1fbc len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x1fec len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x201c len=0x30 type=0 IFLR-first-last-padding',
+                        ],
+                        [
+                            'LRSH: @ 0x2050 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2080 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x20b0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x20e0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2110 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2140 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2170 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x21a0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x21d0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2200 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2230 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2260 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2290 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x22c0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x22f0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2320 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2350 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2380 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x23b0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x23e0 len=0x30 type=0 IFLR-first-last-padding',
+                            'LRSH: @ 0x2410 len=0x30 type=0 IFLR-first-last-padding',
+                        ]
+                    ]
+            ),
     )
 )
 def test_file_iter_LRSHs_for_visible_record(file_bytes, expected):
@@ -1306,31 +1310,32 @@ def test_file_iter_logical_records_raises_eof():
         with File.FileRead(fobj) as file_read:
             for file_logical_data in file_read.iter_logical_records():
                 lr_list.append(str(file_logical_data))
-    assert err.value.args[0] == 'Premature EOF reading at LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 of 504 bytes'
+    assert err.value.args[
+               0] == 'Premature EOF reading at LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 of 504 bytes'
 
 
 @pytest.mark.parametrize(
     'position, length, version, lrsh_expected',
     (
-        (
-            0x50, 0x2000, 0xff01,
-            ['<LogicalRecordSegmentHeader: @ 0x54 len=0x7c attr=0x80 type=0>',
-             '<LogicalRecordSegmentHeader: @ 0xd0 len=0x1fc attr=0x81 type=1>',
-             '<LogicalRecordSegmentHeader: @ 0x2cc len=0xcc attr=0x81 type=4>',
-             '<LogicalRecordSegmentHeader: @ 0x398 len=0xbdc attr=0x80 type=5>',
-             '<LogicalRecordSegmentHeader: @ 0xf74 len=0x352 attr=0x80 type=5>',
-             '<LogicalRecordSegmentHeader: @ 0x12c6 len=0x17e attr=0x80 type=3>',
-             '<LogicalRecordSegmentHeader: @ 0x1444 len=0xa2 attr=0x80 type=128>',
-             '<LogicalRecordSegmentHeader: @ 0x14e6 len=0x69c attr=0x81 type=6>',
-             '<LogicalRecordSegmentHeader: @ 0x1b82 len=0x4ce attr=0xa0 type=6>',
-             ],
-        ),
-        (
-            0x2050, 0x2000, 0xff01,
-            [
-                '<LogicalRecordSegmentHeader: @ 0x2054 len=0x226 attr=0xc1 type=6>',
-            ]
-        ),
+            (
+                    0x50, 0x2000, 0xff01,
+                    ['<LogicalRecordSegmentHeader: @ 0x54 len=0x7c attr=0x80 type=0>',
+                     '<LogicalRecordSegmentHeader: @ 0xd0 len=0x1fc attr=0x81 type=1>',
+                     '<LogicalRecordSegmentHeader: @ 0x2cc len=0xcc attr=0x81 type=4>',
+                     '<LogicalRecordSegmentHeader: @ 0x398 len=0xbdc attr=0x80 type=5>',
+                     '<LogicalRecordSegmentHeader: @ 0xf74 len=0x352 attr=0x80 type=5>',
+                     '<LogicalRecordSegmentHeader: @ 0x12c6 len=0x17e attr=0x80 type=3>',
+                     '<LogicalRecordSegmentHeader: @ 0x1444 len=0xa2 attr=0x80 type=128>',
+                     '<LogicalRecordSegmentHeader: @ 0x14e6 len=0x69c attr=0x81 type=6>',
+                     '<LogicalRecordSegmentHeader: @ 0x1b82 len=0x4ce attr=0xa0 type=6>',
+                     ],
+            ),
+            (
+                    0x2050, 0x2000, 0xff01,
+                    [
+                        '<LogicalRecordSegmentHeader: @ 0x2054 len=0x226 attr=0xc1 type=6>',
+                    ]
+            ),
     )
 )
 def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment(position, length, version,
@@ -1352,27 +1357,27 @@ def test_file_basic_file_iter_LRSHs_for_visible_record_and_logical_data_fragment
 @pytest.mark.parametrize(
     'by, expected_logical_record_positions',
     (
-        (
-            test_data.MINIMAL_FILE,
-            [
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
-            ],
-        ),
-        (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
-            [
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc desc: LogicalDataDescription LRSH attr: 0x81 type: 4 len: 200',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 3032',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 846',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 desc: LogicalDataDescription LRSH attr: 0x80 type: 3 len: 378',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 desc: LogicalDataDescription LRSH attr: 0x80 type: 128 len: 158',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 desc: LogicalDataDescription LRSH attr: 0x81 type: 6 len: 1688',
-                'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 desc: LogicalDataDescription LRSH attr: 0xa0 type: 6 len: 1772',
-            ],
-        ),
+            (
+                    test_data.MINIMAL_FILE,
+                    [
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
+                    ],
+            ),
+            (
+                    test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
+                    [
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 desc: LogicalDataDescription LRSH attr: 0x80 type: 0 len: 120',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 desc: LogicalDataDescription LRSH attr: 0x81 type: 1 len: 504',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc desc: LogicalDataDescription LRSH attr: 0x81 type: 4 len: 200',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 3032',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74 desc: LogicalDataDescription LRSH attr: 0x80 type: 5 len: 846',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 desc: LogicalDataDescription LRSH attr: 0x80 type: 3 len: 378',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 desc: LogicalDataDescription LRSH attr: 0x80 type: 128 len: 158',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 desc: LogicalDataDescription LRSH attr: 0x81 type: 6 len: 1688',
+                        'LRPosDesc pos: LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 desc: LogicalDataDescription LRSH attr: 0xa0 type: 6 len: 1772',
+                    ],
+            ),
     )
 )
 def test_file_iter_logical_record_positions(by, expected_logical_record_positions):
@@ -1395,27 +1400,27 @@ def test_file_iter_logical_record_positions_fails_not_is_first():
 @pytest.mark.parametrize(
     'by, expected_file_logical_data',
     (
-        (
-            test_data.MINIMAL_FILE,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
-            ],
-        ),
-        (
-            test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc LR   4 E n <LogicalData Len: 0xc7 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398 LR   5 E n <LogicalData Len: 0xbd8 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74 LR   5 E n <LogicalData Len: 0x34e Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 LR   3 E n <LogicalData Len: 0x17a Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 LR 128 E n <LogicalData Len: 0x9e Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 LR   6 E n <LogicalData Len: 0x697 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 LR   6 E n <LogicalData Len: 0x6eb Idx: 0x0>>'
-            ],
-        ),
+            (
+                    test_data.MINIMAL_FILE,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
+                    ],
+            ),
+            (
+                    test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000002cc LR   4 E n <LogicalData Len: 0xc7 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000398 LR   5 E n <LogicalData Len: 0xbd8 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000f74 LR   5 E n <LogicalData Len: 0x34e Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000012c6 LR   3 E n <LogicalData Len: 0x17a Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001444 LR 128 E n <LogicalData Len: 0x9e Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000014e6 LR   6 E n <LogicalData Len: 0x697 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00001b82 LR   6 E n <LogicalData Len: 0x6eb Idx: 0x0>>'
+                    ],
+            ),
     )
 )
 def test_file_get_file_logical_data(by, expected_file_logical_data):
@@ -1432,145 +1437,145 @@ def test_file_get_file_logical_data(by, expected_file_logical_data):
 @pytest.mark.parametrize(
     'by, offset, length, expected_file_logical_data, expected_bytes',
     (
-        (
-            test_data.MINIMAL_FILE, 0, -1,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
-            ],
-            [
-                (
-                    b'\xf0\x0bFILE-HEADER4\x0fSEQUENCE-NUMBER\x144\x02ID\x14p\x02\x00\x011!\n00000'
-                    b'00001!AHES INSITE.1                                                     '
-                ),
-                (
-                    b'\xf0\x06ORIGIN8\x07FILE-ID\x008\rFILE-SET-NAME\x008\x0fFILE-SET-NUMBER\x00'
-                    b'8\x0bFILE-NUMBER\x008\tFILE-TYPE\x008\x07PRODUCT\x008\x07VERSION\x008\x08'
-                    b'PROGRAMS\x008\rCREATION-TIME\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER'
-                    b'\x008\nRUN-NUMBER\x008\x07WELL-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rP'
-                    b'RODUCER-CODE\x008\rPRODUCER-NAME\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME'
-                    b'\x008\x12NAME-SPACE-VERSION\x00p\x02\x00\x010-\x01\x14\x0cHES INSITE.1-'
-                    b'\x01\x13$BURU ENERGY LIMITED/VALHALLA NORTH 1-\x01\x12\xcfV\xccU-\x01'
-                    b'\x12\x01-\x01\x13\x08PLAYBACK-\x01\x14\nHES INSITE-\x01\x14\x06R5.1.4\x00-'
-                    b'\x01\x15p\x03\x07\n\x001\x00\x00-\x01\x14\x079262611\x00\x00-\x01\x14\x03N'
-                    b'/A-\x01\x14\x10VALHALLA NORTH 1-\x01\x14\x08VALHALLA-\x01\x10\x01\x18-'
-                    b'\x01\x14\x0bHalliburton-\x01\x14\x13BURU ENERGY LIMITED\x00\x00'
-                )
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 16, -1,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x68 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1e7 Idx: 0x0>>',
-            ],
-            [
-                (
-                    b'EQUENCE-NUMBER\x144\x02ID\x14p\x02\x00\x011!\n0000000001!AHES INSITE.1     '
-                    b'                                                '
-                ),
-                (
-                    b'D\x008\rFILE-SET-NAME\x008\x0fFILE-SET-NUMBER\x008\x0bFILE-NUMBER\x008\tFILE'
-                    b'-TYPE\x008\x07PRODUCT\x008\x07VERSION\x008\x08PROGRAMS\x008\rCREATION-TIME'
-                    b'\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER\x008\nRUN-NUMBER\x008\x07WELL'
-                    b'-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rPRODUCER-CODE\x008\rPRODUCER-NAME'
-                    b'\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME\x008\x12NAME-SPACE-VERSION\x00p\x02'
-                    b'\x00\x010-\x01\x14\x0cHES INSITE.1-\x01\x13$BURU ENERGY LIMITED/VALHALLA '
-                    b'NORTH 1-\x01\x12\xcfV\xccU-\x01\x12\x01-\x01\x13\x08PLAYBACK-\x01\x14\nHE'
-                    b'S INSITE-\x01\x14\x06R5.1.4\x00-\x01\x15p\x03\x07\n\x001\x00\x00-\x01'
-                    b'\x14\x079262611\x00\x00-\x01\x14\x03N/A-\x01\x14\x10VALHALLA NORTH 1-\x01'
-                    b'\x14\x08VALHALLA-\x01\x10\x01\x18-\x01\x14\x0bHalliburton-\x01\x14\x13BURU E'
-                    b'NERGY LIMITED\x00\x00'
-                ),
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 0, 16,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x10 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x10 Idx: 0x0>>',
-            ],
-            [
-                b'\xf0\x0bFILE-HEADER4\x0fS',
-                b'\xf0\x06ORIGIN8\x07FILE-I',
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 32, 16,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x10 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x10 Idx: 0x0>>',
-            ],
-            [
-                b'\x02ID\x14p\x02\x00\x011!\n00000',
-                b'E\x008\x0fFILE-SET-NUM',
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 0, 0,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-            ],
-            [
-                b'',
-                b'',
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 32, 0,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-            ],
-            [
-                b'',
-                b'',
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 0x78, -1,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x17f Idx: 0x0>>',
-            ],
-            [
-                b'',
-                (
-                    b'TIME\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER\x008\nRUN-NUMBER\x008\x07'
-                    b'WELL-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rPRODUCER-CODE\x008\rPRODUCER-'
-                    b'NAME\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME\x008\x12NAME-SPACE-VERSIO'
-                    b'N\x00p\x02\x00\x010-\x01\x14\x0cHES INSITE.1-\x01\x13$BURU ENERGY LIMITED/V'
-                    b'ALHALLA NORTH 1-\x01\x12\xcfV\xccU-\x01\x12\x01-\x01\x13\x08PLAYBACK-\x01'
-                    b'\x14\nHES INSITE-\x01\x14\x06R5.1.4\x00-\x01\x15p\x03\x07\n\x001'
-                    b'\x00\x00-\x01\x14\x079262611\x00\x00-\x01\x14\x03N/A-\x01\x14\x10VALHALLA N'
-                    b'ORTH 1-\x01\x14\x08VALHALLA-\x01\x10\x01\x18-\x01\x14\x0bHalliburton-\x01'
-                    b'\x14\x13BURU ENERGY LIMITED\x00\x00'
-                ),
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 0x1f7, -1,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-            ],
-            [
-                b'',
-                b'',
-            ],
-        ),
-        (
-            test_data.MINIMAL_FILE, 0x1f7 + 1, -1,
-            [
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-                '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
-            ],
-            [
-                b'',
-                b'',
-            ],
-        ),
+            (
+                    test_data.MINIMAL_FILE, 0, -1,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x78 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1f7 Idx: 0x0>>',
+                    ],
+                    [
+                        (
+                                b'\xf0\x0bFILE-HEADER4\x0fSEQUENCE-NUMBER\x144\x02ID\x14p\x02\x00\x011!\n00000'
+                                b'00001!AHES INSITE.1                                                     '
+                        ),
+                        (
+                                b'\xf0\x06ORIGIN8\x07FILE-ID\x008\rFILE-SET-NAME\x008\x0fFILE-SET-NUMBER\x00'
+                                b'8\x0bFILE-NUMBER\x008\tFILE-TYPE\x008\x07PRODUCT\x008\x07VERSION\x008\x08'
+                                b'PROGRAMS\x008\rCREATION-TIME\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER'
+                                b'\x008\nRUN-NUMBER\x008\x07WELL-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rP'
+                                b'RODUCER-CODE\x008\rPRODUCER-NAME\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME'
+                                b'\x008\x12NAME-SPACE-VERSION\x00p\x02\x00\x010-\x01\x14\x0cHES INSITE.1-'
+                                b'\x01\x13$BURU ENERGY LIMITED/VALHALLA NORTH 1-\x01\x12\xcfV\xccU-\x01'
+                                b'\x12\x01-\x01\x13\x08PLAYBACK-\x01\x14\nHES INSITE-\x01\x14\x06R5.1.4\x00-'
+                                b'\x01\x15p\x03\x07\n\x001\x00\x00-\x01\x14\x079262611\x00\x00-\x01\x14\x03N'
+                                b'/A-\x01\x14\x10VALHALLA NORTH 1-\x01\x14\x08VALHALLA-\x01\x10\x01\x18-'
+                                b'\x01\x14\x0bHalliburton-\x01\x14\x13BURU ENERGY LIMITED\x00\x00'
+                        )
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 16, -1,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x68 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x1e7 Idx: 0x0>>',
+                    ],
+                    [
+                        (
+                                b'EQUENCE-NUMBER\x144\x02ID\x14p\x02\x00\x011!\n0000000001!AHES INSITE.1     '
+                                b'                                                '
+                        ),
+                        (
+                                b'D\x008\rFILE-SET-NAME\x008\x0fFILE-SET-NUMBER\x008\x0bFILE-NUMBER\x008\tFILE'
+                                b'-TYPE\x008\x07PRODUCT\x008\x07VERSION\x008\x08PROGRAMS\x008\rCREATION-TIME'
+                                b'\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER\x008\nRUN-NUMBER\x008\x07WELL'
+                                b'-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rPRODUCER-CODE\x008\rPRODUCER-NAME'
+                                b'\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME\x008\x12NAME-SPACE-VERSION\x00p\x02'
+                                b'\x00\x010-\x01\x14\x0cHES INSITE.1-\x01\x13$BURU ENERGY LIMITED/VALHALLA '
+                                b'NORTH 1-\x01\x12\xcfV\xccU-\x01\x12\x01-\x01\x13\x08PLAYBACK-\x01\x14\nHE'
+                                b'S INSITE-\x01\x14\x06R5.1.4\x00-\x01\x15p\x03\x07\n\x001\x00\x00-\x01'
+                                b'\x14\x079262611\x00\x00-\x01\x14\x03N/A-\x01\x14\x10VALHALLA NORTH 1-\x01'
+                                b'\x14\x08VALHALLA-\x01\x10\x01\x18-\x01\x14\x0bHalliburton-\x01\x14\x13BURU E'
+                                b'NERGY LIMITED\x00\x00'
+                        ),
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 0, 16,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x10 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x10 Idx: 0x0>>',
+                    ],
+                    [
+                        b'\xf0\x0bFILE-HEADER4\x0fS',
+                        b'\xf0\x06ORIGIN8\x07FILE-I',
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 32, 16,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x10 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x10 Idx: 0x0>>',
+                    ],
+                    [
+                        b'\x02ID\x14p\x02\x00\x011!\n00000',
+                        b'E\x008\x0fFILE-SET-NUM',
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 0, 0,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                    ],
+                    [
+                        b'',
+                        b'',
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 32, 0,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                    ],
+                    [
+                        b'',
+                        b'',
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 0x78, -1,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x17f Idx: 0x0>>',
+                    ],
+                    [
+                        b'',
+                        (
+                                b'TIME\x008\x0cORDER-NUMBER\x008\x0eDESCENT-NUMBER\x008\nRUN-NUMBER\x008\x07'
+                                b'WELL-ID\x008\tWELL-NAME\x008\nFIELD-NAME\x008\rPRODUCER-CODE\x008\rPRODUCER-'
+                                b'NAME\x008\x07COMPANY\x008\x0fNAME-SPACE-NAME\x008\x12NAME-SPACE-VERSIO'
+                                b'N\x00p\x02\x00\x010-\x01\x14\x0cHES INSITE.1-\x01\x13$BURU ENERGY LIMITED/V'
+                                b'ALHALLA NORTH 1-\x01\x12\xcfV\xccU-\x01\x12\x01-\x01\x13\x08PLAYBACK-\x01'
+                                b'\x14\nHES INSITE-\x01\x14\x06R5.1.4\x00-\x01\x15p\x03\x07\n\x001'
+                                b'\x00\x00-\x01\x14\x079262611\x00\x00-\x01\x14\x03N/A-\x01\x14\x10VALHALLA N'
+                                b'ORTH 1-\x01\x14\x08VALHALLA-\x01\x10\x01\x18-\x01\x14\x0bHalliburton-\x01'
+                                b'\x14\x13BURU ENERGY LIMITED\x00\x00'
+                        ),
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 0x1f7, -1,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                    ],
+                    [
+                        b'',
+                        b'',
+                    ],
+            ),
+            (
+                    test_data.MINIMAL_FILE, 0x1f7 + 1, -1,
+                    [
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x00000054 LR   0 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                        '<FileLogicalData LogicalRecordPosition: VR: 0x00000050 LRSH: 0x000000d0 LR   1 E n <LogicalData Len: 0x0 Idx: 0x0>>',
+                    ],
+                    [
+                        b'',
+                        b'',
+                    ],
+            ),
     )
 )
 def test_file_get_file_logical_data_partial(by, offset, length, expected_file_logical_data, expected_bytes):
@@ -1598,6 +1603,5 @@ def test_file_get_file_logical_data_partial_raises_on_negative_offset():
             with pytest.raises(File.ExceptionFileRead) as err:
                 file_read.get_file_logical_data(lrp, offset=-1)
             assert err.value.args[0] == 'offset must be >= 0 not -1'
-
 
 # ==================== END: Test of FileRead ========================

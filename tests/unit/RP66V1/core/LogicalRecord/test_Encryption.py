@@ -1,8 +1,5 @@
-import pytest
-
 from TotalDepth.RP66V1.core import File
 from TotalDepth.RP66V1.core.LogicalRecord import Encryption
-
 
 ENCRYPTION_EXAMPLE_BYTES = (
     b'\x00\x04'  # UNORM size
@@ -14,7 +11,7 @@ ENCRYPTION_EXAMPLE_BYTES = (
 
 def test_logical_record_segment_encryption_packet_ctor():
     ld = File.LogicalData(ENCRYPTION_EXAMPLE_BYTES)
-    lrsep  = Encryption.LogicalRecordSegmentEncryptionPacket(ld)
+    lrsep = Encryption.LogicalRecordSegmentEncryptionPacket(ld)
     assert lrsep.size == 4
     assert lrsep.producer_code == 440
     assert lrsep.encryption_information == b'\x00\x00\x00\x00'
@@ -24,5 +21,5 @@ def test_logical_record_segment_encryption_packet_ctor():
 
 def test_logical_record_segment_encryption_packet_str():
     ld = File.LogicalData(ENCRYPTION_EXAMPLE_BYTES)
-    lrsep  = Encryption.LogicalRecordSegmentEncryptionPacket(ld)
+    lrsep = Encryption.LogicalRecordSegmentEncryptionPacket(ld)
     assert str(lrsep) == "EncryptionPacket: size: 0x0004 producer: 440 code length: 4 data length: 2"

@@ -27,11 +27,10 @@ import datetime
 import io
 
 import numpy as np
-
 import pytest
 
-from TotalDepth.LIS.core import EngVal
 from TotalDepth.LAS.core import LASRead
+from TotalDepth.LIS.core import EngVal
 from TotalDepth.LIS.core import Mnem
 
 __author__ = 'Paul Ross'
@@ -43,8 +42,8 @@ __rights__ = 'Copyright (c) 2012-2020 Paul Ross.'
 @pytest.mark.parametrize(
     'path, expected',
     (
-        ('foo.las', True),
-        ('foo.lis', False),
+            ('foo.las', True),
+            ('foo.lis', False),
     )
 )
 def test_has_las_extension(path, expected):
@@ -72,9 +71,9 @@ def test_las_read_generator():
 """)
     result = [v for v in LASRead.generate_lines(las_file)]
     expected = [
-        (5,  '~VERSION INFORMATION\n'),
-        (7,  ' VERS.                        2.0: CWLS LOG ASCII STANDARD - VERSION 2.0\n'),
-        (9,  ' WRAP.                         NO: ONE LINE PER DEPTH STEP\n'),
+        (5, '~VERSION INFORMATION\n'),
+        (7, ' VERS.                        2.0: CWLS LOG ASCII STANDARD - VERSION 2.0\n'),
+        (9, ' WRAP.                         NO: ONE LINE PER DEPTH STEP\n'),
         (10, '~A\n'),
         (12, ' 1700.0000  -999.2500  -999.2500  -999.2500  -999.2500\n'),
         (14, ' 1700.5000    40.7909     0.0218     0.0417    25.9985\n'),
@@ -86,10 +85,10 @@ def test_las_read_generator():
 @pytest.mark.parametrize(
     'line, expected',
     (
-        ('#\n', ''),
-        ('# Some comment   \n', ' Some comment   '),
-        (' # Some comment   \n', ' Some comment   '),
-        (' # Some comment   ', ' Some comment   '),
+            ('#\n', ''),
+            ('# Some comment   \n', ' Some comment   '),
+            (' # Some comment   \n', ' Some comment   '),
+            (' # Some comment   ', ' Some comment   '),
     )
 )
 def test_re_parse_comment(line, expected):
@@ -103,8 +102,8 @@ def test_re_parse_comment(line, expected):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        ('~V\n', ('V', None)),
-        ('~VERSION INFORMATION\n', ('V', 'ERSION INFORMATION')),
+            ('~V\n', ('V', None)),
+            ('~VERSION INFORMATION\n', ('V', 'ERSION INFORMATION')),
     )
 )
 def test_re_section_head(line, expected):
@@ -118,7 +117,7 @@ def test_re_section_head(line, expected):
 @pytest.mark.parametrize(
     'line',
     (
-        ' ~V\n',
+            ' ~V\n',
     )
 )
 def test_re_section_head_fails(line):
@@ -130,10 +129,10 @@ def test_re_section_head_fails(line):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        ('MNEM', ('MNEM',)),
-        ('MNEM ', ('MNEM',)),
-        (' MNEM', ('MNEM',)),
-        (' MNEM ', ('MNEM',)),
+            ('MNEM', ('MNEM',)),
+            ('MNEM ', ('MNEM',)),
+            (' MNEM', ('MNEM',)),
+            (' MNEM ', ('MNEM',)),
     )
 )
 def test_re_line_field_0(line, expected):
@@ -147,9 +146,9 @@ def test_re_line_field_0(line, expected):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        ('FEET    Something   ', ('FEET', '    Something   ')),
-        ('FEET    Something   else   ', ('FEET', '    Something   else   ')),
-        (' FEET    Something   else   ', (None,  ' FEET    Something   else   ')),
+            ('FEET    Something   ', ('FEET', '    Something   ')),
+            ('FEET    Something   else   ', ('FEET', '    Something   else   ')),
+            (' FEET    Something   else   ', (None, ' FEET    Something   else   ')),
     )
 )
 def test_re_line_field_1(line, expected):
@@ -177,34 +176,34 @@ def test_las_read_las_section():
 @pytest.mark.parametrize(
     'section_type, text, expected_error',
     (
-        ('V', '', 'Section "V" must have 2 entries not 0.'),
-        (
-            'V',
-            '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-''',
-            'Section "V" must have 2 entries not 1.',
-        ),
-        (
-            'V',
-            '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-XXXX.                      NO: One line per depth step
-''',
-            'Section "V" must have entry[1]: "WRAP".',
-        ),
-        (
-            'V',
-            '''VERS.                     3.0: CWLS log ASCII Standard Version 3.00
-WRAP.                      NO: One line per depth step
-''',
-            'Section "V" must have value for "VERS" converted to (1.2, 2.0) from "3.0".',
-        ),
-        (
-            'V',
-            '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
-WRAP.                      XX: One line per depth step
-''',
-            'Section "V" must have value for "WRAP" converted to (True, False) from "XX".',
-        ),
+            ('V', '', 'Section "V" must have 2 entries not 0.'),
+            (
+                    'V',
+                    '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+        ''',
+                    'Section "V" must have 2 entries not 1.',
+            ),
+            (
+                    'V',
+                    '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+        XXXX.                      NO: One line per depth step
+        ''',
+                    'Section "V" must have entry[1]: "WRAP".',
+            ),
+            (
+                    'V',
+                    '''VERS.                     3.0: CWLS log ASCII Standard Version 3.00
+        WRAP.                      NO: One line per depth step
+        ''',
+                    'Section "V" must have value for "VERS" converted to (1.2, 2.0) from "3.0".',
+            ),
+            (
+                    'V',
+                    '''VERS.                     2.0: CWLS log ASCII Standard Version 2.00
+        WRAP.                      XX: One line per depth step
+        ''',
+                    'Section "V" must have value for "WRAP" converted to (True, False) from "XX".',
+            ),
     )
 )
 def test_las_read_las_section_raises(section_type, text, expected_error):
@@ -223,23 +222,23 @@ def test_las_read_las_section_raises(section_type, text, expected_error):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        # Integers
-        ('1234', 1234,),
-        (' 1234', 1234,),
-        ('1234 ', 1234,),
-        (' 1234 ', 1234,),
-        # floats
-        ('1.234', 1.234,),
-        (' 1.234', 1.234,),
-        ('1.234 ', 1.234,),
-        (' 1.234 ', 1.234,),
-        ('   -1.234E+4   ', -12340.0),
-        ('  1234e01   ', 12340.0),
-        ('YES', True),
-        ('NO', False),
-        ('TEXT', 'TEXT'),
-        (None, ''),
-        (b'', ''),
+            # Integers
+            ('1234', 1234,),
+            (' 1234', 1234,),
+            ('1234 ', 1234,),
+            (' 1234 ', 1234,),
+            # floats
+            ('1.234', 1.234,),
+            (' 1.234', 1.234,),
+            ('1.234 ', 1.234,),
+            (' 1.234 ', 1.234,),
+            ('   -1.234E+4   ', -12340.0),
+            ('  1234e01   ', 12340.0),
+            ('YES', True),
+            ('NO', False),
+            ('TEXT', 'TEXT'),
+            (None, ''),
+            (b'', ''),
     )
 )
 def test_las_read_value(line, expected):
@@ -261,9 +260,9 @@ def test_las_section_str():
 @pytest.mark.parametrize(
     'mnemonic, expected',
     (
-        ('DATE', True),
-        ('STRT', True),
-        ('XXXX', False),
+            ('DATE', True),
+            ('STRT', True),
+            ('XXXX', False),
     )
 )
 def test_las_section_contains(mnemonic, expected):
@@ -280,34 +279,34 @@ def test_las_section_contains(mnemonic, expected):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        (
-            'VERS.                     2.0: CWLS log ASCII Standard Version 2.00\n',
-            LASRead.SectLine(mnem='VERS', unit='', valu=2.0, desc='CWLS log ASCII Standard Version 2.00')
-        ),
-        (
-            'VERS.                     2.0:     \n',
-            LASRead.SectLine(mnem='VERS', unit='', valu=2.0, desc='')
-        ),
-        (
-            'MNEM.     ..: Extra dots.\n',
-            LASRead.SectLine(mnem='MNEM', unit='', valu='..', desc='Extra dots.')
-        ),
-        (
-            'MNEM.    value ::: Extra colons.\n',
-            LASRead.SectLine(mnem='MNEM', unit='', valu='value ::', desc='Extra colons.')
-        ),
-        (
-            'MNEM.    value..::: Extra dots and colons.\n',
-            LASRead.SectLine(mnem='MNEM', unit='', valu='value..::', desc='Extra dots and colons.')
-        ),
-        (
-            ' DATE .       13/12/1986                       : LOG DATE  {DD/MM/YYYY}\n',
-            LASRead.SectLine(mnem='DATE', unit='', valu='13/12/1986', desc='LOG DATE  {DD/MM/YYYY}')
-        ),
-        (
-            ' STRT .M              1670.0000                : First Index Value\n',
-            LASRead.SectLine(mnem='STRT', unit='M', valu=1670.0, desc='First Index Value')
-        ),
+            (
+                    'VERS.                     2.0: CWLS log ASCII Standard Version 2.00\n',
+                    LASRead.SectLine(mnem='VERS', unit='', valu=2.0, desc='CWLS log ASCII Standard Version 2.00')
+            ),
+            (
+                    'VERS.                     2.0:     \n',
+                    LASRead.SectLine(mnem='VERS', unit='', valu=2.0, desc='')
+            ),
+            (
+                    'MNEM.     ..: Extra dots.\n',
+                    LASRead.SectLine(mnem='MNEM', unit='', valu='..', desc='Extra dots.')
+            ),
+            (
+                    'MNEM.    value ::: Extra colons.\n',
+                    LASRead.SectLine(mnem='MNEM', unit='', valu='value ::', desc='Extra colons.')
+            ),
+            (
+                    'MNEM.    value..::: Extra dots and colons.\n',
+                    LASRead.SectLine(mnem='MNEM', unit='', valu='value..::', desc='Extra dots and colons.')
+            ),
+            (
+                    ' DATE .       13/12/1986                       : LOG DATE  {DD/MM/YYYY}\n',
+                    LASRead.SectLine(mnem='DATE', unit='', valu='13/12/1986', desc='LOG DATE  {DD/MM/YYYY}')
+            ),
+            (
+                    ' STRT .M              1670.0000                : First Index Value\n',
+                    LASRead.SectLine(mnem='STRT', unit='M', valu=1670.0, desc='First Index Value')
+            ),
     )
 )
 def test_line_to(line, expected):
@@ -708,7 +707,7 @@ def test_simple_curve_and_array_section_with_wrap_1_one_value():
     expected = np.array(
         [
             [[1700.0]], [[-999.25]], [[-999.25]], [[-999.25]], [[-999.25]]
-         ]
+        ]
     )
     for i in range(len(las_array_section.frame_array)):
         a0 = las_array_section.frame_array.channels[i].array
@@ -752,7 +751,7 @@ def test_simple_curve_and_array_section_with_wrap_1_missing_value_raises_b():
     expected = np.array(
         [
             [[1700.0]], [[-999.25]], [[-999.25]], [[-999.25]], [[-999.25]]
-         ]
+        ]
     )
     for i in range(len(las_array_section.frame_array)):
         a0 = las_array_section.frame_array.channels[i].array
@@ -1404,38 +1403,38 @@ def test_las_read_minimal_with_array_x_axis_values_names():
 @pytest.mark.parametrize(
     'channel, expected',
     (
-        (
-            'GR',
-            np.ma.array(
-                [[-999.25, ], [40.7909, ], [44.0165, ], [45.4578, ], [44.3055, ], [42.6896, ], [52.4264, ],
-                 [61.1144, ]],
-                mask=[True, False, False, False, False, False, False, False, ]
-            )
-        ),
-        (
-            'DPHI',
-            np.ma.array(
-                [[-999.25, ], [0.0218, ], [0.0347, ], [0.0506, ], [0.0527, ], [0.0443, ], [0.0290, ],
-                 [0.0199, ]],
-                mask=[True, False, False, False, False, False, False, False, ]
-            )
-        ),
-        (
-            'NPHI',
-            np.ma.array(
-                [[-999.25, ], [0.0417, ], [0.0333, ], [0.0272, ], [0.0213, ], [0.0167, ], [0.0229, ],
-                 [0.0383, ]],
-                mask=[True, False, False, False, False, False, False, False, ]
-            )
-        ),
-        (
-            'ILD',
-            np.ma.array(
-                [[-999.25, ], [25.9985, ], [26.1850, ], [25.7472, ], [23.8872, ], [20.8817, ], [17.8425, ],
-                 [13.2042, ]],
-                mask=[True, False, False, False, False, False, False, False, ]
-            )
-        ),
+            (
+                    'GR',
+                    np.ma.array(
+                        [[-999.25, ], [40.7909, ], [44.0165, ], [45.4578, ], [44.3055, ], [42.6896, ], [52.4264, ],
+                         [61.1144, ]],
+                        mask=[True, False, False, False, False, False, False, False, ]
+                    )
+            ),
+            (
+                    'DPHI',
+                    np.ma.array(
+                        [[-999.25, ], [0.0218, ], [0.0347, ], [0.0506, ], [0.0527, ], [0.0443, ], [0.0290, ],
+                         [0.0199, ]],
+                        mask=[True, False, False, False, False, False, False, False, ]
+                    )
+            ),
+            (
+                    'NPHI',
+                    np.ma.array(
+                        [[-999.25, ], [0.0417, ], [0.0333, ], [0.0272, ], [0.0213, ], [0.0167, ], [0.0229, ],
+                         [0.0383, ]],
+                        mask=[True, False, False, False, False, False, False, False, ]
+                    )
+            ),
+            (
+                    'ILD',
+                    np.ma.array(
+                        [[-999.25, ], [25.9985, ], [26.1850, ], [25.7472, ], [23.8872, ], [20.8817, ], [17.8425, ],
+                         [13.2042, ]],
+                        mask=[True, False, False, False, False, False, False, False, ]
+                    )
+            ),
     ),
 )
 def test_las_read_minimal_with_array_channel_values(channel, expected):
@@ -1966,16 +1965,16 @@ Some stuff here.
 @pytest.mark.parametrize(
     'las_text, expected',
     (
-        # Before version section.
-        ("""~DOWNHOLE DATA
+            # Before version section.
+            ("""~DOWNHOLE DATA
 Some stuff here.
 ~VERSION INFORMATION
  VERS.                          2.0 :   CWLS LOG ASCII STANDARD -VERSION 2.0
  WRAP.                          NO  :   ONE LINE PER DEPTH STEP
 """, 'User defined section "~DOWNHOLE DATA" but no version section.',
-         ),
-        # After array section.
-        ("""~VERSION INFORMATION
+             ),
+            # After array section.
+            ("""~VERSION INFORMATION
  VERS.                          2.0 :   CWLS LOG ASCII STANDARD -VERSION 2.0
  WRAP.                          NO  :   ONE LINE PER DEPTH STEP
 ~WELL INFORMATION 
@@ -1995,9 +1994,9 @@ NULL    .               -999.25                  :NULL VALUE
 ~DOWNHOLE DATA
 Some stuff here.
 """, 'Line: 18. Found section header line "~DOWNHOLE DATA" after array section',
-         ),
-        # Duplicate.
-        ("""~VERSION INFORMATION
+             ),
+            # Duplicate.
+            ("""~VERSION INFORMATION
  VERS.                          2.0 :   CWLS LOG ASCII STANDARD -VERSION 2.0
  WRAP.                          NO  :   ONE LINE PER DEPTH STEP
 ~DOWNHOLE DATA
@@ -2005,7 +2004,7 @@ Some stuff here.
 ~DOWNHOLE DATA
 Some stuff here.
 """, 'Duplicate section D',
-         ),
+             ),
     ),
 )
 def test_customer_sections_raises_raise_on_error_true(las_text, expected):
@@ -2019,16 +2018,16 @@ def test_customer_sections_raises_raise_on_error_true(las_text, expected):
 @pytest.mark.parametrize(
     'las_text, expected',
     (
-        # Before version section.
-        ("""~DOWNHOLE DATA
+            # Before version section.
+            ("""~DOWNHOLE DATA
 Some stuff here.
 ~VERSION INFORMATION
  VERS.                          2.0 :   CWLS LOG ASCII STANDARD -VERSION 2.0
  WRAP.                          NO  :   ONE LINE PER DEPTH STEP
 """, 1,
-         ),
-        # After array section.
-        ("""~VERSION INFORMATION
+             ),
+            # After array section.
+            ("""~VERSION INFORMATION
  VERS.                          2.0 :   CWLS LOG ASCII STANDARD -VERSION 2.0
  WRAP.                          NO  :   ONE LINE PER DEPTH STEP
 ~WELL INFORMATION 
@@ -2048,7 +2047,7 @@ NULL    .               -999.25                  :NULL VALUE
 ~DOWNHOLE DATA
 Some stuff here.
 """, 4,
-         ),
+             ),
     ),
 )
 def test_customer_sections_ignored_when_raise_on_error_false(las_text, expected):

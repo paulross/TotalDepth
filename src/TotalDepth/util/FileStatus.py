@@ -22,10 +22,10 @@ Created on 28 Jun 2010
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2010-06-28'
+__author__ = 'Paul Ross'
+__date__ = '2010-06-28'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import os
 import sys
@@ -42,6 +42,7 @@ class ExceptionFileStatus(Exception):
 
 class FileInfo:
     """Obtains the status of a file, hash SLOC etc."""
+
     def __init__(self, thePath):
         self._path = thePath
         self._sloc = 0
@@ -56,7 +57,7 @@ class FileInfo:
                 self._hash.update(aLine.encode('utf8'))
                 self._sloc += 1
             self._count += 1
-        
+
     def writeHeader(self, theS=sys.stdout):
         """Write the summary header."""
         theS.write('%8s  ' % 'SLOC')
@@ -69,22 +70,22 @@ class FileInfo:
         theS.write('%8d  ' % self._size)
         if incHash:
             theS.write('%s' % self._hash.hexdigest())
-    
+
     @property
     def sloc(self):
         """SLOC"""
         return self._sloc
-    
+
     @property
     def size(self):
         """Size in bytes."""
         return self._size
-    
+
     @property
     def count(self):
         """Number of files, 0 or 1."""
         return self._count
-    
+
     def __iadd__(self, other):
         self._sloc += other.sloc
         self._size += other.size
@@ -94,11 +95,12 @@ class FileInfo:
 
 class FileInfoSet:
     """Represents a set of files from a directory tree."""
+
     def __init__(self, thePath, glob=None, isRecursive=False, isTestOnly=False):
         # Map of (path : class FileInfo, ...}
         self._infoMap = {}
         self.processPath(thePath, glob, isRecursive, isTestOnly)
-    
+
     def processPath(self, theP, glob=None, isRecursive=False, isTestOnly=False):
         """Process a file or directory."""
         if os.path.isdir(theP):
@@ -106,10 +108,10 @@ class FileInfoSet:
         elif os.path.isfile(theP):
             if not isTestOnly or os.path.basename(theP).startswith('Test'):
                 self._infoMap[theP] = FileInfo(theP)
-    
+
     def processDir(self, theDir, glob, isRecursive, isTestOnly):
         """Read a directory and return a map of {path : class FileInfo, ...}"""
-        assert(os.path.isdir(theDir))
+        assert (os.path.isdir(theDir))
         for aName in os.listdir(theDir):
             p = os.path.join(theDir, aName)
             if os.path.isfile(p):
@@ -122,14 +124,14 @@ class FileInfoSet:
                     self.processPath(p, glob, isRecursive, isTestOnly)
             elif os.path.isdir(p) and isRecursive:
                 self.processPath(p, glob, isRecursive, isTestOnly)
-    
+
     def write(self, theS=sys.stdout):
         """Write out the summary."""
         kS = sorted(self._infoMap.keys())
         fieldWidth = max([len(k) for k in kS])
         theS.write('%-*s  ' % (fieldWidth, 'File'))
         myTotal = FileInfo(None)
-        myTotal.writeHeader(theS) 
+        myTotal.writeHeader(theS)
         theS.write('\n')
         for k in kS:
             theS.write('%-*s  ' % (fieldWidth, k))
@@ -148,26 +150,26 @@ Counts files and sizes."""
     print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
     optParser.add_option("-g", "--glob", type="string", dest="glob", default="*.py *.pyx *.h *.c *.cpp",
-                      help="Space separated list of file match patterns. [default: %default]")
+                         help="Space separated list of file match patterns. [default: %default]")
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=30,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
-    optParser.add_option("-r", action="store_true", dest="recursive", default=False, 
-                      help="Recursive. [default: %default]")
-    optParser.add_option("-t", action="store_true", dest="test_only", default=False, 
-                      help="Report modules beginning with 'Test' only. [default: %default]")
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=30,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
+    optParser.add_option("-r", action="store_true", dest="recursive", default=False,
+                         help="Recursive. [default: %default]")
+    optParser.add_option("-t", action="store_true", dest="test_only", default=False,
+                         help="Report modules beginning with 'Test' only. [default: %default]")
     opts, args = optParser.parse_args()
     clkStart = time.perf_counter()
-    #print opts
+    # print opts
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     if len(args) != 1:
         optParser.print_help()
         optParser.error("No arguments!")
@@ -187,5 +189,5 @@ Counts files and sizes."""
 
 
 if __name__ == '__main__':
-    #multiprocessing.freeze_support()
+    # multiprocessing.freeze_support()
     sys.exit(main())

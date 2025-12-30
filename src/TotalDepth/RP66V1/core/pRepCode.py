@@ -70,13 +70,13 @@ import numpy as np
 from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 from TotalDepth.RP66V1.core.File import LogicalData
 
-
 logger = logging.getLogger(__file__)
 
 
 class ExceptionRepCode(ExceptionTotalDepthRP66V1):
     """General exception for Representation Code errors."""
     pass
+
 
 # TODO: Have static NULL values e.g. IDENT_null = b'' ?
 
@@ -120,7 +120,7 @@ REP_CODES_SUPPORTED = {
     # 1, # - Not found in practice.
     2,
     # 3, 4, # - Not found in practice.
-    5, # - Antiquated types, rarely if ever found, see Western Atlas BIT files.
+    5,  # - Antiquated types, rarely if ever found, see Western Atlas BIT files.
     6,
     7,
     # 8, 9, # - Not found in practice.
@@ -135,7 +135,7 @@ REP_CODE_INT_TO_STR: typing.Dict[int, str] = {
     2: 'FSINGL',
     # 3: 'FSING1',
     # 4: 'FSING2',
-    5: 'ISINGL', # See ReadBIT.bytes_to_float()
+    5: 'ISINGL',  # See ReadBIT.bytes_to_float()
     6: 'VSINGL',
     7: 'FDOUBL',
     # 8: 'FDOUB1',
@@ -172,7 +172,6 @@ REP_CODES_UNSUPPORTED = REP_CODES_ALL - REP_CODES_SUPPORTED
 #: Unsupported Representation Code names.
 REP_CODES_UNSUPPORTED_NAMES = [REP_CODE_INT_TO_STR_ALL[_] for _ in REP_CODES_UNSUPPORTED]
 
-
 #: [RP66V1 Section 5.7.1 Frame Objects, Figure 5-8. Attributes of Frame Object, Comment 2] says:
 #: 'If there is an Index Channel, then it must appear first in the Frame and it must be scalar.'
 #: but does not specify which Representation Codes are scalar. This is out best estimate:
@@ -190,8 +189,8 @@ LENGTH_LARGEST_INDEX_CHANNEL_CODE = 8
 REP_CODE_FIXED_LENGTHS = {
     1: 2,  # Low precision floating point
     2: 4,  # IEEE single precision floating point
-    3: 8,  #Validated single precision floating point
-    4: 12,  #Two-way validated single precision floating point
+    3: 8,  # Validated single precision floating point
+    4: 12,  # Two-way validated single precision floating point
     5: 4,  # IBM single precision floating point
     6: 4,  # VAX single precision floating point
     7: 8,  # IEEE double precision floating point
@@ -204,7 +203,7 @@ REP_CODE_FIXED_LENGTHS = {
     14: 4,  # Long signed integer
     15: 1,  # Short unsigned integer
     16: 2,  # Normal unsigned integer
-    17: 4,  #  Long unsigned integer
+    17: 4,  # Long unsigned integer
     # 18    UVARI   1, 2, or 4    Variable-length unsigned integer
     # 19    IDENT   V               Variable-length identifier
     # 20    ASCII   V               Variable-length ASCII character string
@@ -247,7 +246,7 @@ def ISINGL(ld: LogicalData) -> float:
     exp = b[0] & 0x7f
     mantissa = b[1] << 16 | b[2] << 8 | b[3]
     m = mantissa / 0x1000000
-    ret = m * 16**(exp - 64)
+    ret = m * 16 ** (exp - 64)
     if sign:
         return -ret
     return ret
@@ -263,7 +262,7 @@ def VSINGL(ld: LogicalData) -> float:
         # m is arbitrary
         return 0.0
     m = float(m) / (1 << 23)
-    value = (0.5 + m) * 2**(e - 128)
+    value = (0.5 + m) * 2 ** (e - 128)
     if s:
         return -value
     return value
@@ -291,6 +290,7 @@ def SSHORT(ld: LogicalData) -> int:
     if r > 127:
         r -= 256
     return r
+
 
 def SNORM(ld: LogicalData) -> int:
     """
@@ -453,7 +453,7 @@ class DateTime:
 
     def __str__(self) -> str:
         return f'{self.year}-{self.month:02d}-{self.day:02d}' \
-            f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d} {self.tz_abbreviation}'
+               f' {self.hour:02d}:{self.minute:02d}:{self.second:02d}.{self.millisecond:03d} {self.tz_abbreviation}'
 
     def __repr__(self) -> str:
         return f'<<class \'TotalDepth.RP66V1.core.RepCode.DateTime\'> {str(self)}>'
@@ -461,7 +461,7 @@ class DateTime:
     def as_datetime(self) -> datetime.datetime:
         """Returns a (naive) Python datetime for the date and time."""
         return datetime.datetime(
-            self.year, self.month, self.day, self.hour, self.minute, self.second, microsecond=self.millisecond*1000
+            self.year, self.month, self.day, self.hour, self.minute, self.second, microsecond=self.millisecond * 1000
         )
 
 
@@ -622,8 +622,8 @@ def UNITS(ld: LogicalData) -> bytes:
     if bad_chars:
         bad_chars_as_str = ''.join(sorted(chr(v) for v in bad_chars))
         msg = f'UNITS "{ret}" has characters {bad_chars} "{bad_chars_as_str}"' \
-            f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"' \
-            f' is specified. See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
+              f' that are not allowed, only "{UNITS_ALLOWABLE_CHARACTERS_AS_STRING}"' \
+              f' is specified. See [RP66V1 Appendix B, B.27 Code UNITS: Units Expression]'
         # warnings.warn(msg)
         logger.warning(msg)
         # raise ExceptionRepCode(msg)
@@ -671,6 +671,7 @@ def code_read(rep_code: int, ld: LogicalData):
     except KeyError as err:
         raise ExceptionRepCode(f'Unsupported Representation code {rep_code}') from err
 
+
 # Numpy related stuff
 
 #: Numpy dtypes, numeric Rep Codes only.
@@ -711,6 +712,7 @@ class NumericCategory(enum.Enum):
     INTEGER = 1
     FLOAT = 2
 
+
 #: Categories of Representation Codes. These should match REP_CODE_NUMPY_TYPE_MAP.
 REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
     # 1: NumericCategory.FLOAT,  # FSHORT,
@@ -743,13 +745,12 @@ REP_CODE_CATEGORY_MAP: typing.Dict[int, NumericCategory] = {
 }
 assert set(REP_CODE_CATEGORY_MAP.keys()) == REP_CODES_SUPPORTED
 
-
 # Sanity check
 for r in REP_CODE_NUMPY_TYPE_MAP.keys():
     if np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.integer):
         assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.INTEGER
     elif np.issubdtype(REP_CODE_NUMPY_TYPE_MAP[r], np.floating):
         assert REP_CODE_CATEGORY_MAP[r] == NumericCategory.FLOAT
-    else: # pragma: no cover
+    else:  # pragma: no cover
         assert 0
 del r

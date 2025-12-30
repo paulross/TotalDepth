@@ -53,7 +53,8 @@ class DictTree:
         # non-None if the value is iterable.
         self.value_iterable = value_iterable
         # A dictionary of hashable to a node
-        self.internal_tree: typing.Optional[typing.Dict[typing.Hashable, typing.Union[DictTree, DictTreeHtmlTable]]] = None
+        self.internal_tree: typing.Optional[
+            typing.Dict[typing.Hashable, typing.Union[DictTree, DictTreeHtmlTable]]] = None
         # Node 'value' can be anything
         self.internal_value: typing.Any = None
 
@@ -93,10 +94,10 @@ class DictTree:
             if key[0] not in self.internal_tree:
                 self.internal_tree[key[0]] = self.new_instance()
             self.internal_tree[key[0]].add(key[1:], value)
-            
+
     def remove(self, key: typing.Sequence[typing.Hashable], value: typing.Any = None) -> None:
         """Remove a key/value."""
-        assert(self.value_iterable in self.ITERABLE_TYPES)
+        assert (self.value_iterable in self.ITERABLE_TYPES)
         if len(key) == 0:
             if self.value_iterable is None:
                 self.internal_value = None
@@ -141,7 +142,7 @@ class DictTree:
         except KeyError:
             pass
         return None
-    
+
     def __contains__(self, key: typing.Sequence[typing.Hashable]) -> bool:
         return self.value(key) is not None
 
@@ -150,7 +151,7 @@ class DictTree:
         ret = []
         self._values(ret)
         return ret
-    
+
     def _values(self, value_list) -> None:
         """Finds values recursively."""
         if self.internal_value is not None:
@@ -158,15 +159,15 @@ class DictTree:
         if self.internal_tree is not None:
             for k in self.internal_tree.keys():
                 self.internal_tree[k]._values(value_list)
-                
+
     def keys(self) -> typing.List[typing.Hashable]:
         """Return a list of keys where each key is a list of hashables."""
         ret_keys: typing.List[typing.Hashable] = []
         key_stack: typing.List[typing.Hashable] = []
         self._keys(ret_keys, key_stack)
-        assert(len(key_stack) == 0)
+        assert (len(key_stack) == 0)
         return ret_keys
-    
+
     def _keys(self, key_list: typing.Sequence[typing.Hashable], key_stack: typing.Sequence[typing.Hashable]) -> None:
         """Recursive method to get all keys."""
         if self.internal_value is not None:
@@ -181,7 +182,7 @@ class DictTree:
         """Yields a sequence of key, value pairs."""
         key_stack: typing.List[typing.Hashable] = []
         yield from self._items(key_stack)
-        assert(len(key_stack) == 0)
+        assert (len(key_stack) == 0)
 
     def _items(self, key_stack: typing.Sequence[typing.Hashable]) \
             -> typing.Sequence[typing.Tuple[typing.List[typing.Hashable], typing.Any]]:
@@ -216,9 +217,9 @@ class DictTree:
         ret_list: typing.List[str] = []
         key_stack: typing.List[typing.Hashable] = []
         self._indented_string(ret_list, key_stack)
-        assert(len(key_stack) == 0)
+        assert (len(key_stack) == 0)
         return '\n'.join(ret_list)
-        
+
     def _indented_string(self, return_list: typing.List[str], key_stack: typing.Sequence[typing.Hashable]) -> None:
         """Recursively accumulate an indented string."""
         if self.internal_value is not None:
@@ -229,7 +230,7 @@ class DictTree:
                 key_stack.append(key)
                 self.internal_tree[key]._indented_string(return_list, key_stack)
                 key_stack.pop()
-                
+
 
 class DictTreeTableEvent(typing.NamedTuple):
     """POD class that contains the data needed for a HTML table entry.
@@ -403,7 +404,7 @@ class DictTreeHtmlTable(DictTree):
             for tree in self.internal_tree.values():
                 tree._set_column_span(max_depth, depth + 1)
                 tree._has_valid_row_col_span = True
-    
+
     def _set_row_span(self) -> int:
         """Sets self.row_span recursively."""
         if self.internal_tree is None:

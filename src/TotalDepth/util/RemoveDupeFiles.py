@@ -32,12 +32,12 @@ from TotalDepth.common import cmn_cmd_opts
 logger = logging.getLogger(__file__)
 
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 def remove_dupes(path: str, nervous: bool) -> typing.Tuple[int, int]:
     """Scans a directory tree removing duplicate files detected by their SHA512."""
-    BLOCK_SIZE = 1024**2
+    BLOCK_SIZE = 1024 ** 2
     file_count = byte_count = 0
     dupes: typing.Dict[bytes, str] = {}
     for root, dirs, files in os.walk(path):

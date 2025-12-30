@@ -4,28 +4,26 @@ import pytest
 
 from TotalDepth import DeTif
 
-
 TIF_EMPTY_FILE = b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x0c\x00\x00\x00' \
-    + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x18\x00\x00\x00' \
-    + b'\x01\x00\x00\x00' + b'\x0c\x00\x00\x00' + b'\x24\x00\x00\x00'
-
+                 + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x18\x00\x00\x00' \
+                 + b'\x01\x00\x00\x00' + b'\x0c\x00\x00\x00' + b'\x24\x00\x00\x00'
 
 TIF_EIGHT_BYTES_FILE = b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x14\x00\x00\x00' \
-    + b'\x01\x02\x03\x04\x05\x06\x07\x08' \
-    + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x20\x00\x00\x00' \
-    + b'\x01\x00\x00\x00' + b'\x14\x00\x00\x00' + b'\x2c\x00\x00\x00'
+                       + b'\x01\x02\x03\x04\x05\x06\x07\x08' \
+                       + b'\x01\x00\x00\x00' + b'\x00\x00\x00\x00' + b'\x20\x00\x00\x00' \
+                       + b'\x01\x00\x00\x00' + b'\x14\x00\x00\x00' + b'\x2c\x00\x00\x00'
 
 
 @pytest.mark.parametrize(
     'file_in, has_tif',
     (
-        (io.BytesIO(TIF_EMPTY_FILE), True),
-        (io.BytesIO(TIF_EIGHT_BYTES_FILE), True),
-        (io.BytesIO(b''), False),
+            (io.BytesIO(TIF_EMPTY_FILE), True),
+            (io.BytesIO(TIF_EIGHT_BYTES_FILE), True),
+            (io.BytesIO(b''), False),
     )
 )
 def test_has_tif_file(file_in, has_tif):
-    file_out  =io.BytesIO()
+    file_out = io.BytesIO()
     result = DeTif.has_tif_file(file_in)
     assert result == has_tif
 
@@ -70,8 +68,8 @@ def test_is_tif_start_error():
 @pytest.mark.parametrize(
     'file_in, expected_bytes_written, expected_tif_markers_stripped',
     (
-        (io.BytesIO(TIF_EMPTY_FILE), 0, 3),
-        (io.BytesIO(TIF_EIGHT_BYTES_FILE), 8, 3),
+            (io.BytesIO(TIF_EMPTY_FILE), 0, 3),
+            (io.BytesIO(TIF_EIGHT_BYTES_FILE), 8, 3),
     )
 )
 def test_strip_tif(file_in, expected_bytes_written, expected_tif_markers_stripped):
@@ -85,8 +83,8 @@ def test_strip_tif(file_in, expected_bytes_written, expected_tif_markers_strippe
 @pytest.mark.parametrize(
     'file_in, file_size, expected_errors',
     (
-        (io.BytesIO(TIF_EMPTY_FILE), 3 * 12, []),
-        (io.BytesIO(TIF_EIGHT_BYTES_FILE), 3 * 12 + 8, []),
+            (io.BytesIO(TIF_EMPTY_FILE), 3 * 12, []),
+            (io.BytesIO(TIF_EIGHT_BYTES_FILE), 3 * 12 + 8, []),
     )
 )
 def test_get_errors(file_in, file_size, expected_errors):
@@ -94,4 +92,3 @@ def test_get_errors(file_in, file_size, expected_errors):
     result = DeTif.get_errors(tifs, file_size)
     # print(result)
     assert result == expected_errors
-

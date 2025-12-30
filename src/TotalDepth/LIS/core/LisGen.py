@@ -23,34 +23,36 @@ Created on 10 Feb 2011
 
 @author: p2ross
 """
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
+import collections
+# import time
+# import sys
 import io
 import logging
-import collections
-#from optparse import OptionParser
-
 import math
-#import struct
+# import struct
 import random
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-from TotalDepth.LIS.core import PhysRec
 from TotalDepth.LIS.core import File
-from TotalDepth.LIS.core import Units
-from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import LogiRec
+from TotalDepth.LIS.core import PhysRec
+from TotalDepth.LIS.core import RepCode
+from TotalDepth.LIS.core import Units
+
+# from optparse import OptionParser
 
 random.seed()
+
 
 class ExceptionLisGen(ExceptionTotalDepthLIS):
     """Specialisation of exception for LIS generator."""
     pass
+
 
 ############################
 # Section: Global functions.
@@ -60,19 +62,23 @@ def randomBytes(len=None):
     of length theLen. If theLen is absent a random length of 0<=len<=32kB is
     chosen."""
     if len is None:
-        len = random.randint(0, 32*1024)
+        len = random.randint(0, 32 * 1024)
     return bytes([random.choice(range(256)) for l in range(len)])
+
 
 def randomUnit():
     """Returns a random unit mnemonic."""
     return random.choice(Units.units(theCat=None))
 
+
 def randomMnem():
     """Returns a random mnemonic using uppercase ASCII."""
-    return bytes(random.sample(range(ord('A'), ord('Z')+1), 4))
+    return bytes(random.sample(range(ord('A'), ord('Z') + 1), 4))
+
 
 RANDOM_STRING_CHARS = b'AAABCDEFGHIJKLMNOPQRSTUVWXYZ :;,.'
 RANDOM_STRING_DEFAULT_MAX_LENGTH = 255
+
 
 def randomString(len=None):
     """Returns a bytes() object of specified length that contains random data
@@ -82,15 +88,18 @@ def randomString(len=None):
         len = random.randint(0, RANDOM_STRING_DEFAULT_MAX_LENGTH)
     return bytes([random.choice(RANDOM_STRING_CHARS) for l in range(len)])
 
+
 def randomAllo():
     """Returns b'ALLO' or b'DISA' randomly."""
     if random.randint(0, 1):
         return b'ALLO'
     return b'DISA'
 
+
 def retSinglePr(theB):
     """Given a bytes() object this returns a bytes object encapsulated in a single Physical Record."""
-    return retPrS(theB, len(theB)+PhysRec.PR_PRH_LENGTH)
+    return retPrS(theB, len(theB) + PhysRec.PR_PRH_LENGTH)
+
 
 def retPrS(theB, prLen=1024):
     """Returns a bytearray that is theB split into Physical Records of
@@ -98,10 +107,10 @@ def retPrS(theB, prLen=1024):
     r = bytearray()
     ofs = 0
     while ofs < len(theB):
-        myPayLoad = theB[ofs:ofs+prLen]
+        myPayLoad = theB[ofs:ofs + prLen]
         r.extend(PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myPayLoad)))
         a = 0
-        if ofs+prLen < len(theB):
+        if ofs + prLen < len(theB):
             # Has successor
             a |= 1
         if ofs > 0:
@@ -112,9 +121,11 @@ def retPrS(theB, prLen=1024):
         ofs += prLen
     return r
 
+
 def retFileFromBytes(theB, theId='MyFile', flagKg=False):
     """Returns bytes object wrapped as a File.FileRead object."""
     return File.FileRead(theFile=io.BytesIO(theB), theFileId=theId, keepGoing=flagKg)
+
 
 ############################
 # End: Global functions.
@@ -124,13 +135,14 @@ def retFileFromBytes(theB, theId='MyFile', flagKg=False):
 # Section: Specific EFLRs.
 ##########################
 
-#=========================
+# =========================
 # Section: File/Tape/Reel.
-#=========================
+# =========================
 class FileHeadTail(collections.namedtuple(
     'FileHeadTail',
     'fileName serviceSubLevel version date maxPrLen fileType contName')):
     __slots__ = ()
+
     @property
     def lisBytes(self):
         """The byte array without header, not encapsulated as a PR."""
@@ -150,16 +162,17 @@ class FileHeadTail(collections.namedtuple(
             # Previous/next name, 10 bytes.
             self.contName
         )
-    
+
     @property
     def lrBytesFileHead(self):
         """The Logical Record bytes for a Tape Head, not encapsulated as a PR."""
         return b'\x80\x00' + self.lisBytes
-        
+
     @property
     def lrBytesFileTail(self):
         """The Logical Record bytes for a Tape Tail, not encapsulated as a PR."""
         return b'\x81\x00' + self.lisBytes
+
 
 FileHeadTailDefault = FileHeadTail(
     # File name 6.3 format
@@ -178,10 +191,12 @@ FileHeadTailDefault = FileHeadTail(
     b'Prev name.'
 )
 
+
 class TapeReelHeadTail(collections.namedtuple(
     'TapeReelHeadTail',
     'serviceName date origin tapeName contNum contName comments')):
     __slots__ = ()
+
     @property
     def lisBytes(self):
         """The byte array without header, not encapsulated as a PR."""
@@ -201,26 +216,27 @@ class TapeReelHeadTail(collections.namedtuple(
             # Comments, 74 bytes
             self.comments
         )
-    
+
     @property
     def lrBytesTapeHead(self):
         """The Logical Record bytes for a Tape Head, not encapsulated as a PR."""
         return b'\x82\x00' + self.lisBytes
-        
+
     @property
     def lrBytesTapeTail(self):
         """The Logical Record bytes for a Tape Tail, not encapsulated as a PR."""
         return b'\x83\x00' + self.lisBytes
-        
+
     @property
     def lrBytesReelHead(self):
         """The Logical Record bytes for a Reel Head, not encapsulated as a PR."""
         return b'\x84\x00' + self.lisBytes
-        
+
     @property
     def lrBytesReelTail(self):
         """The Logical Record bytes for a Reel Tail, not encapsulated as a PR."""
         return b'\x85\x00' + self.lisBytes
+
 
 TapeReelHeadTailDefault = TapeReelHeadTail(
     # Service name, 6 bytes
@@ -238,25 +254,27 @@ TapeReelHeadTailDefault = TapeReelHeadTail(
     # Comments, 74 bytes
     b'_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123'
 )
-#=========================
-# End: File/Tape/Reel.
-#=========================
 
-#===========================
+
+# =========================
+# End: File/Tape/Reel.
+# =========================
+
+# ===========================
 # Section: Table generators.
-#===========================
+# ===========================
 class TableGen(object):
     def __init__(self, theLrType, theName, theColTitles, theTable=None):
         """Construct a Logical Record table."""
-        assert(theLrType in LogiRec.LR_TYPE_TABLE_DATA)
+        assert (theLrType in LogiRec.LR_TYPE_TABLE_DATA)
         if theTable is not None:
             for row in theTable:
-                assert(len(row) == len(theColTitles))
+                assert (len(row) == len(theColTitles))
         self._type = theLrType
         self._name = theName
         self._colTitles = theColTitles
         self._table = theTable
-        
+
     def lrBytes(self):
         """Returns the Logical Record bytes that make up this table record."""
         if self._table is None:
@@ -306,34 +324,35 @@ class TableGen(object):
             myCb.rc = 65
             myCb.size = len(v)
         myCb.setValue(v)
-        #print('myCb', myCb)
+        # print('myCb', myCb)
         return myCb.lisBytes()
+
 
 class TableGenRandom(TableGen):
     def __init__(self, theLrType, theName, theColTitles, numRows):
         super().__init__(theLrType, theName, theColTitles=theColTitles, theTable=None)
         self._numRows = numRows
         self._despatch = {
-            b'MNEM' : randomMnem,
-            b'ALLO' : randomAllo,
-            b'PUNI' : randomUnit,
-            b'TUNI' : randomUnit,
-            b'VALU' : self._randValue,
+            b'MNEM': randomMnem,
+            b'ALLO': randomAllo,
+            b'PUNI': randomUnit,
+            b'TUNI': randomUnit,
+            b'VALU': self._randValue,
         }
-    
+
     def _randValue(self):
         # Do random integer, float or string
         c = random.randint(0, 2)
         if c == 0:
             # Integer
-            return random.randint(-64*1024, 64*1024), randomUnit()
+            return random.randint(-64 * 1024, 64 * 1024), randomUnit()
         elif c == 1:
             # Float
-            return 1e6*(random.random()-0.5), randomUnit()
+            return 1e6 * (random.random() - 0.5), randomUnit()
         else:
             # String
-            return randomString(32) 
-    
+            return randomString(32)
+
     def lrBytes(self):
         # Populate the table with values then call super().lrBytes()
         self._table = []
@@ -347,13 +366,15 @@ class TableGenRandom(TableGen):
             self._table.append(myRow)
         return super().lrBytes()
 
+
 class TableGenRandomCONS(TableGenRandom):
     def __init__(self, numRows):
         super().__init__(34, b'CONS', [b'MNEM', b'ALLO', b'PUNI', b'TUNI', b'VALU'], numRows)
 
-#===========================
+
+# ===========================
 # End: Table generators.
-#===========================
+# ===========================
 
 ##########################
 # End: Specific EFLRs.
@@ -365,18 +386,20 @@ class TableGenRandomCONS(TableGenRandom):
 class ChValsBase(object):
     def __init__(self, noise=None):
         self._noise = noise
-    
+
     def val(self, f, s=0):
         raise NotImplementedError
-    
+
     def noise(self):
         if self._noise is not None:
             return (random.random() - 0.5) * self._noise
         return 0.0
 
+
 class ChValsXaxis(ChValsBase):
     """Value generator that produces X axis values evenly spread by frame.
-    May have noise.""" 
+    May have noise."""
+
     def __init__(self, xStart, frameSpacing, xDec, rc=68, noise=None):
         super().__init__(noise)
         """Constructor of X axis generator.
@@ -384,16 +407,16 @@ class ChValsXaxis(ChValsBase):
         frameSpacing - Incremental X per frame as a number.
         xDec - If True X decreases with increasing frame number, otherwise increases.
         noise - If not None then randomly +/- half this value will be added."""
-        assert(frameSpacing is not None)
+        assert (frameSpacing is not None)
         self._xStart = xStart
         self._fSpace = frameSpacing
         self._xDec = xDec
         self.rc = rc
         if self._fSpace < 0:
             logging.warning('ChValsXaxis has -ve frame spacing (left uncorrected).')
-        
+
     def val(self, f, s=0):
-        assert(s == 0), 'ChValsXaxis.val() called with non-zero sample index.'
+        assert (s == 0), 'ChValsXaxis.val() called with non-zero sample index.'
         d = (self._fSpace * f) + self.noise()
         if self._xDec:
             r = self._xStart - d
@@ -402,9 +425,11 @@ class ChValsXaxis(ChValsBase):
         if RepCode.isInt(self.rc):
             r = int(r + 0.5)
         return r
-    
+
+
 class ChValsFrameBase(ChValsBase):
     """Base class for frame related generators."""
+
     def __init__(self, fOffs=0, waveLen=1, mid=0, amp=1, numSa=1, noise=None):
         super().__init__(noise)
         self._fOffs = fOffs
@@ -413,13 +438,13 @@ class ChValsFrameBase(ChValsBase):
         self._amp = amp
         self._numSa = numSa
         self._noise = noise
-        
+
     def __str__(self):
-#        print('HI', self._fOffs, self._waveLen, self._mid, self._amp, self._numSa, str(self._noise))
+        #        print('HI', self._fOffs, self._waveLen, self._mid, self._amp, self._numSa, str(self._noise))
         return 'ChValsFrameBase: fOffs={:g}, waveLen={:g}, mid={:g}, amp={:g}, numSa={:g}, noise={:g}'.format(
             self._fOffs, self._waveLen, self._mid, self._amp, self._numSa, self._noise,
         )
-    
+
     def fr(self, f, s=0):
         """Returns a frame number subtracting the offset and fractionating for samples."""
         if self._numSa == 1:
@@ -427,83 +452,105 @@ class ChValsFrameBase(ChValsBase):
         return f - self._fOffs - (1 - (s + 1) / self._numSa)
 
     def _amplify(self, val):
-        #print('_amplify(val)', val)
+        # print('_amplify(val)', val)
         return self.noise() + self._mid + self._amp * val
 
-#=================================
+
+# =================================
 # Section: Frame invariant values.
-#=================================
+# =================================
 class ChValsConst(ChValsFrameBase):
     """Constant value for the channel, may have noise."""
+
     def val(self, f, s=0):
         return self._mid + self.noise()
 
+
 class ChValsRand(ChValsFrameBase):
     """Random value for the channel, may have noise."""
+
     def val(self, f, s=0):
         return self._amplify(random.random())
+
 
 class ChValsRandNormal(ChValsFrameBase):
     """Random value for the channel, normal distribution. mid is treated as the
     mean and amplitude is treated as the standard deviation, may have noise."""
+
     def val(self, f, s=0):
         return self.noise() + random.normalvariate(mu=self._mid, sigma=self._amp)
+
 
 class ChValsRandLogNormal(ChValsFrameBase):
     """Random value for the channel, log-normal distribution. mid is treated as the
     mean and amplitude is treated as the standard deviation, may have noise."""
+
     def val(self, f, s=0):
         return self.noise() + random.lognormvariate(mu=self._mid, sigma=self._amp)
 
-#=================================
-# End: Frame invariant values.
-#=================================
 
-#=================================
+# =================================
+# End: Frame invariant values.
+# =================================
+
+# =================================
 # Section: Frame dependent values.
-#=================================
+# =================================
 class ChValsFrameDepend(ChValsFrameBase):
     """Base class for frame dependent channel, may have noise."""
     pass
 
+
 class ChValsTrig(ChValsFrameDepend):
     """Base class for trigonometric values for the channel, may have noise."""
+
     def _trigVal(self, func, f, s=0):
-        #print('self.fr(f,s)', self.fr(f,s))
-        #print('func(2 * math.pi * self.fr(f,s) / self._waveLen)', func(2 * math.pi * self.fr(f,s) / self._waveLen))
-        return self._amplify(func(2 * math.pi * self.fr(f,s) / self._waveLen))
+        # print('self.fr(f,s)', self.fr(f,s))
+        # print('func(2 * math.pi * self.fr(f,s) / self._waveLen)', func(2 * math.pi * self.fr(f,s) / self._waveLen))
+        return self._amplify(func(2 * math.pi * self.fr(f, s) / self._waveLen))
+
 
 class ChValsSin(ChValsTrig):
     """sin() value for the channel, may have noise."""
+
     def val(self, f, s=0):
         return self._trigVal(math.sin, f, s)
 
+
 class ChValsCos(ChValsTrig):
     """sin() value for the channel, may have noise."""
+
     def val(self, f, s=0):
         return self._trigVal(math.cos, f, s)
 
+
 class ChValsSaw(ChValsFrameDepend):
     """Saw tooth value for the channel, may have noise."""
+
     def val(self, f, s=0):
-        return self._amplify((self.fr(f,s) % self._waveLen) / self._waveLen)
+        return self._amplify((self.fr(f, s) % self._waveLen) / self._waveLen)
+
 
 class ChValsTriangular(ChValsFrameDepend):
     """Triangular shaped value for the channel."""
+
     def val(self, f, s=0):
-        ofs = self.fr(f,s) % self._waveLen
+        ofs = self.fr(f, s) % self._waveLen
         # TODO: Should this be >= like square wave?
         if ofs > self._waveLen / 2:
             ofs = self._waveLen - ofs
         return self._amplify(ofs / (self._waveLen / 2))
 
+
 class ChValsSquare(ChValsFrameDepend):
     """Square wave shaped value for the channel."""
+
     def val(self, f, s=0):
-        ofs = self.fr(f,s) % self._waveLen
+        ofs = self.fr(f, s) % self._waveLen
         if ofs >= self._waveLen / 2:
             return self._amplify(1.0)
         return self._amplify(-1.0)
+
 
 class ChValsSpecialSeqSqRoot(ChValsFrameDepend):
     """A progressive sequence that generates a particular signature on 2/4/8 etc. frames.
@@ -512,15 +559,16 @@ class ChValsSpecialSeqSqRoot(ChValsFrameDepend):
     This is useful for checking plotting where a regular stair step could be
     mistaken if both the x and y offset wrong.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Frame interval to increase 
         # [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
-        self._frSeq = [2**r for r in range(10)]
-        
+        self._frSeq = [2 ** r for r in range(10)]
+
     def val(self, f, s=0):
         # NOTE: Sample is ignored
-        assert(len(self._frSeq) > 0)
+        assert (len(self._frSeq) > 0)
         frInt = f % self._frSeq[-1]
         i = 0
         while i < len(self._frSeq):
@@ -529,7 +577,8 @@ class ChValsSpecialSeqSqRoot(ChValsFrameDepend):
             i += 1
         return self._amplify(i)
 
-#class ChValsSpecialSeqSquare(ChValsFrameDepend):
+
+# class ChValsSpecialSeqSquare(ChValsFrameDepend):
 #    """A progressive sequence that generates a particular signature on 2/4/8 etc. frames.
 #    For example: 0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0, 4.0,
 #    4.0, 4.0, 4.0, 4.0, ...
@@ -540,9 +589,9 @@ class ChValsSpecialSeqSqRoot(ChValsFrameDepend):
 #        # NOTE: Sample is ignored
 #        return self._amplify((f % 16)**2)
 
-#=================================
+# =================================
 # End: Frame dependent values.
-#=================================
+# =================================
 ##########################################################
 # End: Value value generators (random, sin, cos etc.).
 ##########################################################
@@ -550,16 +599,17 @@ class ChValsSpecialSeqSqRoot(ChValsFrameDepend):
 ##########################################################
 # Section: DFSR and Channel value generators.
 ##########################################################
-#===================================
+# ===================================
 # Section: Channel value generators.
-#===================================
+# ===================================
 class ChannelSpec(collections.namedtuple(
     'ChannelSpec',
     'name servId servOrd units api fileNo chLen sa rc')):
     __slots__ = ()
+
     @property
     def dsbBytes(self):
-        #print(self)
+        # print(self)
         return LogiRec.STRUCT_DSB.pack(
             self.name,
             self.servId,
@@ -570,19 +620,21 @@ class ChannelSpec(collections.namedtuple(
             self.chLen,
             self.sa,
             self.rc,
-            )
+        )
+
 
 class Channel(object):
     """Encapsulates a channel with a ChannelSpec and an object that
     derives from ChValsFrameBase and used to generate the channel values."""
+
     def __init__(self, chSpec, chGen):
         self._chSpec = chSpec
         self._chGen = chGen
-    
+
     @property
     def dsbBytes(self):
         return self._chSpec.dsbBytes
-    
+
     def val(self, f, s):
         """Returns the value for the frame and sample."""
         return self._chGen.val(f, s)
@@ -591,30 +643,32 @@ class Channel(object):
         """Returns the bytes for the frame."""
         r = bytearray()
         for s in range(self._chSpec.sa):
-            r.extend(RepCode.writeBytes(self.val(f,s), self._chSpec.rc))
+            r.extend(RepCode.writeBytes(self.val(f, s), self._chSpec.rc))
         return r
 
-#-------------------------------------------------
+
+# -------------------------------------------------
 # Section: Channel value generators for Dipmeters.
-#-------------------------------------------------
+# -------------------------------------------------
 class ChGenBase(object):
     pass
 
     def _packListWithStruct(self, theStruct, *args):
         """Returns bytes packed with a struct. When called with a list the
         convention is: self._packListWithStruct(myStruct, *myList)."""
-        #>>> def f(*args):
-        #...   print(args)
-        #...   print(*args)
-        #...   return struct.pack('2B', *args)
-        #...
-        #>>> f(*[1,2])
-        #(1, 2)
-        #1 2
-        #b'\x01\x02'
-        #print('_packListWithStruct()', len(args))
+        # >>> def f(*args):
+        # ...   print(args)
+        # ...   print(*args)
+        # ...   return struct.pack('2B', *args)
+        # ...
+        # >>> f(*[1,2])
+        # (1, 2)
+        # 1 2
+        # b'\x01\x02'
+        # print('_packListWithStruct()', len(args))
         return theStruct.pack(*args)
-        
+
+
 class ChGenDipmenter(ChGenBase):
     def __init__(self, n, r, l, curveTypes):
         super().__init__()
@@ -641,40 +695,46 @@ class ChGenDipmenter(ChGenBase):
 
     def frameBytes(self, f):
         raise NotImplementedError
-    
+
     def fastChannels(self, theF):
         """Returns a list of fast channels for a frame number."""
         if self._curveTypeFast == 'random':
-            return [random.randint(0,255) for i in range(RepCode.DIPMETER_SIZE_FAST_CHANNELS)]
+            return [random.randint(0, 255) for i in range(RepCode.DIPMETER_SIZE_FAST_CHANNELS)]
         elif self._curveTypeFast == 'constant':
-            return [0,50,100,150,200] * RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
+            return [0, 50, 100, 150, 200] * RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
         elif self._curveTypeFast == 'linear':
             def linF(sc, sa):
                 return (sc * 50 + sa * 16) % 256
+
             return self._fastChannels(linF)
         elif self._curveTypeFast == 'sin':
             def sinF(sc, sa):
-                return int(127.5+127.5*math.sin(2 * math.pi * (sa - 3 * sc) / RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES))
+                return int(
+                    127.5 + 127.5 * math.sin(2 * math.pi * (sa - 3 * sc) / RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES))
+
             return self._fastChannels(sinF)
-        raise ExceptionLisGen('ChGenDipmenter.fastChannels(): Unknown curve function {:s}'.format(str(self._curveTypeFast)))
-    
+        raise ExceptionLisGen(
+            'ChGenDipmenter.fastChannels(): Unknown curve function {:s}'.format(str(self._curveTypeFast)))
+
     def _fastChannels(self, func):
         """func takes a sub-channel and sample number."""
         myL = []
         for sa in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
             for sc in range(RepCode.DIPMETER_NUM_FAST_CHANNELS):
                 myL.append(func(sc, sa))
-        #print('_fastChannels()', myL)
+        # print('_fastChannels()', myL)
         return myL
 
     def slowChannels(self, theF):
         """Returns a list of slow channels for a frame number."""
         if self._curveTypeSlow == 'random':
-            return [random.randint(0,255) for i in range(RepCode.DIPMETER_NUM_SLOW_CHANNELS)]
+            return [random.randint(0, 255) for i in range(RepCode.DIPMETER_NUM_SLOW_CHANNELS)]
         elif self._curveTypeSlow == 'constant':
-            return [0,25,50,75,100,125,150,175,200,225]
-        raise ExceptionLisGen('ChGenDipmenter.slowChannels(): Unknown curve function {:s}'.format(str(self._curveTypeSlow)))
-    
+            return [0, 25, 50, 75, 100, 125, 150, 175, 200, 225]
+        raise ExceptionLisGen(
+            'ChGenDipmenter.slowChannels(): Unknown curve function {:s}'.format(str(self._curveTypeSlow)))
+
+
 class ChGenDip130(ChGenDipmenter):
     def __init__(self, curveType):
         super().__init__(
@@ -683,13 +743,14 @@ class ChGenDip130(ChGenDipmenter):
             RepCode.DIPMETER_LIS_SIZE_130,
             (curveType, None),
         )
-        
+
     def frameBytes(self, theF):
         """Return frame bytes for a single frame number theF."""
         myStruct = RepCode.STRUCT_RC_UINT_1
         myL = self.fastChannels(theF)
         return self._packListWithStruct(RepCode.STRUCT_RC_DIPMETER_EDIT_TAPE, *myL)
-        
+
+
 class ChGenDip234(ChGenDipmenter):
     def __init__(self, curveTypes):
         super().__init__(
@@ -698,24 +759,25 @@ class ChGenDip234(ChGenDipmenter):
             RepCode.DIPMETER_LIS_SIZE_234,
             curveTypes,
         )
-        
+
     def frameBytes(self, theF):
         """Return frame bytes for a single frame number theF."""
         myStruct = RepCode.STRUCT_RC_UINT_1
         myL = self.fastChannels(theF) + self.slowChannels(theF)
         return self._packListWithStruct(RepCode.STRUCT_RC_DIPMETER_CSU_FIELD_TAPE, *myL)
 
-#---------------------------------------------
-# End: Channel value generators for Dipmeters.
-#---------------------------------------------
-#===============================
-# End: Channel value generators.
-#===============================
 
-#=============================
+# ---------------------------------------------
+# End: Channel value generators for Dipmeters.
+# ---------------------------------------------
+# ===============================
+# End: Channel value generators.
+# ===============================
+
+# =============================
 # Section: LogPass generators.
-#=============================
-#class LisGenBase(object):
+# =============================
+# class LisGenBase(object):
 #    """Generates arbitrary LIS files."""
 #    def __init__(self):
 #        self._b = bytearray()
@@ -758,11 +820,11 @@ class LogPassGen(object):
         else:
             # Indirect X axis so we generate our own X values
             self._chS = chList
-    
+
     @property
     def isDirectX(self):
         return self._ebs.recordingMode == 0
-    
+
     def lrBytesDFSR(self):
         """Returns the Logical Data bytes of the DFSR."""
         r = bytearray([LogiRec.LR_TYPE_DATA_FORMAT, 0])
@@ -770,12 +832,13 @@ class LogPassGen(object):
         for c in self._chS:
             r.extend(c.dsbBytes)
         return r
-    
+
     def _normalAlternateData(self, fFrom, numFrames):
         """Returns frame data for consecutive frames f: fFrom <= f < fTo.
         This does not prepend indirect X axis value."""
         if numFrames < 0:
-            raise ExceptionLisGen('LogPassGen._normalAlternateData(): to negative number of frames: {:d}'.format(numFrames))
+            raise ExceptionLisGen(
+                'LogPassGen._normalAlternateData(): to negative number of frames: {:d}'.format(numFrames))
         r = bytearray()
         i = 0
         f = fFrom
@@ -792,15 +855,15 @@ class LogPassGen(object):
         if not self.isDirectX:
             # Generate indirect X value
             xVal = self._chXVal.val(fFrom)
-            #print('LogPassGen.lrBytes()', xVal)
+            # print('LogPassGen.lrBytes()', xVal)
             myB.extend(RepCode.writeBytes(xVal, self._chXVal.rc))
         # Add frame data
         myB.extend(self._normalAlternateData(fFrom, numFrames))
         return myB
-    
-#==========================
+
+# ==========================
 # End: DFSR generators.
-#==========================
+# ==========================
 
 ##########################################################
 # End: DFSR and Channel value generators.

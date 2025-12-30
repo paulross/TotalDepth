@@ -69,6 +69,7 @@ class RP66V1FrameChannel(LogPass.FrameChannel):
     This represents a single channel in a frame. It is file format independent and can be used depending on the
     source of the information: LIS/LAS/RP66V1 file, XML index, Postgres database etc.
     """
+
     def __init__(self,
                  ident: typing.Hashable,
                  long_name: bytes,
@@ -131,6 +132,7 @@ class RP66V1FrameArray(LogPass.FrameArray):
     """
     In the olden days we would record this on a single chunk of continuous film.
     """
+
     def _handle_remaining(self, ld: LogicalData, frame_number: int) -> None:
         """What to do if there is unread data."""
         if ld.remain != 0:

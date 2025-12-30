@@ -27,10 +27,10 @@ import multiprocessing
 import argparse
 import sys
 
-__author__  = 'Paul Ross'
-__date__    = '2011-05-23'
+__author__ = 'Paul Ross'
+__date__ = '2011-05-23'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2010-2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2010-2019 Paul Ross. All rights reserved.'
 
 import typing
 
@@ -48,7 +48,7 @@ def arg_parser(desc, prog=None, version=None, **kwargs) -> argparse.ArgumentPars
     """
     parser = argparse.ArgumentParser(description=desc, prog=prog, **kwargs)
     if version is not None:
-        parser.add_argument('--version', action='version', version='%(prog)s '+version)
+        parser.add_argument('--version', action='version', version='%(prog)s ' + version)
     # Adding arguments in, well sort of, alphabetical order (not really)
     parser.add_argument("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
                         help="Keep going as far as sensible. Default: %(default)s.")
@@ -68,7 +68,7 @@ def path_in(*args, **kwargs) -> argparse.ArgumentParser:
     # parser.add_argument("-g", "--glob", action="store_true", dest="glob", default=None,
     #                   help="File match pattern. Default: %(default)s.")
     parser.add_argument("-r", "--recurse", action="store_true", dest="recurse", default=False,
-                      help="Process the input recursively. Default: %(default)s.")
+                        help="Process the input recursively. Default: %(default)s.")
     parser.add_argument('path_in', type=str, help='Input path.')
     return parser
 
@@ -103,14 +103,14 @@ DEFAULT_OPT_LOG_FORMAT_VERBOSE = '%(asctime)s - %(filename)-16s#%(lineno)-4d - %
 
 def _get_logging_level_to_name() -> typing.Dict[int, str]:
     # Weird, in Python 3.6 logging._levelToName is not the inverse of logging._nameToLevel
-    ret = {k:v for k, v in logging._levelToName.items()}
+    ret = {k: v for k, v in logging._levelToName.items()}
     for k, v in logging._nameToLevel.items():
         ret[v] = k
     return ret
 
 
 def _get_logging_name_to_level() -> typing.Dict[str, int]:
-    return {v:k for k, v in _get_logging_level_to_name().items()}
+    return {v: k for k, v in _get_logging_level_to_name().items()}
 
 
 def add_log_level(parser: argparse.ArgumentParser, level: int = DEFAULT_OPT_LOG_LEVEL) -> None:
@@ -141,6 +141,7 @@ def set_log_level(parsed_args, format: str = DEFAULT_OPT_LOG_FORMAT_VERBOSE) -> 
     logging.basicConfig(level=log_level, format=format, stream=sys.stdout)
     return log_level
 
+
 # ============ END: Logging ==================
 
 # ============ Multiprocessing ==================
@@ -157,8 +158,8 @@ def add_multiprocessing(parser: argparse.ArgumentParser) -> None:
         dest="jobs",
         default=DEFAULT_OPT_MP_JOBS,
         help="Max processes when multiprocessing."
-            f"Zero uses number of native CPUs [{multiprocessing.cpu_count()}]."
-            " Negative value disables multiprocessing code. Default: %(default)s."
+             f"Zero uses number of native CPUs [{multiprocessing.cpu_count()}]."
+             " Negative value disables multiprocessing code. Default: %(default)s."
     )
 
 

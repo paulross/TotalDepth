@@ -21,6 +21,7 @@ import abc
 import argparse
 import typing
 
+
 # from TotalDepth.RP66V1 import ExceptionTotalDepthRP66V1
 #
 #
@@ -79,6 +80,7 @@ class Slice(SliceABC):
 
         slice(1, 4, 2.0).indices(45)
     """
+
     def __init__(self,
                  start: typing.Union[None, int] = None,
                  stop: typing.Union[None, int] = None,
@@ -137,6 +139,7 @@ class Sample(SliceABC):
     NOTE: This may not produce a regular sequence. For example sampling 7 items out  of a 12 element list gives the
     indices [0, 1, 3, 5, 6, 8, 10]
     """
+
     def __init__(self, sample_size: int):
         if sample_size < 1:
             raise ValueError(f'A Sample must be an integer >= 1 not {sample_size}')
@@ -202,6 +205,7 @@ def create_slice_or_sample(slice_string: str) -> typing.Union[Slice, Sample]:
     """Returns a Slice object from a string such as:
     '', 'None,72', 'None,72,14'
     """
+
     def convert(a_string):
         if a_string in ('None', ''):
             return None
@@ -220,7 +224,7 @@ def create_slice_or_sample(slice_string: str) -> typing.Union[Slice, Sample]:
 
 
 def add_frame_slice_to_argument_parser(parser: argparse.ArgumentParser,
-                                       help_prefix: str = '', use_what: bool = False) -> None: # pragma: no cover
+                                       help_prefix: str = '', use_what: bool = False) -> None:  # pragma: no cover
     help_list = []
     if help_prefix:
         help_list.append(f'{help_prefix}')

@@ -32,20 +32,21 @@ __rights__ = 'Copyright (c) 2011 Paul Ross.'
 
 class Histogram:
     """A histogram class."""
+
     def __init__(self, pre_load=None):
         self._h = collections.defaultdict(int)
         if pre_load:
             for value in pre_load:
                 self._h[value] = 0
-        
+
     def add(self, x, count=1):
         """Increments the count of value x by count (default 1)."""
         self._h[x] += count
-    
+
     def __getitem__(self, x):
         """Returns the current count of x."""
         return self._h[x]
-    
+
     def strRep(self, width=75, chr='+', valTitle='', inclCount=False):
         """Returns a string representation of the histogram in ASCII.
         
@@ -72,8 +73,8 @@ class Histogram:
         if inclCount:
             vWidth = len(str(maxCount))
             barWidth -= vWidth
-            barWidth -= 3 # i.e. ' []'
-#        print('TRACE: ', lenMaxStr, vWidth)
+            barWidth -= 3  # i.e. ' []'
+        #        print('TRACE: ', lenMaxStr, vWidth)
         myFact = maxCount / barWidth
         strL = []
         if len(valTitle) > 0:
@@ -81,20 +82,20 @@ class Histogram:
         for x in sorted(self._h.keys()):
             if inclCount:
                 strL.append('{:>{kWidth}s} [{:>{vWidth}d}]{:s}{:s}'.format(
-                                str(x),
-                                self._h[x],
-                                spacer,
-                                chr * int(0.5 + self._h[x] / myFact),
-                                kWidth=kWidth,
-                                vWidth=vWidth,
-                    )
+                    str(x),
+                    self._h[x],
+                    spacer,
+                    chr * int(0.5 + self._h[x] / myFact),
+                    kWidth=kWidth,
+                    vWidth=vWidth,
+                )
                 )
             else:
                 strL.append('{:>{kWidth}s}{:s}{:s}'.format(
-                                str(x),
-                                spacer,
-                                chr * int(0.5 + self._h[x] / myFact),
-                                kWidth=kWidth,
-                    )
+                    str(x),
+                    spacer,
+                    chr * int(0.5 + self._h[x] / myFact),
+                    kWidth=kWidth,
+                )
                 )
         return '\n'.join(strL)

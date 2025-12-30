@@ -31,10 +31,10 @@ import typing
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import PhysRec, TifMarker
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2010-2020 Paul Ross'
+__rights__ = 'Copyright (c) 2010-2020 Paul Ross'
 
 
 class ExceptionFile(ExceptionTotalDepthLIS):
@@ -54,8 +54,9 @@ class ExceptionFileWrite(ExceptionFile):
 
 class FileBase(object):
     """LIS file handler. This handles Physical Records (and TIF records)."""
+
     def __init__(self, theFile, theFileId, mode, keepGoing):
-        assert(mode in ('r', 'w'))
+        assert (mode in ('r', 'w'))
         self.file = theFile
         self.fileId = theFileId
         self.mode = mode
@@ -94,7 +95,7 @@ class FileRead(FileBase):
             return self._prh.readLrBytes(theLen)
         except PhysRec.ExceptionPhysRec as e:
             raise ExceptionFileRead('LisFileRead.read() PR error "%s"' % e)
-    
+
     def skipLrBytes(self, theLen=-1):
         """Skips logical data and returns a count of skipped bytes.
         If theLen is -1 all the remaining Logical data is read."""
@@ -110,24 +111,25 @@ class FileRead(FileBase):
             return self._prh.seekCurrentLrStart()
         except PhysRec.ExceptionPhysRec as e:
             raise ExceptionFileRead('LisFileRead.seekCurrentLrStart() PR error "%s"' % e)
-    
+
     def skipToNextLr(self):
         """Skips the rest of the current Logical Data and positions the file at
         the start of the next Logical Record."""
         try:
             return self._prh.skipToNextLr()
         except PhysRec.ExceptionPhysRec as e:
-            raise ExceptionFileRead('LisFileRead.skipToNextLr() PR error "%s" tell: 0x%x' % (e, self._prh.stream.tell()))
+            raise ExceptionFileRead(
+                'LisFileRead.skipToNextLr() PR error "%s" tell: 0x%x' % (e, self._prh.stream.tell()))
 
     def tellLr(self):
         """Returns the absolute file position of the start current Logical
         record. This value can be safely used in seekLr."""
         return self._prh.tellLr()
-    
+
     def tell(self):
         """Returns the absolute position of the file."""
         return self._prh.tell()
-        
+
     def ldIndex(self):
         """Returns the index position in the current logical data."""
         return self._prh.ldIndex()
@@ -137,23 +139,23 @@ class FileRead(FileBase):
         a PRH or TIF marker (if present). The caller is fully responsible
         for getting this right!"""
         return self._prh.seekLr(offset)
-        
+
     def hasLd(self):
         """Returns True if there is logical data to be read, False otherwise.
         NOTE: This will return False on file initialisation and only return
         True once the Physical Record Header (i.e. one or more logical bytes)
         has been read."""
         return self._prh.hasLd()
-    
+
     def rewind(self):
         """Sets the file position to the beginning of file."""
         return self.seekLr(0)
-    
+
     @property
     def isEOF(self):
         """True if at EOF."""
         return self._prh.isEOF
-    
+
     #########################
     # Section: Reading words.
     #########################
@@ -165,12 +167,13 @@ class FileRead(FileBase):
             myB = self.readLrBytes(theStruct.size)
             if myB is None or len(myB) != theStruct.size:
                 raise ExceptionFileRead(
-                    'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB, theStruct.size)
+                    'FileRead.unpack(): Bytes: {} not enough for struct that needs: {:d} bytes.'.format(myB,
+                                                                                                        theStruct.size)
                 )
             return theStruct.unpack(myB)
         except struct.error as err:
             raise ExceptionFileRead('Bytes: {:s} error: {:s}'.format(myB, str(err)))
-        
+
     #####################
     # End: Reading words.
     #####################
@@ -191,14 +194,15 @@ class FileWrite(FileBase):
 
     thePrt - Physical Records Trailer settings (defaults to PhysRec.PhysRecTail()).
     """
+
     def __init__(self,
-            theFile,
-            theFileId=None,
-            keepGoing=False,
-            hasTif=False,
-            thePrLen=PhysRec.PR_MAX_LENGTH,
-            thePrt=PhysRec.PhysRecTail(),
-        ):
+                 theFile,
+                 theFileId=None,
+                 keepGoing=False,
+                 hasTif=False,
+                 thePrLen=PhysRec.PR_MAX_LENGTH,
+                 thePrt=PhysRec.PhysRecTail(),
+                 ):
         """Constructor with:
         theFile - A file like object or string, if the latter it assumed to be a path.
         theFileId - File identifier, this could be a path for example. If None the RawStream will try and cope with it.
@@ -224,10 +228,10 @@ class FileWrite(FileBase):
         """Writes the Logical Record to the file. Returns the tell() of the
         start of the LR."""
         return self._prh.writeLr(theLr)
-    
+
     def close(self):
         """Closes the file."""
-        self._prh.close()                
+        self._prh.close()
 
 
 class PhysicalRecordSettings(typing.NamedTuple):
@@ -299,18 +303,21 @@ def scan_file_no_output(file_path_or_object: typing.Union[str, io.BytesIO], keep
     return pr_count
 
 
-def scan_file_with_different_padding(file_path_or_object: typing.Union[str, io.BytesIO], keep_going: bool, pr_limit=0) -> typing.Dict[PhysicalRecordSettings, int]:
+def scan_file_with_different_padding(file_path_or_object: typing.Union[str, io.BytesIO], keep_going: bool,
+                                     pr_limit=0) -> typing.Dict[PhysicalRecordSettings, int]:
     """Tries all different padding options and returns a dict with the number of Physical Records parsed."""
     result: typing.Dict[PhysicalRecordSettings, int] = {}
     for pad_modulo in (0, 2, 4):
         for pad_non_null in (False, True):
             num_prs = scan_file_no_output(file_path_or_object, keep_going, pad_modulo, pad_non_null, pr_limit=pr_limit)
             result[PhysicalRecordSettings(pad_modulo, pad_non_null)] = num_prs
-            logging.debug('File: %s pad_modulo %d pad_non_null %5s gives %d PRs', file_path_or_object, pad_modulo, pad_non_null, num_prs)
+            logging.debug('File: %s pad_modulo %d pad_non_null %5s gives %d PRs', file_path_or_object, pad_modulo,
+                          pad_non_null, num_prs)
     return result
 
 
-def ret_padding_options_with_max_records(pad_opts_to_prs: typing.Dict[PhysicalRecordSettings, int]) -> typing.List[PhysicalRecordSettings]:
+def ret_padding_options_with_max_records(pad_opts_to_prs: typing.Dict[PhysicalRecordSettings, int]) -> typing.List[
+    PhysicalRecordSettings]:
     """Returns the list of padding options that maximises the number of Physical Records parsed from the structure
     provided by scan_file_with_different_padding()."""
     max_prs = max(pad_opts_to_prs.values())

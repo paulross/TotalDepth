@@ -24,17 +24,18 @@ Created on Dec 14, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
-import os
 import logging
+import os
+import sys
 import time
 import unittest
-#import pprint
+
+# import pprint
 try:
     import xml.etree.cElementTree as etree
 except ImportError:
@@ -51,6 +52,7 @@ for __fp in os.listdir(__d):
     with open(os.path.join(__d, __fp)) as f:
         XML_CONTENT_MAP[__fp] = f.read()
 
+
 class TestPhysFilmCfgXMLRead(unittest.TestCase):
 
     def setUp(self):
@@ -62,7 +64,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
     def test_00(self):
         """TestPhysFilmCfgXMLRead.test_00(): Test setUp() and tearDown()"""
         pass
-    
+
     def test_01(self):
         """TestPhysFilmCfgXMLRead.test_01(): Test reading a single track."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -124,13 +126,13 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
             (Coord.Dim(value=0.0, units='in'), Coord.Dim(value=2.4, units='in'), 0, 2),
             myFcxr.interpretTrac('track1')
         )
-#        self.assertEqual(
-#            (Coord.Dim(value=1.2, units='in'), Coord.Dim(value=2.4, units='in'), 1, 1),
-#            myFcxr.interpretTrac(b'RHT1')
-#        )
+        #        self.assertEqual(
+        #            (Coord.Dim(value=1.2, units='in'), Coord.Dim(value=2.4, units='in'), 1, 1),
+        #            myFcxr.interpretTrac(b'RHT1')
+        #        )
         self.assertRaises(FILMCfg.ExceptionFILMCfg, myFcxr.interpretTrac, b'T2  ')
         # Get the track object
-#        print(myFcxr[0])
+        #        print(myFcxr[0])
         self.assertEqual(Coord.Dim(value=0.0, units='in'), myFcxr[0].left)
         self.assertEqual(Coord.Dim(value=2.4, units='in'), myFcxr[0].right)
 
@@ -169,18 +171,18 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertEqual('TestOneTrack', myFcxr.name)
         self.assertEqual(100, myFcxr.xScale)
         # This does nto work as interpret track needs track 2 and three to interpret T23
-#        self.assertEqual(
-#            (Coord.Dim(value=0.0, units='in'), Coord.Dim(value=2.4, units='in'), 0, 2),
-#            myFcxr.interpretTrac(b'T23 ')
-#        )
+        #        self.assertEqual(
+        #            (Coord.Dim(value=0.0, units='in'), Coord.Dim(value=2.4, units='in'), 0, 2),
+        #            myFcxr.interpretTrac(b'T23 ')
+        #        )
         self.assertRaises(FILMCfg.ExceptionFILMCfg, myFcxr.interpretTrac, b'T2  ')
         # Get the track object
-#        print(myFcxr[0])
+        #        print(myFcxr[0])
         self.assertEqual(Coord.Dim(value=3.2, units='in'), myFcxr[0].left)
         self.assertEqual(Coord.Dim(value=8.0, units='in'), myFcxr[0].right)
         self.assertTrue(myFcxr[0].plotXLines)
         self.assertFalse(myFcxr[0].plotXAlpha)
-        
+
     def test_03(self):
         """TestPhysFilmCfgXMLRead.test_03(): Test reading a single track, bad log scale fails."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -216,7 +218,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
             self.fail('FILMCfgXML.ExceptionFILMCfgXMLRead not raised')
         except FILMCfgXML.ExceptionFILMCfgXMLRead:
             pass
-        
+
     def test_04(self):
         """TestPhysFilmCfgXMLRead.test_04(): Test reading a single depth track."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -255,7 +257,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertEqual(Coord.Dim(value=3.2, units='in'), myFcxr[0].right)
         self.assertFalse(myFcxr[0].plotXLines)
         self.assertTrue(myFcxr[0].plotXAlpha)
-        
+
     def test_05(self):
         """TestPhysFilmCfgXMLRead.test_05(): Test reading track1 with no x Axis lines/alpha absent in XML."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -279,7 +281,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertFalse(myFcxr[0].hasGrid)
         self.assertTrue(myFcxr[0].plotXLines)
         self.assertFalse(myFcxr[0].plotXAlpha)
-        
+
     def test_06(self):
         """TestPhysFilmCfgXMLRead.test_06(): Test reading track1 with no x Axis lines, no Y grid."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -303,7 +305,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertFalse(myFcxr[0].hasGrid)
         self.assertFalse(myFcxr[0].plotXLines)
         self.assertFalse(myFcxr[0].plotXAlpha)
-        
+
     def test_07(self):
         """TestPhysFilmCfgXMLRead.test_07(): Test reading track1 with no x Axis lines but with Y grid."""
         root = etree.fromstring("""<LgFormat UniqueId="TestOneTrack" xmlns="x-schema:LgSchema2.xml">
@@ -337,6 +339,7 @@ class TestPhysFilmCfgXMLRead(unittest.TestCase):
         self.assertFalse(myFcxr[0].plotXLines)
         self.assertFalse(myFcxr[0].plotXAlpha)
 
+
 class TestFILMCfgXML(unittest.TestCase):
 
     def setUp(self):
@@ -348,7 +351,7 @@ class TestFILMCfgXML(unittest.TestCase):
     def test_00(self):
         """TestFILMCfgXML.test_00(): Test setUp() and tearDown()"""
         pass
-    
+
     def test_01(self):
         """TestFILMCfgXML.test_01(): Test construction."""
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
@@ -359,9 +362,10 @@ class TestFILMCfgXML(unittest.TestCase):
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
         self.assertTrue("Micro_Resistivity_3Track.xml" in myFcxr)
-#        print()
-#        for k in sorted(myFcxr.keys()):
-#            print('{:50s}: {:s}'.format(k, str(myFcxr[k])))
+
+    #        print()
+    #        for k in sorted(myFcxr.keys()):
+    #            print('{:50s}: {:s}'.format(k, str(myFcxr[k])))
 
     def test_03(self):
         """TestFILMCfgXML.test_03(): Test construction has key "Micro_Resistivity_3Track.xml"."""
@@ -374,16 +378,16 @@ class TestFILMCfgXML(unittest.TestCase):
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
         self.assertTrue("Micro_Resistivity_3Track.xml" in myFcxr)
-#        print()
-#        print('Micro Res:', myFcxr["Micro_Resistivity_3Track.xml"])
+        #        print()
+        #        print('Micro Res:', myFcxr["Micro_Resistivity_3Track.xml"])
         # Four tracks
         self.assertEqual(4, len(myFcxr["Micro_Resistivity_3Track.xml"]))
-#        for i, t in enumerate(myFcxr["Micro_Resistivity_3Track.xml"].genTracks()):
-#            print(i, t)
-#        print(myFcxr["Micro_Resistivity_3Track.xml"][0].left)
+        #        for i, t in enumerate(myFcxr["Micro_Resistivity_3Track.xml"].genTracks()):
+        #            print(i, t)
+        #        print(myFcxr["Micro_Resistivity_3Track.xml"][0].left)
         self.assertEqual(Coord.Dim(0, 'in'), myFcxr["Micro_Resistivity_3Track.xml"][0].left)
         leftRight = [(t.left, t.right) for t in myFcxr["Micro_Resistivity_3Track.xml"].genTracks()]
-#        print(leftRight)
+        #        print(leftRight)
         expResult = [
             (Coord.Dim(value=0.0, units='in'), Coord.Dim(value=2.4, units='in')),
             (Coord.Dim(value=2.4, units='in'), Coord.Dim(value=3.2, units='in')),
@@ -397,8 +401,8 @@ class TestFILMCfgXML(unittest.TestCase):
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
         myFilmID = 'Resistivity_3Track_Logrithmic.xml'
-#        print()
-#        pprint.pprint(myFcxr._chOutpMnemFilmMap)
+        #        print()
+        #        pprint.pprint(myFcxr._chOutpMnemFilmMap)
         self.assertTrue(myFilmID in myFcxr)
         for aCuOutp in (Mnem.Mnem(c, len_mnem=-Mnem.LEN_MNEM) for c in (
                 'BS', 'ROP5', 'CALI', 'PCAL', 'HCAL', 'SP', 'GR', 'ATR', 'PSR',
@@ -408,17 +412,17 @@ class TestFILMCfgXML(unittest.TestCase):
                 'RLA0', 'RLA1', 'RLA2', 'RLA3', 'RLA4', 'RLA5',
                 'SFL', 'ILM', 'ILD', 'MSFL', 'RXO', 'LLM', 'LLD',
                 'A22H', 'A34H', 'P16H_RT', 'P28H_RT', 'P34H_RT', 'TENS',
-                )
-            ):
+        )
+                        ):
             self.assertTrue(myFcxr.chOutpMnemInFilmId(aCuOutp, myFilmID), 'aCuOutp="{!r:s}"'.format(aCuOutp))
-            
+
     def test_11(self):
         """TestFILMCfgXML.test_12(): "Resistivity_3Track_Logrithmic.xml" tracks chOutpMnemInFilmId() returns False."""
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
         myFilmID = 'Resistivity_3Track_Logrithmic.xml'
-#        print()
-#        pprint.pprint(myFcxr._chOutpMnemFilmMap)
+        #        print()
+        #        pprint.pprint(myFcxr._chOutpMnemFilmMap)
         self.assertTrue(myFilmID in myFcxr)
         # Not a Mnem.Mnem object
         self.assertFalse(myFcxr.chOutpMnemInFilmId('NOTBS', myFilmID))
@@ -445,19 +449,19 @@ class TestFILMCfgXML(unittest.TestCase):
         """TestFILMCfgXML.test_15(): "Resistivity_3Track_Logrithmic.xml" test retAllFILMDestS()."""
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
-#        print('')
-#        pprint.pprint(myFcxr._chOutpMnemFilmMap)
+        #        print('')
+        #        pprint.pprint(myFcxr._chOutpMnemFilmMap)
         self.assertEqual(
             [
-                 'Azimuthal_Density_3Track.xml',
-                 'Azimuthal_Resistivity_3Track.xml',
-                 'Micro_Resistivity_3Track.xml',
-                 'Porosity_GR_3Track',
-                 'Resistivity_3Track_Correlation.xml',
-                 'Resistivity_3Track_Logrithmic.xml',
-                 'Resistivity_Investigation_Image.xml',
-                 'Sonic_3Track.xml',
-                 'Triple_Combo',
+                'Azimuthal_Density_3Track.xml',
+                'Azimuthal_Resistivity_3Track.xml',
+                'Micro_Resistivity_3Track.xml',
+                'Porosity_GR_3Track',
+                'Resistivity_3Track_Correlation.xml',
+                'Resistivity_3Track_Logrithmic.xml',
+                'Resistivity_Investigation_Image.xml',
+                'Sonic_3Track.xml',
+                'Triple_Combo',
             ],
             sorted(myFcxr.retAllFILMDestS(Mnem.Mnem('BS'))),
         )
@@ -466,8 +470,9 @@ class TestFILMCfgXML(unittest.TestCase):
         """TestFILMCfgXML.test_16(): "Resistivity_3Track_Logrithmic.xml" test retAllFILMDestS() fails."""
         myFcxr = FILMCfgXML.FilmCfgXMLRead()
         self.assertEqual(29, len(myFcxr))
-#        print(myFcxr._chOutpMnemFilmMap)
-        self.assertRaises(FILMCfgXML.ExceptionFILMCfgXMLReadLookUp, myFcxr.retAllFILMDestS, Mnem.Mnem('NOTBS', len_mnem=0))
+        #        print(myFcxr._chOutpMnemFilmMap)
+        self.assertRaises(FILMCfgXML.ExceptionFILMCfgXMLReadLookUp, myFcxr.retAllFILMDestS,
+                          Mnem.Mnem('NOTBS', len_mnem=0))
 
     def test_17(self):
         """TestFILMCfgXML.test_17(): "Resistivity_3Track_Logrithmic.xml" test retFILMDest()."""
@@ -486,9 +491,11 @@ class TestFILMCfgXML(unittest.TestCase):
             Mnem.Mnem('NOTBS', len_mnem=0),
         )
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -496,6 +503,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFILMCfgXML))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -520,6 +529,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -528,7 +538,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -546,14 +556,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

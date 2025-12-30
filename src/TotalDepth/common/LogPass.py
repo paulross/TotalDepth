@@ -66,6 +66,7 @@ class FrameChannel:
     This represents a single channel in a frame. It is file format independent and can be used depending on the
     source of the information: LIS/LAS/RP66V1 file, XML index, Postgres database etc.
     """
+
     def __init__(self,
                  ident: typing.Hashable,
                  long_name: typing.Union[str, bytes],
@@ -102,7 +103,7 @@ class FrameChannel:
 
     def __str__(self) -> str:
         return f'<FrameChannel: \'{self.ident}\' "{self.long_name}" units: \'{str(self.units)}\'' \
-            f' count: {self.count:d} dimensions: {self.dimensions} frames: {len(self.array)}>'
+               f' count: {self.count:d} dimensions: {self.dimensions} frames: {len(self.array)}>'
 
     def __len__(self) -> int:
         return len(self.array)
@@ -187,6 +188,7 @@ class FrameArray:
 
     Subclass this depending on the source of the information: LIS/LAS/DLIS file, XML index etc.
     """
+
     def __init__(self, ident: typing.Hashable, description: typing.Union[str, bytes]):
         self.ident: typing.Hashable = ident
         self.description: bytes = description
@@ -292,6 +294,7 @@ class LogPass:
     * DAT - No simultaneous FrameArrays.
     * BIT - Custom and practice shows that there can be any number of simultaneous FrameArrays.
     """
+
     def __init__(self):
         # This is a list of independent recordings.
         # In the olden days we would record each of these on separate films.
@@ -340,4 +343,3 @@ class LogPass:
         if isinstance(item, int):
             return self.frame_arrays[item]
         return self.frame_arrays[self.frame_array_map[item]]
-

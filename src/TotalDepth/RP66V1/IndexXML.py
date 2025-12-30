@@ -41,14 +41,15 @@ from TotalDepth.util.bin_file_type import binary_file_type_from_path
 from TotalDepth.util import gnuplot
 from TotalDepth.util import XmlWrite
 
-__author__  = 'Paul Ross'
-__date__    = '2019-04-10'
+__author__ = 'Paul Ross'
+__date__ = '2019-04-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 class ExceptionRP66V1IndexXMLRead(ExceptionIndex):
     pass
+
 
 class ExceptionIndexXML(ExceptionTotalDepthRP66V1):
     pass
@@ -67,13 +68,14 @@ logger = logging.getLogger(__file__)
 XML_SCHEMA_VERSION = '0.1.0'
 XML_TIMESTAMP_FORMAT_NO_TZ = '%Y-%m-%d %H:%M:%S.%f'
 
+
 # UTC with a TZ
 # datetime.datetime.utcnow().replace(tzinfo=datetime.timezone(datetime.timedelta(0))).strftime('%Y-%m-%d %H:%M:%S.%f%z')
 # '2019-05-14 17:33:01.147341+0000'
 
 
 def xml_rle_write(rle: Rle.RLE, element_name: str, xml_stream: XmlWrite.XmlStream, hex_output: bool) -> None:
-    with XmlWrite.Element(xml_stream, element_name, {'count': f'{rle.num_values():d}', 'rle_len': f'{len(rle):d}',}):
+    with XmlWrite.Element(xml_stream, element_name, {'count': f'{rle.num_values():d}', 'rle_len': f'{len(rle):d}', }):
         for rle_item in rle.rle_items:
             attrs = {
                 'datum': f'0x{rle_item.datum:x}' if hex_output else f'{rle_item.datum}',
@@ -102,7 +104,7 @@ def xml_write_value(xml_stream: XmlWrite.XmlStream, value: typing.Any) -> None:
         if isinstance(value, bytes):
             typ = 'bytes'
             # print('TRACE: xml_write_value()', value)
-            _value = value.decode('latin-1')#, errors='ignore')
+            _value = value.decode('latin-1')  # , errors='ignore')
         elif isinstance(value, float):
             typ = 'float'
             _value = str(value)
@@ -145,7 +147,6 @@ def frame_channel_to_XML(channel: LogPass.RP66V1FrameChannel, xml_stream: XmlWri
         pass
 
 
-
 def frame_array_to_XML(frame_array: LogPass.RP66V1FrameArray,
                        iflr_data: typing.Sequence[IFLRReference],
                        xml_stream: XmlWrite.XmlStream) -> None:
@@ -182,15 +183,15 @@ def frame_array_to_XML(frame_array: LogPass.RP66V1FrameArray,
         'C': f'{frame_array.ident.C}',
         'I': f'{frame_array.ident.I.decode("ascii")}',
         'description': frame_array.description.decode('ascii'),
-        'x_axis' : frame_array.channels[0].ident,
-        'x_units' : frame_array.channels[0].units.decode("ascii"),
+        'x_axis': frame_array.channels[0].ident,
+        'x_units': frame_array.channels[0].units.decode("ascii"),
     }
 
     with XmlWrite.Element(xml_stream, 'FrameArray', frame_array_attrs):
         with XmlWrite.Element(xml_stream, 'Channels', {'count': f'{len(frame_array)}'}):
             for channel in frame_array.channels:
                 frame_channel_to_XML(channel, xml_stream)
-        with XmlWrite.Element(xml_stream, 'IFLR', {'count' : f'{len(iflr_data)}'}):
+        with XmlWrite.Element(xml_stream, 'IFLR', {'count': f'{len(iflr_data)}'}):
             # Frame number output
             rle = Rle.create_rle(v.frame_number for v in iflr_data)
             xml_rle_write(rle, 'FrameNumbers', xml_stream, hex_output=False)
@@ -240,7 +241,8 @@ def _write_xml_eflr_object(obj: LogicalRecord.EFLR.Object, xml_stream: XmlWrite.
                         xml_write_value(xml_stream, v)
 
 
-def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream, private: bool) -> None:
+def write_logical_file_to_xml(logical_file_index: int, logical_file: LogicalFile, xml_stream: XmlWrite.XmlStream,
+                              private: bool) -> None:
     with XmlWrite.Element(xml_stream, 'LogicalFile', {
         'has_log_pass': str(logical_file.has_log_pass),
         'index': f'{logical_file_index:d}',
@@ -280,9 +282,11 @@ def write_logical_file_sequence_to_xml(logical_index: LogicalFile.LogicalIndex,
                     {
                         'sequence_number': str(logical_index.storage_unit_label.storage_unit_sequence_number),
                         'dlis_version': logical_index.storage_unit_label.dlis_version.decode('ascii'),
-                        'storage_unit_structure': logical_index.storage_unit_label.storage_unit_structure.decode('ascii'),
+                        'storage_unit_structure': logical_index.storage_unit_label.storage_unit_structure.decode(
+                            'ascii'),
                         'maximum_record_length': str(logical_index.storage_unit_label.maximum_record_length),
-                        'storage_set_identifier': logical_index.storage_unit_label.storage_set_identifier.decode('ascii'),
+                        'storage_set_identifier': logical_index.storage_unit_label.storage_set_identifier.decode(
+                            'ascii'),
                     }):
                 pass
             with XmlWrite.Element(xml_stream, 'LogicalFiles', {'count': f'{len(logical_index.logical_files):d}'}):
@@ -365,7 +369,7 @@ def index_dir_multiprocessing(dir_in: str, dir_out: str, private: bool, jobs: in
             pool.apply_async(index_a_single_file, t) for t in tasks
         ]
     ]
-    return {r.path_input : r for r in results}
+    return {r.path_input: r for r in results}
 
 
 def index_dir_or_file(path_in: str, path_out: str, recurse: bool, private: bool) -> typing.Dict[str, IndexResult]:
@@ -378,6 +382,7 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool, private: bool)
     else:
         ret[path_in] = index_a_single_file(path_in, path_out, private)
     return ret
+
 
 GNUPLOT_PLT = """set logscale x
 set grid
@@ -556,7 +561,7 @@ def main() -> int:
         ret_val = 2
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
         ratio = size_index / size_input
     else:  # pragma: no cover
         ms_mb = 0.0

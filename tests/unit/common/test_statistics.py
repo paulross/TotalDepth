@@ -1,4 +1,3 @@
-
 import pytest
 
 from TotalDepth.common import statistics
@@ -105,4 +104,3 @@ def test_length_dict_histogram_power_2_skip_a_value():
         '>=2**3  [     1] | ++++++++++++++++++++++++++++++++++++++++',
     ]
     assert hist == expected
-

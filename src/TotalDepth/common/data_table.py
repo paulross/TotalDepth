@@ -99,7 +99,7 @@ def format_table_columns(
         column_formats: typing.List[str],
         pad: str = ' ',
         heading_underline: str = '',
-        ) -> typing.List[str]:
+) -> typing.List[str]:
     """Given a list of objects this formats them as a list of strings."""
     table = [rows[0]]
     for row in rows[1:]:

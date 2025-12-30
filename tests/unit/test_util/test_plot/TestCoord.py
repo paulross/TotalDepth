@@ -19,10 +19,10 @@
 # Paul Ross: apaulross@gmail.com
 import math
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-25'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-25'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 """
 paulross@L071183 /cygdrive/d/wip/small_projects/PlotTree/src/python
@@ -33,10 +33,10 @@ import logging
 import sys
 import unittest
 
-
 import pytest
 
 from TotalDepth.util.plot import Coord
+
 
 ######################
 # Section: Unit tests.
@@ -46,12 +46,12 @@ from TotalDepth.util.plot import Coord
 @pytest.mark.parametrize(
     'units_a, units_b, expected',
     (
-        ('px', 'pt', True),
-        ('pt', 'px', True),
-        ('pc', 'pt', True),
-        ('pt', 'pc', True),
-        ('in', 'cm', False),
-        ('cm', 'in', False),
+            ('px', 'pt', True),
+            ('pt', 'px', True),
+            ('pc', 'pt', True),
+            ('pt', 'pc', True),
+            ('in', 'cm', False),
+            ('cm', 'in', False),
     )
 )
 def test_exactConversion(units_a, units_b, expected):
@@ -68,12 +68,12 @@ class TestCoordDim(unittest.TestCase):
         self.assertEqual(
             set(Coord.units()),
             set([None, 'cm', 'in', 'mm', 'pc', 'pt', 'px']),
-            )
+        )
 
     def testConstructor(self):
         """Dim() constructor."""
         myObj = Coord.Dim(12, 'px')
-        #print myObj
+        # print myObj
         self.assertEqual(myObj.value, 12)
         self.assertEqual(myObj.units, 'px')
 
@@ -86,8 +86,8 @@ class TestCoordDim(unittest.TestCase):
         """Dim() addition."""
         myObj_0 = Coord.Dim(1, 'in')
         myObj_1 = Coord.Dim(18, 'px')
-        myResult =  myObj_0 + myObj_1
-        #print myResult
+        myResult = myObj_0 + myObj_1
+        # print myResult
         self.assertEqual(myResult.value, 1.25)
         self.assertEqual(myResult.units, 'in')
 
@@ -95,8 +95,8 @@ class TestCoordDim(unittest.TestCase):
         """Dim() subtraction."""
         myObj_0 = Coord.Dim(1, 'in')
         myObj_1 = Coord.Dim(18, 'px')
-        myResult =  myObj_0 - myObj_1
-        #print myResult
+        myResult = myObj_0 - myObj_1
+        # print myResult
         self.assertEqual(myResult.value, 0.75)
         self.assertEqual(myResult.units, 'in')
 
@@ -105,7 +105,7 @@ class TestCoordDim(unittest.TestCase):
         myObj_0 = Coord.Dim(1, 'in')
         myObj_1 = Coord.Dim(18, 'px')
         myObj_0 += myObj_1
-        #print myObj
+        # print myObj
         self.assertEqual(myObj_0.value, 1.25)
         self.assertEqual(myObj_0.units, 'in')
 
@@ -154,19 +154,19 @@ class TestCoordDim(unittest.TestCase):
             Coord.ExceptionCoordUnitConvert,
             myObj.convert,
             'in'
-            )
+        )
         myObj = Coord.Dim(72, 'px')
         self.assertRaises(
             Coord.ExceptionCoordUnitConvert,
             myObj.convert,
             'WTF'
-            )
+        )
 
     def testCmp_00(self):
         """Dim() cmp() [00]."""
         myObj_0 = Coord.Dim(1, 'in')
         myObj_1 = Coord.Dim(72, 'px')
-        #print myObj_0 == myObj_1
+        # print myObj_0 == myObj_1
         self.assertEqual(myObj_0, myObj_1)
         self.assertEqual(myObj_0, myObj_1)
         self.assertTrue(myObj_0 == myObj_1)
@@ -234,9 +234,9 @@ class TestCoordDim(unittest.TestCase):
 @pytest.mark.parametrize(
     'fmt, expected',
     (
-        ('{:.3f}', '72.000px'),
-        ('{:.0f}', '72px'),
-        ('{:d}', '72px'),
+            ('{:.3f}', '72.000px'),
+            ('{:.0f}', '72px'),
+            ('{:d}', '72px'),
     )
 )
 def test_dim_format(fmt, expected):
@@ -247,10 +247,10 @@ def test_dim_format(fmt, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
-        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
-        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
-        (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
+            (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+            (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
+            (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
+            (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
     )
 )
 def test_dim_mul(dim, factor, expected):
@@ -261,10 +261,10 @@ def test_dim_mul(dim, factor, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
-        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
-        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
-        (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
+            (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+            (Coord.Dim(72, 'px'), 2.0, Coord.Dim(144, 'px')),
+            (Coord.Dim(72, 'px'), 0.5, Coord.Dim(36, 'px')),
+            (Coord.Dim(72, 'px'), 0, Coord.Dim(0, 'px')),
     )
 )
 def test_dim_imul(dim, factor, expected):
@@ -275,9 +275,9 @@ def test_dim_imul(dim, factor, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
-        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
-        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
+            (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+            (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
+            (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
     )
 )
 def test_dim_div(dim, factor, expected):
@@ -288,7 +288,7 @@ def test_dim_div(dim, factor, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+            (Coord.Dim(72, 'px'), 0, 'float division by zero'),
     )
 )
 def test_dim_div_raises(dim, factor, expected):
@@ -300,9 +300,9 @@ def test_dim_div_raises(dim, factor, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
-        (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
-        (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
+            (Coord.Dim(72, 'px'), 1.0, Coord.Dim(72, 'px')),
+            (Coord.Dim(72, 'px'), 2.0, Coord.Dim(36, 'px')),
+            (Coord.Dim(72, 'px'), 0.5, Coord.Dim(144, 'px')),
     )
 )
 def test_dim_idiv(dim, factor, expected):
@@ -313,7 +313,7 @@ def test_dim_idiv(dim, factor, expected):
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
-        (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+            (Coord.Dim(72, 'px'), 0, 'float division by zero'),
     )
 )
 def test_dim_idiv_raises(dim, factor, expected):
@@ -335,8 +335,8 @@ class TestCoordPoint(unittest.TestCase):
         myPt = Coord.Pt(
             Coord.Dim(12, 'px'),
             Coord.Dim(24, 'px'),
-            )
-        #print myPt
+        )
+        # print myPt
         self.assertEqual(myPt.x, Coord.Dim(12, 'px'))
         self.assertEqual(myPt.y, Coord.Dim(24, 'px'))
 
@@ -345,21 +345,21 @@ class TestCoordPoint(unittest.TestCase):
         myPt = Coord.Pt(
             Coord.Dim(12, 'px'),
             Coord.Dim(24, 'px'),
-            )
-        #print myPt
+        )
+        # print myPt
         self.assertEqual(str(myPt), 'Pt(x=Dim(12px), y=Dim(24px))')
-        #self.assertEqual(('%s' % myPt), 'Pt(x=Dim(12px), y=Dim(24px))')
+        # self.assertEqual(('%s' % myPt), 'Pt(x=Dim(12px), y=Dim(24px))')
 
     def testCmp_00(self):
         """Pt() cmp() is 0."""
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(72, 'px'),
             Coord.Dim(12, 'pc'),
-            )
+        )
         self.assertEqual(myPt_0, myPt_1)
         self.assertTrue(myPt_0 == myPt_1)
 
@@ -368,11 +368,11 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(73, 'px'),
             Coord.Dim(12, 'pc'),
-            )
+        )
         self.assertTrue(myPt_0 < myPt_1)
 
     def testCmp_02(self):
@@ -380,11 +380,11 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(71, 'px'),
             Coord.Dim(12, 'pc'),
-            )
+        )
         self.assertTrue(myPt_0 > myPt_1)
 
     def testCmp_03(self):
@@ -392,11 +392,11 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(72, 'px'),
             Coord.Dim(13, 'pc'),
-            )
+        )
         self.assertTrue(myPt_0 < myPt_1)
 
     def testCmp_04(self):
@@ -404,11 +404,11 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(72, 'px'),
             Coord.Dim(11, 'pc'),
-            )
+        )
         self.assertTrue(myPt_0 > myPt_1)
 
     def testConvert_00(self):
@@ -416,27 +416,27 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(1, 'in'),
             Coord.Dim(2, 'in'),
-            )
+        )
         myPt_1 = Coord.Pt(
             Coord.Dim(72, 'px'),
             Coord.Dim(12, 'pc'),
-            )
+        )
         myPt_1 = myPt_1.convert('in')
-        #print myPt_1
+        # print myPt_1
         self.assertTrue(myPt_0 == myPt_1)
-        
+
     def testConvert_01(self):
         """Pt() convert() [01]."""
         myPt_0 = Coord.Pt(
             Coord.Dim(20, 'mm'),
             Coord.Dim(10, 'mm'),
-            )
+        )
         myPt_1 = Coord.Pt(
-            Coord.Dim(20*72/25.4, 'px'),
-            Coord.Dim(10*72/25.4, 'px'),
-            )
+            Coord.Dim(20 * 72 / 25.4, 'px'),
+            Coord.Dim(10 * 72 / 25.4, 'px'),
+        )
         myPt_0 = myPt_0.convert('px')
-        #print myPt_1
+        # print myPt_1
         self.assertEqual(myPt_0, myPt_1)
         self.assertTrue(myPt_0 == myPt_1)
 
@@ -445,14 +445,15 @@ class TestCoordPoint(unittest.TestCase):
         myPt_0 = Coord.Pt(
             Coord.Dim(20, 'mm'),
             Coord.Dim(7, 'px'),
-            )
+        )
         myPt_1 = myPt_0.scale(2.0)
         self.assertEqual(myPt_1.x, Coord.Dim(40, 'mm'))
         self.assertEqual(myPt_1.y, Coord.Dim(14, 'px'))
         self.assertEqual(myPt_1.x.units, 'mm')
         self.assertEqual(myPt_1.y.units, 'px')
-        
-#===============================================================================
+
+
+# ===============================================================================
 #        myObj = Coord.Dim(72, 'px')
 #        myObj = myObj.convert('px')
 #        self.assertEqual(myObj.value, 72)
@@ -460,7 +461,7 @@ class TestCoordPoint(unittest.TestCase):
 #        myObj = myObj.convert('in')
 #        self.assertEqual(myObj.value, 1.0)
 #        self.assertEqual(myObj.units, 'in')
-#===============================================================================
+# ===============================================================================
 
 class TestCoordHelperFunctions(unittest.TestCase):
     """Tests the helper functions in the Coord module."""
@@ -480,8 +481,8 @@ class TestCoordHelperFunctions(unittest.TestCase):
     def test_zeroBaseUnitsBox(self):
         """zeroBaseUnitsBox()."""
         myBox = Coord.zeroBaseUnitsBox()
-        #print()
-        #print(myBox)
+        # print()
+        # print(myBox)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myBox.width)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myBox.depth)
         self.assertEqual('Box(width=Dim(0.0px), depth=Dim(0.0px))', str(myBox))
@@ -489,8 +490,8 @@ class TestCoordHelperFunctions(unittest.TestCase):
     def test_zeroBaseUnitsPad(self):
         """zeroBaseUnitsPad()."""
         myPad = Coord.zeroBaseUnitsPad()
-        #print()
-        #print(myPad)
+        # print()
+        # print(myPad)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myPad.prev)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myPad.next)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myPad.parent)
@@ -499,12 +500,12 @@ class TestCoordHelperFunctions(unittest.TestCase):
             'Pad(prev=Dim(0.0px), next=Dim(0.0px), parent=Dim(0.0px), child=Dim(0.0px))',
             str(myPad),
         )
-        
+
     def test_zeroBaseUnitsPt(self):
         """zeroBaseUnitsPt()."""
         myPt = Coord.zeroBaseUnitsPt()
-        #print()
-        #print(myPt)
+        # print()
+        # print(myPt)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myPt.x)
         self.assertEqual(Coord.Dim(0, Coord.BASE_UNITS), myPt.y)
 
@@ -539,8 +540,8 @@ class TestCoordHelperFunctions(unittest.TestCase):
         self.assertEqual(Coord.Dim(72, 'px'), myPt.x)
         self.assertEqual(Coord.Dim(72, 'px'), myPt.y)
         newPt = Coord.convertPt(myPt, 'in')
-        #print()
-        #print(newPt)
+        # print()
+        # print(newPt)
         self.assertEqual('in', newPt.x.units)
         self.assertEqual('in', newPt.y.units)
         self.assertEqual(Coord.Dim(1, 'in'), newPt.x)
@@ -550,44 +551,44 @@ class TestCoordHelperFunctions(unittest.TestCase):
 @pytest.mark.parametrize(
     'origin, radius, angle, expected',
     (
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(0, 'in'),
-            0.0,
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in'))
-        ),
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(4.0, 'in'),
-            0.0,
-            Coord.Pt(Coord.Dim(4.0, 'in'), Coord.Dim(0.0, 'in'))
-        ),
-        # The four optimisations
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(4.0, 'in'),
-            math.pi / 2.0,
-            Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(4.0, 'in'))
-        ),
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(4.0, 'in'),
-            math.pi,
-            Coord.Pt(Coord.Dim(-4.0, 'in'), Coord.Dim(0.0, 'in'))
-        ),
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(4.0, 'in'),
-            math.pi * 3.0 / 2.0,
-            Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(-4.0, 'in'))
-        ),
-        # 45 degrees
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(4.0, 'in'),
-            math.pi / 4.0,
-            Coord.Pt(Coord.Dim(4.0 * math.cos(math.pi / 4), 'in'), Coord.Dim(4.0 * math.sin(math.pi / 4), 'in'))
-        ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(0, 'in'),
+                    0.0,
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in'))
+            ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(4.0, 'in'),
+                    0.0,
+                    Coord.Pt(Coord.Dim(4.0, 'in'), Coord.Dim(0.0, 'in'))
+            ),
+            # The four optimisations
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(4.0, 'in'),
+                    math.pi / 2.0,
+                    Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(4.0, 'in'))
+            ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(4.0, 'in'),
+                    math.pi,
+                    Coord.Pt(Coord.Dim(-4.0, 'in'), Coord.Dim(0.0, 'in'))
+            ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(4.0, 'in'),
+                    math.pi * 3.0 / 2.0,
+                    Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(-4.0, 'in'))
+            ),
+            # 45 degrees
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(4.0, 'in'),
+                    math.pi / 4.0,
+                    Coord.Pt(Coord.Dim(4.0 * math.cos(math.pi / 4), 'in'), Coord.Dim(4.0 * math.sin(math.pi / 4), 'in'))
+            ),
     )
 )
 def test_to_cartesian(origin, radius, angle, expected):
@@ -598,18 +599,18 @@ def test_to_cartesian(origin, radius, angle, expected):
 @pytest.mark.parametrize(
     'pt_a, pt_b, expected_radius, expected_angle',
     (
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Pt(Coord.Dim(1, 'in'), Coord.Dim(0, 'in')),
-            Coord.Dim(1, 'in'),
-            0.0,
-        ),
-        (
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
-            Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(1, 'in')),
-            Coord.Dim(1, 'in'),
-            math.pi / 2.0,
-        ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Pt(Coord.Dim(1, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Dim(1, 'in'),
+                    0.0,
+            ),
+            (
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(0, 'in')),
+                    Coord.Pt(Coord.Dim(0, 'in'), Coord.Dim(1, 'in')),
+                    Coord.Dim(1, 'in'),
+                    math.pi / 2.0,
+            ),
     )
 )
 def test_to_polar(pt_a, pt_b, expected_radius, expected_angle):
@@ -631,6 +632,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestCoordHelperFunctions))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -652,6 +655,7 @@ Options:
                 NOTSET      0
 """)
 
+
 def main():
     print('TestCoord.py script version "%s", dated %s' % (__version__, __date__))
     print('Author: %s' % __author__)
@@ -663,7 +667,7 @@ def main():
     print(' '.join(sys.argv))
     print()
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError as myErr:
         usage()
         print('ERROR: Invalid option: %s' % str(myErr))
@@ -682,13 +686,14 @@ def main():
     clkStart = time.perf_counter()
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

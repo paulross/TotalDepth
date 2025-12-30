@@ -25,15 +25,15 @@ Created on 28 Feb 2011
 TODO: Remove APIs that are not used by Plot or anything. Plot only appears to
 use genXAxisRange() and genXAxisTextRange().
 """
-__author__  = 'Paul Ross'
-__date__    = '2011-02-28'
+__author__ = 'Paul Ross'
+__date__ = '2011-02-28'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
+# import time
+# import sys
 import logging
-#import collections
+# import collections
 import math
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
@@ -41,13 +41,16 @@ from TotalDepth.LIS.core import Units
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import Stroke
 
+
 class ExceptionPlotXGrid(ExceptionTotalDepthLIS):
     """Exception for plotting."""
     pass
 
+
 #: Definition of a grey solid stroke
 #: Usage: StrokeBlackGrey._replace(width=2.0)
 StrokeGreySolid = Stroke.Stroke('1', 'grey', None, 1.0)
+
 
 class XGrid(object):
     """Class that can generate depth line grid and alphanumeric values.
@@ -56,11 +59,12 @@ class XGrid(object):
     #: Default for unknown units and scale, this is basically like
     #: simple graph paper
     DEFAULT_INTERVAL_MAP = {
-        1   : Stroke.StrokeBlackSolid._replace(width=0.5),
-        10  : Stroke.StrokeBlackSolid._replace(width=1.0),
+        1: Stroke.StrokeBlackSolid._replace(width=0.5),
+        10: Stroke.StrokeBlackSolid._replace(width=1.0),
     }
     #: Default position for text on the X axis
     DEFAULT_INTERVAL_TEXT = 100
+
     def __init__(self, scale):
         """Constructor with integer scale. We make scale a constructor argument
         as we know that up front. We don't necessarily know the X units."""
@@ -74,100 +78,100 @@ class XGrid(object):
         self._intStroke = {}
         # Set predefined values
         self._setInterval(b'FEET', 25,
-            {
-                1   : StrokeGreySolid._replace(width=0.25),
-                5   : StrokeGreySolid._replace(width=0.5),
-                10  : Stroke.StrokeBlackSolid._replace(width=0.5),
-                50  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                100 : Stroke.StrokeBlackSolid._replace(width=1.0),
-            }
-        )
+                          {
+                              1: StrokeGreySolid._replace(width=0.25),
+                              5: StrokeGreySolid._replace(width=0.5),
+                              10: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              50: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              100: Stroke.StrokeBlackSolid._replace(width=1.0),
+                          }
+                          )
         self._setInterval(b'FEET', 40,
-            {
-                1   : StrokeGreySolid._replace(width=0.25),
-                5   : StrokeGreySolid._replace(width=0.5),
-                10  : Stroke.StrokeBlackSolid._replace(width=0.5),
-                50  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                100 : Stroke.StrokeBlackSolid._replace(width=1.0),
-            }
-        )
+                          {
+                              1: StrokeGreySolid._replace(width=0.25),
+                              5: StrokeGreySolid._replace(width=0.5),
+                              10: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              50: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              100: Stroke.StrokeBlackSolid._replace(width=1.0),
+                          }
+                          )
         self._setInterval(b'FEET', 100,
-            {
-                1   : StrokeGreySolid._replace(width=0.25),
-                5   : StrokeGreySolid._replace(width=0.5),
-                10  : Stroke.StrokeBlackSolid._replace(width=0.5),
-                50  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                100 : Stroke.StrokeBlackSolid._replace(width=1.0),
-            }
-        )
+                          {
+                              1: StrokeGreySolid._replace(width=0.25),
+                              5: StrokeGreySolid._replace(width=0.5),
+                              10: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              50: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              100: Stroke.StrokeBlackSolid._replace(width=1.0),
+                          }
+                          )
         self._setInterval(b'FEET', 200,
-            {
-                2   : Stroke.StrokeBlackSolid._replace(width=0.25),
-                10  : Stroke.StrokeBlackSolid._replace(width=0.5),
-                50  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                100 : Stroke.StrokeBlackSolid._replace(width=1.0),
-            }
-        )
+                          {
+                              2: Stroke.StrokeBlackSolid._replace(width=0.25),
+                              10: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              50: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              100: Stroke.StrokeBlackSolid._replace(width=1.0),
+                          }
+                          )
         self._setInterval(b'FEET', 500,
-            {
-                10  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                50  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                100 : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              10: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              50: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              100: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b'FEET', 1000,
-            {
-                20  : Stroke.StrokeBlackSolid._replace(width=0.25),
-                100  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                200 : Stroke.StrokeBlackSolid._replace(width=1.25),
-            }
-        )
+                          {
+                              20: Stroke.StrokeBlackSolid._replace(width=0.25),
+                              100: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              200: Stroke.StrokeBlackSolid._replace(width=1.25),
+                          }
+                          )
         self._setInterval(b'M   ', 25,
-            {
-                1   : Stroke.StrokeBlackSolid._replace(width=0.5),
-                5   : Stroke.StrokeBlackSolid._replace(width=0.75),
-                10  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                25  : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              1: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              5: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              10: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              25: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b'M   ', 40,
-            {
-                1   : Stroke.StrokeBlackSolid._replace(width=0.5),
-                5   : Stroke.StrokeBlackSolid._replace(width=0.75),
-                10  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                25  : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              1: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              5: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              10: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              25: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b'M   ', 100,
-            {
-                1   : Stroke.StrokeBlackSolid._replace(width=0.5),
-                5   : Stroke.StrokeBlackSolid._replace(width=0.75),
-                10  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                25  : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              1: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              5: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              10: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              25: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b"M   ", 200,
-            {
-                1   : Stroke.StrokeBlackSolid._replace(width=0.5),
-                5   : Stroke.StrokeBlackSolid._replace(width=0.75),
-                10  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                25  : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              1: Stroke.StrokeBlackSolid._replace(width=0.5),
+                              5: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              10: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              25: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b"M   ", 500,
-            {
-                5   : Stroke.StrokeBlackSolid._replace(width=0.75),
-                10  : Stroke.StrokeBlackSolid._replace(width=1.25),
-                50  : Stroke.StrokeBlackSolid._replace(width=2.0),
-            }
-        )
+                          {
+                              5: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              10: Stroke.StrokeBlackSolid._replace(width=1.25),
+                              50: Stroke.StrokeBlackSolid._replace(width=2.0),
+                          }
+                          )
         self._setInterval(b"M   ", 1000,
-            {
-#                10  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                50  : Stroke.StrokeBlackSolid._replace(width=0.75),
-                100 : Stroke.StrokeBlackSolid._replace(width=1.25),
-            }
-        )
+                          {
+                              #                10  : Stroke.StrokeBlackSolid._replace(width=0.75),
+                              50: Stroke.StrokeBlackSolid._replace(width=0.75),
+                              100: Stroke.StrokeBlackSolid._replace(width=1.25),
+                          }
+                          )
         # Interval of depth text.
         # NOTE: These are in 'optical' units i.e. the callers units will
         # be converted to Units.opticalUnits() before lookup
@@ -185,11 +189,11 @@ class XGrid(object):
         self._setIntervalText(b'M   ', 200, 25)
         self._setIntervalText(b'M   ', 500, 50)
         self._setIntervalText(b'M   ', 1000, 100)
-        
+
     def _makeEngValOptical(self, theEv):
         """Converts an EngVal to 'optical' units e.g. b'.1IN' goes to b'FEET'."""
         return theEv.newEngValInUnits(Units.opticalUnits(theEv.uom))
-    
+
     def _setInterval(self, units, scale, intStrokeMap):
         """Set interval line strokes, any existing units, scale will be replaced."""
         if not isinstance(scale, int):
@@ -206,7 +210,7 @@ class XGrid(object):
             pass
         logging.warning('XGrid._getInterval() returning default for units={!s:s}.'.format(units))
         return self.DEFAULT_INTERVAL_MAP
-        
+
     def _setIntervalText(self, units, scale, interval):
         """Set interval text positions, any existing units, scale will be replaced."""
         if not isinstance(scale, int):
@@ -225,7 +229,7 @@ class XGrid(object):
         return self.DEFAULT_INTERVAL_TEXT
 
     def _firstVal(self, xVal, xInterval, xInc):
-        assert(xInterval > 0)
+        assert (xInterval > 0)
         if xInc:
             return xInterval * math.ceil(xVal / xInterval)
         return xInterval * math.floor(xVal / xInterval)
@@ -241,11 +245,10 @@ class XGrid(object):
         xInc = evTo > evFrom
         for xPos, stroke in self._genXAxisStroke(evFrom.value, xInc, evFrom.uom):
             if xInc and xPos > evTo \
-            or not xInc and xPos < evTo:
+                    or not xInc and xPos < evTo:
                 break
             myDim = Coord.Dim(Units.convert(xPos - evFrom.value, evFrom.uom, b'INCH'), 'in')
             yield myDim.divide(self._scale), stroke
-
 
     def genXPosStroke(self, xFrom, xInc, units):
         """Generates unbounded series of X line positions as (Dim(), Stroke()).
@@ -289,7 +292,7 @@ class XGrid(object):
     def _genEventsRec(self, xFrom, xInc, l, eMap):
         """Recursive interval generator."""
         if len(l) > 0:
-            assert(l[0] > 0)
+            assert (l[0] > 0)
             v = self._firstVal(xFrom, l[0], xInc)
             if len(l) == 1:
                 # Base case
@@ -331,11 +334,12 @@ class XGrid(object):
         xInc = evTo > evFrom
         for xPos, xVal in self._genXPosText(evFrom.value, xInc, evFrom.uom):
             if xInc and xVal > evTo \
-            or not xInc and xVal < evTo:
+                    or not xInc and xVal < evTo:
                 break
             yield xPos, xVal
-#            myDim = Coord.Dim(Units.convert(xPos - evFrom.value, evFrom.uom, b'INCH'), 'in')
-#            yield myDim.divide(self._scale), xVal
+
+    #            myDim = Coord.Dim(Units.convert(xPos - evFrom.value, evFrom.uom, b'INCH'), 'in')
+    #            yield myDim.divide(self._scale), xVal
 
     def _genXPosText(self, xFrom, xInc, units):
         """Generates unbounded series of X text positions as (Dim(), value).

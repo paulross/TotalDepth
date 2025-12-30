@@ -23,49 +23,54 @@ Created on Dec 13, 2011
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-12-13'
+__author__ = 'Paul Ross'
+__date__ = '2011-12-13'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-#import logging
+# import logging
 
 from TotalDepth.LIS.core import Mnem
 from TotalDepth.util.plot import ExceptionUtilPlot
+
 
 class ExceptionXMLCfg(ExceptionUtilPlot):
     """Exception class for this module."""
     pass
 
+
 class ExceptionXMLCfgWrongRootElem(ExceptionXMLCfg):
     """Exception when the root element is wrong."""
     pass
+
 
 class ExceptionXMLCfgMissingElem(ExceptionXMLCfg):
     """Exception when the is a missing mandatory element."""
     pass
 
+
 class ExceptionXMLCfgNoContent(ExceptionXMLCfg):
     """Exception when the is missing content."""
     pass
 
+
 class LgXMLBase(object):
     """Base class for XML functionality that can be used by both FILM and PRES XML classes."""
     NAMESPACE = '{x-schema:LgSchema2.xml}'
-    
+
     def checkRoot(self, root):
         if root.tag != self.tagInNs('LgFormat'):
             return False
-#            raise ExceptionXMLCfgWrongRootElem('LgXMLBase wrong root element: "{:s}"'.format(root.tag))
-#        print(root.items())
-#        if root.get('UniqueId') is None:
+        #            raise ExceptionXMLCfgWrongRootElem('LgXMLBase wrong root element: "{:s}"'.format(root.tag))
+        #        print(root.items())
+        #        if root.get('UniqueId') is None:
         if self.elemID(root) is None:
             return False
-#            raise ExceptionXMLCfgWrongRootElem(
-#                'LgXMLBase root element missing UniqueId: {:s}'.format(str(root.items()))
-#            )
+        #            raise ExceptionXMLCfgWrongRootElem(
+        #                'LgXMLBase root element missing UniqueId: {:s}'.format(str(root.items()))
+        #            )
         return True
-    
+
     def str(self, e, name, default=None):
         """Returns the text in a single child element or None."""
         elemS = e.findall(name)
@@ -96,16 +101,15 @@ class LgXMLBase(object):
 
     def tagInNs(self, tag):
         return self.NAMESPACE + tag
-    
+
     def tagsInNs(self, *args):
         return '/'.join([self.tagInNs(tag) for tag in args])
-    
+
     def elemID(self, e):
         return e.get('UniqueId')
-    
+
     def chNameAsMnem(self, e):
         myStr = self.str(e, self.tagInNs('ChannelName'), None)
         if myStr is None:
             raise ExceptionXMLCfgNoContent('LgXMLBase.chNameAsMnem(): No ChannelName CDATA.')
         return Mnem.Mnem(myStr, len_mnem=-Mnem.LEN_MNEM)
-    

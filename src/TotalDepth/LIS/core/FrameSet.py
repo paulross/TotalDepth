@@ -23,41 +23,47 @@ Created on 10 Jan 2011
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-01-10'
+__author__ = 'Paul Ross'
+__date__ = '2011-01-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-import sys
-import math
-#import logging
+# import logging
 import collections
-#import array
+import math
+# import time
+import sys
+
+# import array
 import numpy
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-#from TotalDepth.LIS.core import Type01Plan
-#from TotalDepth.LIS.core import Rle
+# from TotalDepth.LIS.core import Type01Plan
+# from TotalDepth.LIS.core import Rle
 from TotalDepth.LIS.core import RepCode
-#from TotalDepth.LIS.core import LogiRec
+# from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Units
+
 
 class ExceptionFrameSet(ExceptionTotalDepthLIS):
     """Specialisation of exception for FrameSet."""
     pass
 
+
 class ExceptionFrameSetEmpty(ExceptionFrameSet):
     """Raised when an illegal operation is performed on a FrameSet."""
     pass
+
 
 class ExceptionFrameSetNULLSpacing(ExceptionFrameSet):
     """Raised when FrameSet depends on a frame spacing that can not be determined."""
     pass
 
+
 class ExceptionFrameSetMixedChannels(ExceptionFrameSet):
     """Raised when generating values for multiple channels where the channels are not of the same shape i.e. number of samples, butsts."""
     pass
+
 
 ############################################################
 # Section: Global functions for checking indexes and raising
@@ -73,21 +79,26 @@ def chkIdx(i, l, msg):
         raise IndexError(msg.format(i, l))
     return myI
 
+
 def sliceDefaults(theSl):
     """Returns a new slice with start=None as 0 and step=None as 1."""
     return slice(theSl.start or 0, theSl.stop, theSl.step or 1)
+
+
 ########################################################
 # End: Global functions for checking indexes and raising
 ########################################################
 
 class DataSeqBase(object):
     """Base class for a sequence of objects."""
+
     def __init__(self):
         # List of some type of objects
         self._data = []
 
     def __getitem__(self, key):
         return self._data[key]
+
 
 #    def clear(self):
 #        self._data = []
@@ -101,11 +112,12 @@ class DataSeqBase(object):
 class SuChArTe(collections.namedtuple('SuChArTe', 'samples bursts')):
     """Sub-channel Array Template."""
     __slots__ = ()
+
     @property
     def numValues(self):
         """The total number of values in this sub-channel."""
         return self.samples * self.bursts
-    
+
     def index(self, theS, theB):
         """Returns the index of a particular sample or channel with bounds checking.
         
@@ -113,7 +125,7 @@ class SuChArTe(collections.namedtuple('SuChArTe', 'samples bursts')):
         myS = chkIdx(theS, self.samples, 'SuChArTe.index(): sample {:d} not in array length {:d}')
         myB = chkIdx(theB, self.bursts, 'SuChArTe.index(): burst {:d} not in array length {:d}')
         return self._index(myS, myB)
-    
+
     def _index(self, theS, theB):
         """Returns the index of a particular sample or channel, NO bounds checking.
         
@@ -128,6 +140,7 @@ class SuChArTe(collections.namedtuple('SuChArTe', 'samples bursts')):
             str(self.numValues),
         )
 
+
 class ChArTe(DataSeqBase):
     """Channel Array Template. Constructed with a DatumSpecBlock object.
     
@@ -136,6 +149,7 @@ class ChArTe(DataSeqBase):
     significantly faster for those routines that access then with
     pre-checked limits. 
     """
+
     def __init__(self, theDsb):
         """Constructor with a DatumSpecBlock object."""
         super(ChArTe, self).__init__()
@@ -160,8 +174,8 @@ class ChArTe(DataSeqBase):
     def __str__(self):
         """String representation."""
         return 'ChArTe lisSize={:d} rc={:d} wordLength={:d} subChannels={:d}:\n'.format(
-                    self._lisSize, self.repCode, self.wordLength, self.numSubChannels
-            ) \
+            self._lisSize, self.repCode, self.wordLength, self.numSubChannels
+        ) \
             + '  ' \
             + '\n  '.join([str(d) for d in self._data])
 
@@ -174,33 +188,33 @@ class ChArTe(DataSeqBase):
     def lisSize(self):
         """Number of bytes per frame in the LIS representation."""
         return self._lisSize
-    
+
     def subChOffsRange(self, sc):
         """Returns a range object that is the sub-channel offset in the frame
         relative to the start of the channel."""
         sc = chkIdx(sc,
-                      self.numSubChannels,
-                      'ChArTe.subChOffsRange(): sub-channel {:d} not in array length {:d}',
-                      )
+                    self.numSubChannels,
+                    'ChArTe.subChOffsRange(): sub-channel {:d} not in array length {:d}',
+                    )
         if self.repCode in RepCode.DIPMETER_REP_CODES:
             return RepCode.DIPMETER_SUB_CHANNEL_RANGES[sc]
         if sc == self.numSubChannels - 1:
             return range(self._scOffsetS[sc], self.numValues, 1)
-        return range(self._scOffsetS[sc], self._scOffsetS[sc+1], 1)
+        return range(self._scOffsetS[sc], self._scOffsetS[sc + 1], 1)
 
     def subChOffsSlice(self, sc, chOfs=0):
         """Returns a slice object that is the sub-channel offset in the frame
         relative to the start of the channel."""
         sc = chkIdx(sc,
-                      self.numSubChannels,
-                      'ChArTe.subChOffsRange(): sub-channel {:d} not in array length {:d}',
-                      )
+                    self.numSubChannels,
+                    'ChArTe.subChOffsRange(): sub-channel {:d} not in array length {:d}',
+                    )
         if self.repCode in RepCode.DIPMETER_REP_CODES:
             mySlice = RepCode.DIPMETER_SUB_CHANNEL_SLICES[sc]
             return slice(chOfs + mySlice.start, chOfs + mySlice.stop, mySlice.step)
         if sc == self.numSubChannels - 1:
             return slice(chOfs + self._scOffsetS[sc], chOfs + self.numValues, 1)
-        return slice(chOfs + self._scOffsetS[sc], chOfs + self._scOffsetS[sc+1], 1)
+        return slice(chOfs + self._scOffsetS[sc], chOfs + self._scOffsetS[sc + 1], 1)
 
     # Implementation note:
     # _index() and _dipmeterIndex() have no bounds checking but are
@@ -212,13 +226,13 @@ class ChArTe(DataSeqBase):
         For those with sub-channels: sub-channel, sample
         This has bounds checking."""
         theSc = chkIdx(theSc,
-                      self.numSubChannels,
-                      'ChArTe.index(): sub-channel {:d} not in array length {:d}',
-                      )
+                       self.numSubChannels,
+                       'ChArTe.index(): sub-channel {:d} not in array length {:d}',
+                       )
         if self.repCode in RepCode.DIPMETER_REP_CODES:
             return self.dipmeterIndex(theSc, theSa, theBu)
         return self._data[theSc].index(theSa, theBu)
-        
+
     def _index(self, theSc, theSa, theBu):
         """Returns the index of a particular sub-channel, sample and burst.
         Order is (fastest changing first): burst, sample.
@@ -253,7 +267,7 @@ class ChArTe(DataSeqBase):
             )
             return mySa * RepCode.DIPMETER_NUM_FAST_CHANNELS + mySc
         # Only representation codes 130, 234 are valid
-        assert(self.repCode == 234)
+        assert (self.repCode == 234)
         # Slow channel data
         chkIdx(theSa, 1, 'ChArTe.index(): Dipmeter slow channel sample index {:d} not in array length {:d}')
         return RepCode.DIPMETER_SIZE_FAST_CHANNELS + mySc - RepCode.DIPMETER_NUM_FAST_CHANNELS
@@ -262,23 +276,24 @@ class ChArTe(DataSeqBase):
         """Returns dipmeter data index. Bounds checking is NOT done.
         Typically 20-25% faster than dipmeterIndex() if your loops are already
         bounded."""
-        #assert(self.repCode in RepCode.DIPMETER_REP_CODES)
+        # assert(self.repCode in RepCode.DIPMETER_REP_CODES)
         if theSc < 0:
             theSc = self.numSubChannels + theSc
-        #assert(theSc >= 0  and theSc < self.numSubChannels), '_dipmeterIndex() theSc={:d}'.format(theSc)
+        # assert(theSc >= 0  and theSc < self.numSubChannels), '_dipmeterIndex() theSc={:d}'.format(theSc)
         # Now behave according to rep code that decides the layout
         if theSc < RepCode.DIPMETER_NUM_FAST_CHANNELS:
             # Fast channel data
             # Fix negative sample indexing from end
             if theSa < 0:
                 theSa = RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES + theSa
-            #assert(theSa >= 0  and theSa < RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES)
+            # assert(theSa >= 0  and theSa < RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES)
             return theSa * RepCode.DIPMETER_NUM_FAST_CHANNELS + theSc
         # Only representation codes 130, 234 are valid
-        #assert(self.repCode == 234)
+        # assert(self.repCode == 234)
         # Slow channel data
-        #assert(theSa in (0, -1))
+        # assert(theSa in (0, -1))
         return RepCode.DIPMETER_SIZE_FAST_CHANNELS + theSc - RepCode.DIPMETER_NUM_FAST_CHANNELS
+
 
 #########################################
 # End: Sub-channel and channel templates.
@@ -292,11 +307,12 @@ class ChArTe(DataSeqBase):
 #: This is essential for indirect X axis.
 #: Names are identical to the DFSR EntryBlockSet
 class XAxisDecl(collections.namedtuple(
-            'XAxisDecl',
-            'upDown frameSpacing frameSpacingUnits recordingMode depthUnits depthRepCode'
-        )
-    ):
+    'XAxisDecl',
+    'upDown frameSpacing frameSpacingUnits recordingMode depthUnits depthRepCode'
+)
+):
     __slots__ = ()
+
     @property
     def isLogUp(self):
         """True if "up" log (x decreasing)."""
@@ -306,11 +322,12 @@ class XAxisDecl(collections.namedtuple(
     def isLogDown(self):
         """True if "down" log (x decreasing)."""
         return self.upDown == 255
-    
+
     @property
     def isIndirectX(self):
         """True if has indirect X axis."""
         return self.recordingMode == 1
+
 
 class FrameSet(object):
     """Contains the representation of a list of Frames and thus a
@@ -328,6 +345,7 @@ class FrameSet(object):
     """
     #: Data type used in the underlying numpy array.
     NUMPY_DATA_TYPE = 'float64'
+
     def __init__(self, theDfsr, theFrameSlice, theChS=None, xAxisIndex=0):
         """Constructed with a DFSR, a slice of frame indexes and an optional
         list of external channel indexes (defaults to all channels).
@@ -352,7 +370,7 @@ class FrameSet(object):
         # Always include the xAxis in the channel set if not indirect X
         if theChS is not None and not self._xAxisDecl.isIndirectX:
             theChS.append(xAxisIndex)
-        #print('self._frameSlice', self._frameSlice)
+        # print('self._frameSlice', self._frameSlice)
         # Set self._chIdxIntExt that maps internal array positions to external
         # channels indexes.
         # i.e. external_index = self._chIdxIntExt[internal_index] 
@@ -393,9 +411,9 @@ class FrameSet(object):
                 try:
                     # Convert frame spacing units to depth units
                     self._frameSpacing = Units.convert(
-                                self._xAxisDecl.frameSpacing,
-                                self._xAxisDecl.frameSpacingUnits,
-                                self._xAxisDecl.depthUnits
+                        self._xAxisDecl.frameSpacing,
+                        self._xAxisDecl.frameSpacingUnits,
+                        self._xAxisDecl.depthUnits
                     )
                 except Units.ExceptionUnits as err:
                     raise ExceptionFrameSet('FrameSet.__init__() can not convert units: {:s}'.format(str(err)))
@@ -408,7 +426,7 @@ class FrameSet(object):
         else:
             self._indrXVector = None
             self._frameSpacing = None
-        self._frames = None#numpy.empty((0), self.NUMPY_DATA_TYPE)
+        self._frames = None  # numpy.empty((0), self.NUMPY_DATA_TYPE)
         self._setFrames(self._totalNumFrames(self._frameSlice))
         # Create the offset tree
         self._offsetTree = self._retOffsetTree()
@@ -452,10 +470,10 @@ class FrameSet(object):
                     for sc in range(RepCode.DIPMETER_NUM_FAST_CHANNELS + RepCode.DIPMETER_NUM_SLOW_CHANNELS):
                         scMap[sc] = self._retDipSubChannelOffsetBranch(sc, ofs)
                     ofs += RepCode.DIPMETER_NUM_FAST_CHANNELS * RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES \
-                            + RepCode.DIPMETER_NUM_SLOW_CHANNELS
+                           + RepCode.DIPMETER_NUM_SLOW_CHANNELS
                 else:
-#                    print('Help:', self._catS[ch].repCode)
-                    assert(0)
+                    #                    print('Help:', self._catS[ch].repCode)
+                    assert (0)
             else:
                 for sc in range(self._catS[ch].numSubChannels):
                     saMap = {}
@@ -468,13 +486,13 @@ class FrameSet(object):
                     scMap[sc] = saMap
             retMap[ch] = scMap
         return retMap
-    
+
     def _retDipSubChannelOffsetBranch(self, theScCh, theBaseOffs):
         """Returns a sub-tree of the offset tree for a fast dipmeter sub-channel.
         theScCh is the sub channel (0-4) and theBaseOffs the start of the
         Dipmeter data in the frame."""
-        assert(theScCh in range(RepCode.DIPMETER_NUM_FAST_CHANNELS + RepCode.DIPMETER_NUM_SLOW_CHANNELS))
-        r = {theScCh : {}}
+        assert (theScCh in range(RepCode.DIPMETER_NUM_FAST_CHANNELS + RepCode.DIPMETER_NUM_SLOW_CHANNELS))
+        r = {theScCh: {}}
         if theScCh in range(RepCode.DIPMETER_NUM_FAST_CHANNELS):
             #   ch  sc  sa  bu: offset
             #        0: {
@@ -484,12 +502,12 @@ class FrameSet(object):
             #            15: {0: 75+theBaseOffs}
             #        }
             for sa in range(RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES):
-                r[theScCh][sa] = {0 : theBaseOffs + theScCh + RepCode.DIPMETER_NUM_FAST_CHANNELS * sa}
+                r[theScCh][sa] = {0: theBaseOffs + theScCh + RepCode.DIPMETER_NUM_FAST_CHANNELS * sa}
         else:
             r[theScCh][0] = {
-                0 : theBaseOffs \
-                    + RepCode.DIPMETER_NUM_FAST_CHANNELS * RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES \
-                    + theScCh - RepCode.DIPMETER_NUM_FAST_CHANNELS,
+                0: theBaseOffs \
+                   + RepCode.DIPMETER_NUM_FAST_CHANNELS * RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES \
+                   + theScCh - RepCode.DIPMETER_NUM_FAST_CHANNELS,
             }
         return r
 
@@ -512,20 +530,20 @@ class FrameSet(object):
         if self._frames is None:
             return '{:s}: Array={:s}'.format(repr(self), str(self._frames))
         return '{:s}: Array={:s}'.format(repr(self), str(self._frames.shape))
-    
+
     def longStr(self):
         """Returns a long string that describes me."""
         return '\n'.join(
             [
                 '>>>>_chIdxIntExt: {:s}'.format(str(self._chIdxIntExt)),
                 '>_chIdxExtIntMap: {:s}'.format(str(self._chIdxExtIntMap)),
-                #'      _chOffset: {:s}'.format(str(self._chOffset)),
-                '>>>>>>>>>>>_catS: {:s}'.format('\n '+str('\n '.join([str(c) for c in self._catS]))),
+                # '      _chOffset: {:s}'.format(str(self._chOffset)),
+                '>>>>>>>>>>>_catS: {:s}'.format('\n ' + str('\n '.join([str(c) for c in self._catS]))),
                 '>_valuesPerFrame: {:s}'.format(str(self._valuesPerFrame)),
                 '>>>>>_frameSlice: {!s:s}'.format(self._frameSlice),
             ]
         )
-        
+
     def dumpFrames(self, theS=sys.stdout):
         """Dump the frames to the stream."""
         if self.numFrames > 0:
@@ -537,27 +555,27 @@ class FrameSet(object):
             for f in range(self.numFrames):
                 theS.write('\t'.join(['{:g}'.format(v) for v in self._frames[f]]))
                 theS.write('\n')
-    
+
     @property
     def nbytes(self):
         """Returns the number of bytes in the underlying array implementation."""
         return self._frames.nbytes
-    
-    #====================================================
+
+    # ====================================================
     # Section: Frame information, access and manipulation
-    #====================================================
+    # ====================================================
     @property
     def lisSize(self):
         """The number of LIS bytes that make up this FrameSet."""
         return self._frameSize * len(self._frames)
-    
+
     @property
     def numFrames(self):
         """The number of frames currently in this FrameSet."""
         if self._indrXVector is not None:
-            assert(len(self._indrXVector) == len(self._frames))
+            assert (len(self._indrXVector) == len(self._frames))
         return len(self._frames)
-    
+
     @property
     def valuesPerFrame(self):
         """The number of values in each frame currently in this FrameSet."""
@@ -567,7 +585,7 @@ class FrameSet(object):
     def numValues(self):
         """The total number of values in the array."""
         return self.numFrames * self.valuesPerFrame
-    
+
     @property
     def frames(self):
         """Gives access to the raw numpy array."""
@@ -577,17 +595,17 @@ class FrameSet(object):
         """Returns a specific frame."""
         return self._frames[fr]
 
-#    def frameStride(self):
-#        """Returns the value of the inter-frame spacing for this partial frame
-#        set. This takes into account the frame slice step. +ve/-ve depending
-#        on direction. Returns None on direct X logs."""
-#        if self._frameSpacing is not None:
-#            return self._frameSpacing * self._frameSlice.step
+    #    def frameStride(self):
+    #        """Returns the value of the inter-frame spacing for this partial frame
+    #        set. This takes into account the frame slice step. +ve/-ve depending
+    #        on direction. Returns None on direct X logs."""
+    #        if self._frameSpacing is not None:
+    #            return self._frameSpacing * self._frameSlice.step
 
     def xAxisValue(self, fr):
         """Returns the X axis value for the frame when indirect X is used or None."""
         if self.isIndirectX:
-            assert(self._indrXVector is not None)
+            assert (self._indrXVector is not None)
             return self._indrXVector[fr]
         # Direct X axis return chosen channel
         return self._frames[fr, self._xAxisFrOffs]
@@ -595,7 +613,7 @@ class FrameSet(object):
     def xAxisValues(self):
         """Returns all the X axis values for the frames."""
         if self.isIndirectX:
-            assert(self._indrXVector is not None)
+            assert (self._indrXVector is not None)
             return self._indrXVector
         # Direct X axis return chosen channel
         return self._frames.T[self._xAxisFrOffs]
@@ -612,15 +630,15 @@ class FrameSet(object):
             self._frames.resize()
         if self._xAxisDecl.recordingMode:
             self._indrXVector = numpy.empty((numFrames,), self.NUMPY_DATA_TYPE)
-    
-#    def clear(self):
-#        """Removes all frames."""
-#        self._setFrames(0)
+
+    #    def clear(self):
+    #        """Removes all frames."""
+    #        self._setFrames(0)
 
     def _totalNumFrames(self, s):
-        """Returns the actual number of internal frames from a slice object.""" 
+        """Returns the actual number of internal frames from a slice object."""
         return len(range(s.start or 0, s.stop, s.step or 1))
-    
+
     def intFrameNum(self, theExtFrameNum):
         """Given an external frame number this returns the internal frame number.
         Will raise an IndexError if the internal frame number is out of
@@ -639,53 +657,56 @@ class FrameSet(object):
     def extFrameNum(self, theIntFrameNum):
         """Given an internal frame number this returns the external frame number.
         This does _not_ test that the internal frame number exists."""
-        return theIntFrameNum * self._frameSlice.step + self._frameSlice.start 
-    #====================================================
+        return theIntFrameNum * self._frameSlice.step + self._frameSlice.start
+        # ====================================================
+
     # End: Frame information, access and manipulation
-    #====================================================
-    
-    #=============================
+    # ====================================================
+
+    # =============================
     # Section: Channel information
-    #=============================
+    # =============================
     @property
     def numChannels(self):
         """The number of _internal_ channels."""
         return len(self._catS)
-    
+
     def numSubChannels(self, theChExt):
         """Number of sub-channels for an external channel."""
         return self._catS[self.internalChIdx(theChExt)].numSubChannels
-    
+
     def numSamples(self, theChExt, theSc):
         """Number of samples for the external channel, sub-channel."""
         return self._catS[self.internalChIdx(theChExt)][theSc].samples
-    
+
     def numBursts(self, theChExt, theSc):
         """Number of bursts for the external channel, sub-channel."""
         return self._catS[self.internalChIdx(theChExt)][theSc].bursts
-    #=============================
-    # End: Channel information
-    #=============================
 
-    #================================
+    # =============================
+    # End: Channel information
+    # =============================
+
+    # ================================
     # Section: Indirect X information
-    #================================
+    # ================================
     @property
     def isIndirectX(self):
         """True if there is an indirect X axis, False otherwise."""
         return self._xAxisDecl.isIndirectX
-    
+
     @property
     def xAxisDecl(self):
         """The XAxisDecl object created from the DFSR."""
         return self._xAxisDecl
-    #================================
-    # End: Indirect X information
-    #================================
 
-    #===========================
+    # ================================
+    # End: Indirect X information
+    # ================================
+
+    # ===========================
     # Section: Populating values
-    #===========================
+    # ===========================
     def setFrameBytes(self, by, fr, chFrom, chTo):
         """Given bytes, convert from Rep Codes to 'float64' and populates the
         appropriate frame and channel(s). This has random write access so the
@@ -698,9 +719,9 @@ class FrameSet(object):
         capable of finding and reading bytes objects in a file (a LogPass uses
         RLE and Type01Plan objects to do this efficiently).
         """
-        assert(chFrom is None or chFrom <= chTo)
-        assert(by is not None)
-        #print('FrameSet.setFrameBytes():', by, fr, chFrom, chTo)
+        assert (chFrom is None or chFrom <= chTo)
+        assert (by is not None)
+        # print('FrameSet.setFrameBytes():', by, fr, chFrom, chTo)
         byOfs = 0
         # If chFrom is None this is indirect depth
         if chFrom is None:
@@ -719,20 +740,20 @@ class FrameSet(object):
         if chTo is not None:
             arrayPos = self.valueIdxStartExtCh(chFrom)
             chInt = self.internalChIdx(chFrom)
-            #print('range(chFrom, chTo+1)', range(chFrom, chTo+1))
-            for chExt in range(chFrom, chTo+1):
-                #assert(arrayPos == self.valueIdxStartExtCh(chExt))
+            # print('range(chFrom, chTo+1)', range(chFrom, chTo+1))
+            for chExt in range(chFrom, chTo + 1):
+                # assert(arrayPos == self.valueIdxStartExtCh(chExt))
                 myCat = self._catS[chInt]
                 # TODO: Possible optimisation here, treat multi-sampled channels
                 # (or all channels) as we do reading dipmeter channels i.e.
                 # RepCode.readBytes() reads all values and returns a list
                 for i in range(myCat.numValues):
-#                    # For the moment be a bit clunky and treat dipmeter codes
-#                    # separately.
-#                    if myCat.repCode in RepCode.DIPMETER_REP_CODES:
-#                        byOfsEnd = byOfs + myCat.lisSize
-#                    else:
-#                        byOfsEnd = byOfs + myCat.wordLength
+                    #                    # For the moment be a bit clunky and treat dipmeter codes
+                    #                    # separately.
+                    #                    if myCat.repCode in RepCode.DIPMETER_REP_CODES:
+                    #                        byOfsEnd = byOfs + myCat.lisSize
+                    #                    else:
+                    #                        byOfsEnd = byOfs + myCat.wordLength
                     byOfsEnd = byOfs + myCat.wordLength
                     # Note: RepCode.readBytes() returns a single value
                     # except with dipmeter codes when it returns a list of values.
@@ -743,15 +764,15 @@ class FrameSet(object):
                     else:
                         if isinstance(val, list):
                             # Set numpy slice, for example
-                            #>>> y = np.array([[0, 1, 2, 3, 4,], [5, 6, 7, 8, 9]])
-                            #>>> y
-                            #array([[0, 1, 2, 3, 4],
+                            # >>> y = np.array([[0, 1, 2, 3, 4,], [5, 6, 7, 8, 9]])
+                            # >>> y
+                            # array([[0, 1, 2, 3, 4],
                             #       [5, 6, 7, 8, 9]])
-                            #>>> y[1, 1:4] = [1,4,6]
-                            #>>> y
-                            #array([[0, 1, 2, 3, 4],
+                            # >>> y[1, 1:4] = [1,4,6]
+                            # >>> y
+                            # array([[0, 1, 2, 3, 4],
                             #       [5, 1, 4, 6, 9]])
-                            self._frames[fr, arrayPos:arrayPos+len(val)] = val
+                            self._frames[fr, arrayPos:arrayPos + len(val)] = val
                             arrayPos += len(val)
                         else:
                             self._frames[fr, arrayPos] = val
@@ -759,20 +780,22 @@ class FrameSet(object):
                     byOfs = byOfsEnd
                 chInt += 1
         if byOfs != len(by):
-            raise ExceptionFrameSet('FrameSet.setFrameBytes() length missmatch byOfs={:d} len(by)={:d}'.format(byOfs, len(by)))
+            raise ExceptionFrameSet(
+                'FrameSet.setFrameBytes() length missmatch byOfs={:d} len(by)={:d}'.format(byOfs, len(by)))
 
     def setIndirectX(self, fr, val):
         """Sets an indirect X axis value directly, for example with an EXTRAPOLATE event."""
-        assert(self._indrXVector is not None)
-        #print('FrameSet.setIndirectX({:d}, {:g})'.format(fr, val))
+        assert (self._indrXVector is not None)
+        # print('FrameSet.setIndirectX({:d}, {:g})'.format(fr, val))
         self._indrXVector[fr] = val
-    #===========================
+
+    # ===========================
     # Section: Populating values
-    #===========================
-    
-    #===================================
+    # ===========================
+
+    # ===================================
     # Section: Indexing and value access
-    #===================================
+    # ===================================
     def internalChIdx(self, chIdxExt):
         """Return the internal channel index from the external one."""
         if self._chIdxExtIntMap is None:
@@ -796,39 +819,39 @@ class FrameSet(object):
     def valueIdxInFrame(self, ch, sc, sa, bu):
         """The index in the frame of the value for (external channel, sub-channel, sample, burst).
         TODO: Provide an API that returns a numpy view of a ch/sc on the frameset."""
-        #chInt = self.internalChIdx(ch)
-        #return self._intChValIdxS[chInt] + self._catS[chInt].index(sc, sa, bu)
+        # chInt = self.internalChIdx(ch)
+        # return self._intChValIdxS[chInt] + self._catS[chInt].index(sc, sa, bu)
         try:
             return self._offsetTree[self.internalChIdx(ch)][sc][sa][bu]
         except KeyError as err:
             raise IndexError(str(err))
-    
+
     def value(self, fr, ch, sc, sa, bu):
         """Returns a single value from an: internal fr, external ch, sc, sa, bu.
         This is very good at random access but can be quite slow for iteration
         compared to the generators."""
-#        chInt = self.internalChIdx(ch)
-#        i = self._intChValIdxS[chInt]
-#        i += self._catS[chInt]._index(sc, sa, bu)
+        #        chInt = self.internalChIdx(ch)
+        #        i = self._intChValIdxS[chInt]
+        #        i += self._catS[chInt]._index(sc, sa, bu)
         return self._frames[fr, self.valueIdxInFrame(ch, sc, sa, bu)]
-    
+
     def frameView(self, chIdxExt, sc):
         """Returns a numpy array that is a view of the current frame set for an
         external channel and sub channel."""
         chIdxInt = self.internalChIdx(chIdxExt)
-        return self._frames[:,self._sliceTree[chIdxInt][sc]]
-    
+        return self._frames[:, self._sliceTree[chIdxInt][sc]]
+
     def frame_channel_sub_channel_values(self, frame_index, channel_index, sub_channel_index):
         """Returns a numpy array that is a view of the values for the frame, external channel and sub channel."""
         channel_index_internal = self.internalChIdx(channel_index)
         return self._frames[frame_index][self._sliceTree[channel_index_internal][sub_channel_index]]
 
-#    def _value(self, fr, chInt, sc, sa, bu):
-#        """Returns a single value from an: internal fr, external ch, sc, sa, bu."""
-#        i = self._intChValIdxS[chInt]
-#        i += self._catS[chInt]._index(sc, sa, bu)
-#        return self._frames[fr, i]
-    
+    #    def _value(self, fr, chInt, sc, sa, bu):
+    #        """Returns a single value from an: internal fr, external ch, sc, sa, bu."""
+    #        i = self._intChValIdxS[chInt]
+    #        i += self._catS[chInt]._index(sc, sa, bu)
+    #        return self._frames[fr, i]
+
     def _retFirstXaxisFrameSpacing(self, theSamples):
         """Returns a pair (initial X, frame spacing) as floats given the 
         number of samples from an internal channel index.
@@ -840,9 +863,10 @@ class FrameSet(object):
         when there is one frame, no declared spacing and multiple samples."""
         if self.isIndirectX:
             # Indirect X
-            assert(len(self._indrXVector) == self.numFrames)
+            assert (len(self._indrXVector) == self.numFrames)
             # raise if indirect X has no frame spacing as this is illegal in LIS
-            assert(self._frameSpacing is not None), 'Can not extrapolate X axis when indirect X and no declared spacing in the DFSR. FrameSet.__init__() should have raised exception.'
+            assert (
+                        self._frameSpacing is not None), 'Can not extrapolate X axis when indirect X and no declared spacing in the DFSR. FrameSet.__init__() should have raised exception.'
             myFrSp = self._frameSpacing
             myX = self._indrXVector[0]
         else:
@@ -852,8 +876,8 @@ class FrameSet(object):
                 # Here we take the extreme X values and divide by the 
                 # total number of frames (including ones stepped over).
                 xDiff = self._frames[-1, self._xAxisFrOffs] - self._frames[0, self._xAxisFrOffs]
-                assert(self._frameSlice.step > 0)
-                myFrSp = xDiff / ((self.numFrames -1) * self._frameSlice.step)
+                assert (self._frameSlice.step > 0)
+                myFrSp = xDiff / ((self.numFrames - 1) * self._frameSlice.step)
             else:
                 # Single frame, if the number of samples of the ch,sc > 1 and
                 # there is no declared frame spacing then we raise as we can
@@ -862,7 +886,8 @@ class FrameSet(object):
                     if self._xAxisDecl.frameSpacing is None:
                         # Multiple samples, single frame and no spacing
                         # information so raise
-                        raise ExceptionFrameSetNULLSpacing('FrameSet can not extrapolate X axis when there is one frame, no declared spacing in the DFSR and multiple samples.')
+                        raise ExceptionFrameSetNULLSpacing(
+                            'FrameSet can not extrapolate X axis when there is one frame, no declared spacing in the DFSR and multiple samples.')
                     else:
                         # Have declared frame spacing so use it
                         myFrSp = self._xAxisDecl.frameSpacing
@@ -874,13 +899,13 @@ class FrameSet(object):
             # Extrapolate to previous frame
             myX -= myFrSp
         return myX, myFrSp
-    
+
     def genExtChIndexes(self):
         """Generates an ordered list of external channel indexes for this
         (possibly) partial frameset."""
         for i in range(len(self._chIdxIntExt)):
             yield self._chIdxIntExt[i]
-    
+
     def genChScValues(self, ch, sc=0, chIsExternal=True):
         """Generates values for the external channel and sub channel.
         sc is ignored unless the channel has > 1 sub-channels.
@@ -897,7 +922,8 @@ class FrameSet(object):
             myCat = self._catS[ch]
             # Range check sub-channel index and fix negative indexing
             if sc != 0:
-                sc = chkIdx(sc, myCat.numSubChannels, 'FrameSet.genChScValues(): sub-channel {:d} not in array length {:d}')
+                sc = chkIdx(sc, myCat.numSubChannels,
+                            'FrameSet.genChScValues(): sub-channel {:d} not in array length {:d}')
             fOfsStart = self._intChValIdxS[ch]
             if myCat.numValues == 1:
                 # Single sub-channel, single value
@@ -908,19 +934,20 @@ class FrameSet(object):
                 myRange = range(myCat.numValues)
                 for f in range(self.numFrames):
                     for vIdx in myRange:
-                        yield self._frames[f, fOfsStart+vIdx]
+                        yield self._frames[f, fOfsStart + vIdx]
             else:
                 # Non-optimised version that does the whole thing
                 # Multiple values and multiple sub-channels,
                 # this can (should) only be dipmeter data
-                assert(myCat.repCode in RepCode.DIPMETER_REP_CODES), 'Rep Code {:d} not a dipmeter code'.format(myCat.repCode)
+                assert (myCat.repCode in RepCode.DIPMETER_REP_CODES), 'Rep Code {:d} not a dipmeter code'.format(
+                    myCat.repCode)
                 # Fast or slow channel?
                 if sc < RepCode.DIPMETER_NUM_FAST_CHANNELS:
                     # Fast
                     myRange = RepCode.DIPMETER_FAST_SUB_CHANNEL_RANGES[sc]
                     for f in range(self.numFrames):
                         for vIdx in myRange:
-                            yield self._frames[f, fOfsStart+vIdx]
+                            yield self._frames[f, fOfsStart + vIdx]
                 else:
                     # Slow
                     myOfs = fOfsStart \
@@ -932,11 +959,11 @@ class FrameSet(object):
     def _genChScPointsSingle(self, frOfs):
         """Yield (x, v) floats for a single value at the supplied offset.
         This is for a channel that has a single sub-channel, single value."""
-        assert(self.numFrames > 0)
-        assert(frOfs >=0 and frOfs < self.valuesPerFrame)
+        assert (self.numFrames > 0)
+        assert (frOfs >= 0 and frOfs < self.valuesPerFrame)
         if self.isIndirectX:
             # Indirect X
-            assert(len(self._indrXVector) == self.numFrames)
+            assert (len(self._indrXVector) == self.numFrames)
             for f in range(self.numFrames):
                 yield self._indrXVector[f], self._frames[f, frOfs]
         else:
@@ -949,28 +976,28 @@ class FrameSet(object):
         This is for channels that have a single sub-channel and single sample
         assert(self.numFrames > 0)
         This is burst data only so all values are 'aligned' with the X value."""
-        assert(self._catS[chInt].numSubChannels == 1)
+        assert (self._catS[chInt].numSubChannels == 1)
         myRange = range(self._catS[chInt].numValues)
         frOfs = self._intChValIdxS[chInt]
         if self.isIndirectX:
             # Indirect X
-            assert(len(self._indrXVector) == self.numFrames)
+            assert (len(self._indrXVector) == self.numFrames)
             for f in range(self.numFrames):
                 myX = self._indrXVector[f]
                 for vIdx in myRange:
-                    yield myX, self._frames[f, frOfs+vIdx]
+                    yield myX, self._frames[f, frOfs + vIdx]
         else:
             # Direct X
             for f in range(self.numFrames):
                 myX = self._frames[f, self._xAxisFrOffs]
                 for vIdx in myRange:
-                    yield myX, self._frames[f, frOfs+vIdx]
+                    yield myX, self._frames[f, frOfs + vIdx]
 
     def _geChScPointsAll(self, chInt, sc):
         """Yield (x, v) floats for all the samples of a channel/sub-channel.
         The X axis is interpolated for each sample."""
-        assert(self.numFrames > 0)
-        #assert(self._catS[chInt].numSubChannels > 1), str(self._catS[chInt])
+        assert (self.numFrames > 0)
+        # assert(self._catS[chInt].numSubChannels > 1), str(self._catS[chInt])
         # Super-sampled channels need fractional X axis values.
         # The formulae is:
         # X(n,ch,s,b) = X[fn-1] - (1+s)*(X[fn-1] - X[fn]) / sa
@@ -990,16 +1017,16 @@ class FrameSet(object):
         mySaSp = myFrSp / myCat[sc].samples
         myBursts = myCat[sc].bursts
         myRange = myCat.subChOffsRange(sc)
-        #print('myCat.subChOffsRange({:d})'.format(sc), myCat.subChOffsRange(sc))
+        # print('myCat.subChOffsRange({:d})'.format(sc), myCat.subChOffsRange(sc))
         chFrOfs = self._intChValIdxS[chInt]
         if self.isIndirectX:
             # Indirect X
-            assert(len(self._indrXVector) == self.numFrames)
+            assert (len(self._indrXVector) == self.numFrames)
             for f in range(self.numFrames):
                 for vIdx in myRange:
                     if vIdx % myBursts == 0:
                         myX += mySaSp
-                    yield myX, self._frames[f, chFrOfs+vIdx]
+                    yield myX, self._frames[f, chFrOfs + vIdx]
                 myX = self._indrXVector[f]
         else:
             # Direct X
@@ -1007,7 +1034,7 @@ class FrameSet(object):
                 for vIdx in myRange:
                     if vIdx % myBursts == 0:
                         myX += mySaSp
-                    yield myX, self._frames[f, chFrOfs+vIdx]
+                    yield myX, self._frames[f, chFrOfs + vIdx]
                 # If self._frameSlice.step == 1 we can use this frame for
                 # X the next time around
                 if self._frameSlice.step == 1:
@@ -1015,12 +1042,12 @@ class FrameSet(object):
                 else:
                     # We have to estimate myX as to what would be immediately
                     # before the next frame
-                    if f+1 < self.numFrames:
-                        myX = self._frames[f+1, self._xAxisFrOffs] - myFrSp
+                    if f + 1 < self.numFrames:
+                        myX = self._frames[f + 1, self._xAxisFrOffs] - myFrSp
                     else:
                         # Force myX to be unusable at end of loop
                         myX = None
-    
+
     def genChScPoints(self, ch, sc=0, chIsExt=True):
         """Generates (xAxis, values) as numbers for the external channel and
         sub-channel. sc is ignored unless the channel has > 1 sub-channels.
@@ -1036,7 +1063,8 @@ class FrameSet(object):
             myCat = self._catS[ch]
             # Range check sub-channel index and fix negative indexing
             if sc != 0:
-                sc = chkIdx(sc, myCat.numSubChannels, 'FrameSet.genChScValues(): sub-channel {:d} not in array length {:d}')
+                sc = chkIdx(sc, myCat.numSubChannels,
+                            'FrameSet.genChScValues(): sub-channel {:d} not in array length {:d}')
             if myCat.numValues == 1:
                 # Single sub-channel, single value
                 for p in self._genChScPointsSingle(self._intChValIdxS[ch]):
@@ -1049,16 +1077,17 @@ class FrameSet(object):
                         yield p
                 else:
                     for p in self._geChScPointsAll(ch, sc):
-                        yield p                
+                        yield p
             else:
                 # Non-optimised version that does the whole thing
                 # Multiple values and multiple sub-channels,
                 # this can (should) only be dipmeter data
-                assert(myCat.repCode in RepCode.DIPMETER_REP_CODES), 'Rep Code {:d} not a dipmeter code'.format(myCat.repCode)
+                assert (myCat.repCode in RepCode.DIPMETER_REP_CODES), 'Rep Code {:d} not a dipmeter code'.format(
+                    myCat.repCode)
                 # Fast or slow channel?
                 if sc < RepCode.DIPMETER_NUM_FAST_CHANNELS:
                     for p in self._geChScPointsAll(ch, sc):
-                        yield p                
+                        yield p
                 else:
                     # Slow channel so treat as a single sampled sub-channel
                     frOfs = self._intChValIdxS[ch] \
@@ -1072,21 +1101,22 @@ class FrameSet(object):
         shape (samples, bursts).
         Raises an ExceptionFrameSetMixedChannels if all intCh/sc channels
         are not of the same form i.e. number of samples and bursts."""
-        assert(len(theIntChScS) > 0)
+        assert (len(theIntChScS) > 0)
         saBu = None
         for ch, sc in theIntChScS:
             mySaBu = (self._catS[ch][sc].samples, self._catS[ch][sc].bursts)
             if saBu is None:
                 saBu = mySaBu
             elif saBu != mySaBu:
-                raise ExceptionFrameSetMixedChannels('FrameSet._checkShapes(): Shape missmatch: {:s} does not match {:s}'.format(mySaBu, saBu))
+                raise ExceptionFrameSetMixedChannels(
+                    'FrameSet._checkShapes(): Shape missmatch: {:s} does not match {:s}'.format(mySaBu, saBu))
         return saBu
-    
+
     def _retChScOffsets(self, theIntChScS):
         """Given a list of (ch, sc) this returns a list of integers that are
         the (partial) frame offsets of the start of that (internal) ch/sc."""
         try:
-            return [self._offsetTree[ch][sc][0][0] for ch,sc in theIntChScS]
+            return [self._offsetTree[ch][sc][0][0] for ch, sc in theIntChScS]
         except KeyError as err:
             raise IndexError(str(err))
 
@@ -1094,11 +1124,11 @@ class FrameSet(object):
         """Yield (x, (v, ...)) floats for a single value at the supplied offset.
         This is for a channel that has a single sub-channel, single value.
         NOTE: (v...) is a generator object."""
-        assert(self.numFrames > 0)
-        assert(frOfs >=0 and frOfs < self.valuesPerFrame for frOfs in frOfsS)
+        assert (self.numFrames > 0)
+        assert (frOfs >= 0 and frOfs < self.valuesPerFrame for frOfs in frOfsS)
         if self.isIndirectX:
             # Indirect X
-            assert(len(self._indrXVector) == self.numFrames)
+            assert (len(self._indrXVector) == self.numFrames)
             for f in range(self.numFrames):
                 yield self._indrXVector[f], (self._frames[f, frOfs] for frOfs in frOfsS)
         else:
@@ -1113,7 +1143,7 @@ class FrameSet(object):
         are not of the same form i.e. number of samples and bursts.
         If chIsExt is True then ch is the external channel index otherwise
         it is the internal index."""
-        assert(0)
+        assert (0)
         if self.number_of_frames > 0 and len(theChScS) > 0:
             if chIsExt:
                 # Internalise channel index
@@ -1131,8 +1161,8 @@ class FrameSet(object):
                 # Compute offsets for each channel
                 myFrOffs = self._retChScOffsets(myChScS)
             else:
-                assert(0)
-    
+                assert (0)
+
     def genAll(self):
         """Yields 6 item tuples (fr ext, ch ext, sc, sa, bu value)."""
         for frInt in range(self.numFrames):
@@ -1143,7 +1173,7 @@ class FrameSet(object):
                 # Optimise for the common uses cases of:
                 # - Single sub-channel, single sample and single burst
                 if cat.numSubChannels == 1 \
-                and cat[0].numValues == 1:
+                        and cat[0].numValues == 1:
                     # Single sub-channel, single sample, single burst optimisation 
                     yield frExt, chExt, 0, 0, 0, self._frames[frInt, fOfs]
                     fOfs += 1
@@ -1159,24 +1189,24 @@ class FrameSet(object):
                             fOfs += 1
                             scOffs += 1
 
-#    def genAlignedValues(self):
-#        """Yields 2 item pair (fr ext, (sub-channel values, ...)) where each
-#        sub-channel value is the one aligned with the frame i.e. the first burst
-#        of the last 
-#        sample."""
-#        for frInt in range(self.numFrames):
-#            frExt = self.extFrameNum(frInt)
-#            fOfs = 0
-#            for chInt, cat in enumerate(self._catS):
-#                pass
+    #    def genAlignedValues(self):
+    #        """Yields 2 item pair (fr ext, (sub-channel values, ...)) where each
+    #        sub-channel value is the one aligned with the frame i.e. the first burst
+    #        of the last
+    #        sample."""
+    #        for frInt in range(self.numFrames):
+    #            frExt = self.extFrameNum(frInt)
+    #            fOfs = 0
+    #            for chInt, cat in enumerate(self._catS):
+    #                pass
 
-    #===================================
+    # ===================================
     # End: Indexing and value access
-    #===================================
-    
-    #==================================================
+    # ===================================
+
+    # ==================================================
     # Section: Mutation and functional programming etc.
-    #==================================================
+    # ==================================================
     def _raiseOnEmpty(self):
         """Will raise a ExceptionFrameSetEmpty if there are no values to analyse."""
         if self.numFrames < 1 or self.numChannels < 1:
@@ -1186,16 +1216,16 @@ class FrameSet(object):
                     self.numChannels,
                 )
             )
-    
+
     def _retAccumulatorArray(self, theAccs):
         """Returns a 2D list of accumulator objects, length being the total
         number of sub-channels, width being the number of accumulator classes."""
-        accArray = [] 
+        accArray = []
         for chInt in range(self.numChannels):
             for sc in range(self._catS[chInt].numSubChannels):
                 accArray.append([a() for a in theAccs])
         return accArray
-    
+
     def _retAccumulatorValues(self, theAccArray):
         """Extract values from accumulators by invoking value() on each.
         theAccArray length being the total number of sub-channels, width being 
@@ -1203,9 +1233,9 @@ class FrameSet(object):
         Returns a numpy array of (numSubCh, len(theAccs))
         """
         numSubCh = len(theAccArray)
-        assert(numSubCh > 0)
+        assert (numSubCh > 0)
         numAccs = len(theAccArray[0])
-        assert(numAccs > 0)
+        assert (numAccs > 0)
         # Now extract values
         retArr = numpy.empty((numSubCh, numAccs), self.NUMPY_DATA_TYPE)
         scOfs = 0
@@ -1215,7 +1245,7 @@ class FrameSet(object):
                     retArr[scOfs, a] = theAccArray[scOfs][a].value()
                 scOfs += 1
         return retArr
-    
+
     def accumulate(self, theAccs):
         """Calls .add() on every accumulator (with a unary function) for every
         internal channel and returns an numpy array of (numSubCh, len(theAccs))
@@ -1229,7 +1259,7 @@ class FrameSet(object):
         # Create array of accumulator objects (num sub-channels, num accumulators)
         accArray = self._retAccumulatorArray(theAccs)
         # Check length is total number of sub-channels
-        assert(len(accArray) == sum([c.numSubChannels for c in self._catS]))
+        assert (len(accArray) == sum([c.numSubChannels for c in self._catS]))
         accArrayOffs = 0
         for chInt in range(self.numChannels):
             for sc in range(self._catS[chInt].numSubChannels):
@@ -1238,10 +1268,12 @@ class FrameSet(object):
                         for a in range(len(theAccs)):
                             accArray[accArrayOffs][a].add(v)
                 accArrayOffs += 1
-        return self._retAccumulatorValues(accArray)    
-    #==================================================
+        return self._retAccumulatorValues(accArray)
+        # ==================================================
     # End: Mutation and functional programming etc.
-    #==================================================
+    # ==================================================
+
+
 #############################
 # End: FrameSet container
 #############################
@@ -1255,9 +1287,10 @@ class FrameSet(object):
 class AccMin(object):
     """Accumulates the minimum value."""
     title = 'Min'
+
     def __init__(self):
         self.min = None
-    
+
     def add(self, v):
         """Add a new value."""
         if self.min is None or v < self.min:
@@ -1267,12 +1300,14 @@ class AccMin(object):
         """Return the result."""
         return self.min
 
+
 class AccMax(object):
     """Accumulates the maximum value."""
     title = 'Max'
+
     def __init__(self):
         self.max = None
-    
+
     def add(self, v):
         """Add a new value."""
         if self.max is None or v > self.max:
@@ -1282,9 +1317,11 @@ class AccMax(object):
         """Return the result."""
         return self.max
 
+
 class AccMean(object):
     """Accumulates the mean value."""
     title = 'Mean'
+
     def __init__(self):
         self.sum = 0.0
         self.cntr = 0
@@ -1303,6 +1340,7 @@ class AccMean(object):
 class AccMedian(object):
     """Accumulates the median value."""
     title = 'Median'
+
     def __init__(self):
         self.values = []
 
@@ -1322,9 +1360,11 @@ class AccMedian(object):
                 # Odd
                 return self.values[index]
 
+
 class AccStDev(object):
     """Accumulates the standard deviation."""
     title = 'StdDev'
+
     def __init__(self):
         self.sum = 0.0
         self.sumSq = 0.0
@@ -1333,21 +1373,23 @@ class AccStDev(object):
     def add(self, v):
         """Add a new value."""
         self.sum += v
-        self.sumSq += v**2
+        self.sumSq += v ** 2
         self.cntr += 1
 
     def value(self):
         """Return the result."""
         if self.cntr > 1:
             # From http://en.wikipedia.org/wiki/Standard_deviation
-            num = self.cntr * self.sumSq - self.sum**2
+            num = self.cntr * self.sumSq - self.sum ** 2
             if num > 0:
                 den = self.cntr * (self.cntr - 1)
                 return math.sqrt(num / den)
 
+
 class AccCount(object):
     """Accumulates the number of values."""
     title = 'Count'
+
     def __init__(self):
         self.cntr = 0
 
@@ -1362,6 +1404,7 @@ class AccCount(object):
 
 class AccDelta(object):
     """Base class for accumulating a count of first order differences."""
+
     def __init__(self):
         self.cntr = 0
         self.prev = None
@@ -1391,6 +1434,7 @@ class AccInc(AccDelta):
 class AccEq(AccDelta):
     """Counting how many values are equal to the previous value."""
     title = '=='
+
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1403,6 +1447,7 @@ class AccEq(AccDelta):
 class AccDec(AccDelta):
     """Counting how many values are less than the previous value."""
     title = '--'
+
     def add(self, v):
         """Add a new value."""
         if self.prev is None:
@@ -1416,6 +1461,7 @@ class AccBias(AccDelta):
     """Measures increment, equal, decrement and computes bias which is:
     (inc - dec) / total."""
     title = 'Bias'
+
     def __init__(self):
         super().__init__()
         self.cntrInc = self.cntrEq = self.cntrDec = 0
@@ -1441,6 +1487,7 @@ class AccBias(AccDelta):
 class AccDrift(AccDelta):
     """Measures drift i.e. the movement between the first and the last value."""
     title = 'Drift'
+
     def __init__(self):
         super().__init__()
         self.first = None
@@ -1462,6 +1509,7 @@ class AccDrift(AccDelta):
 class AccActivity(AccDelta):
     """Measures curve activity."""
     title = 'Activity'
+
     def __init__(self):
         super().__init__()
         self.prevExp = None
@@ -1473,7 +1521,7 @@ class AccActivity(AccDelta):
             myMant, exp = math.frexp(v)
             myExp = exp + (2 * myMant) - 1.0
             if self.cntr > 0:
-                self.actSum += (myExp - self.prevExp)**2
+                self.actSum += (myExp - self.prevExp) ** 2
             self.prevExp = myExp
             self.cntr += 1
 
@@ -1490,7 +1538,6 @@ class AccActivityMille(AccActivity):
         v = super().value()
         if v is not None:
             return v * 1000
-
 
 #########################################
 # Section: FrameSet accumulator functions

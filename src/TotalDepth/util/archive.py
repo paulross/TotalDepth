@@ -43,7 +43,7 @@ from TotalDepth.util import DirWalk
 logger = logging.getLogger(__file__)
 
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 
 class FileBase:
@@ -51,6 +51,7 @@ class FileBase:
     # Number of bytes to take a file fragment of. 18 is useful for LIS+TIF as it gives
     # all the TIF markers [12], the PRH [4] and the LRH [2].
     XXD_NUM_BYTES = 18
+
     # XXD_NUM_BYTES = 8
 
     def __init__(self, path: str):
@@ -181,7 +182,8 @@ class FileZip(FileArchive):
                             z_member_file.seek(0)
                             by = z_member_file.read(self.XXD_NUM_BYTES)
                             self.members.append(
-                                z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time), by
+                                z_info.filename, z_info.file_size, bin_file_type, datetime.datetime(*z_info.date_time),
+                                by
                             )
 
     def __str__(self):
@@ -295,7 +297,7 @@ def analyse_archive(files: typing.List[FileBase],
                 print('\n'.join(archive_count.histogram_power_of_2()))
             print()
 
-    uncatalogued_files = [file for file in  files if file.bin_type == ""]
+    uncatalogued_files = [file for file in files if file.bin_type == ""]
     print(f'Uncatalogued files: [{len(uncatalogued_files)}]')
     print('File extension count of uncatalogued files:')
     file_ext_counter = collections.Counter([os.path.splitext(file.path)[1] for file in uncatalogued_files])
@@ -363,6 +365,7 @@ def copy_tree(path_from: str, path_to: str, recurse: bool,
               file_types: typing.List[str], nervous: bool,
               over_write: bool) -> typing.Tuple[typing.Dict[str, int], int]:
     """Copies particular binary file types from one directory structure to another."""
+
     def _log_message(msg: str) -> None:
         if nervous:
             logger.info(f'Would {msg}')
@@ -496,7 +499,7 @@ will be copied across."""
         t_start = time.perf_counter()
         FileBase.XXD_NUM_BYTES = max(FileBase.XXD_NUM_BYTES, int(args.bytes))
         num_files = 0
-        file_size_count =  0
+        file_size_count = 0
         byte_count = 0
         if args.path_out:
             print('Copying tree.')

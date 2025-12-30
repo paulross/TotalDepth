@@ -25,13 +25,13 @@ Created on Jan 12, 2012
 
 @author: paulross
 """
-import sys
-import os
+import collections
 import logging
+import os
+import re
+import sys
 import time
 import typing
-import collections
-import re
 
 from TotalDepth.LAS.core import LASRead
 from TotalDepth.common import cmn_cmd_opts, process
@@ -41,7 +41,6 @@ __author__ = 'Paul Ross'
 __date__ = '2011-08-03'
 __version__ = '0.1.0'
 __rights__ = 'Copyright (c) 2012-2020 Paul Ross.'
-
 
 logger = logging.getLogger(__file__)
 
@@ -64,13 +63,14 @@ class MnemonicDescriptionCount:
     def menmonics(self) -> typing.KeysView[str]:
         return self.mnemonic_description_map.keys()
 
-    def description_count(self,  mnemonic: str) -> int:
+    def description_count(self, mnemonic: str) -> int:
         return len(self.mnemonic_description_map[mnemonic])
 
 
 class ReadLASFiles:
     RE_DESC = re.compile(r'^\s*(\d+)\s*(.+)$')
     """Reads LAS files and captures the frequency of menemonics."""
+
     def __init__(self, path: str, raise_on_error: bool = True):
         self.counters = collections.defaultdict(int)
         # All mnemonics
@@ -127,7 +127,7 @@ class ReadLASFiles:
             self.counters['crit'] += 1
         self.counters['file'] += 1
         return file_size, exec_time
-    
+
     def _process_las_file(self, las_file: LASRead.LASRead) -> None:
         """Do the necesary processing updating internal state with the LAS parser."""
         self._update_description_maps(las_file)
@@ -159,7 +159,7 @@ class ReadLASFiles:
             data = section[index]
             if isinstance(data, LASRead.SectLine):
                 description_map.add(data.mnem, self._normalise_description(data.desc))
-    
+
     def _normalise_description(self, d):
         """Normalise description according to some rules."""
         # Strip leading integer
@@ -272,8 +272,9 @@ class ReadLASFiles:
         for path in sorted(self.path_size_time_map.keys()):
             file_size, exec_time = self.path_size_time_map[path]
             if exec_time != 0.0:
-                rate = exec_time * 1000 / (file_size / 1024**2)
-                out_stream.write('{:<16d} {:8.3f} {:8.1f}  {}\n'.format(file_size, exec_time, _rate(file_size, exec_time), path))
+                rate = exec_time * 1000 / (file_size / 1024 ** 2)
+                out_stream.write(
+                    '{:<16d} {:8.3f} {:8.1f}  {}\n'.format(file_size, exec_time, _rate(file_size, exec_time), path))
                 total_size += file_size
                 total_time += exec_time
         out_stream.write(f'Total size: {total_size:24,d} (bytes)\n')
@@ -282,7 +283,7 @@ class ReadLASFiles:
         out_stream.write(' DONE: Size/Time (ms/Mb) '.center(75, '-'))
         out_stream.write('\n')
 
-    def pprint_wsd_mnemonic_frequency(self, out_stream: typing.TextIO=sys.stdout):
+    def pprint_wsd_mnemonic_frequency(self, out_stream: typing.TextIO = sys.stdout):
         out_stream.write(' Count of well site mnemonics and the % of files that have them '.center(75, '-'))
         out_stream.write('\n{\n')
         self._pprint_mnem_count(self.wsd_mnemonic_count, out_stream)
@@ -290,7 +291,7 @@ class ReadLASFiles:
         out_stream.write(' DONE: Count of well site mnemonics and the % of files that have them '.center(75, '-'))
         out_stream.write('\n')
 
-    def pprint_param_mnemonic_frequency(self, out_stream: typing.TextIO=sys.stdout):
+    def pprint_param_mnemonic_frequency(self, out_stream: typing.TextIO = sys.stdout):
         out_stream.write(' Count of parameter mnemonics and the % of files that have them '.center(75, '-'))
         out_stream.write('\n{\n')
         self._pprint_mnem_count(self.paramater_mnemonic_count, out_stream)
@@ -305,11 +306,11 @@ class ReadLASFiles:
             else:
                 desc = 'N/A'
             out_stream.write('{:32s} : {:64}, # {:8d} {:8.2%}\n'.format(
-                    '"{:s}"'.format(m),
-                    '"{:s}"'.format(desc.replace('"', '\"').replace('\n', ' ')),
-                    mnem_count[m],
-                    mnem_count[m] / self.counters['file'],
-                )
+                '"{:s}"'.format(m),
+                '"{:s}"'.format(desc.replace('"', '\"').replace('\n', ' ')),
+                mnem_count[m],
+                mnem_count[m] / self.counters['file'],
+            )
             )
 
     def results(self):
@@ -370,7 +371,7 @@ def plot_gnuplot(data: ReadLASFiles, gnuplot_dir: str) -> None:
     table[0][0] = f'# {table[0][0]}'
     for file_path in sorted(data.path_size_time_map.keys()):
         file_size, file_time = data.path_size_time_map[file_path]
-        table.append([file_size, file_time, file_path,])
+        table.append([file_size, file_time, file_path, ])
     name = 'ReadLASFiles'
     return_code = gnuplot.invoke_gnuplot(gnuplot_dir, name, table, GNUPLOT_PLT.format(name=name))
     if return_code:
@@ -382,7 +383,7 @@ def plot_gnuplot(data: ReadLASFiles, gnuplot_dir: str) -> None:
 
 def main():
     """Main entry point."""
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     usage = """usage: %prog [options] dir
 Recursively reads LAS files in a directory reporting information about their contents."""
     parser = cmn_cmd_opts.path_in(usage, version='%prog ' + __version__)

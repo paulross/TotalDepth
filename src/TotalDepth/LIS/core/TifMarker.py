@@ -82,43 +82,48 @@ __copyright__ = '(c) 2010 Paul Ross.'
 
 import logging
 import struct
+
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 # TODO: This is a bit clunky as we only need the Exception from RawStream
 from TotalDepth.LIS.core import RawStream
+
 
 class ExceptionTifMarker(ExceptionTotalDepthLIS):
     """Specialisation of exception for Physical Records."""
     pass
 
+
 # TIF Constants
 #: Number of bytes in a TIF word
-TIF_WORD_BYTES                  = 4 # 32 bit unsigned ints (big endian)
+TIF_WORD_BYTES = 4  # 32 bit unsigned ints (big endian)
 #: Number of words in a TIF marker
-TIF_NUM_WORDS                   = 3
+TIF_NUM_WORDS = 3
 #: Number of bytes in a TIF marker
-TIF_TOTAL_BYTES                 = TIF_WORD_BYTES * TIF_NUM_WORDS
+TIF_TOTAL_BYTES = TIF_WORD_BYTES * TIF_NUM_WORDS
 #: struct.Struct() format for a TIF word
-TIF_WORD_FORMAT                 = struct.Struct('<L')
+TIF_WORD_FORMAT = struct.Struct('<L')
 #: struct.Struct() format for a TIF word written wrongly as little-endian
-TIF_WORD_FORMAT_WRONG_SEX       = struct.Struct('>L')
+TIF_WORD_FORMAT_WRONG_SEX = struct.Struct('>L')
 #: struct.Struct() format for a TIF marker
 # FIXME: This is writing in little endian but should be big endian. Glad we are ignoring TIF markers.
 # FIXME: Should be > not <
-TIF_WORD_ALL_FORMAT             = struct.Struct('<%dL' % TIF_NUM_WORDS)
+TIF_WORD_ALL_FORMAT = struct.Struct('<%dL' % TIF_NUM_WORDS)
 #: struct.Struct() format for a TIF marker written wrongly as little-endian
-TIF_WORD_ALL_FORMAT_WRONG_SEX   = struct.Struct('>%dL' % TIF_NUM_WORDS)
+TIF_WORD_ALL_FORMAT_WRONG_SEX = struct.Struct('>%dL' % TIF_NUM_WORDS)
 #: The maximum possible size of the first 'next' word. If larger than this then
 #: the words are written wrongly as little-endian and need to be reversed
 #: This is calculated as the maximum PR length + TIF bytes.
-TIF_FIRST_WORD_LIMIT            = 0xFFFF + TIF_TOTAL_BYTES
+TIF_FIRST_WORD_LIMIT = 0xFFFF + TIF_TOTAL_BYTES
 # Sanity check
-assert(TIF_WORD_FORMAT.size                 == TIF_WORD_BYTES)
-assert(TIF_WORD_FORMAT_WRONG_SEX.size       == TIF_WORD_BYTES)
-assert(TIF_WORD_ALL_FORMAT.size             == TIF_TOTAL_BYTES)
-assert(TIF_WORD_ALL_FORMAT_WRONG_SEX.size   == TIF_TOTAL_BYTES)
+assert (TIF_WORD_FORMAT.size == TIF_WORD_BYTES)
+assert (TIF_WORD_FORMAT_WRONG_SEX.size == TIF_WORD_BYTES)
+assert (TIF_WORD_ALL_FORMAT.size == TIF_TOTAL_BYTES)
+assert (TIF_WORD_ALL_FORMAT_WRONG_SEX.size == TIF_TOTAL_BYTES)
+
 
 class TifMarkerBase(object):
     """Base class for TIF markers."""
+
     def __init__(self, raiseOnError=True):
         """Constructor, initialises internals."""
         self.hasTif = True
@@ -140,22 +145,22 @@ class TifMarkerBase(object):
             r = '>'
         return 'TIF %5s %s:  0x%8x  0x%8x  0x%8x' % \
             (self.hasTif, r, self.tifType, self.tifBack, self.tifNext)
-            
+
     def markers(self):
         """Current values of markers as a tuple of three integers."""
         return self.tifType, self.tifBack, self.tifNext
-    
+
     @property
     def eof(self):
         """True if I have encountered a EOF marker."""
         return self.tifType == 1
-    
+
     def reset(self):
         """Resets the TIF markers to all zero, this means hasPrevious is False."""
         self.tifType = 0
         self.tifBack = 0
         self.tifNext = 0
-        
+
     def reportError(self, theMsg):
         """Reports the error. I constructed with raiseOnError as True this will
         raise a ExceptionTifMarker otherwise it will write the error to the log."""
@@ -163,6 +168,7 @@ class TifMarkerBase(object):
             raise ExceptionTifMarker(theMsg)
         else:
             logging.error(theMsg)
+
 
 class TifMarkerRead(TifMarkerBase):
     """Class for reading TIF markers. This will automatically determine if TIF
@@ -173,6 +179,7 @@ class TifMarkerRead(TifMarkerBase):
     allowPrPadding - If True this will consume spurious padding bytes after the
     Physical Record tail i.e. the TIF markers determine the Physical Record structure
     rather than the Physical Record Headers."""
+
     def __init__(self, theStream, allowPrPadding=False):
         """Constructor, initialises internals.
         allowPrPadding - If true this allows padding bytes after the PRT.
@@ -198,20 +205,20 @@ class TifMarkerRead(TifMarkerBase):
         self.tifBack = 0
         self.tifNext = 0
         self._prPad = allowPrPadding
-        
+
     @property
     def hasPrevious(self):
         """True if a Physical Record has been read, cleared on reset()."""
         return self.previousTell is not None \
             and (self.tifType, self.tifBack, self.tifNext) != (0, 0, 0)
-    
+
     def reset(self):
         """Calling reset() means that the caller is probably randomly
         accessing the file so we can not error check the previous marker in
         the same way that we can if we are reading the file linearly."""
         super(TifMarkerRead, self).reset()
         self.previousTell = None
-    
+
     def read(self, theStream):
         """Read TIF markers from a RawStream object. Returns the stream tell()
         or None  of the start of the TIF marker. This is not necessarily the
@@ -236,17 +243,17 @@ class TifMarkerRead(TifMarkerBase):
                 if self._prPad and shortFall > 0:
                     logging.debug(
                         'TifMarkerRead: tell 0x{:x} making up PR padding of 0x{:x} by seeking to 0x{:x}'.format(
-                                retTell,
-                                shortFall,
-                                self.tifNext,
+                            retTell,
+                            shortFall,
+                            self.tifNext,
                         )
                     )
                     theStream.seek(self.tifNext)
                     retTell = theStream.tell()
                 else:
                     self.reportError('TIF read() expected 0x%X, got tell: 0x%X, Shortfall: 0x%X' \
-                        % (self.tifNext, retTell, shortFall)
-                    )
+                                     % (self.tifNext, retTell, shortFall)
+                                     )
             if self.isReversed:
                 # Erroneously little-endian TIF markers
                 self._readLittleEndian(theStream)
@@ -255,7 +262,7 @@ class TifMarkerRead(TifMarkerBase):
                 self._readBigEndian(theStream)
             if self.hasPrevious and self.tifBack != self.previousTell:
                 msg = 'TIF read(): tell 0x%x expected previous 0x%X, got 0x%X' \
-                                         % (retTell, self.tifBack, self.previousTell)
+                      % (retTell, self.tifBack, self.previousTell)
                 # Error check here
                 self.reportError(msg)
             self.previousTell = retTell
@@ -264,32 +271,34 @@ class TifMarkerRead(TifMarkerBase):
     def _readBigEndian(self, theStream):
         """Reads from stream, does not test against state."""
         self.tifType, self.tifBack, self.tifNext = theStream.readAndUnpack(TIF_WORD_ALL_FORMAT)
-        
+
     def _readLittleEndian(self, theStream):
         """Reads from stream with reversed markers, does not test against state."""
         self.tifType, self.tifBack, self.tifNext = theStream.readAndUnpack(TIF_WORD_ALL_FORMAT_WRONG_SEX)
-        
+
+
 class TifMarkerWrite(TifMarkerBase):
     """Class for writing TIF markers."""
+
     def __init__(self):
         """Constructor, initialises internals."""
         super().__init__()
         self.previousDiff = 0
-    
+
     def write(self, theStream, theLen):
         """Write TIF markers to a RawStream object. theLen must be the length
         of the Physical Record including the PRH and PRT."""
         if self.hasTif:
             self.tifNext += theLen + TIF_TOTAL_BYTES
             theStream.packAndWrite(
-                            TIF_WORD_ALL_FORMAT,
-                            self.tifType,
-                            self.tifBack,
-                            self.tifNext,
-                        )
+                TIF_WORD_ALL_FORMAT,
+                self.tifType,
+                self.tifBack,
+                self.tifNext,
+            )
             self.tifBack += self.previousDiff
             self.previousDiff = theLen + TIF_TOTAL_BYTES
-    
+
     def close(self, theStream):
         """Write TIF EOF markers."""
         self.tifType = 1

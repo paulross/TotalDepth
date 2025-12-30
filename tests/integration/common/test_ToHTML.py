@@ -167,9 +167,15 @@ def test_to_html_index_html_multiple_file_with_intermediate(tmpdir):
     root = tmpdir.strpath
     # W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_002.las.html
     idx.add(os.path.join(root, 'W001553/SALADIN_6ST1_MWD_1430_1700.LAS.html'), 'a', 'b')
-    idx.add(os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_002.las.html'), 'c', 'd')
-    idx.add(os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_003.las.html'), 'e', 'f')
-    idx.add(os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_004.las.html'), 'g', 'h')
+    idx.add(
+        os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_002.las.html'),
+        'c', 'd')
+    idx.add(
+        os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_003.las.html'),
+        'e', 'f')
+    idx.add(
+        os.path.join(root, 'W001557/Barrow_G68M_Transcribed_Log_Data/183318/Imported/Barrow-G68M_FILE_004.las.html'),
+        'g', 'h')
     # print(idx)
     index_paths = idx.write_indexes(create_intermediate=True, class_style='CLASS', css='CSS')
     for index_path in index_paths:

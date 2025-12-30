@@ -789,15 +789,12 @@ from TotalDepth.common import units
 from TotalDepth.common import xml
 from TotalDepth.util.DirWalk import dirWalk
 
-
-__author__  = 'Paul Ross'
-__date__    = '2020-08-29'
+__author__ = 'Paul Ross'
+__date__ = '2020-08-29'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
-
 
 FileResult = collections.namedtuple('IndexResult', 'size_input, time, exception, ignored')
 
@@ -1009,9 +1006,9 @@ Reads a RP66V1 index XML file and all the data."""
     parser = cmn_cmd_opts.path_in(desc=description, epilog=__rights__, prog=sys.argv[0])
     # Add arguments that control what we report on
     parser.add_argument("-p", "--parameters", action="store_true", default=False,
-                      help="Output Parameter analysis. Default: %(default)s.")
+                        help="Output Parameter analysis. Default: %(default)s.")
     parser.add_argument("-c", "--channels", action="store_true", default=False,
-                      help="Output Channel analysis. Default: %(default)s.")
+                        help="Output Channel analysis. Default: %(default)s.")
     cmn_cmd_opts.add_log_level(parser, 20)
     args = parser.parse_args()
     # print('args:', args)
@@ -1047,10 +1044,11 @@ Reads a RP66V1 index XML file and all the data."""
         logger.exception(str(err))
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
     else:
         ms_mb = 0.0
-    print(f'Out of {len(result):,d} failed {files_failed:,d} files of total size {size_input:,d} input bytes at {ms_mb:.1f} ms/Mb')
+    print(
+        f'Out of {len(result):,d} failed {files_failed:,d} files of total size {size_input:,d} input bytes at {ms_mb:.1f} ms/Mb')
     print('Bye, bye!')
     return 0
 

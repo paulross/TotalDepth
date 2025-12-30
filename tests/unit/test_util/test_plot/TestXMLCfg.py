@@ -24,21 +24,23 @@ Created on Dec 14, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
 import logging
+import sys
 import time
 import unittest
+
 try:
     import xml.etree.cElementTree as etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
 from TotalDepth.util.plot import XMLCfg
+
 
 class TestLgXMLBase(unittest.TestCase):
 
@@ -56,17 +58,17 @@ class TestLgXMLBase(unittest.TestCase):
         """TestLgXMLBase.test_01(): Test checkRoot() succeeds"""
         root = etree.fromstring('<LgFormat UniqueId="Sonic_3Track.xml" xmlns="x-schema:LgSchema2.xml"/>')
         self.assertTrue(self._lxb.checkRoot(root))
-        
+
     def test_02(self):
         """TestLgXMLBase.test_02(): Test checkRoot() fails on root element"""
         root = etree.fromstring('<LGFORMAT UniqueId="Sonic_3Track.xml" xmlns="x-schema:LgSchema2.xml"/>')
         self.assertFalse(self._lxb.checkRoot(root))
-        
+
     def test_03(self):
         """TestLgXMLBase.test_03(): Test checkRoot() fails on missing attribute."""
         root = etree.fromstring('<LgFormat xmlns="x-schema:LgSchema2.xml"/>')
         self.assertFalse(self._lxb.checkRoot(root))
-        
+
     def test_04(self):
         """TestLgXMLBase.test_04(): Test str()."""
         root = etree.fromstring('<root UniqueId="1"><elem>Some text</elem></root>')
@@ -123,15 +125,19 @@ class TestLgXMLBase(unittest.TestCase):
             self._lxb.tagsInNs('LgFormat', 'LgTrack'),
         )
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLgXMLBase))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -156,6 +162,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -164,7 +171,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -182,14 +189,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

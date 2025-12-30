@@ -23,16 +23,16 @@ Created on Jan 5, 2012
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2012-01-05'
+__author__ = 'Paul Ross'
+__date__ = '2012-01-05'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
 from TotalDepth.util.plot import Coord
 
 #: Default SVG plot units
 DEFAULT_PLOT_UNITS = 'in'
-assert(DEFAULT_PLOT_UNITS in Coord.UNIT_MAP)
+assert (DEFAULT_PLOT_UNITS in Coord.UNIT_MAP)
 #: Units that we can convert to in LIS terms
 DEFAULT_PLOT_LIS_UNITS = b"IN  "
 

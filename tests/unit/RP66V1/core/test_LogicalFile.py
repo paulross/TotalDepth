@@ -1,8 +1,6 @@
 import copy
 import io
-import pprint
 
-import numpy as np
 import pytest
 
 from TotalDepth.RP66V1.core import LogicalFile, RepCode
@@ -13,11 +11,11 @@ from tests.unit.RP66V1.core import test_data
 @pytest.mark.parametrize(
     'by, expected',
     (
-        (test_data.SMALL_FILE, 0,),
-        (test_data.MINIMAL_FILE, 0,),
-        (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 0,),
-        (test_data.BASIC_FILE, 0,),
-        (test_data.FILE_256kb, 0,),
+            (test_data.SMALL_FILE, 0,),
+            (test_data.MINIMAL_FILE, 0,),
+            (test_data.BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS, 0,),
+            (test_data.BASIC_FILE, 0,),
+            (test_data.FILE_256kb, 0,),
     )
 )
 def test_logical_index_number_of_logical_files_no_with(by, expected):
@@ -29,11 +27,11 @@ def test_logical_index_number_of_logical_files_no_with(by, expected):
 @pytest.mark.parametrize(
     'bytes_name, expected',
     (
-        ('SMALL_FILE', 1,),
-        ('MINIMAL_FILE', 1,),
-        ('BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS', 1,),
-        ('BASIC_FILE', 1,),
-        ('FILE_256kb', 1,),
+            ('SMALL_FILE', 1,),
+            ('MINIMAL_FILE', 1,),
+            ('BASIC_FILE_WITH_TWO_VISIBLE_RECORDS_NO_IFLRS', 1,),
+            ('BASIC_FILE', 1,),
+            ('FILE_256kb', 1,),
     )
 )
 def test_logical_index_number_of_logical_files(bytes_name, expected):

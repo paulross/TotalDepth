@@ -40,5 +40,5 @@ class LogicalRecordSegmentEncryptionPacket:
 
     def __str__(self):
         return f'EncryptionPacket: size: 0x{self.size:04x}' \
-            f' producer: {self.producer_code}' \
-            f' code length: {len(self.encryption_information)} data length: {len(self.bytes)}'
+               f' producer: {self.producer_code}' \
+               f' code length: {len(self.encryption_information)} data length: {len(self.bytes)}'

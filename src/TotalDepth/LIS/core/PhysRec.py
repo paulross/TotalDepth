@@ -54,9 +54,7 @@ import struct
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import RawStream
-from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import TifMarker
-
 
 __author__ = 'Paul Ross'
 __date__ = '2010-11-05'
@@ -93,42 +91,43 @@ class ExceptionPhysRecTail(ExceptionPhysRec):
     """Physical Record Trailer exception."""
     pass
 
+
 # Physical Record Header constants
 # ================================
 
 #: PR Header 4 bytes long, two big-endian 16 bit numbers
 #: The struct.Struct() format for the Physical Record Header
-PR_PRH_LEN_FORMAT               = struct.Struct('>H')
+PR_PRH_LEN_FORMAT = struct.Struct('>H')
 #: The struct.Struct() format for the Physical Record Header attributes
-PR_PRH_ATTR_FORMAT              = struct.Struct('>H')
+PR_PRH_ATTR_FORMAT = struct.Struct('>H')
 #: The length of the Physical Record Header
-PR_PRH_LENGTH                   = 4
+PR_PRH_LENGTH = 4
 #: Number of bits in the 2 byte attributes
-PR_ATTRIBUTE_BITS               = 16
+PR_ATTRIBUTE_BITS = 16
 # Attribute Bit positions
 # -----------------------
 #: Successor bit position
-PR_SUCCESSOR_ATTRIBUTE_BIT      = 0     # Set if PR has a successor
+PR_SUCCESSOR_ATTRIBUTE_BIT = 0  # Set if PR has a successor
 #: Predessor bit position
-PR_PREDECESSOR_ATTRIBUTE_BIT    = 1     # Set if PR has a predecessor
+PR_PREDECESSOR_ATTRIBUTE_BIT = 1  # Set if PR has a predecessor
 #: Checksum error bit position
-PR_OLD_CHECK_ERROR_BIT          = 5     # Set if PR has had old checksum error
+PR_OLD_CHECK_ERROR_BIT = 5  # Set if PR has had old checksum error
 #: Parity error bit position
-PR_OLD_PARITY_ERROR_BIT         = 6     # Set if PR has had old parity error
+PR_OLD_PARITY_ERROR_BIT = 6  # Set if PR has had old parity error
 #: Bit position to indicate there is a record number in the trailer
-PR_RECORD_NUMBER_BIT            = 9     # Set if PR trailer has record number
+PR_RECORD_NUMBER_BIT = 9  # Set if PR trailer has record number
 #: Bit position to indicate there is a file number in the trailer
-PR_FILE_NUMBER_BIT              = 10    # Set if PR trailer has file number
+PR_FILE_NUMBER_BIT = 10  # Set if PR trailer has file number
 #: Bit position to indicate there is a 16bit checksum in the trailer
-PR_CHECKSUM_BIT                 = 12    # Have 16bit checksum
+PR_CHECKSUM_BIT = 12  # Have 16bit checksum
 #: Bit position to indicate checksum is undefined
-PR_CHECKSUM_UNDEFINED_BIT       = 13    # 16bit checksum is undefined
+PR_CHECKSUM_UNDEFINED_BIT = 13  # 16bit checksum is undefined
 #: Bit position to indicate Physical Record Type
-PR_TYPE_BIT                     = 14    # Only type 0 is defined
+PR_TYPE_BIT = 14  # Only type 0 is defined
 #: Unused only bits - i.e. Unused but not Unused, reserved
-PR_ATTRIBUTE_UNUSED_ONLY_MASK        = 0x0114
+PR_ATTRIBUTE_UNUSED_ONLY_MASK = 0x0114
 #: Unused, reserved bit mask
-PR_ATTRIBUTE_UNUSED_RESERVED_MASK    = 0x8888
+PR_ATTRIBUTE_UNUSED_RESERVED_MASK = 0x8888
 #: Unused and Unused, reserved bits, 0x899C
 PR_ATTRIBUTE_UNUSED_MASK = PR_ATTRIBUTE_UNUSED_ONLY_MASK & PR_ATTRIBUTE_UNUSED_RESERVED_MASK
 #
@@ -136,49 +135,50 @@ PR_ATTRIBUTE_UNUSED_MASK = PR_ATTRIBUTE_UNUSED_ONLY_MASK & PR_ATTRIBUTE_UNUSED_R
 # =================================
 # PR trailer record number 2 bytes long
 #: The struct.Struct() format for the Physical Record Trailer record number, unsigned short.
-PR_PRT_REC_NUM_FORMAT           = struct.Struct('>H')
+PR_PRT_REC_NUM_FORMAT = struct.Struct('>H')
 #: The length of the Physical Record Trailer for the record number
-PR_PRT_REC_NUM_LEN              = 2
+PR_PRT_REC_NUM_LEN = 2
 #: The minimum record number, two byte unsigned.
-PR_PRT_REC_NUM_MIN              = 0
+PR_PRT_REC_NUM_MIN = 0
 #: The maximum record number, two byte unsigned.
-PR_PRT_REC_NUM_MAX              = (1 << 16) - 1
+PR_PRT_REC_NUM_MAX = (1 << 16) - 1
 
 #: The struct.Struct() format for the Physical Record Trailer file number, unsigned short.
-PR_PRT_FILE_NUM_FORMAT          = struct.Struct('>H')
+PR_PRT_FILE_NUM_FORMAT = struct.Struct('>H')
 #: The length of the Physical Record Trailer for the file number
-PR_PRT_FILE_NUM_LEN             = 2
+PR_PRT_FILE_NUM_LEN = 2
 #: The minimum file number, two byte unsigned.
-PR_PRT_FILE_NUM_MIN              = 0
+PR_PRT_FILE_NUM_MIN = 0
 #: The maximum file number, two byte unsigned.
-PR_PRT_FILE_NUM_MAX              = (1 << 16) - 1
+PR_PRT_FILE_NUM_MAX = (1 << 16) - 1
 
 # PR trailer checksum 2 bytes long
 #: The struct.Struct() format for the Physical Record Trailer checksum, unsigned short.
-PR_PRT_CHECKSUM_FORMAT          = struct.Struct('>H')
+PR_PRT_CHECKSUM_FORMAT = struct.Struct('>H')
 #: The length of the Physical Record Trailer for the checksum
-PR_PRT_CHECKSUM_LEN             = 2
+PR_PRT_CHECKSUM_LEN = 2
 
 # Misc.
 # =====
 ## Normal maximum Physical Record length
-#PR_DEFAULT_MAX_LENGTH            = 1024
+# PR_DEFAULT_MAX_LENGTH            = 1024
 ## Arbitrary really but must be greater than PRH + PRT
-#PR_DEFAULT_MIN_LENGTH            = 128
+# PR_DEFAULT_MIN_LENGTH            = 128
 #: Maximum possible Physical Record length represented by an unsigned 16 bit int
-PR_MAX_LENGTH                    = 2**16 - 1
+PR_MAX_LENGTH = 2 ** 16 - 1
 
 # Sanity check of struct compiled formats
-assert(PR_PRH_LEN_FORMAT.size == 2)
-assert(PR_PRH_ATTR_FORMAT.size == 2)
-assert(PR_PRT_REC_NUM_FORMAT.size == PR_PRT_REC_NUM_LEN)
-assert(PR_PRT_FILE_NUM_FORMAT.size == PR_PRT_FILE_NUM_LEN)
-assert(PR_PRT_CHECKSUM_FORMAT.size == PR_PRT_CHECKSUM_LEN)
+assert (PR_PRH_LEN_FORMAT.size == 2)
+assert (PR_PRH_ATTR_FORMAT.size == 2)
+assert (PR_PRT_REC_NUM_FORMAT.size == PR_PRT_REC_NUM_LEN)
+assert (PR_PRT_FILE_NUM_FORMAT.size == PR_PRT_FILE_NUM_LEN)
+assert (PR_PRT_CHECKSUM_FORMAT.size == PR_PRT_CHECKSUM_LEN)
 
 
 class PhysRecBase:
     """Base class for physical record read and write.
     TODO: Checksum reading, writing and testing."""
+
     def __init__(self, theFileId: str, keepGoing: bool):
         """Constructor, initialise data common to child classes.
 
@@ -190,22 +190,22 @@ class PhysRecBase:
         self.keepGoing = keepGoing
         self.stream = None
         self.tif = None
-        self.prLen = 0          # Physical record size
-        self.prAttr = 0         # Physical record attributes
-        self.recNum = None      # Optional record number in trailer
-        self.fileNum = None     # Optional file number in trailer
-        self.checksum = None    # Optional checksum in trailer
-        self.ldLen = 0          # Size of the Logical Data chunk for this record
-        self.startOfLr = 0      # Physical file position of the beginning of the LR
-                                # This is the position of the TIF marker
-                                # (if present) or the position of the first PR
-                                # header for the LR if TIF markers are absent.
-                                # i.e. to read the LR seek to self.startOfLr
-                                # then read TIF and read PR(s)
-        self.startPrPos = 0     # Physical file position of the beginning of this PR
-                                # This is the position of the TIF marker
-                                # (if present) or the position of the PR header
-                                # if TIF markers are absent.
+        self.prLen = 0  # Physical record size
+        self.prAttr = 0  # Physical record attributes
+        self.recNum = None  # Optional record number in trailer
+        self.fileNum = None  # Optional file number in trailer
+        self.checksum = None  # Optional checksum in trailer
+        self.ldLen = 0  # Size of the Logical Data chunk for this record
+        self.startOfLr = 0  # Physical file position of the beginning of the LR
+        # This is the position of the TIF marker
+        # (if present) or the position of the first PR
+        # header for the LR if TIF markers are absent.
+        # i.e. to read the LR seek to self.startOfLr
+        # then read TIF and read PR(s)
+        self.startPrPos = 0  # Physical file position of the beginning of this PR
+        # This is the position of the TIF marker
+        # (if present) or the position of the PR header
+        # if TIF markers are absent.
 
     def _reset(self):
         """Resets internal state, for example when the caller makes a seek."""
@@ -217,13 +217,13 @@ class PhysRecBase:
         self.ldLen = 0
         self.startOfLr = 0
         self.startPrPos = 0
-    
+
     def close(self):
         """Close the underlying stream, further operations will raise a
         ValueError."""
         if self.stream is not None:
             self.stream.close()
-    
+
     def strHeader(self, inc_attributes_short: bool):
         """Returns the header string to go at the top of a list of __str__().
         If inc_attributes_short then the header is suitable for using the string created by attribute_str_short()."""
@@ -232,7 +232,7 @@ class PhysRecBase:
             rS.append(self.tif.strHeader())
             rS.append('  ')
         rS.append('PR:   %08s  %6s    %4s  %6s' \
-            % ('tell()', 'Length', 'Attr', 'LD_len'))
+                  % ('tell()', 'Length', 'Attr', 'LD_len'))
         # PR tail values.
         rS.append('  RecNum')
         # Can be negative like 0x-5f7a
@@ -242,14 +242,14 @@ class PhysRecBase:
             # PSRFC is Predesessor/Successor/Recort Number/File Number/Checksum
             rS.append('  PSRFC')
         return ''.join(rS)
-    
+
     def __str__(self):
         rS = []
         if self.tif is not None and self.tif.hasTif:
             rS.append(str(self.tif))
             rS.append('  ')
         rS.append('PR: 0x%8x  %6d  0x%4x  %6d' \
-            % (self.startPrPos, self.prLen, self.prAttr, self.ldLen))
+                  % (self.startPrPos, self.prLen, self.prAttr, self.ldLen))
         # PR tail values.
         if self.recNum is not None:
             rS.append('  0x%04x' % self.recNum)
@@ -294,77 +294,77 @@ class PhysRecBase:
         ]
         return ''.join(ret)
 
-    #=====================================
+    # =====================================
     # Section: Attribute bit manipulation.
-    #=====================================
+    # =====================================
     def _isAttrBitSet(self, theBit):
         """Returns true if a particular PRH attribute bit is clear."""
         if self.prAttr & (1 << theBit):
             return True
         return False
-    
+
     def _isAttrBitClear(self, theBit):
         """Returns true if a particular PRH attribute bit is set."""
         return not self._isAttrBitSet(theBit)
-    
+
     def _setAttrBit(self, theBit):
         """Sets a particular PRH attribute bit."""
-        assert(theBit < PR_ATTRIBUTE_BITS)
+        assert (theBit < PR_ATTRIBUTE_BITS)
         self.prAttr |= (1 << theBit)
-    
+
     def _clearAttrBit(self, theBit):
         """Clears a particular PRH attribute bit."""
-        assert(theBit < PR_ATTRIBUTE_BITS)
+        assert (theBit < PR_ATTRIBUTE_BITS)
         self.prAttr &= ~(1 << theBit)
-    
+
     def _setOrClearAttrBit(self, theBit, b):
         """If b is True sets a particular PRH attribute bit otherwise clears it."""
         if b:
             self._setAttrBit(theBit)
         else:
             self._clearAttrBit(theBit)
-    
+
     def _hasSuccessor(self):
         """Returns true if this PR has a successor, false otherwise."""
         return self._isAttrBitSet(PR_SUCCESSOR_ATTRIBUTE_BIT)
-        #return self.prAttr & (1 << PR_SUCCESSOR_ATTRIBUTE_BIT)
-    
+        # return self.prAttr & (1 << PR_SUCCESSOR_ATTRIBUTE_BIT)
+
     def _hasPredecessor(self):
         """Returns true if this PR has a predecessor, false otherwise."""
         return self._isAttrBitSet(PR_PREDECESSOR_ATTRIBUTE_BIT)
-        #return self.prAttr & (1 << PR_PREDECESSOR_ATTRIBUTE_BIT)
-    
+        # return self.prAttr & (1 << PR_PREDECESSOR_ATTRIBUTE_BIT)
+
     def _hasRecordNumber(self):
         """Returns true if this PR has a record number, false otherwise."""
         return self._isAttrBitSet(PR_RECORD_NUMBER_BIT)
-        #return self.prAttr & (1 << PR_RECORD_NUMBER_BIT)
-        
+        # return self.prAttr & (1 << PR_RECORD_NUMBER_BIT)
+
     def _hasFileNumber(self):
         """Returns true if this PR has a file number, false otherwise."""
         return self._isAttrBitSet(PR_FILE_NUMBER_BIT)
-        #return self.prAttr & (1 << PR_FILE_NUMBER_BIT)
-    
+        # return self.prAttr & (1 << PR_FILE_NUMBER_BIT)
+
     def _hasChecksum(self):
         """Returns true if this PR has a checksum, false otherwise."""
         if self._isAttrBitSet(PR_CHECKSUM_UNDEFINED_BIT) and not self.keepGoing:
             raise ExceptionPhysRecUndefinedChecksum('Undefined bit in checksum attribute')
         return self._isAttrBitSet(PR_CHECKSUM_BIT)
-    
+
     def _setSuccessor(self, b=True):
         """If b is True this sets the PRH attribute bits for a successor record
         otherwise it clears it."""
         self._setOrClearAttrBit(PR_SUCCESSOR_ATTRIBUTE_BIT, b)
-    
+
     def _setPredecessor(self, b=True):
         """If b is True this sets the PRH attribute bits for a successor record
         otherwise it clears it."""
         self._setOrClearAttrBit(PR_PREDECESSOR_ATTRIBUTE_BIT, b)
-            
+
     def _setHasRecordNumber(self, b=True):
         """If b is True this sets the PRH attribute bit for a record number in the PRT
         otherwise it clears it."""
         self._setOrClearAttrBit(PR_RECORD_NUMBER_BIT, b)
-        
+
     def _setHasFileNumber(self, b=True):
         """If b is True this sets the PRH attribute bit for a file number in the PRT
         otherwise it clears it."""
@@ -374,14 +374,16 @@ class PhysRecBase:
         """If b is True this sets the PRH attribute bits for a checksum in the PRT
         otherwise it clears it."""
         self._setOrClearAttrBit(PR_CHECKSUM_BIT, b)
-    #=================================
+    # =================================
     # End: Attribute bit manipulation.
-    #=================================
+    # =================================
 
 
 class PhysRecRead(PhysRecBase):
     """Specialisation of PhysRecBase for reading streams."""
-    def __init__(self, theFile, theFileId: str = '', keepGoing:bool = False, pad_modulo: int = 0, pad_non_null: bool = False):
+
+    def __init__(self, theFile, theFileId: str = '', keepGoing: bool = False, pad_modulo: int = 0,
+                 pad_non_null: bool = False):
         """Constructor with a file path or file-like object.
         TODO: checksum.
 
@@ -415,19 +417,19 @@ class PhysRecRead(PhysRecBase):
         # Reset the stream self.tif may initialise TIF and read stream
         self.stream.seek(0)
         self.startOfLr = 0
-        
+
     @property
     def isLrStart(self):
         return self._isLrStart
-    
+
     def ldIndex(self):
         return self._ldIndex
-    
+
     def __str__(self):
         if self.isEOF:
             return 'PR: EOF'
         return super(PhysRecRead, self).__str__()
-    
+
     def _reset(self):
         """Resets internal state, for example when the caller makes a seek."""
         super(PhysRecRead, self)._reset()
@@ -438,7 +440,7 @@ class PhysRecRead(PhysRecBase):
         self._mustReadHead = True
         # Reset TIF marker too
         self.tif.reset()
-    
+
     def _raiseOrErrorOnEOF(self, theMsg):
         self.isEOF = True
         if not self.keepGoing:
@@ -449,8 +451,8 @@ class PhysRecRead(PhysRecBase):
         """Read the Physical Record header and set internal state."""
         # If the previous record did not have a successor then this record is
         # the start of a logical record
-        #print('_readHead()', '0x{:x}'.format(self.stream.tell()))
-        #print(''.join(traceback.format_stack()))
+        # print('_readHead()', '0x{:x}'.format(self.stream.tell()))
+        # print(''.join(traceback.format_stack()))
         if not self._hasSuccessor():
             self._ldTell = 0
             self._isLrStart = True
@@ -478,7 +480,7 @@ class PhysRecRead(PhysRecBase):
             # If this is first PR in LR then set start of LR as the start of this PR 
             if self.isLrStart:
                 self.startOfLr = self.startPrPos
-                #print('Set start of LR:', self.startOfLr)
+                # print('Set start of LR:', self.startOfLr)
             if not self.isLrStart and not self._hasPredecessor():
                 logging.debug('Physical record at 0x%X is successor but has no predecessor bit set.', self.startPrPos)
             # Index into logical data for this PR
@@ -499,10 +501,10 @@ class PhysRecRead(PhysRecBase):
             # Set flag to say if this is the first PR of a LR
             if self._ldTell > 0:
                 self._isLrStart = False
-    
+
     def _readTail(self):
         """Read the Physical Record trailer and set internal state."""
-        #print('_readTail()', self.stream.tell())
+        # print('_readTail()', self.stream.tell())
         self._mustReadHead = True
         if self.isEOF:
             raise ExceptionPhysRecEOF('PhysRecRead._readTail() when already EOF')
@@ -598,12 +600,12 @@ class PhysRecRead(PhysRecBase):
                         self._readHead()
                     else:
                         break
-        #print('PhysRecRead.__readOrSkip() returning {:s}'.format(str(retVal)))
+        # print('PhysRecRead.__readOrSkip() returning {:s}'.format(str(retVal)))
         return retVal
 
     def __readLdWithinPr(self, theLd, size):
         """Function for reading into logical data."""
-        assert(size >= 0 and size <= (self.ldLen - self._ldIndex))
+        assert (size >= 0 and size <= (self.ldLen - self._ldIndex))
         self._ldIndex += size
         self._ldTell += size
         try:
@@ -620,10 +622,10 @@ class PhysRecRead(PhysRecBase):
             return theLd
         except RawStream.ExceptionRawStreamEOF as err:
             self._raiseOrErrorOnEOF('PhysRecRead.__readLdWithinPr() on EOF')
-    
+
     def __skipLdWithinPr(self, theCount, size):
         """Function for skipping and counting data."""
-        assert(size >= 0 and size <= (self.ldLen - self._ldIndex))
+        assert (size >= 0 and size <= (self.ldLen - self._ldIndex))
         self._ldIndex += size
         self._ldTell += size
         self.stream.seek(size, 1)
@@ -632,8 +634,8 @@ class PhysRecRead(PhysRecBase):
     def _readOrSkipPreamble(self):
         """Prepares for a read or skip. Returns True if completed OK.
         May raise ExceptionPhysRecEOF if already at EOF."""
-        #print('_readOrSkipPreamble()', '0x{:x}'.format(self.stream.tell()))
-        #print(''.join(traceback.format_stack()))
+        # print('_readOrSkipPreamble()', '0x{:x}'.format(self.stream.tell()))
+        # print(''.join(traceback.format_stack()))
         if self.isEOF:
             raise ExceptionPhysRecEOF('PhysRecRead.read() on EOF')
         if self._mustReadHead:
@@ -643,7 +645,7 @@ class PhysRecRead(PhysRecBase):
                 self._readTail()
             return False
         return True
-    
+
     def readLrBytes(self, theSize=-1, theLd=None):
         """Reads theSize logical data bytes and returns it as a bytes() object.
         If theSize is -1 all logical data for this logical record is returned.
@@ -665,7 +667,7 @@ class PhysRecRead(PhysRecBase):
         if not self._readOrSkipPreamble():
             return 0
         return self.__readOrSkip(0, self.__skipLdWithinPr, theSize)
-    
+
     def skipToNextLr(self):
         """Skips all remaining logical data, the PR trailer, and the next PR
         header. This positions stream at the start of the next logical record.
@@ -678,7 +680,7 @@ class PhysRecRead(PhysRecBase):
         if r != 0 and not self._mustReadHead:
             self._readTail()
         self._readHead()
-        #if self.isEOF:
+        # if self.isEOF:
         #    raise ExceptionPhysRecEOF('PhysRecRead.skipToNextLr() gets EOF')
         return r
 
@@ -686,11 +688,11 @@ class PhysRecRead(PhysRecBase):
         """Returns the absolute file position of the start current Logical
         record. This value can be safely used in seekLr."""
         return self.startOfLr
-    
+
     def tell(self):
         """Returns the absolute position of the file."""
         return self.stream.tell()
-        
+
     def seekLr(self, offset):
         """External setting of file position directly to the beginning of
         a PRH or TIF marker (if present). The caller is fully responsible
@@ -698,25 +700,25 @@ class PhysRecRead(PhysRecBase):
         self.stream.seek(offset, whence=os.SEEK_SET)
         self._reset()
         return self.stream.tell()
-    
+
     def seekCurrentLrStart(self):
         """Setting the file position directly to the beginning of
         a PRH or TIF marker (if present) for the current Logical Rcord."""
-        #print('PhysRec.seekCurrentLrStart(): 0x{:8x}'.format(self.startOfLr))
+        # print('PhysRec.seekCurrentLrStart(): 0x{:8x}'.format(self.startOfLr))
         return self.seekLr(self.startOfLr)
-        
+
     def hasLd(self):
         """Returns True if there is logical data to be read, False otherwise.
         NOTE: This will return False on file initialisation and only return
         True once the Physical Record Header has been read."""
         return (self.ldLen > self._ldIndex) or self._hasSuccessor()
-    
+
     def ldRemaingInPr(self):
         """Returns the number of bytes remaining in this particular Physical
         Record. NOTE: The can be 0 and hasLd() be True if at the end of a
         Physical Record that has a successor record."""
         return self.ldLen - self._ldIndex
-    
+
     def genLd(self):
         """A generator that produces a tuple of (logical data, isLrStart)
         where:
@@ -750,19 +752,21 @@ class PhysRecRead(PhysRecBase):
 
 class PhysRecTail(object):
     """Represents Physical Record Tail fields."""
+
     def __init__(self, hasRecNum=False, fileNum=None, hasCheckSum=False):
         """These three fields are Rep Code type 79 (16 bit signed integer)."""
         self.hasRec = hasRecNum
         self._recNum = 0
         if fileNum is not None \
-        and (fileNum < PR_PRT_FILE_NUM_MIN or fileNum > PR_PRT_FILE_NUM_MAX):
+                and (fileNum < PR_PRT_FILE_NUM_MIN or fileNum > PR_PRT_FILE_NUM_MAX):
             self._fileNum = self.normalise_integer(
                 fileNum,
                 PR_PRT_FILE_NUM_MIN,
                 PR_PRT_FILE_NUM_MAX
             )
             logging.warning(
-                'PhysRecTail.__init__(): File number {:d} out of range, normalising to {:d}'.format(fileNum, self._fileNum)
+                'PhysRecTail.__init__(): File number {:d} out of range, normalising to {:d}'.format(fileNum,
+                                                                                                    self._fileNum)
             )
         else:
             self._fileNum = fileNum
@@ -790,37 +794,37 @@ class PhysRecTail(object):
     @staticmethod
     def normalise_integer(value: int, value_min: int, value_max) -> int:
         """Given a value this normalises it to be within the range value_min <= value <= value_max."""
-        if value_min >=  value_max:
+        if value_min >= value_max:
             raise ValueError(f'min {value_min} is >= max {value_max}')
         return ((value - value_min) % (value_max - value_min + 1)) + value_min
-    
+
     @property
     def recNum(self):
         return self._recNum
-    
+
     @property
     def fileNum(self):
         return self._fileNum
-    
+
     @property
     def prtLen(self):
         return self._prtLen
-    
+
     @property
     def prhAttr(self):
         """Returns the PRH attributes, to be or'd with any other attributes."""
         return self._prhAttr
-    
+
     def hasTail(self):
         """Returns True if any PRT field is present, False otherwise."""
         return self.hasRec or self._fileNum is not None or self.hasCheck
-        
+
     def computeCheckSum(self, theB):
         """Computes the checksum of the byte stream."""
         self.checkSum = 0
         if self.hasCheck:
-            for i in range(0, len(theB)-1, 2):
-                t = theB[i+1] + 256 * theB[i]
+            for i in range(0, len(theB) - 1, 2):
+                t = theB[i + 1] + 256 * theB[i]
                 self.checkSum += t
                 if self.checkSum & 0x10000:
                     self.checkSum += 1
@@ -828,7 +832,7 @@ class PhysRecTail(object):
                 if self.checkSum & 0x10000:
                     self.checkSum += 1
                 self.checkSum &= 0xFFFF
-        
+
     def prtRecNum(self):
         r = b''
         if self.hasRec:
@@ -840,10 +844,11 @@ class PhysRecTail(object):
                     PR_PRT_REC_NUM_MAX
                 )
                 logging.warning(
-                    'PhysRecTail.__init__(): Record number {:d} out of range, normalising to {:d}'.format(oldRecNum, self._recNum)
+                    'PhysRecTail.__init__(): Record number {:d} out of range, normalising to {:d}'.format(oldRecNum,
+                                                                                                          self._recNum)
                 )
             r = PR_PRT_REC_NUM_FORMAT.pack(self._recNum)
-            self._recNum +=1
+            self._recNum += 1
         return r
 
     def prtFileNum(self):
@@ -859,14 +864,15 @@ class PhysRecTail(object):
 
 class PhysRecWrite(PhysRecBase):
     """Specialisation of PhysRecBase for writing to files."""
+
     def __init__(self,
-            theFile,
-            theFileId=None,
-            keepGoing=False,
-            hasTif=False,
-            thePrLen=PR_MAX_LENGTH,
-            thePrt=PhysRecTail(),
-        ):
+                 theFile,
+                 theFileId=None,
+                 keepGoing=False,
+                 hasTif=False,
+                 thePrLen=PR_MAX_LENGTH,
+                 thePrt=PhysRecTail(),
+                 ):
         """Constructor with:
         theFile - A file like object or string, if the latter it assumed to be a path.
         theFileId - File identifier, this could be a path for example. If None the RawStream will try and cope with it.
@@ -875,7 +881,7 @@ class PhysRecWrite(PhysRecBase):
         thePrLen - Max Physical Record length, defaults to the maximum possible length.
         thePrt - Physical Records Trailer settings (defaults to PhysRec.PhysRecTail())."""
         super().__init__(theFileId, keepGoing)
-        #print('thePrt', thePrt)
+        # print('thePrt', thePrt)
         try:
             self.stream = RawStream.RawStream(theFile, mode='wb', fileId=self.fileId)
         except IOError:
@@ -897,23 +903,23 @@ class PhysRecWrite(PhysRecBase):
             raise ExceptionPhysRecWrite(
                 'PhysRecWrite no space for payload in {:d} in PR length {:d}'.format(self._maxPayloadLen, self._prLen)
             )
-    
+
     def close(self):
         """Close the Physical Record Handler and the underlying stream."""
         if self.tif is not None:
             self.tif.close(self.stream)
         self.stream.close()
-    
+
     def writeLr(self, theLr):
         """Splits a Logical Record into into Physical Records and writes them
         to the stream. These Physical Records have trailer records if required.
         Returns the tell() of the start of the LR."""
-        assert(self._maxPayloadLen > 0)
+        assert (self._maxPayloadLen > 0)
         ofs = 0
         myTell = self.stream.tell()
         while ofs < len(theLr):
             myB = bytearray()
-            myPayLoad = theLr[ofs:ofs+self._maxPayloadLen]
+            myPayLoad = theLr[ofs:ofs + self._maxPayloadLen]
             # Pack the PR length for the PRH
             myB.extend(PR_PRH_LEN_FORMAT.pack(
                 PR_PRH_LENGTH + len(myPayLoad) + self._prt.prtLen)

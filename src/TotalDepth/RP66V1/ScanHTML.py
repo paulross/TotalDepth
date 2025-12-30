@@ -48,12 +48,10 @@ from TotalDepth.util import gnuplot, XmlWrite, DictTree
 
 colorama.init(autoreset=True)
 
-
-__author__  = 'Paul Ross'
-__date__    = '2019-03-21'
+__author__ = 'Paul Ross'
+__date__ = '2019-03-21'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
 
@@ -194,14 +192,15 @@ def html_write_storage_unit_label(sul: File.StorageUnitLabel, xhtml_stream: XmlW
     html_write_table(table, xhtml_stream, class_style='sul')
 
 
-def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream, sort: bool) -> None:
-        eflr = eflr_position.eflr
-        if eflr.is_key_value():
-            table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=sort)
-        else:
-            table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=sort)
-        html_write_table(table_as_strings, xhtml_stream, class_style='eflr',
-                         id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
+def html_write_EFLR_as_table(eflr_position: LogicalFile.PositionEFLR, xhtml_stream: XmlWrite.XhtmlStream,
+                             sort: bool) -> None:
+    eflr = eflr_position.eflr
+    if eflr.is_key_value():
+        table_as_strings = eflr.key_values(stringify_function=stringify.stringify_object_by_type, sort=sort)
+    else:
+        table_as_strings = eflr.table_as_strings(stringify_function=stringify.stringify_object_by_type, sort=sort)
+    html_write_table(table_as_strings, xhtml_stream, class_style='eflr',
+                     id=f'0x{eflr_position.lrsh_position.lrsh_position:0x}')
 
 
 def _write_log_pass_content_in_html(
@@ -232,7 +231,7 @@ def _write_log_pass_content_in_html(
                 anchor,
                 xhtml_stream,
             )
-       )
+        )
     return tuple(ret)
 
 
@@ -264,7 +263,7 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
         xhtml_stream.characters('X Axis Spacing')
     # with XmlWrite.Element(xhtml_stream, 'p'):
     #     xhtml_stream.characters(f'Definitions: {XAxis.SPACING_DEFINITIONS}')
-    x_spacing_table = [['X Axis Spacing', 'Value', 'Description'],]
+    x_spacing_table = [['X Axis Spacing', 'Value', 'Description'], ]
     if x_axis.summary.spacing is not None:
         spacing = x_axis.summary.spacing
         x_spacing_table.append(['Minimum', f'{spacing.min} [{units}]', ''])
@@ -273,13 +272,15 @@ def _write_x_axis_summary(x_axis: XAxis.XAxis, xhtml_stream: XmlWrite.XhtmlStrea
         x_spacing_table.append(['Maximum', f'{spacing.max} [{units}]', ''])
         if spacing.median != 0:
             x_spacing_table.append(
-                ['Range', f'{spacing.max - spacing.min} ({(spacing.max - spacing.min) / spacing.median:%}) [{units}]', '']
+                ['Range', f'{spacing.max - spacing.min} ({(spacing.max - spacing.min) / spacing.median:%}) [{units}]',
+                 '']
             )
         else:
             x_spacing_table.append(['Range', f'{spacing.max - spacing.min} [{units}]', ''])
         x_spacing_table.append(['Std. Dev.', f'{spacing.std} [{units}]', ''])
         x_spacing_table.append(['Count of back', f'{spacing.counts.back:,d}', 'spacing < -0.5 median'])
-        x_spacing_table.append(['Count of duplicate', f'{spacing.counts.dupe:,d}', '-0.5 median <= spacing < 0.5 median'])
+        x_spacing_table.append(
+            ['Count of duplicate', f'{spacing.counts.dupe:,d}', '-0.5 median <= spacing < 0.5 median'])
         x_spacing_table.append(['Count of normal', f'{spacing.counts.norm:,d}', '0.5 median <= spacing < 1.5 median'])
         x_spacing_table.append(['Count of skipped', f'{spacing.counts.skip:,d}', 'spacing >= 1.5 median'])
     html_write_table(x_spacing_table, xhtml_stream, class_style='monospace')
@@ -350,7 +351,7 @@ def _write_frame_array_in_html(
             [
                 'Channel', 'Dims', 'Count', 'Units', 'Long Name', 'Size', 'Absent',
                 # If we can create a summary...
-                'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++',  'Activity',
+                'Min', 'Mean', 'Median', 'Std.Dev.', 'Max', '--', '==', '++', 'Activity',
                 'dtype',
             ],
         ]
@@ -383,15 +384,15 @@ def _write_frame_array_in_html(
             else:
                 logger.warning('Failed to create array summary for channel: %s', channel.ident)
                 row += [
-                    'N/A', #f'{array_summary.min:.3f}',
-                    'N/A', #f'{array_summary.mean:.3f}',
-                    'N/A', #f'{array_summary.median:.3f}',
-                    'N/A', #f'{array_summary.std:.3f}',
-                    'N/A', #f'{array_summary.max:.3f}',
-                    'N/A', #f'{array_summary.count_dec:d}',
-                    'N/A', #f'{array_summary.count_eq:d}',
-                    'N/A', #f'{array_summary.count_inc:d}',
-                    'N/A', #f'{array_summary.activity:.3f}',
+                    'N/A',  # f'{array_summary.min:.3f}',
+                    'N/A',  # f'{array_summary.mean:.3f}',
+                    'N/A',  # f'{array_summary.median:.3f}',
+                    'N/A',  # f'{array_summary.std:.3f}',
+                    'N/A',  # f'{array_summary.max:.3f}',
+                    'N/A',  # f'{array_summary.count_dec:d}',
+                    'N/A',  # f'{array_summary.count_eq:d}',
+                    'N/A',  # f'{array_summary.count_inc:d}',
+                    'N/A',  # f'{array_summary.activity:.3f}',
                 ]
             row.append(f'{arr.dtype}')
             frame_table.append(row)
@@ -441,7 +442,8 @@ def html_write_table_of_contents(
                         xhtml_stream.characters(f'Shape: {eflr.shape}')
                 if logical_file.has_log_pass:
                     with XmlWrite.Element(xhtml_stream, 'li'):
-                        with XmlWrite.Element(xhtml_stream, 'a', {'href': f'#{_anchor(index_lf, len(logical_file.eflrs))}'}):
+                        with XmlWrite.Element(xhtml_stream, 'a',
+                                              {'href': f'#{_anchor(index_lf, len(logical_file.eflrs))}'}):
                             xhtml_stream.characters(f'Log Pass with {len(logical_file.log_pass)} Frame Arrays')
                         with XmlWrite.Element(xhtml_stream, 'ol'):
                             for index_fa, frame_array in enumerate(logical_file.log_pass):
@@ -474,7 +476,7 @@ def html_write_body(
         frame_slice: Slice.Slice,
         xhtml_stream: XmlWrite.XhtmlStream,
         sort_eflr: bool
-    ) -> HTMLBodySummary:
+) -> HTMLBodySummary:
     """Write out the <body> of the document."""
     with XmlWrite.Element(xhtml_stream, 'h1'):
         xhtml_stream.characters('RP66V1 File Data Summary')
@@ -597,10 +599,12 @@ def scan_a_single_file(path_in: str, path_out: str, label_process: bool,
                     os.makedirs(out_dir, exist_ok=True)
                 with open(file_path_out, 'w') as fout:
                     logger.info(f'scan_a_single_file() target: "{os.path.basename(file_path_out)}"')
-                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice, sort_eflr)
+                    html_summary = html_scan_RP66V1_file_data_content(path_in, fout, label_process, frame_slice,
+                                                                      sort_eflr)
                 len_scan_output = os.path.getsize(file_path_out)
             else:
-                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice, sort_eflr)
+                html_summary = html_scan_RP66V1_file_data_content(path_in, sys.stdout, label_process, frame_slice,
+                                                                  sort_eflr)
                 len_scan_output = -1
             result = HTMLResult(
                 path_in,
@@ -867,7 +871,8 @@ def _write_top_level_index_table_body(index_file_path: str,
 
 
 def scan_dir_multiprocessing(dir_in, dir_out, jobs,
-                             frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
+                             frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[
+    str, HTMLResult]:
     """Multiprocessing code to plot log passes.
     Returns a dict of {path_in : HTMLResult, ...}"""
     assert os.path.isdir(dir_in)
@@ -888,13 +893,14 @@ def scan_dir_multiprocessing(dir_in, dir_out, jobs,
             pool.apply_async(scan_a_single_file, t) for t in tasks
         ]
     ]
-    _write_indexes(dir_out, {r.path_output : r for r in results})
+    _write_indexes(dir_out, {r.path_output: r for r in results})
     return {r.path_input: r for r in results}
 
 
 def scan_dir_or_file(path_in: str, path_out: str,
                      recursive: bool, label_process: bool,
-                     frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[str, HTMLResult]:
+                     frame_slice: typing.Union[Slice.Slice, Slice.Sample], sort_eflr: bool) -> typing.Dict[
+    str, HTMLResult]:
     """Scans a directory or file putting the results in path_out.
     Returns a dict of {path_in : HTMLResult, ...}
     """
@@ -1133,7 +1139,7 @@ def main() -> int:
         except IOError:
             logger.exception('Plotting with gnuplot failed.')
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input / 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
     else:
         ms_mb = 0.0
     print(f'Processed {len(result):,d} files and {size_input:,d} bytes in {clk_exec:.3f} s, {ms_mb:.1f} ms/Mb')

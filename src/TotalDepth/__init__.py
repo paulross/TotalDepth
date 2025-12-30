@@ -19,7 +19,7 @@
 # Paul Ross: apaulross@gmail.com
 """TotalDepth - a suite of Petrophysical software."""
 
-__all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth',]
+__all__ = ['BIT', 'common', 'DAT', 'LAS', 'LIS', 'RP66V1', 'util', 'ExceptionTotalDepth', ]
 
 __version__ = '0.5.0-rc1'
 

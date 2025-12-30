@@ -24,15 +24,16 @@ Created on Jun 9, 2011
 import enum
 import typing
 
-__author__  = 'Paul Ross'
-__date__    = '2011-06-09'
+__author__ = 'Paul Ross'
+__date__ = '2011-06-09'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import os
 import fnmatch
 
 from TotalDepth import ExceptionTotalDepth
+
 
 #: A pair of (in, out) file paths
 # FileInOut = collections.namedtuple('FileInOut', 'filePathIn, filePathOut')
@@ -83,6 +84,7 @@ def dirWalk(theIn: str, theOut: str = '', theFnMatch: typing.Tuple[str] = (),
 
     bigFirst - If True then the largest files in  directory are given first. If False it is alphabetical.
     """
+
     def _match(file_path: str, fn_match: typing.Tuple[str]):
         if len(fn_match) == 0:
             return True
@@ -126,11 +128,13 @@ def dirWalk(theIn: str, theOut: str = '', theFnMatch: typing.Tuple[str] = (),
                 for aFp in dirWalk(fp, out_path, theFnMatch, recursive):
                     yield aFp
 
+
 class Event(enum.Enum):
     DIR_OPEN = 1
     DIR_CLOSE = 2
     FILE_OPEN = 3
     FILE_CLOSE = 4
+
 
 class FileEvent(typing.NamedTuple):
     event: Event
@@ -199,7 +203,6 @@ def dir_event_walk(path_in: str, path_out: str = '', fn_match: str = '',
                 yield FileEvent(Event.DIR_OPEN, file_path, out_path)
                 yield from dir_event_walk(file_path, out_path, fn_match, recursive)
                 yield FileEvent(Event.DIR_CLOSE, file_path, out_path)
-
 
 # def prune_empty_directories(path_in: str):
 #     """Walk a file tree removing any empty directories."""

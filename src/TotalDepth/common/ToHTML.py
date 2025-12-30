@@ -23,7 +23,6 @@ import typing
 
 from TotalDepth.util import XmlWrite, DictTree
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -67,7 +66,7 @@ def html_write_table(table_as_strings: typing.List[typing.List[str]],
                      class_style,
                      **kwargs) -> None:
     if len(table_as_strings):
-        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}):#.update(kwargs)):
+        with XmlWrite.Element(xhtml_stream, 'table', {'class': class_style}):  # .update(kwargs)):
             with XmlWrite.Element(xhtml_stream, 'tr', {}):
                 for cell in table_as_strings[0]:
                     with XmlWrite.Element(xhtml_stream, 'th', {'class': class_style}):

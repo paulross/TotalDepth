@@ -27,6 +27,7 @@ import typing
 
 class RLEItem:
     """Class that represents a single entry in a Run Length Encoding set. v - The datum value."""
+
     def __init__(self, datum: typing.Union[int, float]):
         self.datum: typing.Union[int, float] = datum
         self.stride: typing.Union[int, float] = 0
@@ -113,6 +114,7 @@ class RLE:
 
     theFunc - optional unary function to convert all values with.
     """
+
     def __init__(self, theFunc=None):
         """Constructor, optionally takes a unary function to convert all values with."""
         # List of RLEItem
@@ -121,7 +123,7 @@ class RLE:
 
     def __str__(self):
         return '<RLE: func={:s}: '.format(str(self.function)) \
-               + '[' + ', '.join([str(r) for r in self.rle_items]) + ']>'
+            + '[' + ', '.join([str(r) for r in self.rle_items]) + ']>'
 
     def __len__(self):
         """The number of RLEItem(s)."""
@@ -190,7 +192,7 @@ class RLE:
             else:
                 lo = mid + 1
         if lo:
-            return self.rle_items[lo-1].largest_le(value)
+            return self.rle_items[lo - 1].largest_le(value)
         raise ValueError(f'Can not find largest_le for value {value}')
 
 

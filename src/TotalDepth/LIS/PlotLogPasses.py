@@ -22,31 +22,32 @@ Created on May 23, 2011
 
 @author: p2ross
 """
-__author__  = 'Paul Ross'
-__date__    = '2011-05-23'
+__author__ = 'Paul Ross'
+__date__ = '2011-05-23'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-import time
-import sys
-import os
+import collections
 import logging
 import multiprocessing
-import collections
+import os
+import sys
+import time
 from optparse import OptionParser
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
-from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import FileIndexer
+from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import Units
-from TotalDepth.util.plot import Plot
-from TotalDepth.util.plot import FILMCfgXML
-from TotalDepth.util.plot import PRESCfgXML
 from TotalDepth.util import DictTree
 from TotalDepth.util import DirWalk
 from TotalDepth.util import XmlWrite
-#from TotalDepth.util import HtmlUtils
+from TotalDepth.util.plot import FILMCfgXML
+from TotalDepth.util.plot import PRESCfgXML
+from TotalDepth.util.plot import Plot
+
+# from TotalDepth.util import HtmlUtils
 
 CSS_CONTENT_INDEX = """body {
 font-size:      12px;
@@ -91,10 +92,12 @@ th, td {
 # The field names are not (yet) used.
 IndexTableValue = collections.namedtuple('IndexTableValue', 'scale evFirst evLast curves numPoints outPath')
 
+
 class PlotLogInfo(object):
     """Class that collates information about the results of plotting log passes.
     This can, for example, write out an index.html page with links to SVG pages."""
     CSS_FILE_PATH = 'index.css'
+
     def __init__(self):
         # So here the essential data that we have to put in the index.html is:
         # A list of tuples of:
@@ -108,20 +111,20 @@ class PlotLogInfo(object):
         self.curvePoints = 0
         # List of EngVal objects that accumulate the number of 'curve feet'
         self._intervalCntrS = []
-        
+
     @property
     def intervals(self):
         return self._intervalCntrS
-        
+
     def __str__(self):
         retL = ['PlotLogInfo {:s} Files={:d} Bytes={:d} LogPasses={:d} Plots={:d} Curve points={:d}'.format(
-                repr(self), self.lisFileCntr, self._lisBytes, self.logPassCntr, self.plotCntr, self.curvePoints)]
+            repr(self), self.lisFileCntr, self._lisBytes, self.logPassCntr, self.plotCntr, self.curvePoints)]
         for l in sorted(self._plotS):
             retL.append('{:s}'.format(str(l)))
         for anEv in self._intervalCntrS:
             retL.append('Interval*curves: {:s}'.format(anEv.newEngValInOpticalUnits().strFormat('{:.3f}')))
         return '\n'.join(retL)
-        
+
     def __iadd__(self, other):
         self._plotS += other._plotS
         self._lisBytes += other._lisBytes
@@ -132,8 +135,9 @@ class PlotLogInfo(object):
         for anI in other.intervals:
             self._addInterval(anI)
         return self
-    
-    def addPlotResult(self, theInPath, theOutPath, theLpIdx, theFilmID, theScale, theEvFirst, theEvLast, theCurveS, ptsPlotted):
+
+    def addPlotResult(self, theInPath, theOutPath, theLpIdx, theFilmID, theScale, theEvFirst, theEvLast, theCurveS,
+                      ptsPlotted):
         """Adds a successful plot.
         theInPath - The file path to the input file.
         theOutPath - The file path to the output file.
@@ -175,7 +179,7 @@ class PlotLogInfo(object):
             myInterval = theEvLast - theEvFirst
         myInterval *= len(theCurveS)
         self._addInterval(myInterval)
-    
+
     def _addInterval(self, theInterval):
         if len(self._intervalCntrS) == 0:
             self._intervalCntrS.append(theInterval)
@@ -189,10 +193,10 @@ class PlotLogInfo(object):
             else:
                 # No break; Add a new interval
                 self._intervalCntrS.append(theInterval)
-            
+
     def writeHTML(self, theFilePath, theDesc):
-        """Write the index.html table.""" 
-        lenCmnPref = os.path.commonprefix([t[0] for t in self._plotS]).rfind(os.sep)+1
+        """Write the index.html table."""
+        lenCmnPref = os.path.commonprefix([t[0] for t in self._plotS]).rfind(os.sep) + 1
         # Put the plot summary data into a DictTree
         myTree = DictTree.DictTreeHtmlTable()
         for aPlt in self._plotS:
@@ -208,17 +212,17 @@ class PlotLogInfo(object):
                         myS,
                         'link',
                         {
-                            'href'  : self.CSS_FILE_PATH,
-                            'type'  : "text/css",
-                            'rel'   : "stylesheet",
+                            'href': self.CSS_FILE_PATH,
+                            'type': "text/css",
+                            'rel': "stylesheet",
                         }
-                    ):
+                ):
                     pass
                 with XmlWrite.Element(myS, 'title'):
                     myS.characters('LIS plots in SVG')
             with XmlWrite.Element(myS, 'h1'):
                 myS.characters('PlotLogPasses: {:s}'.format(theDesc))
-            with XmlWrite.Element(myS, 'table', {'border' : '1'}):
+            with XmlWrite.Element(myS, 'table', {'border': '1'}):
                 self._writeHTMLTh(myS)
                 self._writeIndexTableRows(myS, myTree, theFilePath)
             # Write: </table>
@@ -233,7 +237,7 @@ class PlotLogInfo(object):
                 # Write out the '</tr>' element
                 theS.endElement('tr')
             else:
-                #print 'TRACE: anEvent', anEvent
+                # print 'TRACE: anEvent', anEvent
                 k, v, r, c = anEvent
                 # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, txt[-1])
                 myTdAttrs = {}
@@ -247,17 +251,17 @@ class PlotLogInfo(object):
                     self._writeValues(theS, v, theFilePath)
 
     def _writeValues(self, theS, theVal, theFilePath):
-        assert(theVal is not None)
+        assert (theVal is not None)
         for i, aVal in enumerate(theVal):
             myValAttrs = {}
             if i == 3:
                 # Curve list
-                myValAttrs = {'align' : 'left'}
+                myValAttrs = {'align': 'left'}
             else:
-                myValAttrs = {'align' : 'right'}
+                myValAttrs = {'align': 'right'}
             with XmlWrite.Element(theS, 'td', myValAttrs):
-                if i == len(theVal)-1:
-                    with XmlWrite.Element(theS, 'a', {'href' : self.retRelPath(os.path.dirname(theFilePath), aVal)}):
+                if i == len(theVal) - 1:
+                    with XmlWrite.Element(theS, 'a', {'href': self.retRelPath(os.path.dirname(theFilePath), aVal)}):
                         theS.characters(os.path.basename(aVal))
                 else:
                     theS.characters(str(aVal))
@@ -267,22 +271,24 @@ class PlotLogInfo(object):
             for aTh in ('Input', 'Pass', 'Film', 'Scale', 'From', 'To', 'Curves', 'Points', 'Plot'):
                 with XmlWrite.Element(theS, 'th'):
                     theS.characters(aTh)
-    
+
     def retRelPath(self, d, f):
         """Given directory d and file path of f this returns relative path to f from d."""
         # Make absolute and normalise to remove pesky ../ and so on.
         d = os.path.abspath(d)
         f = os.path.abspath(f)
         pref = os.path.commonprefix([d, os.path.dirname(f)])
-        lPref = pref.rfind(os.sep)+1
+        lPref = pref.rfind(os.sep) + 1
         dS = d[lPref:].split(os.sep)
         fS = f[lPref:].split(os.sep)
-        r = [os.pardir,] * len(dS)
+        r = [os.pardir, ] * len(dS)
         r += fS
-        return os.path.join(*r)        
-    
+        return os.path.join(*r)
+
+
 class PlotLogPasses(object):
     """Takes an input path, output path and generates SVG file(s) from LIS."""
+
     def __init__(self, fpIn, fpOut, recursive=False, keepGoing=True, lgFormatS=None, apiHeader=False):
         """Constructor.
 
@@ -317,9 +323,9 @@ class PlotLogPasses(object):
             self._processFile(self._fpIn, self._fpOut)
         elif os.path.isdir(self._fpIn):
             self._processDir(self._fpIn, self._fpOut)
-    
+
     def _processDir(self, fpIn, fpOut):
-        assert(os.path.isdir(fpIn))
+        assert (os.path.isdir(fpIn))
         if not os.path.isdir(fpOut):
             try:
                 os.makedirs(fpOut)
@@ -332,12 +338,13 @@ class PlotLogPasses(object):
                 self._processDir(myPath, outPath)
             elif os.path.isfile(myPath):
                 self._processFile(myPath, outPath)
-    #===============================================================
+
+    # ===============================================================
     # Sect.: Plotting using LIS Logical Records to specify the plot.
-    #===============================================================
+    # ===============================================================
     def _retPlotFromPlotRecordSet(self, theFi, thePrs):
         """Returns a Plot.PlotReadLIS, a LogPass and a list of CONS records from the PlotRecordSet."""
-        assert(thePrs)
+        assert (thePrs)
         theFi.seekLr(thePrs.tellFilm)
         myLrFilm = LogiRec.LrTableRead(theFi)
         theFi.seekLr(thePrs.tellPres)
@@ -354,17 +361,17 @@ class PlotLogPasses(object):
             myLrPip = None
         myPlot = Plot.PlotReadLIS(myLrFilm, myLrPres, myLrArea, myLrPip)
         return myPlot, thePrs.logPass, self._retCONSRecS(theFi, thePrs)
-    
+
     def _retCONSRecS(self, theFi, thePrs):
         """Returns a list of CONS Logical Records or None is no API header required."""
-        assert(thePrs)
+        assert (thePrs)
         if self._apiHeader:
             consRecS = []
             for t in thePrs.tellConsS:
                 theFi.seekLr(t)
                 consRecS.append(LogiRec.LrTableRead(theFi))
             return consRecS
-    
+
     def _plotUsingLISLogicalRecords(self, theFi, theLpIdx, thePrs, theFpOut):
         """Plots a LogPass from a LIS file using the LIS Logical Records to
         specify the plot.
@@ -381,21 +388,21 @@ class PlotLogPasses(object):
                 myOutFilePath = '{:s}_{:04d}_{:s}.svg'.format(theFpOut, theLpIdx, aFilmId.pStr(strip=True))
                 myFout = open(myOutFilePath, 'w')
                 myCurvIDs, numPoints = myPlot.plotLogPassLIS(
-                        theFi,
-                        myLogPass,
-                        myLogPass.xAxisFirstEngVal,
-                        myLogPass.xAxisLastEngVal,
-                        aFilmId,
-                        myFout,
-                        frameStep=1,
-                        title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
-                            os.path.abspath(myOutFilePath),
-                            theLpIdx,
-                            aFilmId.pStr(strip=True),
-                        ),
-                        lrCONS=myCONSRecS,
-                    )
-                assert(myCurvIDs is not None and numPoints is not None)
+                    theFi,
+                    myLogPass,
+                    myLogPass.xAxisFirstEngVal,
+                    myLogPass.xAxisLastEngVal,
+                    aFilmId,
+                    myFout,
+                    frameStep=1,
+                    title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
+                        os.path.abspath(myOutFilePath),
+                        theLpIdx,
+                        aFilmId.pStr(strip=True),
+                    ),
+                    lrCONS=myCONSRecS,
+                )
+                assert (myCurvIDs is not None and numPoints is not None)
                 # So here the essential data that we have to put in the index.html is:
                 # Key: myOutFilePath or input file fp, lpIdx, aFilmId,
                 # Value: (myPlot.xScale(aFilmId), myLogPass.xAxisFirstEngVal, myLogPass.xAxisLastEngVal, myCurvIDs)
@@ -413,19 +420,20 @@ class PlotLogPasses(object):
                 logging.info(
                     'PlotLogPasses._plotUsingLISLogicalRecords(): No data to plot for FILM ID {}'.format(aFilmId)
                 )
-    #=============================================================
+
+    # =============================================================
     # End: Plotting using LIS Logical Records to specify the plot.
-    #=============================================================
-    
-    #=====================================================
+    # =============================================================
+
+    # =====================================================
     # Sect.: Plotting using XML files to specify the plot.
-    #=====================================================
+    # =====================================================
     def _retPlotFromXML(self, theFi, theIdxLogPass, theUniqueId):
-        assert(len(self._lgFormatS) > 0)
-        assert(theUniqueId in self._lgFormatS)
+        assert (len(self._lgFormatS) > 0)
+        assert (theUniqueId in self._lgFormatS)
         myFcfg = FILMCfgXML.FilmCfgXMLRead()
         return Plot.PlotReadXML(myFcfg[theUniqueId]), theIdxLogPass.logPass
-    
+
     def _plotUsingLgFormats(self, theFi, theLpIdx, thePrs, theFpOut):
         """Plots a LogPass from a LIS file using the LgFormat XML files
         specify the plot.
@@ -435,7 +443,7 @@ class PlotLogPasses(object):
             LIS Logical Records (we only use CONS records here for the API header).
         theFpOut - Output file path for the SVG file(s), one per FILM ID.
         """
-        assert(len(self._lgFormatS) > 0)
+        assert (len(self._lgFormatS) > 0)
         _p, myLogPass, myCONSRecS = self._retPlotFromPlotRecordSet(theFi, thePrs)
         myFilm = FILMCfgXML.FilmCfgXMLRead()
         for aUniqueId in self._lgFormatS:
@@ -449,21 +457,21 @@ class PlotLogPasses(object):
                     # Create output path and plot it
                     myOutFilePath = '{:s}_{:04d}_{:s}.svg'.format(theFpOut, theLpIdx, aUniqueId)
                     myCurvIDs, numPoints = myPlot.plotLogPassLIS(
-                            theFi,
-                            myLogPass,
-                            myLogPass.xAxisFirstEngVal,
-                            myLogPass.xAxisLastEngVal,
+                        theFi,
+                        myLogPass,
+                        myLogPass.xAxisFirstEngVal,
+                        myLogPass.xAxisLastEngVal,
+                        aUniqueId,
+                        open(myOutFilePath, 'w'),
+                        frameStep=1,
+                        title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
+                            os.path.abspath(myOutFilePath),
+                            theLpIdx,
                             aUniqueId,
-                            open(myOutFilePath, 'w'),
-                            frameStep=1,
-                            title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
-                                os.path.abspath(myOutFilePath),
-                                theLpIdx,
-                                aUniqueId,
-                            ),
-                            lrCONS=myCONSRecS,
-                        )
-                    assert(myCurvIDs is not None and numPoints is not None)
+                        ),
+                        lrCONS=myCONSRecS,
+                    )
+                    assert (myCurvIDs is not None and numPoints is not None)
                     # So here the essential data that we have to put in the index.html is:
                     # Key: myOutFilePath or input file fp, lpIdx, aFilmId,
                     # Value: (myPlot.xScale(aFilmId), myLogPass.xAxisFirstEngVal, myLogPass.xAxisLastEngVal, myCurvIDs)
@@ -478,16 +486,18 @@ class PlotLogPasses(object):
                         theCurveS=myCurvIDs,
                         ptsPlotted=numPoints)
                 else:
-                    logging.error('PlotLogPasses._plotUsingLgFormats(): No root node for UniqueId: "{:s}"'.format(aUniqueId))
+                    logging.error(
+                        'PlotLogPasses._plotUsingLgFormats(): No root node for UniqueId: "{:s}"'.format(aUniqueId))
             else:
                 logging.info('PlotLogPasses._plotUsingLgFormats(): No data to plot for FILM ID {:s}'.format(aUniqueId))
-    #===================================================
+
+    # ===================================================
     # End: Plotting using XML files to specify the plot.
-    #===================================================
+    # ===================================================
 
     def _processFile(self, fpIn, fpOut):
-        assert(os.path.isfile(fpIn))
-        assert(os.path.exists(os.path.dirname(fpOut)))
+        assert (os.path.isfile(fpIn))
+        assert (os.path.exists(os.path.dirname(fpOut)))
         logging.info('PlotLogPasses._processFile(): Starting on {:s}'.format(fpIn))
         # Read LIS file and create index
         myFi = File.FileRead(fpIn, theFileId=fpIn, keepGoing=self._keepGoing)
@@ -503,50 +513,50 @@ class PlotLogPasses(object):
                 self._plotUsingLISLogicalRecords(myFi, lpIdx, aPrs, fpOut)
             else:
                 self._plotUsingLgFormats(myFi, lpIdx, aPrs, fpOut)
-            
-            
-#            myPlot, myLogPass, myCONSRecS = self._retPlotFromPlotRecordSet(myFi, aPrs)
-#            for aFilmId in myPlot.filmIdS():
-#                logging.info('PlotLogPasses._processFile(): FILM ID={:s}.'.format(aFilmId.pStr(strip=True)))
-#                if myPlot.hasDataToPlotLIS(myLogPass, aFilmId):
-#                    myOutFilePath = '{:s}_{:04d}_{:s}.svg'.format(fpOut, lpIdx, aFilmId.pStr(strip=True))
-#                    myFout = open(myOutFilePath, 'w')
-#                    myCurvIDs, numPoints = myPlot.plotLogPassLIS(myFi,
-#                            myLogPass,
-#                            myLogPass.xAxisFirstEngVal,
-#                            myLogPass.xAxisLastEngVal,
-#                            aFilmId,
-#                            myFout,
-#                            frameStep=1,
-#                            title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
-#                                os.path.abspath(myOutFilePath),
-#                                lpIdx,
-#                                aFilmId.pStr(strip=True),
-#                            ),
-#                            lrCONS=myCONSRecS,
-#                        )
-#                    assert(myCurvIDs is not None and numPoints is not None)
-#                    # So here the essential data that we have to put in the index.html is:
-#                    # Key: myOutFilePath or input file fp, lpIdx, aFilmId,
-#                    # Value: (myPlot.xScale(aFilmId), myLogPass.xAxisFirstEngVal, myLogPass.xAxisLastEngVal, myCurvIDs)
-#                    self.plotLogInfo.addPlotResult(
-#                        fpIn,
-#                        myOutFilePath,
-#                        lpIdx,
-#                        aFilmId.pStr(),
-#                        myPlot.xScale(aFilmId),
-#                        myLogPass.xAxisFirstEngVal,
-#                        myLogPass.xAxisLastEngVal,
-#                        theCurveS=myCurvIDs,
-#                        ptsPlotted=numPoints)
-#                else:
-#                    logging.info('PlotLogPasses._processFile(): No data to plot for FILM ID {:s}'.format(aFilmId))
+
+        #            myPlot, myLogPass, myCONSRecS = self._retPlotFromPlotRecordSet(myFi, aPrs)
+        #            for aFilmId in myPlot.filmIdS():
+        #                logging.info('PlotLogPasses._processFile(): FILM ID={:s}.'.format(aFilmId.pStr(strip=True)))
+        #                if myPlot.hasDataToPlotLIS(myLogPass, aFilmId):
+        #                    myOutFilePath = '{:s}_{:04d}_{:s}.svg'.format(fpOut, lpIdx, aFilmId.pStr(strip=True))
+        #                    myFout = open(myOutFilePath, 'w')
+        #                    myCurvIDs, numPoints = myPlot.plotLogPassLIS(myFi,
+        #                            myLogPass,
+        #                            myLogPass.xAxisFirstEngVal,
+        #                            myLogPass.xAxisLastEngVal,
+        #                            aFilmId,
+        #                            myFout,
+        #                            frameStep=1,
+        #                            title="Plot: {:s} LogPass: {:d} FILM ID={:s}".format(
+        #                                os.path.abspath(myOutFilePath),
+        #                                lpIdx,
+        #                                aFilmId.pStr(strip=True),
+        #                            ),
+        #                            lrCONS=myCONSRecS,
+        #                        )
+        #                    assert(myCurvIDs is not None and numPoints is not None)
+        #                    # So here the essential data that we have to put in the index.html is:
+        #                    # Key: myOutFilePath or input file fp, lpIdx, aFilmId,
+        #                    # Value: (myPlot.xScale(aFilmId), myLogPass.xAxisFirstEngVal, myLogPass.xAxisLastEngVal, myCurvIDs)
+        #                    self.plotLogInfo.addPlotResult(
+        #                        fpIn,
+        #                        myOutFilePath,
+        #                        lpIdx,
+        #                        aFilmId.pStr(),
+        #                        myPlot.xScale(aFilmId),
+        #                        myLogPass.xAxisFirstEngVal,
+        #                        myLogPass.xAxisLastEngVal,
+        #                        theCurveS=myCurvIDs,
+        #                        ptsPlotted=numPoints)
+        #                else:
+        #                    logging.info('PlotLogPasses._processFile(): No data to plot for FILM ID {:s}'.format(aFilmId))
 
         # Count the number of LogPasses, files etc.
         self.plotLogInfo.logPassCntr += myIdx.numLogPasses()
         self.plotLogInfo.lisFileCntr += 1
         logging.info('PlotLogPasses._processFile(): Done with {:s}'.format(fpIn))
-    
+
+
 ################################
 # Section: Multiprocessing code.
 ################################
@@ -559,6 +569,7 @@ def processFile(fpIn, fpOut, keepGoing, lgFormatS, apiHeader):
     myPlp = PlotLogPasses(fpIn, fpOut, recursive=False, keepGoing=keepGoing, lgFormatS=lgFormatS, apiHeader=apiHeader)
     return myPlp.plotLogInfo
 
+
 def plotLogPassesMP(dIn, dOut, fnMatch, recursive, keepGoing, lgFormatS, apiHeader, jobs):
     """Multiprocessing code to plot log passes. Returns a PlotLogInfo object."""
     if jobs < 1:
@@ -567,10 +578,10 @@ def plotLogPassesMP(dIn, dOut, fnMatch, recursive, keepGoing, lgFormatS, apiHead
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [
         (t.filePathIn, t.filePathOut, keepGoing, lgFormatS, apiHeader) \
-            for t in DirWalk.dirWalk(dIn, dOut, fnMatch, recursive, bigFirst=True)
+        for t in DirWalk.dirWalk(dIn, dOut, fnMatch, recursive, bigFirst=True)
     ]
     retResult = PlotLogInfo()
-    #print('myTaskS', myTaskS)
+    # print('myTaskS', myTaskS)
     myResults = [
         r.get() for r in [
             myPool.apply_async(processFile, t) for t in myTaskS
@@ -580,6 +591,8 @@ def plotLogPassesMP(dIn, dOut, fnMatch, recursive, keepGoing, lgFormatS, apiHead
         # r is a PlotLogInfo object
         retResult += r
     return retResult
+
+
 ################################
 # End: Multiprocessing code.
 ################################
@@ -587,40 +600,40 @@ def plotLogPassesMP(dIn, dOut, fnMatch, recursive, keepGoing, lgFormatS, apiHead
 def main():
     usage = """usage: %prog [options] in out
 Generates plot(s) from input LIS file or directory to an output destination."""
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-A", "--API", action="store_true", dest="apiHeader", default=False, 
-                      help="Include and API header on top of each plot. [default: %default]")
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. [default: %default]")
-    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
-                      help="Process input recursively. [default: %default]")
+    optParser.add_option("-A", "--API", action="store_true", dest="apiHeader", default=False,
+                         help="Include and API header on top of each plot. [default: %default]")
+    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
+                         help="Keep going as far as sensible. [default: %default]")
+    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
+                         help="Process input recursively. [default: %default]")
     optParser.add_option(
-            "-j", "--jobs",
-            type="int",
-            dest="jobs",
-            default=-1,
-            help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
-                    % multiprocessing.cpu_count() \
-                    + " [default: %default]" 
-        )      
+        "-j", "--jobs",
+        type="int",
+        dest="jobs",
+        default=-1,
+        help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
+             % multiprocessing.cpu_count() \
+             + " [default: %default]"
+    )
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=40,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=40,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     optParser.add_option("-x", "--xml", action="append", dest="LgFormat", default=[],
-                      help="Add an XML LgFormat to use for plotting. Value is the UniqueId. Use -x? to see what LgFormats are available. [default: %default]")
+                         help="Add an XML LgFormat to use for plotting. Value is the UniqueId. Use -x? to see what LgFormats are available. [default: %default]")
     opts, args = optParser.parse_args()
     clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
     # Handle -x?
     if '?' in opts.LgFormat:
@@ -638,13 +651,15 @@ Generates plot(s) from input LIS file or directory to an output destination."""
         myPlp = PlotLogPasses(args[0], args[1], opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader)
         myResult = myPlp.plotLogInfo
     else:
-        myResult = plotLogPassesMP(args[0], args[1], [], opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader, opts.jobs)
+        myResult = plotLogPassesMP(args[0], args[1], [], opts.recursive, opts.keepGoing, opts.LgFormat, opts.apiHeader,
+                                   opts.jobs)
     myResult.writeHTML(os.path.join(args[1], 'index.html'), args[0])
     print('plotLogInfo', str(myResult))
     print('  CPU time = %8.3f (S)' % (time.perf_counter() - clkStart))
     print('Exec. time = %8.3f (S)' % (time.time() - timStart))
     print('Bye, bye!')
     return 0
+
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()

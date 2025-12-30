@@ -172,7 +172,7 @@ def pattern_to_array(width: int, pattern: str) -> typing.List[typing.List[int]]:
     b = base64.b64decode(pattern)
     st = ''.join(['{:08b}'.format(v) for v in b])
     # TODO: Check bit 16 is always '0' in each row
-    text_table = [st[i:i+width] for i in range(0, len(st), width+1)]
+    text_table = [st[i:i + width] for i in range(0, len(st), width + 1)]
     int_table = [[int(v) for v in row] for row in text_table]
     return int_table
 
@@ -216,7 +216,7 @@ class Pattern(typing.NamedTuple):
 
     def __str__(self) -> str:
         self._assert_invariants()
-        rows= []
+        rows = []
         for int_row in self.array:
             rows.append(''.join(str(i) for i in int_row))
         return f'{self.unique_id}:\n' + '\n'.join(rows)
@@ -299,8 +299,8 @@ def write_index_html(directory: str, patterns: typing.Dict[str, Pattern]) -> Non
     with XmlWrite.XhtmlStream(open(os.path.join(directory, 'index.html'), 'w')) as myS:
         with XmlWrite.Element(myS, 'head'):
             with XmlWrite.Element(
-                myS,
-                'link', {'href': 'index.css', 'type': "text/css", 'rel': "stylesheet",}
+                    myS,
+                    'link', {'href': 'index.css', 'type': "text/css", 'rel': "stylesheet", }
             ):
                 pass
             with XmlWrite.Element(myS, 'title'):
@@ -350,12 +350,12 @@ def create_png_images():
         key_width = max([len(repr(k)) for k in data_uri_schemes.keys()])
         # Dump to stdout to paste into Python code
         print(directory)
-        print('{}: typing.Dict[str, str] = {}'. format('AREA_DATA_URI_SCHEME_' + sub_dir.upper(), '{'))
+        print('{}: typing.Dict[str, str] = {}'.format('AREA_DATA_URI_SCHEME_' + sub_dir.upper(), '{'))
         for k in sorted(data_uri_schemes.keys()):
             print('    {!r:{width}s} : {!r:s},'.format(k, data_uri_schemes[k], width=key_width))
         print('}')
     # Unique ID
-    unique_ids = {k : v[0] for k, v in patterns.items()}
+    unique_ids = {k: v[0] for k, v in patterns.items()}
     key_width = max([len(repr(k)) for k in unique_ids.keys()])
     # Dump to stdout to paste into Python code
     print('# IDs')

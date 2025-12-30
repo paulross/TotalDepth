@@ -36,7 +36,6 @@ from TotalDepth.RP66V1.core.LogicalRecord.ComponentDescriptor import ComponentDe
 from TotalDepth.RP66V1.core.LogicalRecord.Duplicates import DuplicateObjectStrategy
 from TotalDepth.RP66V1.core import RepCode
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -82,6 +81,7 @@ class ExceptionEFLRObjectDuplicateLabel(ExceptionEFLRObject):
 
 class Set:
     """Class that represents a component set. See [RP66V1 3.2.2.1 Component Descriptor]"""
+
     def __init__(self, ld: LogicalData):
         ld_index = ld.index
         component_descriptor = ComponentDescriptor(ld.read())
@@ -106,6 +106,7 @@ class Set:
 
 class AttributeBase:
     """Class that represents a component attribute. See [RP66V1 3.2.2.1 Component Descriptor]"""
+
     def __init__(self, component_descriptor: ComponentDescriptor):
         if not component_descriptor.is_attribute_group:
             raise ExceptionEFLRAttribute(
@@ -132,7 +133,7 @@ class AttributeBase:
         except KeyError:
             rep_code_str = 'UNKNOWN'
         return f'CD: {self.component_descriptor} L: {self.label} C: {self.count}' \
-            f' R: {self.rep_code:d} ({rep_code_str}) U: {self.units} V: {self.value}'
+               f' R: {self.rep_code:d} ({rep_code_str}) U: {self.units} V: {self.value}'
 
     def stringify_value(self, stringify_function: typing.Callable) -> str:
         """Return the value as a string."""
@@ -150,6 +151,7 @@ class AttributeBase:
 
 class TemplateAttribute(AttributeBase):
     """Class that represents a component template. See [RP66V1 3.2.2.1 Component Descriptor]"""
+
     def __init__(self, component_descriptor: ComponentDescriptor, ld: LogicalData):
         super().__init__(component_descriptor)
         if self.component_descriptor.has_attribute_L:
@@ -166,6 +168,7 @@ class TemplateAttribute(AttributeBase):
 
 class Attribute(AttributeBase):
     """Class that represents a component attribute. See [RP66V1 3.2.2.1 Component Descriptor]"""
+
     def __init__(self,
                  component_descriptor: ComponentDescriptor,
                  ld: LogicalData,
@@ -196,11 +199,11 @@ class Attribute(AttributeBase):
 
 class Template:
     """Class that represents a component template. See [RP66V1 3.2.2.1 Component Descriptor]"""
+
     def __init__(self):
         self.attrs: typing.List[TemplateAttribute] = []
         self.attr_label_map: typing.Dict[bytes, int] = {}
         self.logical_data_consumed = 0
-
 
     def read(self, ld: LogicalData):
         """Populate the template with the Logical Data."""
@@ -252,6 +255,7 @@ class Template:
 class Object:
     """Class that represents a component object. See [RP66V1 3.2.2.1 Component Descriptor].
     Essentially this is one row in the table as a list of Atributes."""
+
     def __init__(self, ld: LogicalData, template: Template):
         component_descriptor = ComponentDescriptor(ld.read())
         if not component_descriptor.is_object:
@@ -328,6 +332,7 @@ class Object:
         ret = [attr.stringify_value(stringify_function) for attr in self.attrs]
         return ret
 
+
 """
 2019-06-05 22:31:49,839 - EFLR.py - 1704 - WARNING  - Ignoring different Object with OBNAME: O: 0 C: 0 I: b'MLL/CP/K_FAC' already seen in the EFLR Set type: b'CALIBRATION-MEASUREMENT' name: b'216'.
 2019-06-05 22:31:49,839 - EFLR.py - 1704 - WARNING  - WAS:
@@ -373,6 +378,7 @@ class PublicEFLRType(typing.NamedTuple):
     type: bytes
     description: str
     allowable_set_types: typing.Set[bytes]
+
 
 #: From [RP66V1 Appendix A: Logical Record Types] Figure A-2. Numeric Codes for Public EFLR Types
 PUBLIC_EFLR_TYPES: typing.Dict[int, PublicEFLRType] = {
@@ -512,7 +518,7 @@ class ExplicitlyFormattedLogicalRecord:
                     and self.object_name_map == other.object_name_map:
                 # Check all the objects are equal
                 assert len(self.objects) == len(other.objects)
-                for a,  b in zip(self.objects, other.objects):
+                for a, b in zip(self.objects, other.objects):
                     if a != b:
                         return False
                 return True

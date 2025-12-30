@@ -18,29 +18,30 @@
 # 
 # Paul Ross: apaulross@gmail.com
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-15'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-15'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 """Treats SVG writing."""
 
-#import os
+import io
+import logging
+# import os
 import sys
 import time
-import logging
-import io
-
-from TotalDepth.util import XmlWrite
-from TotalDepth.util.plot import SVGWriter, Coord
-
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
+from TotalDepth.util import XmlWrite
+from TotalDepth.util.plot import SVGWriter, Coord
+
+
 class TestSVGWriter(unittest.TestCase):
     """Tests SVGWriter."""
+
     def test_00(self):
         """TestSVGWriter.test_00(): construction."""
         myF = io.StringIO()
@@ -50,12 +51,12 @@ class TestSVGWriter(unittest.TestCase):
         )
         with SVGWriter.SVGWriter(myF, myViewPort):
             pass
-        #print
-        #print myF.getvalue()
+        # print
+        # print myF.getvalue()
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="20.000mm" version="1.1" width="100.000mm" xmlns="http://www.w3.org/2000/svg"/>\n""")
-        
+
     def test_01(self):
         """TestSVGlWriter.test_01(): <desc> and four rectangles.
         From second example in http://www.w3.org/TR/2003/REC-SVG11-20030114/struct.html#NewDocumentOverview"""
@@ -89,12 +90,12 @@ class TestSVGWriter(unittest.TestCase):
                     xS,
                     myPt,
                     myBx,
-                    attrs= {
-                            'fill'          : "none",
-                            'stroke'        : "blue",
-                            'stroke-width'  : ".02cm",
-                        }
-                ):
+                    attrs={
+                        'fill': "none",
+                        'stroke': "blue",
+                        'stroke-width': ".02cm",
+                    }
+            ):
                 pass
         # print()
         # print(myF.getvalue())
@@ -109,7 +110,7 @@ class TestSVGWriter(unittest.TestCase):
   <rect fill="none" height="3.980cm" stroke="blue" stroke-width=".02cm" width="4.980cm" x="0.010cm" y="0.010cm"/>
 </svg>
 """)
-       
+
     def test_02(self):
         """TestSVGlWriter.test_02(): a circle.
         From http://www.w3.org/TR/2003/REC-SVG11-20030114/shapes.html#CircleElement"""
@@ -121,18 +122,18 @@ class TestSVGWriter(unittest.TestCase):
         with SVGWriter.SVGWriter(myF, myViewPort) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters('Example circle01 - circle filled with red and stroked with blue')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(1198), Coord.baseUnitsDim(398))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
             myPt = Coord.Pt(Coord.baseUnitsDim(600), Coord.baseUnitsDim(200))
             myRad = Coord.baseUnitsDim(100)
-            with SVGWriter.SVGCircle(xS, myPt, myRad, {'fill':"red", 'stroke':"blue",'stroke-width':"10"}):
+            with SVGWriter.SVGCircle(xS, myPt, myRad, {'fill': "red", 'stroke': "blue", 'stroke-width': "10"}):
                 pass
         # print()
         # print(myF.getvalue())
-#        self.maxDiff = None
+        #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
@@ -153,19 +154,19 @@ class TestSVGWriter(unittest.TestCase):
         with SVGWriter.SVGWriter(myF, myViewPort) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters('Example ellipse01 - examples of ellipses')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(1198), Coord.baseUnitsDim(398))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
             myPt = Coord.Pt(Coord.baseUnitsDim(600), Coord.baseUnitsDim(200))
             myRadX = Coord.baseUnitsDim(250)
             myRadY = Coord.baseUnitsDim(100)
-            with SVGWriter.SVGElipse(xS, myPt, myRadX, myRadY, {'fill':"red", 'stroke':"blue",'stroke-width':"10"}):
+            with SVGWriter.SVGElipse(xS, myPt, myRadX, myRadY, {'fill': "red", 'stroke': "blue", 'stroke-width': "10"}):
                 pass
         # print()
         # print(myF.getvalue())
-#        self.maxDiff = None
+        #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
@@ -186,51 +187,51 @@ class TestSVGWriter(unittest.TestCase):
         with SVGWriter.SVGWriter(myF, myViewPort) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters('Example line01 - lines expressed in user coordinates')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(1198), Coord.baseUnitsDim(398))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
             # Make a group
-            with SVGWriter.SVGGroup(xS, {'stroke' : 'green'}):
+            with SVGWriter.SVGGroup(xS, {'stroke': 'green'}):
                 with SVGWriter.SVGLine(
                         xS,
-                        Coord.Pt(Coord.baseUnitsDim(100), Coord.baseUnitsDim(300)), 
-                        Coord.Pt(Coord.baseUnitsDim(300), Coord.baseUnitsDim(100)), 
-                        {'stroke-width' : "5"}
-                    ):
+                        Coord.Pt(Coord.baseUnitsDim(100), Coord.baseUnitsDim(300)),
+                        Coord.Pt(Coord.baseUnitsDim(300), Coord.baseUnitsDim(100)),
+                        {'stroke-width': "5"}
+                ):
                     pass
                 with SVGWriter.SVGLine(
                         xS,
-                        Coord.Pt(Coord.baseUnitsDim(300), Coord.baseUnitsDim(300)), 
-                        Coord.Pt(Coord.baseUnitsDim(500), Coord.baseUnitsDim(100)), 
-                        {'stroke-width' : "10"}
-                    ):
+                        Coord.Pt(Coord.baseUnitsDim(300), Coord.baseUnitsDim(300)),
+                        Coord.Pt(Coord.baseUnitsDim(500), Coord.baseUnitsDim(100)),
+                        {'stroke-width': "10"}
+                ):
                     pass
                 with SVGWriter.SVGLine(
                         xS,
-                        Coord.Pt(Coord.baseUnitsDim(500), Coord.baseUnitsDim(300)), 
-                        Coord.Pt(Coord.baseUnitsDim(700), Coord.baseUnitsDim(100)), 
-                        {'stroke-width' : "15"}
-                    ):
+                        Coord.Pt(Coord.baseUnitsDim(500), Coord.baseUnitsDim(300)),
+                        Coord.Pt(Coord.baseUnitsDim(700), Coord.baseUnitsDim(100)),
+                        {'stroke-width': "15"}
+                ):
                     pass
                 with SVGWriter.SVGLine(
                         xS,
-                        Coord.Pt(Coord.baseUnitsDim(700), Coord.baseUnitsDim(300)), 
-                        Coord.Pt(Coord.baseUnitsDim(900), Coord.baseUnitsDim(100)), 
-                        {'stroke-width' : "20"}
-                    ):
+                        Coord.Pt(Coord.baseUnitsDim(700), Coord.baseUnitsDim(300)),
+                        Coord.Pt(Coord.baseUnitsDim(900), Coord.baseUnitsDim(100)),
+                        {'stroke-width': "20"}
+                ):
                     pass
                 with SVGWriter.SVGLine(
                         xS,
-                        Coord.Pt(Coord.baseUnitsDim(900), Coord.baseUnitsDim(300)), 
-                        Coord.Pt(Coord.baseUnitsDim(1100), Coord.baseUnitsDim(100)), 
-                        {'stroke-width' : "25"}
-                    ):
+                        Coord.Pt(Coord.baseUnitsDim(900), Coord.baseUnitsDim(300)),
+                        Coord.Pt(Coord.baseUnitsDim(1100), Coord.baseUnitsDim(100)),
+                        {'stroke-width': "25"}
+                ):
                     pass
         # print()
         # print(myF.getvalue())
-#        self.maxDiff = None
+        #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="4.000cm" version="1.1" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
@@ -245,7 +246,7 @@ class TestSVGWriter(unittest.TestCase):
   </g>
 </svg>
 """,
-        myF.getvalue())
+                         myF.getvalue())
 
     def test_05(self):
         """TestSVGlWriter.test_05(): a polyline.
@@ -255,13 +256,13 @@ class TestSVGWriter(unittest.TestCase):
             Coord.Dim(12, 'cm'),
             Coord.Dim(4, 'cm'),
         )
-        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox' : "0 0 1200 400"}) as xS:
+        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox': "0 0 1200 400"}) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters('Example line01 - lines expressed in user coordinates')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(1198), Coord.baseUnitsDim(398))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
             # Make a group
             with SVGWriter.SVGPolyline(
@@ -290,12 +291,12 @@ class TestSVGWriter(unittest.TestCase):
                         Coord.Pt(Coord.baseUnitsDim(1050), Coord.baseUnitsDim(375)),
                         Coord.Pt(Coord.baseUnitsDim(1150), Coord.baseUnitsDim(375)),
                     ],
-                    {'fill' : 'none', 'stroke' : 'blue', 'stroke-width' : "5"}
-                ):
+                    {'fill': 'none', 'stroke': 'blue', 'stroke-width': "5"}
+            ):
                 pass
         # print()
         # print(myF.getvalue())
-#        self.maxDiff = None
+        #        self.maxDiff = None
         self.assertEqual(myF.getvalue(), """<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="4.000cm" version="1.1" viewBox="0 0 1200 400" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
@@ -304,7 +305,7 @@ class TestSVGWriter(unittest.TestCase):
   <polyline fill="none" points="50.0,375.0 150.0,375.0 150.0,325.0 250.0,325.0 250.0,375.0 350.0,375.0 350.0,250.0 450.0,250.0 450.0,375.0 550.0,375.0 550.0,175.0 650.0,175.0 650.0,375.0 750.0,375.0 750.0,100.0 850.0,100.0 850.0,375.0 950.0,375.0 950.0,25.0 1050.0,25.0 1050.0,375.0 1150.0,375.0" stroke="blue" stroke-width="5"/>
 </svg>
 """)
-        
+
     def test_06(self):
         """TestSVGlWriter.test_06(): a polygon.
         Based on http://www.w3.org/TR/2003/REC-SVG11-20030114/shapes.html#PolygonElement"""
@@ -313,13 +314,13 @@ class TestSVGWriter(unittest.TestCase):
             Coord.Dim(12, 'cm'),
             Coord.Dim(4, 'cm'),
         )
-        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox' : "0 0 1200 400"}) as xS:
+        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox': "0 0 1200 400"}) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters('Example line01 - lines expressed in user coordinates')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(1198), Coord.baseUnitsDim(398))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
             # Make a group
             with SVGWriter.SVGPolygon(
@@ -336,12 +337,12 @@ class TestSVGWriter(unittest.TestCase):
                         Coord.Pt(Coord.baseUnitsDim(231), Coord.baseUnitsDim(161)),
                         Coord.Pt(Coord.baseUnitsDim(321), Coord.baseUnitsDim(161)),
                     ],
-                    {'fill' : 'red', 'stroke' : 'blue', 'stroke-width' : "10"}
-                ):
+                    {'fill': 'red', 'stroke': 'blue', 'stroke-width': "10"}
+            ):
                 pass
         # print()
         # print(myF.getvalue())
-#        self.maxDiff = None
+        #        self.maxDiff = None
         self.assertEqual("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg height="4.000cm" version="1.1" viewBox="0 0 1200 400" width="12.000cm" xmlns="http://www.w3.org/2000/svg">
@@ -350,7 +351,7 @@ class TestSVGWriter(unittest.TestCase):
   <polygon fill="red" points="350.0,75.0 379.0,161.0 469.0,161.0 397.0,215.0 423.0,301.0 350.0,250.0 277.0,301.0 303.0,215.0 231.0,161.0 321.0,161.0" stroke="blue" stroke-width="10"/>
 </svg>
 """,
-        myF.getvalue())
+                         myF.getvalue())
 
     def test_07(self):
         """TestSVGlWriter.test_07(): text.
@@ -360,16 +361,16 @@ class TestSVGWriter(unittest.TestCase):
             Coord.Dim(12, 'cm'),
             Coord.Dim(4, 'cm'),
         )
-        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox' : "0 0 1000 300"}) as xS:
+        with SVGWriter.SVGWriter(myF, myViewPort, {'viewBox': "0 0 1000 300"}) as xS:
             with XmlWrite.Element(xS, 'desc'):
                 xS.characters("Example text01 - 'Hello, out there' in blue")
             myPt = Coord.Pt(Coord.baseUnitsDim(250), Coord.baseUnitsDim(150))
-            with SVGWriter.SVGText(xS, myPt, "Verdans", 55, {'fill' : "blue"}):
+            with SVGWriter.SVGText(xS, myPt, "Verdans", 55, {'fill': "blue"}):
                 xS.characters('Hello, out there')
-            #xS.comment(" Show outline of canvas using 'rect' element ")
+            # xS.comment(" Show outline of canvas using 'rect' element ")
             myPt = Coord.Pt(Coord.baseUnitsDim(1), Coord.baseUnitsDim(1))
             myBx = Coord.Box(Coord.baseUnitsDim(998), Coord.baseUnitsDim(298))
-            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill':"none", 'stroke':"blue",'stroke-width':"2"}):
+            with SVGWriter.SVGRect(xS, myPt, myBx, {'fill': "none", 'stroke': "blue", 'stroke-width': "2"}):
                 pass
         # print()
         # print(myF.getvalue())
@@ -382,14 +383,18 @@ class TestSVGWriter(unittest.TestCase):
 </svg>
 """)
 
+
 class NullClass(unittest.TestCase):
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(NullClass)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVGWriter))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -414,6 +419,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestSVGWriter.py script version "%s", dated %s' % (__version__, __date__))
@@ -422,7 +428,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -440,14 +446,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

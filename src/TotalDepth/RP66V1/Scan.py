@@ -62,12 +62,10 @@ from TotalDepth.util.bin_file_type import format_bytes
 
 colorama.init(autoreset=True)
 
-
-__author__  = 'Paul Ross'
-__date__    = '2019-03-21'
+__author__ = 'Paul Ross'
+__date__ = '2019-03-21'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
 
@@ -182,7 +180,8 @@ def scan_RP66V1_file_visible_records(fobj: typing.BinaryIO, fout: typing.TextIO,
                     with _output_section_header_trailer('Summary of Logical Record Types', '-', os=fout):
                         fout.write(f'LRSH: record types and counts (first segments only):\n')
                         for flr_type in ('EFLR', 'IFLR'):
-                            fout.write(f'Count of Logical Record types for "{flr_type}" [{len(count_lrsh_type[flr_type])}]:\n')
+                            fout.write(
+                                f'Count of Logical Record types for "{flr_type}" [{len(count_lrsh_type[flr_type])}]:\n')
                             for record_type in sorted(count_lrsh_type[flr_type].keys()):
                                 fout.write(f'{record_type:3d} : {count_lrsh_type[flr_type][record_type]:8,d}\n')
                     with _output_section_header_trailer('Summary of LRSH Lengths', '-', os=fout):
@@ -215,6 +214,7 @@ class LRSHSummary(typing.NamedTuple):
 
 def scan_RP66V1_LRSH_consistency(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """Look at the consistency of the sequence of LRSH."""
+
     def _output(lrsh_summary: LRSHSummary, message: str, fout: typing.TextIO):
         fout.write(f'VR: Ox{lrsh_summary.vr_position:08x} LRSH: Ox{lrsh_summary.lrsh_position:08x} {message}\n')
 
@@ -275,11 +275,11 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
     """Scans the file reporting the raw Logical Data."""
     verbose = kwargs.get('verbose', 0)
     if not verbose:
-        fout.write(colorama.Fore.YELLOW  + 'Use -v to see individual logical data.\n')
+        fout.write(colorama.Fore.YELLOW + 'Use -v to see individual logical data.\n')
     dump_bytes = kwargs.get('dump_bytes', 0)
     dump_raw_bytes = kwargs.get('dump_raw_bytes', 0)
     if not dump_bytes:
-        fout.write(colorama.Fore.YELLOW  + 'Use -v and --dump-bytes to see actual first n bytes.\n')
+        fout.write(colorama.Fore.YELLOW + 'Use -v and --dump-bytes to see actual first n bytes.\n')
     # Both a dict of {record_type : collections.Counter(length)
     count_eflr_type_length_count = {}
     count_iflr_type_length_count = {}
@@ -368,14 +368,14 @@ def scan_RP66V1_file_logical_data(fobj: typing.BinaryIO, fout: typing.TextIO, **
                 )
                 for length in sorted(count_iflr_type_length_count[record_type]):
                     fout.write(f'{length:10,d}: {count_iflr_type_length_count[record_type][length]:10,d}\n')
-        fout.write(f'Total length EFLR/IFLR: {length_total_eflr/length_total_iflr:.3%}\n')
+        fout.write(f'Total length EFLR/IFLR: {length_total_eflr / length_total_iflr:.3%}\n')
 
 
 def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) -> None:
     """Scans the file reporting the individual EFLR and IFLR."""
     verbose = kwargs.get('verbose', 0)
     if not verbose:
-        fout.write(colorama.Fore.YELLOW  + 'Use -v to see individual logical data.\n')
+        fout.write(colorama.Fore.YELLOW + 'Use -v to see individual logical data.\n')
     # TODO: eflr_dump is never present
     dump_eflr = kwargs.get('eflr_dump', 0)
     eflr_set_type = kwargs.get('eflr_set_type', [])
@@ -409,12 +409,15 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                     if file_logical_data.lr_is_encrypted:
                         if kwargs['encrypted']:
                             if verbose:
-                                fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                                fout.write(
+                                    colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
                             else:
-                                fout.write(colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                                fout.write(
+                                    colorama.Fore.MAGENTA + f'Encrypted EFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
                             fout.write('\n')
                     else:
-                        eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                        eflr = EFLR.ExplicitlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                     file_logical_data.logical_data)
                         if dump_eflr and len(eflr_set_type) == 0 or eflr.set.type in eflr_set_type:
                             if verbose:
                                 lines = str(eflr.str_long()).split('\n')
@@ -427,19 +430,22 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                                     fout.write(line)
                                 fout.write('\n')
                     eflr_count += 1
-                    eflr_set_type_count[eflr.set.type] +=1
+                    eflr_set_type_count[eflr.set.type] += 1
                 else:
                     # IFLR
                     if iflr_dump and verbose:
                         if file_logical_data.lr_is_encrypted:
                             if kwargs['encrypted']:
                                 if verbose:
-                                    fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
+                                    fout.write(
+                                        colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data}' + colorama.Style.RESET_ALL)
                                 else:
-                                    fout.write(colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
+                                    fout.write(
+                                        colorama.Fore.MAGENTA + f'Encrypted IFLR: {file_logical_data.position}' + colorama.Style.RESET_ALL)
                                 fout.write('\n')
                         else:
-                            iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type, file_logical_data.logical_data)
+                            iflr = IFLR.IndirectlyFormattedLogicalRecord(file_logical_data.lr_type,
+                                                                         file_logical_data.logical_data)
                             if len(iflr_set_type) == 0 or iflr.object_name.I in iflr_set_type:
                                 fout.write(str(iflr))
                                 fout.write('\n')
@@ -452,7 +458,8 @@ def scan_RP66V1_file_EFLR_IFLR(fobj: typing.BinaryIO, fout: typing.TextIO, **kwa
                 for k in sorted(eflr_set_type_count.keys()):
                     fout.write(f'{k!r:{fw}}: {eflr_set_type_count[k]:6d}\n')
             else:
-                fout.write(f'EFLR count of Set Type(s) {len(eflr_set_type_count)}:\n{pprint.pformat(eflr_set_type_count)}\n')
+                fout.write(
+                    f'EFLR count of Set Type(s) {len(eflr_set_type_count)}:\n{pprint.pformat(eflr_set_type_count)}\n')
 
 
 def _write_x_axis_summary(x_axis: XAxis.XAxis, fout: typing.TextIO) -> None:
@@ -545,7 +552,8 @@ def scan_RP66V1_file_data_content(fobj: typing.BinaryIO, fout: typing.TextIO,
             fout.write('\n')
             logical_file: LogicalFile.LogicalFile
             for lf, logical_file in enumerate(logical_index.logical_files):
-                with _output_section_header_trailer(f'Logical File [{lf}/{len(logical_index.logical_files)}]', '=', os=fout):
+                with _output_section_header_trailer(f'Logical File [{lf}/{len(logical_index.logical_files)}]', '=',
+                                                    os=fout):
                     fout.write(str(logical_file))
                     fout.write('\n')
                     eflr_position: LogicalFile.PositionEFLR
@@ -606,7 +614,7 @@ def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) 
                     # str_list = []
                     # for i in range(0, len(by), WIDTH):
                     #     str_list.append(f'{by[i:i+WIDTH]}')
-                    str_list = [f'{by[i:i+WIDTH]}' for i in range(0, len(by), WIDTH)]
+                    str_list = [f'{by[i:i + WIDTH]}' for i in range(0, len(by), WIDTH)]
                     if len(str_list) > 1:
                         fout.write(f'        # Logical data length {len(by)} 0x{len(by):x}\n')
                         FW = max(len(s) for s in str_list)
@@ -630,7 +638,8 @@ def dump_RP66V1_test_data(fobj: typing.BinaryIO, fout: typing.TextIO, **kwargs) 
 IndexResult = collections.namedtuple('IndexResult', 'size_input, size_output, time, exception, ignored')
 
 
-def scan_a_single_file(path_in: str, path_out: str, output_extension: str, function: typing.Callable, **kwargs) -> IndexResult:
+def scan_a_single_file(path_in: str, path_out: str, output_extension: str, function: typing.Callable,
+                       **kwargs) -> IndexResult:
     # logging.info(f'index_a_single_file(): "{path_in}" to "{path_out}"')
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     if binary_file_type == 'RP66V1':
@@ -810,7 +819,7 @@ def main() -> int:
     )
     parser.add_argument(
         '--LRSH-consistency', action='store_true',
-        help='Check the consistency the Logical Record Segment Headers.' 
+        help='Check the consistency the Logical Record Segment Headers.'
              ' [default: %(default)s]',
     )
     parser.add_argument(
@@ -870,12 +879,12 @@ def main() -> int:
     )
     log_level_help = f'Log Level as an integer or symbol. ({log_level_help_mapping}) [default: %(default)s]'
     parser.add_argument(
-            "-l", "--log-level",
-            # type=int,
-            # dest="loglevel",
-            default=30,
-            help=log_level_help
-        )
+        "-l", "--log-level",
+        # type=int,
+        # dest="loglevel",
+        default=30,
+        help=log_level_help
+    )
     parser.add_argument(
         "-v", "--verbose", action='count', default=0,
         help="Increase verbosity, additive [default: %(default)s]",
@@ -898,7 +907,7 @@ def main() -> int:
     # Initialise logging etc.
     logging.basicConfig(level=log_level,
                         format='%(asctime)s %(levelname)-8s %(message)s',
-                        #datefmt='%y-%m-%d % %H:%M:%S',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
                         stream=sys.stdout)
     clk_start = time.perf_counter()
     # return 0
@@ -1001,7 +1010,7 @@ def main() -> int:
     if args.gnuplot:
         plot_gnuplot(result, args.gnuplot)
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input / 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
     else:
         ms_mb = 0.0
     print('Execution time = %8.3f (S)' % clk_exec)

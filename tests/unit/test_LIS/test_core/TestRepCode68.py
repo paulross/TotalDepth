@@ -21,10 +21,10 @@
 """
 import pytest
 
-__author__  = 'Paul Ross'
-__date__    = '2 Nov 2010'
+__author__ = 'Paul Ross'
+__date__ = '2 Nov 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2010 Paul Ross.'
+__rights__ = 'Copyright (c) 2010 Paul Ross.'
 
 import os
 import sys
@@ -50,10 +50,12 @@ from TotalDepth.LIS.core import PhysRec
 # Section: Unit tests.
 ######################
 import unittest
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
-#class TestRepCodeBase(BaseTestClasses.TestBase):
+
+# class TestRepCodeBase(BaseTestClasses.TestBase):
 #    def randBits(self, theBits):
 #        """Return a random integer of theBits number of bits."""
 #        return random.getrandbits(theBits)
@@ -94,14 +96,16 @@ import BaseTestClasses
 #    
 class TestRepCode68Base(BaseTestClasses.TestRepCodeBase):
     """Rep Code 68 specific stuff."""
-    
+
     def splitBits68(self, i):
         """Given an integer this returns the bits as a tuple of three strings: sign, exponent, mantissa."""
         b = '{:032b}'.format(i)
         return b[:1], b[1:9], b[9:]
 
+
 class TestRepCodeFrom68Basic(TestRepCode68Base):
     """Tests basic Rep Code functionality."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -120,8 +124,8 @@ class TestRepCodeFrom68Basic(TestRepCode68Base):
 
     def test_minmax(self):
         """TestRepCodeFrom68.test_minmax(): min/max."""
-        #print
-        #print RepCode.minMaxValue(68)
+        # print
+        # print RepCode.minMaxValue(68)
         sys.stderr.write(str(RepCode.minMaxValue(68)))
         sys.stderr.write(' ')
         self.assertEqual(
@@ -137,11 +141,11 @@ class TestRepCodeFrom68Basic(TestRepCode68Base):
         myWord = 1
         myWord <<= 8
         myWord |= 1
-        myWord <<=23
+        myWord <<= 23
         # 0 exponent
         myWord = 0x80000000
-        #print 
-        #print RepCode.from68(myWord)
+        # print
+        # print RepCode.from68(myWord)
         self.assertEqual(RepCode.from68(myWord), RepCode.minValue(68))
         self.assertEqual(pRepCode.from68(myWord), RepCode.minValue(68))
         self.assertEqual(cRepCode.from68(myWord), RepCode.minValue(68))
@@ -150,22 +154,24 @@ class TestRepCodeFrom68Basic(TestRepCode68Base):
         """TestRepCodeFrom68.test_max(): max by bit stuffing."""
         myWord = 0x7FFFFFFF
         f = RepCode.from68(myWord)
-        #m,e = math.frexp(f)
-        #print
-        #print 'Max:', f
-        #print 'm,e:', m,e
-        #print 'm:      shifted 23', m * (1<<23)
-        #print 'm: 1.0 / (1.0 - m)', 1.0 / (1.0 - m)
-        #print '             2**23', 2**23
-        #print '             1<<23', 1<<23
-        #print('dir(RepCode)')
-        #print(dir(RepCode))
+        # m,e = math.frexp(f)
+        # print
+        # print 'Max:', f
+        # print 'm,e:', m,e
+        # print 'm:      shifted 23', m * (1<<23)
+        # print 'm: 1.0 / (1.0 - m)', 1.0 / (1.0 - m)
+        # print '             2**23', 2**23
+        # print '             1<<23', 1<<23
+        # print('dir(RepCode)')
+        # print(dir(RepCode))
         self.assertEqual(RepCode.from68(myWord), RepCode.maxValue(68))
         self.assertEqual(cRepCode.from68(myWord), RepCode.maxValue(68))
         self.assertEqual(pRepCode.from68(myWord), RepCode.maxValue(68))
 
+
 class TestRepCodeFrom68Python(TestRepCode68Base):
     """Tests reading Rep Code 68 using Python code."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -184,7 +190,7 @@ class TestRepCodeFrom68Python(TestRepCode68Base):
 
     def test_02_p(self):
         """TestRepCodeFrom68Python.test_02_p(): from68(0xBBB38000) -> -153.0 Python."""
-        self.assertEqual(pRepCode.from68(0xBBB38000), -153.0)        
+        self.assertEqual(pRepCode.from68(0xBBB38000), -153.0)
 
     def test_04_p(self):
         """TestRepCodeFrom68Python.test_04_p(): from68(0x40000000) -> 0.0 Python."""
@@ -214,8 +220,10 @@ class TestRepCodeFrom68Python(TestRepCode68Base):
         self.assertEqual(pRepCode.read68(myFile), -153.0)
         self.assertFalse(myFile.hasLd())
 
+
 class TestRepCodeFrom68Cython(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -249,9 +257,9 @@ class TestRepCodeFrom68Cython(TestRepCode68Base):
             # Absent Physical Record trailer
         )
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=True)
-#        self.assertEqual(cRepCode.read68(myFile), 153.0)
+        #        self.assertEqual(cRepCode.read68(myFile), 153.0)
         try:
-            assert(cRepCode.read68(myFile) == 153.0)
+            assert (cRepCode.read68(myFile) == 153.0)
             self.fail('AttributeError not raised.')
         except AttributeError:
             pass
@@ -266,16 +274,18 @@ class TestRepCodeFrom68Cython(TestRepCode68Base):
             # Absent Physical Record trailer
         )
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=True)
-#        self.assertEqual(cRepCode.read68(myFile), -153.0)
+        #        self.assertEqual(cRepCode.read68(myFile), -153.0)
         try:
-            assert(cRepCode.read68(myFile) == -153.0)
+            assert (cRepCode.read68(myFile) == -153.0)
             self.fail('AttributeError not raised.')
         except AttributeError:
             pass
         self.assertFalse(myFile.hasLd())
 
+
 class TestRepCodeToFrom68CPython(TestRepCode68Base):
     """Tests representation code 68 converted by a CPython extension."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -337,8 +347,10 @@ class TestRepCodeToFrom68CPython(TestRepCode68Base):
         """TestRepCodeToFrom68CPython.test_04_c(): to68(0x40000000) -> 0.0 CPython."""
         self.assertEqual(cpRepCode.to68(0), 0x40000000)
 
+
 class TestRepCodeFrom68(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -391,12 +403,14 @@ class TestRepCodeFrom68(TestRepCode68Base):
         """TestRepCodeFrom68.test_30(): from68(0x3fc00000) -> 0.25 (Defect found during FrameSet testing)."""
         self.assertEqual(RepCode.from68(0x40000000), 0.0)
         v = 0x3fc00000
-#        print()
-#        print('0x{:08x}'.format(v), self.splitBits68(v), RepCode.from68(v))
+        #        print()
+        #        print('0x{:08x}'.format(v), self.splitBits68(v), RepCode.from68(v))
         self.assertEqual(RepCode.from68(v), 0.25)
+
 
 class TestRepCodeTo68Basic(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -412,11 +426,11 @@ class TestRepCodeTo68Basic(TestRepCode68Base):
     def test_minmax(self):
         """TestRepCodeTo68Basic.test_minmax(): min/max."""
         myMinMax = RepCode.to68(RepCode.minMaxValue(68)[0]), RepCode.to68(RepCode.minMaxValue(68)[1])
-#        print()
-#        print((RepCode.minValue(68)))
-#        print((RepCode.from68(0xFFC00001)))
-#        print((RepCode.from68(0xFFFFFFFF)))
-        #print '(0x%X, 0x%X)' % myMinMax
+        #        print()
+        #        print((RepCode.minValue(68)))
+        #        print((RepCode.from68(0xFFC00001)))
+        #        print((RepCode.from68(0xFFFFFFFF)))
+        # print '(0x%X, 0x%X)' % myMinMax
         sys.stderr.write('(0x%X, 0x%X)' % myMinMax)
         sys.stderr.write(' ')
         self.assertEqual(
@@ -424,8 +438,10 @@ class TestRepCodeTo68Basic(TestRepCode68Base):
             (0xFFC00000, 0x7FFFFFFF),
         )
 
+
 class TestRepCodeTo68Python(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -453,29 +469,31 @@ class TestRepCodeTo68Python(TestRepCode68Base):
     def test_10_p(self):
         """TestRepCodeTo68Python.test_10_p(): to68() <3.50325e-46 is zero Python."""
         v = 3.50325e-46
-#        print()
-#        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
-#            pRepCode.to68(v),
-#            self.splitBits68(pRepCode.to68(v)),
-#            pRepCode.from68(pRepCode.to68(v))),
-#        )
+        #        print()
+        #        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
+        #            pRepCode.to68(v),
+        #            self.splitBits68(pRepCode.to68(v)),
+        #            pRepCode.from68(pRepCode.to68(v))),
+        #        )
         self.assertEqual(0x00000001, pRepCode.to68(v))
         # Now reduce v slightly and we should see zero
-        self.assertEqual(pRepCode.to68(0.99*v), pRepCode.to68(0.0))
+        self.assertEqual(pRepCode.to68(0.99 * v), pRepCode.to68(0.0))
 
     def test_11_p(self):
         """TestRepCodeTo68Python.test_11_p(): to68() -1e40 is min Python."""
-#        print()
-#        print('-1e40 = 0x{:08X} {:s}'.format(pRepCode.to68(-1e40), self.splitBits68(pRepCode.to68(-1e40))))
-#        print('  Min = 0x{:08X} {:g}'.format(pRepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
+        #        print()
+        #        print('-1e40 = 0x{:08X} {:s}'.format(pRepCode.to68(-1e40), self.splitBits68(pRepCode.to68(-1e40))))
+        #        print('  Min = 0x{:08X} {:g}'.format(pRepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
         self.assertEqual(pRepCode.to68(-1e40), pRepCode.to68(RepCode.minValue(68)))
 
     def test_12_p(self):
         """TestRepCodeTo68Python.test_12_p(): to68() +1e40 is max Python."""
         self.assertEqual(pRepCode.to68(+1e40), pRepCode.to68(RepCode.maxValue(68)))
-        
+
+
 class TestRepCodeTo68Cython(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -495,45 +513,47 @@ class TestRepCodeTo68Cython(TestRepCode68Base):
     def test_02_c(self):
         """TestRepCodeTo68Cython.test_02_c(): to68(-153.0) -> 0xBBB38000 Cython."""
         v = -153.0
-#        e = cRepCode.to68(v)
-#        print()
-#        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
-#            e,
-#            self.splitBits68(cRepCode.to68(v)),
-#            cRepCode.from68(cRepCode.to68(v))),
-#        )
+        #        e = cRepCode.to68(v)
+        #        print()
+        #        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
+        #            e,
+        #            self.splitBits68(cRepCode.to68(v)),
+        #            cRepCode.from68(cRepCode.to68(v))),
+        #        )
         self.assertEqual(cRepCode.to68(v), 0xBBB38000)
 
     def test_03_c(self):
         """TestRepCodeTo68Cython.test_03__(): to68(0.0) -> 0x40000000 Cython."""
         self.assertEqual(cRepCode.to68(0.0), 0x40000000)
-        
+
     def test_10_c(self):
         """TestRepCodeTo68Cython.test_10_c(): to68() <3.50325e-46 is zero Cython."""
         v = 3.50325e-46
-#        print()
-#        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
-#            cRepCode.to68(v),
-#            self.splitBits68(cRepCode.to68(v)),
-#            cRepCode.from68(cRepCode.to68(v))),
-#        )
+        #        print()
+        #        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
+        #            cRepCode.to68(v),
+        #            self.splitBits68(cRepCode.to68(v)),
+        #            cRepCode.from68(cRepCode.to68(v))),
+        #        )
         self.assertEqual(0x00000001, cRepCode.to68(v))
         # Now reduce v slightly and we should see zero
-        self.assertEqual(cRepCode.to68(0.99*v), cRepCode.to68(0.0))
+        self.assertEqual(cRepCode.to68(0.99 * v), cRepCode.to68(0.0))
 
     def test_11_c(self):
         """TestRepCodeTo68Cython.test_11_c(): to68() -1e40 is min Cython."""
-#        print()
-#        print('-1e40 = 0x{:08X} {:s}'.format(cRepCode.to68(-1e40), self.splitBits68(cRepCode.to68(-1e40))))
-#        print('  Min = 0x{:08X} {:g}'.format(cRepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
+        #        print()
+        #        print('-1e40 = 0x{:08X} {:s}'.format(cRepCode.to68(-1e40), self.splitBits68(cRepCode.to68(-1e40))))
+        #        print('  Min = 0x{:08X} {:g}'.format(cRepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
         self.assertEqual(cRepCode.to68(-1e40), cRepCode.to68(RepCode.minValue(68)))
 
     def test_12_c(self):
         """TestRepCodeTo68Cython.test_12_c(): to68() +1e40 is max Cython."""
         self.assertEqual(cRepCode.to68(+1e40), cRepCode.to68(RepCode.maxValue(68)))
 
+
 class TestRepCodeTo68(TestRepCode68Base):
     """Tests writing to Rep Code 68 with RepCode module that might choose either Python or Cython."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -561,29 +581,31 @@ class TestRepCodeTo68(TestRepCode68Base):
     def test_10__(self):
         """TestRepCodeTo68.test_10__(): to68() <3.50325e-46 is zero."""
         v = 3.50325e-46
-#        print()
-#        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
-#            RepCode.to68(v),
-#            self.splitBits68(RepCode.to68(v)),
-#            RepCode.from68(RepCode.to68(v))),
-#        )
+        #        print()
+        #        print('1e-40 = 0x{:08X} {:s} {:g}'.format(
+        #            RepCode.to68(v),
+        #            self.splitBits68(RepCode.to68(v)),
+        #            RepCode.from68(RepCode.to68(v))),
+        #        )
         self.assertEqual(0x00000001, RepCode.to68(v))
         # Now reduce v slightly and we should see zero
-        self.assertEqual(RepCode.to68(0.99*v), RepCode.to68(0.0))
+        self.assertEqual(RepCode.to68(0.99 * v), RepCode.to68(0.0))
 
     def test_11__(self):
         """TestRepCodeTo68.test_11__(): to68() -1e40 is min."""
-#        print()
-#        print('-1e40 = 0x{:08X} {:s}'.format(RepCode.to68(-1e40), self.splitBits68(RepCode.to68(-1e40))))
-#        print('  Min = 0x{:08X} {:g}'.format(RepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
+        #        print()
+        #        print('-1e40 = 0x{:08X} {:s}'.format(RepCode.to68(-1e40), self.splitBits68(RepCode.to68(-1e40))))
+        #        print('  Min = 0x{:08X} {:g}'.format(RepCode.to68(RepCode.minValue(68)), RepCode.minValue(68)))
         self.assertEqual(RepCode.to68(-1e40), RepCode.to68(RepCode.minValue(68)))
 
     def test_12__(self):
         """TestRepCodeTo68.test_12__(): to68() +1e40 is max."""
         self.assertEqual(RepCode.to68(+1e40), RepCode.to68(RepCode.maxValue(68)))
 
+
 class TestRepCodeTo68PyCy(TestRepCode68Base):
     """Tests Python and Cython values match"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -595,30 +617,31 @@ class TestRepCodeTo68PyCy(TestRepCode68Base):
     def test_00(self):
         """TestRepCodeTo68PyCy.test(): tests setUp() and tearDown()."""
         pass
-        
+
     def test_10(self):
-        """TestRepCodeTo68PyCy.test_10(): to68() -999.25 -> 0xBA831800"""        
+        """TestRepCodeTo68PyCy.test_10(): to68() -999.25 -> 0xBA831800"""
         self.assertEqual('{:b}'.format(pRepCode.to68(-999.25)), '{:b}'.format(cRepCode.to68(-999.25)))
         self.assertEqual(pRepCode.to68(-999.25), cRepCode.to68(-999.25))
         self.assertEqual(RepCode.to68(-999.25), 0xBA831800)
+
 
 class TestRepCodeTo68LowExponent(TestRepCode68Base):
     """Special tests for low exponent numbers."""
 
     def test_00(self):
         """TestRepCodeTo68LowExponent.test_30(): to68(0.0) -> 0x40000000 and to68(0.25) -> 0x3fc00000 (Defect found during FrameSet testing)."""
-#        print()
-#        print('pRepCode.to68(math.ldexp(-1, -128))', '0x{:08x}'.format(pRepCode.to68(math.ldexp(-1, -128))))
-#        print('pRepCode.to68(math.ldexp(+1, -128))', '0x{:08x}'.format(pRepCode.to68(math.ldexp(1, -128))))
+        #        print()
+        #        print('pRepCode.to68(math.ldexp(-1, -128))', '0x{:08x}'.format(pRepCode.to68(math.ldexp(-1, -128))))
+        #        print('pRepCode.to68(math.ldexp(+1, -128))', '0x{:08x}'.format(pRepCode.to68(math.ldexp(1, -128))))
         self.assertEqual(RepCode.to68(0.0), 0x40000000)
         self.assertEqual(RepCode.to68(0.25), 0x3fc00000)
         self.assertEqual(RepCode.from68(0x40000000), 0.0)
-#        print('0x3fc00000', RepCode.from68(0x3fc00000))
+        #        print('0x3fc00000', RepCode.from68(0x3fc00000))
         self.assertEqual(RepCode.from68(0x3fc00000), 0.25)
 
     def test_02_00(self):
         """TestRepCodeTo68LowExponent.test_02_00(): from68() mantissa depression - pRepCode module."""
-#        print('0x00000001', RepCode.from68(0x00000001))
+        #        print('0x00000001', RepCode.from68(0x00000001))
         self.assertEqual((0.5, -150), math.frexp(pRepCode.from68(0x00000001)))
         self.assertEqual((0.5, -149), math.frexp(pRepCode.from68(0x00000002)))
         self.assertEqual((0.5, -148), math.frexp(pRepCode.from68(0x00000004)))
@@ -642,10 +665,10 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
         self.assertEqual((0.5, -130), math.frexp(pRepCode.from68(0x00100000)))
         self.assertEqual((0.5, -129), math.frexp(pRepCode.from68(0x00200000)))
         self.assertEqual((0.5, -128), math.frexp(pRepCode.from68(0x00400000)))
-        
+
     def test_02_01(self):
         """TestRepCodeTo68LowExponent.test_02_01(): from68() mantissa depression - cRepCode module."""
-#        print('0x00000001', RepCode.from68(0x00000001))
+        #        print('0x00000001', RepCode.from68(0x00000001))
         self.assertEqual((0.5, -150), math.frexp(cRepCode.from68(0x00000001)))
         self.assertEqual((0.5, -149), math.frexp(cRepCode.from68(0x00000002)))
         self.assertEqual((0.5, -148), math.frexp(cRepCode.from68(0x00000004)))
@@ -669,10 +692,10 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
         self.assertEqual((0.5, -130), math.frexp(cRepCode.from68(0x00100000)))
         self.assertEqual((0.5, -129), math.frexp(cRepCode.from68(0x00200000)))
         self.assertEqual((0.5, -128), math.frexp(cRepCode.from68(0x00400000)))
-        
+
     def test_02_02(self):
         """TestRepCodeTo68LowExponent.test_02_02(): from68() mantissa depression - RepCode module."""
-#        print('0x00000001', RepCode.from68(0x00000001))
+        #        print('0x00000001', RepCode.from68(0x00000001))
         self.assertEqual((0.5, -150), math.frexp(RepCode.from68(0x00000001)))
         self.assertEqual((0.5, -149), math.frexp(RepCode.from68(0x00000002)))
         self.assertEqual((0.5, -148), math.frexp(RepCode.from68(0x00000004)))
@@ -696,24 +719,25 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
         self.assertEqual((0.5, -130), math.frexp(RepCode.from68(0x00100000)))
         self.assertEqual((0.5, -129), math.frexp(RepCode.from68(0x00200000)))
         self.assertEqual((0.5, -128), math.frexp(RepCode.from68(0x00400000)))
-        
+
     def test_03(self):
         """TestRepCodeTo68LowExponent.test_03(): Special exponent tests."""
-#        print()
+        #        print()
         for e in (-151, -150, -129, -128, 0):
             rcWord = pRepCode.to68(math.ldexp(0.5, e))
-#            print(
-#                  'pRepCode.to68(math.ldexp(0.5, {:4d}))'.format(e),
-#                  '0x{:08x}->{:s}'.format(rcWord, math.frexp(pRepCode.from68(rcWord)))
-#            )
-            #print()
+        #            print(
+        #                  'pRepCode.to68(math.ldexp(0.5, {:4d}))'.format(e),
+        #                  '0x{:08x}->{:s}'.format(rcWord, math.frexp(pRepCode.from68(rcWord)))
+        #            )
+        # print()
         for e in (-151, -150, -129, -128, 0):
             rcWord = cRepCode.to68(math.ldexp(0.5, e))
-#            print(
-#                  'cRepCode.to68(math.ldexp(0.5, {:4d}))'.format(e),
-#                  '0x{:08x}->{:s}'.format(rcWord, math.frexp(pRepCode.from68(rcWord)))
-#            )
-            #print()
+
+    #            print(
+    #                  'cRepCode.to68(math.ldexp(0.5, {:4d}))'.format(e),
+    #                  '0x{:08x}->{:s}'.format(rcWord, math.frexp(pRepCode.from68(rcWord)))
+    #            )
+    # print()
 
     def test_04(self):
         """TestRepCodeTo68LowExponent.test_04(): Special exponent tests, full range."""
@@ -726,12 +750,13 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
         for e in range(-150, 128, 1):
             rcWord = RepCode.to68(math.ldexp(0.5, e))
             self.assertEqual((0.5, e), math.frexp(RepCode.from68(rcWord)))
-        
+
     def test_05(self):
         """TestRepCodeTo68LowExponent.test_02(): to68() exponent <-150 made to zero."""
         self.assertEqual(0x40000000, pRepCode.to68(math.ldexp(0.5, -151)))
         self.assertEqual(0x40000000, cRepCode.to68(math.ldexp(0.5, -151)))
         self.assertEqual(0x40000000, RepCode.to68(math.ldexp(0.5, -151)))
+
 
 #    def test_10(self):
 #        """TestRepCodeTo68LowExponent.test_10(): to68(0.0) -> 0x40000000 and to68(0.25) -> ??? (Defect found during FrameSet testing)."""
@@ -747,6 +772,7 @@ class TestRepCodeTo68LowExponent(TestRepCode68Base):
 @pytest.mark.slow
 class TestRepCodeFrom68Time(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -768,7 +794,7 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             cRepCode.from68(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom68Time.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -778,7 +804,7 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             pRepCode.from68(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom68Time.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -788,18 +814,18 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             cRepCode.from68(0xBBB38000)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from68(0xBBB38000)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #sys.stderr.write('Cython: %.3f% ' % tE_C)
-        #sys.stderr.write('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # sys.stderr.write('Cython: %.3f% ' % tE_C)
+        # sys.stderr.write('Python: %.3f% ' % tE_P)
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_03(self):
         """TestRepCodeFrom68Time.test_time_03(): tests conversion of 1e6 of same word - RepCode.from68 code."""
         i = 0
@@ -809,7 +835,7 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             RepCode.from68(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_10(self):
         """TestRepCodeFrom68Time.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -819,7 +845,7 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             cRepCode.from68(self.randWord(1, 8, 23))
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom68Time.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -835,26 +861,26 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
         i = 0
         numWords = 1e5
         myWord = b'\x44\x4c\x80\x00'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
-        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                      + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
+                      + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                     + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
+                     + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                    + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
+                    + (myWord * wordsInPr)
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
+        assert (numPrBody >= 0)
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -865,7 +891,7 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        sys.stderr.write('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -876,13 +902,14 @@ class TestRepCodeFrom68Time(TestRepCode68Base):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        sys.stderr.write('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         sys.stderr.write('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
 
 
 @pytest.mark.slow
 class TestRepCodeTo68Time(TestRepCode68Base):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -904,7 +931,7 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             cRepCode.to68(153.0)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_01(self):
         """TestRepCodeTo68Time.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -914,7 +941,7 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             pRepCode.to68(153.0)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_02(self):
         """TestRepCodeTo68Time.test_time_02(): 1e6 same word  Cython time c.f. Python:"""
         i = 0
@@ -924,16 +951,16 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             cRepCode.to68(153.0)
             i += 1
         tE_C = time.perf_counter() - tS
-        sys.stderr.write(' Cython: %.3f rate %8.0f words/S' % (tE_C, num/tE_C))
+        sys.stderr.write(' Cython: %.3f rate %8.0f words/S' % (tE_C, num / tE_C))
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.to68(153.0)
             i += 1
         tE_P = time.perf_counter() - tS
-        sys.stderr.write(' Python: %.3f rate %8.f words/S' % (tE_P, num/tE_P))
+        sys.stderr.write(' Python: %.3f rate %8.f words/S' % (tE_P, num / tE_P))
         sys.stderr.write(' %.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_03(self):
         """TestRepCodeTo68Time.test_time_03(): tests conversion of 1e6 of same word - RepCode.to68 code."""
         i = 0
@@ -943,7 +970,7 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             RepCode.to68(153.0)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_10(self):
         """TestRepCodeTo68Time.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -955,7 +982,7 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             cRepCode.to68(val)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-        
+
     def test_time_11(self):
         """TestRepCodeTo68Time.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -967,7 +994,8 @@ class TestRepCodeTo68Time(TestRepCode68Base):
             pRepCode.to68(val)
             i += 1
         self.writeTimeToStdErr(tS, 68, num)
-                
+
+
 #    def test_time_21(self):
 #        """TestRepCodeTo68Time.test_time_21(): write68() 1e5 words"""
 #        i = 0
@@ -1018,6 +1046,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRepCodeTo68Time))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -1042,6 +1072,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -1050,7 +1081,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -1068,14 +1099,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

@@ -29,7 +29,6 @@ In particular:
 import collections
 import typing
 
-
 # Code  Type        Desciption (sic)    Data Descriptor Reference Object Type
 # 0     FDATA       Frame Data          FRAME
 # 1     NOFORMAT    Unformatted Data    NO-FORMAT
@@ -38,7 +37,6 @@ import typing
 TypeDescriptionDataDescriptorObjectReferenceType: typing.Tuple[bytes, str, bytes] = collections.namedtuple(
     'TypeDescriptionAllowableSetTypes', 'type, description, data_descriptor_reference_object_type')
 
-
 IFLR_PUBLIC_CODE_MAP: typing.Dict[int, TypeDescriptionDataDescriptorObjectReferenceType] = {
     0: TypeDescriptionDataDescriptorObjectReferenceType(b'FDATA', 'Frame Data [RP66V1 Section 5.6]', b'FRAME'),
     1: TypeDescriptionDataDescriptorObjectReferenceType(b'NOFORMAT', 'Unformatted Data', b'NO-FORMAT'),
@@ -46,20 +44,17 @@ IFLR_PUBLIC_CODE_MAP: typing.Dict[int, TypeDescriptionDataDescriptorObjectRefere
     127: TypeDescriptionDataDescriptorObjectReferenceType(b'EOD', 'End of Data [RP66V1 Section 5.11]', b''),
 }
 
-
 # Reverse map of {set_type : lr_type, ...}
 IFLR_PUBLIC_SET_TYPE_TO_CODE_MAP: typing.Dict[bytes, int] = {
     b'FRAME': 0,
     b'NO-FORMAT': 1,
 }
 
-
 IFLR_PUBLIC_CODE_MAP.update(
     {
         _k: TypeDescriptionDataDescriptorObjectReferenceType(b'', 'undefined, reserved', b'') for _k in range(2, 127)
     }
 )
-
 
 # A.2 Explicitly Formatted Logical Records
 #
@@ -69,7 +64,6 @@ IFLR_PUBLIC_CODE_MAP.update(
 # Code	Type	Description	Allowable Set Types
 TypeDescriptionAllowableSetTypes: typing.Tuple[bytes, str, typing.Set[bytes]] = collections.namedtuple(
     'TypeDescriptionAllowableSetTypes', 'type, description, allowable_set_types')
-
 
 EFLR_PUBLIC_CODE_MAP: typing.Dict[int, TypeDescriptionAllowableSetTypes] = {
     0: TypeDescriptionAllowableSetTypes(b'FHLR', 'File Header [RP66V1 Section 5.1]', {b'FILE-HEADER', }),
@@ -94,7 +88,7 @@ EFLR_PUBLIC_CODE_MAP: typing.Dict[int, TypeDescriptionAllowableSetTypes] = {
         }
     ),
     11: TypeDescriptionAllowableSetTypes(
-        b'DICT', 'Dictionary [RP66V1 Section 7.2]',	{
+        b'DICT', 'Dictionary [RP66V1 Section 7.2]', {
             b'BASE-DICTIONARY', b'IDENTIFIER', b'LEXICON', b'OPTION',
         }
     ),
@@ -108,7 +102,6 @@ for _k, _v in EFLR_PUBLIC_CODE_MAP.items():
     for set_type in _v.allowable_set_types:
         assert set_type not in EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP, f'{set_type} already in EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP'
         EFLR_PUBLIC_SET_TYPE_TO_CODE_MAP[set_type] = _k
-
 
 # Add undefined and reserved codes
 EFLR_PUBLIC_CODE_MAP.update(

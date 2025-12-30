@@ -1,7 +1,5 @@
 import time
 
-import pytest
-
 from TotalDepth.util import ExecTimer
 
 

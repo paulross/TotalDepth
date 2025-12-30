@@ -33,7 +33,6 @@ from TotalDepth.common import data_table, Slice, cmn_cmd_opts, process
 from TotalDepth.common.LogPass import FrameArray
 from TotalDepth.util import DirWalk, gnuplot
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -205,7 +204,8 @@ def convert_dir_or_file_to_las(
 STANDARD_TEXT_WIDTH = 132
 
 
-def process_to_las(args: argparse.PARSER, file_conversion_function: typing.Callable) -> typing.Dict[str, LASWriteResult]:
+def process_to_las(args: argparse.PARSER, file_conversion_function: typing.Callable) -> typing.Dict[
+    str, LASWriteResult]:
     result: typing.Dict[str, LASWriteResult] = {}
     # if os.path.isfile(args.path_in) and (args.frame_slice.strip() == '?' or args.channels.strip() == '?'):
     logger.info(f'process_to_las(): {args}')
@@ -403,7 +403,6 @@ WELL_INFORMATION_KEYS: typing.Tuple[str, ...] = (
     # 'LATI', 'LONG',
 )
 
-
 # =================== Writing a Frame Array to LAS ===================
 #: Possible methods to reduce an array to a single value.
 ARRAY_REDUCTIONS = {'first', 'mean', 'median', 'min', 'max'}
@@ -441,7 +440,8 @@ def _stringify(value: typing.Union[str, bytes, typing.Any]) -> str:
     return str(value)
 
 
-def _add_x_axis_to_channels_to_write(frame_array: FrameArray, channel_name_sub_set: typing.Set[typing.Hashable]) -> None:
+def _add_x_axis_to_channels_to_write(frame_array: FrameArray,
+                                     channel_name_sub_set: typing.Set[typing.Hashable]) -> None:
     """Modifies channel_name_sub_set in-place to include x-axis."""
     if len(channel_name_sub_set) != 0:
         channel_name_sub_set.add(frame_array.x_axis.ident)
@@ -490,7 +490,7 @@ def write_array_section_header_to_las(
         channel_name_sub_set: typing.Set[str],
         field_width: int,
         out_stream: typing.TextIO,
-    ) -> None:
+) -> None:
     """
     Write the ``~Array Section`` header to the LAS file, the actual log data.
 
@@ -549,13 +549,13 @@ def write_array_section_header_to_las(
 
 
 def write_array_section_data_to_las(
-            frame_array: FrameArray,
-            array_reduction: str,
-            channel_name_sub_set: typing.Set[str],
-            field_width: int,
-            float_decimal_places_format: str,
-            out_stream: typing.TextIO,
-    ) -> None:
+        frame_array: FrameArray,
+        array_reduction: str,
+        channel_name_sub_set: typing.Set[str],
+        field_width: int,
+        float_decimal_places_format: str,
+        out_stream: typing.TextIO,
+) -> None:
     """
     Write the frame data into the ``~Array Section`` to the LAS file.
     This allows the caller to reduce the memory requirements by creating the FrameArray incrementally thus::
@@ -602,7 +602,7 @@ def write_array_section_to_las(
         field_width: int,
         float_decimal_places_format: str,
         out_stream: typing.TextIO,
-    ) -> None:
+) -> None:
     """
     Write the ``~Array Section`` header + log data to the LAS file.
 
@@ -620,7 +620,8 @@ def write_array_section_to_las(
     _check_float_decimal_places_format(float_decimal_places_format)
     write_array_section_header_to_las(frame_array, max_num_available_frames, array_reduction, frame_slice,
                                       channel_name_sub_set, field_width, out_stream)
-    write_array_section_data_to_las(frame_array, array_reduction, channel_name_sub_set, field_width, float_decimal_places_format,
+    write_array_section_data_to_las(frame_array, array_reduction, channel_name_sub_set, field_width,
+                                    float_decimal_places_format,
                                     out_stream)
 
 
@@ -633,7 +634,7 @@ def write_curve_and_array_section_to_las(
         field_width: int,
         float_decimal_places_format: str,
         out_stream: typing.TextIO,
-    ) -> None:
+) -> None:
     """
     Write the ``~Curve Information Section`` to the LAS file followed by the ``~Array Section`` header + log data to the
     LAS file.
@@ -681,13 +682,13 @@ def las_writer_command_line_arguments(description: str, **kwargs) -> argparse.PA
         help='Method to reduce multidimensional channel data to a single value. [default: %(default)s]',
         default='first',
         choices=list(sorted(ARRAY_REDUCTIONS)),
-        )
+    )
     parser.add_argument(
         '--channels', type=str,
         help='Comma separated list of channels to write out (X axis is always included).'
              ' Use \'?\' to see what channels exist without writing anything. [default: "%(default)s"]',
         default='',
-        )
+    )
     parser.add_argument('--field-width', type=int,
                         help='Field width for array data [default: %(default)s].', default=16)
     parser.add_argument('--float-format', type=str,

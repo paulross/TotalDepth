@@ -9,30 +9,30 @@ import TotalDepth.util.bin_file_type
 @pytest.mark.parametrize(
     'version_line, groups',
     (
-        (
-            b' VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
-            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
-        ),
-        (
-            b'VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
-            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
-        ),
-        (
-            b'VERS. 2.0 : CWLS Log ASCII Standard - VERSION 2.0',
-            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
-        ),
-        (
-            b'     VERS.    2.0    :    CWLS Log ASCII Standard - VERSION 2.0   ',
-            (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
-        ),
-        (
-            b' VERS.                 2.0: ',
-            (b'2.0', None),
-        ),
-        (
-            b' VERS.                 2.0:',
-            (b'2.0', None),
-        ),
+            (
+                    b' VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
+                    (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+            ),
+            (
+                    b'VERS. 2.0: CWLS Log ASCII Standard - VERSION 2.0',
+                    (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+            ),
+            (
+                    b'VERS. 2.0 : CWLS Log ASCII Standard - VERSION 2.0',
+                    (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+            ),
+            (
+                    b'     VERS.    2.0    :    CWLS Log ASCII Standard - VERSION 2.0   ',
+                    (b'2.0', b'CWLS Log ASCII Standard - VERSION 2.0'),
+            ),
+            (
+                    b' VERS.                 2.0: ',
+                    (b'2.0', None),
+            ),
+            (
+                    b' VERS.                 2.0:',
+                    (b'2.0', None),
+            ),
     )
 )
 def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
@@ -44,32 +44,32 @@ def test_re_las_vers_line(version_line: str, groups: typing.Tuple[str, ...]):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Physical record type 1
-        (io.BytesIO(b'\x00\xFF\x40\x00\x80\x00'), ''),
-        # First PR has predecessor
-        (io.BytesIO(b'\x00\xFF\x00\x02\x80\x00'), ''),
-        # Checksum flags are 10
-        (io.BytesIO(b'\x00\xFF\x20\x00\x80\x00'), ''),
-        # Checksum flags are both set
-        (io.BytesIO(b'\x00\xFF\x30\x00\x80\x00'), ''),
-        # Length check with no PRT
-        (io.BytesIO(b'\x00\x04\x00\x00\x80\x00'), ''),
-        # Length check with checksum
-        (io.BytesIO(b'\x00\x06\x10\x00\x80\x00'), ''),
-        # Length check with record number
-        (io.BytesIO(b'\x00\x06\x04\x00\x80\x00'), ''),
-        # Length check with file number
-        (io.BytesIO(b'\x00\x06\x02\x00\x80\x00'),''),
-        # Length check with checksum, record and file number
-        (io.BytesIO(b'\x00\x0A\x16\x00\x80\x00'), ''),
-        # Length check passes with checksum, record and file number
-        (io.BytesIO(b'\x00\x0B\x16\x00\x80\x00'), 'LIS'),
-        # Logical record type is 0
-        (io.BytesIO(b'\x00\xFF\x00\x00\x00\x00'), ''),
-        # Logical record attributes are non-zero
-        (io.BytesIO(b'\x00\xFF\x00\x00\x80\x01'), ''),
-        # Test reserved/unused bits set and return code is 0
-        (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00'), 'LIS'),
+            # Physical record type 1
+            (io.BytesIO(b'\x00\xFF\x40\x00\x80\x00'), ''),
+            # First PR has predecessor
+            (io.BytesIO(b'\x00\xFF\x00\x02\x80\x00'), ''),
+            # Checksum flags are 10
+            (io.BytesIO(b'\x00\xFF\x20\x00\x80\x00'), ''),
+            # Checksum flags are both set
+            (io.BytesIO(b'\x00\xFF\x30\x00\x80\x00'), ''),
+            # Length check with no PRT
+            (io.BytesIO(b'\x00\x04\x00\x00\x80\x00'), ''),
+            # Length check with checksum
+            (io.BytesIO(b'\x00\x06\x10\x00\x80\x00'), ''),
+            # Length check with record number
+            (io.BytesIO(b'\x00\x06\x04\x00\x80\x00'), ''),
+            # Length check with file number
+            (io.BytesIO(b'\x00\x06\x02\x00\x80\x00'), ''),
+            # Length check with checksum, record and file number
+            (io.BytesIO(b'\x00\x0A\x16\x00\x80\x00'), ''),
+            # Length check passes with checksum, record and file number
+            (io.BytesIO(b'\x00\x0B\x16\x00\x80\x00'), 'LIS'),
+            # Logical record type is 0
+            (io.BytesIO(b'\x00\xFF\x00\x00\x00\x00'), ''),
+            # Logical record attributes are non-zero
+            (io.BytesIO(b'\x00\xFF\x00\x00\x80\x01'), ''),
+            # Test reserved/unused bits set and return code is 0
+            (io.BytesIO(b'\x00\x80\x85\x9c\x80\x00'), 'LIS'),
     )
 )
 def test__lis(fobj: io.BytesIO, expected: int):
@@ -79,7 +79,6 @@ def test__lis(fobj: io.BytesIO, expected: int):
 
 # Example of a correct initial Phyisical Record and Logical Record Header
 LIS_PR_GOOD_BYTES = b'\x00\x3e\x00\x00\x80\x00'
-
 
 # b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00\x00\x84\x80\x00\x83\x00EDI         81/09/22  ETJ.  20814     01            FILE SEQ:DIS-GR,FDC-GR,BHC-GR & NORMALIZED DATA                           \x00\x00\x00\x00\x00\x00\x00\x00 \x01\x00\x00\x00\x84\x80\x00\x85\x00EDI         81/09/22        ETJ20814  01            EDIT/NORM. TAPE OF D.TEXACO A.G. WELL KUDHA-1 LOGGED ON 22-JUL-81         \x01\x00\x00\x00\x90\x00\x00\x00,\x01\x00\x00\x01\x00\x00\x00 \x01\x00\x008\x01\x00\x00'
 LIS_MINIMAL = (
@@ -97,9 +96,9 @@ LIS_MINIMAL = (
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00', 0x90),
-        # Reversed.
-        (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90', 0x90),
+            (b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00', 0x90),
+            # Reversed.
+            (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90', 0x90),
     )
 )
 def test__tif_third_word(byt, expected):
@@ -110,9 +109,9 @@ def test__tif_third_word(byt, expected):
 @pytest.mark.parametrize(
     'byt, expected',
     (
-        (b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00', True),
-        # Reversed.
-        (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90', False),
+            (b'\x00\x00\x00\x00\x00\x00\x00\x00\x90\x00\x00\x00', True),
+            # Reversed.
+            (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90', False),
     )
 )
 def test__tif_third_word_normal(byt, expected):
@@ -139,7 +138,6 @@ LIS_TIF_MINIMAL = (
     b'\x01\x00\x00\x00\x20\x01\x00\x00\x38\x01\x00\x00'
 )
 
-
 LIS_TIF_REVERSED_MINIMAL = (
     # TIF @ 0x0
     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90'
@@ -163,11 +161,11 @@ LIS_TIF_REVERSED_MINIMAL = (
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (io.BytesIO(LIS_MINIMAL), 'LIS'),
-        # Typical TIF OK
-        (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
-        # Typical TIF reversed
-        (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
+            (io.BytesIO(LIS_MINIMAL), 'LIS'),
+            # Typical TIF OK
+            (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
+            # Typical TIF reversed
+            (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
     )
 )
 def test__lis(fobj: io.BytesIO, expected: int):
@@ -178,178 +176,178 @@ def test__lis(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Success
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~Version Information',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~Version Information Section',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~V',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~Version Information Block',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        # No space prefix and '1.2:CWLS' rather than '1.2: CWLS'
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~V',
-                    b'VERS. 1.2:CWLS Log ASCII Standard - VERSION 1.2',
-                    b'WRAP. NO:One line per depth step',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        # Comment line(s)
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'# Some comment or other',
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        # Comment line(s)
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'~VERSION INFORMATION',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b'# Some comment or other',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        # Blank lines
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'   ',
-                    b'~VERSION INFORMATION',
-                    b'',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
-        # Failure
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~NOT VERSION INFORMATION',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            ''
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~V',
-                    b' NOTVERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            ''
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~V',
-                    b' VERS.',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            ''
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~V',
-                    b' VERS.                 1.9:   CWLS LOG ASCII STANDARD -VERSION 1.9',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            ''
-        ),
-        (io.BytesIO(b'\n'), ''),
+            # Success
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~Version Information',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~Version Information Section',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~V',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~Version Information Block',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            # No space prefix and '1.2:CWLS' rather than '1.2: CWLS'
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~V',
+                            b'VERS. 1.2:CWLS Log ASCII Standard - VERSION 1.2',
+                            b'WRAP. NO:One line per depth step',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            # Comment line(s)
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'# Some comment or other',
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            # Comment line(s)
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'~VERSION INFORMATION',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b'# Some comment or other',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            # Blank lines
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'   ',
+                            b'~VERSION INFORMATION',
+                            b'',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
+            # Failure
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~NOT VERSION INFORMATION',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    ''
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~V',
+                            b' NOTVERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    ''
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~V',
+                            b' VERS.',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    ''
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~V',
+                            b' VERS.                 1.9:   CWLS LOG ASCII STANDARD -VERSION 1.9',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    ''
+            ),
+            (io.BytesIO(b'\n'), ''),
     )
 )
 def test__las(fobj: io.BytesIO, expected: int):
-    result = TotalDepth.util.bin_file_type._las(fobj, b'1.2')#(b'1.2:', b'1.2'))
+    result = TotalDepth.util.bin_file_type._las(fobj, b'1.2')  # (b'1.2:', b'1.2'))
     assert result == expected
 
 
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Success
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2'
-        ),
+            # Success
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2'
+            ),
     )
 )
 def test__las12(fobj: io.BytesIO, expected: int):
@@ -360,17 +358,17 @@ def test__las12(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Success
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS2.0'
-        ),
+            # Success
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS2.0'
+            ),
     )
 )
 def test__las20(fobj: io.BytesIO, expected: int):
@@ -381,17 +379,17 @@ def test__las20(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Success
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS3.0'
-        ),
+            # Success
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS3.0'
+            ),
     )
 )
 def test__las30(fobj: io.BytesIO, expected: int):
@@ -411,142 +409,142 @@ def test__las30(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (
-            # Good example
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31', # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44', # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32', # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            'RP66V1',
-        ),
-        (
-            # Missing sequence number, byte[3]
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x20', # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44', # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32', # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            '',
-        ),
-        (
-            # Bad version, initial bytes are not 'V1.'
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'X\x31\x2e\x31\x31',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            '',
-        ),
-        (
-            # Bad version, minor number is spaces
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x20\x20',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            '',
-        ),
-        (
-            # Storage unit structure is not b'RECORD'
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'XXXXXX',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            '',
-        ),
-        (
-            # Maximum Record Length is not a number, (last byte is a space)
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x20',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            '',
-        ),
-        (
-            # Storage Set Identifier - too short (last field)
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    (b'\x20' * 15),
-                ]
-            )),
-            '',
-        ),
-        (
-            # Storage Set Identifier - non-printable bytes (last field)
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x00' * 16,
-                ]
-            )),
-            '',
-        ),
+            (
+                    # Good example
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    'RP66V1',
+            ),
+            (
+                    # Missing sequence number, byte[3]
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x20',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Bad version, initial bytes are not 'V1.'
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'X\x31\x2e\x31\x31',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Bad version, minor number is spaces
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x20\x20',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Storage unit structure is not b'RECORD'
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'XXXXXX',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Maximum Record Length is not a number, (last byte is a space)
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x20',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Storage Set Identifier - too short (last field)
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            (b'\x20' * 15),
+                        ]
+                    )),
+                    '',
+            ),
+            (
+                    # Storage Set Identifier - non-printable bytes (last field)
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x00' * 16,
+                        ]
+                    )),
+                    '',
+            ),
     )
 )
 def test__rp66v1(fobj: io.BytesIO, expected: int):
@@ -557,26 +555,26 @@ def test__rp66v1(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (
-            # Good example
-            io.BytesIO(b''.join(
-                [
-                    # TIF
-                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
-                    # RP66V1
-                    b'\x20\x20\x20\x31', # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44', # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32', # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            'RP66V1t',
-        ),
+            (
+                    # Good example
+                    io.BytesIO(b''.join(
+                        [
+                            # TIF
+                            b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
+                            # RP66V1
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    'RP66V1t',
+            ),
     )
 )
 def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
@@ -587,26 +585,26 @@ def test__rp66v1_tif(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (
-            # Good example
-            io.BytesIO(b''.join(
-                [
-                    # TIF
-                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
-                    # RP66V1
-                    b'\x20\x20\x20\x31', # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30', # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44', # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32', # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            'RP66V1tr',
-        ),
+            (
+                    # Good example
+                    io.BytesIO(b''.join(
+                        [
+                            # TIF
+                            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
+                            # RP66V1
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    'RP66V1tr',
+            ),
     )
 )
 def test__rp66v1_tif_r(fobj: io.BytesIO, expected: int):
@@ -658,6 +656,7 @@ SEGY_EMPTY = b''.join(
         b'\xc3\xf4\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
     ])
 
+
 def test_segy():
     file = io.BytesIO(SEGY_EMPTY)
     result = TotalDepth.util.bin_file_type._segy(file)
@@ -667,8 +666,8 @@ def test_segy():
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (io.BytesIO(b''), 'ASCII'),
-        (io.BytesIO(b'PK'), 'ASCII'),
+            (io.BytesIO(b''), 'ASCII'),
+            (io.BytesIO(b'PK'), 'ASCII'),
     )
 )
 def test__ascii(fobj: io.BytesIO, expected: int):
@@ -679,10 +678,10 @@ def test__ascii(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Typical ZIP OK
-        (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
-        # ZIP bad
-        (io.BytesIO(b'PK\x03\x05'), ''),
+            # Typical ZIP OK
+            (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
+            # ZIP bad
+            (io.BytesIO(b'PK\x03\x05'), ''),
     )
 )
 def test__zip(fobj: io.BytesIO, expected: int):
@@ -693,10 +692,10 @@ def test__zip(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Typical PDF OK
-        (io.BytesIO(b'%PDF-'), 'PDF'),
-        # PDF bad
-        (io.BytesIO(b'%PDFX'), ''),
+            # Typical PDF OK
+            (io.BytesIO(b'%PDF-'), 'PDF'),
+            # PDF bad
+            (io.BytesIO(b'%PDFX'), ''),
     )
 )
 def test__pdf(fobj: io.BytesIO, expected: int):
@@ -771,13 +770,14 @@ EXAMPLE_BIT_FILE = (
     b'Bl\xfd7Bl\xfd7Bl\xfd7A0\xc1\x11A0\xc1\x11A0\xc1\x11A0\xc1\x11A0\xc1\x11'
 )
 
+
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        # Typical OK
-        (io.BytesIO(EXAMPLE_BIT_FILE), 'BIT'),
-        # Empty string
-        (io.BytesIO(b""""""), ''),
+            # Typical OK
+            (io.BytesIO(EXAMPLE_BIT_FILE), 'BIT'),
+            # Empty string
+            (io.BytesIO(b""""""), ''),
     )
 )
 def test__bit(fobj: io.BytesIO, expected: int):
@@ -788,101 +788,101 @@ def test__bit(fobj: io.BytesIO, expected: int):
 @pytest.mark.parametrize(
     'fobj, expected',
     (
-        (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
-        (io.BytesIO(b'%PDF-'), 'PDF'),
-        # Need extra bytes so that TIF can be tested as well.
-        (io.BytesIO(LIS_MINIMAL), 'LIS'),
-        (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
-        (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS1.2',
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS2.0',
-        ),
-        (
-            io.BytesIO(b'\n'.join(
-                [
-                    b'~VERSION INFORMATION',
-                    b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
-                    b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
-                ]
-            )),
-            'LAS3.0',
-        ),
-        (
-            io.BytesIO(b''.join(
-                [
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ],
-            )),
-            'RP66V1',
-        ),
-        (
-            # RP66V1 with a TIF marker.
-            io.BytesIO(b''.join(
-                [
-                    # TIF
-                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
-                    # RP66V1
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            'RP66V1t',
-        ),
-        (
-            # RP66V1 with a reversed TIF marker.
-            io.BytesIO(b''.join(
-                [
-                    # TIF
-                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
-                    # RP66V1
-                    b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
-                    b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
-                    b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
-                    b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
-                    # Storage set identifier, 60 bytes, b'Default Storage Set...'
-                    b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
-                    b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
-                    b'\x20' * 16,
-                    b'\x20' * 16,
-                ]
-            )),
-            'RP66V1tr',
-        ),
-        (
-            # Short DAT file.
-            io.BytesIO(b"""UTIM Unix Time sec
+            (io.BytesIO(b'PK\x03\x04'), 'ZIP'),
+            (io.BytesIO(b'%PDF-'), 'PDF'),
+            # Need extra bytes so that TIF can be tested as well.
+            (io.BytesIO(LIS_MINIMAL), 'LIS'),
+            (io.BytesIO(LIS_TIF_MINIMAL), 'LISt'),
+            (io.BytesIO(LIS_TIF_REVERSED_MINIMAL), 'LIStr'),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 1.2:   CWLS LOG ASCII STANDARD -VERSION 1.2',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS1.2',
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 2.0:   CWLS LOG ASCII STANDARD -VERSION 2.0',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS2.0',
+            ),
+            (
+                    io.BytesIO(b'\n'.join(
+                        [
+                            b'~VERSION INFORMATION',
+                            b' VERS.                 3.0:   CWLS LOG ASCII STANDARD -VERSION 3.0',
+                            b' WRAP.                  NO:   ONE LINE PER DEPTH STEP',
+                        ]
+                    )),
+                    'LAS3.0',
+            ),
+            (
+                    io.BytesIO(b''.join(
+                        [
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ],
+                    )),
+                    'RP66V1',
+            ),
+            (
+                    # RP66V1 with a TIF marker.
+                    io.BytesIO(b''.join(
+                        [
+                            # TIF
+                            b'\x00\x00\x00\x00\x00\x00\x00\x00\x5c\x00\x00\x00'
+                            # RP66V1
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    'RP66V1t',
+            ),
+            (
+                    # RP66V1 with a reversed TIF marker.
+                    io.BytesIO(b''.join(
+                        [
+                            # TIF
+                            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x5c'
+                            # RP66V1
+                            b'\x20\x20\x20\x31',  # Storage Unit Sequence Number, 4 bytes
+                            b'\x56\x31\x2e\x30\x30',  # DLIS version, 5 bytes
+                            b'\x52\x45\x43\x4f\x52\x44',  # Storage unit structure, 6 bytes, b'RECORD'
+                            b'\x20\x38\x31\x39\x32',  # Maximum record length, 5 bytes
+                            # Storage set identifier, 60 bytes, b'Default Storage Set...'
+                            b'\x44\x65\x66\x61\x75\x6c\x74\x20\x53\x74\x6f\x72',
+                            b'\x61\x67\x65\x20\x53\x65\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20',
+                            b'\x20' * 16,
+                            b'\x20' * 16,
+                        ]
+                    )),
+                    'RP66V1tr',
+            ),
+            (
+                    # Short DAT file.
+                    io.BytesIO(b"""UTIM Unix Time sec
 DATE Date ddmmyy
 TIME Time hhmmss
 WAC Wits Activity Code unitless
@@ -892,10 +892,10 @@ EPEN Neo-Pentane ppm
 UTIM DATE TIME WAC BDIA NPEN EPEN
 1165665017 09Dec06 11-50-17 0 8.50 0 0
 """),
-            'DAT',
-        ),
-        (io.BytesIO(SEGY_EMPTY), 'SEGY',),
-        (io.BytesIO(EXAMPLE_BIT_FILE), 'BIT'),
+                    'DAT',
+            ),
+            (io.BytesIO(SEGY_EMPTY), 'SEGY',),
+            (io.BytesIO(EXAMPLE_BIT_FILE), 'BIT'),
     )
 )
 def test_binary_file_type_from_bytes(fobj: io.BytesIO, expected: str):

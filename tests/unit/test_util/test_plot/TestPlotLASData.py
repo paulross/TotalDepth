@@ -24,10 +24,10 @@ Created on 19 jan 2012
 @author: p2ross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2012-01-19'
+__author__ = 'Paul Ross'
+__date__ = '2012-01-19'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 LAS_00_200_FEET_DOWN = """# 03/10/1999 14:53:39 Updated by the Kansas Geological Survey
 # #KGS#ID: 31S33W/1001178923

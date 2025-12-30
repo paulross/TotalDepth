@@ -36,9 +36,7 @@ __date__ = '2021-02-05'
 __version__ = '0.1.0'
 __rights__ = 'Copyright (c) 2021 Paul Ross. All rights reserved.'
 
-
 LAS_PRODUCER_VERSION = '0.1.1'
-
 
 logger = logging.getLogger(__file__)
 
@@ -89,14 +87,15 @@ def bit_frame_array_to_las_file(bit_frame_array: ReadBIT.BITFrameArray,
                 ['#MNEM.UNIT', 'DATA', 'DESCRIPTION', ],
                 ['#----.----', '----', '-----------', ],
                 [f'{"STRT":4}.{"    ":4}', f'{x_start}', f': {"START"}', ],
-                [f'{"STOP":4}.{"    ":4}', f'{x_stop}', f': {"STOP"}',],
-                [f'{"STRP":4}.{"    ":4}', f'{x_spacing}', f': {"STEP"}',],
+                [f'{"STOP":4}.{"    ":4}', f'{x_stop}', f': {"STOP"}', ],
+                [f'{"STRP":4}.{"    ":4}', f'{x_spacing}', f': {"STEP"}', ],
             ]
             WriteLAS.write_table(table, '~Well Information Section', las_file)
 
             # Write the curve and array sections.
             WriteLAS.write_curve_and_array_section_to_las(bit_frame_array.frame_array, bit_frame_array.frame_count,
-                'first', frame_slice, channel_name_sub_set, field_width, float_format, las_file,)
+                                                          'first', frame_slice, channel_name_sub_set, field_width,
+                                                          float_format, las_file, )
 
 
 def single_bit_path_to_las_path(bit_path: str,
@@ -203,7 +202,8 @@ Reads Western Atlas BIT file(s) and writes them out as LAS files."""
         clk_start = time.perf_counter()
         result: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_bit_path_to_las_path)
         clk_exec = time.perf_counter() - clk_start
-        _failed_file_count = WriteLAS.report_las_write_results_and_performance(result, clk_exec, args.gnuplot, include_ignored=False)
+        _failed_file_count = WriteLAS.report_las_write_results_and_performance(result, clk_exec, args.gnuplot,
+                                                                               include_ignored=False)
     print('Bye, bye!')
     return ret_val
 

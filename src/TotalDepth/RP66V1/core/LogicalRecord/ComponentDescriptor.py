@@ -52,8 +52,8 @@ class ExceptionComponentDescriptorAccessError(ExceptionComponentDescriptor):
 
 class RoleType(typing.NamedTuple):
     """Contains the role and type such as ``('ABSATR', 'Absent Attribute')``"""
-    role:  str
-    type:  str
+    role: str
+    type: str
 
 
 class CharacteristicRepCodeGlobalDefault(typing.NamedTuple):
@@ -78,14 +78,14 @@ class ComponentDescriptor:
     ROLE_RSET = 0xc0
     ROLE_SET = 0xe0
     ROLE_MAP = {
-        ROLE_ABSATR : RoleType('ABSATR', 'Absent Attribute'),
-        ROLE_ATTRIB : RoleType('ATTRIB', 'Attribute'),
-        ROLE_INVATR : RoleType('INVATR', 'Invariant Attribute'),
-        ROLE_OBJECT : RoleType('OBJECT', 'Object'),
-        ROLE_reserved : RoleType('reserved', ''),
-        ROLE_RDSET : RoleType('RDSET', 'Redundant Set'),
-        ROLE_RSET : RoleType('RSET', 'Replacement Set'),
-        ROLE_SET : RoleType('SET', 'Set'),
+        ROLE_ABSATR: RoleType('ABSATR', 'Absent Attribute'),
+        ROLE_ATTRIB: RoleType('ATTRIB', 'Attribute'),
+        ROLE_INVATR: RoleType('INVATR', 'Invariant Attribute'),
+        ROLE_OBJECT: RoleType('OBJECT', 'Object'),
+        ROLE_reserved: RoleType('reserved', ''),
+        ROLE_RDSET: RoleType('RDSET', 'Redundant Set'),
+        ROLE_RSET: RoleType('RSET', 'Replacement Set'),
+        ROLE_SET: RoleType('SET', 'Set'),
     }
     CHARACTERISTICS_AND_COMPONENT_FORMAT_MASK = 0x1f
     # Bits symbols for Sets [RP66V1 Section 3.2.2.1 Figure 3-3]
@@ -131,7 +131,8 @@ class ComponentDescriptor:
             raise ExceptionComponentDescriptorInit(f'SET type must have \'Type\' Characteristic from 0x{self._desc:x}')
         if self.is_object and not self.has_object_N:
             # [RP66V1 Section 3.2.2.1 Component Descriptor, comment 1 following Figure 3-4.]
-            raise ExceptionComponentDescriptorInit(f'OBJECT type must have \'Name\' Characteristic from 0x{self._desc:x}')
+            raise ExceptionComponentDescriptorInit(
+                f'OBJECT type must have \'Name\' Characteristic from 0x{self._desc:x}')
 
     def __eq__(self, other):
         if other.__class__ == ComponentDescriptor:

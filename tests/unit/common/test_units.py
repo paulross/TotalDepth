@@ -1,7 +1,6 @@
-from bs4 import BeautifulSoup
-import pytest
-
 import numpy as np
+import pytest
+from bs4 import BeautifulSoup
 
 import TotalDepth.common.units
 
@@ -9,15 +8,15 @@ import TotalDepth.common.units
 @pytest.mark.parametrize(
     'args, expected',
     (
-        (
-            ('DEGC', 'degree celsius', 'degC', 'Temperature', 1, -273.15), False,
-        ),
-        (
-            ('DEGF', 'degree fahrenheit', 'degF', 'Temperature', 0.555555555555556, -459.67), False,
-        ),
-        (
-            ('DEGK', 'degree kelvin', 'degK', 'Temperature', 1, 0), True,
-        ),
+            (
+                    ('DEGC', 'degree celsius', 'degC', 'Temperature', 1, -273.15), False,
+            ),
+            (
+                    ('DEGF', 'degree fahrenheit', 'degF', 'Temperature', 0.555555555555556, -459.67), False,
+            ),
+            (
+                    ('DEGK', 'degree kelvin', 'degK', 'Temperature', 1, 0), True,
+            ),
     )
 )
 def test_unit_is_primary(args, expected):
@@ -28,12 +27,12 @@ def test_unit_is_primary(args, expected):
 @pytest.mark.parametrize(
     'args, expected',
     (
-        (
-            ('DEGC', 'degree celsius', 'degC', 'Temperature', 1, -273.15), True,
-        ),
-        (
-            ('DEGK', 'degree kelvin', 'degK', 'Temperature', 1, 0), False,
-        ),
+            (
+                    ('DEGC', 'degree celsius', 'degC', 'Temperature', 1, -273.15), True,
+            ),
+            (
+                    ('DEGK', 'degree kelvin', 'degK', 'Temperature', 1, 0), False,
+            ),
     )
 )
 def test_unit_has_offset(args, expected):
@@ -80,10 +79,12 @@ def test__slb_units_from_parse_tree():
     table = BeautifulSoup(table_text, features='lxml')
     result = TotalDepth.common.units._slb_units_from_parse_tree(table)
     expected = {'(MSCF/d)/ft/psi': TotalDepth.common.units.Unit(code='(MSCF/d)/ft/psi', name='GeoFrame legacy unit',
-                                                                standard_form='1000 ft3/(d.ft.psi)', dimension='Mobility',
+                                                                standard_form='1000 ft3/(d.ft.psi)',
+                                                                dimension='Mobility',
                                                                 scale=1.55954244790036e-07, offset=0.0),
                 '(MSCF/d)/psi': TotalDepth.common.units.Unit(code='(MSCF/d)/psi', name='GeoFrame legacy unit',
-                                                             standard_form='1000 ft3/(d.psi)', dimension='FlowratePerPressure',
+                                                             standard_form='1000 ft3/(d.psi)',
+                                                             dimension='FlowratePerPressure',
                                                              scale=4.75348538120031e-08, offset=0.0),
                 '(STB/d)/ft/psi': TotalDepth.common.units.Unit(code='(STB/d)/ft/psi', name='GeoFrame legacy unit',
                                                                standard_form='bbl/(d.ft.psi)', dimension='Mobility',
@@ -105,12 +106,12 @@ METR = TotalDepth.common.units.Unit('M', 'meter', 'm', 'Length', 1.0, 0.0)
 @pytest.mark.parametrize(
     'array, units_from, units_to, expected',
     (
-        (
-            np.array([0.0, 100.0]), DEG_C, DEG_F, np.array([32.0, 212.0]),
-        ),
-        (
-            np.array([0.0, 100.0]), FEET, METR, np.array([0.0, 30.48]),
-        ),
+            (
+                    np.array([0.0, 100.0]), DEG_C, DEG_F, np.array([32.0, 212.0]),
+            ),
+            (
+                    np.array([0.0, 100.0]), FEET, METR, np.array([0.0, 30.48]),
+            ),
     )
 )
 def test_convert_array(array, units_from, units_to, expected):
@@ -121,12 +122,12 @@ def test_convert_array(array, units_from, units_to, expected):
 @pytest.mark.parametrize(
     'array, units_from, units_to',
     (
-        (
-            np.array([0.0, 100.0]), DEG_C, DEG_F,
-        ),
-        (
-            np.array([0.0, 100.0]), FEET, METR,
-        ),
+            (
+                    np.array([0.0, 100.0]), DEG_C, DEG_F,
+            ),
+            (
+                    np.array([0.0, 100.0]), FEET, METR,
+            ),
     )
 )
 def test_convert_array_id(array, units_from, units_to):

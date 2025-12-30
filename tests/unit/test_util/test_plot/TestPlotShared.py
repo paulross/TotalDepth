@@ -24,15 +24,17 @@ Created on Jan 6, 2012
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
-import os
 import collections
+import os
+
 
 def outPath(f):
     return os.path.join(os.path.dirname(__file__), 'test_svg', f)
+
 
 SVGTestOutput = collections.namedtuple('SVGTestOutput', 'fileName description')

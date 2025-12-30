@@ -21,18 +21,16 @@
 """
 import pytest
 
-__author__  = 'Paul Ross'
-__date__    = '2 Nov 2010'
+__author__ = 'Paul Ross'
+__date__ = '2 Nov 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2010 Paul Ross.'
+__rights__ = 'Copyright (c) 2010 Paul Ross.'
 
 import os
 import sys
 import time
 import logging
-import random
 import io
-import math
 
 # Generic methods, these choose between Python and Cython
 from TotalDepth.LIS.core import RepCode
@@ -48,10 +46,12 @@ from TotalDepth.LIS.core import PhysRec
 # Section: Unit tests.
 ######################
 import unittest
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
-#class TestRepCodeBase(BaseTestClasses.TestBase):
+
+# class TestRepCodeBase(BaseTestClasses.TestBase):
 #    def randBits(self, theBits):
 #        """Return a random integer of theBits number of bits."""
 #        return random.getrandbits(theBits)
@@ -89,9 +89,9 @@ import BaseTestClasses
 #        siz = numWords * RepCode.lisSize(rc)
 #        print('Time: {:.3f} Rate {:8.0f} words/S '.format(tE, numWords/tE))
 #        print(' Cost: {:.3f} (ms/MB)'.format((tE*1024)/(siz/(1024*1024))))
-        
 
-#class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
+
+# class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
 #    """Tests ..."""
 #    def test_size(self):
 #        """TestRepCodeFrom49.test_size(): word length of 2."""
@@ -152,6 +152,7 @@ import BaseTestClasses
 
 class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -170,8 +171,8 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom49.test_minmax(): min/max."""
-        #print
-        #print RepCode.minMaxValue(49)
+        # print
+        # print RepCode.minMaxValue(49)
         print(str(RepCode.minMaxValue(49)))
         print(' ')
         self.assertEqual(RepCode.minMaxValue(49), (-32768.0, 32752.0))
@@ -179,24 +180,24 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
     def test_min(self):
         """TestRepCodeFrom49.test_min(): min by bit stuffing."""
         myWord = 0x800F
-        #self.assertEqual(RepCode.from49(myWord), RepCode.minValue(49))
-        #self.assertEqual(pRepCode.from49(myWord), RepCode.minValue(49))
+        # self.assertEqual(RepCode.from49(myWord), RepCode.minValue(49))
+        # self.assertEqual(pRepCode.from49(myWord), RepCode.minValue(49))
         self.assertEqual(cRepCode.from49(myWord), RepCode.minValue(49))
 
     def test_max(self):
         """TestRepCodeFrom49.test_max(): max by bit stuffing."""
         myWord = 0x7FFF
         f = RepCode.from49(myWord)
-        #m,e = math.frexp(f)
-        #print
-        #print 'Max:', f
-        #print 'm,e:', m,e
-        #print 'm:      shifted 23', m * (1<<23)
-        #print 'm: 1.0 / (1.0 - m)', 1.0 / (1.0 - m)
-        #print '             2**23', 2**23
-        #print '             1<<23', 1<<23
-        #print('dir(RepCode)')
-        #print(dir(RepCode))
+        # m,e = math.frexp(f)
+        # print
+        # print 'Max:', f
+        # print 'm,e:', m,e
+        # print 'm:      shifted 23', m * (1<<23)
+        # print 'm: 1.0 / (1.0 - m)', 1.0 / (1.0 - m)
+        # print '             2**23', 2**23
+        # print '             1<<23', 1<<23
+        # print('dir(RepCode)')
+        # print(dir(RepCode))
         self.assertEqual(RepCode.from49(myWord), RepCode.maxValue(49))
         self.assertEqual(cRepCode.from49(myWord), RepCode.maxValue(49))
         self.assertEqual(pRepCode.from49(myWord), RepCode.maxValue(49))
@@ -224,7 +225,7 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
     def test_02_p(self):
         """TestRepCodeFrom49.test_02_p(): from49(0xB388) -> -153.0 Python."""
         self.assertEqual(pRepCode.from49(0xB388), -153.0)
-        
+
     def test_04(self):
         """TestRepCodeFrom49.test_04__(): from49(0x0000) -> 0.0."""
         self.assertEqual(RepCode.from49(0x0000), 0.0)
@@ -265,6 +266,7 @@ class TestRepCodeFrom49(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -286,7 +288,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from49(0x4C88)
             i += 1
         self.writeTimeToStdErr(tS, 49, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom49.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -296,7 +298,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from49(0x4C88)
             i += 1
         self.writeTimeToStdErr(tS, 49, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom49.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -306,18 +308,18 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from49(0x4C88)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from49(0x4C88)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom49.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -327,7 +329,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from49(self.randWord(1, 7, 8))
             i += 1
         self.writeTimeToStdErr(tS, 49, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom49.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -343,26 +345,26 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 2e5
         myWord = b'\x4c\x88'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/  len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
-        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                      + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
+                      + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                     + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
+                     + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                    + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
+                    + (myWord * wordsInPr)
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
+        assert (numPrBody >= 0)
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -373,7 +375,7 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -384,11 +386,13 @@ class TestRepCodeFrom49Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -407,8 +411,8 @@ class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom50.test_minmax(): min/max."""
-        #print
-        #print RepCode.minMaxValue(50)
+        # print
+        # print RepCode.minMaxValue(50)
         print(str(RepCode.minMaxValue(50)))
         print(' ')
         self.assertEqual(
@@ -457,7 +461,7 @@ class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
     def test_02_p(self):
         """TestRepCodeFrom50.test_02_p(): from50(0x0008B380) -> -153.0 Python."""
         self.assertEqual(pRepCode.from50(0x0008B380), -153.0)
-        
+
     def test_04(self):
         """TestRepCodeFrom50.test_04__(): from50(0x00000000) -> 0.0."""
         self.assertEqual(RepCode.from50(0x00000000), 0.0)
@@ -498,6 +502,7 @@ class TestRepCodeFrom50(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -519,7 +524,7 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from50(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 50, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom50.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -529,7 +534,7 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from50(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 50, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom50.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -539,18 +544,18 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from50(0xBBB38000)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from50(0xBBB38000)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom50.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -560,32 +565,32 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from50(self.randWord(1, 8, 23))
             i += 1
         self.writeTimeToStdErr(tS, 50, num)
-        
+
     def test_time_20(self):
         """TestRepCodeFrom50.test_time_20(): 1e5 word conversion from FileRead: """
         i = 0
         numWords = 1e5
         myWord = b'\x44\x4c\x80\x00'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
-        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                      + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
+                      + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                     + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
+                     + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                    + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
+                    + (myWord * wordsInPr)
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
+        assert (numPrBody >= 0)
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -596,7 +601,7 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -607,11 +612,13 @@ class TestRepCodeFrom50Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 56"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -710,6 +717,7 @@ class TestRepCodeFrom56(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -728,41 +736,41 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         num = 1e6
         tS = time.perf_counter()
         while i < num:
-            cRepCode.from56(89)#0x99)
+            cRepCode.from56(89)  # 0x99)
             i += 1
         self.writeTimeToStdErr(tS, 56, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom56.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
         num = 1e6
         tS = time.perf_counter()
         while i < num:
-            pRepCode.from56(89)#0x99)
+            pRepCode.from56(89)  # 0x99)
             i += 1
         self.writeTimeToStdErr(tS, 56, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom56.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
         num = 1e6
         tS = time.perf_counter()
         while i < num:
-            cRepCode.from56(89)#0x99)
+            cRepCode.from56(89)  # 0x99)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from56(0x0099)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom56.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -773,7 +781,7 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from56(self.randInt(myMin, myMax))
             i += 1
         self.writeTimeToStdErr(tS, 56, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom56.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -790,37 +798,37 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 2e5
         myWord = b'\x59'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
         prContStart = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContBody = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContEnd = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
-#        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
-#                    len(myWord),
-#                    wordsInPr,
-#                    numPr,
-#                    numPrBody,
-#                    wordsInPr * numPr,
-#                )
-#        )
+        assert (numPrBody >= 0)
+        #        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
+        #                    len(myWord),
+        #                    wordsInPr,
+        #                    numPr,
+        #                    numPrBody,
+        #                    wordsInPr * numPr,
+        #                )
+        #        )
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -831,7 +839,7 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -842,11 +850,13 @@ class TestRepCodeFrom56Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 66"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -913,6 +923,7 @@ class TestRepCodeFrom66(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -934,7 +945,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from66(0x99)
             i += 1
         self.writeTimeToStdErr(tS, 66, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom66.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -944,7 +955,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from66(0x99)
             i += 1
         self.writeTimeToStdErr(tS, 66, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom66.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -954,18 +965,18 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from66(0x99)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from66(0x99)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom66.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -976,7 +987,7 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from66(self.randInt(myMin, myMax))
             i += 1
         self.writeTimeToStdErr(tS, 66, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom66.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -993,37 +1004,37 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 4e5
         myWord = b'\x99'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
         prContStart = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContBody = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContEnd = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
-#        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
-#                    len(myWord),
-#                    wordsInPr,
-#                    numPr,
-#                    numPrBody,
-#                    wordsInPr * numPr,
-#                )
-#        )
+        assert (numPrBody >= 0)
+        #        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
+        #                    len(myWord),
+        #                    wordsInPr,
+        #                    numPr,
+        #                    numPrBody,
+        #                    wordsInPr * numPr,
+        #                )
+        #        )
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1033,14 +1044,14 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.read66(myFile)
             i += 1
         tE_P = time.perf_counter() - tS
-#        print('\ni =', i)
-#        i = 0
-#        while myFile.hasLd():
-#            pRepCode.read66(myFile)
-#            i += 1
-#        print('i increment =', i)
+        #        print('\ni =', i)
+        #        i = 0
+        #        while myFile.hasLd():
+        #            pRepCode.read66(myFile)
+        #            i += 1
+        #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1051,11 +1062,13 @@ class TestRepCodeFrom66Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1074,8 +1087,8 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
 
     def test_minmax(self):
         """TestRepCodeFrom70.test_minmax(): min/max."""
-        #print
-        #print RepCode.minMaxValue(70)
+        # print
+        # print RepCode.minMaxValue(70)
         print(str(RepCode.minMaxValue(70)))
         print(' ')
         self.assertEqual(
@@ -1087,8 +1100,8 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
         """TestRepCodeFrom70.test_min(): min by bit stuffing."""
         # 0 exponent
         myWord = 0x80000000
-        #print 
-        #print RepCode.from70(myWord)
+        # print
+        # print RepCode.from70(myWord)
         self.assertEqual(RepCode.from70(myWord), RepCode.minValue(70))
         self.assertEqual(pRepCode.from70(myWord), RepCode.minValue(70))
         self.assertEqual(cRepCode.from70(myWord), RepCode.minValue(70))
@@ -1123,7 +1136,6 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
     def test_02_p(self):
         """TestRepCodeFrom70.test_02_p(): from70(0xFF66C000) -> -153.25 Python."""
         self.assertEqual(pRepCode.from70(0xFF66C000), -153.25)
-        
 
     def test_04(self):
         """TestRepCodeFrom70.test_04__(): from70(0x00000000) -> 0.0."""
@@ -1165,6 +1177,7 @@ class TestRepCodeFrom70(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1186,7 +1199,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from70(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 70, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom70.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -1196,7 +1209,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from70(0xBBB38000)
             i += 1
         self.writeTimeToStdErr(tS, 70, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom70.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -1206,18 +1219,18 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from70(0xBBB38000)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from70(0xBBB38000)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom70.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -1227,7 +1240,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from70(self.randWord(1, 8, 23))
             i += 1
         self.writeTimeToStdErr(tS, 70, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom70.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -1243,26 +1256,26 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 1e5
         myWord = b'\x44\x4c\x80\x00'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
-        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                      + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
+                      + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                     + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
+                     + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                    + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
+                    + (myWord * wordsInPr)
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
+        assert (numPrBody >= 0)
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1273,7 +1286,7 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1284,11 +1297,13 @@ class TestRepCodeFrom70Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 73"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1378,6 +1393,7 @@ class TestRepCodeFrom73(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1399,7 +1415,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from73(0x00000099)
             i += 1
         self.writeTimeToStdErr(tS, 73, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom73.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -1409,7 +1425,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from73(0x00000099)
             i += 1
         self.writeTimeToStdErr(tS, 73, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom73.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -1419,18 +1435,18 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from73(0x00000099)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from73(0x00000099)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom73.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -1441,7 +1457,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from73(self.randInt(myMin, myMax))
             i += 1
         self.writeTimeToStdErr(tS, 73, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom73.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -1458,26 +1474,26 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 1e5
         myWord = b'\x00\x00\x00\x99'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
-        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
-        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
-            + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
-            + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        prContStart = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                      + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
+                      + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContBody = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                     + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
+                     + (myWord * wordsInPr)
+        # Absent Physical Record trailer
+        prContEnd = PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
+                    + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
+                    + (myWord * wordsInPr)
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
+        assert (numPrBody >= 0)
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1488,7 +1504,7 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_P = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1499,11 +1515,13 @@ class TestRepCodeFrom73Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 77"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1570,6 +1588,7 @@ class TestRepCodeFrom77(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1591,7 +1610,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from77(0x99)
             i += 1
         self.writeTimeToStdErr(tS, 77, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom77.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -1601,7 +1620,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from77(0x99)
             i += 1
         self.writeTimeToStdErr(tS, 77, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom77.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -1611,18 +1630,18 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from77(0x99)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from77(0x99)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom77.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -1633,7 +1652,7 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from77(self.randInt(myMin, myMax))
             i += 1
         self.writeTimeToStdErr(tS, 77, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom77.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -1650,37 +1669,37 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 4e5
         myWord = b'\x99'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
         prContStart = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContBody = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContEnd = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
-#        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
-#                    len(myWord),
-#                    wordsInPr,
-#                    numPr,
-#                    numPrBody,
-#                    wordsInPr * numPr,
-#                )
-#        )
+        assert (numPrBody >= 0)
+        #        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
+        #                    len(myWord),
+        #                    wordsInPr,
+        #                    numPr,
+        #                    numPrBody,
+        #                    wordsInPr * numPr,
+        #                )
+        #        )
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1690,14 +1709,14 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.read77(myFile)
             i += 1
         tE_P = time.perf_counter() - tS
-#        print('\ni =', i)
-#        i = 0
-#        while myFile.hasLd():
-#            pRepCode.read77(myFile)
-#            i += 1
-#        print('i increment =', i)
+        #        print('\ni =', i)
+        #        i = 0
+        #        while myFile.hasLd():
+        #            pRepCode.read77(myFile)
+        #            i += 1
+        #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1708,11 +1727,13 @@ class TestRepCodeFrom77Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
     """Tests repCode 79"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1811,6 +1832,7 @@ class TestRepCodeFrom79(BaseTestClasses.TestRepCodeBase):
 @pytest.mark.slow
 class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1832,7 +1854,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from79(0x0099)
             i += 1
         self.writeTimeToStdErr(tS, 79, num)
-        
+
     def test_time_01(self):
         """TestRepCodeFrom79.test_time_01(): tests conversion of 1e6 of same word - Python code."""
         i = 0
@@ -1842,7 +1864,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.from79(0x0099)
             i += 1
         self.writeTimeToStdErr(tS, 79, num)
-        
+
     def test_time_02(self):
         """TestRepCodeFrom79.test_time_00(): tests conversion of 1e6 of same word - Cython time c.f. Python: """
         i = 0
@@ -1852,18 +1874,18 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from79(0x0099)
             i += 1
         tE_C = time.perf_counter() - tS
-        #print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
+        # print 'C time: %.3f rate %8.0f words/S' % (tE_C, num/tE_C)
         i = 0
         tS = time.perf_counter()
         while i < num:
             pRepCode.from79(0x0099)
             i += 1
         tE_P = time.perf_counter() - tS
-        #print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
-        #print('Cython: %.3f% ' % tE_C)
-        #print('Python: %.3f% ' % tE_P)
+        # print 'Python time: %.3f rate %8.0f words/S' % (tE_P, num/tE_P)
+        # print('Cython: %.3f% ' % tE_C)
+        # print('Python: %.3f% ' % tE_P)
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
-        
+
     def test_time_10(self):
         """TestRepCodeFrom79.test_time_10(): tests conversion of 1e5 random words - Cython code."""
         i = 0
@@ -1874,7 +1896,7 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             cRepCode.from79(self.randInt(myMin, myMax))
             i += 1
         self.writeTimeToStdErr(tS, 79, num)
-        
+
     def test_time_11(self):
         """TestRepCodeFrom79.test_time_11(): tests conversion of 1e5 random words - Python code."""
         i = 0
@@ -1891,37 +1913,37 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
         i = 0
         numWords = 1e5
         myWord = b'\x00\x99'
-        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH)/ len(myWord))
+        wordsInPr = int((PhysRec.PR_MAX_LENGTH - PhysRec.PR_PRH_LENGTH) / len(myWord))
         # Suc no Pre: 1
         # Pre no Suc: 2
         # Suc and Pre: 3
         prContStart = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(1) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContBody = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(3) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         prContEnd = \
-            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord)*wordsInPr) \
+            PhysRec.PR_PRH_LEN_FORMAT.pack(PhysRec.PR_PRH_LENGTH + len(myWord) * wordsInPr) \
             + PhysRec.PR_PRH_ATTR_FORMAT.pack(2) \
             + (myWord * wordsInPr)
-            # Absent Physical Record trailer
+        # Absent Physical Record trailer
         # How many physical records
-        numPr = int(numWords/wordsInPr)
+        numPr = int(numWords / wordsInPr)
         numPrBody = numPr - 2
-        assert(numPrBody >= 0)
-#        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
-#                    len(myWord),
-#                    wordsInPr,
-#                    numPr,
-#                    numPrBody,
-#                    wordsInPr * numPr,
-#                )
-#        )
+        assert (numPrBody >= 0)
+        #        print('\nlen={:d} wordsInPr={:d} numPr={:d} numPrBody={:d} loops={:d}'.format(
+        #                    len(myWord),
+        #                    wordsInPr,
+        #                    numPr,
+        #                    numPrBody,
+        #                    wordsInPr * numPr,
+        #                )
+        #        )
         # Python code first
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1931,14 +1953,14 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             pRepCode.read79(myFile)
             i += 1
         tE_P = time.perf_counter() - tS
-#        print('\ni =', i)
-#        i = 0
-#        while myFile.hasLd():
-#            pRepCode.read79(myFile)
-#            i += 1
-#        print('i increment =', i)
+        #        print('\ni =', i)
+        #        i = 0
+        #        while myFile.hasLd():
+        #            pRepCode.read79(myFile)
+        #            i += 1
+        #        print('i increment =', i)
         self.assertFalse(myFile.hasLd())
-        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords/tE_P))
+        print('Python: %.3f %8.0f words/S ' % (tE_P, numWords / tE_P))
         # Now Cython code
         myBy = io.BytesIO(prContStart + prContBody * numPrBody + prContEnd)
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=False)
@@ -1949,11 +1971,13 @@ class TestRepCodeFrom79Time(BaseTestClasses.TestRepCodeBase):
             i += 1
         tE_C = time.perf_counter() - tS
         self.assertFalse(myFile.hasLd())
-        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords/tE_C))
+        print('Cython: %.3f %8.0f words/S ' % (tE_C, numWords / tE_C))
         print('%.1f%% (x%.1f) ' % ((100.0 * (tE_C / tE_P)), tE_P / tE_C))
+
 
 class TestRepCodeIndirect(BaseTestClasses.TestRepCodeBase):
     """Tests indirect repcode functionality."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1968,15 +1992,15 @@ class TestRepCodeIndirect(BaseTestClasses.TestRepCodeBase):
 
     def test_from_00(self):
         """TestRepCodeIndirect.test_from_00(): fromRepCode()"""
-        self.assertEqual(RepCode.fromRepCode(49, 0x4C88),       153.0)
-        self.assertEqual(RepCode.fromRepCode(50, 0x00084C80),   153.0)
-        self.assertEqual(RepCode.fromRepCode(56, 0x59),         89)
-        self.assertEqual(RepCode.fromRepCode(66, 0x99),         153)
-        self.assertEqual(RepCode.fromRepCode(70, 0x00994000),   153.25)
-        self.assertEqual(RepCode.fromRepCode(73, 0x00000099),   153)
-        self.assertEqual(RepCode.fromRepCode(77, 0x99),         153)
+        self.assertEqual(RepCode.fromRepCode(49, 0x4C88), 153.0)
+        self.assertEqual(RepCode.fromRepCode(50, 0x00084C80), 153.0)
+        self.assertEqual(RepCode.fromRepCode(56, 0x59), 89)
+        self.assertEqual(RepCode.fromRepCode(66, 0x99), 153)
+        self.assertEqual(RepCode.fromRepCode(70, 0x00994000), 153.25)
+        self.assertEqual(RepCode.fromRepCode(73, 0x00000099), 153)
+        self.assertEqual(RepCode.fromRepCode(77, 0x99), 153)
         self.assertEqual(RepCode.fromRepCode(79, 0x0099), 153)
-        
+
     def test_from_01(self):
         """TestRepCodeIndirect.test_from_00(): fromRepCode() fails"""
         self.assertRaises(RepCode.ExceptionRepCodeUnknown, RepCode.fromRepCode, 0, 0x4C88)
@@ -2004,9 +2028,11 @@ class TestRepCodeIndirect(BaseTestClasses.TestRepCodeBase):
         myFile = File.FileRead(theFile=myBy, theFileId='MyFile', keepGoing=True)
         self.assertRaises(RepCode.ExceptionRepCodeUnknown, RepCode.readRepCode, 0, myFile)
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -2040,6 +2066,8 @@ def unitTest(theVerbosity=2):
     #
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -2064,6 +2092,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -2072,7 +2101,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -2090,14 +2119,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

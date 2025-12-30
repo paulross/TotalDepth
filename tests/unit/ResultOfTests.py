@@ -24,24 +24,24 @@ Created on Jan 16, 2012
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2012-01-16'
+__author__ = 'Paul Ross'
+__date__ = '2012-01-16'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
 import collections
 
 
 class ResultOfTests(collections.namedtuple('ResultOfTests', 'testsRun errors failures')):
-    #__slots__ = ()
+    # __slots__ = ()
     def __iadd__(self, other):
         """+= implementation. other is None or ResultOfTests(testsRun, errors, failures)."""
         if other is not None:
             self = self._replace(
-                testsRun = self.testsRun + other.testsRun,
-                errors = self.errors + other.errors,
-                failures = self.failures + other.failures,
-                )
+                testsRun=self.testsRun + other.testsRun,
+                errors=self.errors + other.errors,
+                failures=self.failures + other.failures,
+            )
         return self
 
     def __str__(self):
@@ -51,4 +51,4 @@ class ResultOfTests(collections.namedtuple('ResultOfTests', 'testsRun errors fai
                 '  Errors: %d\n' % self.errors,
                 'Failures: %d\n' % self.failures,
             ]
-            )
+        )

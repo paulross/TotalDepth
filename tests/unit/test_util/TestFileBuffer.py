@@ -24,18 +24,19 @@ Created on Oct 27, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
+import io
 import logging
+import sys
 import time
 import unittest
-import io
 
 from TotalDepth.util import FileBuffer
+
 
 class TestFileBuffer(unittest.TestCase):
 
@@ -57,7 +58,7 @@ class TestFileBuffer(unittest.TestCase):
     def test_02(self):
         """TestFileBuffer.test_02(): Tests position [0]...[9]."""
         for i in range(10):
-            self.assertEqual(i+ord('0'), self._fileBuf[i])
+            self.assertEqual(i + ord('0'), self._fileBuf[i])
 
     def test_03(self):
         """TestFileBuffer.test_02(): Tests position [10] raises IndexError."""
@@ -76,18 +77,18 @@ class TestFileBuffer(unittest.TestCase):
         for i in range(10):
             self.assertEqual(i, self._fileBuf.tell())
             s = self._fileBuf.step()
-            self.assertEqual(bytes([i+ord('0'),]), s)
+            self.assertEqual(bytes([i + ord('0'), ]), s)
 
     def test_21(self):
         """TestFileBuffer.test_21(): Tests tell(), step() and index [0]...[9]."""
         for i in range(10):
             self.assertEqual(i, self._fileBuf.tell())
-            for j in range(0, 10-i):
-                self.assertEqual(i+j+ord('0'), self._fileBuf[j])
-#            print('TRACE: buffer:', self._fileBuf._buf)
+            for j in range(0, 10 - i):
+                self.assertEqual(i + j + ord('0'), self._fileBuf[j])
+            #            print('TRACE: buffer:', self._fileBuf._buf)
             s = self._fileBuf.step()
-#            print('TRACE: s', s)
-            self.assertEqual(bytes([i+ord('0'),]), s)
+            #            print('TRACE: s', s)
+            self.assertEqual(bytes([i + ord('0'), ]), s)
 
     def test_22(self):
         """TestFileBuffer.test_22(): Tests tell(), step() and correct EOF."""
@@ -95,7 +96,7 @@ class TestFileBuffer(unittest.TestCase):
             self.assertEqual(i, self._fileBuf.tell())
             self._fileBuf.step()
         self.assertRaises(FileBuffer.ExceptionFileBufferEOF, self._fileBuf.step)
-            
+
     def test_23(self):
         """TestFileBuffer.test_23(): Tests tell(), step(), IndexError on EOF and correct EOF."""
         for i in range(10):
@@ -107,17 +108,17 @@ class TestFileBuffer(unittest.TestCase):
         except IndexError:
             pass
         self.assertRaises(FileBuffer.ExceptionFileBufferEOF, self._fileBuf.step)
-            
+
     def test_30(self):
         """TestFileBuffer.test_30(): Tests slice [0:4]."""
         self.assertEqual(b'0123', self._fileBuf[0:4])
 
     def test_31(self):
         """TestFileBuffer.test_30(): Tests slice [:-1]."""
-#        for i in range(4):
-#            self._fileBuf.step()
+        #        for i in range(4):
+        #            self._fileBuf.step()
         self._fileBuf[4]
-#        print('TRACE: test_31(): buffer:', self._fileBuf._buf)
+        #        print('TRACE: test_31(): buffer:', self._fileBuf._buf)
         self.assertEqual(b'0123', self._fileBuf[:-1])
 
     def test_32(self):
@@ -132,15 +133,19 @@ class TestFileBuffer(unittest.TestCase):
         except TypeError:
             pass
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFileBuffer))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -165,6 +170,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -173,7 +179,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -191,14 +197,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

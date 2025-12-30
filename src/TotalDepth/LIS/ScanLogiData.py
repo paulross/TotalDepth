@@ -32,12 +32,10 @@ from TotalDepth.LIS.core import PhysRec
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util import Histogram
 
-
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2010-2020 Paul Ross'
-
+__rights__ = 'Copyright (c) 2010-2020 Paul Ross'
 
 # How much of the logical data to display
 LEN_TRUNCATE = 32
@@ -71,17 +69,17 @@ def scan_file(file_path, verbose, keepGoing, pad_modulo, pad_non_null, dump_tell
                     myHistTyp.add(lrType)
                 theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
                 if myOffs not in dump_tell_list \
-                and not verbose and len(myLdSigma) > LEN_TRUNCATE:
+                        and not verbose and len(myLdSigma) > LEN_TRUNCATE:
                     theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
                 else:
                     theS.write('  {!r:s}\n'.format(myLdSigma))
-                myLdSigma = bytes() 
+                myLdSigma = bytes()
                 myOffs = myPrh.tellLr()
         myLdSigma += myLd
     if len(myLdSigma) > 0:
         theS.write('0x{:08X}  {:8d}  {:4d}'.format(myOffs, len(myLdSigma), lrType))
         if myOffs not in dump_tell_list \
-        and not verbose and len(myLdSigma) > LEN_TRUNCATE:
+                and not verbose and len(myLdSigma) > LEN_TRUNCATE:
             theS.write('  {!r:s}...\n'.format(myLdSigma[0:LEN_TRUNCATE]))
         else:
             theS.write('  {!r:s}\n'.format(myLdSigma))
@@ -91,7 +89,7 @@ def scan_file(file_path, verbose, keepGoing, pad_modulo, pad_non_null, dump_tell
     theS.write('Histogram of Logical Record types:\n')
     theS.write(myHistTyp.strRep(100, inclCount=True))
     theS.write('\n')
-    
+
 
 def ret_int_dump_list(arg_string: str) -> typing.List[int]:
     """Splits a string and returns a list of integers from hex/dec."""
@@ -115,11 +113,11 @@ Scans a LIS79 file and dumps logical record data."""
     lis_cmn_cmd_opts.add_physical_record_padding_options(arg_parser)
     cmn_cmd_opts.add_log_level(arg_parser, level=20)
     arg_parser.add_argument(
-            "-d", "--dump",
-            type=str,
-            dest="dump",
-            default='',
-            help="Dump complete data at these integer positions (ws separated, hex/dec). [default: %(default)s]"
+        "-d", "--dump",
+        type=str,
+        dest="dump",
+        default='',
+        help="Dump complete data at these integer positions (ws separated, hex/dec). [default: %(default)s]"
     )
     args = arg_parser.parse_args()
     print(args)
@@ -127,16 +125,14 @@ Scans a LIS79 file and dumps logical record data."""
     cmn_cmd_opts.set_log_level(args)
     # Your code here
     clkStart = time.perf_counter()
-    scan_file(args.path_in, args.verbose, args.keepGoing, args.pad_modulo, args.pad_non_null, ret_int_dump_list(args.dump))
+    scan_file(args.path_in, args.verbose, args.keepGoing, args.pad_modulo, args.pad_non_null,
+              ret_int_dump_list(args.dump))
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
     return 0
 
-if __name__ == '__main__':
-    #multiprocessing.freeze_support()
-    sys.exit(main())
 
-    
-    
-    
+if __name__ == '__main__':
+    # multiprocessing.freeze_support()
+    sys.exit(main())

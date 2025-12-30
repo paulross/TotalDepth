@@ -2,7 +2,6 @@ import contextlib
 import os
 
 import pytest
-
 from example_data.RP66V1 import demo_read
 
 

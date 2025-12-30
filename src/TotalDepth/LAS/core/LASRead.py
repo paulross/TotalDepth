@@ -57,7 +57,6 @@ __date__ = '2012-01-11'
 __version__ = '0.1.0'
 __rights__ = 'Copyright (c) 2012 Paul Ross.'
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -100,7 +99,6 @@ def has_las_extension(fp):
 #: Regex to match a comment
 #: Section 5.1 of "LAS Version 2.0: A Digital Standard for Logs, Update February 2017"
 RE_COMMENT = re.compile(r'^\s*#(.*)$')
-
 
 #: logger.debug call here can add about 50% of the processing time
 DEBUG_LINE_BY_LINE = False
@@ -206,8 +204,8 @@ def line_to_sect_line(line: str) -> SectLine:
     if m0 is None or m1 is None:
         # Use !s prefix as any of m0, m1, m2 can be None.
         raise ExceptionLASReadSection('Can not decompose line "{:s}" with results: {!s:s}, {!s:s}'.format(
-                line.replace('\n', '\\n'), m0, m1
-            )
+            line.replace('\n', '\\n'), m0, m1
+        )
         )
     return SectLine(*[string_to_value(g) for g in (m0.groups() + m1.groups() + (description,))])
 
@@ -219,9 +217,9 @@ class LASSection:
     #: one of the given values.
     SECTION_MNEMONIC_ORDER_AND_VALUES = {
         'V': (
-               ('VERS', (1.2, 2.0)),
-               ('WRAP', (True, False)),
-            ),
+            ('VERS', (1.2, 2.0)),
+            ('WRAP', (True, False)),
+        ),
     }
 
     def __init__(self, section_type: str, raise_on_error: bool = True):
@@ -233,14 +231,14 @@ class LASSection:
         # {MNEM : ordinal, ...} for those sections that have it
         # Populated by finalise()
         self.mnemonic_index_map: typing.Dict[typing.Union[str, float], int] = {}
-        
+
     def __str__(self):
         return 'LASSection: "{:s}" with {:d} lines'.format(self.type, len(self.members))
-    
+
     def __len__(self):
         """Number of members."""
         return len(self.members)
-    
+
     def __contains__(self, mnemonic: str):
         """Membership test."""
         return mnemonic in self.mnemonic_index_map
@@ -272,7 +270,7 @@ class LASSection:
                         str(k),
                         str(self.members[self.mnemonic_index_map[k]]),
                         str(memb),
-                        )
+                    )
                     )
                 else:
                     self.mnemonic_index_map[k] = m
@@ -307,7 +305,7 @@ class LASSection:
                     )
         # TODO: Essential MNEM in other sections
         # TODO: 'W' section: Check consistency of STRT/STOP/STEP and their units
-    
+
     def __getitem__(self, key) -> SectLine:
         """Returns an entry, key can be int or str."""
         if isinstance(key, int):
@@ -315,7 +313,7 @@ class LASSection:
         if isinstance(key, str):
             return self.members[self.mnemonic_index_map[key]]
         raise TypeError('{:s} object is not subscriptable with {:s}'.format(type(self), type(key)))
-        
+
     def mnemonics(self):
         """Returns an list of mnemonics."""
         return [m.mnem for m in self.members]
@@ -323,11 +321,11 @@ class LASSection:
     def units(self):
         """Returns an list of mnemonic units."""
         return [m.unit for m in self.members]
-    
+
     def keys(self):
         """Returns the keys in the internal map."""
         return self.mnemonic_index_map.keys()
-    
+
     def find(self, m):
         """Returns the member ordinal for mnemonic m or -1 if not found.
         This can be used for finding the array column for a particular curve."""
@@ -403,7 +401,7 @@ class LASSectionArray(LASSection):
                     pass
             logger.warning(
                 'LASSectionArray._convert_value(): line [%d], can not convert "%s" to date, returning None.',
-                    line_number, value
+                line_number, value
             )
             return None
         elif channel.ident == 'TIME' and channel.units == 'HHMMSS':
@@ -414,7 +412,7 @@ class LASSectionArray(LASSection):
                     pass
             logger.warning(
                 'LASSectionArray._convert_value(): line [%d], can not convert "%s" to time, returning None.',
-                    line_number, value
+                line_number, value
             )
             return None
         else:
@@ -423,7 +421,7 @@ class LASSectionArray(LASSection):
             except ValueError:
                 logger.warning(
                     'LASSectionArray._convert_value(): line [%d], can not convert "%s" to float, returning %s.',
-                        line_number, value, self._null
+                    line_number, value, self._null
                 )
             return self._null
 
@@ -552,13 +550,13 @@ class LASBase:
         self._sections: typing.List[LASSection] = []
         # {sect_type : ordinal, ...}
         # Populated by _finalise()
-        self._section_map:  typing.Dict[str, int] = {}
+        self._section_map: typing.Dict[str, int] = {}
         self._wrap = None
-        
+
     def __len__(self):
         """Number of sections."""
         return len(self._sections)
-    
+
     def __getitem__(self, key):
         """Returns a section, key can be int or str."""
         if isinstance(key, int):
@@ -576,15 +574,15 @@ class LASBase:
             raise ExceptionLASRead('Duplicate section {:s}'.format(section.type))
         self._section_map[section.type] = len(self._sections)
         self._sections.append(section)
-    
+
     # def _finalise(self):
     #     raise NotImplementedError
-    
+
     def generate_sections(self) -> typing.Sequence[LASSection]:
         """Yields up each section."""
         for s in self._sections:
             yield s
-            
+
     @property
     def null_value(self) -> float:
         """The NULL value, defaults to -999.25."""
@@ -594,7 +592,7 @@ class LASBase:
             pass
         # Bit contentious this as LAS does not specify default value for this
         return -999.25
-        
+
     @property
     def x_axis_units(self):
         """The X axis units."""
@@ -620,7 +618,7 @@ class LASBase:
         v, u = self.get_wsd_mnemonic(mnemonic)
         if v is not None:
             return EngVal.EngVal(v, self._units(u))
-            
+
     @property
     def x_axis_start(self) -> EngVal.EngVal:
         """The Xaxis start value as an EngVal."""
@@ -642,7 +640,7 @@ class LASBase:
             return self['W']['STEP'].valu > 0
         except KeyError:
             raise ExceptionLASReadData('LASBase.logDown(): No "W" section or no "STEP" value.')
-    
+
     def get_wsd_mnemonic(self, mnemonic) -> typing.Tuple[typing.Union[str, None], typing.Union[str, None]]:
         """Returns a tuple of (value, units) for a Mnemonic that may appear in either a
         Well section or a Parameter section. Units may be None if empty.
@@ -661,7 +659,7 @@ class LASBase:
                 else:
                     return member.valu, member.unit
         return None, None
-    
+
     def get_all_wsd_mnemonics(self) -> typing.Set[str]:
         """Returns a set of mnemonics from the Well section and the Parameter section."""
         ret = set()
@@ -671,7 +669,7 @@ class LASBase:
             except KeyError:
                 pass
         return ret
-    
+
     # Section: Channel data access.
     def _curve_or_alt_curve(self, mnemonic: str):
         """Returns the entry in the Curve table corresponding to theMnem.
@@ -682,7 +680,7 @@ class LASBase:
         if i != -1:
             return self['C'][i]
         raise KeyError
-        
+
     def _find_curve_or_alt_curve(self, mnemonic: str):
         """Returns the index if entry in the Curve table corresponding to theMnem.
         The list of alternate names table LGFORMAT_LAS from LASConstants to interpret 
@@ -697,7 +695,7 @@ class LASBase:
                 if idx != -1:
                     return idx
         return -1
-        
+
     def has_output_mnemonic(self, mnemonic: str):
         """Returns True if theMnem, a Mnem.Mnem() object is an output in the Curve section.
         It will use the alternate names table LGFORMAT_LAS from LASConstants to interpret 
@@ -708,7 +706,7 @@ class LASBase:
             # No curve section
             pass
         return False
-    
+
     def curve_mnemonics(self, ordered=False):
         """Returns list of curve names actually declared in the Curve section.
         List will be unordered if ordered is False."""
@@ -723,17 +721,18 @@ class LASBase:
             # No curve section
             pass
         return r
-    
+
     def curve_units_as_str(self, m):
         """Given a curve as a Mnem.Mnem() this returns the units as a string.
         May raise KeyError."""
         return self._units(self._curve_or_alt_curve(m).unit)
-    
+
     # End: Channel data access.
 
 
 class LASRead(LASBase):
     """Reads a LAS file."""
+
     def __init__(self, file_path: typing.Union[str, typing.TextIO],
                  file_identity: str = '', raise_on_error: bool = True):
         """
@@ -810,7 +809,7 @@ class LASRead(LASBase):
                         else:
                             _consume_section(gen)
                     else:
-                        section = LASSection(line[1], raise_on_error = self.raise_on_error)
+                        section = LASSection(line[1], raise_on_error=self.raise_on_error)
                         self._add_members_to_section(gen, section)
                         self._finalise_section_and_add(section)
                 else:
@@ -840,7 +839,7 @@ class LASRead(LASBase):
 
     def _process_section_v(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
         logger.debug('_procSectV(): Start')
-        assert(match is not None)
+        assert (match is not None)
         if len(self._sections) != 0:
             raise ExceptionLASRead('Version section must be first one.')
         section = self._proc_section_generic(match, gen)
@@ -850,7 +849,7 @@ class LASRead(LASBase):
 
     def _process_section(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
         logger.debug('_procSect(): Start: {:s}'.format(match.group(1)))
-        assert(match is not None)
+        assert (match is not None)
         if len(self._sections) == 0:
             raise ExceptionLASRead('Non-version section can not be the first one.')
         self._finalise_section_and_add(self._proc_section_generic(match, gen))
@@ -858,19 +857,20 @@ class LASRead(LASBase):
 
     def _process_section_a(self, match: re.match, gen: typing.Generator[typing.Tuple[int, str], None, None]) -> None:
         logger.debug('_procSectA(): Start')
-        assert(match is not None)
+        assert (match is not None)
         if len(self._sections) == 0:
             raise ExceptionLASRead('Non-version section can not be the first one.')
-        assert(self._wrap is not None)
+        assert (self._wrap is not None)
         curve_index = 0
         for section in self._sections:
             if section.type == 'C':
                 break
             curve_index += 1
-        if curve_index > len(self._sections)-1:
+        if curve_index > len(self._sections) - 1:
             raise ExceptionLASRead('No curve section to describe array section.')
         # TODO: Pass in NULL
-        array_section = LASSectionArray(match.group(1), self._wrap, self._sections[curve_index], raise_on_error=self.raise_on_error)
+        array_section = LASSectionArray(match.group(1), self._wrap, self._sections[curve_index],
+                                        raise_on_error=self.raise_on_error)
         for i, line in gen:
             # Bail out if start of new section
             if line.startswith('~'):

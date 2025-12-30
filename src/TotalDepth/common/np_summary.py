@@ -51,7 +51,7 @@ class ArraySummary(typing.NamedTuple):
     def span(self) -> float:
         """The max - min value."""
         return self.max - self.min
-    
+
     @property
     def drift(self) -> float:
         return (self.last - self.first) / (self.len - 1)
@@ -78,7 +78,7 @@ class ArraySummary(typing.NamedTuple):
                 f'{"Last":>12}',
             ]
         )
-    
+
     def str(self) -> str:
         # print(f'TRACE: {type(self.drift)} {self.drift}')
         return ' '.join(

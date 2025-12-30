@@ -13,13 +13,13 @@ from TotalDepth.util import XmlWrite
 @pytest.mark.parametrize(
     'dimensions, frame_number, expected',
     (
-        ([1], 7, [(7, 0)]),
-        ([2, 3], 7, [(7, 0, 0), (7, 0, 1), (7, 0, 2), (7, 1, 0), (7, 1, 1), (7, 1, 2)]),
-        ([3, 5], 11, [
-            (11, 0, 0), (11, 0, 1), (11, 0, 2), (11, 0, 3), (11, 0, 4),
-            (11, 1, 0), (11, 1, 1), (11, 1, 2), (11, 1, 3), (11, 1, 4),
-            (11, 2, 0), (11, 2, 1), (11, 2, 2), (11, 2, 3), (11, 2, 4),
-        ]),
+            ([1], 7, [(7, 0)]),
+            ([2, 3], 7, [(7, 0, 0), (7, 0, 1), (7, 0, 2), (7, 1, 0), (7, 1, 1), (7, 1, 2)]),
+            ([3, 5], 11, [
+                (11, 0, 0), (11, 0, 1), (11, 0, 2), (11, 0, 3), (11, 0, 4),
+                (11, 1, 0), (11, 1, 1), (11, 1, 2), (11, 1, 3), (11, 1, 4),
+                (11, 2, 0), (11, 2, 1), (11, 2, 2), (11, 2, 3), (11, 2, 4),
+            ]),
     )
 )
 def test_frame_channel_numpy_indexes(dimensions, frame_number, expected):
@@ -52,10 +52,11 @@ IFLR_BYTES = [
 ]
 FRAME_ARRAY_IDENT = RepCode.ObjectName(O=11, C=0, I=b'0B')
 
+
 @pytest.mark.parametrize(
     'by',
     (
-        BYTES_EFLR_CHANNEL, BYTES_EFLR_FRAME,
+            BYTES_EFLR_CHANNEL, BYTES_EFLR_FRAME,
     )
 )
 def test_logical_data_constructs(by):
@@ -65,8 +66,8 @@ def test_logical_data_constructs(by):
 @pytest.mark.parametrize(
     'lr_type, by',
     (
-        (3, BYTES_EFLR_CHANNEL),
-        (4, BYTES_EFLR_FRAME),
+            (3, BYTES_EFLR_CHANNEL),
+            (4, BYTES_EFLR_FRAME),
     )
 )
 def test_eflr_constructs(lr_type, by):
@@ -85,7 +86,8 @@ def _eflr_frame() -> EFLR.ExplicitlyFormattedLogicalRecord:
     return EFLR.ExplicitlyFormattedLogicalRecord(4, ld)
 
 
-def _iflr_and_logical_data_from_bytes(by: bytes) -> typing.Tuple[IFLR.IndirectlyFormattedLogicalRecord, File.LogicalData]:
+def _iflr_and_logical_data_from_bytes(by: bytes) -> typing.Tuple[
+    IFLR.IndirectlyFormattedLogicalRecord, File.LogicalData]:
     ld = File.LogicalData(by)
     iflr = IFLR.IndirectlyFormattedLogicalRecord(1, ld)
     return iflr, ld
@@ -136,7 +138,7 @@ def test_log_pass_frame_channels_from_RP66V1_file():
     #     RepCode.ObjectName(O=11, C=0, I=b'SECT'), RepCode.ObjectName(O=11, C=0, I=b'RCN'),
     #     RepCode.ObjectName(O=11, C=0, I=b'RCE'), RepCode.ObjectName(O=11, C=0, I=b'DLSEV'),
     #     RepCode.ObjectName(O=11, C=0, I=b'TLTS'),
-    expected = ['DEPT', 'INC', 'AZI', 'MTTVD', 'SECT', 'RCN', 'RCE', 'DLSEV', 'TLTS',]
+    expected = ['DEPT', 'INC', 'AZI', 'MTTVD', 'SECT', 'RCN', 'RCE', 'DLSEV', 'TLTS', ]
     assert list(frame_array.keys()) == expected
 
 
@@ -231,9 +233,9 @@ def test_read_iflr():
 def test_read_iflr_partial():
     log_pass = _log_pass()
     frame_array: LogPass.FrameArray = log_pass[FRAME_ARRAY_IDENT]
-            # RepCode.ObjectName(O=11, C=0, I=b'DEPT'),
-            # RepCode.ObjectName(O=11, C=0, I=b'INC'),
-            # RepCode.ObjectName(O=11, C=0, I=b'SECT'),
+    # RepCode.ObjectName(O=11, C=0, I=b'DEPT'),
+    # RepCode.ObjectName(O=11, C=0, I=b'INC'),
+    # RepCode.ObjectName(O=11, C=0, I=b'SECT'),
     channels = {'DEPT', 'INC', 'SECT'}
     frame_array.init_arrays_partial(len(IFLR_BYTES), channels)
     for f, by in enumerate(IFLR_BYTES):
@@ -302,6 +304,7 @@ def test_log_pass_write_XML():
   </FrameArray>
 </LogPass>"""
     assert ostream.getvalue() == expected
+
 
 # Taken from core/LogicalRecord/test_LogPass.py
 
@@ -594,22 +597,22 @@ def test_example_iflr_process():
         np.array(
             [
                 [0.],
-                 [0.50002027],
-                 [0.50002027],
-                 [0.7500017],
-                 [0.50002027],
-                 [0.99998325],
-                 [0.9699998],
-                 [0.9699998],
-                 [0.69999975],
-                 [1.0600001],
-                 [0.9699998],
-                 [0.8800001],
-                 [0.78999996],
-                 [1.7599998],
-                 [2.2000003],
-                 [2.9],
-             ],
+                [0.50002027],
+                [0.50002027],
+                [0.7500017],
+                [0.50002027],
+                [0.99998325],
+                [0.9699998],
+                [0.9699998],
+                [0.69999975],
+                [1.0600001],
+                [0.9699998],
+                [0.8800001],
+                [0.78999996],
+                [1.7599998],
+                [2.2000003],
+                [2.9],
+            ],
         ),
         np.array(
             [

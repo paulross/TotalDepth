@@ -20,13 +20,12 @@
 """Tests LogiRec module.
 """
 
+import io
+import logging
 import os
+import random
 import sys
 import time
-import logging
-import io
-import pprint
-import random
 import unittest
 
 import pytest
@@ -39,17 +38,16 @@ from TotalDepth.LIS.core import PhysRec
 from TotalDepth.LIS.core import RepCode
 from TotalDepth.LIS.core import Units
 
-
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
 
-__author__  = 'Paul Ross'
-__date__    = '29 Dec 2010'
+__author__ = 'Paul Ross'
+__date__ = '29 Dec 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
-#class TestLrBase(unittest.TestCase):
+# class TestLrBase(unittest.TestCase):
 #    def _retFileSinglePr(self, theB):
 #        """Given a bytes() object this returns a file with them encapsulated in a single Physical Record."""
 #        myBy = io.BytesIO(
@@ -63,8 +61,10 @@ __rights__  = 'Copyright (c) Paul Ross'
 class TestLrBase(BaseTestClasses.TestBaseFile):
     pass
 
+
 class TestLrBaseClass(TestLrBase):
     """Tests LrBase class."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -85,7 +85,7 @@ class TestLrBaseClass(TestLrBase):
             self.assertEqual(0, myLr.attr)
             self.assertEqual(LogiRec.LR_DESCRIPTION_MAP[lrType], myLr.desc)
             str(myLr)
-        
+
     def test_02(self):
         """TestLrBaseClass.test_02(): random unknown LR types."""
         for i in range(1024):
@@ -97,8 +97,10 @@ class TestLrBaseClass(TestLrBase):
                 self.assertEqual(LogiRec.LR_DESCRIPTION_UNKNOWN, myLr.desc)
                 str(myLr)
 
+
 class TestLrMarker(unittest.TestCase):
     """Tests Marker logical records (EOF BOT EOT EOM)"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -159,8 +161,10 @@ class TestLrMarker(unittest.TestCase):
         myLr = LogiRec.LrEOMRead(myFile)
         self.assertEqual(myLr.desc, 'Logical EOM (end of medium)')
 
+
 class TestLrWithDateField(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -320,8 +324,10 @@ class TestLrWithDateField(unittest.TestCase):
         self.assertEqual(myLr.date, b'99/03/15')
         self.assertEqual(myLr.ymd, (1999, 3, 15))
 
+
 class TestLrFileHeadTail(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -418,8 +424,10 @@ class TestLrFileHeadTail(unittest.TestCase):
         self.assertEqual(myLr.fileType, b'AB')
         self.assertEqual(myLr.nextFileName, b'Next name.')
 
+
 class TestLrTapeHeadTail(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -524,8 +532,10 @@ class TestLrTapeHeadTail(unittest.TestCase):
         self.assertEqual(myLr.nextTapeName, b'NextName')
         self.assertEqual(myLr.comments, b'_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123')
 
+
 class TestLrReelHeadTail(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -632,8 +642,10 @@ class TestLrReelHeadTail(unittest.TestCase):
         # File is consumed
         self.assertFalse(myFile.hasLd())
 
+
 class TestLrMisc(TestLrBase):
     """Tests misc logical records."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -652,12 +664,14 @@ class TestLrMisc(TestLrBase):
             myPayload = self.randomBytes()
             myFi = self._retFilePrS(bytes([lrType, 0]) + myPayload)
             myLr = LogiRec.LrMiscRead(myFi)
-            self.assertEqual(LogiRec.LR_DESCRIPTION_MAP[lrType] , myLr.desc)
+            self.assertEqual(LogiRec.LR_DESCRIPTION_MAP[lrType], myLr.desc)
             self.assertEqual(len(myPayload), len(myLr.bytes))
             self.assertEqual(myPayload, myLr.bytes)
 
+
 class TestCbEngValRead(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -673,9 +687,9 @@ class TestCbEngValRead(TestLrBase):
     def test_00(self):
         """TestCbEngValRead.test_00(): Read string component block."""
         myB = bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii')
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii')
         myF = self._retFileSinglePr(myB)
         myCbev = LogiRec.CbEngValRead(myF)
         self.assertEqual(myCbev.type, 73)
@@ -690,13 +704,13 @@ class TestCbEngValRead(TestLrBase):
         self.assertEqual(myCbev.engVal, EngVal.EngValRc(b'FILM', b'    ', 65))
         # Check file is consumed
         self.assertFalse(myF.hasLd())
-        
+
     def test_01(self):
         """TestCbEngValRead.test_01(): Read Component block with repcode 68 and unit conversion."""
         myB = bytes([69, 68, 4, 0]) \
-            + bytes('LENG', 'ascii') \
-            + bytes('M   ', 'ascii') \
-            + b'\x44\x4c\x80\x00'
+              + bytes('LENG', 'ascii') \
+              + bytes('M   ', 'ascii') \
+              + b'\x44\x4c\x80\x00'
         myF = self._retFileSinglePr(myB)
         myCbev = LogiRec.CbEngValRead(myF)
         self.assertEqual(myCbev.type, 69)
@@ -709,14 +723,16 @@ class TestCbEngValRead(TestLrBase):
         self.assertEqual(myCbev.engVal.uom, b'M   ')
         self.assertEqual(myCbev.engVal.rc, 68)
         self.assertEqual(myCbev.engVal, EngVal.EngValRc(153.0, b'M   ', 68))
-        #print()
-        #print(EngVal.EngValRc(153.0*0.3048, b'FT  ', 68))
+        # print()
+        # print(EngVal.EngValRc(153.0*0.3048, b'FT  ', 68))
         self.assertTrue(myCbev.engVal == EngVal.EngValRc(153.0 / 0.3048, b'FT  ', 68))
         # Check file is consumed
         self.assertFalse(myF.hasLd())
-        
+
+
 class TestCbEngValWrite(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -732,8 +748,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_00(self):
         """TestCbEngValWrite.test_00(): Create a component block with bytes."""
         myCbev = LogiRec.CbEngValWrite(69, b'E2E ', b'GCOD')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(65, myCbev.rc)
         self.assertEqual(4, myCbev.size)
@@ -744,8 +760,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_01(self):
         """TestCbEngValWrite.test_01(): Create a component block dimensionless float."""
         myCbev = LogiRec.CbEngValWrite(69, -999.25, b'ABSV')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(68, myCbev.rc)
         self.assertEqual(4, myCbev.size)
@@ -756,8 +772,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_02(self):
         """TestCbEngValWrite.test_02(): Create a component block dimensioned float."""
         myCbev = LogiRec.CbEngValWrite(69, 42., b'LENG', units=b'INCH')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(68, myCbev.rc)
         self.assertEqual(4, myCbev.size)
@@ -768,8 +784,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_03(self):
         """TestCbEngValWrite.test_03(): Create a component block dimensionless int=0."""
         myCbev = LogiRec.CbEngValWrite(69, 0, b'LENG')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(66, myCbev.rc)
         self.assertEqual(1, myCbev.size)
@@ -780,8 +796,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_04(self):
         """TestCbEngValWrite.test_04(): Create a component block dimensionless int=256."""
         myCbev = LogiRec.CbEngValWrite(69, 256, b'LENG')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(79, myCbev.rc)
         self.assertEqual(2, myCbev.size)
@@ -792,8 +808,8 @@ class TestCbEngValWrite(TestLrBase):
     def test_05(self):
         """TestCbEngValWrite.test_05(): Create a component block dimensionless int=-1."""
         myCbev = LogiRec.CbEngValWrite(69, -1, b'LENG')
-#        print('')
-#        print(myCbev)
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(79, myCbev.rc)
         self.assertEqual(2, myCbev.size)
@@ -803,31 +819,32 @@ class TestCbEngValWrite(TestLrBase):
 
     def test_06(self):
         """TestCbEngValWrite.test_06(): Create a component block dimensionless int=2**16."""
-        myCbev = LogiRec.CbEngValWrite(69, 2**16, b'LENG')
-#        print('')
-#        print(myCbev)
+        myCbev = LogiRec.CbEngValWrite(69, 2 ** 16, b'LENG')
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(73, myCbev.rc)
         self.assertEqual(4, myCbev.size)
-        self.assertEqual(2**16, myCbev.value)
+        self.assertEqual(2 ** 16, myCbev.value)
         self.assertEqual(b'LENG', myCbev.mnem)
         self.assertEqual(b'    ', myCbev.units)
 
     def test_07(self):
         """TestCbEngValWrite.test_07(): Create a component block dimensionless int=-2**16."""
-        myCbev = LogiRec.CbEngValWrite(69, -(2**16), b'LENG')
-#        print('')
-#        print(myCbev)
+        myCbev = LogiRec.CbEngValWrite(69, -(2 ** 16), b'LENG')
+        #        print('')
+        #        print(myCbev)
         self.assertEqual(69, myCbev.type)
         self.assertEqual(73, myCbev.rc)
         self.assertEqual(4, myCbev.size)
-        self.assertEqual(-(2**16), myCbev.value)
+        self.assertEqual(-(2 ** 16), myCbev.value)
         self.assertEqual(b'LENG', myCbev.mnem)
         self.assertEqual(b'    ', myCbev.units)
 
 
 class TestTableRow(TestLrBase):
     """Tests LogiRec.TableRow"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -850,38 +867,38 @@ class TestTableRow(TestLrBase):
     def test_00(self):
         """TestTableRow.test_00(): Test the construction of a TableRow."""
         myB = bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr = LogiRec.TableRow(myCbEv)
         self.assertEqual(myTr.value, b'1   ')
         self.assertEqual(len(myTr), 1)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 2)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii')
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 3)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('DEST', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('PF1 ', 'ascii')
+              + bytes('DEST', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('PF1 ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 4)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('DSCA', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('S5  ', 'ascii')
+              + bytes('DSCA', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('S5  ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 5)
@@ -902,26 +919,26 @@ class TestTableRow(TestLrBase):
     def test_01(self):
         """TestTableRow.test_01(): TableRow fails starting with type 1 block."""
         myB = bytes([1, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         self.assertRaises(LogiRec.ExceptionLrTableRowInit, LogiRec.TableRow, myCbEv)
 
     def test_02(self):
         """TestTableRow.test_02(): TableRow fails with entry that is a type 1 block."""
         myB = bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr = LogiRec.TableRow(myCbEv)
         self.assertEqual(myTr.value, b'1   ')
         self.assertEqual(len(myTr), 1)
         myB = bytes([1, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         self.assertRaises(LogiRec.ExceptionLrTableRow, myTr.addCb, myCbEv)
         self.assertEqual(len(myTr), 1)
@@ -929,17 +946,17 @@ class TestTableRow(TestLrBase):
     def test_03(self):
         """TestTableRow.test_03(): TableRow __getitem__ failures."""
         myB = bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr = LogiRec.TableRow(myCbEv)
         self.assertEqual(myTr.value, b'1   ')
         self.assertEqual(len(myTr), 1)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 2)
@@ -961,24 +978,24 @@ class TestTableRow(TestLrBase):
     def test_05(self):
         """TestTableRow.test_05(): Duplicate cell in a TableRow."""
         myB = bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr = LogiRec.TableRow(myCbEv)
         self.assertEqual(myTr.value, b'1   ')
         self.assertEqual(len(myTr), 1)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('XXXX', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('XXXX', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 2)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('YYYY', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('YYYY', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 3)
@@ -999,17 +1016,17 @@ class TestTableRow(TestLrBase):
     def test_06(self):
         """TestTableRow.test_07(): TableRow __contains__"""
         myB = bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr = LogiRec.TableRow(myCbEv)
         self.assertEqual(myTr.value, b'1   ')
         self.assertEqual(len(myTr), 1)
         myB = bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii')
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii')
         myCbEv = self._retCbEngValFromBytes(myB)
         myTr.addCb(myCbEv)
         self.assertEqual(len(myTr), 2)
@@ -1020,53 +1037,54 @@ class TestTableRow(TestLrBase):
 
 class TestLrTableSimple(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         myB = bytes([34, 0]) \
-            + bytes([73, 65, 4, 0]) \
-                + bytes('TYPE', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('FILM', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-                + bytes('MNEM', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('1   ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('GCOD', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('E2E ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('GDEC', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('2   ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('DEST', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('PF1 ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('DSCA', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('S5  ', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-                + bytes('MNEM', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('2   ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('GCOD', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('BBB ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('GDEC', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('____', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('DEST', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('PF2 ', 'ascii') \
-                + bytes([69, 65, 4, 0]) \
-                + bytes('DSCA', 'ascii') \
-                + bytes('    ', 'ascii') \
-                + bytes('S5  ', 'ascii')
+              + bytes([73, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DEST', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('PF1 ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DSCA', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('S5  ', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('BBB ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('____', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DEST', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('PF2 ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DSCA', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('S5  ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self._lrTable = LogiRec.LrTableRead(myF)
 
@@ -1089,7 +1107,7 @@ class TestLrTableSimple(TestLrBase):
         self.assertEqual(len(self._lrTable[b'1   ']), 5)
         self.assertTrue(self._lrTable[b'2   '] is not None)
         self.assertEqual(len(self._lrTable[b'2   ']), 5)
-        
+
     def test_01(self):
         """TestLrTableSimple.test_01(): Two row table - __contains__ using bytes object."""
         self.assertEqual(self._lrTable.value, b'FILM')
@@ -1167,56 +1185,56 @@ class TestLrTableSimple(TestLrBase):
             assert row is not None
 
 
-
 class TestLrTableDupeRow(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         myB = bytes([34, 0]) \
-            + bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DEST', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('PF1 ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DSCA', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('S5  ', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('BBB ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('____', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DEST', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('PF2 ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('DSCA', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('S5  ', 'ascii')
+              + bytes([73, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DEST', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('PF1 ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DSCA', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('S5  ', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('BBB ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('____', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DEST', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('PF2 ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('DSCA', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('S5  ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self._lrTable = LogiRec.LrTableRead(myF)
 
@@ -1248,7 +1266,7 @@ class TestLrTableDupeRow(TestLrBase):
             self.fail('IndexError not raised.')
         except IndexError:
             pass
-        
+
     def test_10(self):
         """TestLrTableDupeRow.test_00(): Two row table with duplicate row - access failure."""
         try:
@@ -1265,8 +1283,10 @@ class TestLrTableDupeRow(TestLrBase):
         # Get non-existent slice
         self.assertEqual(self._lrTable[5:7], [])
 
+
 class TestLrTableBadBlocks(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1282,61 +1302,61 @@ class TestLrTableBadBlocks(TestLrBase):
     def test_00(self):
         """TestLrTableBadBlocks.test_00(): Bad initial block type 99 raises LogiRec.ExceptionLrTableInit."""
         myB = bytes([34, 0]) \
-            + bytes([99, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii')
+              + bytes([99, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii')
         myF = self._retFileSinglePr(myB)
         self.assertRaises(LogiRec.ExceptionLrTableInit, LogiRec.LrTableRead, myF)
-        
+
     def test_01(self):
         """TestLrTableBadBlocks.test_01(): Bad start row block type 12 raises LogiRec.ExceptionLrTableInit."""
         myB = bytes([34, 0]) \
-            + bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii') \
-            + bytes([12, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii')
+              + bytes([73, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii') \
+              + bytes([12, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self.assertRaises(LogiRec.ExceptionLrTableInit, LogiRec.LrTableRead, myF)
 
     def test_02(self):
         """TestLrTableBadBlocks.test_02(): Missing start row block type 0 raises LogiRec.ExceptionLrTableInit."""
         myB = bytes([34, 0]) \
-            + bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii')
+              + bytes([73, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self.assertRaises(LogiRec.ExceptionLrTableInit, LogiRec.LrTableRead, myF)
 
     def test_03(self):
         """TestLrTableBadBlocks.test_03(): Spurious trailing bytes warns but does not raise."""
         myB = bytes([34, 0]) \
-            + bytes([73, 65, 4, 0]) \
-            + bytes('TYPE', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('FILM', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GCOD', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('E2E ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('GDEC', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii') \
-            + bytes([0])
+              + bytes([73, 65, 4, 0]) \
+              + bytes('TYPE', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('FILM', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GCOD', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('E2E ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('GDEC', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii') \
+              + bytes([0])
         myF = self._retFileSinglePr(myB)
         myLr = LogiRec.LrTableRead(myF)
         self.assertEqual(myLr.value, b'FILM')
@@ -1347,19 +1367,21 @@ class TestLrTableBadBlocks(TestLrBase):
         self.assertTrue(myLr[b'1   '] is not None)
         self.assertEqual(len(myLr[b'1   ']), 3)
 
+
 class TestLrTableSingleParameter(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         myB = bytes([34, 0]) \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii')
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii')
         myF = self._retFileSinglePr(myB)
         self._lrTable = LogiRec.LrTableRead(myF)
 
@@ -1378,7 +1400,7 @@ class TestLrTableSingleParameter(TestLrBase):
         self.assertTrue(self._lrTable.isSingleParam)
         # self.assertEqual(list(self._lrTable.rowLabels()), [b'1   ', b'2   '])
         self.assertEqual(list(self._lrTable.rowLabels()), [])
-        self.assertEqual(1, len(self._lrTable.colLabels()) )
+        self.assertEqual(1, len(self._lrTable.colLabels()))
         # self.assertTrue(self._lrTable[b'1   '] is None)
         # self.assertEqual(len(self._lrTable[b'1   ']), 1)
         # self.assertTrue(self._lrTable[b'2   '] is None)
@@ -1400,12 +1422,14 @@ class TestLrTableSingleParameter(TestLrBase):
         # Get non-existent slice
         self.assertEqual(self._lrTable[5:7], [])
 
+
 class TestLrTableSingleParameterIllFormed(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
-    
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -1417,20 +1441,22 @@ class TestLrTableSingleParameterIllFormed(TestLrBase):
     def test_00(self):
         """TestLrTableSingleParameterIllFormed.test_00(): Late type 69 block."""
         myB = bytes([34, 0]) \
-            + bytes([0, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('1   ', 'ascii') \
-            + bytes([69, 65, 4, 0]) \
-            + bytes('MNEM', 'ascii') \
-            + bytes('    ', 'ascii') \
-            + bytes('2   ', 'ascii')
+              + bytes([0, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('1   ', 'ascii') \
+              + bytes([69, 65, 4, 0]) \
+              + bytes('MNEM', 'ascii') \
+              + bytes('    ', 'ascii') \
+              + bytes('2   ', 'ascii')
         myF = self._retFileSinglePr(myB)
-        #LogiRec.LrTableRead(myF)
+        # LogiRec.LrTableRead(myF)
         self.assertRaises(LogiRec.ExceptionLrTableInit, LogiRec.LrTableRead, myF)
+
 
 class TestLrTableSpecific(TestLrBase):
     """Class to test specific tables."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1446,245 +1472,245 @@ class TestLrTableSpecific(TestLrBase):
     def test_00(self):
         """TestLrTableSpecific.test_00(): PRES table."""
         myBy = b'"\x00' \
-            + b'IA\x04\x00TYPE    PRES' \
-                + b'\x00A\x04\x00MNEM    SP\x00\x00' \
-                    + b'EA\x04\x00OUTP    SP  ' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    BOTH' \
-                    + b'EA\x04\x00MODE    SHIF' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGMV  \xbc0\x00\x00' \
-                    + b'ED\x04\x00REDGMV  B\xd0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    SFLU' \
-                    + b'EA\x04\x00OUTP    SFLU' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T23 ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    1   ' \
-                    + b'EA\x04\x00MODE    GRAD' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM?fff' \
-                    + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
-                + b'\x00A\x04\x00MNEM    ILM\x00' \
-                    + b'EA\x04\x00OUTP    ILM ' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T23 ' \
-                    + b'EA\x04\x00CODI    LSPO' \
-                    + b'EA\x04\x00DEST    1   ' \
-                    + b'EA\x04\x00MODE    GRAD' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM?fff' \
-                    + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
-                + b'\x00A\x04\x00MNEM    ILDG' \
-                    + b'EA\x04\x00OUTP    ILD ' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T23 ' \
-                    + b'EA\x04\x00CODI    LDAS' \
-                    + b'EA\x04\x00DEST    1   ' \
-                    + b'EA\x04\x00MODE    GRAD' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM?fff' \
-                    + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
-                + b'\x00A\x04\x00MNEM    4\x00\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    5\x00\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    6\x00\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    7\x00\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    SFLA' \
-                    + b'EA\x04\x00OUTP    SFLA' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T2  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    2   ' \
-                    + b'EA\x04\x00MODE    X10 ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDGOHMMBP\x00\x00' \
-                + b'\x00A\x04\x00MNEM    ASFA' \
-                    + b'EA\x04\x00OUTP    SFLA' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T2  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    2   ' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDGOHMMA@\x00\x00' \
-                + b'\x00A\x04\x00MNEM    ILDE' \
-                    + b'EA\x04\x00OUTP    ILD ' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T2  ' \
-                    + b'EA\x04\x00CODI    LDAS' \
-                    + b'EA\x04\x00DEST    2   ' \
-                    + b'EA\x04\x00MODE    X10 ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDGOHMMBP\x00\x00' \
-                + b'\x00A\x04\x00MNEM    CILD' \
-                    + b'EA\x04\x00OUTP    CILD' \
-                    + b'EA\x04\x00STAT    ALLO' \
-                    + b'EA\x04\x00TRAC    T3  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    2   ' \
-                    + b'EA\x04\x00MODE    SHIF' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDGMMHOE\xfd\x00\x00' \
-                    + b'ED\x04\x00REDGMMHO\x00\x00\x00\x00' \
-                + b'\x00A\x04\x00MNEM    12\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    13\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    14\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    15\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    16\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    17\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    18\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00' \
-                + b'\x00A\x04\x00MNEM    19\x00\x00' \
-                    + b'EA\x04\x00OUTP    DUMM' \
-                    + b'EA\x04\x00STAT    DISA' \
-                    + b'EA\x04\x00TRAC    T1  ' \
-                    + b'EA\x04\x00CODI    LLIN' \
-                    + b'EA\x04\x00DEST    NEIT' \
-                    + b'EA\x04\x00MODE    NB  ' \
-                    + b'ED\x04\x00FILT    @@\x00\x00' \
-                    + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
-                    + b'ED\x04\x00REDG    @\xc0\x00\x00'
+               + b'IA\x04\x00TYPE    PRES' \
+               + b'\x00A\x04\x00MNEM    SP\x00\x00' \
+               + b'EA\x04\x00OUTP    SP  ' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    BOTH' \
+               + b'EA\x04\x00MODE    SHIF' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGMV  \xbc0\x00\x00' \
+               + b'ED\x04\x00REDGMV  B\xd0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    SFLU' \
+               + b'EA\x04\x00OUTP    SFLU' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T23 ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    1   ' \
+               + b'EA\x04\x00MODE    GRAD' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM?fff' \
+               + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
+               + b'\x00A\x04\x00MNEM    ILM\x00' \
+               + b'EA\x04\x00OUTP    ILM ' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T23 ' \
+               + b'EA\x04\x00CODI    LSPO' \
+               + b'EA\x04\x00DEST    1   ' \
+               + b'EA\x04\x00MODE    GRAD' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM?fff' \
+               + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
+               + b'\x00A\x04\x00MNEM    ILDG' \
+               + b'EA\x04\x00OUTP    ILD ' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T23 ' \
+               + b'EA\x04\x00CODI    LDAS' \
+               + b'EA\x04\x00DEST    1   ' \
+               + b'EA\x04\x00MODE    GRAD' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM?fff' \
+               + b'ED\x04\x00REDGOHMME\xfd\x00\x00' \
+               + b'\x00A\x04\x00MNEM    4\x00\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    5\x00\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    6\x00\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    7\x00\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    SFLA' \
+               + b'EA\x04\x00OUTP    SFLA' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T2  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    2   ' \
+               + b'EA\x04\x00MODE    X10 ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
+               + b'ED\x04\x00REDGOHMMBP\x00\x00' \
+               + b'\x00A\x04\x00MNEM    ASFA' \
+               + b'EA\x04\x00OUTP    SFLA' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T2  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    2   ' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
+               + b'ED\x04\x00REDGOHMMA@\x00\x00' \
+               + b'\x00A\x04\x00MNEM    ILDE' \
+               + b'EA\x04\x00OUTP    ILD ' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T2  ' \
+               + b'EA\x04\x00CODI    LDAS' \
+               + b'EA\x04\x00DEST    2   ' \
+               + b'EA\x04\x00MODE    X10 ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGOHMM\x00\x00\x00\x00' \
+               + b'ED\x04\x00REDGOHMMBP\x00\x00' \
+               + b'\x00A\x04\x00MNEM    CILD' \
+               + b'EA\x04\x00OUTP    CILD' \
+               + b'EA\x04\x00STAT    ALLO' \
+               + b'EA\x04\x00TRAC    T3  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    2   ' \
+               + b'EA\x04\x00MODE    SHIF' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDGMMHOE\xfd\x00\x00' \
+               + b'ED\x04\x00REDGMMHO\x00\x00\x00\x00' \
+               + b'\x00A\x04\x00MNEM    12\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    13\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    14\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    15\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    16\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    17\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    18\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00' \
+               + b'\x00A\x04\x00MNEM    19\x00\x00' \
+               + b'EA\x04\x00OUTP    DUMM' \
+               + b'EA\x04\x00STAT    DISA' \
+               + b'EA\x04\x00TRAC    T1  ' \
+               + b'EA\x04\x00CODI    LLIN' \
+               + b'EA\x04\x00DEST    NEIT' \
+               + b'EA\x04\x00MODE    NB  ' \
+               + b'ED\x04\x00FILT    @@\x00\x00' \
+               + b'ED\x04\x00LEDG    \x00\x00\x00\x00' \
+               + b'ED\x04\x00REDG    @\xc0\x00\x00'
         myF = self._retFileSinglePr(myBy)
         myT = LogiRec.LrTableRead(myF)
         self.assertEqual(b'PRES', myT.value)
-        #print()
+        # print()
         for r in myT.genRows():
             for c in r.genCells():
                 pass
-                #print(c.engVal, '\t', end="")
-            #print('\n')
+                # print(c.engVal, '\t', end="")
+            # print('\n')
         self.assertEqual(len(myT), 20)
         self.assertFalse(myT.isSingleParam)
-        #print(sorted(list(myT.rowLabels())))
+        # print(sorted(list(myT.rowLabels())))
         self.assertEqual(
             [
-                 b'12\x00\x00',
-                 b'13\x00\x00',
-                 b'14\x00\x00',
-                 b'15\x00\x00',
-                 b'16\x00\x00',
-                 b'17\x00\x00',
-                 b'18\x00\x00',
-                 b'19\x00\x00',
-                 b'4\x00\x00\x00',
-                 b'5\x00\x00\x00',
-                 b'6\x00\x00\x00',
-                 b'7\x00\x00\x00',
-                 b'ASFA',
-                 b'CILD',
-                 b'ILDE',
-                 b'ILDG',
-                 b'ILM\x00',
-                 b'SFLA',
-                 b'SFLU',
-                 b'SP\x00\x00'
-             ],                         
-             sorted(list(myT.rowLabels())),
+                b'12\x00\x00',
+                b'13\x00\x00',
+                b'14\x00\x00',
+                b'15\x00\x00',
+                b'16\x00\x00',
+                b'17\x00\x00',
+                b'18\x00\x00',
+                b'19\x00\x00',
+                b'4\x00\x00\x00',
+                b'5\x00\x00\x00',
+                b'6\x00\x00\x00',
+                b'7\x00\x00\x00',
+                b'ASFA',
+                b'CILD',
+                b'ILDE',
+                b'ILDG',
+                b'ILM\x00',
+                b'SFLA',
+                b'SFLU',
+                b'SP\x00\x00'
+            ],
+            sorted(list(myT.rowLabels())),
         )
-        #print(myT.colLabels())
+        # print(myT.colLabels())
         self.assertEqual(
             {b'OUTP', b'STAT', b'TRAC', b'FILT', b'DEST', b'CODI', b'MNEM', b'REDG', b'MODE', b'LEDG'},
             myT.colLabels(),
@@ -1693,8 +1719,8 @@ class TestLrTableSpecific(TestLrBase):
         self.assertEqual(len(myT[b'CILD']), 10)
         self.assertTrue(myT[b'ILDE'] is not None)
         self.assertEqual(len(myT[b'ILDE']), 10)
-#        print()
-#        pprint.pprint(myT._mnemRowIndex)
+        #        print()
+        #        pprint.pprint(myT._mnemRowIndex)
         self.assertEqual(
             {
                 Mnem.Mnem(b'12\x00\x00'): 12,
@@ -1720,16 +1746,16 @@ class TestLrTableSpecific(TestLrBase):
             },
             myT._mnemRowIndex,
         )
-    
+
     def test_01(self):
         """TestLrTableSpecific.test_00(): CONS table."""
         # Mnem/value/uom where value is bytes/float/int
         myData = [
-            (b'HIDE', b'MAIN LOG',  None),
-#            (b'TDD ', RepCode.writeBytes(3000.0, 68),   b'M   '),
-#            (b'TDL ', RepCode.writeBytes(2989.5, 68),   b'M   '),
-            (b'TDD ', 3000.0,       b'M   '),
-            (b'TDL ', 2989.5,       b'M   '),
+            (b'HIDE', b'MAIN LOG', None),
+            #            (b'TDD ', RepCode.writeBytes(3000.0, 68),   b'M   '),
+            #            (b'TDL ', RepCode.writeBytes(2989.5, 68),   b'M   '),
+            (b'TDD ', 3000.0, b'M   '),
+            (b'TDL ', 2989.5, b'M   '),
         ]
         # Record header
         myB = [
@@ -1746,8 +1772,8 @@ class TestLrTableSpecific(TestLrBase):
             if u is None:
                 u = b'    '
             myB.append(bytes([0, 65, 4, 0]))
-            myB.append(b'MNEM') # Mnem
-            myB.append(b'    ') # Units
+            myB.append(b'MNEM')  # Mnem
+            myB.append(b'    ')  # Units
             myB.append(m)
             myB.append(bytes([69, 65, 4, 0]))
             myB.append(b'STAT')
@@ -1761,7 +1787,7 @@ class TestLrTableSpecific(TestLrBase):
             myB.append(b'TUNI')
             myB.append(b'    ')
             myB.append(u)
-            assert(type(v) in (bytes, int, float))
+            assert (type(v) in (bytes, int, float))
             if isinstance(v, bytes):
                 myB.append(bytes([69, 65, len(v), 0]))
                 myB.append(b'VALU')
@@ -1781,24 +1807,24 @@ class TestLrTableSpecific(TestLrBase):
         myF = self._retFilePrS(b''.join(myB))
         myLr = LogiRec.LrTableRead(myF)
         self.assertEqual(b'CONS', myLr.value)
-#        print()
-#        for r in myLr.genRows():
-#            for c in r.genCells():
-#                pass
-#                print(c.engVal, '\t', end="")
-#            print('\n')
+        #        print()
+        #        for r in myLr.genRows():
+        #            for c in r.genCells():
+        #                pass
+        #                print(c.engVal, '\t', end="")
+        #            print('\n')
         self.assertEqual(len(myLr), 3)
         self.assertFalse(myLr.isSingleParam)
-        #print(sorted(list(myLr.rowLabels())))
+        # print(sorted(list(myLr.rowLabels())))
         self.assertEqual(
             [
-                 b'HIDE',
-                 b'TDD ',
-                 b'TDL ',
-             ],                         
-             sorted(list(myLr.rowLabels())),
+                b'HIDE',
+                b'TDD ',
+                b'TDL ',
+            ],
+            sorted(list(myLr.rowLabels())),
         )
-        #print(myT.colLabels())
+        # print(myT.colLabels())
         self.assertEqual(
             {b'MNEM', b'STAT', b'PUNI', b'TUNI', b'VALU'},
             myLr.colLabels(),
@@ -1812,8 +1838,8 @@ class TestLrTableSpecific(TestLrBase):
             self.fail('KeyError not raised.')
         except KeyError:
             pass
-#        print()
-#        print(myLr._mnemRowIndex)
+        #        print()
+        #        print(myLr._mnemRowIndex)
         self.assertEqual(
             {
                 Mnem.Mnem(b'TDD\x00'): 1,
@@ -1822,9 +1848,11 @@ class TestLrTableSpecific(TestLrBase):
             },
             myLr._mnemRowIndex,
         )
-    
+
+
 class TestLrTableWrite(TestLrBase):
     """Class to test direct creation of tables."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1836,13 +1864,13 @@ class TestLrTableWrite(TestLrBase):
     def test_SetUpTearDown(self):
         """TestLrTableSpecific: Tests setUp() and tearDown()."""
         pass
-    
+
     def _retAllBytes(self, theR):
         ba = bytearray([34, 0])
         for b in theR.genLisBytes():
             ba += b
         return bytes(ba)
-    
+
     def _checkByteLists(self, bA, bB):
         for i, (a, b) in enumerate(map(lambda *args: args, bA, bB)):
             if a != b:
@@ -1859,8 +1887,8 @@ class TestLrTableWrite(TestLrBase):
                 (b'2   ', b'BBB ', b'-   ', b'PF2 ', b'S5  ',),
             ),
         )
-#        print()
-#        print(myT)
+        #        print()
+        #        print(myT)
         self.assertEqual(myT.value, b'FILM')
         self.assertEqual(len(myT), 2)
         self.assertFalse(myT.isSingleParam)
@@ -1871,26 +1899,25 @@ class TestLrTableWrite(TestLrBase):
         self.assertTrue(myT[b'2   '] is not None)
         self.assertEqual(len(myT[b'2   ']), 5)
         expBytes = (b'IA\x04\x00TYPE    FILM'
-            + b'\x00A\x04\x00MNEM    1   '
-            + b'EA\x04\x00GCOD    E2E '
-            + b'EA\x04\x00GDEC    2   '
-            + b'EA\x04\x00DEST    PF1 '
-            + b'EA\x04\x00DSCA    S5  '
-            + b'\x00A\x04\x00MNEM    2   '
-            + b'EA\x04\x00GCOD    BBB '
-            + b'EA\x04\x00GDEC    -   '
-            + b'EA\x04\x00DEST    PF2 '
-            + b'EA\x04\x00DSCA    S5  '
-        )
+                    + b'\x00A\x04\x00MNEM    1   '
+                    + b'EA\x04\x00GCOD    E2E '
+                    + b'EA\x04\x00GDEC    2   '
+                    + b'EA\x04\x00DEST    PF1 '
+                    + b'EA\x04\x00DSCA    S5  '
+                    + b'\x00A\x04\x00MNEM    2   '
+                    + b'EA\x04\x00GCOD    BBB '
+                    + b'EA\x04\x00GDEC    -   '
+                    + b'EA\x04\x00DEST    PF2 '
+                    + b'EA\x04\x00DSCA    S5  '
+                    )
         ba = bytearray()
-#        print()
+        #        print()
         for b in myT.genLisBytes():
-#            print(b)
+            #            print(b)
             ba += b
-#        print(ba)
+        #        print(ba)
         self.assertEqual(expBytes, ba)
-        
-        
+
     def test_01(self):
         """TestLrTableWrite.test_01(): Simple FILM table from the TestPlotExample."""
         myT = LogiRec.LrTableWrite(
@@ -1902,25 +1929,25 @@ class TestLrTableWrite(TestLrBase):
                 (b'2   ', b'EEE ', b'----', b'PF2 ', b'D200',),
             ),
         )
-#        print()
-#        print(myT)
+        #        print()
+        #        print(myT)
         expBytes = b'"\x00' \
-            + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    E20 ' \
-                    + b'EA\x04\x00GDEC    -4--' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D200' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D200'
+                   + b'IA\x04\x00TYPE    FILM' \
+                   + b'\x00A\x04\x00MNEM    1   ' \
+                   + b'EA\x04\x00GCOD    E20 ' \
+                   + b'EA\x04\x00GDEC    -4--' \
+                   + b'EA\x04\x00DEST    PF1 ' \
+                   + b'EA\x04\x00DSCA    D200' \
+                   + b'\x00A\x04\x00MNEM    2   ' \
+                   + b'EA\x04\x00GCOD    EEE ' \
+                   + b'EA\x04\x00GDEC    ----' \
+                   + b'EA\x04\x00DEST    PF2 ' \
+                   + b'EA\x04\x00DSCA    D200'
         actBytes = self._retAllBytes(myT)
-#        print()
-#        print(expBytes)
-#        print(actBytes)
-#        print(len(expBytes))
+        #        print()
+        #        print(expBytes)
+        #        print(actBytes)
+        #        print(len(expBytes))
         self._checkByteLists(expBytes, actBytes)
         self.assertEqual(expBytes, actBytes)
 
@@ -1934,27 +1961,27 @@ class TestLrTableWrite(TestLrBase):
                 (b'SP  ', b'SP  ', b'ALLO', b'T1  ', b'LLIN', b'1   ', b'SHIF', 0.5, (-80.0, b'MV  '), (20.0, b'MV  ')),
             ),
         )
-#        print()
-#        print(myT)
+        #        print()
+        #        print(myT)
         expBytes = (b'"\x00'
-            + b'IA\x04\x00TYPE    PRES'
-            #SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
-            + b'\x00A\x04\x00MNEM    SP  '
-                + b'EA\x04\x00OUTP    SP  '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-        )
+                    + b'IA\x04\x00TYPE    PRES'
+                    # SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
+                    + b'\x00A\x04\x00MNEM    SP  '
+                    + b'EA\x04\x00OUTP    SP  '
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T1  '
+                    + b'EA\x04\x00CODI    LLIN'
+                    + b'EA\x04\x00DEST    1   '
+                    + b'EA\x04\x00MODE    SHIF'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)  # \xbc0\x00\x00'
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+                    )
         actBytes = self._retAllBytes(myT)
-#        print()
-#        print(expBytes)
-#        print(actBytes)
-#        print(len(expBytes))
+        #        print()
+        #        print(expBytes)
+        #        print(actBytes)
+        #        print(len(expBytes))
         self._checkByteLists(expBytes, actBytes)
         self.assertEqual(expBytes, actBytes)
 
@@ -1972,79 +1999,82 @@ class TestLrTableWrite(TestLrBase):
                 (b'2.5 ', b'TEST', b'ALLO', b'T3  ', b'LSPO', b'2   ', b'WRAP', 0.5, (-2.5, b'MV  '), (2.5, b'MV  ')),
             ),
         )
-#        print()
-#        print(myT)
+        #        print()
+        #        print(myT)
         expBytes = (b'"\x00'
-            + b'IA\x04\x00TYPE    PRES'
-            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
-            + b'\x00A\x04\x00MNEM    40  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
-            + b'\x00A\x04\x00MNEM    20  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
-            + b'\x00A\x04\x00MNEM    10  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)#B\xd0\x00\x00'
-            # Scale -5 to 5
-            + b'\x00A\x04\x00MNEM    5   '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
-            # Scale -2.5 to 2.5
-            + b'\x00A\x04\x00MNEM    2.5 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
-        )
+                    + b'IA\x04\x00TYPE    PRES'
+                    # 40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+                    + b'\x00A\x04\x00MNEM    40  '
+                    + b'EA\x04\x00OUTP    TEST'
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T1  '
+                    + b'EA\x04\x00CODI    LLIN'
+                    + b'EA\x04\x00DEST    2   '
+                    + b'EA\x04\x00MODE    SHIF'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+                    # 20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+                    + b'\x00A\x04\x00MNEM    20  '
+                    + b'EA\x04\x00OUTP    TEST'
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T2  '
+                    + b'EA\x04\x00CODI    HDAS'
+                    + b'EA\x04\x00DEST    2   '
+                    + b'EA\x04\x00MODE    SHIF'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+                    # 10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+                    + b'\x00A\x04\x00MNEM    10  '
+                    + b'EA\x04\x00OUTP    TEST'
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T3  '
+                    + b'EA\x04\x00CODI    LGAP'
+                    + b'EA\x04\x00DEST    2   '
+                    + b'EA\x04\x00MODE    WRAP'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)  # \xbc0\x00\x00'
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)  # B\xd0\x00\x00'
+                    # Scale -5 to 5
+                    + b'\x00A\x04\x00MNEM    5   '
+                    + b'EA\x04\x00OUTP    TEST'
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T2  '
+                    + b'EA\x04\x00CODI    HSPO'
+                    + b'EA\x04\x00DEST    2   '
+                    + b'EA\x04\x00MODE    WRAP'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
+                    # Scale -2.5 to 2.5
+                    + b'\x00A\x04\x00MNEM    2.5 '
+                    + b'EA\x04\x00OUTP    TEST'
+                    + b'EA\x04\x00STAT    ALLO'
+                    + b'EA\x04\x00TRAC    T3  '
+                    + b'EA\x04\x00CODI    LSPO'
+                    + b'EA\x04\x00DEST    2   '
+                    + b'EA\x04\x00MODE    WRAP'
+                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                    + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
+                    + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
+                    )
         actBytes = self._retAllBytes(myT)
-#        print()
-#        print(expBytes)
-#        print(actBytes)
-#        print(len(expBytes))
+        #        print()
+        #        print(expBytes)
+        #        print(actBytes)
+        #        print(len(expBytes))
         self._checkByteLists(expBytes, actBytes)
         self.assertEqual(expBytes, actBytes)
 
+
 class TestEntryBlock(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2064,7 +2094,7 @@ class TestEntryBlock(TestLrBase):
 
     def test_01(self):
         """TestEntryBlock.test_01(): Absent value = -999.25."""
-        #print(RepCode.write68(-999.25))
+        # print(RepCode.write68(-999.25))
         myF = self._retFileSinglePr(
             bytes([12, 4, 68]) + b'\xba\x83\x18\x00'
         )
@@ -2091,11 +2121,14 @@ class TestEntryBlock(TestLrBase):
             'EntryBlockRead(type=0, size=0, repCode=66, value=None)'
         )
 
+
 class TestEntryBlockSet(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2107,8 +2140,8 @@ class TestEntryBlockSet(TestLrBase):
     def test_00(self):
         """TestEntryBlockSet.test_00(): Test defaults."""
         myEbs = LogiRec.EntryBlockSet()
-        #print()
-        #print(myEbs)
+        # print()
+        # print(myEbs)
         self.maxDiff = None
         self.assertEqual(str(myEbs), """EntryBlockSet [20 bytes]:
 EntryBlock(type=0, size=0, repCode=66, value=None)
@@ -2128,8 +2161,8 @@ EntryBlock(type=13, size=1, repCode=66, value=0)
 EntryBlock(type=14, size=4, repCode=65, value=b'.1IN')
 EntryBlock(type=15, size=1, repCode=66, value=0)
 EntryBlock(type=16, size=1, repCode=66, value=0)""")
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         expByList = [
             bytearray(b'\x01\x01B\x00'),
             bytearray(b'\x02\x01B\x00'),
@@ -2152,23 +2185,23 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             expByList,
             myEbs.lisByteList(),
         )
-        #print('myEbs.lisBytes()', myEbs.lisBytes())
+        # print('myEbs.lisBytes()', myEbs.lisBytes())
         expBy = b'\x01\x01B\x00' \
-            + b'\x02\x01B\x00' \
-            + b'\x03\x01B\x00' \
-            + b'\x04\x01B\x01' \
-            + b'\x05\x01B\x01' \
-            + b'\x06\x00B' \
-            + b'\x07\x04A.1IN' \
-            + b'\x08\x00B' \
-            + b'\t\x00A' \
-            + b'\x0b\x00B' \
-            + b'\x0c\x04D\xba\x83\x18\x00' \
-            + b'\r\x01B\x00' \
-            + b'\x0e\x04A.1IN' \
-            + b'\x0f\x01B\x00' \
-            + b'\x10\x01B' \
-            + b'\x00\x00\x00B'
+                + b'\x02\x01B\x00' \
+                + b'\x03\x01B\x00' \
+                + b'\x04\x01B\x01' \
+                + b'\x05\x01B\x01' \
+                + b'\x06\x00B' \
+                + b'\x07\x04A.1IN' \
+                + b'\x08\x00B' \
+                + b'\t\x00A' \
+                + b'\x0b\x00B' \
+                + b'\x0c\x04D\xba\x83\x18\x00' \
+                + b'\r\x01B\x00' \
+                + b'\x0e\x04A.1IN' \
+                + b'\x0f\x01B\x00' \
+                + b'\x10\x01B' \
+                + b'\x00\x00\x00B'
         self.assertEqual(expBy, myEbs.lisBytes())
         self.assertFalse(myEbs.xInc)
         self.assertFalse(myEbs.logDown)
@@ -2179,8 +2212,8 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         myEbs = LogiRec.EntryBlockSet()
         myEb = LogiRec.EntryBlock(4, 1, 66, 255)
         myEbs.setEntryBlock(myEb)
-        #print()
-        #print(myEbs)
+        # print()
+        # print(myEbs)
         self.maxDiff = None
         self.assertEqual(str(myEbs), """EntryBlockSet [20 bytes]:
 EntryBlock(type=0, size=0, repCode=66, value=None)
@@ -2219,7 +2252,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             self.fail('LogiRec.ExceptionEntryBlock not raised')
         except LogiRec.ExceptionEntryBlock:
             pass
-        
+
     def test_03(self):
         """TestEntryBlockSet.test_03(): Set bad block."""
         myEbs = LogiRec.EntryBlockSet()
@@ -2229,11 +2262,11 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
     def test_04(self):
         """TestEntryBlockSet.test_04(): Get attributes."""
         myEbs = LogiRec.EntryBlockSet()
-        self.assertEqual(myEbs.dataType,        0)
-        self.assertEqual(myEbs.absentValue,     -999.25)
-        self.assertEqual(myEbs.recordingMode,   0)
-        self.assertEqual(myEbs.depthUnits,      b'.1IN')
-        self.assertEqual(myEbs.depthRepCode,    0)
+        self.assertEqual(myEbs.dataType, 0)
+        self.assertEqual(myEbs.absentValue, -999.25)
+        self.assertEqual(myEbs.recordingMode, 0)
+        self.assertEqual(myEbs.depthUnits, b'.1IN')
+        self.assertEqual(myEbs.depthRepCode, 0)
 
     def test_05(self):
         """TestEntryBlockSet.test_05(): Get attribute that fails."""
@@ -2243,7 +2276,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             self.fail('AttributeError not raised.')
         except AttributeError:
             pass
-        #self.assertRaises(AttributeError, myEbs.spam)
+        # self.assertRaises(AttributeError, myEbs.spam)
 
     def test_10(self):
         """TestEntryBlockSet.test_10(): Read from file."""
@@ -2252,7 +2285,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             # Logical record header for DFSR
             bytes([64, 0])
             # Entry block 4, value 0
-            +bytes([4, 1, 66, 0])
+            + bytes([4, 1, 66, 0])
             # Entry block 12, value -153.0
             + bytes([12, 4, 68])
             + b'\xbb\xb3\x80\x00'
@@ -2261,7 +2294,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         myEbs.readFromFile(myF)
         self.assertEqual(myEbs[4].value, 0)
         self.assertEqual(myEbs.absentValue, -153.0)
-        
+
     def test_11(self):
         """TestEntryBlockSet.test_11(): Read from file raises with spurious bytes."""
         myEbs = LogiRec.EntryBlockSet()
@@ -2269,7 +2302,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             # Logical record header for DFSR
             bytes([64, 0])
             # Entry block 4, value 0
-            +bytes([4, 1, 66, 0])
+            + bytes([4, 1, 66, 0])
             # Entry block 12, value -153.0
             + bytes([12, 4, 68])
             + b'\xbb\xb3\x80\x00'
@@ -2281,7 +2314,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         self.assertRaises(File.ExceptionFileRead, myEbs.readFromFile, myF)
         self.assertEqual(myEbs[4].value, 0)
         self.assertEqual(myEbs.absentValue, -153.0)
-        
+
     def test_12(self):
         """TestEntryBlockSet.test_12(): Read from file with spurious bytes masked by type 0 block."""
         myEbs = LogiRec.EntryBlockSet()
@@ -2294,7 +2327,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             + bytes([12, 4, 68])
             + b'\xbb\xb3\x80\x00'
             # Entry block 0, value None terminates read
-            +bytes([0, 1, 66, 0])
+            + bytes([0, 1, 66, 0])
             # Spurious bytes
             + bytes([1, 2])
         )
@@ -2302,7 +2335,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         myEbs.readFromFile(myF)
         self.assertEqual(myEbs[4].value, 0)
         self.assertEqual(myEbs.absentValue, -153.0)
-        
+
     def test_13(self):
         """TestEntryBlockSet.test_13(): Undefined entry block type 10 produces warning but does not raise."""
         myEbs = LogiRec.EntryBlockSet()
@@ -2310,7 +2343,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
             # Logical record header for DFSR
             bytes([64, 0])
             # Entry block 4, value 0
-            +bytes([10, 1, 66, 0])
+            + bytes([10, 1, 66, 0])
             # Entry block 12, value -153.0
             + bytes([12, 4, 68])
             + b'\xbb\xb3\x80\x00'
@@ -2318,12 +2351,12 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         self.assertEqual(myF.readLrBytes(2), b'@\x00')
         myEbs.readFromFile(myF)
         self.assertEqual(myEbs.absentValue, -153.0)
-        
+
     def test_20(self):
         """TestEntryBlockSet.test_20(): Test optical X units are FEET by default."""
         myEbs = LogiRec.EntryBlockSet()
-        #print()
-        #print(myEbs)
+        # print()
+        # print(myEbs)
         self.assertEqual(Units.OPTICAL_FEET, myEbs.opticalLogScale)
 
     def test_21(self):
@@ -2338,7 +2371,7 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         myEb = LogiRec.EntryBlock(5, 1, 66, 255)
         myEbs.setEntryBlock(myEb)
         self.assertEqual(Units.OPTICAL_METERS, myEbs.opticalLogScale)
-        
+
     def test_23(self):
         """TestEntryBlockSet.test_23(): Test optical X units are set to b'S   ' with entry block 5 value 0."""
         myEbs = LogiRec.EntryBlockSet()
@@ -2346,11 +2379,14 @@ EntryBlock(type=16, size=1, repCode=66, value=0)""")
         myEbs.setEntryBlock(myEb)
         self.assertEqual(Units.OPTICAL_TIME, myEbs.opticalLogScale)
 
+
 class TestDatumSpecBlock(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2364,10 +2400,10 @@ class TestDatumSpecBlock(TestLrBase):
         myDsb = LogiRec.DatumSpecBlock()
         self.assertEqual(myDsb._unpackApiInt(45310011), (45, 310, 1, 1))
         myDsb._unpackApiCodes(45310011)
-        self.assertEqual(myDsb.apiLogType,      45)        
-        self.assertEqual(myDsb.apiCurveType,    310)        
-        self.assertEqual(myDsb.apiCurveClass,   1)        
-        self.assertEqual(myDsb.apiModifier,     1)        
+        self.assertEqual(myDsb.apiLogType, 45)
+        self.assertEqual(myDsb.apiCurveType, 310)
+        self.assertEqual(myDsb.apiCurveClass, 1)
+        self.assertEqual(myDsb.apiModifier, 1)
 
     def test_10(self):
         """TestDatumSpecBlock.test_10(): Read from file."""
@@ -2391,29 +2427,29 @@ class TestDatumSpecBlock(TestLrBase):
         # Padding '0'
         myB += b'000'
         # Samples: 4 super samples
-        myB += bytes([4,])
+        myB += bytes([4, ])
         # Representation code
-        myB += bytes([68,])
+        myB += bytes([68, ])
         # Process indicators
         myB += bytes([0, 1, 2, 3, 4])
         myF = self._retFileSinglePr(myB)
         self.assertEqual(myF.readLrBytes(2), b'@\x00')
         myDsb = LogiRec.DatumSpecBlockRead(myF)
-        self.assertEqual(myDsb.mnem,            b'GR  ')
-        self.assertEqual(myDsb.servId,          b'ServID')
-        self.assertEqual(myDsb.servOrd,         b'ServOrdN')
-        self.assertEqual(myDsb.units,           b'GAPI')
-        self.assertEqual(myDsb.apiLogType,      45)
-        self.assertEqual(myDsb.apiCurveType,    310)
-        self.assertEqual(myDsb.apiCurveClass,   1)        
-        self.assertEqual(myDsb.apiModifier,     1)
-        self.assertEqual(myDsb.fileNumber,      256)
-        self.assertEqual(myDsb.size,            96)        
-        self.assertEqual(myDsb._samples,        4)
-        self.assertEqual(myDsb.repCode,         68)
-        self.assertEqual(myDsb.subChannels,     1)
-        self.assertEqual(myDsb.bursts(0),       6)
-        self.assertEqual(myDsb.samples(0),      4)
+        self.assertEqual(myDsb.mnem, b'GR  ')
+        self.assertEqual(myDsb.servId, b'ServID')
+        self.assertEqual(myDsb.servOrd, b'ServOrdN')
+        self.assertEqual(myDsb.units, b'GAPI')
+        self.assertEqual(myDsb.apiLogType, 45)
+        self.assertEqual(myDsb.apiCurveType, 310)
+        self.assertEqual(myDsb.apiCurveClass, 1)
+        self.assertEqual(myDsb.apiModifier, 1)
+        self.assertEqual(myDsb.fileNumber, 256)
+        self.assertEqual(myDsb.size, 96)
+        self.assertEqual(myDsb._samples, 4)
+        self.assertEqual(myDsb.repCode, 68)
+        self.assertEqual(myDsb.subChannels, 1)
+        self.assertEqual(myDsb.bursts(0), 6)
+        self.assertEqual(myDsb.samples(0), 4)
         self.assertRaises(IndexError, myDsb.samples, -1)
         self.assertRaises(IndexError, myDsb.samples, 2)
 
@@ -2439,37 +2475,37 @@ class TestDatumSpecBlock(TestLrBase):
         # Padding '0'
         myB += b'000'
         # Samples: 4 super samples
-        myB += bytes([1,])
+        myB += bytes([1, ])
         # Representation code
-        myB += bytes([130,])
+        myB += bytes([130, ])
         # Process indicators
         myB += bytes([0, 1, 2, 3, 4])
         myF = self._retFileSinglePr(myB)
         self.assertEqual(myF.readLrBytes(2), b'@\x00')
         myDsb = LogiRec.DatumSpecBlockRead(myF)
-        self.assertEqual(myDsb.mnem,            b'HDT ')
-        self.assertEqual(myDsb.servId,          b'ServID')
-        self.assertEqual(myDsb.servOrd,         b'ServOrdN')
-        self.assertEqual(myDsb.units,           b'    ')
-        self.assertEqual(myDsb.apiLogType,      45)
-        self.assertEqual(myDsb.apiCurveType,    310)
-        self.assertEqual(myDsb.apiCurveClass,   1)        
-        self.assertEqual(myDsb.apiModifier,     1)
-        self.assertEqual(myDsb.fileNumber,      256)
-        self.assertEqual(myDsb.size,            80)        
-        self.assertEqual(myDsb._samples,        1)
-        self.assertEqual(myDsb.repCode,         130)
-        self.assertEqual(myDsb.subChannels,     5)
-        self.assertEqual(myDsb.bursts(0),       1)
-        self.assertEqual(myDsb.bursts(1),       1)
-        self.assertEqual(myDsb.bursts(2),       1)
-        self.assertEqual(myDsb.bursts(3),       1)
-        self.assertEqual(myDsb.bursts(4),       1)
-        self.assertEqual(myDsb.samples(0),      16)
-        self.assertEqual(myDsb.samples(1),      16)
-        self.assertEqual(myDsb.samples(2),      16)
-        self.assertEqual(myDsb.samples(3),      16)
-        self.assertEqual(myDsb.samples(4),      16)
+        self.assertEqual(myDsb.mnem, b'HDT ')
+        self.assertEqual(myDsb.servId, b'ServID')
+        self.assertEqual(myDsb.servOrd, b'ServOrdN')
+        self.assertEqual(myDsb.units, b'    ')
+        self.assertEqual(myDsb.apiLogType, 45)
+        self.assertEqual(myDsb.apiCurveType, 310)
+        self.assertEqual(myDsb.apiCurveClass, 1)
+        self.assertEqual(myDsb.apiModifier, 1)
+        self.assertEqual(myDsb.fileNumber, 256)
+        self.assertEqual(myDsb.size, 80)
+        self.assertEqual(myDsb._samples, 1)
+        self.assertEqual(myDsb.repCode, 130)
+        self.assertEqual(myDsb.subChannels, 5)
+        self.assertEqual(myDsb.bursts(0), 1)
+        self.assertEqual(myDsb.bursts(1), 1)
+        self.assertEqual(myDsb.bursts(2), 1)
+        self.assertEqual(myDsb.bursts(3), 1)
+        self.assertEqual(myDsb.bursts(4), 1)
+        self.assertEqual(myDsb.samples(0), 16)
+        self.assertEqual(myDsb.samples(1), 16)
+        self.assertEqual(myDsb.samples(2), 16)
+        self.assertEqual(myDsb.samples(3), 16)
+        self.assertEqual(myDsb.samples(4), 16)
         self.assertRaises(IndexError, myDsb.samples, -1)
         self.assertRaises(IndexError, myDsb.samples, 5)
 
@@ -2495,57 +2531,57 @@ class TestDatumSpecBlock(TestLrBase):
         # Padding '0'
         myB += b'000'
         # Samples: 1 super samples
-        myB += bytes([1,])
+        myB += bytes([1, ])
         # Representation code
-        myB += bytes([234,])
+        myB += bytes([234, ])
         # Process indicators
         myB += bytes([0, 1, 2, 3, 4])
         myF = self._retFileSinglePr(myB)
         self.assertEqual(myF.readLrBytes(2), b'@\x00')
         myDsb = LogiRec.DatumSpecBlockRead(myF)
-        self.assertEqual(myDsb.mnem,            b'HDT ')
-        self.assertEqual(myDsb.servId,          b'ServID')
-        self.assertEqual(myDsb.servOrd,         b'ServOrdN')
-        self.assertEqual(myDsb.units,           b'    ')
-        self.assertEqual(myDsb.apiLogType,      45)
-        self.assertEqual(myDsb.apiCurveType,    310)
-        self.assertEqual(myDsb.apiCurveClass,   1)        
-        self.assertEqual(myDsb.apiModifier,     1)
-        self.assertEqual(myDsb.fileNumber,      256)
-        self.assertEqual(myDsb.size,            90)        
-        self.assertEqual(myDsb._samples,        1)
-        self.assertEqual(myDsb.repCode,         234)
-        self.assertEqual(myDsb.subChannels,     15)
-        self.assertEqual(myDsb.bursts(0),       1)
-        self.assertEqual(myDsb.bursts(1),       1)
-        self.assertEqual(myDsb.bursts(2),       1)
-        self.assertEqual(myDsb.bursts(3),       1)
-        self.assertEqual(myDsb.bursts(4),       1)
-        self.assertEqual(myDsb.bursts(5),       1)
-        self.assertEqual(myDsb.bursts(6),       1)
-        self.assertEqual(myDsb.bursts(7),       1)
-        self.assertEqual(myDsb.bursts(8),       1)
-        self.assertEqual(myDsb.bursts(9),       1)
-        self.assertEqual(myDsb.bursts(10),       1)
-        self.assertEqual(myDsb.bursts(11),       1)
-        self.assertEqual(myDsb.bursts(12),       1)
-        self.assertEqual(myDsb.bursts(13),       1)
-        self.assertEqual(myDsb.bursts(14),       1)
-        self.assertEqual(myDsb.samples(0),      16)
-        self.assertEqual(myDsb.samples(1),      16)
-        self.assertEqual(myDsb.samples(2),      16)
-        self.assertEqual(myDsb.samples(3),      16)
-        self.assertEqual(myDsb.samples(4),      16)
-        self.assertEqual(myDsb.samples(5),      1)
-        self.assertEqual(myDsb.samples(6),      1)
-        self.assertEqual(myDsb.samples(7),      1)
-        self.assertEqual(myDsb.samples(8),      1)
-        self.assertEqual(myDsb.samples(9),      1)
-        self.assertEqual(myDsb.samples(10),     1)
-        self.assertEqual(myDsb.samples(11),     1)
-        self.assertEqual(myDsb.samples(12),     1)
-        self.assertEqual(myDsb.samples(13),     1)
-        self.assertEqual(myDsb.samples(14),     1)
+        self.assertEqual(myDsb.mnem, b'HDT ')
+        self.assertEqual(myDsb.servId, b'ServID')
+        self.assertEqual(myDsb.servOrd, b'ServOrdN')
+        self.assertEqual(myDsb.units, b'    ')
+        self.assertEqual(myDsb.apiLogType, 45)
+        self.assertEqual(myDsb.apiCurveType, 310)
+        self.assertEqual(myDsb.apiCurveClass, 1)
+        self.assertEqual(myDsb.apiModifier, 1)
+        self.assertEqual(myDsb.fileNumber, 256)
+        self.assertEqual(myDsb.size, 90)
+        self.assertEqual(myDsb._samples, 1)
+        self.assertEqual(myDsb.repCode, 234)
+        self.assertEqual(myDsb.subChannels, 15)
+        self.assertEqual(myDsb.bursts(0), 1)
+        self.assertEqual(myDsb.bursts(1), 1)
+        self.assertEqual(myDsb.bursts(2), 1)
+        self.assertEqual(myDsb.bursts(3), 1)
+        self.assertEqual(myDsb.bursts(4), 1)
+        self.assertEqual(myDsb.bursts(5), 1)
+        self.assertEqual(myDsb.bursts(6), 1)
+        self.assertEqual(myDsb.bursts(7), 1)
+        self.assertEqual(myDsb.bursts(8), 1)
+        self.assertEqual(myDsb.bursts(9), 1)
+        self.assertEqual(myDsb.bursts(10), 1)
+        self.assertEqual(myDsb.bursts(11), 1)
+        self.assertEqual(myDsb.bursts(12), 1)
+        self.assertEqual(myDsb.bursts(13), 1)
+        self.assertEqual(myDsb.bursts(14), 1)
+        self.assertEqual(myDsb.samples(0), 16)
+        self.assertEqual(myDsb.samples(1), 16)
+        self.assertEqual(myDsb.samples(2), 16)
+        self.assertEqual(myDsb.samples(3), 16)
+        self.assertEqual(myDsb.samples(4), 16)
+        self.assertEqual(myDsb.samples(5), 1)
+        self.assertEqual(myDsb.samples(6), 1)
+        self.assertEqual(myDsb.samples(7), 1)
+        self.assertEqual(myDsb.samples(8), 1)
+        self.assertEqual(myDsb.samples(9), 1)
+        self.assertEqual(myDsb.samples(10), 1)
+        self.assertEqual(myDsb.samples(11), 1)
+        self.assertEqual(myDsb.samples(12), 1)
+        self.assertEqual(myDsb.samples(13), 1)
+        self.assertEqual(myDsb.samples(14), 1)
         self.assertRaises(IndexError, myDsb.samples, -1)
         self.assertRaises(IndexError, myDsb.samples, 15)
 
@@ -2571,37 +2607,40 @@ class TestDatumSpecBlock(TestLrBase):
         # Padding '0'
         myB += b'000'
         # Samples: 4 super samples
-        myB += bytes([0,])
+        myB += bytes([0, ])
         # Representation code
-        myB += bytes([1,])
+        myB += bytes([1, ])
         # Process indicators
         myB += bytes([0, 1, 2, 3, 4])
         myF = self._retFileSinglePr(myB)
         self.assertEqual(myF.readLrBytes(2), b'@\x00')
         myDsb = LogiRec.DatumSpecBlockRead(myF)
-        self.assertEqual(myDsb.mnem,            b'GR  ')
-        self.assertEqual(myDsb.servId,          b'ServID')
-        self.assertEqual(myDsb.servOrd,         b'ServOrdN')
-        self.assertEqual(myDsb.units,           b'GAPI')
-        self.assertEqual(myDsb.apiLogType,      45)
-        self.assertEqual(myDsb.apiCurveType,    310)
-        self.assertEqual(myDsb.apiCurveClass,   1)        
-        self.assertEqual(myDsb.apiModifier,     1)
-        self.assertEqual(myDsb.fileNumber,      256)
-        self.assertEqual(myDsb.size,            0)        
-        self.assertEqual(myDsb._samples,        0)
-        self.assertEqual(myDsb.repCode,         1)
-        self.assertEqual(myDsb.subChannels,     0)
-        self.assertEqual(myDsb.bursts(0),       0)
+        self.assertEqual(myDsb.mnem, b'GR  ')
+        self.assertEqual(myDsb.servId, b'ServID')
+        self.assertEqual(myDsb.servOrd, b'ServOrdN')
+        self.assertEqual(myDsb.units, b'GAPI')
+        self.assertEqual(myDsb.apiLogType, 45)
+        self.assertEqual(myDsb.apiCurveType, 310)
+        self.assertEqual(myDsb.apiCurveClass, 1)
+        self.assertEqual(myDsb.apiModifier, 1)
+        self.assertEqual(myDsb.fileNumber, 256)
+        self.assertEqual(myDsb.size, 0)
+        self.assertEqual(myDsb._samples, 0)
+        self.assertEqual(myDsb.repCode, 1)
+        self.assertEqual(myDsb.subChannels, 0)
+        self.assertEqual(myDsb.bursts(0), 0)
         self.assertRaises(IndexError, myDsb.samples, 0)
         self.assertRaises(IndexError, myDsb.samples, -1)
         self.assertRaises(IndexError, myDsb.samples, 1)
 
+
 class TestDFSR(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2643,7 +2682,7 @@ class TestDFSR(TestLrBase):
             # Samples: 1 super samples
             + b'\x01'
             # Representation code
-            + bytes([68,])
+            + bytes([68, ])
             # Process indicators
             + bytes([0, 1, 2, 3, 4])
             # Sensor 1
@@ -2665,9 +2704,9 @@ class TestDFSR(TestLrBase):
             # Padding '0'
             + b'000'
             # Samples: 4 super samples
-            + bytes([4,])
+            + bytes([4, ])
             # Representation code
-            + bytes([68,])
+            + bytes([68, ])
             # Process indicators
             + bytes([0, 1, 2, 3, 4])
         )
@@ -2675,11 +2714,14 @@ class TestDFSR(TestLrBase):
         self.assertEqual(len(myLr.dsbBlocks), 2)
         self.assertEqual(myLr.frameSize(), 100)
 
+
 class TestNormalAltData(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2691,17 +2733,20 @@ class TestNormalAltData(TestLrBase):
     def test_00(self):
         """TestNormalAltData.test_00(): LogiRec.LrNormalAlternateData() construction fails."""
         self.assertRaises(LogiRec.ExceptionLrNotImplemented, LogiRec.LrNormalAlternateData, 0, 0)
-    
+
     def test_01(self):
         """TestNormalAltData.test_00(): LogiRec.LrNormalAlternateDataRead() construction fails."""
         myF = self._retFileSinglePr(bytes([0, 0]))
         self.assertRaises(LogiRec.ExceptionLrNotImplemented, LogiRec.LrNormalAlternateDataRead, myF)
 
+
 class TestLrFactory(TestLrBase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
+
     def tearDown(self):
         """Tear down."""
         pass
@@ -2713,9 +2758,9 @@ class TestLrFactory(TestLrBase):
     def test_00(self):
         """TestLrFactory.test_00(): LogiRec.LrFactory() construction."""
         myLrf = LogiRec.LrFactory()
-        #print(myLrf)
-        #print(myLrf._lrMap)
-        
+        # print(myLrf)
+        # print(myLrf._lrMap)
+
     def test_01(self):
         """TestLrFactory.test_00(): LogiRec.LrFactoryRead() construction of a single DFSR."""
         myF = self._retFileSinglePr(
@@ -2749,7 +2794,7 @@ class TestLrFactory(TestLrBase):
             # Samples: 1 super samples
             + b'\x01'
             # Representation code
-            + bytes([68,])
+            + bytes([68, ])
             # Process indicators
             + bytes([0, 1, 2, 3, 4])
             # Sensor 1
@@ -2771,23 +2816,25 @@ class TestLrFactory(TestLrBase):
             # Padding '0'
             + b'000'
             # Samples: 4 super samples
-            + bytes([4,])
+            + bytes([4, ])
             # Representation code
-            + bytes([68,])
+            + bytes([68, ])
             # Process indicators
             + bytes([0, 1, 2, 3, 4])
         )
         myLrfr = LogiRec.LrFactoryRead()
-        #print(myLrfr)
-        #print(myLrfr._lrMap)
+        # print(myLrfr)
+        # print(myLrfr._lrMap)
         myLr = myLrfr.retLrFromFile(myF)
-        #print(myLr)
+        # print(myLr)
         self.assertEqual(myLr.desc, 'Data format specification record')
         self.assertEqual(len(myLr.dsbBlocks), 2)
-      
+
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -2816,6 +2863,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLrFactory))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -2823,23 +2872,24 @@ def unitTest(theVerbosity=2):
 def usage():
     """Send the help to stdout."""
     print(
-"""TestClass.py - A module that tests something.
-Usage:
-python TestClass.py [-lh --help]
+        """TestClass.py - A module that tests something.
+        Usage:
+        python TestClass.py [-lh --help]
+        
+        Options:
+        -h, --help  Help (this screen) and exit
+        
+        Options (debug):
+        -l:         Set the logging level higher is quieter.
+                     Default is 20 (INFO) e.g.:
+                        CRITICAL    50
+                        ERROR       40
+                        WARNING     30
+                        INFO        20
+                        DEBUG       10
+                        NOTSET      0
+        """)
 
-Options:
--h, --help  Help (this screen) and exit
-
-Options (debug):
--l:         Set the logging level higher is quieter.
-             Default is 20 (INFO) e.g.:
-                CRITICAL    50
-                ERROR       40
-                WARNING     30
-                INFO        20
-                DEBUG       10
-                NOTSET      0
-""")
 
 def main():
     """Invoke unit test code."""
@@ -2849,7 +2899,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -2867,14 +2917,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

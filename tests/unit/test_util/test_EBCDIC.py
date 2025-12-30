@@ -130,9 +130,9 @@ def test_ebcdic_printable_to_ascii_printable():
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', '0'),
-        (b'\x41', '65'),
-        (b'\xc1', '193'),
+            (b'\x00', '0'),
+            (b'\x41', '65'),
+            (b'\xc1', '193'),
     )
 )
 def test_ebcdic_ascii_description_decimal_str(ebcdic_bytes, expected):
@@ -143,9 +143,9 @@ def test_ebcdic_ascii_description_decimal_str(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', '00'),
-        (b'\x41', '41'),
-        (b'\xc1', 'C1'),
+            (b'\x00', '00'),
+            (b'\x41', '41'),
+            (b'\xc1', 'C1'),
     )
 )
 def test_ebcdic_ascii_description_hex_str(ebcdic_bytes, expected):
@@ -156,9 +156,9 @@ def test_ebcdic_ascii_description_hex_str(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 'Ctrl-@'),
-        (b'\x41', ''),
-        (b'\xc1', ''),
+            (b'\x00', 'Ctrl-@'),
+            (b'\x41', ''),
+            (b'\xc1', ''),
     )
 )
 def test_ebcdic_ascii_description_ctrl_char(ebcdic_bytes, expected):
@@ -169,9 +169,9 @@ def test_ebcdic_ascii_description_ctrl_char(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 'NUL'),
-        (b'\x41', 'A'),
-        (b'\xc1', ''),
+            (b'\x00', 'NUL'),
+            (b'\x41', 'A'),
+            (b'\xc1', ''),
     )
 )
 def test_ebcdic_ascii_description_ascii(ebcdic_bytes, expected):
@@ -182,9 +182,9 @@ def test_ebcdic_ascii_description_ascii(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 'null'),
-        (b'\x41', ''),
-        (b'\xc1', ''),
+            (b'\x00', 'null'),
+            (b'\x41', ''),
+            (b'\xc1', ''),
     )
 )
 def test_ebcdic_ascii_description_ascii_meaning(ebcdic_bytes, expected):
@@ -195,9 +195,9 @@ def test_ebcdic_ascii_description_ascii_meaning(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 'NUL'),
-        (b'\x41', ''),
-        (b'\xc1', 'A'),
+            (b'\x00', 'NUL'),
+            (b'\x41', ''),
+            (b'\xc1', 'A'),
     )
 )
 def test_ebcdic_ascii_description_ebcdic(ebcdic_bytes, expected):
@@ -208,9 +208,9 @@ def test_ebcdic_ascii_description_ebcdic(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 'null'),
-        (b'\x41', ''),
-        (b'\xc1', ''),
+            (b'\x00', 'null'),
+            (b'\x41', ''),
+            (b'\xc1', ''),
     )
 )
 def test_ebcdic_ascii_description_ebcdic_meaning(ebcdic_bytes, expected):
@@ -221,9 +221,9 @@ def test_ebcdic_ascii_description_ebcdic_meaning(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', 0),
-        (b'\x41', 65),
-        (b'\xc1', 193),
+            (b'\x00', 0),
+            (b'\x41', 65),
+            (b'\xc1', 193),
     )
 )
 def test_ebcdic_ascii_description_value(ebcdic_bytes, expected):
@@ -234,9 +234,9 @@ def test_ebcdic_ascii_description_value(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', True),
-        (b'\x41', False),
-        (b'\xc1', False),
+            (b'\x00', True),
+            (b'\x41', False),
+            (b'\xc1', False),
     )
 )
 def test_ebcdic_ascii_description_is_ctrl(ebcdic_bytes, expected):
@@ -247,9 +247,9 @@ def test_ebcdic_ascii_description_is_ctrl(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', '@'),
-        (b'\x41', ''),
-        (b'\xc1', ''),
+            (b'\x00', '@'),
+            (b'\x41', ''),
+            (b'\xc1', ''),
     )
 )
 def test_ebcdic_ascii_description_ctrl_symbol(ebcdic_bytes, expected):
@@ -260,16 +260,11 @@ def test_ebcdic_ascii_description_ctrl_symbol(ebcdic_bytes, expected):
 @pytest.mark.parametrize(
     'ebcdic_bytes, expected',
     (
-        (b'\x00', False),
-        (b'\x41', False),
-        (b'\xc1', True),
+            (b'\x00', False),
+            (b'\x41', False),
+            (b'\xc1', True),
     )
 )
 def test_ebcdic_ascii_description_ebcdic_printable(ebcdic_bytes, expected):
     result = EBCDIC.ebcdic_ascii_description(ebcdic_bytes)
     assert result.ebcdic_printable == expected
-
-
-
-
-

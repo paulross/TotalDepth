@@ -19,7 +19,6 @@
 # Paul Ross: apaulross@gmail.com
 import string
 
-
 ASCII_VISUAL_BYTES = set(
     bytes(string.digits + string.ascii_letters + string.punctuation + ' ', 'ascii')
 )
@@ -84,7 +83,7 @@ def xxd(by: bytes,
                 else:
                     hex_list.append('{:02x}'.format(part[j]))
             if ebcdic:
-                char = part[j:j+1].decode('cp500')
+                char = part[j:j + 1].decode('cp500')
                 if ord(char) in ASCII_VISUAL_BYTES:
                     chr_list.append(char)
                 else:

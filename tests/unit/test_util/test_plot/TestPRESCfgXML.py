@@ -24,16 +24,15 @@ Created on Dec 17, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
 import logging
+import sys
 import time
 import unittest
-import pprint
 
 try:
     import xml.etree.cElementTree as etree
@@ -80,7 +79,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
     <WrapMode>LG_LEFT_WRAPPED</WrapMode>
 </LgCurve>"""))
         self.assertEqual((0, -1), myB)
-        
+
     def test_00_02(self):
         """CurveCfgXMLRead.test_00_02(): tests low-level: _retBackup() UNKNOWN."""
         # Say in <LgTrack UniqueId="track1">
@@ -98,8 +97,8 @@ class TestCurveCfgXMLRead(unittest.TestCase):
         myB = myCcxr._retBackup(etree.fromstring("""<LgCurve xmlns="x-schema:LgSchema2.xml">
     <WrapMode>UNKNOWN</WrapMode>
 </LgCurve>"""))
-        self.assertEqual((0,0), myB)
-        
+        self.assertEqual((0, 0), myB)
+
     def test_00_11(self):
         """CurveCfgXMLRead.test_00_11(): tests low-level: _retCoding()."""
         # Say in <LgTrack UniqueId="track1">
@@ -119,7 +118,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
     <LineStyle>LG_DASH_LINE</LineStyle>
 </LgCurve>"""))
         self.assertEqual(Stroke.Stroke(width=0.5, colour='rgb(255,0,0)', coding=(4, 4), opacity=1.0), myV)
-        
+
     def test_00_12(self):
         """CurveCfgXMLRead.test_00_12(): tests low-level: _retColour()."""
         # Say in <LgTrack UniqueId="track1">
@@ -138,7 +137,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
     <Color>FF0000</Color>
 </LgCurve>"""))
         self.assertEqual('rgb(255,0,0)', myV)
-        
+
     def test_01(self):
         """CurveCfgXMLRead.test_01(): tests single channel read."""
         # Say in <LgTrack UniqueId="track1">
@@ -153,12 +152,12 @@ class TestCurveCfgXMLRead(unittest.TestCase):
 </LgCurve>"""
         root = etree.fromstring(xStr)
         myCcxr = PRESCfgXML.CurveCfgXMLRead(root, "track1", self._fcxr)
-#        print()
-#        print('myCcxr._filmTrackWidthMap [{:d}]'.format(len(myCcxr._filmTrackWidthMap)))
-#        pprint.pprint(myCcxr._filmTrackWidthMap)
-#        print()
-#        print('myCcxr._filmTrackFnMap [{:d}]'.format(len(myCcxr._filmTrackFnMap)))
-#        pprint.pprint(myCcxr._filmTrackFnMap)
+        #        print()
+        #        print('myCcxr._filmTrackWidthMap [{:d}]'.format(len(myCcxr._filmTrackWidthMap)))
+        #        pprint.pprint(myCcxr._filmTrackWidthMap)
+        #        print()
+        #        print('myCcxr._filmTrackFnMap [{:d}]'.format(len(myCcxr._filmTrackFnMap)))
+        #        pprint.pprint(myCcxr._filmTrackFnMap)
         self.assertEqual('Cali', myCcxr.mnem)
         self.assertEqual('CALI', myCcxr.outp)
         self.assertEqual(True, myCcxr.stat)
@@ -183,7 +182,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
         root = etree.fromstring(xStr)
         self.assertRaises(
             PRESCfgXML.ExceptionCurveCfgXMLRead,
-            PRESCfgXML.CurveCfgXMLRead, 
+            PRESCfgXML.CurveCfgXMLRead,
             root, "track1", self._fcxr,
         )
 
@@ -202,7 +201,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
         root = etree.fromstring(xStr)
         self.assertRaises(
             PRESCfgXML.ExceptionCurveCfgXMLRead,
-            PRESCfgXML.CurveCfgXMLRead, 
+            PRESCfgXML.CurveCfgXMLRead,
             root, "Not track1", self._fcxr,
         )
 
@@ -221,7 +220,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
         root = etree.fromstring(xStr)
         self.assertRaises(
             PRESCfgXML.ExceptionCurveCfgXMLRead,
-            PRESCfgXML.CurveCfgXMLRead, 
+            PRESCfgXML.CurveCfgXMLRead,
             root, "track1", self._fcxr,
         )
 
@@ -271,8 +270,9 @@ class TestCurveCfgXMLRead(unittest.TestCase):
 </LgCurve>"""
         root = etree.fromstring(xStr)
         myCcxr = PRESCfgXML.CurveCfgXMLRead(root, "track1", self._fcxr)
-#        self.assertTrue(myCcxr.mode is None)
-        
+
+    #        self.assertTrue(myCcxr.mode is None)
+
     def test_08(self):
         """CurveCfgXMLRead.test_08(): tests single channel wrap mode UNKNOWN."""
         # Say in <LgTrack UniqueId="track1">
@@ -287,7 +287,8 @@ class TestCurveCfgXMLRead(unittest.TestCase):
 </LgCurve>"""
         root = etree.fromstring(xStr)
         myCcxr = PRESCfgXML.CurveCfgXMLRead(root, "track1", self._fcxr)
-#        self.assertTrue(myCcxr.mode is None)
+
+    #        self.assertTrue(myCcxr.mode is None)
 
     def test_09(self):
         """CurveCfgXMLRead.test_09(): tests single channel coding OK."""
@@ -307,7 +308,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
             Stroke.Stroke(width=0.5, colour='rgb(0,0,255)', coding=(4, 4), opacity=1.0),
             myCcxr.codiStroke,
         )
-        
+
     def test_10(self):
         """CurveCfgXMLRead.test_10(): tests single channel coding substitutes default when rubbish encountered."""
         # Say in <LgTrack UniqueId="track1">
@@ -326,7 +327,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
             Stroke.Stroke(width=0.5, colour='rgb(0,0,255)', coding=None, opacity=1.0),
             myCcxr.codiStroke,
         )
-        
+
     def test_11(self):
         """CurveCfgXMLRead.test_11(): tests single colour OK."""
         # Say in <LgTrack UniqueId="track1">
@@ -345,7 +346,7 @@ class TestCurveCfgXMLRead(unittest.TestCase):
             Stroke.Stroke(width=0.5, colour='rgb(0,0,255)', coding=(4, 4), opacity=1.0),
             myCcxr.codiStroke,
         )
-        
+
     def test_12(self):
         """CurveCfgXMLRead.test_12(): tests single colour substitutes default when rubbish encountered."""
         # Say in <LgTrack UniqueId="track1">
@@ -396,9 +397,9 @@ class TestPresCfgXMLRead(unittest.TestCase):
             self._fcxr,
             "Resistivity_3Track_Logrithmic.xml",
         )
-#        print('')
-#        pprint.pprint(self._fcxr._chOutpMnemFilmMap)
-#        print(myPcxr.keys())
+        #        print('')
+        #        pprint.pprint(self._fcxr._chOutpMnemFilmMap)
+        #        print(myPcxr.keys())
         self.assertEqual(43, len(myPcxr))
 
     def test_03(self):
@@ -408,16 +409,16 @@ class TestPresCfgXMLRead(unittest.TestCase):
             "Resistivity_3Track_Logrithmic.xml",
         )
         self.assertEqual(
-            sorted([Mnem.Mnem(v, len_mnem=0) for v in 
+            sorted([Mnem.Mnem(v, len_mnem=0) for v in
                     ['PCAL', 'ILD', 'AHT60_8', 'MSFL', 'ILM', 'AHO90_9', 'ATR',
-                    'AHF90_9', 'AHF30_7', 'A34H_ARC', 'AHT10_6', 'AHF60_8',
-                    'RXO', 'AHT90_9', 'LLM', 'RLA1', 'AHT30_7', 'RLA3', 'RLA2',
-                    'RLA5', 'RLA4', 'P34H_ARC', 'LLD', 'ROP5', 'A22H_ARC',
-                    'AHO60_8', 'AHF20_5', 'BS_7', 'RLA0', 'AHO30_7', 'AHT20_5',
-                    'P28H_ARC', 'SP_10', 'GR_9', 'AHO10_6', 'HiltCaliper',
-                    'AHF10_6', 'TENS_6', 'SFL', 'P16H_ARC', 'AHO20_5', 'PSR',
-                    'CALI_8',
-                    ]
+                     'AHF90_9', 'AHF30_7', 'A34H_ARC', 'AHT10_6', 'AHF60_8',
+                     'RXO', 'AHT90_9', 'LLM', 'RLA1', 'AHT30_7', 'RLA3', 'RLA2',
+                     'RLA5', 'RLA4', 'P34H_ARC', 'LLD', 'ROP5', 'A22H_ARC',
+                     'AHO60_8', 'AHF20_5', 'BS_7', 'RLA0', 'AHO30_7', 'AHT20_5',
+                     'P28H_ARC', 'SP_10', 'GR_9', 'AHO10_6', 'HiltCaliper',
+                     'AHF10_6', 'TENS_6', 'SFL', 'P16H_ARC', 'AHO20_5', 'PSR',
+                     'CALI_8',
+                     ]
                     ]),
             sorted(myPcxr.keys()),
         )
@@ -430,20 +431,20 @@ class TestPresCfgXMLRead(unittest.TestCase):
             "Resistivity_3Track_Logrithmic.xml",
         )
         self.assertTrue(myPcxr.hasCurvesForDest("Resistivity_3Track_Logrithmic.xml"))
-#        print()
-#        print(sorted(myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")))
-#        pprint.pprint(sorted(myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")))
+        #        print()
+        #        print(sorted(myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")))
+        #        pprint.pprint(sorted(myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")))
         self.assertEqual(43, len(myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")))
         exp = [
-                Mnem.Mnem(m) for m in [
-                    'A22H', 'A34H', 'AHF10', 'AHF20', 'AHF30', 'AHF60', 'AHF90',
-                    'AHO10', 'AHO20', 'AHO30', 'AHO60', 'AHO90', 'AHT10', 'AHT20',
-                    'AHT30', 'AHT60', 'AHT90', 'ATR', 'BS', 'CALI', 'GR', 'HCAL',
-                    'ILD', 'ILM', 'LLD', 'LLM', 'MSFL', 'P16H_RT', 'P28H_RT',
-                    'P34H_RT', 'PCAL', 'PSR', 'RLA0', 'RLA1', 'RLA2', 'RLA3',
-                    'RLA4', 'RLA5', 'ROP5', 'RXO', 'SFL', 'SP', 'TENS',
-                ]
+            Mnem.Mnem(m) for m in [
+                'A22H', 'A34H', 'AHF10', 'AHF20', 'AHF30', 'AHF60', 'AHF90',
+                'AHO10', 'AHO20', 'AHO30', 'AHO60', 'AHO90', 'AHT10', 'AHT20',
+                'AHT30', 'AHT60', 'AHT90', 'ATR', 'BS', 'CALI', 'GR', 'HCAL',
+                'ILD', 'ILM', 'LLD', 'LLM', 'MSFL', 'P16H_RT', 'P28H_RT',
+                'P34H_RT', 'PCAL', 'PSR', 'RLA0', 'RLA1', 'RLA2', 'RLA3',
+                'RLA4', 'RLA5', 'ROP5', 'RXO', 'SFL', 'SP', 'TENS',
             ]
+        ]
         act = sorted([str(v) for v in myPcxr.outpChIDs("Resistivity_3Track_Logrithmic.xml")])
         self.assertEqual(exp, act)
 
@@ -458,10 +459,10 @@ class TestPresCfgXMLRead(unittest.TestCase):
             len(myPcxr.outpCurveIDs("Resistivity_3Track_Logrithmic.xml", Mnem.Mnem('BS'))),
         )
         self.assertEqual(
-            ['BS_7',],
+            ['BS_7', ],
             myPcxr.outpCurveIDs("Resistivity_3Track_Logrithmic.xml", Mnem.Mnem('BS')),
         )
-        
+
     def test_06(self):
         """PresCfgXMLRead.test_06(): create a PRESCfgXML.PresCfgXMLRead() from "Resistivity_3Track_Logrithmic.xml" outputs for destination."""
         myPcxr = PRESCfgXML.PresCfgXMLRead(
@@ -471,17 +472,19 @@ class TestPresCfgXMLRead(unittest.TestCase):
         self.assertTrue(myPcxr.usesOutpChannel("Resistivity_3Track_Logrithmic.xml", Mnem.Mnem('BS')))
         self.assertFalse(myPcxr.usesOutpChannel("Resistivity_3Track_Logrithmic.xml", Mnem.Mnem('NOTBS')))
         self.assertFalse(myPcxr.usesOutpChannel("Resistivity_3Track_Logrithmic.xml", 'BS'))
-        
+
     def test_15(self):
         """PresCfgXMLRead.test_15(): create a PRESCfgXML.PresCfgXMLRead() fails with wrong root node."""
-#        xStr = """<LgFormatNOT UniqueId="NOT" xmlns="x-schema:LgSchema2.xml"/>
-#"""
-#        root = etree.fromstring(xStr)
+        #        xStr = """<LgFormatNOT UniqueId="NOT" xmlns="x-schema:LgSchema2.xml"/>
+        # """
+        #        root = etree.fromstring(xStr)
         self.assertRaises(PRESCfgXML.ExceptionPresCfgXMLRead, PRESCfgXML.PresCfgXMLRead, self._fcxr, 'WTF')
+
 
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -489,6 +492,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPresCfgXMLRead))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -513,6 +518,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -521,7 +527,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -539,14 +545,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

@@ -5,7 +5,6 @@ import pytest
 
 from TotalDepth.BIT import ReadBIT
 
-
 ISINGL_EXAMPLES = (
     # From RP666V2
     (153.0, b'\x42\x99\x00\x00'),
@@ -57,7 +56,7 @@ def test_bytes_to_float64(float_value, bytes_value):
 @pytest.mark.parametrize(
     'bytes_value, expected',
     (
-        (b'', "Need at least 4 bytes not b''."),
+            (b'', "Need at least 4 bytes not b''."),
     )
 )
 def test_bytes_to_float_raises(bytes_value, expected):
@@ -420,14 +419,14 @@ def test_create_bit_frame_array_from_file_temporary_frames_empty():
 @pytest.mark.parametrize(
     'attribute, expected',
     (
-        ('description', b'OCCIDENTAL PETROLEUM                                                    '),
-        ('channel_names',
-         ['SSN ', 'LSN ', 'SSD ', 'LSD ', 'CAL ', 'TEN ', 'SPD ', 'THZ ', 'UZ  ', 'KZ  ', 'GR  ', 'DEN ', 'CORR',
-          'CN  ', 'TH  ', 'U   ', 'K   ']),
-        ('frame_count', 128),
-        ('ident', '0'),
-        ('len_channels', 17),
-        ('unknown_b', b'15/17-12                                                                '),
+            ('description', b'OCCIDENTAL PETROLEUM                                                    '),
+            ('channel_names',
+             ['SSN ', 'LSN ', 'SSD ', 'LSD ', 'CAL ', 'TEN ', 'SPD ', 'THZ ', 'UZ  ', 'KZ  ', 'GR  ', 'DEN ', 'CORR',
+              'CN  ', 'TH  ', 'U   ', 'K   ']),
+            ('frame_count', 128),
+            ('ident', '0'),
+            ('len_channels', 17),
+            ('unknown_b', b'15/17-12                                                                '),
     )
 )
 def test_create_bit_frame_array_from_file_attributes(attribute, expected):
@@ -441,13 +440,13 @@ def test_create_bit_frame_array_from_file_attributes(attribute, expected):
 @pytest.mark.parametrize(
     'attribute, expected',
     (
-        ('depth_from', 11916.0),
-        ('depth_to', 0.0),
-        ('spacing', 0.25),
-        ('unknown_a', 0.0),
-        ('unknown_b', 32.0),
-        ('frames', 47665),
-        ('is_increasing', False),
+            ('depth_from', 11916.0),
+            ('depth_to', 0.0),
+            ('spacing', 0.25),
+            ('unknown_a', 0.0),
+            ('unknown_b', 32.0),
+            ('frames', 47665),
+            ('is_increasing', False),
     )
 )
 def test_create_bit_frame_array_from_file_bit_log_pass_range(attribute, expected):
@@ -469,11 +468,11 @@ def test_create_bit_frame_array_from_file_long_str():
 @pytest.mark.parametrize(
     'offset, expected_value',
     (
-        (0x104, 11916.0,),  # Start
-        (0x108, 0.0,),  # Stop
-        (0x10c, 0.25,),  # Spacing
-        (0x110, 0.0,),  # ???
-        (0x114, 32.0,),  # ???
+            (0x104, 11916.0,),  # Start
+            (0x108, 0.0,),  # Stop
+            (0x10c, 0.25,),  # Spacing
+            (0x110, 0.0,),  # ???
+            (0x114, 32.0,),  # ???
     )
 )
 def test_floats_at_offset(offset, expected_value):

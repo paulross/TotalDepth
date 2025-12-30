@@ -1,5 +1,5 @@
-from bs4 import BeautifulSoup
 import pytest
+from bs4 import BeautifulSoup
 
 from TotalDepth.common import lookup_mnemonic
 
@@ -74,47 +74,48 @@ def test__decompose_table_to_key_value():
 """,
              'main_GridView1',
              [
-                {'Code': '(MSCF/d)/ft/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': '1000 ft3/(d.ft.psi)',
-                 'Dimension': 'Mobility', 'Scale': '1.55954244790036E-07', 'Offset': '0'},
-                {'Code': '(MSCF/d)/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': '1000 ft3/(d.psi)',
-                 'Dimension': 'FlowratePerPressure', 'Scale': '4.75348538120031E-08', 'Offset': '0'},
-                {'Code': '(STB/d)/ft/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': 'bbl/(d.ft.psi)',
-                 'Dimension': 'Mobility', 'Scale': '8.75618153524512E-10', 'Offset': '0'},
+                 {'Code': '(MSCF/d)/ft/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': '1000 ft3/(d.ft.psi)',
+                  'Dimension': 'Mobility', 'Scale': '1.55954244790036E-07', 'Offset': '0'},
+                 {'Code': '(MSCF/d)/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': '1000 ft3/(d.psi)',
+                  'Dimension': 'FlowratePerPressure', 'Scale': '4.75348538120031E-08', 'Offset': '0'},
+                 {'Code': '(STB/d)/ft/psi', 'Name': 'GeoFrame legacy unit', 'Standard Form': 'bbl/(d.ft.psi)',
+                  'Dimension': 'Mobility', 'Scale': '8.75618153524512E-10', 'Offset': '0'},
              ]
-         ),
+             ),
             (
-                """<table cellspacing="0" cellpadding="4" id="main_GridView1" style="width:940px;border-collapse:collapse;">
-    <tr align="left" style="background-color:#E0E0E0;font-size:X-Small;">
-        <th scope="col">Unit</th>
-        <th scope="col">Unit System</th>
-        <th scope="col">Unit Quantity</th>
-        <th scope="col">Dimension</th>
-    </tr><tr>
-        <td>(bbl/d)/(rev/s)</td>
-        <td>ProductionEnglish</td>
-        <td>FlowratePerRotationalVelocity</td>
-        <td>VolumePerRotation</td>
-    </tr><tr>
-        <td>(rev/s)/(ft/min)</td>
-        <td>ProductionEnglish</td>
-        <td>RotationalVelocityPerVelocity</td>
-        <td>RotationPerLength</td>
-    </tr><tr>
-        <td>gn</td>
-        <td>Metric</td>
-        <td>Gravity</td>
-        <td>Acceleration</td>
-    </tr>
-""",
-            'main_GridView1',
-            [
-                {'Unit': '(bbl/d)/(rev/s)', 'Unit System': 'ProductionEnglish',
-              'Unit Quantity': 'FlowratePerRotationalVelocity', 'Dimension': 'VolumePerRotation'},
-                {'Unit': '(rev/s)/(ft/min)', 'Unit System': 'ProductionEnglish',
-              'Unit Quantity': 'RotationalVelocityPerVelocity', 'Dimension': 'RotationPerLength'},
-                {'Unit': 'gn', 'Unit System': 'Metric', 'Unit Quantity': 'Gravity', 'Dimension': 'Acceleration'},
-            ]
-        ),
+                    """<table cellspacing="0" cellpadding="4" id="main_GridView1" style="width:940px;border-collapse:collapse;">
+        <tr align="left" style="background-color:#E0E0E0;font-size:X-Small;">
+            <th scope="col">Unit</th>
+            <th scope="col">Unit System</th>
+            <th scope="col">Unit Quantity</th>
+            <th scope="col">Dimension</th>
+        </tr><tr>
+            <td>(bbl/d)/(rev/s)</td>
+            <td>ProductionEnglish</td>
+            <td>FlowratePerRotationalVelocity</td>
+            <td>VolumePerRotation</td>
+        </tr><tr>
+            <td>(rev/s)/(ft/min)</td>
+            <td>ProductionEnglish</td>
+            <td>RotationalVelocityPerVelocity</td>
+            <td>RotationPerLength</td>
+        </tr><tr>
+            <td>gn</td>
+            <td>Metric</td>
+            <td>Gravity</td>
+            <td>Acceleration</td>
+        </tr>
+    """,
+                    'main_GridView1',
+                    [
+                        {'Unit': '(bbl/d)/(rev/s)', 'Unit System': 'ProductionEnglish',
+                         'Unit Quantity': 'FlowratePerRotationalVelocity', 'Dimension': 'VolumePerRotation'},
+                        {'Unit': '(rev/s)/(ft/min)', 'Unit System': 'ProductionEnglish',
+                         'Unit Quantity': 'RotationalVelocityPerVelocity', 'Dimension': 'RotationPerLength'},
+                        {'Unit': 'gn', 'Unit System': 'Metric', 'Unit Quantity': 'Gravity',
+                         'Dimension': 'Acceleration'},
+                    ]
+            ),
     ),
 )
 def test__decompose_table_by_header_row(table_text, table_id, expected):

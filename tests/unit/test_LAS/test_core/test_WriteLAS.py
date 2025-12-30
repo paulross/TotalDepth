@@ -1,7 +1,6 @@
 import io
 
 import numpy as np
-
 import pytest
 
 from TotalDepth.LAS.core import WriteLAS
@@ -12,11 +11,11 @@ from TotalDepth.common import Slice, LogPass
 @pytest.mark.parametrize(
     'array, method, expected',
     (
-        (np.array(np.arange(5.0)), 'first', 0.0),
-        (np.array(np.arange(5.0)), 'mean', 2.0),
-        (np.array(np.arange(5.0)), 'median', 2.0),
-        (np.array(np.arange(5.0)), 'min', 0.0),
-        (np.array(np.arange(5.0)), 'max', 4.0),
+            (np.array(np.arange(5.0)), 'first', 0.0),
+            (np.array(np.arange(5.0)), 'mean', 2.0),
+            (np.array(np.arange(5.0)), 'median', 2.0),
+            (np.array(np.arange(5.0)), 'min', 0.0),
+            (np.array(np.arange(5.0)), 'max', 4.0),
     )
 )
 def test_log_pass__array_reduce(array, method, expected):
@@ -40,9 +39,9 @@ def test_log_pass__array_reduce_raises(array, method, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('abc', 'abc'),
-        (b'abc', 'abc'),
-        (1.0, '1.0'),
+            ('abc', 'abc'),
+            (b'abc', 'abc'),
+            (1.0, '1.0'),
     )
 )
 def test_log_pass__stringify(value, expected):
@@ -53,7 +52,7 @@ def test_log_pass__stringify(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        (b'\xff', 'ascii'),
+            (b'\xff', 'ascii'),
     )
 )
 def test_log_pass__stringify_raises(value, expected):
@@ -65,8 +64,8 @@ def test_log_pass__stringify_raises(value, expected):
 @pytest.mark.parametrize(
     'value, expected_error',
     (
-        ('', 'Invalid float fractional format of ""'),
-        ('abc', 'Invalid float fractional format of "abc"'),
+            ('', 'Invalid float fractional format of ""'),
+            ('abc', 'Invalid float fractional format of "abc"'),
     )
 )
 def test__check_float_decimal_places_format_raises(value, expected_error):
@@ -86,6 +85,7 @@ def _create_log_pass_single_frame_array(frame_length: int) -> LogPass.LogPass:
         frame_array['GR  '][i] = i
     log_pass.append(frame_array)
     return log_pass
+
 
 def _create_log_pass_single_frame_array_integer(frame_length: int) -> LogPass.LogPass:
     log_pass = LogPass.LogPass()

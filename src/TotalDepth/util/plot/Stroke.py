@@ -23,10 +23,10 @@ Created on 7 Mar 2011
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-03-07'
+__author__ = 'Paul Ross'
+__date__ = '2011-03-07'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import collections
 
@@ -36,14 +36,15 @@ Stroke = collections.namedtuple('Stroke', 'width colour coding opacity')
 #: Usage: StrokeBlackSolid._replace(width=2.0)
 StrokeBlackSolid = Stroke('1', 'black', None, 1.0)
 
+
 def retSVGAttrsFromStroke(stroke):
     """Returns SVG attributes as a dictionary from a Stroke() object."""
     r = {
-        'stroke-width'          : '{:.3f}'.format(stroke.width),
-        'stroke'                : str(stroke.colour),
-        'stroke-opacity'        : '{:.3f}'.format(stroke.opacity),
+        'stroke-width': '{:.3f}'.format(stroke.width),
+        'stroke': str(stroke.colour),
+        'stroke-opacity': '{:.3f}'.format(stroke.opacity),
     }
-#    print('stroke.coding', stroke.coding)
+    #    print('stroke.coding', stroke.coding)
     if stroke.coding:
         r['stroke-dasharray'] = '{:d},{:d}'.format(stroke.coding[0], stroke.coding[1])
     return r

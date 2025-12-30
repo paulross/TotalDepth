@@ -4,7 +4,6 @@ import pytest
 
 from TotalDepth.util import SEGY
 
-
 SEQY_REEL_IDENTIFICATION_HEADER_EXAMPLE = [
     b'\xc3\xf0\xf1\xc3\x96\x94\x97\x81\x95\xa8@@z@\xc1\x97\x81\x83\x88\x85@\xc5\x95\x85\x99\x87\xa8@\xd3\xa3\x84K@@z@@\xe3\x81\x97\x85@\xc4\x81\xa3\x85@z@\xf0\xf5K\xf0\xf5K\xf2\xf0\xf0\xf0@@@@@@@@@@@@@@@@@@@@@',
     b'\xc3\xf0\xf2\xc3\xd6\xd5\xe3\xd9\xc1\xc3\xe3\xd6\xd9@z@\xc3\xc7\xc7@@@\xd7\xd9\xd6\xc3\xc5\xe2\xe2\xc9\xd5\xc7@z@\xe2\xa8\x95\xa3\x88\x85\xa3\x89\x83@\xe2\x85\x89\xa2\x94\x96\x87\x99\x81\x94K@@@@@@@@@@@@@@@@@@@@@@@@',
@@ -82,7 +81,6 @@ SEQY_REEL_IDENTIFICATION_HEADER_EXAMPLE = [
     # b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
 ]
 
-
 SEQY_REEL_IDENTIFICATION_EMPTY = [
     b'\xc3\xf0\xf1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
     b'\xc3\xf0\xf2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
@@ -125,7 +123,6 @@ SEQY_REEL_IDENTIFICATION_EMPTY = [
     b'\xc3\xf3\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
     b'\xc3\xf4\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
 ]
-
 
 # First card is missing 'C'
 SEQY_REEL_IDENTIFICATION_EMPTY_MISSING_C = [
@@ -170,7 +167,6 @@ SEQY_REEL_IDENTIFICATION_EMPTY_MISSING_C = [
     b'\xc3\xf3\xf9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
     b'\xc3\xf4\xf0@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@',
 ]
-
 
 # First card is numbered '00'
 SEQY_REEL_IDENTIFICATION_EMPTY_WRONG_NUMBER = [

@@ -84,7 +84,6 @@ FREQUENTLY_USED_ATTRIBUTES = {
     b'AXIS': Restrictions(R=(b'OBNAME',)),
 }
 
-
 #: [RP66V1 Section 5]
 SEMANTICS: typing.Dict[bytes, typing.Dict[bytes, Restrictions]] = {
     # [RP66V1 Section 5.7 Figure 5-8]

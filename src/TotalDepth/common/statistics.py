@@ -24,6 +24,7 @@ import typing
 
 class LengthDict:
     """Provides statistics about a summary of lengths such as file lengths or logical data lengths."""
+
     def __init__(self):
         self._count = collections.defaultdict(int)
 

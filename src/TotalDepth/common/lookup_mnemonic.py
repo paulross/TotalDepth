@@ -230,9 +230,7 @@ from functools import lru_cache
 from bs4 import BeautifulSoup
 import requests
 
-
 from TotalDepth import ExceptionTotalDepth
-
 
 logger = logging.getLogger(__file__)
 

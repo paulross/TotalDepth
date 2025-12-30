@@ -171,10 +171,10 @@ We do not need to support that.
 """
 import sys
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
 from TotalDepth.LIS.core import LogiRec, FileIndexer
 from TotalDepth.LIS import ExceptionTotalDepthLIS
@@ -191,11 +191,11 @@ class XNAM:
     TABLE_NAME = b'XNAM'
     TABLE_COLS = (b'MNEM', b'TYPE', b'NAME', b'ORIG', b'CNUM')
     TYPE_TO_TABLE_NAME = {
-        b'ARRAY   '     : b'OUTP',
-        b'CHANNEL '     : b'OUTP',
-        b'CONS'         : b'CONS',
-        b'PARAMETER   ' : b'CONS',
-        b'TOOL'         : b'TOOL',
+        b'ARRAY   ': b'OUTP',
+        b'CHANNEL ': b'OUTP',
+        b'CONS': b'CONS',
+        b'PARAMETER   ': b'CONS',
+        b'TOOL': b'TOOL',
     }
 
     def __init__(self, log_pass_index: FileIndexer.IndexLogPass):

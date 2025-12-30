@@ -1,13 +1,11 @@
 import io
 
-import pytest
-
 from TotalDepth.common import colorama
 
 
 def test_section():
     file = io.StringIO()
-    with colorama.section('TITLE', '=', width=40,  out_stream=file):
+    with colorama.section('TITLE', '=', width=40, out_stream=file):
         file.write('Some text\n')
     result = file.getvalue()
     print(repr(result))

@@ -161,15 +161,9 @@ Created on 17 Jan 2011
 @author: p2ross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import time
-import sys
-import logging
-from optparse import OptionParser
-
-
-    

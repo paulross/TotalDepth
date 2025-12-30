@@ -20,6 +20,7 @@
 
 from TotalDepth import ExceptionTotalDepth
 
+
 class ExceptionUtil(ExceptionTotalDepth):
     """Exception class for util package."""
     pass

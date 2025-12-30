@@ -26,19 +26,18 @@ Created on Dec 31, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
-import os
-import logging
-import time
-import pprint
-import multiprocessing
-from optparse import OptionParser
 import collections
+import logging
+import multiprocessing
+import pprint
+import sys
+import time
+from optparse import OptionParser
 
 try:
     import xml.etree.cElementTree as etree
@@ -52,23 +51,25 @@ Static = collections.namedtuple('Static', 'x y w h text')
 class ViewSVG(object):  # pragma: no cover
     """Class documentation."""
     NS_SVG = '{http://www.w3.org/2000/svg}'
+
     def __init__(self, fp):
         self._fp = fp
         tree = etree.parse(self._fp)
         root = tree.getroot()
-#        print(root)
-#        pprint.pprint(root.findall(self._tagsInSVGNs('g', 'rect')))
-#        pprint.pprint(list(root))
-#        for rElem in root.findall(self._tagsInSVGNs('g', 'rect')):
-#            print(self._readRect(rElem))
+        #        print(root)
+        #        pprint.pprint(root.findall(self._tagsInSVGNs('g', 'rect')))
+        #        pprint.pprint(list(root))
+        #        for rElem in root.findall(self._tagsInSVGNs('g', 'rect')):
+        #            print(self._readRect(rElem))
         rectS = [self._readRect(r) for r in root.findall(self._tagsInSVGNs('g', 'rect'))]
-#        print(rectS)
-        print(    '_getMarkers():', self._getMarkers(rectS))
+        #        print(rectS)
+        print('_getMarkers():', self._getMarkers(rectS))
         print('_getWidDepScale():', self._getWidDepScale(rectS))
         self._datumX, self._datumY, self._scaleW, self._scaleD = self._getWidDepScale(rectS)
-        self._staticS = [self._retStatic(self._readRect(r)) for r in root.findall(self._tagsInSVGNs('g', 'rect')) if self._isStaticElem(r)]
+        self._staticS = [self._retStatic(self._readRect(r)) for r in root.findall(self._tagsInSVGNs('g', 'rect')) if
+                         self._isStaticElem(r)]
         pprint.pprint(sorted(self._staticS))
-        
+
     def _getMarkers(self, rS):
         """Returns top-left in pixels and box that should represent w=6.25 inches h=8.25 inches
         Looks like inkscape uses 90px/inch, we use 96px/inch...
@@ -89,17 +90,17 @@ class ViewSVG(object):  # pragma: no cover
         if tl is not None and br is not None:
             return tl, (br[0] - tl[0], br[1] - tl[1])
         return None, None
-    
+
     def _getWidDepScale(self, rS):
         (w0, d0), (w, d) = self._getMarkers(rS)
         return w0, d0, (w) / 6.25, (d) / 8.5
-    
+
     def _scaleX(self, x):
         return (x - self._datumX) / self._scaleW
-    
+
     def _scaleY(self, y):
         return (y - self._datumY) / self._scaleD
-    
+
     def _retStatic(self, r):
         return Static(
             self._scaleX(r.x),
@@ -108,11 +109,11 @@ class ViewSVG(object):  # pragma: no cover
             r.h / self._scaleD,
             r.title,
         )
-    
+
     def _isStaticElem(self, e):
-        assert(e.tag == self._tagInSVGNs('rect')), 'r.tag is {:s}'.format(e.tag)
+        assert (e.tag == self._tagInSVGNs('rect')), 'r.tag is {:s}'.format(e.tag)
         return 'stroke:#0000ff' in e.get('style')
-        
+
     def _readRect(self, r):
         """Reads a <rect> element. Example:
 <rect
@@ -127,7 +128,7 @@ class ViewSVG(object):  # pragma: no cover
   <title
      id="title4056-4">Bottom Right</title>
 </rect>"""
-        assert(r.tag == self._tagInSVGNs('rect')), 'r.tag is {:s}'.format(r.tag)
+        assert (r.tag == self._tagInSVGNs('rect')), 'r.tag is {:s}'.format(r.tag)
         w = float(r.get('width'))
         h = float(r.get('height'))
         x = float(r.get('x'))
@@ -135,50 +136,50 @@ class ViewSVG(object):  # pragma: no cover
         desc = self.getText(r, 'desc')
         title = self.getText(r, 'title')
         return Rect(x, y, w, h, desc, title)
-    
+
     def _tagInSVGNs(self, tag):
         return self.NS_SVG + tag
-    
+
     def _tagsInSVGNs(self, *args):
         return '/'.join([self._tagInSVGNs(tag) for tag in args])
-    
+
     def getText(self, e, *args):
         return ''.join([r.text for r in e.findall(self._tagsInSVGNs(*args))])
-    
+
 
 def main():  # pragma: no cover
     usage = """usage: %prog [options] in out
 Generates plot(s) from input LIS file or directory to and output destination."""
-    print ('Cmd: %s' % ' '.join(sys.argv))
+    print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-#    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-#                      help="Keep going as far as sensible. [default: %default]")
-#    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
-#                      help="Process input recursively. [default: %default]")
+    #    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
+    #                      help="Keep going as far as sensible. [default: %default]")
+    #    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
+    #                      help="Process input recursively. [default: %default]")
     optParser.add_option(
-            "-j", "--jobs",
-            type="int",
-            dest="jobs",
-            default=-1,
-            help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
-                    % multiprocessing.cpu_count() \
-                    + " [default: %default]" 
-        )      
+        "-j", "--jobs",
+        type="int",
+        dest="jobs",
+        default=-1,
+        help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
+             % multiprocessing.cpu_count() \
+             + " [default: %default]"
+    )
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=40,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )      
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=40,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     opts, args = optParser.parse_args()
     clkStart = time.perf_counter()
     timStart = time.time()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
     if len(args) != 1:
         optParser.print_help()

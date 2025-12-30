@@ -204,9 +204,9 @@ class ExceptionRP66V1Units(ExceptionTotalDepth):
 #: This is just an example, see `src/TotalDepth/RP66V1/util/XMLReadUnits.py` for some analysis of test files.
 PRODUCER_CODE_MAPPING_OF_UNIT_CODE: typing.Dict[int, typing.Dict[bytes, bytes]] = {
     280: {
-        b'ltrs' : b'dm3',
-        b'sec' : b'SEC',
-        b'gapi' : b'GAPI',
+        b'ltrs': b'dm3',
+        b'sec': b'SEC',
+        b'gapi': b'GAPI',
     },
 }
 

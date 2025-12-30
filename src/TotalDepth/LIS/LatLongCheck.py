@@ -24,7 +24,6 @@ Created on Aug 03, 2023
 '''
 import logging
 import os
-import pprint
 import sys
 import time
 import traceback
@@ -34,9 +33,6 @@ import TotalDepth
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS import ProcLISPath
 from TotalDepth.LIS.core import LogiRec, LogPass
-from TotalDepth.LIS.core import LatLong
-from TotalDepth.LIS.core import Mnem
-from TotalDepth.common import xxd
 from TotalDepth.util import bin_file_type
 
 __author__ = 'Paul Ross'
@@ -76,7 +72,8 @@ class IndexSummary(object):
     def __len__(self):
         return len(self.file_results)
 
-    def add(self, fpIn, numLr, cpuTime, exception, locations: typing.List[typing.List[typing.List[typing.Tuple[bytes, str]]]]):
+    def add(self, fpIn, numLr, cpuTime, exception,
+            locations: typing.List[typing.List[typing.List[typing.Tuple[bytes, str]]]]):
         self.file_results.append(FileInfo(fpIn, os.path.getsize(fpIn), numLr, cpuTime, exception, locations))
 
     @property

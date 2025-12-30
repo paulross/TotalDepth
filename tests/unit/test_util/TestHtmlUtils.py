@@ -24,26 +24,24 @@ Created on Jun 8, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = 'Jun 8, 2011'
+__author__ = 'Paul Ross'
+__date__ = 'Jun 8, 2011'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2011 paulross.'
+__rights__ = 'Copyright (c) 2011 paulross.'
 
-#import pprint
+import io
+import logging
+# import pprint
 import re
 import sys
-import os
 import time
-import logging
-import io
-
-from TotalDepth.util import HtmlUtils
-from TotalDepth.util import XmlWrite
-
 ######################
 # Section: Unit tests.
 ######################
 import unittest
+
+from TotalDepth.util import HtmlUtils
+from TotalDepth.util import XmlWrite
 
 # class Test_retHtmlFileName(unittest.TestCase):
 #     """Tests HtmlUtils.retHtmlFileName"""
@@ -94,6 +92,7 @@ def fix_hrefs(s):
 
 class Test_XhtmlWrite(unittest.TestCase):
     """Tests TestXhtmlWrite."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -111,24 +110,24 @@ class Test_XhtmlWrite(unittest.TestCase):
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeHtmlFileLink(myS, 'spam/eggs/chips.lis', 47, theText='Navigation text', theClass=None)
-#        print()
-#        print(myF.getvalue())
+        #        print()
+        #        print(myF.getvalue())
         self.assertEqual(fix_hrefs("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <a href="chips.lis_de0b5666bb2303d292de593c61f4e8c8.html#47">Navigation text</a>
 </html>
 """),
-            fix_hrefs(myF.getvalue()),
-        )
+                         fix_hrefs(myF.getvalue()),
+                         )
 
     def test_02(self):
         """TestXhtmlWrite.test_02(): writeHtmlFileLink() with class."""
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeHtmlFileLink(myS, 'spam/eggs/chips.lis', 47, theText='Navigation text', theClass='CSS_class')
-#        print()
-#        print(myF.getvalue())
+        #        print()
+        #        print(myF.getvalue())
         self.assertEqual(fix_hrefs("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -137,29 +136,30 @@ class Test_XhtmlWrite(unittest.TestCase):
   </a>
 </html>
 """),
-            fix_hrefs(myF.getvalue())
-        )
+                         fix_hrefs(myF.getvalue())
+                         )
 
     def test_03(self):
         """TestXhtmlWrite.test_03(): writeHtmlFileAnchor()."""
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeHtmlFileAnchor(myS, 47, theText='Navigation text')
-#        print()
-#        print(myF.getvalue())
+        #        print()
+        #        print(myF.getvalue())
         self.assertEqual(fix_hrefs(myF.getvalue()), fix_hrefs("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <a name="47">Navigation text</a>
 </html>
 """))
+
     def test_04(self):
         """TestXhtmlWrite.test_04(): writeHtmlFileAnchor() with class."""
         myF = io.StringIO()
         with XmlWrite.XhtmlStream(myF) as myS:
             HtmlUtils.writeHtmlFileAnchor(myS, 47, theText='Navigation text', theClass='CSS_class')
-#        print()
-#        print(myF.getvalue())
+        #        print()
+        #        print(myF.getvalue())
         self.assertEqual(fix_hrefs(myF.getvalue()), fix_hrefs("""<?xml version='1.0' encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -169,8 +169,10 @@ class Test_XhtmlWrite(unittest.TestCase):
 </html>
 """))
 
+
 class Test_PathSplit(unittest.TestCase):
     """Tests TestXhtmlWrite."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -191,8 +193,10 @@ class Test_PathSplit(unittest.TestCase):
         self.assertEqual(['../', 'eggs.lis'], HtmlUtils.pathSplit('../spam/../eggs.lis'))
         self.assertEqual(['../', 'chips/', 'eggs.lis'], HtmlUtils.pathSplit('../spam/../chips/eggs.lis'))
 
+
 class Test_writeFileListAsTable(unittest.TestCase):
     """Tests TestXhtmlWrite."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -358,8 +362,10 @@ class Test_writeFileListAsTable(unittest.TestCase):
 </html>
 """))
 
+
 class Test_writeFileListTrippleAsTable(unittest.TestCase):
     """Tests writeFileListTrippleAsTable()."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -469,9 +475,11 @@ class Test_writeFileListTrippleAsTable(unittest.TestCase):
 </html>
 """))
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -482,6 +490,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(Test_writeFileListTrippleAsTable))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -506,6 +516,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -514,7 +525,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -532,14 +543,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

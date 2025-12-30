@@ -22,7 +22,6 @@ Represents a RP66V1 file as a 'logical' level.
 
 """
 
-
 import bisect
 import collections
 import io
@@ -117,7 +116,7 @@ class LogicalFile:
         self._check_fld_matches_eflr(file_logical_data, fhlr)
         # Take a reference to the low-level index which we need in conjunction with iflr_position_map to get random
         # access to the IFLRs that belong to this Logical File.
-        self._logical_record_index= logical_record_index
+        self._logical_record_index = logical_record_index
         self.eflrs: typing.List[PositionEFLR] = [
             PositionEFLR(file_logical_data.position, fhlr)
         ]
@@ -136,7 +135,8 @@ class LogicalFile:
                 f'File logical data LR type {file_logical_data.lr_type} does not match {eflr.lr_type}'
             )
 
-    def _add_origin_eflr(self, file_logical_data: File.FileLogicalData, olr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
+    def _add_origin_eflr(self, file_logical_data: File.FileLogicalData,
+                         olr: EFLR.ExplicitlyFormattedLogicalRecord) -> None:
         # assert self.origin_logical_record is None
         assert self.channel is None
         assert self.frame is None
@@ -227,7 +227,8 @@ class LogicalFile:
                 if self.log_pass is None:
                     self.log_pass = LogPass.log_pass_from_RP66V1(self.frame, self.channel)
 
-    def _check_fld_iflr(self, file_logical_data: File.FileLogicalData, iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
+    def _check_fld_iflr(self, file_logical_data: File.FileLogicalData,
+                        iflr: IFLR.IndirectlyFormattedLogicalRecord) -> None:
         # TODO: Check file_logical_data and against iflr.
         if self.origin_logical_record is None:
             raise ExceptionLogicalFileAdd('LogicalFile can not add IFLR before seeing a ORIGIN EFLR.')
@@ -319,6 +320,7 @@ class LogicalFile:
 
 class LogicalIndex:
     """This takes a RP66V1 file and indexes it into a sequence of Logical Files."""
+
     def __init__(self, path_or_file: typing.Union[str, typing.BinaryIO]):
         self.logical_files: typing.List[LogicalFile] = []
         # Low level index of Logical Records. A reference to this is given to every LogicalFile

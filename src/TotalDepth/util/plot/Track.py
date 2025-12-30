@@ -196,22 +196,24 @@ What to do with 0 (continuation?).
 Examples: E20   -4-- means 4 decades over track 23.
 
 """
-__author__  = 'Paul Ross'
-__date__    = '2011-02-28'
+__author__ = 'Paul Ross'
+__date__ = '2011-02-28'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-import math
 import functools
+import math
 
-from TotalDepth.util.plot import ExceptionTotalDepthLISPlot
 from TotalDepth.util.plot import Coord
-from TotalDepth.util.plot import Stroke
+from TotalDepth.util.plot import ExceptionTotalDepthLISPlot
 from TotalDepth.util.plot import SVGWriter
+from TotalDepth.util.plot import Stroke
+
 
 class ExceptionTotalDepthLISPlotTrack(ExceptionTotalDepthLISPlot):
     """Exception for plotting tracks."""
     pass
+
 
 #################################################################
 # Section: Track grid generators and line transforms to the grid.
@@ -229,6 +231,7 @@ def genLinear10(l, r):
             yield Stroke.StrokeBlackSolid._replace(width=0.25), p
         p += slc
 
+
 def genLog10(l, r, cycles=1, start=1):
     """Generate a log10 series of track grid lines as (Stroke, position).
     cycles is the number of log cycles to split the track up into.
@@ -243,17 +246,18 @@ def genLog10(l, r, cycles=1, start=1):
             if c == 0 and i == 0:
                 yield Stroke.StrokeBlackSolid._replace(width=0.75), l
             else:
-                p = posStart + slc * (math.log10(1 + i + (start-1)) - xOffs)
+                p = posStart + slc * (math.log10(1 + i + (start - 1)) - xOffs)
                 if (start == 1 and i == 0) \
-                or i == 9 - (start - 1):
+                        or i == 9 - (start - 1):
                     yield Stroke.StrokeBlackSolid._replace(width=0.75), p
                 else:
                     yield Stroke.StrokeBlackSolid._replace(width=0.25), p
         posStart += slc
     yield Stroke.StrokeBlackSolid._replace(width=0.75), r
 
+
 # Was:
-#def genLog10Decade2(l, r):
+# def genLog10Decade2(l, r):
 #    for a in genLog10(l, r, cycles=2, start=1):
 #        yield a
 
@@ -270,6 +274,7 @@ genLog10Decade5 = functools.partial(genLog10, cycles=5, start=1)
 genLog10Decade1Start2 = functools.partial(genLog10, cycles=1, start=2)
 #: Generator for 2 decades of log base 10 starting at 2
 genLog10Decade2Start2 = functools.partial(genLog10, cycles=2, start=2)
+
 
 #############################################################
 # End: Track grid generators and line transforms to the grid.
@@ -293,6 +298,7 @@ class Track(object):
     """
     #: Space for plotting the scale for each curve
     DEPTH_PER_CH = Coord.Dim(0.25, 'in')
+
     def __init__(self, leftPos, rightPos, gridGn, plotXLines=True, plotXAlpha=False):
         """The track, as a structural graphical element, is merely a grid.
         The actual curves are plotted on panes that are independent from
@@ -318,7 +324,7 @@ class Track(object):
         self._gridGn = gridGn
         self.plotXLines = plotXLines
         self.plotXAlpha = plotXAlpha
-        
+
     def __str__(self):
         return '{:s}: left={:s} right={:s} gridGen={:s} plotXLines={:s} plotXAlpha={:s}'.format(
             repr(self),
@@ -328,22 +334,22 @@ class Track(object):
             str(self.plotXLines),
             str(self.plotXAlpha),
         )
-    
+
     @property
     def left(self):
         """The left edge as a Coord.Dim()."""
         return self._lP
-    
+
     @property
     def right(self):
         """The left edge as a Coord.Dim()."""
         return self._rP
-    
+
     @property
     def hasGrid(self):
         """True if ther is a grid to be generated for this track."""
         return self._gridGn is not None
-    
+
     def plotSVG(self, topLeft, depth, theSVGWriter):
         """Plot the track gridlines.
         topLeft - A Coord.Pt() object that is the top left of the canvas.
@@ -360,5 +366,5 @@ class Track(object):
                         topP,
                         botP,
                         attrs=Stroke.retSVGAttrsFromStroke(stroke)
-                    ):
+                ):
                     pass

@@ -54,6 +54,7 @@ class LogicalRecordIndex:
             the LRSH attributes, Logical Record type and the Logical Data length. This will be of interest to indexers
             to offer up to their callers.
     """
+
     def __init__(self, path_or_file: typing.Union[str, io.BytesIO]):
         self.lr_pos_desc: typing.List[File.LRPosDesc] = []
         self.rp66v1_file: File.FileRead = File.FileRead(path_or_file)

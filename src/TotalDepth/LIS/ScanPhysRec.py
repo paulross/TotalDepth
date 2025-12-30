@@ -24,10 +24,10 @@ Created on 10 Nov 2010
 """
 import os
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import logging
 import struct
@@ -43,7 +43,7 @@ from TotalDepth.util import Histogram, DirWalk
 
 # One byte for type, on for attributes
 LD_STRUCT_HEAD = struct.Struct('>BB')
-assert(LD_STRUCT_HEAD.size == 2)
+assert (LD_STRUCT_HEAD.size == 2)
 
 
 def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
@@ -70,7 +70,7 @@ def scan_file(fp, keepGoing, pad_modulo, pad_non_null, theS=sys.stdout):
             else:
                 # This is not the first time through the loop
                 # so write out the trailing LogicalData length
-                theS.write(' [%8d]' % myLdSum) 
+                theS.write(' [%8d]' % myLdSum)
             myLdSum = 0
         myLdSum += len(myLd)
         theS.write('\n')

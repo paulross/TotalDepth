@@ -21,20 +21,21 @@
 """
 from tests.unit.test_util.test_plot import TestPlotAREA
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import os
 import sys
 import time
 import logging
-#import math
+# import math
 import pprint
 import io
 import random
-#import collections
+
+# import collections
 try:
     import xml.etree.cElementTree as etree
 except ImportError:
@@ -52,7 +53,7 @@ from TotalDepth.LIS.core import Mnem
 from TotalDepth.LAS.core import LASRead
 # Plot
 from TotalDepth.util.plot import Coord
-#from TotalDepth.util.plot import XGrid
+# from TotalDepth.util.plot import XGrid
 from TotalDepth.util.plot import Plot
 from TotalDepth.util.plot import PlotConstants
 from TotalDepth.util.plot import FILMCfgXML
@@ -69,151 +70,150 @@ import unittest
 from . import TestPlotShared
 from . import TestLogHeader
 from . import TestPlotLASData
-from . import TestLgFormatXMLData
 # sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 from tests.unit import BaseTestClasses
 
-#=================================================
+# =================================================
 # Section: Managing where our test SVG is written.
-#=================================================
+# =================================================
 # This is a global map that has a (sortable) key, typically and int to a
 # file location and description
 TEST_SVG_FILE_MAP_LIS = {
-#    0 : TestPlotShared.SVGTestOutput('test_plot_00.svg', 'Test plot')
-    1   : TestPlotShared.SVGTestOutput(
-            'SP_sin.svg',
-            "TestPlotReadLIS_SingleSinCurve.test_01(): Sinusoidal SP plotted on a number of different scales."
-        ),
-    2   : TestPlotShared.SVGTestOutput(
-            'SP_square_lowfreq.svg',
-            "TestPlotReadLIS_SingleSquareCurveLowFreq.test_01(): Square wave with 4' spacing to check wrap interpolation."
-        ),
-    3   : TestPlotShared.SVGTestOutput(
-            'SP_square_highfreq.svg',
-            "TestPlotReadLIS_SingleSquareCurveHighFreq.test_01(): Square wave with 0.5' spacing to check wrap interpolation."
-        ),
-    3.1   : TestPlotShared.SVGTestOutput(
-            'SP_square_superhighfreq.svg',
-            "TestPlotReadLIS_SingleSquareCurveSuperHighFreq.test_01(): Square wave with 0.5' spacing to check super high wrap interpolation."
-        ),
-    4   : TestPlotShared.SVGTestOutput(
-            'HDT_00.svg',
-            "TestPlotReadLIS_HDT.test_01(): 50 feet of HDT on a 1:200 scale."
-        ),
-    4.1   : TestPlotShared.SVGTestOutput(
-            'HDT_01.svg',
-            "TestPlotReadLIS_HDT_20.test_01(): 50 feet of HDT on a 1:20 scale."
-        ),
-    4.2   : TestPlotShared.SVGTestOutput(
-            'HDT_02.svg',
-            "TestPlotReadLIS_HDT_40.test_01(): 50 feet of HDT on a 1:40 scale."
-        ),
-    5   : TestPlotShared.SVGTestOutput(
-            'SuperSampled.svg',
-            "TestPlotReadLIS_SuperSampled.test_01(): Channels at 4' frame spacing, single, x8, x32 super-sampling."
-        ),
-    6   : TestPlotShared.SVGTestOutput(
-            'COLOName.svg',
-            "TestPlotReadLIS_COLO_Named.test_01(): Sinusoidal SP plotted on a number of different named colours."
-        ),
-    7   : TestPlotShared.SVGTestOutput(
-            'COLONumber.svg',
-            "TestPlotReadLIS_COLO_Numbered.test_01(): Numbered colours 400 (red), 040 (green), 004 (blue)."
-        ),
-    8   : TestPlotShared.SVGTestOutput(
-            'COLONumber_Comp.svg',
-            "TestPlotReadLIS_COLO_Numbered_Comp.test_01(): Numbered colours 440 (yellow), 404 (magenta), 044 (cyan)."
-        ),
-    9   : TestPlotShared.SVGTestOutput(
-            'Performance_00_01.svg',
-            "TestPlotReadLIS_Perf_00.test_01(): Film 1 2000' of 10 curves, linear scale."
-        ),
-    10  : TestPlotShared.SVGTestOutput(
-            'Performance_00_02.svg',
-            "TestPlotReadLIS_Perf_00.test_02(): Film 2 2000' of 10 curves, linear and log scale."
-        ),
+    #    0 : TestPlotShared.SVGTestOutput('test_plot_00.svg', 'Test plot')
+    1: TestPlotShared.SVGTestOutput(
+        'SP_sin.svg',
+        "TestPlotReadLIS_SingleSinCurve.test_01(): Sinusoidal SP plotted on a number of different scales."
+    ),
+    2: TestPlotShared.SVGTestOutput(
+        'SP_square_lowfreq.svg',
+        "TestPlotReadLIS_SingleSquareCurveLowFreq.test_01(): Square wave with 4' spacing to check wrap interpolation."
+    ),
+    3: TestPlotShared.SVGTestOutput(
+        'SP_square_highfreq.svg',
+        "TestPlotReadLIS_SingleSquareCurveHighFreq.test_01(): Square wave with 0.5' spacing to check wrap interpolation."
+    ),
+    3.1: TestPlotShared.SVGTestOutput(
+        'SP_square_superhighfreq.svg',
+        "TestPlotReadLIS_SingleSquareCurveSuperHighFreq.test_01(): Square wave with 0.5' spacing to check super high wrap interpolation."
+    ),
+    4: TestPlotShared.SVGTestOutput(
+        'HDT_00.svg',
+        "TestPlotReadLIS_HDT.test_01(): 50 feet of HDT on a 1:200 scale."
+    ),
+    4.1: TestPlotShared.SVGTestOutput(
+        'HDT_01.svg',
+        "TestPlotReadLIS_HDT_20.test_01(): 50 feet of HDT on a 1:20 scale."
+    ),
+    4.2: TestPlotShared.SVGTestOutput(
+        'HDT_02.svg',
+        "TestPlotReadLIS_HDT_40.test_01(): 50 feet of HDT on a 1:40 scale."
+    ),
+    5: TestPlotShared.SVGTestOutput(
+        'SuperSampled.svg',
+        "TestPlotReadLIS_SuperSampled.test_01(): Channels at 4' frame spacing, single, x8, x32 super-sampling."
+    ),
+    6: TestPlotShared.SVGTestOutput(
+        'COLOName.svg',
+        "TestPlotReadLIS_COLO_Named.test_01(): Sinusoidal SP plotted on a number of different named colours."
+    ),
+    7: TestPlotShared.SVGTestOutput(
+        'COLONumber.svg',
+        "TestPlotReadLIS_COLO_Numbered.test_01(): Numbered colours 400 (red), 040 (green), 004 (blue)."
+    ),
+    8: TestPlotShared.SVGTestOutput(
+        'COLONumber_Comp.svg',
+        "TestPlotReadLIS_COLO_Numbered_Comp.test_01(): Numbered colours 440 (yellow), 404 (magenta), 044 (cyan)."
+    ),
+    9: TestPlotShared.SVGTestOutput(
+        'Performance_00_01.svg',
+        "TestPlotReadLIS_Perf_00.test_01(): Film 1 2000' of 10 curves, linear scale."
+    ),
+    10: TestPlotShared.SVGTestOutput(
+        'Performance_00_02.svg',
+        "TestPlotReadLIS_Perf_00.test_02(): Film 2 2000' of 10 curves, linear and log scale."
+    ),
     # Format from XML LgFormat files
-    20  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_00_LIS.svg',
-            "LgFormat: \"Triple_Combo_00\" 2000 of 10 curves, linear and log scale."
-        ),
-    21  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_00_LIS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml_00\" 2000' of 10 curves, linear and log scale."
-        ),
-    22  : TestPlotShared.SVGTestOutput(
-            'HDT_Example.svg',
-            "LgFormat: \"HDT_Example.svg\" 25' of example HDT on 1:40 scale with API header."
-        ),
+    20: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_00_LIS.svg',
+        "LgFormat: \"Triple_Combo_00\" 2000 of 10 curves, linear and log scale."
+    ),
+    21: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_00_LIS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml_00\" 2000' of 10 curves, linear and log scale."
+    ),
+    22: TestPlotShared.SVGTestOutput(
+        'HDT_Example.svg',
+        "LgFormat: \"HDT_Example.svg\" 25' of example HDT on 1:40 scale with API header."
+    ),
     # With API Header
-    30   : TestPlotShared.SVGTestOutput(
-            'SP_sin_api.svg',
-            "TestPlotReadLIS_SingleSinCurve.test_01(): Sinusoidal SP plotted on a number of different scales with API header."
-        ),
+    30: TestPlotShared.SVGTestOutput(
+        'SP_sin_api.svg',
+        "TestPlotReadLIS_SingleSinCurve.test_01(): Sinusoidal SP plotted on a number of different scales with API header."
+    ),
 }
 
 # LAS data
 TEST_SVG_FILE_MAP_LAS = {
     # Format from XML LgFormat files and LAS data
     # test_01
-    40  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_40_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, DOWN log, no header."
-        ),
-    41  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_41_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, DOWN log, no header."
-        ),
+    40: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_40_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, DOWN log, no header."
+    ),
+    41: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_41_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, DOWN log, no header."
+    ),
     # test_02
-    42  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_42_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 200 of 10 curves, linear and log scale from LAS file, DOWN log, with header."
-        ),
-    43  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_43_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, DOWN log, with header."
-        ),
+    42: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_42_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 200 of 10 curves, linear and log scale from LAS file, DOWN log, with header."
+    ),
+    43: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_43_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, DOWN log, with header."
+    ),
     # test_03
-    44  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_44_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, UP log, no header."
-        ),
-    45  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_45_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, UP log, no header."
-        ),
+    44: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_44_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, UP log, no header."
+    ),
+    45: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_45_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, UP log, no header."
+    ),
     # test_04
-    46  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_46_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, UP log, with header."
-        ),
-    47  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_47_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, UP log, with header."
-        ),
+    46: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_46_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 200 of 15 curves, linear and log scale from LAS file, UP log, with header."
+    ),
+    47: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_47_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 200' of 15 curves, linear and log scale from LAS file, UP log, with header."
+    ),
     # test_10
-    48  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_48_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 1000 of 15 curves, linear and log scale from LAS file, large down log, with header."
-        ),
-    49  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_49_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 1000' of 15 curves, linear and log scale from LAS file, large down log, with header."
-        ),
+    48: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_48_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 1000 of 15 curves, linear and log scale from LAS file, large down log, with header."
+    ),
+    49: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_49_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 1000' of 15 curves, linear and log scale from LAS file, large down log, with header."
+    ),
     # test_11
-    50  : TestPlotShared.SVGTestOutput(
-            'Triple_Combo_50_LAS.svg',
-            "LgFormat: \"Triple_Combo\" 100 feet of 5 gamma ray curves."
-        ),
-    51  : TestPlotShared.SVGTestOutput(
-            'Resistivity_3Track_Logrithmic.xml_51_LAS.svg',
-            "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 100 feet of 5 gamma ray curves."
-        ),
+    50: TestPlotShared.SVGTestOutput(
+        'Triple_Combo_50_LAS.svg',
+        "LgFormat: \"Triple_Combo\" 100 feet of 5 gamma ray curves."
+    ),
+    51: TestPlotShared.SVGTestOutput(
+        'Resistivity_3Track_Logrithmic.xml_51_LAS.svg',
+        "LgFormat: \"Resistivity_3Track_Logrithmic.xml\" 100 feet of 5 gamma ray curves."
+    ),
     # test_12
-    52  : TestPlotShared.SVGTestOutput(
-            'Porosity_GR_3Track_52_LAS.svg',
-            "LgFormat: \"Porosity_GR_3Track\" 100 feet of Density, porosity and 5 gamma ray curves."
-        ),
+    52: TestPlotShared.SVGTestOutput(
+        'Porosity_GR_3Track_52_LAS.svg',
+        "LgFormat: \"Porosity_GR_3Track\" 100 feet of Density, porosity and 5 gamma ray curves."
+    ),
 }
 
 
@@ -227,7 +227,7 @@ def writeTestSVGIndex():
         with XmlWrite.Element(xS, 'ol'):
             for k in sorted(TestLogHeader.TEST_SVG_FILE_MAP_HDR.keys()):
                 with XmlWrite.Element(xS, 'li'):
-                    with XmlWrite.Element(xS, 'a', {'href' : TestLogHeader.TEST_SVG_FILE_MAP_HDR[k].fileName}):
+                    with XmlWrite.Element(xS, 'a', {'href': TestLogHeader.TEST_SVG_FILE_MAP_HDR[k].fileName}):
                         xS.characters('link')
                     xS.characters(' ')
                     xS.characters(TestLogHeader.TEST_SVG_FILE_MAP_HDR[k].description)
@@ -236,7 +236,7 @@ def writeTestSVGIndex():
         with XmlWrite.Element(xS, 'ol'):
             for k in sorted(TEST_SVG_FILE_MAP_LIS.keys()):
                 with XmlWrite.Element(xS, 'li'):
-                    with XmlWrite.Element(xS, 'a', {'href' : TEST_SVG_FILE_MAP_LIS[k].fileName}):
+                    with XmlWrite.Element(xS, 'a', {'href': TEST_SVG_FILE_MAP_LIS[k].fileName}):
                         xS.characters('link')
                     xS.characters(' ')
                     xS.characters(TEST_SVG_FILE_MAP_LIS[k].description)
@@ -245,7 +245,7 @@ def writeTestSVGIndex():
         with XmlWrite.Element(xS, 'ol'):
             for k in sorted(TEST_SVG_FILE_MAP_LAS.keys()):
                 with XmlWrite.Element(xS, 'li'):
-                    with XmlWrite.Element(xS, 'a', {'href' : TEST_SVG_FILE_MAP_LAS[k].fileName}):
+                    with XmlWrite.Element(xS, 'a', {'href': TEST_SVG_FILE_MAP_LAS[k].fileName}):
                         xS.characters('link')
                     xS.characters(' ')
                     xS.characters(TEST_SVG_FILE_MAP_LAS[k].description)
@@ -254,17 +254,20 @@ def writeTestSVGIndex():
         with XmlWrite.Element(xS, 'ol'):
             for k in sorted(TestPlotAREA.TEST_SVG_AREAS.keys()):
                 with XmlWrite.Element(xS, 'li'):
-                    with XmlWrite.Element(xS, 'a', {'href' : TestPlotAREA.TEST_SVG_AREAS[k].fileName}):
+                    with XmlWrite.Element(xS, 'a', {'href': TestPlotAREA.TEST_SVG_AREAS[k].fileName}):
                         xS.characters('link')
                     xS.characters(' ')
                     xS.characters(TestPlotAREA.TEST_SVG_AREAS[k].description)
-#=================================================
+
+
+# =================================================
 # End: Managing where our test SVG is written.
-#=================================================
+# =================================================
 
 
 class TestPlotRollStatic(unittest.TestCase):
     """Simple arrangement of PlotRoll."""
+
     def setUp(self):
         """Set up."""
         self._plotRoll = Plot.PlotRoll(
@@ -284,13 +287,13 @@ class TestPlotRollStatic(unittest.TestCase):
 
     def test_01(self):
         """TestPlotRollStatic.test_01(): viewBox."""
-#        print()
-#        print(myPr.viewBox)
+        #        print()
+        #        print(myPr.viewBox)
         self.assertEqual(
             Coord.Box(
                 Coord.Dim(8.5, 'in'),
-                Coord.Dim(.25+2.0+12*(1000.0-900.0)/200.0+2.0+.25, 'in'),
-                ),
+                Coord.Dim(.25 + 2.0 + 12 * (1000.0 - 900.0) / 200.0 + 2.0 + .25, 'in'),
+            ),
             self._plotRoll.viewBox,
         )
 
@@ -310,7 +313,7 @@ class TestPlotRollStatic(unittest.TestCase):
                 Coord.Box(
                     Coord.Dim(8.0, 'in'),
                     Coord.Dim(2.0, 'in'),
-                    ),
+                ),
             ),
             self._plotRoll.retLegendPane(isTop=True),
         )
@@ -326,11 +329,11 @@ class TestPlotRollStatic(unittest.TestCase):
                 Coord.Box(
                     Coord.Dim(8.0, 'in'),
                     Coord.Dim(2.0, 'in'),
-                    ),
+                ),
             ),
             self._plotRoll.retLegendPane(isTop=False),
         )
-        
+
     def test_05(self):
         """TestPlotRollStatic.test_05(): main pane."""
         self.assertEqual(
@@ -342,7 +345,7 @@ class TestPlotRollStatic(unittest.TestCase):
                 Coord.Box(
                     Coord.Dim(8.0, 'in'),
                     Coord.Dim(6.0, 'in'),
-                    ),
+                ),
             ),
             self._plotRoll.retMainPane(),
         )
@@ -350,11 +353,11 @@ class TestPlotRollStatic(unittest.TestCase):
     def test_06(self):
         """TestPlotRollStatic.test_06(): widthDim()."""
         self.assertEqual(Coord.Dim(8.5, 'in'), self._plotRoll.widthDim)
-    
+
     def test_07(self):
         """TestPlotRollStatic.test_07(): depthDim()."""
         self.assertEqual(Coord.Dim(10.5, 'in'), self._plotRoll.depthDim)
-    
+
     def test_08(self):
         """TestPlotRollStatic.test_08(): property trackTopLeft."""
         self.assertEqual(
@@ -364,14 +367,14 @@ class TestPlotRollStatic(unittest.TestCase):
             ),
             self._plotRoll.trackTopLeft
         )
-    
+
     def test_09(self):
         """TestPlotRollStatic.test_09(): property mainPanePlotDepth."""
         self.assertEqual(
             Coord.Dim(6.0, 'in'),
             self._plotRoll.mainPanePlotDepth
         )
-    
+
     def test_10(self):
         """TestPlotRollStatic.test_10(): retMainPaneStart()."""
         self.assertEqual(
@@ -381,7 +384,7 @@ class TestPlotRollStatic(unittest.TestCase):
             ),
             self._plotRoll.retMainPaneStart()
         )
-    
+
 
 class TestPlotRoll(unittest.TestCase):
     def setUp(self):
@@ -404,13 +407,13 @@ class TestPlotRoll(unittest.TestCase):
             200,
             Coord.Dim(2.0, 'in'),
             plotUp=True)
-#        print()
-#        print(myPr.viewBox)
+        #        print()
+        #        print(myPr.viewBox)
         self.assertEqual(
             Coord.Box(Coord.Dim(8.5, 'in'), Coord.Dim(10.5, 'in')),
             myPr.viewBox
         )
-#        print('myPr.retMainPane()', myPr.retMainPane())
+        #        print('myPr.retMainPane()', myPr.retMainPane())
         self.assertEqual(
             (
                 Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(2.25, 'in')),
@@ -418,10 +421,10 @@ class TestPlotRoll(unittest.TestCase):
             ),
             myPr.retMainPane(),
         )
-#        print()
-#        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
-#        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
-#        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
+        #        print()
+        #        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
+        #        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
+        #        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
         self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(1000.0))
         self.assertEqual(Coord.Dim(5.25, 'in'), myPr.xDepth(950.0))
         self.assertEqual(Coord.Dim(2.25, 'in'), myPr.xDepth(900.0))
@@ -434,13 +437,13 @@ class TestPlotRoll(unittest.TestCase):
             200,
             Coord.Dim(2.0, 'in'),
             plotUp=False)
-#        print()
-#        print(myPr.viewBox)
+        #        print()
+        #        print(myPr.viewBox)
         self.assertEqual(
             Coord.Box(Coord.Dim(8.5, 'in'), Coord.Dim(10.5, 'in')),
             myPr.viewBox
         )
-#        print('myPr.retMainPane()', myPr.retMainPane())
+        #        print('myPr.retMainPane()', myPr.retMainPane())
         self.assertEqual(
             (
                 Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(2.25, 'in')),
@@ -448,10 +451,10 @@ class TestPlotRoll(unittest.TestCase):
             ),
             myPr.retMainPane(),
         )
-#        print()
-#        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
-#        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
-#        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
+        #        print()
+        #        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
+        #        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
+        #        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
         self.assertEqual(Coord.Dim(2.25, 'in'), myPr.xDepth(1000.0))
         self.assertEqual(Coord.Dim(5.25, 'in'), myPr.xDepth(950.0))
         self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(900.0))
@@ -464,13 +467,13 @@ class TestPlotRoll(unittest.TestCase):
             200,
             Coord.Dim(2.0, 'in'),
             plotUp=True)
-#        print()
-#        print(myPr.viewBox)
+        #        print()
+        #        print(myPr.viewBox)
         self.assertEqual(
             Coord.Box(Coord.Dim(8.5, 'in'), Coord.Dim(16.5, 'in')),
             myPr.viewBox
         )
-#        print('myPr.retMainPane()', myPr.retMainPane())
+        #        print('myPr.retMainPane()', myPr.retMainPane())
         self.assertEqual(
             (
                 Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(2.25, 'in')),
@@ -478,10 +481,10 @@ class TestPlotRoll(unittest.TestCase):
             ),
             myPr.retMainPane(),
         )
-#        print()
-#        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
-#        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
-#        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
+        #        print()
+        #        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
+        #        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
+        #        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
         self.assertEqual(Coord.Dim(14.25, 'in'), myPr.xDepth(200.0))
         self.assertEqual(Coord.Dim(11.25, 'in'), myPr.xDepth(150.0))
         self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(100.0))
@@ -501,7 +504,7 @@ class TestPlotRoll(unittest.TestCase):
             Coord.Box(Coord.Dim(8.5, 'in'), Coord.Dim(16.5, 'in')),
             myPr.viewBox
         )
-#        print('myPr.retMainPane()', myPr.retMainPane())
+        #        print('myPr.retMainPane()', myPr.retMainPane())
         self.assertEqual(
             (
                 Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(2.25, 'in')),
@@ -509,17 +512,17 @@ class TestPlotRoll(unittest.TestCase):
             ),
             myPr.retMainPane(),
         )
-#        print()
-#        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
-#        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
-#        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
+        #        print()
+        #        print('myPr.xDepth(1000.0)', myPr.xDepth(1000.0))
+        #        print('myPr.xDepth( 950.0)', myPr.xDepth(950.0))
+        #        print('myPr.xDepth( 900.0)', myPr.xDepth(900.0))
         self.assertEqual(Coord.Dim(14.25, 'in'), myPr.xDepth(200.0))
         self.assertEqual(Coord.Dim(14.25, 'in'), myPr.xDepth(EngVal.EngVal(200.0, b'FEET')))
         self.assertEqual(Coord.Dim(11.25, 'in'), myPr.xDepth(150.0))
         self.assertEqual(Coord.Dim(11.25, 'in'), myPr.xDepth(EngVal.EngVal(150.0, b'FEET')))
         self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(100.0))
         self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(EngVal.EngVal(100.0, b'FEET')))
-        self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(EngVal.EngVal(100.0*0.3048, b'M   ')))
+        self.assertEqual(Coord.Dim(8.25, 'in'), myPr.xDepth(EngVal.EngVal(100.0 * 0.3048, b'M   ')))
         self.assertEqual(Coord.Dim(5.25, 'in'), myPr.xDepth(50.0))
         self.assertEqual(Coord.Dim(5.25, 'in'), myPr.xDepth(EngVal.EngVal(50.0, b'FEET')))
         self.assertEqual(Coord.Dim(2.25, 'in'), myPr.xDepth(0.0))
@@ -539,7 +542,7 @@ class TestPlotRoll(unittest.TestCase):
             Coord.Box(Coord.Dim(8.5, 'in'), Coord.Dim(16.5, 'in')),
             myPr.viewBox
         )
-#        print('myPr.retMainPane()', myPr.retMainPane())
+        #        print('myPr.retMainPane()', myPr.retMainPane())
         self.assertEqual(
             (
                 Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(2.25, 'in')),
@@ -551,8 +554,8 @@ class TestPlotRoll(unittest.TestCase):
         # TODO: Eh? Surely these should be in 'px' not 'in'
         self.assertEqual(
             Coord.Pt(
-                Coord.Dim(0.25*PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS, 'in'),
-                Coord.Dim(8.25*PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS, 'in')),
+                Coord.Dim(0.25 * PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS, 'in'),
+                Coord.Dim(8.25 * PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS, 'in')),
             myPr.polyLinePt(100.0, 0.0),
         )
 
@@ -562,7 +565,7 @@ class TestPlotRoll(unittest.TestCase):
             EngVal.EngVal(1000.0, b'FEET'),
             EngVal.EngVal(900.0, b'FEET'),
             200,
-            Coord.Dim(2.0, 'in'), # Legend
+            Coord.Dim(2.0, 'in'),  # Legend
             theHeadDepth=Coord.Dim(4.5, 'in'),
         )
         self.assertEqual(
@@ -597,7 +600,7 @@ class TestPlotRoll(unittest.TestCase):
             EngVal.EngVal(1000.0, b'FEET'),
             EngVal.EngVal(900.0, b'FEET'),
             200,
-            Coord.Dim(2.0, 'in'), # Legend
+            Coord.Dim(2.0, 'in'),  # Legend
             theTailDepth=Coord.Dim(4.5, 'in'),
         )
         self.assertEqual(
@@ -647,226 +650,228 @@ class TestPlotBase(BaseTestClasses.TestBaseFile):
 
 class TestPlotBase_00(TestPlotBase):
     """Base class that has a typical FILM and PRES table."""
+
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    E20 ' \
-                    + b'EA\x04\x00GDEC    -4--' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D200' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D200'
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    E20 ' \
+            + b'EA\x04\x00GDEC    -4--' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D200' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D200'
 
     def retPresBytes(self):
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
+            # SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
             + b'\x00A\x04\x00MNEM    SP  '
-                + b'EA\x04\x00OUTP    SP  '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
+            + b'EA\x04\x00OUTP    SP  '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
             + b'\x00A\x04\x00MNEM    CALI'
-                + b'EA\x04\x00OUTP    CALI'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGIN  A\xd0\x00\x00'
-                + b'ED\x04\x00REDGIN  Bx\x00\x00'
+            + b'EA\x04\x00OUTP    CALI'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGIN  A\xd0\x00\x00'
+            + b'ED\x04\x00REDGIN  Bx\x00\x00'
             + b'\x00A\x04\x00MNEM    MINV'
-                + b'EA\x04\x00OUTP    MINV'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDG    B\xf8\x00\x00'
-                + b'ED\x04\x00REDG    \x00\x00\x00\x00'
+            + b'EA\x04\x00OUTP    MINV'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDG    B\xf8\x00\x00'
+            + b'ED\x04\x00REDG    \x00\x00\x00\x00'
             + b'\x00A\x04\x00MNEM    MNOR'
-                + b'EA\x04\x00OUTP    MNOR'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDG    B\xf8\x00\x00'
-                + b'ED\x04\x00REDG    \x00\x00\x00\x00'
+            + b'EA\x04\x00OUTP    MNOR'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDG    B\xf8\x00\x00'
+            + b'ED\x04\x00REDG    \x00\x00\x00\x00'
             + b'\x00A\x04\x00MNEM    LLD\x00'
-                + b'EA\x04\x00OUTP    LLD '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T23 '
-                + b'EA\x04\x00CODI    LDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMM?fff'
-                + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
+            + b'EA\x04\x00OUTP    LLD '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T23 '
+            + b'EA\x04\x00CODI    LDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMM?fff'
+            + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
             + b'\x00A\x04\x00MNEM    LLDB'
-                + b'EA\x04\x00OUTP    LLD '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
-                + b'ED\x04\x00REDGOHMMIa\xa8\x00'
+            + b'EA\x04\x00OUTP    LLD '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
+            + b'ED\x04\x00REDGOHMMIa\xa8\x00'
             + b'\x00A\x04\x00MNEM    LLG\x00'
-                + b'EA\x04\x00OUTP    LLG '
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T23 '
-                + b'EA\x04\x00CODI    LDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMM?fff'
-                + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
+            + b'EA\x04\x00OUTP    LLG '
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T23 '
+            + b'EA\x04\x00CODI    LDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMM?fff'
+            + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
             + b'\x00A\x04\x00MNEM    LLGB'
-                + b'EA\x04\x00OUTP    LLG '
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
-                + b'ED\x04\x00REDGOHMMIa\xa8\x00'
+            + b'EA\x04\x00OUTP    LLG '
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
+            + b'ED\x04\x00REDGOHMMIa\xa8\x00'
             + b'\x00A\x04\x00MNEM    LLS\x00'
-                + b'EA\x04\x00OUTP    LLS '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T23 '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMM?fff'
-                + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
+            + b'EA\x04\x00OUTP    LLS '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T23 '
+            + b'EA\x04\x00CODI    LSPO'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMM?fff'
+            + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
             + b'\x00A\x04\x00MNEM    LLSB'
-                + b'EA\x04\x00OUTP    LLS '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
-                + b'ED\x04\x00REDGOHMMIa\xa8\x00'
+            + b'EA\x04\x00OUTP    LLS '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HSPO'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMME\xfd\x00\x00'
+            + b'ED\x04\x00REDGOHMMIa\xa8\x00'
             + b'\x00A\x04\x00MNEM    MSFL'
-                + b'EA\x04\x00OUTP    MSFL'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T23 '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    GRAD'
-                + b'ED\x04\x00FILT    @@\x00\x00'
-                + b'ED\x04\x00LEDGOHMM?fff'
-                + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
+            + b'EA\x04\x00OUTP    MSFL'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T23 '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    GRAD'
+            + b'ED\x04\x00FILT    @@\x00\x00'
+            + b'ED\x04\x00LEDGOHMM?fff'
+            + b'ED\x04\x00REDGOHMME\xfd\x00\x00'
             + b'\x00A\x04\x00MNEM    11\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    12\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    13\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    14\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    15\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    16\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    17\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    18\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
             + b'\x00A\x04\x00MNEM    19\x00\x00'
-                + b'EA\x04\x00OUTP    DUMM'
-                + b'EA\x04\x00STAT    DISA'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    NEIT'
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)#\x00\x00\x00\x00'
-                + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)#@\xc0\x00\x00'
+            + b'EA\x04\x00OUTP    DUMM'
+            + b'EA\x04\x00STAT    DISA'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    NEIT'
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDG    ' + RepCode.writeBytes(-80.0, 68)  # \x00\x00\x00\x00'
+            + b'ED\x04\x00REDG    ' + RepCode.writeBytes(20.0, 68)  # @\xc0\x00\x00'
         )
+
 
 #    def retFileAndFileIndex_ShortSP(self):
 #        """Returns a File and a FileIndexer.FileIndex of DEPt plus a single SP
@@ -920,6 +925,7 @@ class TestPlotBase_00(TestPlotBase):
 
 class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
     """Tests low level functionality of Plot, generally where no LogPass is initialised."""
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -936,129 +942,129 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
     def test_00(self):
         """TestPlotLowLevelCurvePlotScale.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPlotLowLevelCurvePlotScale.test_01(): Sort order of CurvePlotScale with pair of same named items."""
         myL = [
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=1, halfTracks=4),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=1, halfTracks=4),
         ]
-#        print()
-#        pprint.pprint(myL)
-#        pprint.pprint(sorted(myL))
+        #        print()
+        #        pprint.pprint(myL)
+        #        pprint.pprint(sorted(myL))
         self.assertEqual(
             [
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=1, halfTracks=4),
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=1, halfTracks=4),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=0, halfTracks=2),
             ],
             sorted(myL),
         )
-        
+
     def test_02(self):
         """TestPlotLowLevelCurvePlotScale.test_02(): Sort order of CurvePlotScale with several same named items."""
         myL = [
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=9, halfTracks=1),
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=2, halfTracks=3),
-            Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=7, halfTracks=4),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=9, halfTracks=1),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=2, halfTracks=3),
+            Plot.CurvePlotScale(name=b'NAME', halfTrackStart=7, halfTracks=4),
         ]
-#        print()
-#        pprint.pprint(myL)
+        #        print()
+        #        pprint.pprint(myL)
         self.assertEqual(
             [
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=7, halfTracks=4),
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=2, halfTracks=3),
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=0, halfTracks=2),
-                Plot.CurvePlotScale(name=b'NAME',    halfTrackStart=9, halfTracks=1),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=7, halfTracks=4),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=2, halfTracks=3),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'NAME', halfTrackStart=9, halfTracks=1),
             ],
             sorted(myL),
         )
-            
+
     def test_03(self):
         """TestPlotLowLevelCurvePlotScale.test_03(): Sort order of CurvePlotScale with several different named items."""
         myL = [
-            Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
+            Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
         ]
-#        print('\nmyL and sorted myL')
-#        pprint.pprint(myL)
-#        pprint.pprint(sorted(myL))
+        #        print('\nmyL and sorted myL')
+        #        pprint.pprint(myL)
+        #        pprint.pprint(sorted(myL))
         self.assertEqual(
             [
-                Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
-                Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
+                Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
             ],
             sorted(myL),
         )
-            
+
     def test_04(self):
         """TestPlotLowLevelCurvePlotScale.test_04(): Sort order of CurvePlotScale with several different named items."""
         myL = [
-            Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
-            Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=4),
+            Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
+            Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=4),
         ]
-#        print('myL and sorted myL')
-#        pprint.pprint(myL)
-#        print()
-#        pprint.pprint(sorted(myL))
+        #        print('myL and sorted myL')
+        #        pprint.pprint(myL)
+        #        print()
+        #        pprint.pprint(sorted(myL))
         self.assertEqual(
             [
-                Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=4),
-                Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
-                Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
-                Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=4),
+                Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
+                Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=2),
             ],
             sorted(myL),
         )
-            
+
     def test_05(self):
         """TestPlotLowLevelCurvePlotScale.test_05(): Sort order of CurvePlotScale with 4 items - 100 random tests."""
         myL = [
-            Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
-            Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
-            Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=4),
+            Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
+            Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
+            Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=4),
         ]
-#        print('myL and sorted myL')
-#        pprint.pprint(myL)
-#        print()
-#        pprint.pprint(sorted(myL))
+        #        print('myL and sorted myL')
+        #        pprint.pprint(myL)
+        #        print()
+        #        pprint.pprint(sorted(myL))
         for i in range(100):
             random.shuffle(myL)
             self.assertEqual(
                 [
-                    Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=4),
-                    Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=4),
-                    Plot.CurvePlotScale(name=b'A   ',    halfTrackStart=0, halfTracks=2),
-                    Plot.CurvePlotScale(name=b'B   ',    halfTrackStart=0, halfTracks=2),
+                    Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=4),
+                    Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=4),
+                    Plot.CurvePlotScale(name=b'A   ', halfTrackStart=0, halfTracks=2),
+                    Plot.CurvePlotScale(name=b'B   ', halfTrackStart=0, halfTracks=2),
                 ],
                 sorted(myL),
             )
-            
+
     def test_10(self):
         """TestPlotLowLevelCurvePlotScale.test_10(): Sort CurvePlotScale scales from FILM/PRES table."""
-#        print()
-##        print(b'1   ', self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
-#        pprint.pprint(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
+        #        print()
+        ##        print(b'1   ', self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
+        #        pprint.pprint(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
         self.assertEqual(
             [
-                Plot.CurvePlotScale(name=b'LLD\x00',    halfTrackStart=4, halfTracks=4),
-                Plot.CurvePlotScale(name=b'LLG\x00',    halfTrackStart=4, halfTracks=4),
-                Plot.CurvePlotScale(name=b'LLS\x00',    halfTrackStart=4, halfTracks=4),
-                Plot.CurvePlotScale(name=b'MSFL',       halfTrackStart=4, halfTracks=4),
-                Plot.CurvePlotScale(name=b'CALI',       halfTrackStart=0, halfTracks=2),
-                Plot.CurvePlotScale(name=b'LLDB',       halfTrackStart=4, halfTracks=2),
-                Plot.CurvePlotScale(name=b'LLGB',       halfTrackStart=4, halfTracks=2),
-                Plot.CurvePlotScale(name=b'LLSB',       halfTrackStart=4, halfTracks=2),
-                Plot.CurvePlotScale(name=b'MINV',       halfTrackStart=0, halfTracks=2),
-                Plot.CurvePlotScale(name=b'MNOR',       halfTrackStart=0, halfTracks=2),
-                Plot.CurvePlotScale(name=b'SP  ',       halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'LLD\x00', halfTrackStart=4, halfTracks=4),
+                Plot.CurvePlotScale(name=b'LLG\x00', halfTrackStart=4, halfTracks=4),
+                Plot.CurvePlotScale(name=b'LLS\x00', halfTrackStart=4, halfTracks=4),
+                Plot.CurvePlotScale(name=b'MSFL', halfTrackStart=4, halfTracks=4),
+                Plot.CurvePlotScale(name=b'CALI', halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'LLDB', halfTrackStart=4, halfTracks=2),
+                Plot.CurvePlotScale(name=b'LLGB', halfTrackStart=4, halfTracks=2),
+                Plot.CurvePlotScale(name=b'LLSB', halfTrackStart=4, halfTracks=2),
+                Plot.CurvePlotScale(name=b'MINV', halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'MNOR', halfTrackStart=0, halfTracks=2),
+                Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2),
             ],
             self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None),
         )
-    
+
     def test_15(self):
         """TestPlotLowLevelCurvePlotScale.test_15(): Plot.CurvePlotScaleSlotMap() from internal data."""
         # This comes from  problem we were having with plotting density/porosity LAS curves
@@ -1071,11 +1077,11 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
             Plot.CurvePlotScale(name=Mnem.Mnem(b'DRHO'), halfTrackStart=6, halfTracks=2),
         ]
         myCpssm = Plot.CurvePlotScaleSlotMap(myCpsS)
-#        print()
-#        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
-#        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
-#        for v in myCpssm.genScaleSliceCurve():
-#            print(v)
+        #        print()
+        #        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
+        #        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
+        #        for v in myCpssm.genScaleSliceCurve():
+        #            print(v)
         self.assertEqual(
             [
                 Plot.ScaleSliceCurve(slice=0, curveName=Mnem.Mnem(b'Dens'), start=4, span=4),
@@ -1090,27 +1096,27 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
     def test_20(self):
         """TestPlotLowLevelCurvePlotScale.test_20(): Plot.CurvePlotScaleSlotMap() from FILM/PRES table, simple canFit()."""
         myCpssm = Plot.CurvePlotScaleSlotMap(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
-#        print()
-#        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
-#        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
+        #        print()
+        #        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
+        #        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
         self.assertTrue(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
-        
+
     def test_21(self):
         """TestPlotLowLevelCurvePlotScale.test_21(): Plot.CurvePlotScaleSlotMap() from FILM/PRES table, simple canFit(), fit() and canFit()."""
         myCpssm = Plot.CurvePlotScaleSlotMap(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
-#        print()
-#        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
-#        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
+        #        print()
+        #        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
+        #        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
         self.assertTrue(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
         myCpssm.fit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2))
         self.assertFalse(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
-        
+
     def test_22(self):
         """TestPlotLowLevelCurvePlotScale.test_22(): Plot.CurvePlotScaleSlotMap() from FILM/PRES table, simple canFit(), fit(), reset() and repeat."""
         myCpssm = Plot.CurvePlotScaleSlotMap(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
-#        print()
-#        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
-#        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
+        #        print()
+        #        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
+        #        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
         self.assertTrue(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
         myCpssm.fit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2))
         self.assertFalse(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
@@ -1118,26 +1124,27 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
         self.assertTrue(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
         myCpssm.fit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2))
         self.assertFalse(myCpssm.canFit(Plot.CurvePlotScale(name=b'SP  ', halfTrackStart=0, halfTracks=2)))
-        
+
     def test_23(self):
         """TestPlotLowLevelCurvePlotScale.test_23(): Plot.CurvePlotScaleSlotMap() from FILM/PRES table, looping canFit(), fit(), reset()."""
         myCpssm = Plot.CurvePlotScaleSlotMap(self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None))
-#        print()
-#        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
-#        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
+        #        print()
+        #        print('myCpssm._htIdxSet', myCpssm._htIdxSet)
+        #        print('myCpssm._htIdxMap', myCpssm._htIdxMap)
         for aCps in self._prl._retCurvePlotScales(Mnem.Mnem(b'1   '), theLp=None):
             if not myCpssm.canFit(aCps):
-#                print('myCpssm._htIdxMap slice full:', myCpssm._htIdxMap)
+                #                print('myCpssm._htIdxMap slice full:', myCpssm._htIdxMap)
                 myCpssm.reset()
             myCpssm.fit(aCps)
-#        print('myCpssm._htIdxMap slice full:', myCpssm._htIdxMap)
-        
+
+    #        print('myCpssm._htIdxMap slice full:', myCpssm._htIdxMap)
+
     def test_30(self):
         """TestPlotLowLevelCurvePlotScale.test_30(): _retCurvePlotScaleOrder() from FILM/PRES table."""
         myCpso = self._prl._retCurvePlotScaleOrder(Mnem.Mnem(b'1   '), theLp=None)
-#        print()
-#        print(myCpso)
-#        pprint.pprint(myCpso)
+        #        print()
+        #        print(myCpso)
+        #        pprint.pprint(myCpso)
         self.assertEqual(
             [
                 Plot.ScaleSliceCurve(slice=0, curveName=b'LLD\x00', start=4, span=4),
@@ -1163,6 +1170,7 @@ class TestPlotLowLevelCurvePlotScale(TestPlotBase_00):
 
 class TestPlotLowLevelCurvePlotScaleXML(TestPlotBase_00):
     """Tests low level functionality of Plot for LgFormat XML descriptions."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -1174,16 +1182,19 @@ class TestPlotLowLevelCurvePlotScaleXML(TestPlotBase_00):
     def test_00(self):
         """TestPlotLowLevelCurvePlotScaleXML.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPlotLowLevelCurvePlotScaleXML.test_01(): _retCurvePlotScales()."""
         myPrx = Plot.PlotReadXML('Porosity_GR_3Track')
-#        print()
-#        pprint.pprint(sorted(myPrx._retCurvePlotScales('Porosity_GR_3Track', theLp=None)))
+        #        print()
+        #        pprint.pprint(sorted(myPrx._retCurvePlotScales('Porosity_GR_3Track', theLp=None)))
         expResult = [
-            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedDolomitePorosity', len_mnem=0), halfTrackStart=4, halfTracks=4),
-            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedLimestinePorosity', len_mnem=0), halfTrackStart=4, halfTracks=4),
-            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedSandstonePorosity', len_mnem=0), halfTrackStart=4, halfTracks=4),
+            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedDolomitePorosity', len_mnem=0), halfTrackStart=4,
+                                halfTracks=4),
+            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedLimestinePorosity', len_mnem=0), halfTrackStart=4,
+                                halfTracks=4),
+            Plot.CurvePlotScale(name=Mnem.Mnem(b'APS_CorrectedSandstonePorosity', len_mnem=0), halfTrackStart=4,
+                                halfTracks=4),
             Plot.CurvePlotScale(name=Mnem.Mnem(b'CMR_FreeFluidPorosity', len_mnem=0), halfTrackStart=4, halfTracks=4),
             Plot.CurvePlotScale(name=Mnem.Mnem(b'CMR_POROSITY', len_mnem=0), halfTrackStart=4, halfTracks=4),
             Plot.CurvePlotScale(name=Mnem.Mnem(b'DPHB', len_mnem=0), halfTrackStart=4, halfTracks=4),
@@ -1219,44 +1230,45 @@ class TestPlotLowLevelCurvePlotScaleXML(TestPlotBase_00):
 
 class TestPlotLowLevel_wrap(TestPlotBase_00):
     """Tests Plot._retInterpolateWrapPoints()."""
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
-#        myByPres = self.retPresBytes()
+        #        myByPres = self.retPresBytes()
         myByPres = bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
+            # SP    SP    ALLO  T1    LLIN  1     SHIF      0.500000      -80.0000       20.0000
             + b'\x00A\x04\x00MNEM    NB  '
-                + b'EA\x04\x00OUTP    SP  '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    NB  '
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
+            + b'EA\x04\x00OUTP    SP  '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    NB  '
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
             + b'\x00A\x04\x00MNEM    SHIF'
-                + b'EA\x04\x00OUTP    SP  '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
+            + b'EA\x04\x00OUTP    SP  '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
             + b'\x00A\x04\x00MNEM    WRAP'
-                + b'EA\x04\x00OUTP    SP  '
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    1   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
+            + b'EA\x04\x00OUTP    SP  '
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    1   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-80.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
         )
         self._prl = Plot.PlotReadLIS(
             LogiRec.LrTableRead(self._retFileSinglePr(myByFilm)),
@@ -1270,80 +1282,80 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_00(self):
         """TestPlotLowLevel_wrap.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPlotLowLevel_wrap.test_01(): Both wraps off scale left, no backup."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(5.0, 'in'),
-                    wrapPrev=-2,
-                    wrapNow=-1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(5.0, 'in'),
+            wrapPrev=-2,
+            wrapNow=-1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_02(self):
         """TestPlotLowLevel_wrap.test_01(): Both wraps off scale right, no backup."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(5.0, 'in'),
-                    wrapPrev=1,
-                    wrapNow=2,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(5.0, 'in'),
+            wrapPrev=1,
+            wrapNow=2,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_03(self):
         """TestPlotLowLevel_wrap.test_03(): Both wraps off scale left, SHIF backup."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(5.0, 'in'),
-                    wrapPrev=-2,
-                    wrapNow=-3,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(5.0, 'in'),
+            wrapPrev=-2,
+            wrapNow=-3,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_04(self):
         """TestPlotLowLevel_wrap.test_04(): Both wraps off scale right, SHIF backup."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(5.0, 'in'),
-                    wrapPrev=2,
-                    wrapNow=3,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(5.0, 'in'),
+            wrapPrev=2,
+            wrapNow=3,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_10(self):
         """TestPlotLowLevel_wrap.test_10(): Simple NB no backup that wraps centreline to right edge."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=2.4, units='in')),
@@ -1356,16 +1368,16 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_11(self):
         """TestPlotLowLevel_wrap.test_11(): Simple NB no backup that wraps centreline to left edge."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=-1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=-1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=0.0, units='in')),
@@ -1378,46 +1390,46 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_12(self):
         """TestPlotLowLevel_wrap.test_12(): Simple NB no backup, both wraps off-scale right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=1,
-                    wrapNow=2,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=1,
+            wrapNow=2,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_13(self):
         """TestPlotLowLevel_wrap.test_13(): Simple NB no backup, both wraps off-scale left."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=-1,
-                    wrapNow=-2,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=-1,
+            wrapNow=-2,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual((None, [], []), myPts)
 
     def test_14(self):
         """TestPlotLowLevel_wrap.test_14(): Simple NB no backup, comes back on-scale from right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=1,
-                    wrapNow=0,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=1,
+            wrapNow=0,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 None,
@@ -1426,23 +1438,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1005.0, Coord.Dim(value=2.4, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_15(self):
         """TestPlotLowLevel_wrap.test_15(): Simple NB no backup, comes back on-scale from left."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=-1,
-                    wrapNow=0,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[Mnem.Mnem(b'NB  ')].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=-1,
+            wrapNow=0,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 None,
@@ -1450,7 +1462,7 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                 [
                     (1005.0, Coord.Dim(value=0.0, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
-                 ],
+                ],
             ),
             myPts,
         )
@@ -1458,16 +1470,16 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_16(self):
         """TestPlotLowLevel_wrap.test_16(): Simple SHIF backup, centreline-centreline to right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=2.4, units='in')),
@@ -1476,23 +1488,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1005.0, Coord.Dim(value=0.0, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_17(self):
         """TestPlotLowLevel_wrap.test_17(): Simple SHIF backup, centreline-centreline to left."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=-1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=-1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=0.0, units='in')),
@@ -1501,23 +1513,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1005.0, Coord.Dim(value=2.4, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_18(self):
         """TestPlotLowLevel_wrap.test_18(): Simple SHIF backup, centreline to off-scale right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=2,
-                )
-    #        print()
-    #        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=2,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1007.5, Coord.Dim(value=2.4, units='in')),
@@ -1526,23 +1538,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1002.5, Coord.Dim(value=2.4, units='in')),
                 ],
                 [],
-             ),
+            ),
             myPts,
         )
 
     def test_19(self):
         """TestPlotLowLevel_wrap.test_19(): Simple SHIF backup, centreline to off-scale left."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=-2,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=-2,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1007.5, Coord.Dim(value=0.0, units='in')),
@@ -1551,23 +1563,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1002.5, Coord.Dim(value=0.0, units='in')),
                 ],
                 [],
-             ),
+            ),
             myPts,
         )
 
     def test_20(self):
         """TestPlotLowLevel_wrap.test_20(): Simple SHIF backup, comes back on-scale from right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=2,
-                    wrapNow=0,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=2,
+            wrapNow=0,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 None,
@@ -1586,16 +1598,16 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_21(self):
         """TestPlotLowLevel_wrap.test_21(): Simple SHIF backup, comes back on-scale from right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=-2,
-                    wrapNow=0,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'SHIF'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'SHIF'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=-2,
+            wrapNow=0,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 None,
@@ -1614,16 +1626,16 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_22(self):
         """TestPlotLowLevel_wrap.test_22(): Simple WRAP backup, centreline-centreline to right."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=2.4, units='in')),
@@ -1632,23 +1644,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1005.0, Coord.Dim(value=0.0, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_23(self):
         """TestPlotLowLevel_wrap.test_23(): Simple WRAP backup, centreline-centreline to left."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=-1,
-                )
-#        print()
-#        print(myPts)
+            self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=-1,
+        )
+        #        print()
+        #        print(myPts)
         self.assertEqual(
             (
                 (1005.0, Coord.Dim(value=0.0, units='in')),
@@ -1657,23 +1669,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1005.0, Coord.Dim(value=2.4, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_24(self):
         """TestPlotLowLevel_wrap.test_24(): Simple WRAP backup, centreline-centreline wrap right from 0 to 5."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=5,
-                )
-#        print()
-#        pprint.pprint(myPts)
+            self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=5,
+        )
+        #        print()
+        #        pprint.pprint(myPts)
         self.assertEqual(
             (
                 (1009.0, Coord.Dim(value=2.4, units='in')),
@@ -1691,23 +1703,23 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1001.0, Coord.Dim(value=0.0, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
     def test_25(self):
         """TestPlotLowLevel_wrap.test_25(): Simple WRAP backup, centreline-centreline wrap left from 0 to -5."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
-                    xPrev=1010.0,
-                    xNow=1000.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=-5,
-                )
-#        print()
-#        pprint.pprint(myPts)
+            self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
+            xPrev=1010.0,
+            xNow=1000.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=-5,
+        )
+        #        print()
+        #        pprint.pprint(myPts)
         self.assertEqual(
             (
                 (1009.0, Coord.Dim(value=0.0, units='in')),
@@ -1725,7 +1737,7 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
                     (1001.0, Coord.Dim(value=2.4, units='in')),
                     (1000.0, Coord.Dim(value=1.2, units='in')),
                 ],
-             ),
+            ),
             myPts,
         )
 
@@ -1733,18 +1745,18 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
     def test_27(self):
         """TestPlotLowLevel_wrap.test_27(): Huge WRAP backup, centreline-centreline wrap left from 0 to 100."""
         myPts = self._prl._retInterpolateWrapPoints(
-                    self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
-                    self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
-                    # Highly exagerated X step
-                    xPrev=16.0,
-                    xNow=0.0,
-                    pNow=Coord.Dim(1.2, 'in'),
-                    wrapPrev=0,
-                    wrapNow=64,
-                )
+            self._prl._presCfg[b'WRAP'].tracWidthData(Mnem.Mnem(b'1')),
+            self._prl._presCfg[b'WRAP'].tracValueFunction(Mnem.Mnem(b'1')),
+            # Highly exagerated X step
+            xPrev=16.0,
+            xNow=0.0,
+            pNow=Coord.Dim(1.2, 'in'),
+            wrapPrev=0,
+            wrapNow=64,
+        )
         print()
         pprint.pprint(myPts)
-        self.assertEqual(2*Plot.Plot.MAX_BACKUP_TRACK_CROSSING_LINES, len(myPts[1]))
+        self.assertEqual(2 * Plot.Plot.MAX_BACKUP_TRACK_CROSSING_LINES, len(myPts[1]))
         expResult = (
             (15.875, Coord.Dim(value=2.4, units='in')),
             [
@@ -1775,67 +1787,68 @@ class TestPlotLowLevel_wrap(TestPlotBase_00):
 
 class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
     """Tests plotting a LIS file."""
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+            # 40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
             + b'\x00A\x04\x00MNEM    40  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            # 20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
             + b'\x00A\x04\x00MNEM    20  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            # 10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
             + b'\x00A\x04\x00MNEM    10  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)#B\xd0\x00\x00'
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)  # B\xd0\x00\x00'
             # Scale -5 to 5
             + b'\x00A\x04\x00MNEM    5   '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
             # Scale -2.5 to 2.5
             + b'\x00A\x04\x00MNEM    2.5 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
+        )
 
     def retFileAndFileIndex_ShortTEST(self):
         """Returns a File and a FileIndexer.FileIndex of DEPt plus a single curve.
@@ -1846,8 +1859,8 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -1859,7 +1872,7 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
                         45310011, 256, 4, 1, 68
                     ),
                     LisGen.ChValsSin(fOffs=0, waveLen=160.0, mid=0.0, amp=40.0, numSa=1, noise=None),
-#                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
+                    #                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -1877,14 +1890,15 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
-        logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
+        logging.info(
+            'TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating FileIndex...')
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): returning File and FileIndex.')
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -1902,13 +1916,13 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SingleSinCurve.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[1].description)
         for anIlp in self._lisFileIndex.genLogPasses():
             myFout = io.StringIO()
-#            myXStart = EngVal.EngVal(9900.0, b'FEET')
-#            myXStop = EngVal.EngVal(9600.0, b'FEET')
+            #            myXStart = EngVal.EngVal(9900.0, b'FEET')
+            #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
             myTimerS = ExecTimer.TimerList()
@@ -1928,45 +1942,46 @@ class TestPlotReadLIS_SingleSinCurve(TestPlotBase_00):
 class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
     """Tests plotting a square wave with a low frequency (4 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 2
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+            # 40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
             + b'\x00A\x04\x00MNEM    40  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            # 20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
             + b'\x00A\x04\x00MNEM    20  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            # 10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
             + b'\x00A\x04\x00MNEM    8   '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-8.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(8.0, 68)#B\xd0\x00\x00'
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-8.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(8.0, 68)  # B\xd0\x00\x00'
+        )
 
     def retFileAndFileIndex(self):
         """Returns a File and a FileIndexer.FileIndex of DEPT plus a single curve.
@@ -1976,8 +1991,8 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 4.0))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -2008,7 +2023,7 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -2026,7 +2041,7 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurve.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2049,45 +2064,46 @@ class TestPlotReadLIS_SingleSquareCurveLowFreq(TestPlotBase_00):
 class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
     """Tests plotting a square wave with a high frequency (0.5 foot spacing) to illustrate wrapping."""
     TEST_SVG_FILE_MAP_ENTRY = 3
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+            # 40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
             + b'\x00A\x04\x00MNEM    40  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            # 20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
             + b'\x00A\x04\x00MNEM    20  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            # 10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
             + b'\x00A\x04\x00MNEM    8   '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(8.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(-8.0, 68)#B\xd0\x00\x00'
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(8.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(-8.0, 68)  # B\xd0\x00\x00'
+        )
 
     def retFileAndFileIndex(self):
         """Returns a File and a FileIndexer.FileIndex of DEPT plus a single curve.
@@ -2097,8 +2113,8 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -2109,7 +2125,7 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
                         b'TEST', b'ServID', b'ServOrdN', b'MV  ',
                         45310011, 256, 4, 1, 68
                     ),
-                    LisGen.ChValsSquare(fOffs=0, waveLen=4*8.0, mid=0.0, amp=30.0, numSa=1, noise=None),
+                    LisGen.ChValsSquare(fOffs=0, waveLen=4 * 8.0, mid=0.0, amp=30.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -2129,7 +2145,7 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -2147,7 +2163,7 @@ class TestPlotReadLIS_SingleSquareCurveHighFreq(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2174,56 +2190,56 @@ class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D20 ' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D20 '
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D20 ' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D20 '
 
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
-            #40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
+            # 40    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -40.0000       40.0000
             + b'\x00A\x04\x00MNEM    40  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-            #20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            # 20    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -20.0000       20.0000
             + b'\x00A\x04\x00MNEM    20  '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-            #10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            # 10    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      -10.0000       10.0000
             + b'\x00A\x04\x00MNEM    8   '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(8.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(-8.0, 68)#B\xd0\x00\x00'
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(8.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(-8.0, 68)  # B\xd0\x00\x00'
+        )
 
     def retFileAndFileIndex(self):
         """Returns a File and a FileIndexer.FileIndex of DEPT plus a single curve.
@@ -2233,8 +2249,8 @@ class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -2245,7 +2261,7 @@ class TestPlotReadLIS_SingleSquareCurveSuperHighFreq(TestPlotBase_00):
                         b'TEST', b'ServID', b'ServOrdN', b'MV  ',
                         45310011, 256, 4, 1, 68
                     ),
-                    LisGen.ChValsSquare(fOffs=0, waveLen=4*8.0, mid=0.0, amp=300.0, numSa=1, noise=None),
+                    LisGen.ChValsSquare(fOffs=0, waveLen=4 * 8.0, mid=0.0, amp=300.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -2307,19 +2323,19 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
     """Base class for plotting HDT data."""
     # A list of ((PRES row bytes, ...), LisGenChannel)
     PRES_CHANNEL_DATA = [
-        #BS    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      6.0000       16.0000
+        # BS    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      6.0000       16.0000
         (
             (
                 b'\x00A\x04\x00MNEM    BS  '
-                    + b'EA\x04\x00OUTP    BS  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    HLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
+                + b'EA\x04\x00OUTP    BS  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    HLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2329,41 +2345,41 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 LisGen.ChValsConst(mid=8.0, numSa=1, noise=None),
             ),
         ),
-        #GR    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      0.0000       150.0000
+        # GR    TEST  ALLO  T1    LLIN  1     SHIF      0.500000      0.0000       150.0000
         (
             (
                 b'\x00A\x04\x00MNEM    GR  '
-                    + b'EA\x04\x00OUTP    GR  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(150.0, 68),
+                + b'EA\x04\x00OUTP    GR  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(150.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'GR  ', b'ServID', b'ServOrdN', b'GAPI',
                     45310011, 256, 4, 1, 68
                 ),
-                LisGen.ChValsSin(fOffs=0, waveLen=16*8.0, mid=50.0, amp=40.0, numSa=1, noise=2.0),
+                LisGen.ChValsSin(fOffs=0, waveLen=16 * 8.0, mid=50.0, amp=40.0, numSa=1, noise=2.0),
             ),
         ),
-        #AZIM  ALLO  AZIM  T1    LLIN  BOTH  NB        0.500000      -40.0000       360.000 
+        # AZIM  ALLO  AZIM  T1    LLIN  BOTH  NB        0.500000      -40.0000       360.000
         (
             (
                 b'\x00A\x04\x00MNEM    AZIM'
-                    + b'EA\x04\x00OUTP    AZIM'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(-40.0, 68)
-                    + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(360.0, 68),
+                + b'EA\x04\x00OUTP    AZIM'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(-40.0, 68)
+                + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(360.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2373,20 +2389,20 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 # Wavelength is 100' of 3.2" frames = 375
                 LisGen.ChValsSaw(fOffs=10, waveLen=375.0, mid=0.0, amp=360.0, numSa=1, noise=4.0),
             ),
-         ),
-        #RB    ALLO  RB    T1    LDAS  BOTH  NB        0.500000      -40.0000       360.000 
+        ),
+        # RB    ALLO  RB    T1    LDAS  BOTH  NB        0.500000      -40.0000       360.000
         (
             (
                 b'\x00A\x04\x00MNEM    RB  '
-                    + b'EA\x04\x00OUTP    RB  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(-40.0, 68)
-                    + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(360.0, 68),
+                + b'EA\x04\x00OUTP    RB  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGGAPI' + RepCode.writeBytes(-40.0, 68)
+                + b'ED\x04\x00REDGGAPI' + RepCode.writeBytes(360.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2396,20 +2412,20 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 # Wavelength is 100' of 3.2" frames = 375
                 LisGen.ChValsSaw(fOffs=100, waveLen=375.0, mid=0.0, amp=360.0, numSa=1, noise=4.0),
             ),
-         ),
-        #DEVI  ALLO  DEVI  T1    LSPO  BOTH  NB        0.500000      -1.00000       9.00000 
+        ),
+        # DEVI  ALLO  DEVI  T1    LSPO  BOTH  NB        0.500000      -1.00000       9.00000
         (
             (
                 b'\x00A\x04\x00MNEM    DEVI'
-                    + b'EA\x04\x00OUTP    DEVI'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-1.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(9.0, 68),
+                + b'EA\x04\x00OUTP    DEVI'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-1.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(9.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2419,19 +2435,19 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 LisGen.ChValsConst(mid=7.0, numSa=1, noise=1.0),
             ),
         ),
-        #C1    ALLO  C1    T1    LDAS  BOTH  NB        0.500000       6.0000       26.00000 
+        # C1    ALLO  C1    T1    LDAS  BOTH  NB        0.500000       6.0000       26.00000
         (
             (
                 b'\x00A\x04\x00MNEM    C1  '
-                    + b'EA\x04\x00OUTP    C1  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
+                + b'EA\x04\x00OUTP    C1  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2441,19 +2457,19 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 LisGen.ChValsConst(mid=8.0, numSa=1, noise=1.0),
             ),
         ),
-        #C2    ALLO  C2    T1    LLIN  BOTH  NB        0.500000       6.0000       26.00000 
+        # C2    ALLO  C2    T1    LLIN  BOTH  NB        0.500000       6.0000       26.00000
         (
             (
                 b'\x00A\x04\x00MNEM    C2  '
-                    + b'EA\x04\x00OUTP    C2  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
+                + b'EA\x04\x00OUTP    C2  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(6.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(16.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2463,130 +2479,131 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
                 LisGen.ChValsConst(mid=8.0, numSa=1, noise=1.0),
             ),
         ),
-        #FC0   ALLO  FC0   LHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000 
+        # FC0   ALLO  FC0   LHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000
         (
             (
                 b'\x00A\x04\x00MNEM    FC0 '
-                    + b'EA\x04\x00OUTP    FC0 '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    LHT2'
-                    + b'EA\x04\x00CODI    SFDA'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
+                + b'EA\x04\x00OUTP    FC0 '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    LHT2'
+                + b'EA\x04\x00CODI    SFDA'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'FC0 ', b'ServID', b'ServOrdN', b'    ',
-                    45310011, 256, 4*16, 16, 68,
+                    45310011, 256, 4 * 16, 16, 68,
                 ),
                 LisGen.ChValsConst(mid=127.0, numSa=16, noise=128.0),
             ),
         ),
-        #FC1   ALLO  FC1   LHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000 
+        # FC1   ALLO  FC1   LHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000
         (
             (
                 b'\x00A\x04\x00MNEM    FC1 '
-                    + b'EA\x04\x00OUTP    FC1 '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    LHT2'
-                    + b'EA\x04\x00CODI    SFLN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
+                + b'EA\x04\x00OUTP    FC1 '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    LHT2'
+                + b'EA\x04\x00CODI    SFLN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'FC1 ', b'ServID', b'ServOrdN', b'    ',
-                    45310011, 256, 4*16, 16, 68,
+                    45310011, 256, 4 * 16, 16, 68,
                 ),
                 LisGen.ChValsConst(mid=127.0, numSa=16, noise=128.0),
             ),
         ),
-        #FC2   ALLO  FC2   RHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000 
+        # FC2   ALLO  FC2   RHT2  LLIN  BOTH  NB        0.500000       0.0000       256.00000
         (
             (
                 b'\x00A\x04\x00MNEM    FC2 '
-                    + b'EA\x04\x00OUTP    FC2 '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    RHT2'
-                    + b'EA\x04\x00CODI    SFLN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
+                + b'EA\x04\x00OUTP    FC2 '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    RHT2'
+                + b'EA\x04\x00CODI    SFLN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'FC2 ', b'ServID', b'ServOrdN', b'    ',
-                    45310011, 256, 4*16, 16, 68,
+                    45310011, 256, 4 * 16, 16, 68,
                 ),
                 LisGen.ChValsConst(mid=127.0, numSa=16, noise=128.0),
             ),
         ),
-        #FC3   ALLO  FC3   LHT3  LLIN  BOTH  NB        0.500000       0.0000       256.00000 
+        # FC3   ALLO  FC3   LHT3  LLIN  BOTH  NB        0.500000       0.0000       256.00000
         (
             (
                 b'\x00A\x04\x00MNEM    FC3 '
-                    + b'EA\x04\x00OUTP    FC2 '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    LHT3'
-                    + b'EA\x04\x00CODI    SFLN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
+                + b'EA\x04\x00OUTP    FC2 '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    LHT3'
+                + b'EA\x04\x00CODI    SFLN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'FC3 ', b'ServID', b'ServOrdN', b'    ',
-                    45310011, 256, 4*16, 16, 68,
+                    45310011, 256, 4 * 16, 16, 68,
                 ),
                 LisGen.ChValsConst(mid=127.0, numSa=16, noise=128.0),
             ),
         ),
-        #FC4   ALLO  FC4   RHT3  LLIN  BOTH  NB        0.500000       0.0000       256.00000 
+        # FC4   ALLO  FC4   RHT3  LLIN  BOTH  NB        0.500000       0.0000       256.00000
         (
             (
                 b'\x00A\x04\x00MNEM    FC4 '
-                    + b'EA\x04\x00OUTP    FC4 '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    RHT3'
-                    + b'EA\x04\x00CODI    SFLN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
+                + b'EA\x04\x00OUTP    FC4 '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    RHT3'
+                + b'EA\x04\x00CODI    SFLN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(255.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'FC4 ', b'ServID', b'ServOrdN', b'    ',
-                    45310011, 256, 4*16, 16, 68,
+                    45310011, 256, 4 * 16, 16, 68,
                 ),
                 LisGen.ChValsConst(mid=127.0, numSa=16, noise=128.0),
             ),
         ),
     ]
+
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D200' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D200'
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D200' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D200'
 
     def retPresBytes(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
@@ -2602,15 +2619,15 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 73, 32))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
             # Output list
             [a[1] for a in self.PRES_CHANNEL_DATA],
             # 5000 feet in tenth inches
-            xStart=5000.0*12*10,
+            xStart=5000.0 * 12 * 10,
             xRepCode=68,
             xNoise=None,
         )
@@ -2623,9 +2640,9 @@ class TestPlotReadLIS_HDTBase(TestPlotBase_00):
         numFrames = int(1 + 2000 * 12 / 3.2)
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
-#            print('Stuff')
-#            print(myData)
-#            print()
+        #            print('Stuff')
+        #            print(myData)
+        #            print()
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         # Create a file index
@@ -2654,7 +2671,7 @@ class TestPlotReadLIS_HDT(TestPlotReadLIS_HDTBase):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2681,16 +2698,16 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D20 ' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D20 '
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D20 ' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D20 '
 
     def setUp(self):
         """Set up."""
@@ -2710,7 +2727,7 @@ class TestPlotReadLIS_HDT_20(TestPlotReadLIS_HDTBase):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2737,16 +2754,16 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D40 ' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D40 '
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D40 ' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D40 '
 
     def setUp(self):
         """Set up."""
@@ -2766,7 +2783,7 @@ class TestPlotReadLIS_HDT_40(TestPlotReadLIS_HDTBase):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2794,15 +2811,15 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    1   '
-                    + b'EA\x04\x00OUTP    1   '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
+                + b'EA\x04\x00OUTP    1   '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -2815,20 +2832,20 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    8   '
-                    + b'EA\x04\x00OUTP    8   '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T2  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
+                + b'EA\x04\x00OUTP    8   '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T2  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'8   ', b'ServID', b'ServOrdN', b'INCH',
-                    45310011, 256, 4*8, 8, 68
+                    45310011, 256, 4 * 8, 8, 68
                 ),
                 LisGen.ChValsSquare(fOffs=0, waveLen=8.0, mid=0.0, amp=30.0, numSa=8, noise=4.0),
             ),
@@ -2836,20 +2853,20 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    32  '
-                    + b'EA\x04\x00OUTP    32  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T3  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
+                + b'EA\x04\x00OUTP    32  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T3  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-40.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(40.0, 68),
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
                     b'32  ', b'ServID', b'ServOrdN', b'INCH',
-                    45310011, 256, 4*32, 32, 68
+                    45310011, 256, 4 * 32, 32, 68
                 ),
                 LisGen.ChValsSquare(fOffs=0, waveLen=8.0, mid=0.0, amp=30.0, numSa=32, noise=4.0),
             ),
@@ -2859,16 +2876,16 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D200' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D200'
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D200' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D200'
 
     def retPresBytes(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
@@ -2884,8 +2901,8 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 4.0))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -2909,7 +2926,7 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -2927,7 +2944,7 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SuperSampled.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -2950,67 +2967,68 @@ class TestPlotReadLIS_SuperSampled(TestPlotBase_00):
 class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
     """Tests plotting a LIS file with colours."""
     TEST_SVG_FILE_MAP_ENTRY = 6
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
             + b'\x00A\x04\x00MNEM    BLAC'
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    BLAC'
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    BLAC'
             + b'\x00A\x04\x00MNEM    BLUE'
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    BLUE'
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    BLUE'
             + b'\x00A\x04\x00MNEM    AQUA'
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    AQUA'
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    AQUA'
             + b'\x00A\x04\x00MNEM    GREE'
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
-                + b'EA\x04\x00COLO    GREE'
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
+            + b'EA\x04\x00COLO    GREE'
             + b'\x00A\x04\x00MNEM    RED '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
-                + b'EA\x04\x00COLO    RED '
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
+            + b'EA\x04\x00COLO    RED '
+        )
 
     def retFileAndFileIndex_ShortTEST(self):
         """Returns a File and a FileIndexer.FileIndex of DEPt plus a single curve.
@@ -3021,8 +3039,8 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -3034,7 +3052,7 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
                         45310011, 256, 4, 1, 68
                     ),
                     LisGen.ChValsSin(fOffs=0, waveLen=160.0, mid=0.0, amp=40.0, numSa=1, noise=None),
-#                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
+                    #                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -3052,14 +3070,15 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
-        logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
+        logging.info(
+            'TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating FileIndex...')
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): returning File and FileIndex.')
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -3077,12 +3096,12 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_COLOCurve_Name.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
-#            myXStart = EngVal.EngVal(9900.0, b'FEET')
-#            myXStop = EngVal.EngVal(9600.0, b'FEET')
+            #            myXStart = EngVal.EngVal(9900.0, b'FEET')
+            #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
             myTimerS = ExecTimer.TimerList()
@@ -3102,67 +3121,68 @@ class TestPlotReadLIS_COLO_Named(TestPlotBase_00):
 class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
     """Tests plotting a LIS file with numbered colours."""
     TEST_SVG_FILE_MAP_ENTRY = 7
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
             + b'\x00A\x04\x00MNEM    000 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    000 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    000 '
             + b'\x00A\x04\x00MNEM    333 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    333 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    333 '
             + b'\x00A\x04\x00MNEM    400 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    400 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    400 '
             + b'\x00A\x04\x00MNEM    040 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
-                + b'EA\x04\x00COLO    040 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
+            + b'EA\x04\x00COLO    040 '
             + b'\x00A\x04\x00MNEM    004 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
-                + b'EA\x04\x00COLO    004 '
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
+            + b'EA\x04\x00COLO    004 '
+        )
 
     def retFileAndFileIndex_ShortTEST(self):
         """Returns a File and a FileIndexer.FileIndex of DEPt plus a single curve.
@@ -3173,8 +3193,8 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -3186,7 +3206,7 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
                         45310011, 256, 4, 1, 68
                     ),
                     LisGen.ChValsSin(fOffs=0, waveLen=160.0, mid=0.0, amp=40.0, numSa=1, noise=None),
-#                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
+                    #                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -3204,14 +3224,15 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
-        logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
+        logging.info(
+            'TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating FileIndex...')
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): returning File and FileIndex.')
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -3229,12 +3250,12 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_COLOCurve_Numbered.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
-#            myXStart = EngVal.EngVal(9900.0, b'FEET')
-#            myXStop = EngVal.EngVal(9600.0, b'FEET')
+            #            myXStart = EngVal.EngVal(9900.0, b'FEET')
+            #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
             myTimerS = ExecTimer.TimerList()
@@ -3254,67 +3275,68 @@ class TestPlotReadLIS_COLO_Numbered(TestPlotBase_00):
 class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
     """Tests plotting a LIS file with numbered complimentary colours."""
     TEST_SVG_FILE_MAP_ENTRY = 8
+
     def retPresBytes_TEST(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
         return bytes(
             b'"\x00'
             + b'IA\x04\x00TYPE    PRES'
             + b'\x00A\x04\x00MNEM    000 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T1  '
-                + b'EA\x04\x00CODI    LLIN'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    000 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T1  '
+            + b'EA\x04\x00CODI    LLIN'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-40.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(40.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    000 '
             + b'\x00A\x04\x00MNEM    333 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HDAS'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    SHIF'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    333 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HDAS'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    SHIF'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-20.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(20.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    333 '
             + b'\x00A\x04\x00MNEM    044 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LGAP'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)#@@\x00\x00'
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)#\xbc0\x00\x00'
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)#B\xd0\x00\x00'
-                + b'EA\x04\x00COLO    044 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LGAP'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)  # @@\x00\x00'
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-10.0, 68)  # \xbc0\x00\x00'
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(10.0, 68)  # B\xd0\x00\x00'
+            + b'EA\x04\x00COLO    044 '
             + b'\x00A\x04\x00MNEM    440 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T2  '
-                + b'EA\x04\x00CODI    HSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
-                + b'EA\x04\x00COLO    440 '
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T2  '
+            + b'EA\x04\x00CODI    HSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-5.0, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(5.0, 68)
+            + b'EA\x04\x00COLO    440 '
             + b'\x00A\x04\x00MNEM    404 '
-                + b'EA\x04\x00OUTP    TEST'
-                + b'EA\x04\x00STAT    ALLO'
-                + b'EA\x04\x00TRAC    T3  '
-                + b'EA\x04\x00CODI    LSPO'
-                + b'EA\x04\x00DEST    2   '
-                + b'EA\x04\x00MODE    WRAP'
-                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
-                + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
-                + b'EA\x04\x00COLO    404 '
-            )
+            + b'EA\x04\x00OUTP    TEST'
+            + b'EA\x04\x00STAT    ALLO'
+            + b'EA\x04\x00TRAC    T3  '
+            + b'EA\x04\x00CODI    LSPO'
+            + b'EA\x04\x00DEST    2   '
+            + b'EA\x04\x00MODE    WRAP'
+            + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+            + b'ED\x04\x00LEDGMV  ' + RepCode.writeBytes(-2.5, 68)
+            + b'ED\x04\x00REDGMV  ' + RepCode.writeBytes(2.5, 68)
+            + b'EA\x04\x00COLO    404 '
+        )
 
     def retFileAndFileIndex_ShortTEST(self):
         """Returns a File and a FileIndexer.FileIndex of DEPt plus a single curve.
@@ -3325,8 +3347,8 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 68, 0.5))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'FEET'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT' and b'SP  '
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -3338,7 +3360,7 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
                         45310011, 256, 4, 1, 68
                     ),
                     LisGen.ChValsSin(fOffs=0, waveLen=160.0, mid=0.0, amp=40.0, numSa=1, noise=None),
-#                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
+                    #                    LisGen.ChValsSpecialSeqSqRoot(fOffs=0, waveLen=20.0, mid=-80.0, amp=100.0, numSa=1, noise=None),
                 ),
             ],
             xStart=1000.0,
@@ -3356,14 +3378,15 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
-        logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
+        logging.info(
+            'TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating File length={:d} ...'.format(len(myData)))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): creating FileIndex...')
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         logging.info('TestPlotBase_00.retFileAndFileIndex_ShortTEST(): returning File and FileIndex.')
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -3381,12 +3404,12 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_COLOCurve_Numbered.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY].description)
         for anIlp in self._lisFileIndex.genLogPasses():
-#            myXStart = EngVal.EngVal(9900.0, b'FEET')
-#            myXStop = EngVal.EngVal(9600.0, b'FEET')
+            #            myXStart = EngVal.EngVal(9900.0, b'FEET')
+            #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
             myTimerS = ExecTimer.TimerList()
@@ -3406,8 +3429,8 @@ class TestPlotReadLIS_COLO_Numbered_Comp(TestPlotBase_00):
 class TestPlotReadLIS_Perf_00(TestPlotBase_00):
     """Tests plotting performance, 2000' of 10 curves."""
     TEST_SVG_FILE_MAP_ENTRY_MAP = {
-                b'1   ' : 9,
-                b'2   ' : 10,
+        b'1   ': 9,
+        b'2   ': 10,
     }
     # A list of ((PRES row bytes, ...), LisGenChannel) for ten channels
     # We have four OUTP/ five curves in T1, one in TD, these go to both films
@@ -3418,16 +3441,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    ONE '
-                    + b'EA\x04\x00OUTP    ONE '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    NB  '
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-5.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(5.0, 68)
-                    + b'EA\x04\x00COLO    RED ',
+                + b'EA\x04\x00OUTP    ONE '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    NB  '
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-5.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(5.0, 68)
+                + b'EA\x04\x00COLO    RED ',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3440,16 +3463,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    TWO '
-                    + b'EA\x04\x00OUTP    TWO '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGMM  ' + RepCode.writeBytes(-5.0, 68)
-                    + b'ED\x04\x00REDGMM  ' + RepCode.writeBytes(5.0, 68)
-                    + b'EA\x04\x00COLO    GREE',
+                + b'EA\x04\x00OUTP    TWO '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGMM  ' + RepCode.writeBytes(-5.0, 68)
+                + b'ED\x04\x00REDGMM  ' + RepCode.writeBytes(5.0, 68)
+                + b'EA\x04\x00COLO    GREE',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3462,16 +3485,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    THRE'
-                    + b'EA\x04\x00OUTP    THRE'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-10.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(10.0, 68)
-                    + b'EA\x04\x00COLO    BLAC',
+                + b'EA\x04\x00OUTP    THRE'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-10.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(10.0, 68)
+                + b'EA\x04\x00COLO    BLAC',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3484,32 +3507,32 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    thre'
-                    + b'EA\x04\x00OUTP    THRE'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-5.0, 68)
-                    + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(5.0, 68)
-                    + b'EA\x04\x00COLO    BLUE',
+                + b'EA\x04\x00OUTP    THRE'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGINCH' + RepCode.writeBytes(-5.0, 68)
+                + b'ED\x04\x00REDGINCH' + RepCode.writeBytes(5.0, 68)
+                + b'EA\x04\x00COLO    BLUE',
             ),
             None,
         ),
         (
             (
                 b'\x00A\x04\x00MNEM    FOUR'
-                    + b'EA\x04\x00OUTP    FOUR'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T1  '
-                    + b'EA\x04\x00CODI    LGAP'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGDEG ' + RepCode.writeBytes(-5.0, 68)
-                    + b'ED\x04\x00REDGDEG ' + RepCode.writeBytes(45.0, 68)
-                    + b'EA\x04\x00COLO    BLAC',
+                + b'EA\x04\x00OUTP    FOUR'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T1  '
+                + b'EA\x04\x00CODI    LGAP'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGDEG ' + RepCode.writeBytes(-5.0, 68)
+                + b'ED\x04\x00REDGDEG ' + RepCode.writeBytes(45.0, 68)
+                + b'EA\x04\x00COLO    BLAC',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3522,16 +3545,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    TENS'
-                    + b'EA\x04\x00OUTP    TENS'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    TD  '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    BOTH'
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGLBF ' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGLBF ' + RepCode.writeBytes(5000.0, 68)
-                    + b'EA\x04\x00COLO    BLAC',
+                + b'EA\x04\x00OUTP    TENS'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    TD  '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    BOTH'
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGLBF ' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGLBF ' + RepCode.writeBytes(5000.0, 68)
+                + b'EA\x04\x00COLO    BLAC',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3544,32 +3567,32 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    CORS'
-                    + b'EA\x04\x00OUTP    T2  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T2  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGMMHO' + RepCode.writeBytes(-50.0, 68)
-                    + b'ED\x04\x00REDGMMHO' + RepCode.writeBytes(50.0, 68)
-                    + b'EA\x04\x00COLO    BLUE',
+                + b'EA\x04\x00OUTP    T2  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T2  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGMMHO' + RepCode.writeBytes(-50.0, 68)
+                + b'ED\x04\x00REDGMMHO' + RepCode.writeBytes(50.0, 68)
+                + b'EA\x04\x00COLO    BLUE',
             ),
             None,
         ),
         (
             (
                 b'\x00A\x04\x00MNEM    FINE'
-                    + b'EA\x04\x00OUTP    T2  '
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T2  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGMMHO' + RepCode.writeBytes(10.0, 68)
-                    + b'ED\x04\x00REDGMMHO' + RepCode.writeBytes(-10.0, 68)
-                    + b'EA\x04\x00COLO    BLAC',
+                + b'EA\x04\x00OUTP    T2  '
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T2  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGMMHO' + RepCode.writeBytes(10.0, 68)
+                + b'ED\x04\x00REDGMMHO' + RepCode.writeBytes(-10.0, 68)
+                + b'EA\x04\x00COLO    BLAC',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3582,16 +3605,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T3C1'
-                    + b'EA\x04\x00OUTP    T3F1'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T3  '
-                    + b'EA\x04\x00CODI    HLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGDEGC' + RepCode.writeBytes(0.0, 68)
-                    + b'ED\x04\x00REDGDEGC' + RepCode.writeBytes(100.0, 68)
-                    + b'EA\x04\x00COLO    CYAN',
+                + b'EA\x04\x00OUTP    T3F1'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T3  '
+                + b'EA\x04\x00CODI    HLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGDEGC' + RepCode.writeBytes(0.0, 68)
+                + b'ED\x04\x00REDGDEGC' + RepCode.writeBytes(100.0, 68)
+                + b'EA\x04\x00COLO    CYAN',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3604,16 +3627,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T3C2'
-                    + b'EA\x04\x00OUTP    T3F1'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T3  '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    1   '
-                    + b'EA\x04\x00MODE    WRAP'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGDEGC' + RepCode.writeBytes(40.0, 68)
-                    + b'ED\x04\x00REDGDEGC' + RepCode.writeBytes(60.0, 68)
-                    + b'EA\x04\x00COLO    MAGE',
+                + b'EA\x04\x00OUTP    T3F1'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T3  '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    1   '
+                + b'EA\x04\x00MODE    WRAP'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGDEGC' + RepCode.writeBytes(40.0, 68)
+                + b'ED\x04\x00REDGDEGC' + RepCode.writeBytes(60.0, 68)
+                + b'EA\x04\x00COLO    MAGE',
             ),
             None,
         ),
@@ -3621,16 +3644,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T23A'
-                    + b'EA\x04\x00OUTP    T23A'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T23 '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    2   '
-                    + b'EA\x04\x00MODE    GRAD'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
-                    + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
-                    + b'EA\x04\x00COLO    BLAC',
+                + b'EA\x04\x00OUTP    T23A'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T23 '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    GRAD'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
+                + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
+                + b'EA\x04\x00COLO    BLAC',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3643,16 +3666,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T23B'
-                    + b'EA\x04\x00OUTP    T23B'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T23 '
-                    + b'EA\x04\x00CODI    LSPO'
-                    + b'EA\x04\x00DEST    2   '
-                    + b'EA\x04\x00MODE    GRAD'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
-                    + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
-                    + b'EA\x04\x00COLO    RED ',
+                + b'EA\x04\x00OUTP    T23B'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T23 '
+                + b'EA\x04\x00CODI    LSPO'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    GRAD'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
+                + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
+                + b'EA\x04\x00COLO    RED ',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3665,16 +3688,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T23C'
-                    + b'EA\x04\x00OUTP    T23C'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T23 '
-                    + b'EA\x04\x00CODI    LDAS'
-                    + b'EA\x04\x00DEST    2   '
-                    + b'EA\x04\x00MODE    GRAD'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
-                    + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
-                    + b'EA\x04\x00COLO    BLUE',
+                + b'EA\x04\x00OUTP    T23C'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T23 '
+                + b'EA\x04\x00CODI    LDAS'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    GRAD'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
+                + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
+                + b'EA\x04\x00COLO    BLUE',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3687,16 +3710,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T23D'
-                    + b'EA\x04\x00OUTP    T23D'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T23 '
-                    + b'EA\x04\x00CODI    LLIN'
-                    + b'EA\x04\x00DEST    2   '
-                    + b'EA\x04\x00MODE    GRAD'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
-                    + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
-                    + b'EA\x04\x00COLO    GREE',
+                + b'EA\x04\x00OUTP    T23D'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T23 '
+                + b'EA\x04\x00CODI    LLIN'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    GRAD'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
+                + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
+                + b'EA\x04\x00COLO    GREE',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3709,16 +3732,16 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         (
             (
                 b'\x00A\x04\x00MNEM    T23E'
-                    + b'EA\x04\x00OUTP    T23E'
-                    + b'EA\x04\x00STAT    ALLO'
-                    + b'EA\x04\x00TRAC    T23 '
-                    + b'EA\x04\x00CODI    LGAP'
-                    + b'EA\x04\x00DEST    2   '
-                    + b'EA\x04\x00MODE    GRAD'
-                    + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
-                    + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
-                    + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
-                    + b'EA\x04\x00COLO    GREE',
+                + b'EA\x04\x00OUTP    T23E'
+                + b'EA\x04\x00STAT    ALLO'
+                + b'EA\x04\x00TRAC    T23 '
+                + b'EA\x04\x00CODI    LGAP'
+                + b'EA\x04\x00DEST    2   '
+                + b'EA\x04\x00MODE    GRAD'
+                + b'ED\x04\x00FILT    ' + RepCode.writeBytes(0.5, 68)
+                + b'ED\x04\x00LEDGOHMM' + RepCode.writeBytes(0.2, 68)
+                + b'ED\x04\x00REDGOHMM' + RepCode.writeBytes(2000.0, 68)
+                + b'EA\x04\x00COLO    GREE',
             ),
             LisGen.Channel(
                 LisGen.ChannelSpec(
@@ -3729,19 +3752,20 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
             ),
         ),
     ]
+
     def retFilmBytes(self):
         return b'"\x00' \
             + b'IA\x04\x00TYPE    FILM' \
-                + b'\x00A\x04\x00MNEM    1   ' \
-                    + b'EA\x04\x00GCOD    EEE ' \
-                    + b'EA\x04\x00GDEC    ----' \
-                    + b'EA\x04\x00DEST    PF1 ' \
-                    + b'EA\x04\x00DSCA    D200' \
-                + b'\x00A\x04\x00MNEM    2   ' \
-                    + b'EA\x04\x00GCOD    E20 ' \
-                    + b'EA\x04\x00GDEC    -4--' \
-                    + b'EA\x04\x00DEST    PF2 ' \
-                    + b'EA\x04\x00DSCA    D200'
+            + b'\x00A\x04\x00MNEM    1   ' \
+            + b'EA\x04\x00GCOD    EEE ' \
+            + b'EA\x04\x00GDEC    ----' \
+            + b'EA\x04\x00DEST    PF1 ' \
+            + b'EA\x04\x00DSCA    D200' \
+            + b'\x00A\x04\x00MNEM    2   ' \
+            + b'EA\x04\x00GCOD    E20 ' \
+            + b'EA\x04\x00GDEC    -4--' \
+            + b'EA\x04\x00DEST    PF2 ' \
+            + b'EA\x04\x00DSCA    D200'
 
     def retPresBytes(self):
         """Returns the PRES logical record with curves from output TEST on various scales and tracks."""
@@ -3757,15 +3781,15 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 73, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT'
         myLpGen = LisGen.LogPassGen(
             myEbs,
             # Output list
             [a[1] for a in self.PRES_CHANNEL_DATA if a[1] is not None],
             # 5000 feet in tenth inches
-            xStart=5000.0*12*10,
+            xStart=5000.0 * 12 * 10,
             xRepCode=68,
             xNoise=None,
         )
@@ -3778,15 +3802,15 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
         numFrames = int(1 + 2000 * 12 / 6)
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
-#            print('Stuff')
-#            print(myData)
-#            print()
+        #            print('Stuff')
+        #            print(myData)
+        #            print()
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         myByFilm = self.retFilmBytes()
@@ -3804,7 +3828,7 @@ class TestPlotReadLIS_Perf_00(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_SingleSquareCurveHighFreq.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s} FILM 1""".format(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[b'1   ']].description)
         for anIlp in self._lisFileIndex.genLogPasses():
@@ -3847,8 +3871,8 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
     PLOT_START_IN_FEET = 5000.0
     PLOT_LENGTH_IN_FEET = 200.0
     TEST_SVG_FILE_MAP_ENTRY_MAP = {
-                'Triple_Combo'                      : 20,
-                'Resistivity_3Track_Logrithmic.xml' : 21,
+        'Triple_Combo': 20,
+        'Resistivity_3Track_Logrithmic.xml': 21,
     }
     # Tuple of LisGen.Channel() objects
     CHANNEL_DATA = (
@@ -3924,15 +3948,15 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
             LisGen.ChValsTriangular(fOffs=0, waveLen=80, mid=.2, amp=.15, numSa=1, noise=0),
         ),
     )
-    
+
     def retFileAndFileIndex(self):
         """Returns a File and a FileIndexer. Read the code!"""
         myEbs = LogiRec.EntryBlockSet()
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 73, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         # Create a direct X axis log with b'DEPT'
         myLpGen = LisGen.LogPassGen(
             myEbs,
@@ -3952,15 +3976,15 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
         numFrames = int(1 + self.PLOT_LENGTH_IN_FEET * 12 / 6)
         for fNum in range(0, numFrames, framesPerLr):
             myData.extend(self.retPrS(myLpGen.lrBytes(fNum, framesPerLr)))
-#            print('Stuff')
-#            print(myData)
-#            print()
+        #            print('Stuff')
+        #            print(myData)
+        #            print()
         myData.extend(LisGen.retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail))
         myFile = self._retFileFromBytes(myData, theId='MyFile', flagKg=False)
         # Create a file index
         myFileIndex = FileIndexer.FileIndex(myFile)
         return myFile, myFileIndex
-        
+
     def setUp(self):
         """Set up."""
         self._prlMap = {}
@@ -3975,12 +3999,12 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
     def test_00(self):
         """TestPlotReadLIS_XML_LgFormat.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestPlotReadLIS_XML_LgFormat.test_00(): Plot from XML LgFormat files."""
         for anIlp in self._lisFileIndex.genLogPasses():
             myXStart = EngVal.EngVal(self.PLOT_START_IN_FEET, b'FEET')
-            myXStop = EngVal.EngVal(self.PLOT_START_IN_FEET-self.PLOT_LENGTH_IN_FEET, b'FEET')
+            myXStop = EngVal.EngVal(self.PLOT_START_IN_FEET - self.PLOT_LENGTH_IN_FEET, b'FEET')
             myTimerS = ExecTimer.TimerList()
             for lgFormat in self._prlMap:
                 fp = TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[self.TEST_SVG_FILE_MAP_ENTRY_MAP[lgFormat]].fileName)
@@ -4000,6 +4024,7 @@ class TestPlotReadLIS_XML_LgFormat(TestPlotBase_00):
 
 class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
     """Example of a plot of HDT data extracted from real LIS file."""
+
     def _logicalRecords(self):
         return [
             b'\x80\x00HDT   .001                          1024                ',
@@ -4034,61 +4059,60 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
         # Mnem/value/uom where value is bytes/float/int
         myData = [
             # Basic
-            (b'CN  ', b'Company name',                      None),
-            (b'FN  ', b'Field name',                      None),
-            (b'COUN', b'Rig name',                      None),
-            (b'WN  ', b'Well name',                      None),
-            (b'NATI', b'Nation',                      None),
-    #            (b'STAT', b'State',                      None),
+            (b'CN  ', b'Company name', None),
+            (b'FN  ', b'Field name', None),
+            (b'COUN', b'Rig name', None),
+            (b'WN  ', b'Well name', None),
+            (b'NATI', b'Nation', None),
+            #            (b'STAT', b'State',                      None),
             # Three field location records
-            (b'FL  ', b'Field location one',                      None),
-            (b'FL1 ', b'Field location two',                      None),
-            (b'FL2 ', b'Field location three',                      None),
+            (b'FL  ', b'Field location one', None),
+            (b'FL1 ', b'Field location two', None),
+            (b'FL2 ', b'Field location three', None),
             # Dynamic header
             (b'HIDE', b'High Resolution Dipmeter', None),
-            (b'HID1', b'Log Title ONE',                      None),
-            (b'HID2', b'Log Title TWO',                      None),
+            (b'HID1', b'Log Title ONE', None),
+            (b'HID2', b'Log Title TWO', None),
             # Deviation and Lat/Long
-            (b'MHD ', 8.7,   b'DEG '),
-            (b'LATI', b'52 31\' 47.369"N',   None),
-            (b'LONG', b'2 12\' 12.196"W',   None),
+            (b'MHD ', 8.7, b'DEG '),
+            (b'LATI', b'52 31\' 47.369"N', None),
+            (b'LONG', b'2 12\' 12.196"W', None),
             # Fine column of 24 rows
             (b'DATE', b'2012-01-05', None),
-            (b'RUN ', b'Run number',                      None),
-            (b'TDD ', 12521.0,   b'FEET'),
-            (b'TDL ', 12518.5,   b'FEET'),
-            (b'BLI ', 12511.0,   b'FEET'),
-            (b'TLI ', 11192.5,   b'FEET'),
-            (b'CSIZ', 8.0,      b'IN  '),
-            (b'CD  ', 11190.5,  b'FEET'),
-            (b'CBLO', 11192.5,  b'FEET'),
-            (b'BS  ', 6.5,      b'IN  '),
-            (b'DFT ', b'KCL Polymer Glycol PHPA',      None),
-            
-            
-            (b'MSS ', b'Flowline',      None),
+            (b'RUN ', b'Run number', None),
+            (b'TDD ', 12521.0, b'FEET'),
+            (b'TDL ', 12518.5, b'FEET'),
+            (b'BLI ', 12511.0, b'FEET'),
+            (b'TLI ', 11192.5, b'FEET'),
+            (b'CSIZ', 8.0, b'IN  '),
+            (b'CD  ', 11190.5, b'FEET'),
+            (b'CBLO', 11192.5, b'FEET'),
+            (b'BS  ', 6.5, b'IN  '),
+            (b'DFT ', b'KCL Polymer Glycol PHPA', None),
+
+            (b'MSS ', b'Flowline', None),
             # Mud stuff
-            (b'RMS ', 0.196,    b'OHMM'),
-            (b'RMFS', 0.0797,   b'OHMM'),
-            (b'RMCS', 0.266,    b'OHMM'),
-            (b'MST ', 16.0,     b'DEGC'),
-            (b'MFST', 16.0,     b'DEGC'),
-            (b'MCST', 16.0,     b'DEGC'),
-            (b'RMB ', 0.0368,   b'OHMM'),
-            (b'RMFB', 0.0329,   b'OHMM'),
-            (b'MRT ', 183.6,    b'DEGC'),
-            (b'TCS ', b'22:35 2012-01-04',    None),
-            (b'TLAB', b'09:50 2012-01-05',    None),
-            
+            (b'RMS ', 0.196, b'OHMM'),
+            (b'RMFS', 0.0797, b'OHMM'),
+            (b'RMCS', 0.266, b'OHMM'),
+            (b'MST ', 16.0, b'DEGC'),
+            (b'MFST', 16.0, b'DEGC'),
+            (b'MCST', 16.0, b'DEGC'),
+            (b'RMB ', 0.0368, b'OHMM'),
+            (b'RMFB', 0.0329, b'OHMM'),
+            (b'MRT ', 183.6, b'DEGC'),
+            (b'TCS ', b'22:35 2012-01-04', None),
+            (b'TLAB', b'09:50 2012-01-05', None),
+
             # Datums
             (b'PDAT', b'Permanent datum', None),
-            (b'EKB ', 21.0,   b'FT  '),
-            (b'EDF ', 20.0,   b'FT  '),
-            (b'EGL ', 3.0,   b'FT  '),
+            (b'EKB ', 21.0, b'FT  '),
+            (b'EDF ', 20.0, b'FT  '),
+            (b'EGL ', 3.0, b'FT  '),
             (b'LMF ', b'DF  ', None),
             (b'APD ', 17.0, b'FT  '),
             (b'DMF ', b'DF  ', None),
-            
+
             # Location etc
             (b'ENGI', b'Paul Ross', None),
             (b'WITN', b'Son of Godzilla', None),
@@ -4120,7 +4144,7 @@ class TestPlotReadLIS_HDT_Example(TestPlotBase_00):
                 fp,
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[22].description,
-                lrCONS=[self._consRecord(),],
+                lrCONS=[self._consRecord(), ],
                 timerS=myTimerS)
             sys.stderr.write(str(myTimerS))
             sys.stderr.flush()
@@ -4147,13 +4171,13 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
     def test_00(self):
         """TestPlotReadLIS_SingleSinCurve_API.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """{:s}""".format(TEST_SVG_FILE_MAP_LIS[30].description)
         for anIlp in self._lisFileIndex.genLogPasses():
-#            myFout = io.StringIO()
-#            myXStart = EngVal.EngVal(9900.0, b'FEET')
-#            myXStop = EngVal.EngVal(9600.0, b'FEET')
+            #            myFout = io.StringIO()
+            #            myXStart = EngVal.EngVal(9900.0, b'FEET')
+            #            myXStop = EngVal.EngVal(9600.0, b'FEET')
             myXStart = EngVal.EngVal(1000.0, b'FEET')
             myXStop = EngVal.EngVal(900.0, b'FEET')
             myTimerS = ExecTimer.TimerList()
@@ -4166,9 +4190,10 @@ class TestPlotReadLIS_SingleSinCurve_API(TestPlotReadLIS_SingleSinCurve):
                 TestPlotShared.outPath(TEST_SVG_FILE_MAP_LIS[30].fileName),
                 frameStep=1,
                 title=TEST_SVG_FILE_MAP_LIS[1].description,
-                lrCONS=[TestLogHeader.headerLogicalRecordLIS(),],
+                lrCONS=[TestLogHeader.headerLogicalRecordLIS(), ],
                 timerS=myTimerS)
             sys.stderr.write(str(myTimerS))
+
 
 class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
     """Tests plotting of 200' of curves from "Triple_Combo" LgFormat XML file from LAS."""
@@ -4180,11 +4205,11 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
     def tearDown(self):
         """Tear down."""
         pass
-    
+
     def test_00(self):
         """TestPlotReadLAS_XML_LgFormat.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def _plotLAS(self, theLasFile, fIdxMap, plotHeader):
         """TestPlotReadLAS_XML_LgFormat.test_00(): Plot from XML LgFormat files - down log, no header."""
         myTimerS = ExecTimer.TimerList()
@@ -4210,8 +4235,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_00_200_FEET_DOWN)),
             {
-                'Triple_Combo'                      : 40,
-                'Resistivity_3Track_Logrithmic.xml' : 41,
+                'Triple_Combo': 40,
+                'Resistivity_3Track_Logrithmic.xml': 41,
             },
             False,
         )
@@ -4222,8 +4247,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_00_200_FEET_DOWN)),
             {
-                'Triple_Combo'                      : 42,
-                'Resistivity_3Track_Logrithmic.xml' : 43,
+                'Triple_Combo': 42,
+                'Resistivity_3Track_Logrithmic.xml': 43,
             },
             True,
         )
@@ -4234,8 +4259,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_01_200_FEET_UP)),
             {
-                'Triple_Combo'                      : 44,
-                'Resistivity_3Track_Logrithmic.xml' : 45,
+                'Triple_Combo': 44,
+                'Resistivity_3Track_Logrithmic.xml': 45,
             },
             False,
         )
@@ -4246,8 +4271,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_01_200_FEET_UP)),
             {
-                'Triple_Combo'                      : 46,
-                'Resistivity_3Track_Logrithmic.xml' : 47,
+                'Triple_Combo': 46,
+                'Resistivity_3Track_Logrithmic.xml': 47,
             },
             True,
         )
@@ -4258,8 +4283,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_02_1000FT_DOWN)),
             {
-                'Triple_Combo'                      : 48,
-                'Resistivity_3Track_Logrithmic.xml' : 49,
+                'Triple_Combo': 48,
+                'Resistivity_3Track_Logrithmic.xml': 49,
             },
             True,
         )
@@ -4270,8 +4295,8 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_03_MULTI_GR)),
             {
-                'Triple_Combo'                      : 50,
-                'Resistivity_3Track_Logrithmic.xml' : 51,
+                'Triple_Combo': 50,
+                'Resistivity_3Track_Logrithmic.xml': 51,
             },
             True,
         )
@@ -4282,7 +4307,7 @@ class TestPlotReadLAS_XML_LgFormat(TestPlotBase_00):
         self._plotLAS(
             LASRead.LASRead(io.StringIO(TestPlotLASData.LAS_03_DENS_PORO_MULTI_GR)),
             {
-                'Porosity_GR_3Track'                 : 52,
+                'Porosity_GR_3Track': 52,
             },
             True,
         )
@@ -4303,18 +4328,18 @@ class SpecialUnused(unittest.TestCase):
             # Create a PRESCfgXML
             print(' {:s} START '.format(uid).center(75, '='))
             myPc = PRESCfgXML.PresCfgXMLRead(myFc, uid)
-#            pprint.pprint(myPc._destOutpToCurveIdMap)
-#            print(myPc._destOutpToCurveIdMap.items())
+            #            pprint.pprint(myPc._destOutpToCurveIdMap)
+            #            print(myPc._destOutpToCurveIdMap.items())
             for uid in myPc._destOutpToCurveIdMap:
                 for m, uS in myPc._destOutpToCurveIdMap[uid].items():
                     for u in uS:
                         try:
                             myMnemUniqueIDMap[m].add(u)
                         except KeyError:
-                            myMnemUniqueIDMap[m] = set([u,])
-#            print(myPc.outpChIDs(uid))
+                            myMnemUniqueIDMap[m] = set([u, ])
+            #            print(myPc.outpChIDs(uid))
             print(' {:s} END '.format(uid).center(75, '='))
-#        pprint.pprint(myMnemUniqueIDMap)
+        #        pprint.pprint(myMnemUniqueIDMap)
         print(' OUTP : UniqueId(s) START '.center(75, '='))
         for k in sorted(myMnemUniqueIDMap.keys()):
             theID = '"{!r:s}"'.format(k.pStr(strip=True))
@@ -4365,9 +4390,11 @@ def unitTest(theVerbosity=2):
     # LAS plots
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlotReadLAS_XML_LgFormat))
 
-#    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(SpecialUnused))
+    #    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(SpecialUnused))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -4393,6 +4420,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestClass.py script version "%s", dated %s' % (__version__, __date__))
@@ -4401,7 +4429,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -4419,14 +4447,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

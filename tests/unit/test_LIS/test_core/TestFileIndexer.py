@@ -35,20 +35,21 @@ from TotalDepth.LIS.core import LisGen
 from TotalDepth.LIS.core import LogiRec
 from tests.unit import BaseTestClasses
 
-__author__  = 'Paul Ross'
-__date__    = '10 Feb 2011'
+__author__ = 'Paul Ross'
+__date__ = '10 Feb 2011'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 
 class TestPlotRecordSet(unittest.TestCase):
     """Tests PlotRecordSet."""
+
     def setUp(self):
         pass
-    
+
     def tearDown(self):
         pass
-    
+
     def test_00(self):
         """TestPlotRecordSet.test_00(): Tests setUp() and tearDown()."""
         pass
@@ -140,14 +141,15 @@ class TestPlotRecordSet(unittest.TestCase):
 
 class TestFileIndexerBase(BaseTestClasses.TestBaseLogPass):
     """Base class to create LIS files to index."""
+
     def _retFileHead(self):
         """Returns a single Physical Record encapsulating as File Head."""
         return self._retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileHead)
-    
+
     def _retFileTail(self):
         """Returns a single Physical Record encapsulating as File Tail."""
         return self._retSinglePr(LisGen.FileHeadTailDefault.lrBytesFileTail)
-        
+
     def _retTapeHead(self):
         """Returns a single Physical Record encapsulating as Tape Head."""
         return self._retSinglePr(LisGen.TapeReelHeadTailDefault.lrBytesTapeHead)
@@ -163,16 +165,18 @@ class TestFileIndexerBase(BaseTestClasses.TestBaseLogPass):
     def _retReelTail(self):
         """Returns a single Physical Record encapsulating as Reel Tail."""
         return self._retSinglePr(LisGen.TapeReelHeadTailDefault.lrBytesReelTail)
-    
+
     def _retLrRandom(self, theLrType, theLen=None):
         """Returns a Logical Record with random content of specified type and
         length of theLen. If theLen is absent a random length of up to 32kB is
         chosen."""
-        #print('_retLrRandom()', theLrType)
+        # print('_retLrRandom()', theLrType)
         return bytes([theLrType, 0]) + LisGen.randomBytes(theLen)
-    
+
+
 class TestFileIndexerCtor(TestFileIndexerBase):
     """Tests FileIndex construction."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -189,33 +193,35 @@ class TestFileIndexerCtor(TestFileIndexerBase):
         """TestFileIndexer.test_00(): Empty file."""
         myF = self._retFileFromBytes(b'')
         myIdx = FileIndexer.FileIndex(myF)
-        
+
+
 class TestIndexDelimiter(TestFileIndexerBase):
     """Tests FileIndex with EFLR records that are delimiter."""
+
     def test_00(self):
         """TestIndexEflrHeadTail.test_00(): File head and tail."""
-        myFile = self._retFileFromBytes(self._retFileHead()+self._retFileTail())
+        myFile = self._retFileFromBytes(self._retFileHead() + self._retFileTail())
         myIdx = FileIndexer.FileIndex(myFile)
-        #print()
-        #print(myIdx._idx)
+        # print()
+        # print(myIdx._idx)
         self.assertEqual(2, len(myIdx))
         self.assertEqual([128, 129], myIdx.lrTypeS)
 
     def test_01(self):
         """TestIndexEflrHeadTail.test_01(): Tape head and tail."""
-        myFile = self._retFileFromBytes(self._retTapeHead()+self._retTapeTail())
+        myFile = self._retFileFromBytes(self._retTapeHead() + self._retTapeTail())
         myIdx = FileIndexer.FileIndex(myFile)
-        #print()
-        #print(myIdx._idx)
+        # print()
+        # print(myIdx._idx)
         self.assertEqual(2, len(myIdx))
         self.assertEqual([130, 131], myIdx.lrTypeS)
 
     def test_02(self):
         """TestIndexEflrHeadTail.test_02(): Reel head and tail."""
-        myFile = self._retFileFromBytes(self._retReelHead()+self._retReelTail())
+        myFile = self._retFileFromBytes(self._retReelHead() + self._retReelTail())
         myIdx = FileIndexer.FileIndex(myFile)
-        #print()
-        #print(myIdx._idx)
+        # print()
+        # print(myIdx._idx)
         self.assertEqual(2, len(myIdx))
         self.assertEqual([132, 133], myIdx.lrTypeS)
 
@@ -230,14 +236,16 @@ class TestIndexDelimiter(TestFileIndexerBase):
             + self._retReelTail()
         )
         myIdx = FileIndexer.FileIndex(myFile)
-        #print()
-        #print(myIdx._idx)
+        # print()
+        # print(myIdx._idx)
         self.assertEqual(6, len(myIdx))
-        #print(myIdx.lrTypeS)
+        # print(myIdx.lrTypeS)
         self.assertEqual([132, 130, 128, 129, 131, 133], myIdx.lrTypeS)
+
 
 class TestIndexMarker(TestFileIndexerBase):
     """Tests indexing of marker records such as EOM etc."""
+
     def test_00(self):
         """TestIndexMarker.test_00(): All marker records."""
         myFile = self._retFileFromBytes(
@@ -247,38 +255,42 @@ class TestIndexMarker(TestFileIndexerBase):
             + self._retSinglePr(b'\x8D\x00')
         )
         myIdx = FileIndexer.FileIndex(myFile)
-        #print()
-        #print(myIdx._idx)
+        # print()
+        # print(myIdx._idx)
         self.assertEqual(4, len(myIdx))
-        #print(myIdx.lrTypeS)
+        # print(myIdx.lrTypeS)
         self.assertEqual([137, 138, 139, 141], myIdx.lrTypeS)
+
 
 class TestIndexUnknownIntFormat(TestFileIndexerBase):
     """Tests indexing of Logical Records of unknown internal format."""
+
     def test_00(self):
         """TestIndexUnknownIntFormat.test_00(): Logical Records of unknown internal format, random lengths."""
-        #print()
-        #print(LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT)
+        # print()
+        # print(LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT)
         myB = b''
         for aType in LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
             myB += self._retSinglePr(self._retLrRandom(aType))
         myFile = self._retFileFromBytes(myB)
         myIdx = FileIndexer.FileIndex(myFile)
-        #print(myIdx._idx)
+        # print(myIdx._idx)
         self.assertEqual(len(LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT), len(myIdx))
-        #print(myIdx.lrTypeS)
+        # print(myIdx.lrTypeS)
         self.assertEqual(list(LogiRec.LR_TYPE_UNKNOWN_INTERNAL_FORMAT), myIdx.lrTypeS)
+
 
 class TestIndex_genPlotRecords(TestFileIndexerBase):
     """Tests indexer genPlotRecords()."""
+
     def _retLogPassGen(self):
-        #print()
+        # print()
         myEbs = LogiRec.EntryBlockSet()
-        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4*4))
+        myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SIZE, 1, 66, 4 * 4))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE, 1, 66, 60))
         myEbs.setEntryBlock(LogiRec.EntryBlock(LogiRec.EB_TYPE_FRAME_SPACE_UNITS, 4, 65, b'.1IN'))
-        #print('myEbs.lisByteList()')
-        #pprint.pprint(myEbs.lisByteList())
+        # print('myEbs.lisByteList()')
+        # pprint.pprint(myEbs.lisByteList())
         myLp = LisGen.LogPassGen(
             myEbs,
             # Channel list
@@ -305,16 +317,16 @@ class TestIndex_genPlotRecords(TestFileIndexerBase):
         myBa += self.retPrS(myLp.lrBytesDFSR())
         # Add some logical records
         for i in range(4):
-            myBa += self.retPrS(myLp.lrBytes(i*100, 100))
+            myBa += self.retPrS(myLp.lrBytes(i * 100, 100))
         myBa += self._retFileTail()
         myFile = self._retFileFromBytes(myBa)
         myIdx = FileIndexer.FileIndex(myFile)
         return myFile, myIdx
-        
+
     def test_00(self):
         """TestIndex_genPlotRecords.test_00(): Test genPlotRecords()."""
         # TODO: Should add testing of Index.FileIndex generators
-#        assert(0), 'Should add testing of Index.FileIndex generators'
+        #        assert(0), 'Should add testing of Index.FileIndex generators'
         print('Should add testing of Index.FileIndex generators\n')
         myBa = bytearray(self._retFileHead())
         # Add a log pass
@@ -323,7 +335,7 @@ class TestIndex_genPlotRecords(TestFileIndexerBase):
         myBa += self.retPrS(myLp.lrBytesDFSR())
         # Add some logical records
         for i in range(4):
-            myBa += self.retPrS(myLp.lrBytes(i*100, 100))
+            myBa += self.retPrS(myLp.lrBytes(i * 100, 100))
         myBa += self._retFileTail()
         myFile, myIdx = self._retFileIndexSingleChannel()
         print('myIdx.longDesc():')
@@ -353,9 +365,11 @@ class TestIndex_genPlotRecords(TestFileIndexerBase):
         print('Index pass[0].logPass.longStr():')
         print(myPasses[0].logPass.longStr())
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -367,6 +381,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestIndex_genPlotRecords))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -391,6 +407,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestClass.py script version "%s", dated %s' % (__version__, __date__))
@@ -399,7 +416,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -417,14 +434,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

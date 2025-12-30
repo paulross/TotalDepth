@@ -20,13 +20,13 @@
 """Provides a fairly basic two dimensional coordinate system.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-25'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-25'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import logging
-#import sys
+# import logging
+# import sys
 import collections
 import math
 import typing
@@ -47,16 +47,15 @@ class ExceptionCoordUnitConvert(ExceptionCoord):
 #: Base units for dimensions
 BASE_UNITS = 'px'
 
-
 #: Map of {unit name : conversion factor to base units, ...}
 UNIT_MAP = {
-    None        : 1.0,  # Implied base units i.e. default
-    'px'        : 1.0,
-    'pt'        : 1.0,  # Actual base units i.e. BASE_UNITS
-    'pc'        : 12.0,
-    'in'        : 72.0,
-    'cm'        : 72.0/2.54,
-    'mm'        : 72.0/25.4,
+    None: 1.0,  # Implied base units i.e. default
+    'px': 1.0,
+    'pt': 1.0,  # Actual base units i.e. BASE_UNITS
+    'pc': 12.0,
+    'in': 72.0,
+    'cm': 72.0 / 2.54,
+    'mm': 72.0 / 25.4,
 }
 
 
@@ -74,21 +73,21 @@ def exactConversion(units_a, units_b=BASE_UNITS):
 #: Formatting strings for writing attributes.
 #: We are trying not to write 3.999999999mm here!
 UNIT_MAP_DEFAULT_FORMAT = {
-    None        : '%.4f', # Implied base units i.e. m
-    'px'        : '%d',
-    'pt'        : '%d',
-    'pc'        : '%.2f',
-    'cm'        : '%.2f',
-    'mm'        : '%.1f',
-    'in'        : '%.3f',
+    None: '%.4f',  # Implied base units i.e. m
+    'px': '%d',
+    'pt': '%d',
+    'pc': '%.2f',
+    'cm': '%.2f',
+    'mm': '%.1f',
+    'in': '%.3f',
     # Non-SVG units.
-    'm'         : '%.4f', # Actual base units i.e. BASE_UNITS
-    'ft'        : '%.4f', # Feet
-    'NM'        : '%.6f', # Nautical miles.
+    'm': '%.4f',  # Actual base units i.e. BASE_UNITS
+    'ft': '%.4f',  # Feet
+    'NM': '%.6f',  # Nautical miles.
 }
 
 #: Map of formatting strings for value and units e.g. to create '0.667in' from (2.0 / 3.0, 'in')
-UNIT_MAP_DEFAULT_FORMAT_WITH_UNITS = {__k : UNIT_MAP_DEFAULT_FORMAT[__k] + '%s' for __k in UNIT_MAP_DEFAULT_FORMAT}
+UNIT_MAP_DEFAULT_FORMAT_WITH_UNITS = {__k: UNIT_MAP_DEFAULT_FORMAT[__k] + '%s' for __k in UNIT_MAP_DEFAULT_FORMAT}
 
 
 def units():
@@ -108,24 +107,24 @@ def convert(val, unitFrom, unitTo):
         raise ExceptionCoordUnitConvert('Unsupported units %s' % unitFrom)
 
 
-class Dim(collections.namedtuple('Dim', 'value units',)):
-    """Represents a dimension as an engineering value i.e. a number and units.""" 
+class Dim(collections.namedtuple('Dim', 'value units', )):
+    """Represents a dimension as an engineering value i.e. a number and units."""
     __slots__ = ()
 
     def scale(self, factor):
         """Returns a new Dim() multiplied by a factor, units are unchanged."""
-        return self._replace(value=self.value*factor)
+        return self._replace(value=self.value * factor)
 
     def divide(self, factor):
         """Returns a new Dim() divided by a factor, units are unchanged."""
-        return self._replace(value=self.value/factor)
+        return self._replace(value=self.value / factor)
 
     def convert(self, u):
         """Returns a new Dim() with units changed and value converted."""
         return self._replace(value=convert(self.value, self.units, u), units=u)
 
     def __str__(self):
-        #return 'Dim: %s (%s)' % (self.value, self.units)
+        # return 'Dim: %s (%s)' % (self.value, self.units)
         return 'Dim(%s%s)' % (self.value, self.units)
 
     def __repr__(self):
@@ -194,7 +193,7 @@ class Dim(collections.namedtuple('Dim', 'value units',)):
 
     def __ipow__(self, other):
         # Use __pow__()
-        self = self**other
+        self = self ** other
         return self
 
     def __lt__(self, other):
@@ -250,13 +249,14 @@ def dimIn(v):
     """Returns a Dim object with the value in inches."""
     return Dim(v, 'in')
 
+
 # All of these take a Dim() for each member
 #
 # This describes the size of a box, its members are Dim() objects
-#Box         = collections.namedtuple('Box', 'width depth',)
+# Box         = collections.namedtuple('Box', 'width depth',)
 # Padding around another object that forms the Bounding Box
 # All 4 attributes are Dim() objects
-#Pad         = collections.namedtuple('Pad', 'prev next parent child',)
+# Pad         = collections.namedtuple('Pad', 'prev next parent child',)
 
 
 class Box(collections.namedtuple('Box', 'width depth', )):
@@ -298,7 +298,7 @@ class Pad(collections.namedtuple('Pad', 'prev next parent child', )):
         )
 
 
-class Margin(collections.namedtuple('Margin', 'left right top bottom',)):
+class Margin(collections.namedtuple('Margin', 'left right top bottom', )):
     """Margin padding around another object. All 4 attributes are Coord.Dim()
     objects."""
     __slots__ = ()

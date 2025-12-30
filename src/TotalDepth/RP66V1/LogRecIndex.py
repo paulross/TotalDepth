@@ -34,10 +34,10 @@ from TotalDepth.common import cmn_cmd_opts, process
 from TotalDepth.util import bin_file_type, DirWalk, ExecTimer
 from TotalDepth.util import gnuplot
 
-__author__  = 'Paul Ross'
-__date__    = '2019-11-30'
+__author__ = 'Paul Ross'
+__date__ = '2019-11-30'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
 
@@ -152,6 +152,7 @@ def index_dir_or_file(path_in: str, path_out: str,
         if file_type == 'RP66V1':
             ret[path_in] = index_a_single_file(path_in, path_out, read_back, validate)
     return ret
+
 
 GNUPLOT_PLT = """set logscale x
 set grid
@@ -322,8 +323,8 @@ def main() -> int:
                 ratio = idx_result.size_index / idx_result.size_input
                 print(
                     f'{idx_result.size_input:16,d} {idx_result.size_index:16,d}'
-                    f' {1000*idx_result.index_time:10.1f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
-                    f' {1000*idx_result.time_write:10.1f} {1000*idx_result.time_read_back:10.1f}'
+                    f' {1000 * idx_result.index_time:10.1f} {ratio:8.3%} {ms_mb:8.1f} {str(idx_result.exception):5}'
+                    f' {1000 * idx_result.time_write:10.1f} {1000 * idx_result.time_read_back:10.1f}'
                     f' "{path[len_path:]}"'
                 )
                 size_input += result[path].size_input

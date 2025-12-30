@@ -20,36 +20,38 @@
 """Handles LIS Logical Records.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '29 Dec 2010'
+__author__ = 'Paul Ross'
+__date__ = '29 Dec 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-import codecs
-import struct
-import logging
 import collections
-
+import logging
+import struct
 import typing
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
-from TotalDepth.LIS.core import Units
 from TotalDepth.LIS.core import EngVal
-from TotalDepth.LIS.core import RepCode
-from TotalDepth.LIS.core import Mnem
 from TotalDepth.LIS.core import File
+from TotalDepth.LIS.core import Mnem
+from TotalDepth.LIS.core import RepCode
+from TotalDepth.LIS.core import Units
+
 
 class ExceptionLr(ExceptionTotalDepthLIS):
     """Specialisation of exception for Logical Records."""
     pass
 
+
 class ExceptionLrNotImplemented(ExceptionLr):
     """Logical Records that have no implementation here."""
     pass
 
+
 class ExceptionCbWrite(ExceptionLr):
     """Raised when creating a component block with Python native types that has illogical or conflicting data."""
     pass
+
 
 # Logical Record Header Information
 # =================================
@@ -60,53 +62,53 @@ LR_HEADER_LENGTH = 2
 #
 # Group 0 - Data records
 # ----------------------
-LR_TYPE_NORMAL_DATA             = 0    #: 0x00 Normal data record containing log data
-LR_TYPE_ALTERNATE_DATA          = 1    #: 0x01 Alternate data.
+LR_TYPE_NORMAL_DATA = 0  #: 0x00 Normal data record containing log data
+LR_TYPE_ALTERNATE_DATA = 1  #: 0x01 Alternate data.
 #
 # Group 1 Information records
 # ---------------------------
-LR_TYPE_JOB_ID                  = 32    #: 0x20 Job identification
-LR_TYPE_WELL_DATA               = 34    #: 0x22 Well site data
-LR_TYPE_TOOL_INFO               = 39    #: 0x27 Tool string info
-LR_TYPE_ENCRYPTED_TABLE         = 42    #: 0x2a Encrypted table dump
-LR_TYPE_TABLE_DUMP              = 47    #: 0x2f Table dump
+LR_TYPE_JOB_ID = 32  #: 0x20 Job identification
+LR_TYPE_WELL_DATA = 34  #: 0x22 Well site data
+LR_TYPE_TOOL_INFO = 39  #: 0x27 Tool string info
+LR_TYPE_ENCRYPTED_TABLE = 42  #: 0x2a Encrypted table dump
+LR_TYPE_TABLE_DUMP = 47  #: 0x2f Table dump
 #
 # Group 2 Data format specification records
 # -----------------------------------------
-LR_TYPE_DATA_FORMAT             = 64    #: 0x40 Data format specification record
-LR_TYPE_DATA_DESCRIPTOR         = 65    #: 0x41 Data descriptor (not defined in the LIS79 Description Reference Manual)
+LR_TYPE_DATA_FORMAT = 64  #: 0x40 Data format specification record
+LR_TYPE_DATA_DESCRIPTOR = 65  #: 0x41 Data descriptor (not defined in the LIS79 Description Reference Manual)
 #
 # Group 3 Program records (CSU only)
 # ----------------------------------
-LR_TYPE_TU10_BOOT               = 95    #: 0x5f TU10 software boot
-LR_TYPE_BOOTSTRAP_LOADER        = 96    #: 0x60 Bootstrap loader
-LR_TYPE_CP_KERNEL               = 97    #: 0x61 CP-kernel loader boot
-LR_TYPE_PROGRAM_FILE_HEAD       = 100   #: 0x64 Program file header
-LR_TYPE_PROGRAM_OVER_HEAD       = 101   #: 0x65 Program overlay header
-LR_TYPE_PROGRAM_OVER_LOAD       = 102   #: 0x66 Program overlay load
+LR_TYPE_TU10_BOOT = 95  #: 0x5f TU10 software boot
+LR_TYPE_BOOTSTRAP_LOADER = 96  #: 0x60 Bootstrap loader
+LR_TYPE_CP_KERNEL = 97  #: 0x61 CP-kernel loader boot
+LR_TYPE_PROGRAM_FILE_HEAD = 100  #: 0x64 Program file header
+LR_TYPE_PROGRAM_OVER_HEAD = 101  #: 0x65 Program overlay header
+LR_TYPE_PROGRAM_OVER_LOAD = 102  #: 0x66 Program overlay load
 #
 # Group 4 Delimiters
 # ------------------
-LR_TYPE_FILE_HEAD               = 128    #: 0x80 File header
-LR_TYPE_FILE_TAIL               = 129    #: 0x81 File trailer
-LR_TYPE_TAPE_HEAD               = 130    #: 0x82 Tape header
-LR_TYPE_TAPE_TAIL               = 131    #: 0x83 Tape trailer
-LR_TYPE_REEL_HEAD               = 132    #: 0x84 Reel header
-LR_TYPE_REEL_TAIL               = 133    #: 0x85 Reel trailer
-LR_TYPE_EOF                     = 137    #: 0x89 Logical EOF (end of file)
-LR_TYPE_BOT                     = 138    #: 0x8a Logical BOT (beginning of tape)
-LR_TYPE_EOT                     = 139    #: 0x8b Logical EOT (end of tape)
-LR_TYPE_EOM                     = 141    #: 0x8d Logical EOM (end of medium)
+LR_TYPE_FILE_HEAD = 128  #: 0x80 File header
+LR_TYPE_FILE_TAIL = 129  #: 0x81 File trailer
+LR_TYPE_TAPE_HEAD = 130  #: 0x82 Tape header
+LR_TYPE_TAPE_TAIL = 131  #: 0x83 Tape trailer
+LR_TYPE_REEL_HEAD = 132  #: 0x84 Reel header
+LR_TYPE_REEL_TAIL = 133  #: 0x85 Reel trailer
+LR_TYPE_EOF = 137  #: 0x89 Logical EOF (end of file)
+LR_TYPE_BOT = 138  #: 0x8a Logical BOT (beginning of tape)
+LR_TYPE_EOT = 139  #: 0x8b Logical EOT (end of tape)
+LR_TYPE_EOM = 141  #: 0x8d Logical EOM (end of medium)
 #
 # Group 7 Miscellaneous records
 # -----------------------------
-LR_TYPE_OPERATOR_INPUT          = 224    #: 0xe0 Operator command inputs
-LR_TYPE_OPERATOR_RESPONSE       = 225    #: 0xe1 Operator response inputs
-LR_TYPE_SYSTEM_OUTPUT           = 227    #: 0xe3 System outputs to operator
-LR_TYPE_FLIC_COMMENT            = 232    #: 0xe8 FLIC comment
-LR_TYPE_BLANK_RECORD            = 234    #: 0xea Blank record/CSU comment
-LR_TYPE_PICTURE                 = 85     #: 0x55 Picture
-LR_TYPE_IMAGE                   = 86     #: 0x56 Image
+LR_TYPE_OPERATOR_INPUT = 224  #: 0xe0 Operator command inputs
+LR_TYPE_OPERATOR_RESPONSE = 225  #: 0xe1 Operator response inputs
+LR_TYPE_SYSTEM_OUTPUT = 227  #: 0xe3 System outputs to operator
+LR_TYPE_FLIC_COMMENT = 232  #: 0xe8 FLIC comment
+LR_TYPE_BLANK_RECORD = 234  #: 0xea Blank record/CSU comment
+LR_TYPE_PICTURE = 85  #: 0x55 Picture
+LR_TYPE_IMAGE = 86  #: 0x56 Image
 #
 # Collections
 # -----------
@@ -180,10 +182,12 @@ LR_FIXED_FORMAT = {
     LR_TYPE_EOM: 0,
 }
 
+
 # Global function for detecting delimiter records
 def isDelimiter(theType):
     """Returns True if the Logical Record Type is a Delimiter record."""
     return theType in LR_TYPE_DELIMITER
+
 
 #: Logical Records Types with no known format so just treat these as unformatted binary data
 LR_TYPE_UNKNOWN_INTERNAL_FORMAT = (
@@ -207,43 +211,43 @@ LR_TYPE_UNKNOWN_INTERNAL_FORMAT = (
 #: Map of {Logical Records Type : description, ...}
 LR_DESCRIPTION_MAP = {
     # Group 0 - Data records
-    0 : 'Normal data record containing log data',
-    1 : 'Alternate data.',
+    0: 'Normal data record containing log data',
+    1: 'Alternate data.',
     # Group 1 Information records
-    32 : 'Job identification',
-    34 : 'Well site data',
-    39 : 'Tool string info',
-    42 : 'Encrypted table dump',
-    47 : 'Table dump',
+    32: 'Job identification',
+    34: 'Well site data',
+    39: 'Tool string info',
+    42: 'Encrypted table dump',
+    47: 'Table dump',
     # Group 2 Data format specification records
-    64 : 'Data format specification record',
-    65 : 'Data descriptor (not defined in the LIS79 Description Reference Manual)',
+    64: 'Data format specification record',
+    65: 'Data descriptor (not defined in the LIS79 Description Reference Manual)',
     # Group 3 Program records (CSU only)
-    95 : 'TU10 software boot',
-    96 : 'Bootstrap loader',
-    97 : 'CP-kernel loader boot',
-    100 : 'Program file header',
-    101 : 'Program overlay header',
-    102 : 'Program overlay load',
+    95: 'TU10 software boot',
+    96: 'Bootstrap loader',
+    97: 'CP-kernel loader boot',
+    100: 'Program file header',
+    101: 'Program overlay header',
+    102: 'Program overlay load',
     # Group 4 Delimiters
-    128 : 'File header',
-    129 : 'File trailer',
-    130 : 'Tape header',
-    131 : 'Tape trailer',
-    132 : 'Reel header',
-    133 : 'Reel trailer',
-    137 : 'Logical EOF (end of file)',
-    138 : 'Logical BOT (beginning of tape)',
-    139 : 'Logical EOT (end of tape)',
-    141 : 'Logical EOM (end of medium)',
+    128: 'File header',
+    129: 'File trailer',
+    130: 'Tape header',
+    131: 'Tape trailer',
+    132: 'Reel header',
+    133: 'Reel trailer',
+    137: 'Logical EOF (end of file)',
+    138: 'Logical BOT (beginning of tape)',
+    139: 'Logical EOT (end of tape)',
+    141: 'Logical EOM (end of medium)',
     # Group 7 Miscellaneous records
-    224 : 'Operator command inputs',
-    225 : 'Operator response inputs',
-    227 : 'System outputs to operator',
-    232 : 'FLIC comment',
-    234 : 'Blank record/CSU comment',
-    85 : 'Picture',
-    86 : 'Image',
+    224: 'Operator command inputs',
+    225: 'Operator response inputs',
+    227: 'System outputs to operator',
+    232: 'FLIC comment',
+    234: 'Blank record/CSU comment',
+    85: 'Picture',
+    86: 'Image',
 }
 
 #: Description string for unknown Logical Records Type
@@ -255,32 +259,33 @@ LR_DESCRIPTION_UNKNOWN = 'Unknown Logical Record type.'
 #: Logical Record header (type and attributes)
 STRUCT_LR_HEAD = struct.Struct('BB')
 # 2 bytes, 2 fields
-assert(STRUCT_LR_HEAD.size == LR_HEADER_LENGTH)
-assert(len(STRUCT_LR_HEAD.unpack(b' ' * STRUCT_LR_HEAD.size)) == 2)
+assert (STRUCT_LR_HEAD.size == LR_HEADER_LENGTH)
+assert (len(STRUCT_LR_HEAD.unpack(b' ' * STRUCT_LR_HEAD.size)) == 2)
 
 #: Logical Record field interpretation via the struct module
 STRUCT_LR_FILE_HEAD_TAIL = struct.Struct('10s2x6s8s8s1x5s2x2s2x10s')
 # 56 bytes, 7 fields
-assert(STRUCT_LR_FILE_HEAD_TAIL.size == 58 - LR_HEADER_LENGTH)
-assert(len(STRUCT_LR_FILE_HEAD_TAIL.unpack(b' ' * STRUCT_LR_FILE_HEAD_TAIL.size)) == 7)
+assert (STRUCT_LR_FILE_HEAD_TAIL.size == 58 - LR_HEADER_LENGTH)
+assert (len(STRUCT_LR_FILE_HEAD_TAIL.unpack(b' ' * STRUCT_LR_FILE_HEAD_TAIL.size)) == 7)
 
 #: Logical Record reel/tape head/tail via the struct module
 STRUCT_LR_REEL_TAPE_HEAD_TAIL = struct.Struct('6s6x8s2x4s2x8s2x2s2x8s2x74s')
 # 128 bytes, 7 fields
-assert(STRUCT_LR_REEL_TAPE_HEAD_TAIL.size == 128 - LR_HEADER_LENGTH), 'Size is {:d}'.format(STRUCT_LR_REEL_TAPE_HEAD_TAIL.size)
-assert(len(STRUCT_LR_REEL_TAPE_HEAD_TAIL.unpack(b' ' * STRUCT_LR_REEL_TAPE_HEAD_TAIL.size)) == 7)
+assert (STRUCT_LR_REEL_TAPE_HEAD_TAIL.size == 128 - LR_HEADER_LENGTH), 'Size is {:d}'.format(
+    STRUCT_LR_REEL_TAPE_HEAD_TAIL.size)
+assert (len(STRUCT_LR_REEL_TAPE_HEAD_TAIL.unpack(b' ' * STRUCT_LR_REEL_TAPE_HEAD_TAIL.size)) == 7)
 
 #: Component Block preamble as a struct.Struct()
 STRUCT_COMPONENT_BLOCK_PREAMBLE = struct.Struct('4B4s4s')
 # 12 bytes, 6 fields
-assert(STRUCT_COMPONENT_BLOCK_PREAMBLE.size == 12)
-assert(len(STRUCT_COMPONENT_BLOCK_PREAMBLE.unpack(b' ' * STRUCT_COMPONENT_BLOCK_PREAMBLE.size)) == 6)
+assert (STRUCT_COMPONENT_BLOCK_PREAMBLE.size == 12)
+assert (len(STRUCT_COMPONENT_BLOCK_PREAMBLE.unpack(b' ' * STRUCT_COMPONENT_BLOCK_PREAMBLE.size)) == 6)
 
 #: Entry Block preamble as a struct.Struct()
 STRUCT_ENTRY_BLOCK_PREAMBLE = struct.Struct('BBB')
 # 3 bytes, 3 fields
-assert(STRUCT_ENTRY_BLOCK_PREAMBLE.size == 3)
-assert(len(STRUCT_ENTRY_BLOCK_PREAMBLE.unpack(b' ' * STRUCT_ENTRY_BLOCK_PREAMBLE.size)) == 3)
+assert (STRUCT_ENTRY_BLOCK_PREAMBLE.size == 3)
+assert (len(STRUCT_ENTRY_BLOCK_PREAMBLE.unpack(b' ' * STRUCT_ENTRY_BLOCK_PREAMBLE.size)) == 3)
 
 #: Datum Specification Block structure.
 #: NOTE: Due to the funny way API codes are done we read then as a single
@@ -288,8 +293,9 @@ assert(len(STRUCT_ENTRY_BLOCK_PREAMBLE.unpack(b' ' * STRUCT_ENTRY_BLOCK_PREAMBLE
 #: extract the four sub-fields
 STRUCT_DSB = struct.Struct('>4s6s8s4sI2h3x2B5x')
 # 40 bytes, 9 fields (17 fields if process indicator bytes are included)
-assert(STRUCT_DSB.size == 40)
-assert(len(STRUCT_DSB.unpack(b' ' * STRUCT_DSB.size)) == 9)
+assert (STRUCT_DSB.size == 40)
+assert (len(STRUCT_DSB.unpack(b' ' * STRUCT_DSB.size)) == 9)
+
 
 #####################################################
 # End: Struct declarations for reading from file.
@@ -298,19 +304,20 @@ assert(len(STRUCT_DSB.unpack(b' ' * STRUCT_DSB.size)) == 9)
 class LrBase(object):
     """Base class for Logical Records.
     Constructed with and integer type and integer attributes."""
+
     def __init__(self, theType, theAttr):
         """Base class constructor, theType and theAttr are bytes."""
         self.type = theType
         self.attr = theAttr
-        
+
     def init(self, theLen):
         """Returns a string of spaces of the supplied length."""
         return b' ' * theLen
-    
+
     def __str__(self):
         """String representation."""
         return '{:s}: Type: {} "{:s}"'.format(repr(self), self.type, self.desc)
-    
+
     @property
     def desc(self):
         """Description ot the LR type."""
@@ -319,86 +326,106 @@ class LrBase(object):
         except KeyError:
             myType = LR_DESCRIPTION_UNKNOWN
         return myType
-    
+
     def _typeAttrUnpack(self, theFile):
         """Unpacks and returns type and attribute as a pair from a File."""
         return theFile.unpack(STRUCT_LR_HEAD)
+
 
 ########################################
 # Section: Fixed Format Logical Records.
 ########################################
 
-#================================================
+# ================================================
 # Section: Marker records such as EOF BOT EOT EOM
-#================================================
+# ================================================
 class LrMarker(LrBase):
-    """A marker record such as EOF BOT EOT EOM."""  
+    """A marker record such as EOF BOT EOT EOM."""
+
     def __init__(self, theType, theAttr):
         super(LrMarker, self).__init__(theType, theAttr)
-        assert(self.type in LR_TYPE_MARKER), \
+        assert (self.type in LR_TYPE_MARKER), \
             'Illegal LR type of %d for a LrMarker' % self.type
 
+
 class LrEOF(LrMarker):
-    """A EOF marker record."""  
+    """A EOF marker record."""
+
     def __init__(self, attr=0):
         super(LrEOF, self).__init__(LR_TYPE_EOF, attr)
 
+
 class LrEOFRead(LrEOF):
-    """A EOF marker record read from a file."""  
+    """A EOF marker record read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
-        assert(t == LR_TYPE_EOF), \
+        assert (t == LR_TYPE_EOF), \
             'Illegal LR type of %d for a LrMarker' % t
         super(LrEOFRead, self).__init__(a)
 
+
 class LrBOT(LrMarker):
-    """A BOT marker record."""  
+    """A BOT marker record."""
+
     def __init__(self, attr=0):
         super(LrBOT, self).__init__(LR_TYPE_BOT, attr)
 
+
 class LrBOTRead(LrBOT):
-    """A BOT marker record read from a file."""  
+    """A BOT marker record read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
-        assert(t == LR_TYPE_BOT), \
+        assert (t == LR_TYPE_BOT), \
             'Illegal LR type of %d for a LrMarker' % t
         super(LrBOTRead, self).__init__(a)
 
+
 class LrEOT(LrMarker):
-    """A EOT marker record."""  
+    """A EOT marker record."""
+
     def __init__(self, attr=0):
         super(LrEOT, self).__init__(LR_TYPE_EOT, attr)
 
+
 class LrEOTRead(LrEOT):
-    """A EOT marker record read from a file."""  
+    """A EOT marker record read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
-        assert(t == LR_TYPE_EOT), \
+        assert (t == LR_TYPE_EOT), \
             'Illegal LR type of %d for a LrMarker' % t
         super(LrEOTRead, self).__init__(a)
 
+
 class LrEOM(LrMarker):
-    """A EOM marker record."""  
+    """A EOM marker record."""
+
     def __init__(self, attr=0):
         super(LrEOM, self).__init__(LR_TYPE_EOM, attr)
 
+
 class LrEOMRead(LrEOM):
-    """A EOM marker record read from a file."""  
+    """A EOM marker record read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
-        assert(t == LR_TYPE_EOM), \
+        assert (t == LR_TYPE_EOM), \
             'Illegal LR type of %d for a LrMarker' % t
         super(LrEOMRead, self).__init__(a)
 
-#================================================
+
+# ================================================
 # End: Marker records such as EOF BOT EOT EOM
-#================================================
+# ================================================
 
 class LrWithDateField(LrBase):
-    """ABC for classes that have the YY/MM/DD date field.""" 
+    """ABC for classes that have the YY/MM/DD date field."""
+
     def __init__(self, theType, theAttr):
         super(LrWithDateField, self).__init__(theType, theAttr)
-    
+
     @property
     def ymd(self):
         """Returns the YY/MM/DD date field to a year, month, day tuple or None."""
@@ -418,32 +445,34 @@ class LrWithDateField(LrBase):
         except ValueError or UnicodeEncodeError:
             pass
         else:
-            #print('ymd', y, m, d)
+            # print('ymd', y, m, d)
             if y < 27:
                 y += 100
             y += 1900
-            #print('ymd', y, m, d)
+            # print('ymd', y, m, d)
             return y, m, d
 
-#===============================================
+
+# ===============================================
 # Section: File head and tail (trailer) records.
-#===============================================
+# ===============================================
 class LrFileHeadTail(LrWithDateField):
-    """Parent class of FileHead, FileTail that have identical structure.""" 
+    """Parent class of FileHead, FileTail that have identical structure."""
+
     def __init__(self, theType, theAttr):
         super(LrFileHeadTail, self).__init__(theType, theAttr)
-        assert(self.type in (LR_TYPE_FILE_HEAD, LR_TYPE_FILE_TAIL)), \
+        assert (self.type in (LR_TYPE_FILE_HEAD, LR_TYPE_FILE_TAIL)), \
             'Illegal LR type of %d for a Logical Record File head/tail' % self.type
-        self.fileName           = self.init(10)
-        self.serviceSubLevel    = self.init(6)
-        self.version            = self.init(8)
-        self.date               = self.init(8)
-        self.maxPrLength        = self.init(5)
-        self.fileType           = self.init(2)
+        self.fileName = self.init(10)
+        self.serviceSubLevel = self.init(6)
+        self.version = self.init(8)
+        self.date = self.init(8)
+        self.maxPrLength = self.init(5)
+        self.fileType = self.init(2)
         # This can be previous file name or next file name
         # See concrete class properties
-        self._contFileName       = self.init(10)
-            
+        self._contFileName = self.init(10)
+
     def read(self, theFile):
         """Read from a LIS physical file."""
         (
@@ -460,11 +489,13 @@ class LrFileHeadTail(LrWithDateField):
         """Continuation file name."""
         return self._contFileName
 
+
 class LrFileHead(LrFileHeadTail):
     """Specific class of File Head."""
+
     def __init__(self, theType, theAttr):
         super(LrFileHead, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_FILE_HEAD), \
+        assert (self.type == LR_TYPE_FILE_HEAD), \
             'Illegal LR type of %d for a LrFileHead' % self.type
 
     @property
@@ -472,18 +503,22 @@ class LrFileHead(LrFileHeadTail):
         """Previous file name."""
         return self._contFileName
 
+
 class LrFileHeadRead(LrFileHead):
     """Specific class of File head read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrFileHeadRead, self).__init__(t, a)
         self.read(theFile)
 
+
 class LrFileTail(LrFileHeadTail):
     """Specific class of File Tail."""
+
     def __init__(self, theType, theAttr):
         super(LrFileTail, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_FILE_TAIL), \
+        assert (self.type == LR_TYPE_FILE_TAIL), \
             'Illegal LR type of %d for a LrFileTail' % self.type
 
     @property
@@ -491,38 +526,42 @@ class LrFileTail(LrFileHeadTail):
         """Next file name."""
         return self._contFileName
 
+
 class LrFileTailRead(LrFileTail):
     """Specific class of File tail read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrFileTailRead, self).__init__(t, a)
         self.read(theFile)
 
-#===============================================
+
+# ===============================================
 # End: File head and tail (trailer) records.
-#===============================================
+# ===============================================
 
 
-#========================================================
+# ========================================================
 # Section: Reel and Tape head and tail (trailer) records.
-#========================================================
+# ========================================================
 class LrReelTapeHeadTail(LrWithDateField):
-    """Parent class of Reel/Tape Head/Tail that have identical structure.""" 
+    """Parent class of Reel/Tape Head/Tail that have identical structure."""
+
     def __init__(self, theType, theAttr):
         super(LrReelTapeHeadTail, self).__init__(theType, theAttr)
-        assert(self.type in (LR_TYPE_TAPE_HEAD,
-                               LR_TYPE_TAPE_TAIL,
-                               LR_TYPE_REEL_HEAD,
-                               LR_TYPE_REEL_TAIL)), \
+        assert (self.type in (LR_TYPE_TAPE_HEAD,
+                              LR_TYPE_TAPE_TAIL,
+                              LR_TYPE_REEL_HEAD,
+                              LR_TYPE_REEL_TAIL)), \
             'Illegal LR type of %d for a LrReelTapeHeadTail' % self.type
-        self.serviceName        = self.init(6)
-        self.date               = self.init(8)
-        self.origin             = self.init(4)
-        self.name               = self.init(8)
-        self.contNumber         = self.init(2)
-        self._contName          = self.init(8)
-        self.comments           = self.init(74)
-        
+        self.serviceName = self.init(6)
+        self.date = self.init(8)
+        self.origin = self.init(4)
+        self.name = self.init(8)
+        self.contNumber = self.init(2)
+        self._contName = self.init(8)
+        self.comments = self.init(74)
+
     def read(self, theFile):
         (
             self.serviceName,
@@ -532,19 +571,23 @@ class LrReelTapeHeadTail(LrWithDateField):
             self.contNumber,
             self._contName,
             self.comments) = theFile.unpack(STRUCT_LR_REEL_TAPE_HEAD_TAIL)
-        
+
+
 class LrTapeHeadTail(LrReelTapeHeadTail):
     """Tape head or tail Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrTapeHeadTail, self).__init__(theType, theAttr)
-        assert(self.type in (LR_TYPE_TAPE_HEAD, LR_TYPE_TAPE_TAIL)), \
+        assert (self.type in (LR_TYPE_TAPE_HEAD, LR_TYPE_TAPE_TAIL)), \
             'Illegal LR type of %d for a LrTapeHeadTail' % self.type
+
 
 class LrTapeHead(LrTapeHeadTail):
     """Tape head Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrTapeHead, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_TAPE_HEAD), \
+        assert (self.type == LR_TYPE_TAPE_HEAD), \
             'Illegal LR type of %d for a LrTapeHead' % self.type
 
     @property
@@ -552,18 +595,22 @@ class LrTapeHead(LrTapeHeadTail):
         """Previous tape name."""
         return self._contName
 
+
 class LrTapeHeadRead(LrTapeHead):
     """Specific class of Tape head read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrTapeHeadRead, self).__init__(t, a)
         self.read(theFile)
 
+
 class LrTapeTail(LrTapeHeadTail):
     """Tape tail Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrTapeTail, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_TAPE_TAIL), \
+        assert (self.type == LR_TYPE_TAPE_TAIL), \
             'Illegal LR type of %d for a LrTapeTail' % self.type
 
     @property
@@ -571,25 +618,31 @@ class LrTapeTail(LrTapeHeadTail):
         """Next tape name."""
         return self._contName
 
+
 class LrTapeTailRead(LrTapeTail):
     """Specific class of Tape tail read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrTapeTailRead, self).__init__(t, a)
         self.read(theFile)
 
+
 class LrReelHeadTail(LrReelTapeHeadTail):
     """Reel head or tail Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrReelHeadTail, self).__init__(theType, theAttr)
-        assert(self.type in (LR_TYPE_REEL_HEAD, LR_TYPE_REEL_TAIL)), \
+        assert (self.type in (LR_TYPE_REEL_HEAD, LR_TYPE_REEL_TAIL)), \
             'Illegal LR type of %d for a LrReelHeadTail' % self.type
+
 
 class LrReelHead(LrReelHeadTail):
     """Reel head Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrReelHead, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_REEL_HEAD), \
+        assert (self.type == LR_TYPE_REEL_HEAD), \
             'Illegal LR type of %d for a LrReelHead' % self.type
 
     @property
@@ -597,18 +650,22 @@ class LrReelHead(LrReelHeadTail):
         """Previous reel name."""
         return self._contName
 
+
 class LrReelHeadRead(LrReelHead):
     """Specific class of Reel head read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrReelHeadRead, self).__init__(t, a)
         self.read(theFile)
 
+
 class LrReelTail(LrReelHeadTail):
     """Reel tail Logical Record."""
+
     def __init__(self, theType, theAttr):
         super(LrReelTail, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_REEL_TAIL), \
+        assert (self.type == LR_TYPE_REEL_TAIL), \
             'Illegal LR type of %d for a LrReelTail' % self.type
 
     @property
@@ -616,16 +673,19 @@ class LrReelTail(LrReelHeadTail):
         """Next reel name."""
         return self._contName
 
+
 class LrReelTailRead(LrReelTail):
     """Specific class of Reel tail read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrReelTailRead, self).__init__(t, a)
         self.read(theFile)
 
-#========================================================
+
+# ========================================================
 # End: Reel and Tape head and tail (trailer) records.
-#========================================================
+# ========================================================
 
 ########################################
 # End: Fixed Format Logical Records.
@@ -638,15 +698,17 @@ class LrReelTailRead(LrReelTail):
 
 class LrMisc(LrBase):
     """Miscellaneous Logical Record."""
+
     def __init__(self, theType, theAttr):
         super().__init__(theType, theAttr)
         # assert(self.type in LR_TYPE_UNKNOWN_INTERNAL_FORMAT), \
         #     'Illegal LR type of %d for a LrMisc' % self.type
         self.bytes = b''
-    
+
 
 class LrMiscRead(LrMisc):
     """Miscellaneous Logical Record read from a LIS file."""
+
     def __init__(self, theFile: File.FileRead):
         t, a = self._typeAttrUnpack(theFile)
         super().__init__(t, a)
@@ -657,6 +719,7 @@ class LrMiscRead(LrMisc):
 
 class LrUnknown(LrBase):
     """Logical Record that does not fall into any other category."""
+
     def __init__(self, theType, theAttr):
         super().__init__(theType, theAttr)
         self.bytes = b''
@@ -665,12 +728,14 @@ class LrUnknown(LrBase):
 class LrUnkownRead(LrUnknown):
     """Logical Record that does not fall into any other category."""
     """Miscellaneous Logical Record read from a LIS file."""
+
     def __init__(self, theFile: File.FileRead):
         t, a = self._typeAttrUnpack(theFile)
         super().__init__(t, a)
         self.bytes: bytes = theFile.readLrBytes()
         # Set to beginning of LR as we have consumed the complete LR and the caller is most likely to call skipToNextLr.
         theFile.seekCurrentLrStart()
+
 
 ############################################################################
 # End: Misc Logical records - these have no interpreted internal format.
@@ -780,52 +845,61 @@ Table record (type 34) type: ZONE
 
 # Table Logical Records
 #: Type of first Component Blocks in the table
-COMPONENT_BLOCK_TABLE               = 73
+COMPONENT_BLOCK_TABLE = 73
 #: Type of first Component Blocks in the Datum Block i.e. row
-COMPONENT_BLOCK_DATUM_BLOCK_START   = 0
+COMPONENT_BLOCK_DATUM_BLOCK_START = 0
 #: Component Block type that describes an entry in a Datum Block i.e. a cell
-COMPONENT_BLOCK_DATUM_BLOCK_ENTRY   = 69
+COMPONENT_BLOCK_DATUM_BLOCK_ENTRY = 69
+
 
 class ExceptionLrTable(ExceptionLr):
     """Specialisation of exception for Table Logical Records."""
     pass
 
+
 class ExceptionLrTableInit(ExceptionLrTable):
     """Table __init__() issues."""
     pass
+
 
 class ExceptionLrTableInternaStructuresCorrupt(ExceptionLrTable):
     """Raised when there are inconsistencies with the IR of the table."""
     pass
 
+
 class ExceptionLrTableCompose(ExceptionLrTable):
     """Table creation (not from file) issues."""
     pass
+
 
 class ExceptionLrTableRow(ExceptionLrTable):
     """TableRow issues."""
     pass
 
+
 class ExceptionLrTableRowInit(ExceptionLrTableRow):
     """TableRow __init__() issues."""
     pass
+
 
 class ExceptionCbEngValInit(ExceptionLrTable):
     """CbEngVal.__init__() issues such as unknown rep code."""
     pass
 
+
 class CbEngVal(object):
     """Contains the data from a Component Block and has an EngVal"""
     #: Allowable Component Block types
     CB_TYPES = (COMPONENT_BLOCK_TABLE, COMPONENT_BLOCK_DATUM_BLOCK_START, COMPONENT_BLOCK_DATUM_BLOCK_ENTRY)
+
     def __init__(self):
-        self.type       = None # 73, 0, 69
-        self.rc         = None
-        self.size       = None
-        self.category   = None
-        self.mnem       = None
-        self.units      = None
-        self.engVal     = None
+        self.type = None  # 73, 0, 69
+        self.rc = None
+        self.size = None
+        self.category = None
+        self.mnem = None
+        self.units = None
+        self.engVal = None
 
     def __str__(self):
         return 'CB: type={:s} rc={:s} size={:s} mnem={:s} {:s}'.format(
@@ -861,14 +935,16 @@ class CbEngVal(object):
         """The value of the Component Block or None."""
         if self.engVal is not None:
             return self.engVal.value
-        
+
     @property
     def status(self):
         """Returns True if the value is b'ALLO', False otherwise."""
         return self.value == b'ALLO'
 
+
 class CbEngValRead(CbEngVal):
     """Contains the data from a Component Block and has an EngVal read from a file."""
+
     def __init__(self, the_file: File.FileRead):
         """Initialise. This will raise a TypeError if theFile.unpack returns None
         i.e. when not enough data to create a Component Block."""
@@ -892,8 +968,10 @@ class CbEngValRead(CbEngVal):
             # as the logical record is incomplete            
             raise ExceptionCbEngValInit(str(err))
 
+
 class CbEngValWrite(CbEngVal):
     """A Component Block and has an EngVal created directly."""
+
     def __init__(self, t, v, m, **kwargs):
         """Initialise component block with type, value, mnemonic and optional key words."""
         super().__init__()
@@ -902,10 +980,10 @@ class CbEngValWrite(CbEngVal):
         self.mnem = m
         if self.type not in self.CB_TYPES:
             raise ExceptionCbWrite('CbEngValWrite type {:d} not in {:s}'.format(self.type, str(self.CB_TYPES)))
-#        self.rc         = kwargs.get('rc')
-#        self.size       = kwargs.get('size')
-        self.category   = kwargs.get('category') or 0
-        self.units      = kwargs.get('units') or Units.MT_UNIT
+        #        self.rc         = kwargs.get('rc')
+        #        self.size       = kwargs.get('size')
+        self.category = kwargs.get('category') or 0
+        self.units = kwargs.get('units') or Units.MT_UNIT
         # Now check and set rc/size according to the native type of v
         # only bytes/float/int acceptable
         # Change the rc and size regardless of what is passed in on the kwargs
@@ -931,9 +1009,11 @@ class CbEngValWrite(CbEngVal):
         else:
             raise ExceptionCbWrite('CbEngValWrite unsupported value type {:s}'.format(type(v)))
         self.setValue(v)
-        
+
+
 class TableRow(object):
     """Represents a row of a table and consists of CbEngVal objects."""
+
     def __init__(self, theCb):
         if theCb.type != COMPONENT_BLOCK_DATUM_BLOCK_START:
             raise ExceptionLrTableRowInit(
@@ -944,25 +1024,25 @@ class TableRow(object):
         # Lazily initialised on __getitem__
         # Otherwise a map {menmonic : index, ...]
         self._cellMnemMap = None
-    
+
     def genCells(self):
         """yields each CbEngVal."""
         for b in self._blocks:
             yield b
-    
+
     def __len__(self):
         """The number of cells in the row."""
         return len(self._blocks)
-    
+
     @property
     def value(self):
         """The name of the row i.e. the value of block 0."""
         return self._blocks[0].value
-    
+
     def _getByLable(self, theB):
         """Returns the index of the block whose mnemonic is theB.
         May raise KeyError on no match."""
-        assert(isinstance(theB, bytes))
+        assert (isinstance(theB, bytes))
         if self._cellMnemMap is None:
             self._cellMnemMap = {}
             for i, c in enumerate(self._blocks):
@@ -973,7 +1053,7 @@ class TableRow(object):
                     self._cellMnemMap[c.mnem] = i
         # Could raise KeyError here
         return self._cellMnemMap[theB]
-    
+
     def addCb(self, theCb):
         """Adds a component block onto the end of the row.
         Returns the mnemonic field from the component block."""
@@ -983,7 +1063,7 @@ class TableRow(object):
             )
         self._blocks.append(theCb)
         return theCb.mnem
-        
+
     def __getitem__(self, key):
         """If key is an integer or slice this returns a CbEngVal by index(es).
         If key is a bytes() object then this returns a CbEngVal by label.
@@ -992,7 +1072,7 @@ class TableRow(object):
             return self._blocks[key]
         elif isinstance(key, bytes):
             return self._blocks[self._getByLable(key)]
-            
+
     def __contains__(self, key):
         """Returns True if this row has a column named key."""
         try:
@@ -1001,13 +1081,15 @@ class TableRow(object):
         except KeyError:
             pass
         return False
-            
+
+
 class LrTable(LrBase):
     """Table-like Logical Record."""
+
     def __init__(self, theType, theAttr):
         """Base class constructor. theType, theAttr are byte objects i.e. integers 0 to 255"""
         super(LrTable, self).__init__(theType, theAttr)
-        assert(self.type in LR_TYPE_TABLE_DATA), \
+        assert (self.type in LR_TYPE_TABLE_DATA), \
             'Illegal LR type of %d for a Logical Record Table' % self.type
         self.tableCbEv = None
         # List of TableRow
@@ -1019,13 +1101,13 @@ class LrTable(LrBase):
         self._mnemRowIndex = {}
         # Ordered dict of { mnem : ref_count, ...}
         self._colMnemS = collections.OrderedDict()
-        
+
     def genRows(self):
         """yields each TableRow.
         TODO: parameter to sort or reverse."""
         for r in self._rows:
             yield r
-    
+
     def genRowNames(self, sort=0):
         """yields each TableRow name.
         If sort > 0 then the results are sorted. If sort < 0 the results are reverse sorted"""
@@ -1034,7 +1116,7 @@ class LrTable(LrBase):
                 yield r.value
         else:
             valS = [r.value for r in self._rows]
-            valS.sort(reverse=(sort<0))
+            valS.sort(reverse=(sort < 0))
             for v in valS:
                 yield v
 
@@ -1049,18 +1131,18 @@ class LrTable(LrBase):
                 'self._mnemRowIndex[m] is index {:d} but number of rows is {:d}'.format(self._mnemRowIndex[m],
                                                                                         len(self._rows))
             )
-    
+
     @property
     def isSingleParam(self):
         """True it this table is a list of single parameters (i.e. type 0 blocks)."""
         return self.tableCbEv == None
-    
+
     @property
     def value(self):
         """The name of the table or None i.e. the value of the first block."""
         if self.tableCbEv is not None:
             return self.tableCbEv.value
-    
+
     def __getitem__(self, key):
         """If key is an integer or slice this returns block by index(es).
         If key is a bytes() object then this returns row by label.
@@ -1081,11 +1163,11 @@ class LrTable(LrBase):
         except KeyError as err:
             pass
         return False
-    
+
     def __len__(self):
         """Number of rows in the table."""
         return len(self._rows)
-            
+
     def _incColMnem(self, theMnem):
         """Increment the reference count of the column mnemonic."""
         if theMnem in self._colMnemS:
@@ -1113,7 +1195,7 @@ class LrTable(LrBase):
             )
         self._rows.append(TableRow(theCbEv))
         self._incColMnem(theCbEv.mnem)
-        
+
     def addDatumBlock(self, theCbEv):
         """Adds a component block to the last row. Returns theCbEv value."""
         if theCbEv.type != COMPONENT_BLOCK_DATUM_BLOCK_ENTRY:
@@ -1159,7 +1241,7 @@ class LrTable(LrBase):
                     yield myR[aColMnem]
                 except KeyError:
                     yield None
-    
+
     def genLisBytes(self):
         """Yields chunks of binary LIS data (actually each component block)."""
         if self.tableCbEv is not None:
@@ -1168,9 +1250,11 @@ class LrTable(LrBase):
             for cell in self.genRowValuesInColOrder(r):
                 if cell is not None:
                     yield cell.lisBytes()
-        
+
+
 class LrTableRead(LrTable):
     """A table-like Logical Record read from a LIS file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrTableRead, self).__init__(t, a)
@@ -1192,7 +1276,10 @@ class LrTableRead(LrTable):
             except File.ExceptionFileRead as err:
                 # Will happen if there is spurious extra bytes not enough to
                 # create a block
-                logging.warning('LrTableRead.__init__(): Tell: 0x{:x} LD index: 0x{:x} Error: {:s}'.format(theFile.tellLr(), theFile.ldIndex(), str(err)))
+                logging.warning(
+                    'LrTableRead.__init__(): Tell: 0x{:x} LD index: 0x{:x} Error: {:s}'.format(theFile.tellLr(),
+                                                                                               theFile.ldIndex(),
+                                                                                               str(err)))
                 break
             else:
                 if myCbEv.type == COMPONENT_BLOCK_DATUM_BLOCK_START:
@@ -1208,7 +1295,8 @@ class LrTableRead(LrTable):
                     raise ExceptionLrTableInit('Unknown Component block type {:d}'.format(myCbEv.type))
         # Index the last row
         self._indexLastRowOrDiscard()
-        
+
+
 class LrTableWrite(LrTable):
     """Creates a table from internal Python data structures.
     
@@ -1218,6 +1306,7 @@ class LrTableWrite(LrTable):
     
     If an element of the table is a tuple or a list it is assumed to be (value, units).
     """
+
     def __init__(self, theType, theName, theMnemS, theTable):
         """Construct a table from internal data that must be bytes/float/int.
         theType is the table type e.g. b'FILM'
@@ -1230,7 +1319,9 @@ class LrTableWrite(LrTable):
         self.tableCbEv = CbEngValWrite(COMPONENT_BLOCK_TABLE, theName, b'TYPE', units=b'    ')
         for row in theTable:
             if len(row) != len(theMnemS):
-                raise ExceptionLrTableCompose('LrTableWrite: Row length {:d} does not match MNEM list length {:d}'.format(len(row), len(theMnemS)))
+                raise ExceptionLrTableCompose(
+                    'LrTableWrite: Row length {:d} does not match MNEM list length {:d}'.format(len(row),
+                                                                                                len(theMnemS)))
             for c, val in enumerate(row):
                 if isinstance(val, tuple) or isinstance(val, list):
                     val, uom = val
@@ -1247,6 +1338,7 @@ class LrTableWrite(LrTable):
                     self.addDatumBlock(myCbEv)
             self._indexLastRowOrDiscard()
 
+
 ############################
 # End: Table logical records
 ############################
@@ -1255,41 +1347,45 @@ class LrTableWrite(LrTable):
 # Section: DFSR and Normal/Alternate data
 #########################################
 
-#=======================
+# =======================
 # Section: Entry Blocks.
-#=======================
+# =======================
 # Entry block types for Logical Record DFSR
-EB_SET_SIZE = 16+1
+EB_SET_SIZE = 16 + 1
 EB_TYPE_RANGE = tuple(range(EB_SET_SIZE))
-EB_TYPE_TERMINATOR                 = 0
-EB_TYPE_DATA_TYPE                  = 1
-EB_TYPE_DSB_TYPE                   = 2
-EB_TYPE_FRAME_SIZE                 = 3
-EB_TYPE_UP_DOWN_FLAG               = 4
-EB_TYPE_OPTICAL_DEPTH_UNITS        = 5
-EB_TYPE_REF_POINT                  = 6
-EB_TYPE_REF_POINT_UNITS            = 7
-EB_TYPE_FRAME_SPACE                = 8
-EB_TYPE_FRAME_SPACE_UNITS          = 9
-EB_TYPE_UNDEFINED_10               = 10
-EB_TYPE_MAX_FRAMES_PER_REC         = 11
-EB_TYPE_ABSENT_VALUE               = 12
-EB_TYPE_RECORD_MODE                = 13
-EB_TYPE_DEPTH_UNITS                = 14
-EB_TYPE_DEPTH_REP_CODE             = 15
-EB_TYPE_DSB_SUB_TYPE               = 16
+EB_TYPE_TERMINATOR = 0
+EB_TYPE_DATA_TYPE = 1
+EB_TYPE_DSB_TYPE = 2
+EB_TYPE_FRAME_SIZE = 3
+EB_TYPE_UP_DOWN_FLAG = 4
+EB_TYPE_OPTICAL_DEPTH_UNITS = 5
+EB_TYPE_REF_POINT = 6
+EB_TYPE_REF_POINT_UNITS = 7
+EB_TYPE_FRAME_SPACE = 8
+EB_TYPE_FRAME_SPACE_UNITS = 9
+EB_TYPE_UNDEFINED_10 = 10
+EB_TYPE_MAX_FRAMES_PER_REC = 11
+EB_TYPE_ABSENT_VALUE = 12
+EB_TYPE_RECORD_MODE = 13
+EB_TYPE_DEPTH_UNITS = 14
+EB_TYPE_DEPTH_REP_CODE = 15
+EB_TYPE_DSB_SUB_TYPE = 16
+
 
 class ExceptionEntryBlock(ExceptionLr):
     """Specialisation of exception for Entry Blocks."""
     pass
 
+
 class ExceptionEntryBlockSetInit(ExceptionLr):
     """Exception for EntryBlockSet.__init__()."""
     pass
 
+
 #: An entry block that contains a type, size, representation code and a value
 class EntryBlock(collections.namedtuple('EntryBlock', 'type size repCode value')):
-    __slots__= ()
+    __slots__ = ()
+
     def lisBytes(self):
         """Returns the LIS bytes for the Entry Block."""
         r = bytearray(STRUCT_ENTRY_BLOCK_PREAMBLE.pack(self.type, self.size, self.repCode))
@@ -1297,8 +1393,10 @@ class EntryBlock(collections.namedtuple('EntryBlock', 'type size repCode value')
             r.extend(RepCode.writeBytes(self.value, self.repCode))
         return r
 
+
 class EntryBlockRead(EntryBlock):
     """An entry block read from a LIS file."""
+
     def __new__(self, theFile):
         t, s, r = theFile.unpack(STRUCT_ENTRY_BLOCK_PREAMBLE)
         if s == 0:
@@ -1306,98 +1404,100 @@ class EntryBlockRead(EntryBlock):
             return super(EntryBlockRead, self).__new__(self, t, s, r, None)
         return super(EntryBlockRead, self).__new__(self, t, s, r, RepCode.readRepCode(r, theFile, s))
 
+
 class EntryBlockSet(object):
     """Represents the set of Entry Blocks in a DFSR."""
     #: Map of supported attributes i.e. those that are 'interesting'
     ATTR_MAP = {
         # Normal/Alternate data
-        'dataType'              : 1,    # Block 1
-        'dsbType'               : 2,    # Block 2
+        'dataType': 1,  # Block 1
+        'dsbType': 2,  # Block 2
         # Blocks 4, 8 and 9 are significant for indirect depth.
-        'upDown'                : 4,    # Block 4
-        'optLogScale'           : 5,    # Block 5
-        'frameSpacing'          : 8,    # Block 8
-        'frameSpacingUnits'     : 9,    # Block 9
-        'absentValue'           : 12,   # Block 12
+        'upDown': 4,  # Block 4
+        'optLogScale': 5,  # Block 5
+        'frameSpacing': 8,  # Block 8
+        'frameSpacingUnits': 9,  # Block 9
+        'absentValue': 12,  # Block 12
         # If 1 this is indirect depth, 0 is explicit depth
         # If 1 then entries in blocks 4, 8 and 9 and 14 and 15 are significant.
         # If this is 1 and block 9 != block 14 then
         # unit conversion is required from 14->9.
-        'recordingMode'         : 13,   # Block 13
+        'recordingMode': 13,  # Block 13
         # Strictly speaking these are not 'depth' but could be time
-        'depthUnits'            : 14,   # Block 14
-        'depthRepCode'          : 15    # Block 15
+        'depthUnits': 14,  # Block 14
+        'depthRepCode': 15  # Block 15
     }
     #: Documentation about each Entry Block
     EB_DOC = {
-        0   : 'Terminator, size is chosen to make total size even.',
-        1   : 'Data Record Type. The type of the IFLR (0 | 1) that this describes.',
-        2   : 'Datum Spec Block Type. How to interpret the DSBs. Only 0 is defined.',
-        3   : 'Data Frame Size. Not required.',
-        4   : 'Up/Down. 1=up, 255=down, 0=neither.',
-        5   : 'Optical Log Scale. 1=Feet, 255=Meters, 0=Time.',
-        6   : 'Data Reference Point. The distance of the data reference point above the tool reference point. Essentially add this to depth to find the depth axis of un-memorised data such as tension.',
-        7   : 'Units for Data Reference Point.',
-        8   : 'Frame Spacing.',
-        9   : 'Units for Frame Spacing.',
-        10  : 'Undefined.',
-        11  : 'Maximum Frames per Record.',
-        12  : 'Absent value.',
-        13  : 'Depth Recording Mode. 1=Indirect X, 0=Direct X',
-        14  : 'Units of Depth when depth Recording Mode=1',
-        15  : 'Representation Code for depth when Depth Recording Mode=1',
-        16  : 'Datum Spec Block sub-Type. How to interpret the DSBs (0 | 1)',
+        0: 'Terminator, size is chosen to make total size even.',
+        1: 'Data Record Type. The type of the IFLR (0 | 1) that this describes.',
+        2: 'Datum Spec Block Type. How to interpret the DSBs. Only 0 is defined.',
+        3: 'Data Frame Size. Not required.',
+        4: 'Up/Down. 1=up, 255=down, 0=neither.',
+        5: 'Optical Log Scale. 1=Feet, 255=Meters, 0=Time.',
+        6: 'Data Reference Point. The distance of the data reference point above the tool reference point. Essentially add this to depth to find the depth axis of un-memorised data such as tension.',
+        7: 'Units for Data Reference Point.',
+        8: 'Frame Spacing.',
+        9: 'Units for Frame Spacing.',
+        10: 'Undefined.',
+        11: 'Maximum Frames per Record.',
+        12: 'Absent value.',
+        13: 'Depth Recording Mode. 1=Indirect X, 0=Direct X',
+        14: 'Units of Depth when depth Recording Mode=1',
+        15: 'Representation Code for depth when Depth Recording Mode=1',
+        16: 'Datum Spec Block sub-Type. How to interpret the DSBs (0 | 1)',
     }
     #: List of block numbers that are not written out, also _setLisSizeEven()
     #: and lisSize() ignore these.
     BLOCKS_TO_SKIP = (10,)
+
     def __init__(self):
         # Set defaults
         self._ebS = [
-            EntryBlock(EB_TYPE_TERMINATOR,              0, 66, None),       # 0
-            EntryBlock(EB_TYPE_DATA_TYPE,               1, 66, 0),          # 1
-            EntryBlock(EB_TYPE_DSB_TYPE,                1, 66, 0),          # 2
+            EntryBlock(EB_TYPE_TERMINATOR, 0, 66, None),  # 0
+            EntryBlock(EB_TYPE_DATA_TYPE, 1, 66, 0),  # 1
+            EntryBlock(EB_TYPE_DSB_TYPE, 1, 66, 0),  # 2
             # Default not specified in LIS79 specification so assumed here
-            EntryBlock(EB_TYPE_FRAME_SIZE,              1, 66, 0),          # 3
-            EntryBlock(EB_TYPE_UP_DOWN_FLAG,            1, 66, 1),          # 4
-            EntryBlock(EB_TYPE_OPTICAL_DEPTH_UNITS,     1, 66, 1),          # 5
+            EntryBlock(EB_TYPE_FRAME_SIZE, 1, 66, 0),  # 3
+            EntryBlock(EB_TYPE_UP_DOWN_FLAG, 1, 66, 1),  # 4
+            EntryBlock(EB_TYPE_OPTICAL_DEPTH_UNITS, 1, 66, 1),  # 5
             # Default not specified in LIS79 specification so assumed here
-            EntryBlock(EB_TYPE_REF_POINT,               0, 66, None),       # 6
-            EntryBlock(EB_TYPE_REF_POINT_UNITS,         4, 65, b'.1IN'),    # 7
+            EntryBlock(EB_TYPE_REF_POINT, 0, 66, None),  # 6
+            EntryBlock(EB_TYPE_REF_POINT_UNITS, 4, 65, b'.1IN'),  # 7
             # Default not specified in LIS79 specification so assumed here
-#            EntryBlock(EB_TYPE_FRAME_SPACE,             1, 66, 60),         # 8
-#            EntryBlock(EB_TYPE_FRAME_SPACE_UNITS,       4, 65, b'.1IN'),    # 9
-            EntryBlock(EB_TYPE_FRAME_SPACE,             0, 66, None),         # 8
-            EntryBlock(EB_TYPE_FRAME_SPACE_UNITS,       0, 65, None),    # 9
+            #            EntryBlock(EB_TYPE_FRAME_SPACE,             1, 66, 60),         # 8
+            #            EntryBlock(EB_TYPE_FRAME_SPACE_UNITS,       4, 65, b'.1IN'),    # 9
+            EntryBlock(EB_TYPE_FRAME_SPACE, 0, 66, None),  # 8
+            EntryBlock(EB_TYPE_FRAME_SPACE_UNITS, 0, 65, None),  # 9
             # Default not specified in LIS79 specification so assumed here
-            EntryBlock(EB_TYPE_UNDEFINED_10,            0, 66, None),       # 10
+            EntryBlock(EB_TYPE_UNDEFINED_10, 0, 66, None),  # 10
             # Default not specified in LIS79 specification so assumed here
-            EntryBlock(EB_TYPE_MAX_FRAMES_PER_REC,      0, 66, None),       # 11
-            EntryBlock(EB_TYPE_ABSENT_VALUE,            4, 68, -999.25),    # 12
-            EntryBlock(EB_TYPE_RECORD_MODE,             1, 66, 0),          # 13
-            EntryBlock(EB_TYPE_DEPTH_UNITS,             4, 65, b'.1IN'),    # 14
+            EntryBlock(EB_TYPE_MAX_FRAMES_PER_REC, 0, 66, None),  # 11
+            EntryBlock(EB_TYPE_ABSENT_VALUE, 4, 68, -999.25),  # 12
+            EntryBlock(EB_TYPE_RECORD_MODE, 1, 66, 0),  # 13
+            EntryBlock(EB_TYPE_DEPTH_UNITS, 4, 65, b'.1IN'),  # 14
             # Default not specified in LIS79 specification so an impossible 0 assumed here
-            EntryBlock(EB_TYPE_DEPTH_REP_CODE,          1, 66, 0),          # 15
-            EntryBlock(EB_TYPE_DSB_SUB_TYPE,            1, 66, 0),          # 16
+            EntryBlock(EB_TYPE_DEPTH_REP_CODE, 1, 66, 0),  # 15
+            EntryBlock(EB_TYPE_DSB_SUB_TYPE, 1, 66, 0),  # 16
         ]
         self._setLisSizeEven()
-        assert(self._checkIntegrity() == 0), \
+        assert (self._checkIntegrity() == 0), \
             'Integrity failure of default values [{:d}:\n{:s}'.format(
                 self._checkIntegrity(),
                 str(self._ebS),
-                )
-    
+            )
+
     def __str__(self):
         return 'EntryBlockSet [{:d} bytes]:\n'.format(self.lisSize()) \
             + '\n'.join([str(e) for e in self._ebS])
-    
+
     def __getattr__(self, name):
         """Returns the Entry Block corresponding to the name."""
         try:
             return self._ebS[self.ATTR_MAP[name]].value
         except KeyError or IndexError as err:
             raise AttributeError(str(err))
-    
+
     def __getitem__(self, key):
         """This returns an Entry block by integer index."""
         return self._ebS[key]
@@ -1413,12 +1513,12 @@ class EntryBlockSet(object):
         """True if the logging direction is down (X increasing).
         Note: not logUp and not logDown is possible to be True e.g. time log."""
         return self.upDown == 255
-    
+
     @property
     def xInc(self):
         """True if the logging X increases (down or time log)."""
         return not self.logUp
-    
+
     @property
     def opticalLogScale(self):
         """Returns the Units corresponding to Entry Block 5: 'Optical Log Scale'
@@ -1433,11 +1533,11 @@ class EntryBlockSet(object):
         elif val == 0:
             return Units.OPTICAL_TIME
         return Units.MT_UNIT
-    
+
     def lisSize(self):
         """Returns the totla size of the Entry Block set."""
         return sum([e.size for e in self._ebS if e.type not in self.BLOCKS_TO_SKIP])
-    
+
     def _checkIntegrity(self):
         if len(self._ebS) != EB_SET_SIZE:
             return 1
@@ -1451,29 +1551,30 @@ class EntryBlockSet(object):
             if eb.value is None and eb.size != 0:
                 return 4
         return 0
-    
+
     def _setLisSizeEven(self):
         """Sets the total LIS size of the Entry Block set to be even by
         adjusting the size of the terminator block."""
-        assert(self._checkIntegrity() == 0)
+        assert (self._checkIntegrity() == 0)
         # Set terminator block zero size
         self._ebS[0] = EntryBlock(EB_TYPE_TERMINATOR, 0, 66, None)
         if self.lisSize() % 2:
             # Set terminator block size 1
             self._ebS[0] = EntryBlock(EB_TYPE_TERMINATOR, 1, 66, 1)
-    
+
     def setEntryBlock(self, theEb):
         """Sets an Entry Block."""
-        assert(self._checkIntegrity() == 0)
+        assert (self._checkIntegrity() == 0)
         if theEb.type not in EB_TYPE_RANGE:
             raise ExceptionEntryBlock(
                 'EntryBlockSet.setEntryBlock(): type {:s} not in range'.format(str(theEb.type)))
         if theEb.type in self.BLOCKS_TO_SKIP:
             raise ExceptionEntryBlock(
-                'EntryBlockSet.setEntryBlock(): type {:s} excluded from EntryBlockSet value: {:s}'.format(str(theEb.type), str(theEb)))
+                'EntryBlockSet.setEntryBlock(): type {:s} excluded from EntryBlockSet value: {:s}'.format(
+                    str(theEb.type), str(theEb)))
         self._ebS[theEb.type] = theEb
         self._setLisSizeEven()
-        assert(self._checkIntegrity() == 0)
+        assert (self._checkIntegrity() == 0)
 
     def readFromFile(self, theFile):
         """Reads from a File object. NOTE: theFile.hasLd() must be True so
@@ -1483,66 +1584,70 @@ class EntryBlockSet(object):
             try:
                 self.setEntryBlock(eb)
             except ExceptionEntryBlock as err:
-                logging.warning('EntryBlockSet.readFromFile(): File.tellLr= 0x{:x} error: {:s}'.format(theFile.tellLr(), str(err)))
+                logging.warning(
+                    'EntryBlockSet.readFromFile(): File.tellLr= 0x{:x} error: {:s}'.format(theFile.tellLr(), str(err)))
             if eb.type == 0:
                 break
         self._setLisSizeEven()
-        
+
     def lisBytes(self):
         """Returns the Entry Block set as an array of bytes."""
         return b''.join(self.lisByteList())
-    
+
     def lisByteList(self):
         "Returns a list of bytes() objects, one for each entry block."""
         self._setLisSizeEven()
         r = []
         for e in self._ebS:
             if e.type not in self.BLOCKS_TO_SKIP \
-            and e.type != EB_TYPE_TERMINATOR:
+                    and e.type != EB_TYPE_TERMINATOR:
                 r.append(e.lisBytes())
         # Add terminator Entry Block
         r.append(self._ebS[EB_TYPE_TERMINATOR].lisBytes())
         return r
-        
-#=======================
-# End: Entry Blocks.
-#=======================
 
-#=====================================
+
+# =======================
+# End: Entry Blocks.
+# =======================
+
+# =====================================
 # Section: Datum Specification Blocks.
-#=====================================
+# =====================================
 class ExceptionDatumSpecBlock(ExceptionLr):
     """Specialisation of exception for Datum Specification Blocks."""
     pass
 
+
 class DatumSpecBlock(object):
     """This represents as Datum Specification Block."""
+
     def __init__(self):
-        self.mnem           = None
-        self.servId         = None
-        self.servOrd        = None
-        self.units          = None
-        self.apiLogType     = None
-        self.apiCurveType   = None
-        self.apiCurveClass  = None
-        self.apiModifier    = None
-        self.fileNumber     = None
-        self.size           = None
+        self.mnem = None
+        self.servId = None
+        self.servOrd = None
+        self.units = None
+        self.apiLogType = None
+        self.apiCurveType = None
+        self.apiCurveClass = None
+        self.apiModifier = None
+        self.fileNumber = None
+        self.size = None
         # Note: use samples()
-        self._samples        = None
-        self.repCode        = None
+        self._samples = None
+        self.repCode = None
         # Computed bursts and sub channels
         # bursts are invariant over sub-channels
-        self._bursts        = None
-        self.subChannels    = None
-    
+        self._bursts = None
+        self.subChannels = None
+
     @property
     def isNull(self):
         """True if this block is compromised in any way and should be ignored
         when composing a DFSR. The critical test is whether the data from this
         channel will be in the frame."""
-        return self.size == 0 
-    
+        return self.size == 0
+
     def _setBurstsSubChannels(self):
         """Calculates the number of sub-channels and bursts."""
         # Dipmeter data is specially treated
@@ -1581,12 +1686,12 @@ class DatumSpecBlock(object):
                 return RepCode.DIPMETER_FAST_CHANNEL_SUPER_SAMPLES
             return 1
         return self._samples
-    
+
     def bursts(self, theSc):
         """Returns the (samples, burst) for a sub-channel (bursts are invariant over sub-channels)."""
         # bursts are invariant over sub-channels
         return self._bursts
-    
+
     def values(self):
         """Returns the total number of discrete values per frame for a single channel."""
         if self.repCode == RepCode.DIPMETER_EDIT_TAPE_REP_CODE:
@@ -1603,8 +1708,8 @@ class DatumSpecBlock(object):
             (theInt % 1000000) // 1000,
             (theInt % 1000) // 10,
             theInt % 10,
-            )
-        
+        )
+
     def _unpackApiCodes(self, theInt):
         """Unpacks the API codes so that an integer value 45310011 sets
         (45, 310, 01, 1)."""
@@ -1613,16 +1718,18 @@ class DatumSpecBlock(object):
             self.apiCurveType,
             self.apiCurveClass,
             self.apiModifier,) = self._unpackApiInt(theInt)
-    
+
     def subChMnem(self, theSc):
         """Returns the curve Mnemonic for a particular sub-channel or None if unknown."""
         if self.subChannels == 1:
             return self.mnem
         if self.repCode in RepCode.DIPMETER_REP_CODES:
             return RepCode.DIPMETER_SUB_CHANNEL_SHORT_LONG_NAMES[theSc][0]
-        
+
+
 class DatumSpecBlockRead(DatumSpecBlock):
     """This represents as Datum Specification Block read from a file."""
+
     def __init__(self, theF):
         super(DatumSpecBlockRead, self).__init__()
         (
@@ -1635,37 +1742,42 @@ class DatumSpecBlockRead(DatumSpecBlock):
             self.size,
             self._samples,
             self.repCode,
-            ) = theF.unpack(STRUCT_DSB)
+        ) = theF.unpack(STRUCT_DSB)
         # Fix API codes
         self._unpackApiCodes(myApiInt)
         # Set bursts and sub-channels
         self._setBurstsSubChannels()
-#=====================================
-# End: Datum Specification Blocks.
-#=====================================
 
-#============================================
+
+# =====================================
+# End: Datum Specification Blocks.
+# =====================================
+
+# ============================================
 # Section: Datum Format Specification Record.
-#============================================
+# ============================================
 class LrDFSR(LrBase):
     """Data Format Specification Record."""
+
     def __init__(self, theType, theAttr):
         super(LrDFSR, self).__init__(theType, theAttr)
-        assert(self.type == LR_TYPE_DATA_FORMAT), \
+        assert (self.type == LR_TYPE_DATA_FORMAT), \
             'Illegal LR type of %d for a Logical Record DFSR' % self.type
         self.ebs = EntryBlockSet()
         # Ordered list of [DatumSpecBlock, ...]
         self.dsbBlocks = []
 
-#    def __getitem__(self, key):
-#        """This returns an Entry block by integer index."""
-#        return self.dsbBlocks[key]
-            
+    #    def __getitem__(self, key):
+    #        """This returns an Entry block by integer index."""
+    #        return self.dsbBlocks[key]
+
     def frameSize(self):
         return sum([d.size for d in self.dsbBlocks])
-    
+
+
 class LrDFSRRead(LrDFSR):
     """Data Format Specification Record read from a file."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrDFSRRead, self).__init__(t, a)
@@ -1678,29 +1790,36 @@ class LrDFSRRead(LrDFSR):
                 self.dsbBlocks.append(myDsbr)
             else:
                 logging.warning('LrDFSRRead.__init__(): Ignoring NULL Datum Spec. Block')
-#============================================
-# End: Datum Format Specification Record.
-#============================================
 
-#==========================================================================
+
+# ============================================
+# End: Datum Format Specification Record.
+# ============================================
+
+# ==========================================================================
 # Section: Normal and Alternate data, these are supported 'by other means'.
-#==========================================================================
+# ==========================================================================
 class LrNormalAlternateData(LrBase):
     """Class for Normal and Alternate data i.e. curve data."""
+
     def __init__(self, theType, theAttr):
         super(LrNormalAlternateData, self).__init__(theType, theAttr)
-        assert(self.type in (LR_TYPE_NORMAL_DATA, LR_TYPE_ALTERNATE_DATA)), \
+        assert (self.type in (LR_TYPE_NORMAL_DATA, LR_TYPE_ALTERNATE_DATA)), \
             'Illegal LR type of %d for a Logical Record Normal/Alternate Data' % self.type
         raise ExceptionLrNotImplemented('Logical Record Normal/Alternate Data not implemented.')
 
+
 class LrNormalAlternateDataRead(LrNormalAlternateData):
     """Class for Normal and Alternate data i.e. curve data."""
+
     def __init__(self, theFile):
         t, a = self._typeAttrUnpack(theFile)
         super(LrNormalAlternateDataRead, self).__init__(t, a)
-#==========================================================================
+
+
+# ==========================================================================
 # End: Normal and Alternate data, these are supported 'by other means'.
-#==========================================================================
+# ==========================================================================
 
 #########################################
 # End: DFSR and Normal/Alternate data
@@ -1713,6 +1832,7 @@ class LrFactory(object):
     """Provides a despatch mechanism for generating Logical Records.
     This can be sub-classed to create different sets of Logical Records.
     For example the Indexer creates minimal logical records."""
+
     def __init__(self):
         self._lrMap = {}
         # Log data
@@ -1739,14 +1859,16 @@ class LrFactory(object):
         for t in LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
             self._lrMap[t] = LrMisc
 
+
 class LrFactoryRead(LrFactory):
     """A factory for generating complete Logical Records from a file."""
+
     def __init__(self):
         super(LrFactoryRead, self).__init__()
         # Specialise despatch map
         # Log data
         for t in LR_TYPE_LOG_DATA:
-            self._lrMap[t] = None#LrNormalAlternateDataRead
+            self._lrMap[t] = None  # LrNormalAlternateDataRead
         # Table records
         for t in LR_TYPE_TABLE_DATA:
             self._lrMap[t] = LrTableRead
@@ -1767,7 +1889,7 @@ class LrFactoryRead(LrFactory):
         # Unknown internal format
         for t in LR_TYPE_UNKNOWN_INTERNAL_FORMAT:
             self._lrMap[t] = LrMiscRead
-    
+
     def retLrFromFile(self, theFile):
         """Given a LIS file this reads one Logical Record, and returns the
         appropriate Logical Record object or None."""

@@ -41,6 +41,7 @@ class XAxis:
     It has an ident, long name and units. It accumulates, for every IFLR in the set, the VR position LRSH position, frame number
     and X axis value.
     """
+
     def __init__(self, ident: bytes, long_name: bytes, units: bytes):
         self.ident = ident
         self.long_name = long_name
@@ -73,5 +74,3 @@ class XAxis:
         return self._summary
 
     # TODO: Add an API that can turn an X axis value into the nearest frame number. Needs to cope with decreasing data.
-
-

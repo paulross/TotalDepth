@@ -79,9 +79,9 @@ UTIM DATE TIME WAC BDIA DBTM DBTV DMEA DVER RSU RSD SWAB SURG ROP BPOS HKL WOB T
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('1165665017', datetime.datetime(2006, 12, 9, 11, 50, 17)),
-        ('1165665020', datetime.datetime(2006, 12, 9, 11, 50, 20)),
-        ('1165665027', datetime.datetime(2006, 12, 9, 11, 50, 27)),
+            ('1165665017', datetime.datetime(2006, 12, 9, 11, 50, 17)),
+            ('1165665020', datetime.datetime(2006, 12, 9, 11, 50, 20)),
+            ('1165665027', datetime.datetime(2006, 12, 9, 11, 50, 27)),
     )
 )
 def test__unit_unix_time_to_datetime_datetime(value, expected):
@@ -106,23 +106,23 @@ def test__unit_unix_time_to_datetime_datetime_raises(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('09Dec06', datetime.date(2006, 12, 9)),
-        ('09Dec55', datetime.date(1955, 12, 9)),
-        ('09Dec75', datetime.date(1975, 12, 9)),
-        ('09Dec50', datetime.date(2050, 12, 9)),
-        ('09-Dec-06', datetime.date(2006, 12, 9)),
-        ('09-Dec-55', datetime.date(1955, 12, 9)),
-        ('09-Dec-75', datetime.date(1975, 12, 9)),
-        ('09-Dec-50', datetime.date(2050, 12, 9)),
-        # Sigh
-        ('9-Oct-11', datetime.date(2011, 10, 9)),
-        ('9Oct11', datetime.date(2011, 10, 9)),
-        ('9-Oct-1', datetime.date(2001, 10, 9)),
-        ('9Oct1', datetime.date(2001, 10, 9)),
-        ('9-Oct-01', datetime.date(2001, 10, 9)),
-        ('9Oct01', datetime.date(2001, 10, 9)),
-        ('09-Oct-01', datetime.date(2001, 10, 9)),
-        ('09Oct01', datetime.date(2001, 10, 9)),
+            ('09Dec06', datetime.date(2006, 12, 9)),
+            ('09Dec55', datetime.date(1955, 12, 9)),
+            ('09Dec75', datetime.date(1975, 12, 9)),
+            ('09Dec50', datetime.date(2050, 12, 9)),
+            ('09-Dec-06', datetime.date(2006, 12, 9)),
+            ('09-Dec-55', datetime.date(1955, 12, 9)),
+            ('09-Dec-75', datetime.date(1975, 12, 9)),
+            ('09-Dec-50', datetime.date(2050, 12, 9)),
+            # Sigh
+            ('9-Oct-11', datetime.date(2011, 10, 9)),
+            ('9Oct11', datetime.date(2011, 10, 9)),
+            ('9-Oct-1', datetime.date(2001, 10, 9)),
+            ('9Oct1', datetime.date(2001, 10, 9)),
+            ('9-Oct-01', datetime.date(2001, 10, 9)),
+            ('9Oct01', datetime.date(2001, 10, 9)),
+            ('09-Oct-01', datetime.date(2001, 10, 9)),
+            ('09Oct01', datetime.date(2001, 10, 9)),
     )
 )
 def test__unit_ddmmyy_to_datetime_date(value, expected):
@@ -133,11 +133,11 @@ def test__unit_ddmmyy_to_datetime_date(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('32Dec06', '_unit_ddmmyy_to_datetime_date(): day is out of range for month on value "32Dec06"'),
-        ('09XXX06', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09XXX06"'),
-        ('', '_unit_ddmmyy_to_datetime_date(): Can not grep value ""'),
-        ('09', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09"'),
-        ('09Dec', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09Dec"'),
+            ('32Dec06', '_unit_ddmmyy_to_datetime_date(): day is out of range for month on value "32Dec06"'),
+            ('09XXX06', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09XXX06"'),
+            ('', '_unit_ddmmyy_to_datetime_date(): Can not grep value ""'),
+            ('09', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09"'),
+            ('09Dec', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09Dec"'),
     )
 )
 def test__unit_ddmmyy_to_datetime_date_raises(value, expected):
@@ -149,7 +149,7 @@ def test__unit_ddmmyy_to_datetime_date_raises(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('11-50-17', datetime.time(11, 50, 17)),
+            ('11-50-17', datetime.time(11, 50, 17)),
     )
 )
 def test__unit_hhmmyy_to_datetime_time(value, expected):
@@ -160,7 +160,8 @@ def test__unit_hhmmyy_to_datetime_time(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('115017', '_unit_hhmmyy_to_datetime_time(): time data \'115017\' does not match format \'%H-%M-%S\' on value "115017"'),
+            ('115017',
+             '_unit_hhmmyy_to_datetime_time(): time data \'115017\' does not match format \'%H-%M-%S\' on value "115017"'),
     )
 )
 def test__unit_hhmmyy_to_datetime_time_raises(value, expected):
@@ -172,11 +173,11 @@ def test__unit_hhmmyy_to_datetime_time_raises(value, expected):
 @pytest.mark.parametrize(
     'line, expected',
     (
-        ('UTIM Unix Time sec', ('UTIM', 'Unix Time', 'sec')),
-        ('UTIM\tUnix Time\tsec', ('UTIM', 'Unix Time', 'sec')),
-        ('ECDW ECD at Weakest Depth g/cc', ('ECDW', 'ECD at Weakest Depth', 'g/cc')),
-        ('HVMX Heave m', ('HVMX', 'Heave', 'm')),
-        ("PIT1 Tank Volume Pit 1 m3", ('PIT1', 'Tank Volume Pit 1', 'm3')),
+            ('UTIM Unix Time sec', ('UTIM', 'Unix Time', 'sec')),
+            ('UTIM\tUnix Time\tsec', ('UTIM', 'Unix Time', 'sec')),
+            ('ECDW ECD at Weakest Depth g/cc', ('ECDW', 'ECD at Weakest Depth', 'g/cc')),
+            ('HVMX Heave m', ('HVMX', 'Heave', 'm')),
+            ("PIT1 Tank Volume Pit 1 m3", ('PIT1', 'Tank Volume Pit 1', 'm3')),
     )
 )
 def test_re_channel_definition(line, expected):
@@ -188,9 +189,9 @@ def test_re_channel_definition(line, expected):
 @pytest.mark.parametrize(
     'line',
     (
-        'UTIM    DATE    TIME ...',
-        'UTIM DATE TIME ...',
-        'UTIM\tDATE\tTIME ...',
+            'UTIM    DATE    TIME ...',
+            'UTIM DATE TIME ...',
+            'UTIM\tDATE\tTIME ...',
     )
 )
 def test_re_data_header_definition_match(line):
@@ -201,8 +202,8 @@ def test_re_data_header_definition_match(line):
 @pytest.mark.parametrize(
     'line',
     (
-        'UTIM    DAT    TIME ...',
-        'UTIM Unix Time sec',
+            'UTIM    DAT    TIME ...',
+            'UTIM Unix Time sec',
     )
 )
 def test_re_data_header_definition_no_match(line):
@@ -256,9 +257,9 @@ def test_parse_example_file_channel_names():
 @pytest.mark.parametrize(
     'value, expected',
     (
-        ('', 'Parsing DAT file results in no channels.'),
-        ('asdadf\nasdsa', 'Line: 1: In channel declaration section but no match on "asdadf"'),
-        ("""UTIM Unix Time sec
+            ('', 'Parsing DAT file results in no channels.'),
+            ('asdadf\nasdsa', 'Line: 1: In channel declaration section but no match on "asdadf"'),
+            ("""UTIM Unix Time sec
 UTIM DATE TIME WAC BDIA DBTM DBTV DMEA DVER RSU RSD SWAB SURG ROP BPOS HKL WOB TRQ RPMA RPMB BROT BDTI TBR SPP COPP CEPP WHP KLP CHP HVMX CCVL CFO CFI CDI CDO CTVL TVA TPVT ETPT MFO MFI MDO MDI MTO MTI ECDB ECDT ECDC ECDW ECDM GAS METH ETH PRP IBUT NBUT IPEN NPEN EPEN
 1165665017 09Dec06 11-50-17 0 8.50 10.00 10.00 3131.07 3036.55 0.11 0.00 1.20 0.00 3.02 1.15 33.26 0.00 0.00 -0 0 222036.00 0.00 269999 0.7 0.0 0.0 0.0 0.0 0.0 0.00 0.0 0.0 0.0 0.0 0.0 0.0 14.70 0.35 0.00 7.7035 0.0000 1.20 1.20 30.2 22.7 1.1976 1.1976 1.1976 1.1976 0.0000 0.000 11 0 0 0 0 0 0 0
 """, 'Line: 2: channel name DATE not defined in section 1.'),

@@ -23,10 +23,10 @@ Created on Dec 14, 2011
 
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-12-14'
+__author__ = 'Paul Ross'
+__date__ = '2011-12-14'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
 import functools
 import logging
@@ -42,39 +42,43 @@ from TotalDepth.util.plot import FILMCfg
 from TotalDepth.util.plot import XMLCfg
 from TotalDepth.util.plot import Track
 
+
 class ExceptionFILMCfgXML(FILMCfg.ExceptionFILMCfg):
     """Specialisation of exception for FILMCfgXML module."""
     pass
 
+
 class ExceptionFILMCfgXMLRead(ExceptionFILMCfgXML):
     """Specialisation of exception for FILMCfgXMLRead module."""
     pass
+
 
 class ExceptionFILMCfgXMLReadLookUp(ExceptionFILMCfgXMLRead):
     """Specialisation of exception for FILMCfgXMLRead module when a lookup
     fails that would normally raise a KeyError."""
     pass
 
-#Paul-Rosss-MacBook-Pro:plot paulross$ grep -hr "<LgTrack " formats | tr -d " \t" | sort | uniq
-#<LgTrackUniqueId="DepthTrack">
-#<LgTrackUniqueId="Track2">
-#<LgTrackUniqueId="Track3">
-#<LgTrackUniqueId="TrackFC1">
-#<LgTrackUniqueId="TrackFC2">
-#<LgTrackUniqueId="TrackFC3">
-#<LgTrackUniqueId="TrackFC4">
-#<LgTrackUniqueId="depthTrack">
-#<LgTrackUniqueId="timeTrack">
-#<LgTrackUniqueId="track1">
-#<LgTrackUniqueId="track12">
-#<LgTrackUniqueId="track2">
-#<LgTrackUniqueId="track23">
-#<LgTrackUniqueId="track3">
-#<LgTrackUniqueId="track4">
-#<LgTrackUniqueId="track5">
-#<LgTrackUniqueId="track6">
-#<LgTrackUniqueId="trackLHT1">
-#<LgTrackUniqueId="trackRHT1">
+
+# Paul-Rosss-MacBook-Pro:plot paulross$ grep -hr "<LgTrack " formats | tr -d " \t" | sort | uniq
+# <LgTrackUniqueId="DepthTrack">
+# <LgTrackUniqueId="Track2">
+# <LgTrackUniqueId="Track3">
+# <LgTrackUniqueId="TrackFC1">
+# <LgTrackUniqueId="TrackFC2">
+# <LgTrackUniqueId="TrackFC3">
+# <LgTrackUniqueId="TrackFC4">
+# <LgTrackUniqueId="depthTrack">
+# <LgTrackUniqueId="timeTrack">
+# <LgTrackUniqueId="track1">
+# <LgTrackUniqueId="track12">
+# <LgTrackUniqueId="track2">
+# <LgTrackUniqueId="track23">
+# <LgTrackUniqueId="track3">
+# <LgTrackUniqueId="track4">
+# <LgTrackUniqueId="track5">
+# <LgTrackUniqueId="track6">
+# <LgTrackUniqueId="trackLHT1">
+# <LgTrackUniqueId="trackRHT1">
 
 class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
     """Extracts FILM information from a single XML file root element."""
@@ -82,29 +86,30 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
     TRAC_STANDARD_SPAN = 2
     #: Map of track IDs to start track location in half-tracks
     TRAC_UNIQUEID_TO_NON_STANDARD_SPAN = {
-        'track12'               : 4,
-        'track23'               : 4,
-        'TrackFC1'              : 1,
-        'TrackFC2'              : 1,
-        'TrackFC3'              : 1,
-        'TrackFC4'              : 1,
-        'trackLHT1'             : 1,
-        'trackRHT1'             : 1,
+        'track12': 4,
+        'track23': 4,
+        'TrackFC1': 1,
+        'TrackFC2': 1,
+        'TrackFC3': 1,
+        'TrackFC4': 1,
+        'trackLHT1': 1,
+        'trackRHT1': 1,
     }
     #: Number of half-tracks of the start of the track, this is a fudge around
     #: deciding this from the order of the LgTrack elements
     TRAC_UNIQUEID_TO_NON_STANDARD_START = {
-        'track12'               : 2,
-        'track23'               : 4,
-        'TrackFC1'              : 4,
-        'TrackFC2'              : 5,
-        'TrackFC3'              : 6,
-        'TrackFC4'              : 7,
-        'trackLHT1'             : 0,
-        'trackRHT1'             : 1,
-    }    
+        'track12': 2,
+        'track23': 4,
+        'TrackFC1': 4,
+        'TrackFC2': 5,
+        'TrackFC3': 6,
+        'TrackFC4': 7,
+        'trackLHT1': 0,
+        'trackRHT1': 1,
+    }
+
     def __init__(self, root):
-        assert(root.tag == self.tagInNs('LgFormat')), 'Wrong root element {:s}'.format(root.tag)
+        assert (root.tag == self.tagInNs('LgFormat')), 'Wrong root element {:s}'.format(root.tag)
         myName = self.elemID(root)
         # Tracks, create a list of Track.Track objects
         # NOTE: This is not quite like the LIS track buildup where the tracks are single
@@ -133,16 +138,17 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
             if trackID is None:
                 raise ExceptionFILMCfgXMLRead('PhysFilmCfgXMLRead.__init__(): Missing track UniqueId'.format(trackID))
             if trackID in self._trackNameOrdinalMap:
-                raise ExceptionFILMCfgXMLRead('PhysFilmCfgXMLRead.__init__(): Duplicate track UniqueId="{:s}"'.format(trackID))
+                raise ExceptionFILMCfgXMLRead(
+                    'PhysFilmCfgXMLRead.__init__(): Duplicate track UniqueId="{:s}"'.format(trackID))
             # Add the track ordinal
             self._trackNameOrdinalMap[trackID] = t
-#        myXPath = self.tagsInNs('LgFormat', 'LgVerticalScale', 'IndexScaler')
-#        myElem = root.find(myXPath)
-#        myX = self.int(root, self.tagsInNs('LgVerticalScale', 'IndexScaler'))
-#        print()
-#        print('TRACE:', myXPath, myElem, myX)
+        #        myXPath = self.tagsInNs('LgFormat', 'LgVerticalScale', 'IndexScaler')
+        #        myElem = root.find(myXPath)
+        #        myX = self.int(root, self.tagsInNs('LgVerticalScale', 'IndexScaler'))
+        #        print()
+        #        print('TRACE:', myXPath, myElem, myX)
         myXScale = self.int(root, self.tagsInNs('LgVerticalScale', 'IndexScaler'), None)
-        assert(myXScale is not None)
+        assert (myXScale is not None)
         super().__init__(
             theName=myName,
             theTracks=myTrackS,
@@ -150,10 +156,10 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
             theDest=None,
             theX=myXScale,
         )
-    
+
     def _retGridGen(self, e):
         """Returns a partial grid generator from the Track.py module or None."""
-        assert(e.tag == self.tagInNs('LgTrack')), 'Wrong element {:s}'.format(e.tag)
+        assert (e.tag == self.tagInNs('LgTrack')), 'Wrong element {:s}'.format(e.tag)
         # Try logarithmic first as, if it is a log track it will have both linear
         # and log specifications, the linear one being merely the track edges
         if len(e.findall(self.tagInNs('LgLogarithmicGrid'))) > 0:
@@ -175,7 +181,7 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
             return Track.genLinear10
         # Blank grid
         return None
-    
+
     def interpretTrac(self, theTracStr):
         """Turns TRAC information into left/right positions as Cooord.Dim()
         objects and the number of half-tracks of the start and half-tracks
@@ -186,18 +192,18 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
         e.g. b'T2 ' returns:
         (the left position of T2, right of T2, 4, 2).
         Note: There is some fudging going on here"""
-        assert(theTracStr is not None)
+        assert (theTracStr is not None)
         try:
             myTrackIdx = self._trackNameOrdinalMap[theTracStr]
         except KeyError:
             raise ExceptionFILMCfgXMLReadLookUp('PhysFilmCfgXMLRead.interpretTrac(): "{!r:s}" not in {:s}'.format(
-                    theTracStr,
-                    str(self._trackNameOrdinalMap.keys())
-                )
+                theTracStr,
+                str(self._trackNameOrdinalMap.keys())
+            )
             )
         else:
             # Work out half track starts and half track spans by walking across the tracks
-            assert(myTrackIdx >= 0  and myTrackIdx < len(self._trackS))
+            assert (myTrackIdx >= 0 and myTrackIdx < len(self._trackS))
             myTrack = self._trackS[myTrackIdx]
             try:
                 # This copes with special cases such as Track23 that might appear after both track 2 and 3
@@ -210,8 +216,10 @@ class PhysFilmCfgXMLRead(FILMCfg.PhysFilmCfg, XMLCfg.LgXMLBase):
                 myTracSpan = self.TRAC_STANDARD_SPAN
             return myTrack.left, myTrack.right, myHalfTrackStart, myTracSpan
 
+
 class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
     """Contains the configuration equivalent to a complete FILM table from a set of XML files."""
+
     def __init__(self, directory=None):
         """Constructor with a directory, all files in the directory (non-recursive)
         are read as LGFormat XML files. If dir is None then the "formats/" directory
@@ -225,7 +233,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
         # {LgCurve/LgChannel>"ROP5" : [<LgFormat UniqueId="Porosity_GR_3Track", ...], ...}
         self._chOutpMnemFilmMap = {}
         self.readDir(directory)
-        
+
     def readDir(self, d=None):
         """Read a directory of XML files (not recursive)."""
         if d == None:
@@ -249,7 +257,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
 
     def addXMLRoot(self, theRoot):
         """Adds a parsed LgFormat XML document to the IR."""
-        assert(self.checkRoot(theRoot))
+        assert (self.checkRoot(theRoot))
         filmID = self.elemID(theRoot)
         logging.debug('FilmCfgXMLRead.addXMLRoot(): UniqueId={:s}'.format(str(filmID)))
         # Create a PhysFilmCfgXMLRead and add it to the IR
@@ -259,13 +267,13 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
             try:
                 self._chOutpMnemFilmMap[chMnem].append(filmID)
             except KeyError:
-                self._chOutpMnemFilmMap[chMnem] = [filmID,]
+                self._chOutpMnemFilmMap[chMnem] = [filmID, ]
         if filmID in self._xmlRoot:
             logging.warning('FILMCfgXMLRead.addXMLRoot(): Ignoring duplicate FILM UniqueId: "{:s}"'.format(filmID))
         else:
             self._xmlRoot[filmID] = theRoot
         return filmID
-        
+
     def _genAllMnem(self, theRoot):
         """Yields an unordered list of channel names from the XML file.
         The XPath is LgTrack/LgCurve."""
@@ -273,8 +281,9 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
             try:
                 yield self.chNameAsMnem(aCurveElem)
             except XMLCfg.ExceptionXMLCfgNoContent as err:
-                logging.error('FILMCfgXMLRead.addXMLRoot(): Can not extract ChannelName from {:s}, error: {:s}'.format(str(aCurveElem), str(err)))
-        
+                logging.error('FILMCfgXMLRead.addXMLRoot(): Can not extract ChannelName from {:s}, error: {:s}'.format(
+                    str(aCurveElem), str(err)))
+
     def chOutpMnemInFilmId(self, chOutp, filmID):
         """Returns True if this curve appears in the film."""
         try:
@@ -282,7 +291,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
         except KeyError:
             pass
         return False
-    
+
     def longStr(self, verbose=1):
         """Returns a long string of the XML UniqueIds and their description."""
         r = []
@@ -295,15 +304,15 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
             if verbose > 1:
                 SLICE = 12
                 myCurves = sorted([m.pStr() for m in self._genAllMnem(self.rootNode(k))])
-#                r.append('  Curves:')
-                for curvS in [myCurves[i:i+SLICE] for i in range(0, len(myCurves), SLICE)]:
+                #                r.append('  Curves:')
+                for curvS in [myCurves[i:i + SLICE] for i in range(0, len(myCurves), SLICE)]:
                     r.append('    ' + ', '.join(curvS))
         return '\n'.join(r)
 
     def uniqueIdS(self):
         """Returns the UniqueId values that I know about."""
         return self._xmlRoot.keys()
-    
+
     def description(self, theUID):
         """Returns the XML description corresponding to the Unique ID or None if unknown."""
         lgFormat = self.rootNode(theUID)
@@ -324,7 +333,8 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
         try:
             return self._chOutpMnemFilmMap[curveDestID]
         except KeyError:
-            raise ExceptionFILMCfgXMLReadLookUp('FilmCfgXMLRead.retAllFILMDestS() no entry for "{:s}"'.format(str(curveDestID)))            
+            raise ExceptionFILMCfgXMLReadLookUp(
+                'FilmCfgXMLRead.retAllFILMDestS() no entry for "{:s}"'.format(str(curveDestID)))
 
     def retFILMDest(self, filmDestID, curveDestID):
         """Returns a PhysFilmCfgXMLRead object by matching curveDestID to the filmDestID.
@@ -333,6 +343,7 @@ class FilmCfgXMLRead(FILMCfg.FilmCfg, XMLCfg.LgXMLBase):
         This is commonly used by the PRESCfg module so that interpretTrac() can
         be called on the result and thus build up a map of track positions for
         all possible logical film outputs."""
-        assert(filmDestID in self._plotCfgMap), '{:s} not in {:s}'.format(filmDestID, [str(k) for k in self._plotCfgMap.keys()])
+        assert (filmDestID in self._plotCfgMap), '{:s} not in {:s}'.format(filmDestID,
+                                                                           [str(k) for k in self._plotCfgMap.keys()])
         if filmDestID in self.retAllFILMDestS(curveDestID):
             return self._plotCfgMap[filmDestID]

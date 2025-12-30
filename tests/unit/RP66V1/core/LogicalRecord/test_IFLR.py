@@ -1,4 +1,3 @@
-
 import pytest
 
 from TotalDepth.RP66V1.core import File, RepCode
@@ -16,7 +15,6 @@ IFLR_BYTES = [
     b"\x0b\x00\x020B\tH\xda\x9d\x00?33/CN.\x14D\x8e$s@\xdfg\xc3@\xdfg\xc3\xbf\x86]}>'6FBi\xb3h",
 ]
 
-
 IFLR_STRINGS = [
     "<IndirectlyFormattedLogicalRecord OBNAME: O: 11 C: 0 I: b'0B' frame: 2 free data: 36>",
     "<IndirectlyFormattedLogicalRecord OBNAME: O: 11 C: 0 I: b'0B' frame: 3 free data: 36>",
@@ -27,6 +25,7 @@ IFLR_STRINGS = [
     "<IndirectlyFormattedLogicalRecord OBNAME: O: 11 C: 0 I: b'0B' frame: 8 free data: 36>",
     "<IndirectlyFormattedLogicalRecord OBNAME: O: 11 C: 0 I: b'0B' frame: 9 free data: 36>",
 ]
+
 
 @pytest.mark.parametrize(
     'frame_number, by',

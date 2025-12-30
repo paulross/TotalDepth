@@ -31,12 +31,10 @@ import typing
 from TotalDepth.common import cmn_cmd_opts
 from TotalDepth.util.DirWalk import dirWalk
 
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 __version__ = '0.1.0'
 
-
 logger = logging.getLogger(__file__)
-
 
 TIF_STRUCT = struct.Struct('<L')
 TIFS_STRUCT = struct.Struct('<LLL')
@@ -175,12 +173,13 @@ def get_errors(tifs: typing.List[TifMarker], file_size: int) -> typing.List[str]
                     if tifs[t].type != 1:
                         ret.append(f'ERROR: TIF[{t}] type != 1: {tifs[t]}')
                 # Have t-1 and t+1
-                if tifs[t].tell - tifs[t-1].tell < TIF_WORD_NUM_BYTES:
-                    ret.append(f'ERROR: TIF[{t}] tell - TIF[{t-1}] tell < {TIF_WORD_NUM_BYTES}: {tifs[t]} {tifs[t - 1]}')
-                if tifs[t].tell != tifs[t-1].next:
-                    ret.append(f'ERROR: TIF[{t}] tell != TIF[{t-1}] next: {tifs[t]} {tifs[t-1]}')
-                if tifs[t].prev != tifs[t-1].tell:
-                    ret.append(f'ERROR: TIF[{t}] tell != TIF[{t-1}] next: {tifs[t]} {tifs[t-1]}')
+                if tifs[t].tell - tifs[t - 1].tell < TIF_WORD_NUM_BYTES:
+                    ret.append(
+                        f'ERROR: TIF[{t}] tell - TIF[{t - 1}] tell < {TIF_WORD_NUM_BYTES}: {tifs[t]} {tifs[t - 1]}')
+                if tifs[t].tell != tifs[t - 1].next:
+                    ret.append(f'ERROR: TIF[{t}] tell != TIF[{t - 1}] next: {tifs[t]} {tifs[t - 1]}')
+                if tifs[t].prev != tifs[t - 1].tell:
+                    ret.append(f'ERROR: TIF[{t}] tell != TIF[{t - 1}] next: {tifs[t]} {tifs[t - 1]}')
                 if t < len(tifs) - 1:
                     if tifs[t].next - tifs[t].tell < TIF_WORD_NUM_BYTES:
                         ret.append(f'ERROR: TIF[{t}] next - TIF[{t}] tell < {TIF_WORD_NUM_BYTES}: {tifs[t]}')
@@ -280,9 +279,11 @@ Scans a file for TIF markers or can copy a directory of files with TIF markers r
         # Strip the TIF markers, respecting the nervous option.
         files_copied = tif_count = bytes_copied = 0
         if os.path.isfile(args.path_in):
-            files_copied, tif_count, bytes_copied = de_tif_file(args.path_in, args.path_out, args.nervous, args.over_write)
+            files_copied, tif_count, bytes_copied = de_tif_file(args.path_in, args.path_out, args.nervous,
+                                                                args.over_write)
         else:
-            for file_in_out in dirWalk(args.path_in, args.path_out, theFnMatch='', recursive=args.recurse, bigFirst=False):
+            for file_in_out in dirWalk(args.path_in, args.path_out, theFnMatch='', recursive=args.recurse,
+                                       bigFirst=False):
                 _files_copied, _tif_count, _byte_count = de_tif_file(
                     file_in_out.filePathIn, file_in_out.filePathOut, args.nervous, args.over_write
                 )

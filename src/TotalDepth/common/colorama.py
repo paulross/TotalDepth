@@ -27,7 +27,6 @@ import colorama
 
 colorama.init(autoreset=True)
 
-
 STANDARD_TEXT_WIDTH = 75
 
 

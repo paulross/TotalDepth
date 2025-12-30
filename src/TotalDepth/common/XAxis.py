@@ -53,7 +53,7 @@ class XAxisSpacingSummary(typing.NamedTuple):
         ret = [
             f'{"Value":>{fmt[:fmt.find(".")]}} [{"N":>{int_width}}]: Relative Frequency'
         ]
-        scale  = float(bar_width) / counts_max
+        scale = float(bar_width) / counts_max
         for i in range(len(counts)):
             ret.append(
                 f'{values[i]:>{fmt}f} [{counts[i]:>{int_width}}]: {char * int(0.5 + scale * counts[i])}'
@@ -65,7 +65,7 @@ class XAxisSpacingSummary(typing.NamedTuple):
             if self.min != other.min or self.max != other.max or self.mean != other.mean or self.median != other.median \
                     or self.std != other.std or self.counts != other.counts:
                 return False
-            for i in range(2): # pragma: no coverage
+            for i in range(2):  # pragma: no coverage
                 if not (self.histogram[i] == other.histogram[i]).all():
                     return False
             return True

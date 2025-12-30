@@ -34,7 +34,6 @@ from TotalDepth.LIS.core import File, FileIndexer
 from TotalDepth.common import xxd
 from TotalDepth.util import SEGY
 
-
 logger = logging.getLogger(__file__)
 
 #: Regular expressions for RP66 files. Keys refer to the documentation.
@@ -71,7 +70,6 @@ ASCII_BYTES_LOWER_128 = set(bytes(range(128)))
 
 #: Regex for extracting the LAS version.
 RE_LAS_VERSION_LINE = re.compile(br'^\s*VERS\s*\.\s+([\d.]+)\s*:\s*(.+?)?\s*$')
-
 
 #: LAS binary file types we support
 LAS_BINARY_FILE_TYPES = {'LAS1.2', 'LAS2.0'}
@@ -297,7 +295,7 @@ def _ascii(fobj: typing.BinaryIO) -> str:
     """Returns 'ASCII' if all the bytes are ASCII characters 0 to 127, '' otherwise.
     """
     fobj.seek(0)
-    if set(fobj.read(256)).issubset(ASCII_BYTES_LOWER_128):#ASCII_PRINTABLE_BYTES):
+    if set(fobj.read(256)).issubset(ASCII_BYTES_LOWER_128):  # ASCII_PRINTABLE_BYTES):
         return 'ASCII'
     return ''
 
@@ -439,7 +437,7 @@ def _rcd(fobj: typing.BinaryIO) -> str:
             b'\xff\xff'
             b'\x00\x00'
             b'\x00\x00'
-        ):
+    ):
         return 'RCD'
     return ''
 
@@ -461,7 +459,7 @@ def _stk(fobj: typing.BinaryIO) -> str:
             b'\x00\x00'
             b'\x04\x00'
             b'\x00\x00'
-        ):
+    ):
         return 'STK'
     return ''
 
@@ -484,7 +482,7 @@ def _pds(fobj: typing.BinaryIO) -> str:
             b'\xf1\xf8'
             b'\xff\x82'
             b'\x03\x84'
-        ):
+    ):
         return 'PDS'
     return ''
 
@@ -535,9 +533,9 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
     (_rp66v1_tif, 'RP66V1t'),
     (_rp66v1_tif_r, 'RP66V1tr'),
     (_rp66v2, 'RP66V2'),
-    (_dat, 'DAT'), # Strong, but slow. Needs to be before ASCII as it is a specialisation of ASCII.
+    (_dat, 'DAT'),  # Strong, but slow. Needs to be before ASCII as it is a specialisation of ASCII.
     (_segy, 'SEGY'),  # 3200 EBCDIC characters.
-    (_lis_ver, 'LISVER'), # Highly specific first line.
+    (_lis_ver, 'LISVER'),  # Highly specific first line.
     (_ascii, 'ASCII'),
     (_lis, 'LISt'),
     (_lis, 'LIStr'),
@@ -547,7 +545,6 @@ FUNCTION_ID_MAP: typing.Tuple[typing.Tuple[typing.Callable, str], ...] = (
 BINARY_FILE_TYPE_CODE_WIDTH: int = max(len(v[1]) for v in FUNCTION_ID_MAP)
 #: Set of binary file types supported.
 BINARY_FILE_TYPES_SUPPORTED: typing.Set[str] = {v[1] for v in FUNCTION_ID_MAP}
-
 
 BINARY_FILE_TYPE_DESCRIPTIONS: typing.Dict[str, str] = {
     'RCD': 'RCD Seismic Format',

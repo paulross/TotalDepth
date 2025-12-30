@@ -21,7 +21,6 @@
 
 __all__ = ['core', 'ExceptionTotalDepthRP66V1']
 
-
 from TotalDepth import ExceptionTotalDepth
 
 

@@ -27,7 +27,6 @@ import subprocess
 import typing
 from functools import reduce
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -68,7 +67,7 @@ def create_gnuplot_dat(table: typing.Sequence[typing.Sequence[typing.Any]]) -> s
     """
     num_columns = _num_columns(table)
     column_widths = reduce(
-        lambda l, rows: [max(l, len(str(r)) + 2) for l, r in zip(l, rows)], table, [0,] * num_columns,
+        lambda l, rows: [max(l, len(str(r)) + 2) for l, r in zip(l, rows)], table, [0, ] * num_columns,
     )
     result: typing.List[str] = []
     for row in table:
@@ -139,6 +138,7 @@ def write_test_file(path: str, typ: str) -> int:
         logging.error(f'gnuplot stderr: {stdout}')
     # TODO: Return stderr?
     return proc.returncode
+
 
 # Gnuplot fragments
 

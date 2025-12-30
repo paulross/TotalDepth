@@ -22,8 +22,8 @@ def test_index_html_add_raises_dupe():
 @pytest.mark.parametrize(
     'args, expected',
     (
-        (tuple(), 'Got 0 values but expected 1'),
-        ((1, 2, 3), 'Got 3 values but expected 1'),
+            (tuple(), 'Got 0 values but expected 1'),
+            ((1, 2, 3), 'Got 3 values but expected 1'),
     )
 )
 def test_index_html_add_raises_args_mismatch(args, expected):
@@ -36,28 +36,28 @@ def test_index_html_add_raises_args_mismatch(args, expected):
 @pytest.mark.parametrize(
     'add, expected',
     (
-        (
-            tuple(), None
-        ),
-        (
             (
-                ('foo', 'f'),
+                    tuple(), None
             ),
-            os.path.abspath(''),
-        ),
-        (
             (
-                ('foo/bar', 'a'),
+                    (
+                            ('foo', 'f'),
+                    ),
+                    os.path.abspath(''),
             ),
-            os.path.abspath('foo'),
-        ),
-        (
             (
-                ('foo/bar', 'a'),
-                ('foo/baz', 'b'),
+                    (
+                            ('foo/bar', 'a'),
+                    ),
+                    os.path.abspath('foo'),
             ),
-            os.path.abspath('foo'),
-        ),
+            (
+                    (
+                            ('foo/bar', 'a'),
+                            ('foo/baz', 'b'),
+                    ),
+                    os.path.abspath('foo'),
+            ),
     )
 )
 def test_index_html_common_path(add, expected):
@@ -73,21 +73,21 @@ def test_index_html_common_path(add, expected):
 @pytest.mark.parametrize(
     'class_style, kwargs, expected',
     (
-        (
-            '',
-            {'foo': 'bar'},
-            {'foo': 'bar'},
-        ),
-        (
-            'style',
-            {'foo': 'bar'},
-            {'class': 'style', 'foo': 'bar'},
-        ),
-        (
-            'style',
-            {'class': 'bar'},
-            {'class': 'bar',},
-        ),
+            (
+                    '',
+                    {'foo': 'bar'},
+                    {'foo': 'bar'},
+            ),
+            (
+                    'style',
+                    {'foo': 'bar'},
+                    {'class': 'style', 'foo': 'bar'},
+            ),
+            (
+                    'style',
+                    {'class': 'bar'},
+                    {'class': 'bar', },
+            ),
     )
 )
 def test_index_html_attr(class_style, kwargs, expected):

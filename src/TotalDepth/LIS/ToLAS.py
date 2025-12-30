@@ -21,7 +21,6 @@
 
 Created on 25 Mar 2011
 """
-import datetime
 import logging
 import os
 import sys
@@ -33,23 +32,21 @@ import TotalDepth.common
 from TotalDepth.LAS.core import WriteLAS, LASConstants
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import FrameSet, File, FileIndexer, LogiRec, Mnem
-from TotalDepth.common import LogPass
-from TotalDepth.util import gnuplot, DirWalk, bin_file_type
+from TotalDepth.util import DirWalk, bin_file_type
 
-__author__  = 'Paul Ross'
-__date__    = '2020-08-10'
+__author__ = 'Paul Ross'
+__date__ = '2020-08-10'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2020 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
-
 
 LAS_PRODUCER_VERSION = '0.1.1'
 
 
 class LisLogicalFile:
     """Contains a representation of a LIS Logical File which is a series of indexes followed by a Log Pass"""
+
     def __init__(self):
         self.cons_table_index_entries: typing.List[FileIndexer.IndexObjBase] = []
         self.last_log_pass: FileIndexer.IndexLogPass = None
@@ -149,7 +146,7 @@ def write_well_information_section(lis_logical_file: LisLogicalFile,
 
 def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream: typing.TextIO) -> None:
     table: typing.List[typing.List[str]] = [
-        ['#MNEM.UNIT', 'API CODE',    'Curve Description'],
+        ['#MNEM.UNIT', 'API CODE', 'Curve Description'],
         ['#---------', '------------', '-----------------'],
     ]
     log_pass = lis_logical_file.last_log_pass.logPass
@@ -183,7 +180,8 @@ def write_curve_information_section(lis_logical_file: LisLogicalFile, out_stream
     WriteLAS.write_table(table, '~Curve Information Section', out_stream)
 
 
-def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_format: str, out_stream: typing.TextIO) -> None:
+def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_format: str,
+                                        out_stream: typing.TextIO) -> None:
     table: typing.List[typing.List[str]] = [
         ['#MNEM.UNIT', 'Value', 'Description'],
         ['#---------', '-----', '-----------'],
@@ -203,7 +201,7 @@ def write_parameter_information_section(lis_logical_file: LisLogicalFile, float_
                     value = 'N/A'
                 value_str = stringify(value, float_format)
                 desc = LASConstants.PARAMETER_MNEM_DESCRIPTION.get(row_name_bytes, 'N/A')
-                table.append([f'{mnem_str}.{units}', value_str, f': {desc}',])
+                table.append([f'{mnem_str}.{units}', value_str, f': {desc}', ])
     WriteLAS.write_table(table, '~Parameter Information Section', out_stream)
 
 
@@ -290,7 +288,8 @@ def single_lis_file_to_las(path_in: str,
     binary_file_type = bin_file_type.binary_file_type_from_path(path_in)
     sum_path_out = las_file_count = 0
     if not bin_file_type.is_lis_file_type(binary_file_type):
-        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out, las_file_count, 0.0, False,
+        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out,
+                                       las_file_count, 0.0, False,
                                        True)
     clock_start = time.perf_counter()
     try:
@@ -315,7 +314,7 @@ def single_lis_file_to_las(path_in: str,
             logical_file.add_index(lis_index)
         if len(logical_file):
             logical_file_entries.append(logical_file)
-        logger.info('LIS Logical Files: %s',  logical_file_entries)
+        logger.info('LIS Logical Files: %s', logical_file_entries)
         for l, lis_logical_file in enumerate(logical_file_entries):
             # try:
             sum_path_out = write_las_file(path_in, array_reduction, path_out, frame_slice, channels, field_width,
@@ -324,7 +323,8 @@ def single_lis_file_to_las(path_in: str,
             las_file_count += 1
             # except Exception as error:
             #     logger.exception(f'Unable to write LAS file with error {error}')
-        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out, las_file_count,
+        return WriteLAS.LASWriteResult(path_in, binary_file_type, os.path.getsize(path_in), sum_path_out,
+                                       las_file_count,
                                        time.perf_counter() - clock_start, False, False)
     except ExceptionTotalDepthLIS as error:
         logger.error(f'Could not convert file {path_in} to LAS with error: {error}')
@@ -385,7 +385,8 @@ def main():
         clk_start = time.perf_counter()
         results: typing.Dict[str, WriteLAS.LASWriteResult] = WriteLAS.process_to_las(args, single_lis_file_to_las)
         clk_exec = time.perf_counter() - clk_start
-        _failed_file_count = WriteLAS.report_las_write_results_and_performance(results, clk_exec, args.gnuplot, include_ignored=False)
+        _failed_file_count = WriteLAS.report_las_write_results_and_performance(results, clk_exec, args.gnuplot,
+                                                                               include_ignored=False)
     print('Bye, bye!')
     return ret_val
 

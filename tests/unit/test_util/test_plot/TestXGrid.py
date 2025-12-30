@@ -20,32 +20,34 @@
 """Tests ...
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import pprint
+import logging
+# import pprint
 import sys
 import time
-import logging
-#import math
-import pprint
-#import io
-
-from TotalDepth.LIS.core import EngVal
-from TotalDepth.util.plot import Coord
-from TotalDepth.util.plot import Stroke
-from TotalDepth.util.plot import XGrid
-#from TotalDepth.util.plot import Plot
-
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
+from TotalDepth.LIS.core import EngVal
+from TotalDepth.util.plot import Coord
+from TotalDepth.util.plot import Stroke
+from TotalDepth.util.plot import XGrid
+
+
+# import math
+# import io
+# from TotalDepth.util.plot import Plot
+
+
 class TestXGrid(unittest.TestCase):
     """Tests XGrid plotting"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -57,7 +59,7 @@ class TestXGrid(unittest.TestCase):
     def test_00(self):
         """TestXGrid.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestXGrid.test_01(): Constructor."""
         myXs = XGrid.XGrid(200)
@@ -69,27 +71,27 @@ class TestXGrid(unittest.TestCase):
 
     def test_02(self):
         """TestXGrid.test_02(): genEvents() with 2/5/10/25, xInc=False."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         v = 0
         eventS = []
         for e in myXs._genEvents(
                 xFrom=0,
                 xInc=True,
-                eMap = {
-                    2   : 'two',
-                    5   : 'five',
-                    10  : 'ten',
-                    25  : 'twenty five',
+                eMap={
+                    2: 'two',
+                    5: 'five',
+                    10: 'ten',
+                    25: 'twenty five',
                 },
-            ):
-            #print(e)
+        ):
+            # print(e)
             eventS.append(e)
             v += 1
             if v > 25:
                 break
-        #print()
-        #pprint.pprint(eventS)
+        # print()
+        # pprint.pprint(eventS)
         self.assertEqual(
             [
                 (0, 'twenty five'),
@@ -121,30 +123,30 @@ class TestXGrid(unittest.TestCase):
             ],
             eventS
         )
-        
+
     def test_03(self):
         """TestXGrid.test_03(): genEvents() with 2/5/10/25, xInc=False."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         v = 0
         eventS = []
         for e in myXs._genEvents(
                 xFrom=0,
                 xInc=False,
-                eMap = {
-                    2   : 'two',
-                    5   : 'five',
-                    10  : 'ten',
-                    25  : 'twenty five',
+                eMap={
+                    2: 'two',
+                    5: 'five',
+                    10: 'ten',
+                    25: 'twenty five',
                 },
-            ):
-            #print(e)
+        ):
+            # print(e)
             eventS.append(e)
             v += 1
             if v > 25:
                 break
-        #print()
-        #pprint.pprint(eventS)
+        # print()
+        # pprint.pprint(eventS)
         self.assertEqual(
             [
                 (0, 'twenty five'),
@@ -176,67 +178,66 @@ class TestXGrid(unittest.TestCase):
             ],
             eventS
         )
-        
+
     def test_04(self):
         """TestXGrid.test_04(): ctor uses default _setInterval(), test _getInterval()."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
-        #print(myXs._getInterval(b'FEET'))
+        # print(myXs._getInterval(b'FEET'))
         self.assertEqual(
             {
-                2   : Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0),
-                10  : Stroke.Stroke(width=0.5, colour='black', coding=None, opacity=1.0),
-                50  : Stroke.Stroke(width=0.75, colour='black', coding=None, opacity=1.0),
-                100 : Stroke.Stroke(width=1.0, colour='black', coding=None, opacity=1.0),
+                2: Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0),
+                10: Stroke.Stroke(width=0.5, colour='black', coding=None, opacity=1.0),
+                50: Stroke.Stroke(width=0.75, colour='black', coding=None, opacity=1.0),
+                100: Stroke.Stroke(width=1.0, colour='black', coding=None, opacity=1.0),
             },
             myXs._getInterval(b'FEET'),
         )
 
     def test_05(self):
         """TestXGrid.test_05(): ctor uses default _setInterval(), test _getInterval() defaults."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         self.assertEqual(XGrid.XGrid.DEFAULT_INTERVAL_MAP, myXs._getInterval(b'    '))
 
     def test_06(self):
         """TestXGrid.test_06(): _setInterval() fails."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         self.assertRaises(XGrid.ExceptionPlotXGrid, myXs._setInterval, 'in', 200.0, {})
 
-        
     def test_07(self):
         """TestXGrid.test_07(): ctor uses default _setInterval(), test _getIntervalText()."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
-        #print(myXs._getInterval(b'FEET'))
+        # print(myXs._getInterval(b'FEET'))
         self.assertEqual(100, myXs._getIntervalText(b'FEET'))
 
     def test_08(self):
         """TestXGrid.test_08(): ctor uses default _setInterval(), test _getInterval() defaults."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         self.assertEqual(XGrid.XGrid.DEFAULT_INTERVAL_TEXT, myXs._getIntervalText(b'    '))
 
     def test_09(self):
         """TestXGrid.test_09(): _setIntervalText() fails."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         self.assertRaises(XGrid.ExceptionPlotXGrid, myXs._setIntervalText, 'in', 200.0, {})
 
     def test_10(self):
         """TestXGrid.test_10(): genXAxisStroke() plotting UP with FEET and 1/200."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         v = 0
         eventS = []
         for e in myXs._genXAxisStroke(xFrom=4307.5, xInc=False, units=b'FEET'):
-            #print(e)
+            # print(e)
             eventS.append(e)
             v += 1
             if v > 30:
                 break
-        #pprint.pprint(eventS)
+        # pprint.pprint(eventS)
         self.assertEqual(
             [
                 (4306, Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
@@ -273,20 +274,20 @@ class TestXGrid(unittest.TestCase):
             ],
             eventS
         )
-     
+
     def test_11(self):
         """TestXGrid.test_11(): genXPosStroke() plotting UP with FEET and 1/200."""
-        #print()
+        # print()
         myXs = XGrid.XGrid(200)
         v = 0
         eventS = []
         for e in myXs.genXPosStroke(xFrom=4307.5, xInc=False, units=b'FEET'):
-            #print(e)
+            # print(e)
             eventS.append(e)
             v += 1
             if v > 30:
                 break
-        #pprint.pprint(eventS)
+        # pprint.pprint(eventS)
         self.assertEqual(
             [
                 (Coord.Dim(value=-0.09000000000000002, units='in'),
@@ -355,8 +356,10 @@ class TestXGrid(unittest.TestCase):
             eventS
         )
 
+
 class TestXText(unittest.TestCase):
     """Tests XText plotting"""
+
     def setUp(self):
         """Set up."""
         pass
@@ -368,11 +371,11 @@ class TestXText(unittest.TestCase):
     def test_00(self):
         """TestXGrid.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestXGrid.test_01(): genXAxisText() 5 values from 4307.5 upwards."""
         myXs = XGrid.XGrid(200)
-        #print()
+        # print()
         v = 0
         eventS = []
         for e in myXs._genXAxisText(xFrom=4307.5, xInc=False, units=b'FEET'):
@@ -380,13 +383,13 @@ class TestXText(unittest.TestCase):
             v += 1
             if v > 4:
                 break
-        #pprint.pprint(eventS)
-        self.assertEqual([4300, 4200, 4100, 4000, 3900,], eventS)
+        # pprint.pprint(eventS)
+        self.assertEqual([4300, 4200, 4100, 4000, 3900, ], eventS)
 
     def test_02(self):
         """TestXGrid.test_02(): genXPosText() 5 values from 4307.5 upwards."""
         myXs = XGrid.XGrid(200)
-        #print()
+        # print()
         v = 0
         eventS = []
         for e in myXs._genXPosText(xFrom=4307.5, xInc=False, units=b'FEET'):
@@ -394,7 +397,7 @@ class TestXText(unittest.TestCase):
             v += 1
             if v > 4:
                 break
-        #pprint.pprint(eventS)
+        # pprint.pprint(eventS)
         self.assertEqual(
             [
                 (Coord.Dim(value=-0.45, units='in'), 4300),
@@ -406,8 +409,10 @@ class TestXText(unittest.TestCase):
             eventS
         )
 
+
 class TestXGridRange(unittest.TestCase):
     """Tests XGrid plotting across an X axis range."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -419,17 +424,17 @@ class TestXGridRange(unittest.TestCase):
     def test_00(self):
         """TestXGridRange.test_00(): Tests setUp() and tearDown()."""
         pass
-    
+
     def test_01(self):
         """TestXGridRange.test_01(): genXAxisRange()."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisRange(
-                                    EngVal.EngVal(4001.0, b'FEET'),
-                                    EngVal.EngVal(3987.0, b'FEET')
-                                    )
-                                ]
-        #print()
-        #pprint.pprint(myVals)
+            EngVal.EngVal(4001.0, b'FEET'),
+            EngVal.EngVal(3987.0, b'FEET')
+        )
+                  ]
+        # print()
+        # pprint.pprint(myVals)
         self.assertEqual(
             [
                 (Coord.Dim(value=-0.06000000000000001, units='in'),
@@ -454,12 +459,12 @@ class TestXGridRange(unittest.TestCase):
         """TestXGridRange.test_02(): genXAxisRange() with unit change."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisRange(
-                        EngVal.EngVal(4001.0, b'FEET'),
-                        EngVal.EngVal(3987.0, b'FEET').newEngValInUnits(b'M   ')
-                        )
-                    ]
-        #print()
-        #pprint.pprint(myVals)
+            EngVal.EngVal(4001.0, b'FEET'),
+            EngVal.EngVal(3987.0, b'FEET').newEngValInUnits(b'M   ')
+        )
+                  ]
+        # print()
+        # pprint.pprint(myVals)
         self.assertEqual(
             [
                 (Coord.Dim(value=-0.06000000000000001, units='in'),
@@ -484,12 +489,12 @@ class TestXGridRange(unittest.TestCase):
         """TestXGridRange.test_10(): genXAxisTextRange()."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisTextRange(
-                                    EngVal.EngVal(4001.0, b'FEET'),
-                                    EngVal.EngVal(3499.0, b'FEET')
-                                    )
-                                ]
-        #print()
-        #pprint.pprint(myVals)
+            EngVal.EngVal(4001.0, b'FEET'),
+            EngVal.EngVal(3499.0, b'FEET')
+        )
+                  ]
+        # print()
+        # pprint.pprint(myVals)
         self.assertEqual(
             [
                 (Coord.Dim(value=-0.06000000000000001, units='in'), 4000),
@@ -506,12 +511,12 @@ class TestXGridRange(unittest.TestCase):
         """TestXGridRange.test_11(): genXAxisTextRange() with unit change."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisTextRange(
-                    EngVal.EngVal(4001.0, b'FEET'),
-                    EngVal.EngVal(3499.0, b'FEET').newEngValInUnits(b'M   ')
-                    )
-                ]
-        #print()
-        #pprint.pprint(myVals)
+            EngVal.EngVal(4001.0, b'FEET'),
+            EngVal.EngVal(3499.0, b'FEET').newEngValInUnits(b'M   ')
+        )
+                  ]
+        # print()
+        # pprint.pprint(myVals)
         self.assertEqual(6, len(myVals))
         self.assertEqual(
             [
@@ -529,30 +534,30 @@ class TestXGridRange(unittest.TestCase):
         """TestXGridRange.test_20(): genXAxisRange() with 'non-optical' units b'.1IN'."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisRange(
-                        EngVal.EngVal(4001.0, b'FEET').newEngValInUnits(b'.1IN'),
-                        EngVal.EngVal(3987.0, b'FEET').newEngValInUnits(b'.1IN'),
-                        )
-                    ]
+            EngVal.EngVal(4001.0, b'FEET').newEngValInUnits(b'.1IN'),
+            EngVal.EngVal(3987.0, b'FEET').newEngValInUnits(b'.1IN'),
+        )
+                  ]
         self.assertEqual(7, len(myVals))
-#        print()
-#        pprint.pprint(myVals)
+        #        print()
+        #        pprint.pprint(myVals)
         self.assertEqual(
-#            [
-#                (Coord.Dim(value=-0.06000000000000001, units='in'),
-#                 Stroke.Stroke(width=1.0, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.18000000000000005, units='in'),
-#                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.3, units='in'),
-#                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.42, units='in'),
-#                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.54, units='in'),
-#                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.66, units='in'),
-#                 Stroke.Stroke(width=0.5, colour='black', coding=None, opacity=1.0)),
-#                (Coord.Dim(value=-0.78, units='in'),
-#                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
-#            ],
+            #            [
+            #                (Coord.Dim(value=-0.06000000000000001, units='in'),
+            #                 Stroke.Stroke(width=1.0, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.18000000000000005, units='in'),
+            #                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.3, units='in'),
+            #                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.42, units='in'),
+            #                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.54, units='in'),
+            #                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.66, units='in'),
+            #                 Stroke.Stroke(width=0.5, colour='black', coding=None, opacity=1.0)),
+            #                (Coord.Dim(value=-0.78, units='in'),
+            #                 Stroke.Stroke(width=0.25, colour='black', coding=None, opacity=1.0)),
+            #            ],
             [
                 (Coord.Dim(value=-0.060000000000027295, units='in'),
                  Stroke.Stroke(width=1.0, colour='black', coding=None, opacity=1.0)),
@@ -576,22 +581,22 @@ class TestXGridRange(unittest.TestCase):
         """TestXGridRange.test_21(): genXAxisTextRange() with 'non-optical' units b'.1IN'."""
         myXs = XGrid.XGrid(200)
         myVals = [v for v in myXs.genXAxisTextRange(
-                    EngVal.EngVal(4001.0, b'FEET').newEngValInUnits(b'.1IN'),
-                    EngVal.EngVal(3499.0, b'FEET').newEngValInUnits(b'.1IN'),
-                    )
-                ]
+            EngVal.EngVal(4001.0, b'FEET').newEngValInUnits(b'.1IN'),
+            EngVal.EngVal(3499.0, b'FEET').newEngValInUnits(b'.1IN'),
+        )
+                  ]
         self.assertEqual(6, len(myVals))
-#        print()
-#        pprint.pprint(myVals)
+        #        print()
+        #        pprint.pprint(myVals)
         self.assertEqual(
-#            [
-#                (Coord.Dim(value=-0.06000000000000001, units='in'), 4000),
-#                (Coord.Dim(value=-6.06, units='in'), 3900),
-#                (Coord.Dim(value=-12.06, units='in'), 3800),
-#                (Coord.Dim(value=-18.06, units='in'), 3700),
-#                (Coord.Dim(value=-24.06, units='in'), 3600),
-#                (Coord.Dim(value=-30.060000000000006, units='in'), 3500),
-#            ],
+            #            [
+            #                (Coord.Dim(value=-0.06000000000000001, units='in'), 4000),
+            #                (Coord.Dim(value=-6.06, units='in'), 3900),
+            #                (Coord.Dim(value=-12.06, units='in'), 3800),
+            #                (Coord.Dim(value=-18.06, units='in'), 3700),
+            #                (Coord.Dim(value=-24.06, units='in'), 3600),
+            #                (Coord.Dim(value=-30.060000000000006, units='in'), 3500),
+            #            ],
             [
                 (Coord.Dim(value=-0.060000000000027295, units='in'), 4000),
                 (Coord.Dim(value=-6.060000000000027, units='in'), 3900),
@@ -603,9 +608,11 @@ class TestXGridRange(unittest.TestCase):
             myVals,
         )
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -614,6 +621,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestXGridRange))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -638,6 +647,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestClass.py script version "%s", dated %s' % (__version__, __date__))
@@ -646,7 +656,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -664,14 +674,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

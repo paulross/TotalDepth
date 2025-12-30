@@ -107,34 +107,34 @@ Examples of PRES and FILM records::
     PHIX  PHIX  ALLO  T1    LLIN  1     NB        0.500000      0.500000       0.00000
 
 """
-__author__  = 'Paul Ross'
-__date__    = '2011-02-28'
+__author__ = 'Paul Ross'
+__date__ = '2011-02-28'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import time
-#import sys
-import os
-import logging
 import collections
+import logging
+# import time
+# import sys
+import os
 import pprint
-#import math
-#from optparse import OptionParser
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import EngVal
 from TotalDepth.LIS.core import Units
-
 from TotalDepth.util.plot import Coord
-from TotalDepth.util.plot import Stroke
-from TotalDepth.util.plot import SVGWriter
-from TotalDepth.util.plot import XGrid
 from TotalDepth.util.plot import FILMCfg
-from TotalDepth.util.plot import PRESCfg
 from TotalDepth.util.plot import FILMCfgXML
+from TotalDepth.util.plot import LogHeader
+from TotalDepth.util.plot import PRESCfg
 from TotalDepth.util.plot import PRESCfgXML
 from TotalDepth.util.plot import PlotConstants
-from TotalDepth.util.plot import LogHeader
+from TotalDepth.util.plot import SVGWriter
+from TotalDepth.util.plot import Stroke
+from TotalDepth.util.plot import XGrid
+
+# import math
+# from optparse import OptionParser
 
 #: Allows detailed trace comments to appear in the SVG
 COMMENTS_IN_SVG_TRACE = False
@@ -145,14 +145,17 @@ COMMENTS_IN_SVG_SECTION_WIDTH = 40
 #: Map of section level to comment padding character
 COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE = ('=', '.', '^',)
 
+
 # TODO: Should remove LIS from name as plotting now also covers LAS files
 class ExceptionTotalDepthLISPlot(ExceptionTotalDepthLIS):
     """Exception for plotting."""
     pass
 
+
 class ExceptionTotalDepthPlotRoll(ExceptionTotalDepthLISPlot):
     """Exception for plotting."""
     pass
+
 
 # Describes a curve plots data, fn is the track transfer function, buffer is a
 # list of Coord.Pt() and prevWrap is the previous wrap value.
@@ -162,18 +165,19 @@ class CurvePlotData(object):
         self._fn = theFn
         self.buffer = []
         self.prevWrap = None
-    
+
     def __str__(self):
         return '{!r:s} id={!r:s} fn={!r:s}'.format(self, self._id, self._fn)
-    
+
     @property
     def fn(self):
         return self._fn
-    
+
     @property
     def id(self):
         return self._id
-    
+
+
 #############################################################################
 # Section: Code that handles the curve scales (or legends) that appear at top
 # and bottom of the log.
@@ -187,6 +191,7 @@ class CurvePlotScale(collections.namedtuple('CurvePlotScale', 'name halfTrackSta
     
     halfTracks is the curve span as an integer so T23=4 LHT1=1 and so on."""
     __slots__ = ()
+
     def __lt__(self, other):
         """Slightly weird sort order, larger halfTracks come first then names."""
         if self.halfTracks > other.halfTracks:
@@ -197,10 +202,12 @@ class CurvePlotScale(collections.namedtuple('CurvePlotScale', 'name halfTrackSta
             retVal = False
         return retVal
 
+
 # Used to record what curve mnemonic goes into which vertical slice of
 # the scale at each end of the log
 # slice is an integer, curveName is a CURV MNEM, slice and span are half-track integers
 ScaleSliceCurve = collections.namedtuple('ScaleSliceCurve', 'slice curveName start span')
+
 
 class CurvePlotScaleSlotMap(object):
     """Keeps track of which slots are available for putting the curve scales in
@@ -208,6 +215,7 @@ class CurvePlotScaleSlotMap(object):
     This scale are is divided into slices that span the plot from left to right.
     These slices are subdivided into slots that correspond to a half-track in
     that slice."""
+
     def __init__(self, theCpsS):
         """Ctor with a list of CurvePlotScale objects (can be unsorted)."""
         self._curvePlotScaleS = sorted(theCpsS)
@@ -215,7 +223,7 @@ class CurvePlotScaleSlotMap(object):
         # population template. We thus only know half-tracks where curves start
         self._htIdxSet = set()
         for cID, htStart, htSpan in self._curvePlotScaleS:
-            for h in range(htStart, htStart+htSpan):
+            for h in range(htStart, htStart + htSpan):
                 self._htIdxSet.add(h)
         # Map of {htSlot : boolean, ...} as to whether a slot is filled or not
         self._htIdxMap = {}
@@ -224,24 +232,24 @@ class CurvePlotScaleSlotMap(object):
     def reset(self):
         """Clears the slot map for the current slice."""
         self._htIdxMap = {}.fromkeys(self._htIdxSet, False)
-    
+
     def canFit(self, theCps):
         """Returns True if I can fit the CurvePlotScale object in the current slice."""
-        for h in range(theCps.halfTrackStart, theCps.halfTrackStart+theCps.halfTracks):
-            assert(h in self._htIdxMap)
+        for h in range(theCps.halfTrackStart, theCps.halfTrackStart + theCps.halfTracks):
+            assert (h in self._htIdxMap)
             if self._htIdxMap[h]:
                 # Slot already occupied
                 return False
         return True
-        
+
     def fit(self, theCps):
         """Populates slots from a CurvePlotScale, caller should call canFit() first."""
-        assert(self.canFit(theCps))
-        for h in range(theCps.halfTrackStart, theCps.halfTrackStart+theCps.halfTracks):
-            assert(h in self._htIdxMap)
-            assert(self._htIdxMap[h] is False)
+        assert (self.canFit(theCps))
+        for h in range(theCps.halfTrackStart, theCps.halfTrackStart + theCps.halfTracks):
+            assert (h in self._htIdxMap)
+            assert (self._htIdxMap[h] is False)
             self._htIdxMap[h] = True
-    
+
     def genScaleSliceCurve(self):
         """Generates a ordered list of ScaleSliceCurve objects laid out in a 'nice' fashion."""
         # The vertical slice, 0 is nearest the log itself.
@@ -252,7 +260,7 @@ class CurvePlotScaleSlotMap(object):
             # Fit a curve in the slice
             i = 0
             # First curve in this slice should always fit
-            assert(self.canFit(myCpsS[0])), \
+            assert (self.canFit(myCpsS[0])), \
                 'CurvePlotScaleSlotMap {!r:s} can not fit first curve' \
                 ' remaining in list.'.format(self._htIdxMap)
             while i < len(myCpsS):
@@ -267,7 +275,8 @@ class CurvePlotScaleSlotMap(object):
                 else:
                     i += 1
             scaleSlice += 1
-            
+
+
 #############################################################################
 # End: Code that handles the curve scales (or legends) that appear at top and
 # bottom of the log.
@@ -323,16 +332,17 @@ class PlotRoll(object):
         |--------------------------------------------------------------------|
     
     """
+
     def __init__(self,
-            theXStart,
-            theXStop,
-            theScale,
-            theLegendDepth,
-            theHeadDepth=Coord.Dim(0, 'in'),
-            theTailDepth=Coord.Dim(0, 'in'),
-            plotUp=True,
-            theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
-            theMargin=PlotConstants.MarginQtrInch):
+                 theXStart,
+                 theXStop,
+                 theScale,
+                 theLegendDepth,
+                 theHeadDepth=Coord.Dim(0, 'in'),
+                 theTailDepth=Coord.Dim(0, 'in'),
+                 plotUp=True,
+                 theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
+                 theMargin=PlotConstants.MarginQtrInch):
         """Initialise with:
         
         *theXStart*
@@ -366,11 +376,11 @@ class PlotRoll(object):
         self._rollWidth = theWidth
         self._rollMargin = theMargin
         # The main pane depth as a Coord.Dim() from (theXStart, theXStop) as EngVal's.
-        assert(theScale != 0)
-#        print(self._xSpan)
-#        print(self._xSpan.uom)
-#        print(self._xSpan.newEngValInUnits(PlotConstants.DEFAULT_PLOT_LIS_UNITS))
-#        print(self._xSpan.newEngValInUnits(PlotConstants.DEFAULT_PLOT_LIS_UNITS).value)
+        assert (theScale != 0)
+        #        print(self._xSpan)
+        #        print(self._xSpan.uom)
+        #        print(self._xSpan.newEngValInUnits(PlotConstants.DEFAULT_PLOT_LIS_UNITS))
+        #        print(self._xSpan.newEngValInUnits(PlotConstants.DEFAULT_PLOT_LIS_UNITS).value)
         try:
             # This might raise if units are something silly like b'    '
             self._plotDepth = Coord.Dim(
@@ -381,38 +391,38 @@ class PlotRoll(object):
             raise ExceptionTotalDepthPlotRoll('PlotRoll.__init__(): {:s}'.format(str(err)))
         # A Coord.Dim() for the depth of the overall plot.
         self._rollDepth = self._rollMargin.top \
-                            + self._headDepth \
-                            + self._legendDepth \
-                            + self._plotDepth \
-                            + self._legendDepth \
-                            + self._tailDepth \
-                            + self._rollMargin.bottom
-        
+                          + self._headDepth \
+                          + self._legendDepth \
+                          + self._plotDepth \
+                          + self._legendDepth \
+                          + self._tailDepth \
+                          + self._rollMargin.bottom
+
     @property
     def viewBox(self):
         """The overall size of the plot."""
         return Coord.Box(self._rollWidth, self._rollDepth)
-    
+
     @property
     def width(self):
         """The overall width as a number in PlotConstants.DEFAULT_PLOT_UNITS."""
         return self._rollWidth.convert(PlotConstants.DEFAULT_PLOT_UNITS).value
-        
+
     @property
     def depth(self):
         """The overall width as a number in PlotConstants.DEFAULT_PLOT_UNITS."""
         return self._rollDepth.convert(PlotConstants.DEFAULT_PLOT_UNITS).value
-        
+
     @property
     def widthDim(self):
         """The overall width as a Coord.Dim()."""
         return self._rollWidth.convert(PlotConstants.DEFAULT_PLOT_UNITS)
-        
+
     @property
     def depthDim(self):
         """The overall width as a Coord.Dim()."""
         return self._rollDepth.convert(PlotConstants.DEFAULT_PLOT_UNITS)
-    
+
     @property
     def trackTopLeft(self):
         """"A Coord.Pt() that is the top left of the pane that tracks are
@@ -421,17 +431,17 @@ class PlotRoll(object):
             self._rollMargin.left,
             self._rollMargin.top + self._legendDepth + self._headDepth,
         )
-    
+
     @property
     def mainPanePlotDepth(self):
         """The depth of the plot of the main pane as a Coord.Dim()."""
         return self._plotDepth
-    
+
     @property
     def availableWidth(self):
         """The available width inside the margins."""
         return self._rollWidth - self._rollMargin.left - self._rollMargin.right
-    
+
     def retHeadPane(self):
         """Returns a pair of top-left Coord.Pt(), Coord.Box() for the top
         header where the header goes."""
@@ -485,8 +495,8 @@ class PlotRoll(object):
         a number or an EngVal. If this is a number it is expected to be in the
         units of the xStart/xStop in the constructor."""
         xProp = (theX - self._xStart) / self._xSpan
-#         print('theX', theX, 'self._xStart', self._xStart, 'self._xSpan',
-#               self._xSpan, 'xProp', xProp)
+        #         print('theX', theX, 'self._xStart', self._xStart, 'self._xSpan',
+        #               self._xSpan, 'xProp', xProp)
         # Note the contract we have with EngVal, the calculations might have
         # resulted in xProp being an EngVal.
         if self._isUpPlot:
@@ -494,7 +504,7 @@ class PlotRoll(object):
                 + self._legendDepth + self._plotDepth.scale(1.0 - xProp.value)
         return self._rollMargin.top + self._headDepth + self._legendDepth \
             + self._plotDepth.scale(xProp.value)
-        
+
     def polyLinePt(self, theX, theTracPos):
         """Returns a Coord.Pt from theX axis value (or EngVal) and theTracPos
         that is a value in DEFAULT_PLOT_UNITS, for example given by a
@@ -506,7 +516,7 @@ class PlotRoll(object):
             tracDim.scale(PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS),
             self.xDepth(theX).scale(PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS)
         )
-    
+
     def retMainPaneStart(self):
         """Returns the start Coord.Pt() for the pane where the main log goes.
         For and upPlot this will be pane-bottom-left, for a downPlot this will
@@ -515,6 +525,7 @@ class PlotRoll(object):
         if self._isUpPlot:
             depthDim += self._plotDepth
         return Coord.Pt(self._rollMargin.left, depthDim)
+
 
 class Plot(object):
     """Defines a plot configuration. The basic architecture follows the
@@ -536,7 +547,7 @@ class Plot(object):
     LEGEND_DEPTH_SPARE = Coord.Dim(0.5, 'in')
     #: Where the curve line in the legend section appears as a proportion of
     #: LEGEND_DEPTH_PER_CURVE
-    LEGEND_HORIZONTAL_LINE_DEPTH_PROPORTION = 5/8
+    LEGEND_HORIZONTAL_LINE_DEPTH_PROPORTION = 5 / 8
     #: Arrow heads on legend scales
     LEGEND_ARROW_DISPLAY = True
     #: Arrow head width on legend scales
@@ -555,7 +566,7 @@ class Plot(object):
     #: Maximum number of backup lines that can cross a single track in a single X step
     #: See the source of ``_filterCrossLineList()`` for an explanation.
     MAX_BACKUP_TRACK_CROSSING_LINES = 4
-    
+
     def __init__(self, theFilmCfg, thePresCfg, theScale=0):
         # A FILMCfg.FilmCfg() object
         self._filmCfg = theFilmCfg
@@ -570,14 +581,14 @@ class Plot(object):
         if self._scale < 0:
             raise ExceptionTotalDepthLISPlot(
                 'Plot.__init__(): Scale override {:g} is < 0'.format(self._scale))
-                
+
     def xScale(self, theFilmID):
         """Returns the X axis scale as a number given the FILM ID."""
         if self._scale != 0:
-            assert(self._scale > 0)
+            assert (self._scale > 0)
             return self._scale
         return self._filmCfg[theFilmID].xScale
-    
+
     def _openOutFile(self, theFp):
         """Returns a writable file-like object. This creates the enclosing
         directory if necessary."""
@@ -585,21 +596,22 @@ class Plot(object):
         if not os.path.exists(d):
             os.makedirs(d, exist_ok=True)
         return open(theFp, 'w')
-    
+
     def filmIdS(self):
         """Returns an unordered list of FILM IDs."""
         return self._filmCfg.keys()
 
     def _insertCommentInSVG(self, xS, cmt, level):
-        assert(level in range(len(COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE)))
+        assert (level in range(len(COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE)))
         if COMMENTS_IN_SVG_SECTION:
             myCmt = '\n%s\n' % cmt.center(COMMENTS_IN_SVG_SECTION_WIDTH,
                                           COMMENTS_IN_SVG_SECTION_LEVEL_TUPLE[level])
-            xS.comment(myCmt) 
-    
-    #=============================
+            xS.comment(myCmt)
+
+            # =============================
+
     # Section: Plotting LIS files.
-    #=============================   
+    # =============================
     def hasDataToPlotLIS(self, theLogPass, theFilmId):
         """Returns True if a call to plotLogPassLIS() is likely to lead to some
         plot data being produced."""
@@ -625,7 +637,7 @@ class Plot(object):
             ' LogPass._chMap keys: {:s}'.format(str(theLogPass._chMap.keys()))
         )
         for anO in myOutS:
-#            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
+            #            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
             # If an output is in the LogPass we are good to go
             if theLogPass.hasOutpMnem(anO):
                 return True
@@ -633,19 +645,19 @@ class Plot(object):
             'Plot.hasDataToPlotLIS():'
             ' No outputs for destination "{:s}"'.format(str(theFilmId)))
         return False
-        
+
     def plotLogPassLIS(self,
-                    theLisFile,     # LIS specific
-                    theLogPass,     # LIS specific
-                    theXStart,
-                    theXStop,
-                    theFilmId,
-                    theFpOut,
-                    frameStep=1,
-                    title="",
-                    lrCONS=None,    # LIS specific
-                    timerS=None,
-                ):
+                       theLisFile,  # LIS specific
+                       theLogPass,  # LIS specific
+                       theXStart,
+                       theXStop,
+                       theFilmId,
+                       theFpOut,
+                       frameStep=1,
+                       title="",
+                       lrCONS=None,  # LIS specific
+                       timerS=None,
+                       ):
         """Plot a part of a LogPass and returns a list of Channel IDs plotted.
                 
         *theLisFile*
@@ -719,7 +731,7 @@ class Plot(object):
             theXStop,
             self.xScale(theFilmId),
             # theLegendDepth
-            self.LEGEND_DEPTH_SPARE+self._retPlotScaleDepth(mySscS),
+            self.LEGEND_DEPTH_SPARE + self._retPlotScaleDepth(mySscS),
             # theHeadDepth
             myHeadDepth,
             # theTailDepth
@@ -735,9 +747,9 @@ class Plot(object):
         )
         # Set up viewBox and viewPort
         myRootAttrs = {
-            'viewBox'  : "0 0 {:.3f} {:.3f}".format(
-                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS*myPlRo.width,
-                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS*myPlRo.depth,
+            'viewBox': "0 0 {:.3f} {:.3f}".format(
+                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS * myPlRo.width,
+                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS * myPlRo.depth,
             ),
         }
         myViewPort = Coord.Box(width=myPlRo.widthDim, depth=myPlRo.depthDim)
@@ -745,7 +757,7 @@ class Plot(object):
         with SVGWriter.SVGWriter(theFpOut, myViewPort, rootAttrs=myRootAttrs) as xS:
             # Optionally plot API header
             if myLogHeader is not None:
-                assert(lrCONS is not None)
+                assert (lrCONS is not None)
                 self._insertCommentInSVG(xS, ' API Header START ', 0)
                 self._incTimers(timerS, 0, 'Plotting API Header')
                 logging.info('Plot.plotLogPassLIS(): Plotting Tracks...')
@@ -781,13 +793,14 @@ class Plot(object):
             # End timer
             self._incTimers(timerS, myLisSize, None)
         return retVal
-    #=========================
+
+    # =========================
     # End: Plotting LIS files.
-    #=========================   
-    
-    #=============================
+    # =========================
+
+    # =============================
     # Section: Plotting LAS files.
-    #=============================   
+    # =============================
     def hasDataToPlotLAS(self, theLasFile, theFilmId):
         """Returns True if a call to plotLogPassLIS() is likely to lead to some
         plot data being produced."""
@@ -822,18 +835,18 @@ class Plot(object):
             ' No outputs for destination "{:s}"'.format(str(theFilmId))
         )
         return False
-        
+
     def plotLogPassLAS(self,
-                    theLasFile,     # LAS specific
-                    theXStart,
-                    theXStop,
-                    theFilmId,
-                    theFpOut,
-                    frameStep=1,
-                    title="",
-                    plotHeader=False,
-                    timerS=None,
-                ):
+                       theLasFile,  # LAS specific
+                       theXStart,
+                       theXStop,
+                       theFilmId,
+                       theFpOut,
+                       frameStep=1,
+                       title="",
+                       plotHeader=False,
+                       timerS=None,
+                       ):
         """Plot a part of a LogPass and returns a list of Channel IDs plotted.
         
         theLisFile - The LIS File object.
@@ -883,7 +896,7 @@ class Plot(object):
             theXStop,
             self.xScale(theFilmId),
             # theLegendDepth
-            self.LEGEND_DEPTH_SPARE+self._retPlotScaleDepth(mySscS),
+            self.LEGEND_DEPTH_SPARE + self._retPlotScaleDepth(mySscS),
             # theHeadDepth
             myHeadDepth,
             # theTailDepth
@@ -896,9 +909,9 @@ class Plot(object):
         )
         # Set up viewBox and viewPort
         myRootAttrs = {
-            'viewBox'  : "0 0 {:.3f} {:.3f}".format(
-                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS*myPlRo.width,
-                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS*myPlRo.depth,
+            'viewBox': "0 0 {:.3f} {:.3f}".format(
+                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS * myPlRo.width,
+                PlotConstants.VIEW_BOX_UNITS_PER_PLOT_UNITS * myPlRo.depth,
             ),
         }
         myViewPort = Coord.Box(width=myPlRo.widthDim, depth=myPlRo.depthDim)
@@ -941,7 +954,7 @@ class Plot(object):
             # End timer
             self._incTimers(timerS, theLasFile.number_of_data_points() * 6, None)
         return retVal
-    
+
     def _incTimers(self, theTim, theSize=0, theNewMsg=None):
         """Stop the existing timer and load another one.
         If theTim is None then this is a NOP.
@@ -961,13 +974,13 @@ class Plot(object):
         # Get the list of output curves from the presentation table
         # Will raise KeyError if not self._presCfg.hasCurvesForDest(myPhsFiCf.name):
         return self._presCfg.outpChIDs(myPhsFiCf.name)
-    
-#    def _outpCurveIDs(self, theFilmId, theOutpId):
-#        # Get the PhysFilmCfg that corresponds to theFilmId, may raise KeyError.
-#        myPhsFiCf = self._filmCfg[theFilmId]
-#        # Get the list of output curves from the presentation table
-#        return self._presCfg.outpCurveIDs(myPhsFiCf.name, theOutpId)
-        
+
+    #    def _outpCurveIDs(self, theFilmId, theOutpId):
+    #        # Get the PhysFilmCfg that corresponds to theFilmId, may raise KeyError.
+    #        myPhsFiCf = self._filmCfg[theFilmId]
+    #        # Get the list of output curves from the presentation table
+    #        return self._presCfg.outpCurveIDs(myPhsFiCf.name, theOutpId)
+
     def _loadFrameSet(self, theLisFile, theLogPass, theXStart, theXStop, theFilmId, frameStep=1):
         """Loads the LogPass FrameSet with the output channels that are needed for the plot.
         theLisFile is a File object, theLogPass is a LogPass, theXStart/Stop are
@@ -976,7 +989,8 @@ class Plot(object):
         # Load the FrameSet
         logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet...')
         myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.hasOutpMnem(m)]
-        logging.info('Plot._loadFrameSet(): X axis from="{:s}" to="{:s}" frame step={:d}. Channel IDs[{:d}]:\n{:s}'.format(
+        logging.info(
+            'Plot._loadFrameSet(): X axis from="{:s}" to="{:s}" frame step={:d}. Channel IDs[{:d}]:\n{:s}'.format(
                 str(theXStart),
                 str(theXStop),
                 frameStep,
@@ -987,55 +1001,56 @@ class Plot(object):
         theLogPass.setFrameSetChX(theLisFile, myChIdS, theXStart, theXStop, frStep=frameStep)
         logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet DONE...')
         return theLogPass.numBytes
-    
-    #============================================
+
+    # ============================================
     # Section: Plotting the X axis grid and text.
-    #============================================
+    # ============================================
     def _plotXGrid(self, thePhsFiCf, xStart, xStop, xS, refPt):
-        myXg = XGrid.XGrid(self.xScale(thePhsFiCf.name))#thePhsFiCf.xScale)
+        myXg = XGrid.XGrid(self.xScale(thePhsFiCf.name))  # thePhsFiCf.xScale)
         self._plotXGridLines(thePhsFiCf, myXg, xStart, xStop, xS, refPt)
         self._plotXGridAlpha(thePhsFiCf, myXg, xStart, xStop, xS, refPt)
-        
+
     def _plotXGridLines(self, thePhsFiCf, theXg, xStart, xStop, xS, refPt):
         """Plot an XCrid.XGrid() object to the SVG stream xS and start point
         startPt (Coord.Pt() object), from EngVal xStart to EngVal xStop."""
         # Plot depth lines
-        #myXInc = (xStart < xStop)
-#        for t in thePhsFiCf.genTracks():
-#            print('TRACE: _plotXGridLines():', t, 'Grid:', t.hasGrid)
+        # myXInc = (xStart < xStop)
+        #        for t in thePhsFiCf.genTracks():
+        #            print('TRACE: _plotXGridLines():', t, 'Grid:', t.hasGrid)
         for pos, stroke in theXg.genXAxisRange(xStart, xStop):
             for t in thePhsFiCf.genTracks():
                 if t.plotXLines:
                     with SVGWriter.SVGLine(
                             xS,
-                            Coord.Pt(t.left+refPt.x, refPt.y+pos),
-                            Coord.Pt(t.right+refPt.x, refPt.y+pos),
+                            Coord.Pt(t.left + refPt.x, refPt.y + pos),
+                            Coord.Pt(t.right + refPt.x, refPt.y + pos),
                             attrs=Stroke.retSVGAttrsFromStroke(stroke)
-                        ):
+                    ):
                         pass
 
     def _plotXGridAlpha(self, thePhsFiCf, theXg, xStart, xStop, xS, refPt):
         # Plot depth text
         textAttrs = {
-            'text-anchor'       : 'end',
-            'dominant-baseline' : 'middle',
+            'text-anchor': 'end',
+            'dominant-baseline': 'middle',
         }
         for pos, val in theXg.genXAxisTextRange(xStart, xStop):
             for t in thePhsFiCf.genTracks():
                 if t.plotXAlpha:
                     myPt = Coord.Pt(
-                        t.right+refPt.x-Coord.Dim(0.05, 'in'),
-                        refPt.y+pos+Coord.Dim(0.05, 'in'),
+                        t.right + refPt.x - Coord.Dim(0.05, 'in'),
+                        refPt.y + pos + Coord.Dim(0.05, 'in'),
                     )
                     with SVGWriter.SVGText(xS, myPt, 'Courier', 12, textAttrs):
                         xS.characters(str(val))
-    #============================================
+
+    # ============================================
     # End: Plotting the X axis grid and text.
-    #============================================
-    
-    #================================================================
+    # ============================================
+
+    # ================================================================
     # Section: Plotting the scales (legends) at each end of the plot.
-    #================================================================
+    # ================================================================
     def _plotScales(self, theFilmID, theLpData, thePlotRoll, xS, theSscS, title):
         #                 theFilmId, theLogPass, myPlRo, xS, mySscS, title
         """Plots the scales (legend) at the top and bottom of the log.
@@ -1059,7 +1074,7 @@ class Plot(object):
         # retHeaderPane() returns a pair of top-left Coord.Pt(), Coord.Box()
         myPt, myBox = thePlotRoll.retLegendPane(isTop=isTop)
         # Bounding box
-        with SVGWriter.SVGRect(xS, myPt, myBox, {'fill' : "none", 'stroke' : "blue", 'stroke-width' : ".25",}):
+        with SVGWriter.SVGRect(xS, myPt, myBox, {'fill': "none", 'stroke': "blue", 'stroke-width': ".25", }):
             pass
         # Title text
         # Compute the text reference point, x is half myBox.width,
@@ -1067,8 +1082,8 @@ class Plot(object):
         textPt = Coord.newPt(myPt, incX=myBox.width.scale(0.5), incY=self.LEGEND_DEPTH_SPARE.scale(0.5))
         if not isTop:
             # Shift text point down for the lower header
-            textPt = Coord.newPt(textPt, incX=None, incY=myBox.depth-self.LEGEND_DEPTH_SPARE)
-        with SVGWriter.SVGText(xS, textPt, self.TITLE_FONT_FAMILY, self.TITLE_FONT_SIZE, {'text-anchor' : 'middle'}):
+            textPt = Coord.newPt(textPt, incX=None, incY=myBox.depth - self.LEGEND_DEPTH_SPARE)
+        with SVGWriter.SVGText(xS, textPt, self.TITLE_FONT_FAMILY, self.TITLE_FONT_SIZE, {'text-anchor': 'middle'}):
             xS.characters(title)
         # myNumSlices is only relevant when isTop is True, it allows us to
         # reverse the slice order
@@ -1077,8 +1092,9 @@ class Plot(object):
         for aSsc in theSliceCurveS:
             # aSsc has slice curveName start span
             # Get the CurveCfg object
-            assert(aSsc.curveName in self._presCfg)
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotScale() curve={:s} {:s} START'.format(aSsc.curveName.pStr(), str(isTop)))
+            assert (aSsc.curveName in self._presCfg)
+            if COMMENTS_IN_SVG_TRACE: xS.comment(
+                ' Plot.Plot._plotScale() curve={:s} {:s} START'.format(aSsc.curveName.pStr(), str(isTop)))
             myCurvCfg = self._presCfg[aSsc.curveName]
             # myCurvCfg has leftP/rightP as Coord.Dim() objects and
             # myCurvCfg.trac.leftL, myCurvCfg.trac.rightL are the numeric values
@@ -1105,7 +1121,7 @@ class Plot(object):
                     Coord.newPt(myTopLeft, incX=None, incY=None),
                     Coord.newPt(myTopLeft, incX=None, incY=myDepth),
                     attrs=myAttrs
-                ):
+            ):
                 pass
             # Right vertical line
             with SVGWriter.SVGLine(
@@ -1113,7 +1129,7 @@ class Plot(object):
                     Coord.newPt(myTopLeft, incX=myWidth, incY=None),
                     Coord.newPt(myTopLeft, incX=myWidth, incY=myDepth),
                     attrs=myAttrs
-                ):
+            ):
                 pass
             # Horizontal line
             with SVGWriter.SVGLine(
@@ -1121,11 +1137,11 @@ class Plot(object):
                     Coord.newPt(myTopLeft, incX=None, incY=horizLineIncY),
                     Coord.newPt(myTopLeft, incX=myWidth, incY=horizLineIncY),
                     attrs=myAttrs
-                ):
+            ):
                 pass
             # Arrow head on the larger value
             if self.LEGEND_ARROW_DISPLAY:
-#                myArrowAttrs = Stroke.retSVGAttrsFromStroke(myCurvCfg.codiStroke)
+                #                myArrowAttrs = Stroke.retSVGAttrsFromStroke(myCurvCfg.codiStroke)
                 myArrowAttrs = Stroke.retSVGAttrsFromStroke(
                     Stroke.StrokeBlackSolid._replace(width=self.LEGEND_ARROW_WIDTH_PX)
                 )
@@ -1133,13 +1149,13 @@ class Plot(object):
                     # left to right so arrow on right
                     ptA = Coord.newPt(myTopLeft, incX=myWidth, incY=horizLineIncY)
                     ptB = Coord.newPt(myTopLeft,
-                                        incX=myWidth-self.LEGEND_ARROW_WIDTH,
-                                        incY=horizLineIncY-self.LEGEND_ARROW_DEPTH)
+                                      incX=myWidth - self.LEGEND_ARROW_WIDTH,
+                                      incY=horizLineIncY - self.LEGEND_ARROW_DEPTH)
                     with SVGWriter.SVGLine(xS, ptA, ptB, attrs=myArrowAttrs):
                         pass
                     ptA = Coord.newPt(ptB, incX=None, incY=self.LEGEND_ARROW_DEPTH.scale(2.0))
-#                    with SVGWriter.SVGLine(xS, ptB, ptA, attrs=myArrowAttrs):
-#                        pass
+                    #                    with SVGWriter.SVGLine(xS, ptB, ptA, attrs=myArrowAttrs):
+                    #                        pass
                     ptB = Coord.newPt(myTopLeft, incX=myWidth, incY=horizLineIncY)
                     with SVGWriter.SVGLine(xS, ptA, ptB, attrs=myArrowAttrs):
                         pass
@@ -1147,47 +1163,48 @@ class Plot(object):
                     # right to left so arrow on left
                     ptA = Coord.newPt(myTopLeft, incX=None, incY=horizLineIncY)
                     ptB = Coord.newPt(myTopLeft,
-                                        incX=self.LEGEND_ARROW_WIDTH,
-                                        incY=horizLineIncY-self.LEGEND_ARROW_DEPTH)
+                                      incX=self.LEGEND_ARROW_WIDTH,
+                                      incY=horizLineIncY - self.LEGEND_ARROW_DEPTH)
                     with SVGWriter.SVGLine(xS, ptA, ptB, attrs=myArrowAttrs):
                         pass
                     ptA = Coord.newPt(ptB, incX=None, incY=self.LEGEND_ARROW_DEPTH.scale(2.0))
-#                    with SVGWriter.SVGLine(xS, ptB, ptA, attrs=myArrowAttrs):
-#                        pass
+                    #                    with SVGWriter.SVGLine(xS, ptB, ptA, attrs=myArrowAttrs):
+                    #                        pass
                     ptB = Coord.newPt(myTopLeft, incX=None, incY=horizLineIncY)
                     with SVGWriter.SVGLine(xS, ptA, ptB, attrs=myArrowAttrs):
                         pass
             # Now do text: left/right/centre or in SVG speak start/end/middle
             with SVGWriter.SVGText(xS,
-                                   Coord.newPt(myTopLeft, incX=self.MICRO_MARGIN, incY=myDepth.scale(1/2)),
+                                   Coord.newPt(myTopLeft, incX=self.MICRO_MARGIN, incY=myDepth.scale(1 / 2)),
                                    self.CURVE_LEGEND_FONT_FAMILY,
                                    self.CURVE_LEGEND_FONT_SIZE,
-                                   {'text-anchor' : 'start'},
+                                   {'text-anchor': 'start'},
                                    ):
                 xS.characters('{:g}'.format(myCurvCfg.tracValueFunction(theFilmID).leftL))
             with SVGWriter.SVGText(xS,
-                                   Coord.newPt(myTopLeft, incX=myWidth-self.MICRO_MARGIN, incY=myDepth.scale(1/2)),
+                                   Coord.newPt(myTopLeft, incX=myWidth - self.MICRO_MARGIN, incY=myDepth.scale(1 / 2)),
                                    self.CURVE_LEGEND_FONT_FAMILY,
                                    self.CURVE_LEGEND_FONT_SIZE,
-                                   {'text-anchor' : 'end'},
+                                   {'text-anchor': 'end'},
                                    ):
                 xS.characters('{:g}'.format(myCurvCfg.tracValueFunction(theFilmID).rightL))
             with SVGWriter.SVGText(xS,
-                                   Coord.newPt(myTopLeft, incX=myWidth.scale(0.5), incY=myDepth.scale(1/2)),
+                                   Coord.newPt(myTopLeft, incX=myWidth.scale(0.5), incY=myDepth.scale(1 / 2)),
                                    self.CURVE_LEGEND_FONT_FAMILY,
                                    self.CURVE_LEGEND_FONT_SIZE,
-                                   {'text-anchor' : 'middle'},
+                                   {'text-anchor': 'middle'},
                                    ):
                 # Get the units from the LogPass, first find which OUTP drives
                 # this curve
                 myTxt = '{:s}'.format(myCurvCfg.mnem.pStr(strip=True))
                 # Add units if present
                 myUnits = theLpData.curveUnitsAsStr(myCurvCfg.outp)
-                assert(myUnits is not None), 'None returned for curve: "{!r:s}"'.format(myCurvCfg.outp)
+                assert (myUnits is not None), 'None returned for curve: "{!r:s}"'.format(myCurvCfg.outp)
                 if len(myUnits.strip()) > 0:
                     myTxt += ' [{!r:s}]'.format(myUnits)
-                xS.characters(myTxt)            
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._plotScale() curve={!r:s} {!r:s} END'.format(aSsc.curveName.pStr(), isTop))
+                xS.characters(myTxt)
+            if COMMENTS_IN_SVG_TRACE: xS.comment(
+                ' Plot.Plot._plotScale() curve={!r:s} {!r:s} END'.format(aSsc.curveName.pStr(), isTop))
 
     def _retPlotScaleDepth(self, theSscS):
         """Returns a Coord.Dim() of the amount of space needed to plot the
@@ -1218,32 +1235,32 @@ class Plot(object):
         5. Repeat 2. until list is empty.
         """
         myCpsS = self._retCurvePlotScales(theFilmID, theLp)
-#        print('_retCurvePlotScaleOrder(): myCpsS:', myCpsS)
+        #        print('_retCurvePlotScaleOrder(): myCpsS:', myCpsS)
         # Create a slot handler
         mySlotH = CurvePlotScaleSlotMap(myCpsS)
         # A list of ScaleSliceCurve objects
         return [v for v in mySlotH.genScaleSliceCurve()]
 
-#        retSscS = []
-#        print('_retCurvePlotScaleOrder(): mySlotH:', mySlotH)
-#        scaleSlice = 0
-#        while len(myCpsS) > 0:
-#            mySlotH.reset()
-#            # Fit a curve in the slice
-#            i = 0
-#            # First curve in this slice should always fit
-#            assert(mySlotH.canFit(myCpsS[0])), 'CurvePlotScaleSlotMap {:s} can not fit first curve remaining in list.'.format(mySlotH._htIdxMap)
-#            while i < len(myCpsS):
-#                if mySlotH.canFit(myCpsS[i]):
-#                    myCps = myCpsS.pop(i)
-#                    retSscS.append(ScaleSliceCurve(scaleSlice, myCps.name, myCps.halfTrackStart, myCps.halfTracks))
-#                    # Pack the slice with these curve slots
-#                    mySlotH.fit(myCps)
-#                else:
-#                    i += 1
-#            scaleSlice += 1
-#        print('_retCurvePlotScaleOrder(): returns:', retSscS)
-#        return retSscS
+    #        retSscS = []
+    #        print('_retCurvePlotScaleOrder(): mySlotH:', mySlotH)
+    #        scaleSlice = 0
+    #        while len(myCpsS) > 0:
+    #            mySlotH.reset()
+    #            # Fit a curve in the slice
+    #            i = 0
+    #            # First curve in this slice should always fit
+    #            assert(mySlotH.canFit(myCpsS[0])), 'CurvePlotScaleSlotMap {:s} can not fit first curve remaining in list.'.format(mySlotH._htIdxMap)
+    #            while i < len(myCpsS):
+    #                if mySlotH.canFit(myCpsS[i]):
+    #                    myCps = myCpsS.pop(i)
+    #                    retSscS.append(ScaleSliceCurve(scaleSlice, myCps.name, myCps.halfTrackStart, myCps.halfTracks))
+    #                    # Pack the slice with these curve slots
+    #                    mySlotH.fit(myCps)
+    #                else:
+    #                    i += 1
+    #            scaleSlice += 1
+    #        print('_retCurvePlotScaleOrder(): returns:', retSscS)
+    #        return retSscS
 
     def _retCurvePlotScales(self, theFilmID, theLp=None):
         """Returns a sorted list of CurvePlotScale objects given a FilmId and
@@ -1267,7 +1284,7 @@ class Plot(object):
             ' LogPass: {!r:s}'.format(curvIdSet))
         # cpsSet is a set of curve IDs
         # Now create a list of CurvePlotScale objects and sort it
-        cpsList = []        
+        cpsList = []
         for curvId in curvIdSet:
             cpsList.append(
                 CurvePlotScale(
@@ -1276,15 +1293,16 @@ class Plot(object):
                     self._presCfg[curvId].tracWidthData(theFilmID).halfTracks,
                 )
             )
-#        print('_retCurvePlotScales()', sorted(cpsList))
+        #        print('_retCurvePlotScales()', sorted(cpsList))
         return sorted(cpsList)
-    #================================================================
+
+    # ================================================================
     # End: Plotting the scales (legends) at each end of the plot.
-    #================================================================
-    
-    #==============================
+    # ================================================================
+
+    # ==============================
     # Section: Plotting the curves.
-    #==============================
+    # ==============================
     def _plotCurves(self, theFilmID, theFrameHolder, thePlRo, xS):
         """Plots curves from a populated log pass to a SVG stream.
         theFilmID - An ID to look up in in the presentation table to see what outputs are to be plotted.
@@ -1308,7 +1326,7 @@ class Plot(object):
                 logging.warning('Plot._plotCurves() omitting OUTP "{!r:s}" as not used by PRES table.'.format(anO))
             self._insertCommentInSVG(xS, ' Output {:s} END '.format(anO.pStr()), 1)
         return curveS, numPoints
-    
+
     def _plotSingleOutput(self, theFilmID, theOutpID, theFrameHolder, thePlRo, xS):
         """Takes a single OUTP and plots all curves that use it. Returns the curve IDs.
         theFilmID - The ID of self._filmCfg for this plot.
@@ -1318,8 +1336,8 @@ class Plot(object):
         xS - The SVG stream to write to. 
         """
         logging.info('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
-        assert(self._presCfg.usesOutpChannel(theFilmID, theOutpID))
-        assert(theFrameHolder.hasOutpMnem(theOutpID))
+        assert (self._presCfg.usesOutpChannel(theFilmID, theOutpID))
+        assert (theFrameHolder.hasOutpMnem(theOutpID))
         # Given an output ID select all curve IDs and iterate through their
         # X/v points and scale them accordingly; X by the X axis scale and v by
         # the tracValueFunction() and the track dimensions. Finally assemble
@@ -1332,7 +1350,8 @@ class Plot(object):
         ptPrevS = [None] * len(myCurvIdS)
         numPoints = 0
         numMathErrors = 0
-        if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
+        if COMMENTS_IN_SVG_TRACE: xS.comment(
+            ' Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
         for x, v in theFrameHolder.genOutpPoints(theOutpID):
             # If v is a null or absent value then flush the buffer and start again
             if v == theFrameHolder.nullValue:
@@ -1373,18 +1392,20 @@ class Plot(object):
                     ptPrevS[cuIdx] = pt
             xPrev = x
         logging.info('DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
-        if COMMENTS_IN_SVG_TRACE: xS.comment(' DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
+        if COMMENTS_IN_SVG_TRACE: xS.comment(
+            ' DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
         for cuPlot in myCurvPlotS:
             self._flushPolyLineBuffer(cuPlot, xS)
         if numMathErrors > 0:
             logging.warning('Plot._plotSingleOutput(): {:d} maths errors plotting output {!r:s}'.format(numMathErrors,
                                                                                                         theOutpID))
         return myCurvIdS, numPoints
-    
+
     def _flushPolyLineBuffer(self, theCurvPlotData, xS):
         """Flush buffer and plot the points."""
         if len(theCurvPlotData.buffer) > 0:
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._flushPolyLineBuffer() curve={:s}'.format(theCurvPlotData.id.pStr()))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(
+                ' Plot._flushPolyLineBuffer() curve={:s}'.format(theCurvPlotData.id.pStr()))
             myAttrs = Stroke.retSVGAttrsFromStroke(self._presCfg[theCurvPlotData.id].codiStroke)
             myAttrs['fill'] = "none"
             with SVGWriter.SVGPolyline(
@@ -1394,8 +1415,9 @@ class Plot(object):
                 pass
             # Now flush the buffer
             theCurvPlotData.buffer = []
-    
-    def _interpolateBackup(self, theCuPlot, xS, thePlRo, theTwd, theLtb, xPrev, xNow, pNow, wrapPrev, wrapNow, theXUnits):
+
+    def _interpolateBackup(self, theCuPlot, xS, thePlRo, theTwd, theLtb, xPrev, xNow, pNow, wrapPrev, wrapNow,
+                           theXUnits):
         """Handles the case where the curve is on a backup track.
         theTwd is a TrackWidthData object, theLtb is derived from LineTransBase.
         xPrev/xNow is the previous/current X axis value as a number. 
@@ -1414,28 +1436,30 @@ class Plot(object):
             )
         # Interpolate wrapping
         polyEnd, wrapLines, polyStart = self._retInterpolateWrapPoints(
-                theTwd,
-                theLtb,
-                xPrev=xPrev,
-                xNow=xNow,
-                pNow=pNow,
-                wrapPrev=theCuPlot.prevWrap,
-                wrapNow=wrapNow)
+            theTwd,
+            theLtb,
+            xPrev=xPrev,
+            xNow=xNow,
+            pNow=pNow,
+            wrapPrev=theCuPlot.prevWrap,
+            wrapNow=wrapNow)
         # Sanity checks
-        assert(polyEnd is None or len(polyEnd) == 2)
-        assert(len(wrapLines) % 2 == 0)
-        assert(len(polyStart) in (0, 2))
-#        logging.debug('Plot._interpolateBackup()   polyEnd {:s}'.format(str(polyEnd)))
-#        logging.debug('Plot._interpolateBackup() wrapLines {:s}'.format(str(wrapLines)))
-#        logging.debug('Plot._interpolateBackup() polyStart {:s}'.format(str(polyStart)))
-#        logging.debug('')
+        assert (polyEnd is None or len(polyEnd) == 2)
+        assert (len(wrapLines) % 2 == 0)
+        assert (len(polyStart) in (0, 2))
+        #        logging.debug('Plot._interpolateBackup()   polyEnd {:s}'.format(str(polyEnd)))
+        #        logging.debug('Plot._interpolateBackup() wrapLines {:s}'.format(str(wrapLines)))
+        #        logging.debug('Plot._interpolateBackup() polyStart {:s}'.format(str(polyStart)))
+        #        logging.debug('')
         if COMMENTS_IN_SVG_TRACE:
             xS.comment(' Plot._interpolateBackup()   polyEnd {:s} '.format(str(polyEnd)))
             xS.comment(' Plot._interpolateBackup() wrapLines {:s} '.format(str(wrapLines)))
             xS.comment(' Plot._interpolateBackup() polyStart {:s} '.format(str(polyStart)))
         # End existing polyline
         if polyEnd is not None:
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() appending as polyEnd is not None {:s}'.format(thePlRo.polyLinePt(polyEnd[0], polyEnd[1].value)))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(
+                ' Plot._interpolateBackup() appending as polyEnd is not None {:s}'.format(
+                    thePlRo.polyLinePt(polyEnd[0], polyEnd[1].value)))
             theCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(polyEnd[0], theXUnits), polyEnd[1].value))
         # Flush buffer
         self._flushPolyLineBuffer(theCuPlot, xS)
@@ -1445,19 +1469,26 @@ class Plot(object):
         if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._interpolateBackup() writing crossing lines ')
         for c in range(0, len(wrapLines), 2):
             # Write a line from [c] to [c+1]
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() appending cross line[0] {:s}'.format(thePlRo.polyLinePt(wrapLines[c][0], wrapLines[c][1].value)))
-            theCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(wrapLines[c][0], theXUnits), wrapLines[c][1].value))
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() appending cross line[1] {:s}'.format(thePlRo.polyLinePt(wrapLines[c+1][0], wrapLines[c+1][1].value)))
-            theCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(wrapLines[c+1][0], theXUnits), wrapLines[c+1][1].value))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() appending cross line[0] {:s}'.format(
+                thePlRo.polyLinePt(wrapLines[c][0], wrapLines[c][1].value)))
+            theCuPlot.buffer.append(
+                thePlRo.polyLinePt(EngVal.EngVal(wrapLines[c][0], theXUnits), wrapLines[c][1].value))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() appending cross line[1] {:s}'.format(
+                thePlRo.polyLinePt(wrapLines[c + 1][0], wrapLines[c + 1][1].value)))
+            theCuPlot.buffer.append(
+                thePlRo.polyLinePt(EngVal.EngVal(wrapLines[c + 1][0], theXUnits), wrapLines[c + 1][1].value))
             self._flushPolyLineBuffer(theCuPlot, xS)
             theCuPlot.buffer = []
         if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot.Plot._interpolateBackup() have written crossing lines ')
         # Now start of next polyline
         if len(polyStart) > 0:
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() starting new line[0] {:s}'.format(thePlRo.polyLinePt(polyStart[0][0], polyStart[0][1].value)))
-            theCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(polyStart[0][0], theXUnits), polyStart[0][1].value))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() starting new line[0] {:s}'.format(
+                thePlRo.polyLinePt(polyStart[0][0], polyStart[0][1].value)))
+            theCuPlot.buffer.append(
+                thePlRo.polyLinePt(EngVal.EngVal(polyStart[0][0], theXUnits), polyStart[0][1].value))
             # Note: polyStart[1][1] is a number not a Dim()
-            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() starting new line[1] {:s}'.format(thePlRo.polyLinePt(polyStart[1][0], polyStart[1][1])))
+            if COMMENTS_IN_SVG_TRACE: xS.comment(' Plot._interpolateBackup() starting new line[1] {:s}'.format(
+                thePlRo.polyLinePt(polyStart[1][0], polyStart[1][1])))
             theCuPlot.buffer.append(thePlRo.polyLinePt(EngVal.EngVal(polyStart[1][0], theXUnits), polyStart[1][1]))
 
     def _retInterpolateWrapPoints(self, theTwd, theLtb, xPrev, xNow, pNow, wrapPrev, wrapNow):
@@ -1506,7 +1537,7 @@ class Plot(object):
         449820.0 	    0.295198	        0.211552
         449760.0 	    0.427305	        0.427305
         """
-        assert(wrapPrev != wrapNow)
+        assert (wrapPrev != wrapNow)
         # print('TRACE:', '_retInterpolateWrapPoints(', theTwd, theLtb, xPrev, xNow, pNow, wrapPrev, wrapNow, ')')
         # assert abs(wrapPrev) < 10, 'Far too many wrapPrev'
         # assert abs(wrapNow) < 10, 'Far too many wrapNow'
@@ -1515,7 +1546,7 @@ class Plot(object):
         polyNew = []
         # If both wraps off-scale then return nothing
         if theLtb.isOffScaleLeft(wrapPrev) and theLtb.isOffScaleLeft(wrapNow) \
-        or theLtb.isOffScaleRight(wrapPrev) and theLtb.isOffScaleRight(wrapNow):
+                or theLtb.isOffScaleRight(wrapPrev) and theLtb.isOffScaleRight(wrapNow):
             logging.debug('All off scale.')
             return polyEnd, crossLines, polyNew
         # wrapDiff is +ve to the right
@@ -1561,7 +1592,7 @@ class Plot(object):
             x = xNow
             polyNew.append((x, pNow))
         # Note: Filters cross line list to make sure that are are not too many.
-#        return polyEnd, crossLines, polyNew
+        #        return polyEnd, crossLines, polyNew
         return polyEnd, self._filterCrossLineList(crossLines), polyNew
 
     def _filterCrossLineList(self, cLineS):
@@ -1584,7 +1615,7 @@ class Plot(object):
         137,166 wrap lines crossing the track. This can turn a 1.6Mb file into a 91Mb file!
         This code cuts down those 137,166 wrap lines (mostly duplicate ones) to 8 or so.
         """
-        assert(len(cLineS) % 2 == 0)
+        assert (len(cLineS) % 2 == 0)
         if len(cLineS) / 2 <= self.MAX_BACKUP_TRACK_CROSSING_LINES:
             # 'Normal' return without filtering
             return cLineS
@@ -1599,30 +1630,34 @@ class Plot(object):
         r = []
         while i < (len(cLineS) / 2) - int(s + 0.5):
             # Append from/to points
-            r.append(cLineS[2*i])
-            r.append(cLineS[2*i+1])
+            r.append(cLineS[2 * i])
+            r.append(cLineS[2 * i + 1])
             # Increment by stride
             f += s
             # Round to nearest member
-            i = int(f+0.5)
+            i = int(f + 0.5)
         # Last from/to point
-        r.append(cLineS[2*i])
-        r.append(cLineS[2*i+1])
+        r.append(cLineS[2 * i])
+        r.append(cLineS[2 * i + 1])
         return r
-        
-    #==============================
+
+    # ==============================
     # End: Plotting the curves.
-    #==============================
+    # ==============================
+
 
 class PlotReadLIS(Plot):
     """A subclass of Plot that is configured from FILM, PRES and (optionally) AREA, PIP Logical Records."""
+
     def __init__(self, lrFILM, lrPRES, lrAREA=None, lrPIP=None, theScale=0):
         myFilmCfg = FILMCfg.FilmCfgLISRead(lrFILM)
         myPresCfg = PRESCfg.PresCfgLISRead(lrPRES, myFilmCfg)
         super().__init__(myFilmCfg, myPresCfg, theScale)
 
+
 class PlotReadXML(Plot):
     """A subclass of Plot that is configured from XML file(s) using LgFormat."""
+
     def __init__(self, uniqueId, theScale=0):
         myFilmCfg = FILMCfgXML.FilmCfgXMLRead()
         myPresCfg = PRESCfgXML.PresCfgXMLRead(myFilmCfg, uniqueId)

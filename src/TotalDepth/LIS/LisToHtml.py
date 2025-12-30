@@ -947,7 +947,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         except ExceptionTotalDepthLIS as err:
             # logger.error('Can not create file and index: {!r:s}'.format(err))
             logger.exception('Can not create file and index from {}'.format(fpIn))
-            self.summary.add(fpIn, fpOut, 0, time.perf_counter() - clkStart, True)
+            self.summary.add(fpIn, fpOut, 0, 0, time.perf_counter() - clkStart, True)
             return
         # Write the CSS is not already there
         self._writeCss(fpOut)

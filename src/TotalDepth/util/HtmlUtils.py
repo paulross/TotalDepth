@@ -19,27 +19,30 @@
 # Paul Ross: apaulross@gmail.com
 """HTML utility functions."""
 
-__author__  = 'Paul Ross'
-__date__    = '2009-09-15'
+__author__ = 'Paul Ross'
+__date__ = '2009-09-15'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
 import os
 import hashlib
-#import types
+# import types
 
 from TotalDepth.util import XmlWrite
 from TotalDepth.util import DictTree
-    
+
+
 def retHtmlFileName(thePath):
     """Creates a unique, short, human readable file name base on the input
     file path."""
     myHash = hashlib.md5(os.path.abspath(thePath.encode('ascii'))).hexdigest()
     return '%s_%s%s' % (os.path.basename(thePath), myHash, '.html')
 
+
 def retHtmlFileLink(theSrcPath, theLineNum):
     """Returns a link to a file/line."""
     return "%s#%d" % (retHtmlFileName(theSrcPath), theLineNum)
+
 
 def writeHtmlFileLink(theS, theSrcPath, theLineNum, theText='', theClass=None):
     """Writes a link to another HTML file that represents source code.
@@ -52,60 +55,65 @@ def writeHtmlFileLink(theS, theSrcPath, theLineNum, theText='', theClass=None):
             theS,
             'a',
             {
-                'href' : retHtmlFileLink(theSrcPath, theLineNum),
+                'href': retHtmlFileLink(theSrcPath, theLineNum),
             },
-        ):
+    ):
         if theText:
             if theClass is None:
                 theS.characters(theText)
             else:
-                with XmlWrite.Element(theS, 'span', {'class' : theClass}):
+                with XmlWrite.Element(theS, 'span', {'class': theClass}):
                     theS.characters(theText)
-                
+
+
 def writeHtmlFileAnchor(theS, theLineNum, theText='', theClass=None):
     """Write an anchor to the stream."""
-    with XmlWrite.Element(theS, 'a', {'name' : "%d" % theLineNum}):
+    with XmlWrite.Element(theS, 'a', {'name': "%d" % theLineNum}):
         if theText:
             if theClass is None:
                 theS.characters(theText)
             else:
-                with XmlWrite.Element(theS, 'span', {'class' : theClass}):
+                with XmlWrite.Element(theS, 'span', {'class': theClass}):
                     theS.characters(theText)
+
 
 def pathSplit(p):
     """Split a path into its components."""
-    #print 'TRACE: pathSplit(%s):' % p
-    #p = os.path.splitdrive(p)[1]
+    # print 'TRACE: pathSplit(%s):' % p
+    # p = os.path.splitdrive(p)[1]
     l = os.path.normpath(p).split(os.sep)
     retVal = ['%s%s' % (d, os.sep) for d in l[:-1]]
     retVal.append(l[-1])
-    #print 'TRACE: pathSplit(%s): returns %s' % (p, str(retVal))
+    # print 'TRACE: pathSplit(%s): returns %s' % (p, str(retVal))
     return retVal
+
 
 def writeFileListAsTable(theS, theFileLinkS, tableAttrs, includeKeyTail):
     """Writes a list of file names as an HTML table looking like a directory
     structure. theFileLinkS is a list of pairs (file_path, href).
     The navigation text in the cell will be the basename of the file_path."""
-    #myList = [(f, h, os.path.basename(f)) for f, h in theFileLinkS]
-    #writeFileListTrippleAsTable(theS, myList, tableAttrs, includeKeyTail)
-    #print 'TRACE: theFileLinkS', theFileLinkS
+    # myList = [(f, h, os.path.basename(f)) for f, h in theFileLinkS]
+    # writeFileListTrippleAsTable(theS, myList, tableAttrs, includeKeyTail)
+    # print 'TRACE: theFileLinkS', theFileLinkS
     myDict = DictTree.DictTreeHtmlTable(None)
     for f, h in theFileLinkS:
         keyList = pathSplit(f)
         myDict.add(keyList, (h, os.path.basename(f)))
     writeDictTreeAsTable(theS, myDict, tableAttrs, includeKeyTail)
 
+
 def writeFileListTrippleAsTable(theS, theFileLinkS, tableAttrs, includeKeyTail):
     """Writes a list of file names as an HTML table looking like a directory
     structure. theFileLinkS is a list of triples (file_name, href, nav_text)."""
-    #print 'TRACE: theFileLinkS', theFileLinkS
+    # print 'TRACE: theFileLinkS', theFileLinkS
     myDict = DictTree.DictTreeHtmlTable('list')
     for f, h, n in theFileLinkS:
         keyList = pathSplit(f)
         myDict.add(keyList, (h, n))
-    #print 'TRACE:   myDict.keys():', myDict.keys()
-    #print 'TRACE: myDict.values():', myDict.values()
+    # print 'TRACE:   myDict.keys():', myDict.keys()
+    # print 'TRACE: myDict.values():', myDict.values()
     writeDictTreeAsTable(theS, myDict, tableAttrs, includeKeyTail)
+
 
 def writeDictTreeAsTable(theS, theDt, tableAttrs, includeKeyTail):
     """Writes a DictTreeHtmlTable object as a table, for example as a directory
@@ -130,7 +138,7 @@ def writeDictTreeAsTable(theS, theDt, tableAttrs, includeKeyTail):
                 # Write out the '</tr>' element
                 theS.endElement('tr')
             else:
-                #print 'TRACE: anEvent', anEvent
+                # print 'TRACE: anEvent', anEvent
                 k, v, r, c = anEvent
                 # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, txt[-1])
                 myTdAttrs = {}
@@ -142,16 +150,16 @@ def writeDictTreeAsTable(theS, theDt, tableAttrs, includeKeyTail):
                 with XmlWrite.Element(theS, 'td', myTdAttrs):
                     if v is not None:
                         if includeKeyTail:
-                            theS.characters('%s:' % k[-1])                        
-                        # Output depending on the type of the value
+                            theS.characters('%s:' % k[-1])
+                            # Output depending on the type of the value
                         if isinstance(v, list):
                             for h, n in v:
                                 theS.characters(' ')
-                                with XmlWrite.Element(theS, 'a', {'href' : h}):
+                                with XmlWrite.Element(theS, 'a', {'href': h}):
                                     # Write the nav text
                                     theS.characters('%s' % n)
                         elif isinstance(v, tuple) and len(v) == 2:
-                            with XmlWrite.Element(theS, 'a', {'href' : v[0]}):
+                            with XmlWrite.Element(theS, 'a', {'href': v[0]}):
                                 # Write the nav text
                                 theS.characters(v[1])
                         else:
@@ -160,7 +168,8 @@ def writeDictTreeAsTable(theS, theDt, tableAttrs, includeKeyTail):
                     else:
                         theS.characters(k[-1])
     # Write: </table>
-    
+
+
 def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
     """Writes file paths as a table, for example as a directory structure.
     
@@ -182,7 +191,7 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
     for k, v in theKvS:
         myDict.add(pathSplit(k), v)
     # Propagate table class attribute
-    with XmlWrite.Element(theS, 'table', {'class' : tableStyle}):
+    with XmlWrite.Element(theS, 'table', {'class': tableStyle}):
         for anEvent in myDict.gen_row_column_events():
             if anEvent == myDict.ROW_OPEN:
                 # Write out the '<tr>' element
@@ -191,10 +200,10 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
                 # Write out the '</tr>' element
                 theS.endElement('tr')
             else:
-                #print 'TRACE: anEvent', anEvent
+                # print 'TRACE: anEvent', anEvent
                 k, v, r, c = anEvent
                 # Write '<td rowspan="%d" colspan="%d">%s</td>' % (r, c, txt[-1])
-                myTdAttrs = {'class' : tableStyle}
+                myTdAttrs = {'class': tableStyle}
                 if r > 1:
                     myTdAttrs['rowspan'] = "%d" % r
                 if c > 1:
@@ -205,7 +214,7 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
                     with XmlWrite.Element(theS, 'td', myTdAttrs):
                         # Write out part of the file name
                         theS.characters(k[-1])
-#===============================================================================
+# ===============================================================================
 #                        if includeKeyTail:
 #                            theS.characters('%s:' % k[-1])                        
 #                        # Output depending on the type of the value
@@ -222,6 +231,5 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
 #                        else:
 #                            # Treat as string
 #                            theS.characters(str(v))
-#===============================================================================
-    # Write: </table>
-
+# ===============================================================================
+# Write: </table>

@@ -1,4 +1,3 @@
-
 import pytest
 
 from TotalDepth.common import data_table
@@ -20,7 +19,7 @@ def test_format_table_simple():
 
 def test_format_table_simple_raises():
     with pytest.raises(ValueError) as err:
-        data_table.format_table([['Col 1', 'Col 2'], [1,]])
+        data_table.format_table([['Col 1', 'Col 2'], [1, ]])
     assert err.value.args[0] == 'Rows not of equal length but lengths of {1, 2}'
 
 
@@ -72,5 +71,3 @@ def test_format_table_columns_simple_floats():
     assert formatted_table == ['   Col 1 Col 2', '1.000000  2.00', '3.000000  4.00', '5.000000  6.00']
     # print('\n'.join(formatted_table))
     assert '\n'.join(formatted_table) == expected
-
-

@@ -89,7 +89,6 @@ import numpy as np
 from TotalDepth import ExceptionTotalDepth
 from TotalDepth.common import LogPass
 
-
 logger = logging.getLogger(__file__)
 
 
@@ -109,12 +108,10 @@ RE_CHANNEL_DEFINITION = re.compile(r'^([A-Z0-9]+)\s(.+?)\s(\S+)$')
 #: Matches 'UTIM    DATE    TIME ...'
 RE_DATA_HEADER_DEFINITION = re.compile(r'^UTIM\s+DATE\s+TIME\s+.+$')
 
-
 #: Matches '12Oct20' and '5Oct20'
 RE_DATE_STYLE_A = re.compile(r'^(\d+)(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d+)$')
 #: Matches '12-Oct-20' and '5O-Oct-20'
 RE_DATE_STYLE_B = re.compile(r'^(\d+)-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d+)$')
-
 
 #: Map of numpy dtype from the name/units.
 NAME_UNITS_TYPE_MAP = {

@@ -20,27 +20,27 @@
 """Unit tests for the LogicalData module.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '8 Nov 2010'
+__author__ = 'Paul Ross'
+__date__ = '8 Nov 2010'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) 2010 Paul Ross.'
+__rights__ = 'Copyright (c) 2010 Paul Ross.'
 
-#import pprint
+import logging
+# import pprint
 import sys
 import time
-import logging
-import io
-
-from TotalDepth.LIS.core import EngVal
-from TotalDepth.LIS.core import Units
-
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
+from TotalDepth.LIS.core import EngVal
+from TotalDepth.LIS.core import Units
+
+
 class TestEngVal(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -57,34 +57,34 @@ class TestEngVal(unittest.TestCase):
         """TestEngVal.test_01(): Basic class functionality."""
         myEv = EngVal.EngVal(1.0, b'S   ')
         self.assertFalse(myEv.dimensionless())
-        #myEv2 = EngVal.EngVal(1000.0, b'mS  ')
-        
+        # myEv2 = EngVal.EngVal(1000.0, b'mS  ')
+
     def test_02(self):
         """TestEngVal.test_02(): __str__()."""
         myEv = EngVal.EngVal(1.0, b'S   ')
         self.assertEqual('EngVal: 1.0 (S   )', str(myEv))
-        
+
     def test_03(self):
         """TestEngVal.test_03(): __str__() dimensionless."""
         myEv = EngVal.EngVal(1.0, EngVal.DIMENSIONLESS)
         self.assertEqual('EngVal: 1.0', str(myEv))
-        
+
     def test_04(self):
         """TestEngVal.test_04(): strFmt()."""
         myEv = EngVal.EngVal(1.0, b'S   ')
         self.assertEqual('EngVal: 1.000 (S   )', myEv.strFormat('{:.3f}'))
         self.assertEqual('1.000 (S   )', myEv.strFormat('{:.3f}', incPrefix=False))
-        
+
     def test_05(self):
         """TestEngVal.test_0f(): strFmt() dimensionless."""
         myEv = EngVal.EngVal(1.0, EngVal.DIMENSIONLESS)
         self.assertEqual('EngVal: 1.000', myEv.strFormat('{:.3f}'))
-        
+
     def test_10(self):
         """TestEngVal.test_10(): Unit conversion."""
         myEv = EngVal.EngVal(1.0, b'S   ')
         myEv.convert(b'MS  ')
-        #print(myEv)
+        # print(myEv)
         self.assertEqual(EngVal.EngVal(1.0, b'S   '), myEv)
         self.assertEqual(EngVal.EngVal(1000.0, b'MS  '), myEv)
         self.assertEqual(1000.0, myEv.getInUnits(b'MS  '))
@@ -95,14 +95,14 @@ class TestEngVal(unittest.TestCase):
         self.assertEqual(1000.0, myEv.getInUnits(b'MS  '))
         myEv.convert(b'MS  ')
         self.assertEqual(1000.0, myEv.getInUnits(b'MS  '))
-        
+
     def test_20_00(self):
         """TestEngVal.test_20_00(): add with unit conversion."""
         myEv = EngVal.EngVal(1.0, b'S   ') + EngVal.EngVal(1.0, b'S   ')
         self.assertTrue(EngVal.EngVal(2.0, b'S   ') == myEv)
         myEv = EngVal.EngVal(1000.0, b'MS  ') + EngVal.EngVal(1.0, b'S   ')
         self.assertTrue(EngVal.EngVal(2.0, b'S   ') == myEv)
-    
+
     def test_20_01(self):
         """TestEngVal.test_20_01(): add with real numbers."""
         self.assertEqual(EngVal.EngVal(2.0, b'S   '), EngVal.EngVal(1.0, b'S   ') + 1)
@@ -282,8 +282,8 @@ class TestEngVal(unittest.TestCase):
         self.assertEqual(EngVal.EngVal(1.0, EngVal.DIMENSIONLESS), myEv)
         # Distance example
         myEv = EngVal.EngVal(1.0, b'FEET') / EngVal.EngVal(0.3048, b'M   ')
-#        print()
-#        print(myEv)
+        #        print()
+        #        print(myEv)
         self.assertTrue(EngVal.EngVal(1.0, EngVal.DIMENSIONLESS) == myEv)
         self.assertEqual(EngVal.EngVal(1.0, EngVal.DIMENSIONLESS), myEv)
 
@@ -364,7 +364,7 @@ class TestEngVal(unittest.TestCase):
             self.fail('TypeError not raised.')
         except TypeError:
             pass
-    
+
     def test_27_03(self):
         """TestEngVal.test_27_03(): /= of same category dimensions results in dimensionless value."""
         myEv = EngVal.EngVal(1.0, b'S   ')
@@ -478,7 +478,7 @@ class TestEngVal(unittest.TestCase):
             self.fail('Units.ExceptionUnitsNoUnitInCategory not raised.')
         except Units.ExceptionUnitsNoUnitInCategory:
             pass
-        
+
     def test_50(self):
         """TestEngVal.test_50(): newEngValInOpticalUnits(), same units."""
         myEv = EngVal.EngVal(1.0, b'FEET')
@@ -504,14 +504,14 @@ class TestEngVal(unittest.TestCase):
         """TestEngVal.test_61(): pStr() with bytes value."""
         myEv = EngVal.EngVal(b'120.0', b'.1IN')
         self.assertEqual('120.0 (.1IN)', myEv.pStr())
-        myEv = EngVal.EngVal(bytes([65,0,66,1]), b'.1IN')
+        myEv = EngVal.EngVal(bytes([65, 0, 66, 1]), b'.1IN')
         self.assertEqual('A\x00B\x01 (.1IN)', myEv.pStr())
 
     def test_62(self):
         """TestEngVal.test_62(): pStr() with bytes value, dimensionless."""
         myEv = EngVal.EngVal(b'120.0')
         self.assertEqual('120.0', myEv.pStr())
-        myEv = EngVal.EngVal(bytes([65,0,66,1]))
+        myEv = EngVal.EngVal(bytes([65, 0, 66, 1]))
         self.assertEqual('A\x00B\x01', myEv.pStr())
 
     def test_63(self):
@@ -524,8 +524,10 @@ class TestEngVal(unittest.TestCase):
         myEv = EngVal.EngVal('120.0')
         self.assertEqual('120.0', myEv.pStr())
 
+
 class TestEngValRc(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -542,24 +544,26 @@ class TestEngValRc(unittest.TestCase):
         """TestEngValRc.test_01(): __str__()."""
         myEvr = EngVal.EngValRc(1.0, b'S   ', 68)
         self.assertEqual('EngValRc: 1.0 (S   )', str(myEvr))
-        
+
     def test_02(self):
         """TestEngValRc.test_02(): __str__() dimensionless."""
         myEvr = EngVal.EngValRc(1.0, EngVal.DIMENSIONLESS, 68)
         self.assertEqual('EngValRc: 1.0', str(myEvr))
-        
+
     def test_03(self):
         """TestEngValRc.test_03(): encode()."""
         myEvr = EngVal.EngValRc(1.0, b'S   ', 68)
         self.assertEqual(b'@\xc0\x00\x00', myEvr.encode())
-        
+
     def test_04(self):
         """TestEngValRc.test_04(): encode() fails."""
         myEvr = EngVal.EngValRc(1.0, b'S   ', 0)
         self.assertRaises(EngVal.ExceptionEngVal, myEvr.encode)
-        
+
+
 class TestEngValRval(unittest.TestCase):
     """Tests using rvals that promote numbers to EngVals."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -575,34 +579,36 @@ class TestEngValRval(unittest.TestCase):
     def test_01(self):
         """TestEngValRval.test_01(): Promoting a float to an EngVal with + using __radd__()."""
         v = 8.0 + EngVal.EngVal(1.0, b'S   ')
-#        print()
-#        print(v)
+        #        print()
+        #        print(v)
         self.assertEqual(EngVal.EngVal(9.0, b'S   '), v)
-        
+
     def test_02(self):
         """TestEngValRval.test_02(): Promoting a float to an EngVal with - using __rsub__()."""
         v = 8.0 - EngVal.EngVal(1.0, b'S   ')
-#        print()
-#        print(v)
+        #        print()
+        #        print(v)
         self.assertEqual(EngVal.EngVal(7.0, b'S   '), v)
-        
+
     def test_03(self):
         """TestEngValRval.test_03(): Promoting a float to an EngVal with * using __rmul__()."""
         v = 8.0 * EngVal.EngVal(2.0, b'S   ')
-#        print()
-#        print(v)
+        #        print()
+        #        print(v)
         self.assertEqual(EngVal.EngVal(16.0, b'S   '), v)
-        
+
     def test_04(self):
         """TestEngValRval.test_04(): Promoting a float to an EngVal with / using __rtruediv__()."""
         v = 8.0 / EngVal.EngVal(2.0, b'S   ')
-#        print()
-#        print(v)
+        #        print()
+        #        print(v)
         self.assertEqual(EngVal.EngVal(4.0, b'S   '), v)
-        
+
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
@@ -611,6 +617,8 @@ def unitTest(theVerbosity=2):
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestEngValRval))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -635,6 +643,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('TestClass.py script version "%s", dated %s' % (__version__, __date__)))
@@ -643,7 +652,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -661,14 +670,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

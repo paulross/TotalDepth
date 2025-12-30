@@ -24,17 +24,18 @@ Created on Nov 29, 2011
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2011 Paul Ross.'
+__rights__ = 'Copyright (c) 2011 Paul Ross.'
 
-import sys
 import logging
+import sys
 import time
 import unittest
 
 from TotalDepth.util import Histogram
+
 
 class TestHistogram(unittest.TestCase):
 
@@ -61,8 +62,8 @@ class TestHistogram(unittest.TestCase):
         """TestHistogram.test_03(): Tests strRep() with single entry."""
         for x in range(1, 3):
             self._hist.add(x, x)
-#        print('')
-#        print(self._hist.strRep())
+        #        print('')
+        #        print(self._hist.strRep())
         result = """1 | ++++++++++++++++++++++++++++++++++++
 2 | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"""
         self.assertEqual(result, self._hist.strRep())
@@ -71,8 +72,8 @@ class TestHistogram(unittest.TestCase):
         """TestHistogram.test_04(): Tests strRep() with two entries and title."""
         for x in range(1, 3):
             self._hist.add(x, x)
-#        print('')
-#        print(self._hist.strRep(valTitle='Integers:'))
+        #        print('')
+        #        print(self._hist.strRep(valTitle='Integers:'))
         result = """Integers:
         1 | ++++++++++++++++++++++++++++++++
         2 | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"""
@@ -81,9 +82,9 @@ class TestHistogram(unittest.TestCase):
     def test_05(self):
         """TestHistogram.test_05(): Tests strRep() with two entries, title and counts."""
         for x in range(1, 3):
-            self._hist.add(x, x*10)
-#        print('')
-#        print(self._hist.strRep(valTitle='Integers:', inclCount=True))
+            self._hist.add(x, x * 10)
+        #        print('')
+        #        print(self._hist.strRep(valTitle='Integers:', inclCount=True))
         result = """Integers:
         1 [10] | +++++++++++++++++++++++++++++
         2 [20] | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"""
@@ -93,8 +94,8 @@ class TestHistogram(unittest.TestCase):
         """TestHistogram.test_10(): Tests strRep()."""
         for x in range(1, 12):
             self._hist.add(x, x)
-#        print('')
-#        print(self._hist.strRep())
+        #        print('')
+        #        print(self._hist.strRep())
         result = """ 1 | ++++++
  2 | +++++++++++++
  3 | +++++++++++++++++++
@@ -108,15 +109,19 @@ class TestHistogram(unittest.TestCase):
 11 | ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"""
         self.assertEqual(result, self._hist.strRep())
 
+
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestHistogram))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -141,6 +146,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -149,7 +155,7 @@ def main():
     print('')
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -167,14 +173,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

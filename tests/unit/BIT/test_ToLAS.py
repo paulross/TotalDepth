@@ -21,7 +21,7 @@ def print_differences(a: str, b: str) -> None:
         print('{:7}   a[{}:{}] --> b[{}:{}] {!r:>8} --> {!r}'.format(tag, i1, i2, j1, j2, a[i1:i2], b[j1:j2]))
 
 
-TYPICAL_LAS_HEADER  = """~Version Information Section
+TYPICAL_LAS_HEADER = """~Version Information Section
 VERS.           2.0                             : CWLS Log ASCII Standard - VERSION 2.0
 WRAP.           NO                              : One Line per depth step
 PROD.           TotalDepth                      : LAS Producer
@@ -237,7 +237,6 @@ K   .       : K    Dimensions (1,)
        11884.250          276.639          147.089          252.430          118.663            3.040          988.125           10.798            6.055           26.691           35.621          216.464            2.661            0.015           23.474           19.000           20.267            0.712
 """
 
-
 EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_16_3F = """~Version Information Section
 VERS.           2.0                             : CWLS Log ASCII Standard - VERSION 2.0
 WRAP.           NO                              : One Line per depth step
@@ -274,7 +273,6 @@ CAL .       : CAL  Dimensions (1,)
        11916.000            3.047
        11915.000            3.047
 """
-
 
 EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_8_1F = """~Version Information Section
 VERS.           2.0                             : CWLS Log ASCII Standard - VERSION 2.0
@@ -317,10 +315,10 @@ CAL .       : CAL  Dimensions (1,)
 @pytest.mark.parametrize(
     'frame_slice, channels, field_width, float_format, expected',
     (
-        (None, set(), 16, '.3f', EXPECTED_LAS_ALL_FRAMES_ALL_CHANNELS_16_3F),
-        (Slice.Slice(), set(), 16, '.3f', EXPECTED_LAS_ALL_FRAMES_ALL_CHANNELS_16_3F),
-        (Slice.Slice(0, 8, 4), {'X   ', 'CAL ',}, 16, '.3f', EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_16_3F),
-        (Slice.Slice(0, 8, 4), {'X   ', 'CAL ',}, 8, '.1f', EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_8_1F),
+            (None, set(), 16, '.3f', EXPECTED_LAS_ALL_FRAMES_ALL_CHANNELS_16_3F),
+            (Slice.Slice(), set(), 16, '.3f', EXPECTED_LAS_ALL_FRAMES_ALL_CHANNELS_16_3F),
+            (Slice.Slice(0, 8, 4), {'X   ', 'CAL ', }, 16, '.3f', EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_16_3F),
+            (Slice.Slice(0, 8, 4), {'X   ', 'CAL ', }, 8, '.1f', EXPECTED_LAS_SLICE_0_8_4_TWO_CHANNELS_8_1F),
     )
 )
 def test_bit_file_to_las(frame_slice, channels, field_width, float_format, expected):
@@ -338,4 +336,3 @@ def test_bit_file_to_las(frame_slice, channels, field_width, float_format, expec
             # print(result)
             # print_differences(expected, result)
             assert las_is_effectively_the_same(result, expected)
-

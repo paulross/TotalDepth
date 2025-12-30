@@ -84,23 +84,20 @@ Fixed by being a bit more cautious about dealing with DSB blocks that are 'null'
 import math
 import typing
 
-
-__author__  = 'Paul Ross'
-__date__    = '2010-08-02'
+__author__ = 'Paul Ross'
+__date__ = '2010-08-02'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2010-2011 Paul Ross. All rights reserved.'
+__rights__ = 'Copyright (c) 2010-2011 Paul Ross. All rights reserved.'
 
 import time
 import sys
 import os
 import logging
-import traceback
 from optparse import OptionParser
 import multiprocessing
 # Serialisation
 import pickle
 import json
-import pprint
 
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS.core import File
@@ -115,7 +112,7 @@ class IndexTimer:
         self.len_pickle = -1
         self.len_json = -1
         self.times = []
-    
+
     # def __iadd__(self, other):
     #     self.error_count += other._errCount
     #     self.times.extend(other._sizeTime)
@@ -123,7 +120,7 @@ class IndexTimer:
 
     def __len__(self):
         return len(self.times)
-        
+
     def __str__(self):
         if len(self.times):
             time_min = min(self.times)
@@ -136,7 +133,7 @@ class IndexTimer:
                 time_median = self.times[0]
         else:
             time_min = time_max = time_mean = time_median = math.nan
-        median_rate = time_median * 1000 / (self.file_size / 1024**2)
+        median_rate = time_median * 1000 / (self.file_size / 1024 ** 2)
         ret = (
             f'{self.error_count:2d}'
             f' {self.file_size:12,d}'
@@ -153,7 +150,7 @@ class IndexTimer:
 
     def inc_error_count(self):
         self.error_count += 1
-    
+
     def add_time(self, t):
         self.times.append(t)
 
@@ -176,12 +173,12 @@ class IndexTimer:
 
 def index_file(file_path: str, num_times: int, verbose: int, keepGoing) -> IndexTimer:
     logging.info('Index.indexFile(): {:s}'.format(os.path.abspath(file_path)))
-    assert(os.path.isfile(file_path))
+    assert (os.path.isfile(file_path))
     ret = IndexTimer(file_path)
     try:
         for t in range(num_times):
             clk_start = time.perf_counter()
-            lis_file  = File.file_read_with_best_physical_record_pad_settings(file_path, file_path, pr_limit=100)
+            lis_file = File.file_read_with_best_physical_record_pad_settings(file_path, file_path, pr_limit=100)
             if lis_file is None:
                 raise ExceptionTotalDepthLIS('Can not find valid PR pad settings for {:s}'.format(file_path))
             # May raise an ExceptionTotalDepthLIS
@@ -216,7 +213,7 @@ def index_file(file_path: str, num_times: int, verbose: int, keepGoing) -> Index
 
 def index_dir_single_process(d, r, t, v, k) -> typing.Dict[str, IndexTimer]:
     """Recursively process a directory using a single process."""
-    assert(os.path.isdir(d))
+    assert (os.path.isdir(d))
     ret: typing.Dict[str, IndexTimer] = {}
     for n in os.listdir(d):
         fp = os.path.join(d, n)
@@ -228,6 +225,7 @@ def index_dir_single_process(d, r, t, v, k) -> typing.Dict[str, IndexTimer]:
                 ret[fp] = result_map[fp]
     return ret
 
+
 ################################
 # Section: Multiprocessing code.
 ################################
@@ -235,7 +233,7 @@ def index_dir_single_process(d, r, t, v, k) -> typing.Dict[str, IndexTimer]:
 
 def generate_file_paths(d, r):
     """Generates file paths, recursive if necessary."""
-    assert(os.path.isdir(d))
+    assert (os.path.isdir(d))
     for n in os.listdir(d):
         fp = os.path.join(d, n)
         if os.path.isfile(fp):
@@ -260,6 +258,7 @@ def index_dir_multi_process(directory, recursive, num_times, verbose, keepGoing,
     ret: typing.Dict[str, IndexTimer] = {v.path: v for v in results}
     return ret
 
+
 ################################
 # End: Multiprocessing code.
 ################################
@@ -270,43 +269,43 @@ def main():
 Indexes LIS files recursively."""
     print('Cmd: %s' % ' '.join(sys.argv))
     optParser = OptionParser(usage, version='%prog ' + __version__)
-    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False, 
-                      help="Keep going as far as sensible. [default: %default]")
+    optParser.add_option("-k", "--keep-going", action="store_true", dest="keepGoing", default=False,
+                         help="Keep going as far as sensible. [default: %default]")
     optParser.add_option(
-            "-l", "--loglevel",
-            type="int",
-            dest="loglevel",
-            default=20,
-            help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
-        )
+        "-l", "--loglevel",
+        type="int",
+        dest="loglevel",
+        default=20,
+        help="Log Level (debug=10, info=20, warning=30, error=40, critical=50) [default: %default]"
+    )
     optParser.add_option(
-            "-j", "--jobs",
-            type="int",
-            dest="jobs",
-            default=-1,
-            help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
-                    % multiprocessing.cpu_count() \
-                    + " [default: %default]" 
-        )      
+        "-j", "--jobs",
+        type="int",
+        dest="jobs",
+        default=-1,
+        help="Max processes when multiprocessing. Zero uses number of native CPUs [%d]. -1 disables multiprocessing." \
+             % multiprocessing.cpu_count() \
+             + " [default: %default]"
+    )
     optParser.add_option("-t", "--times", type="int", dest="times", default=1,
-            help="Number of times to repeat the read [default: %default]"
-        )
-    optParser.add_option("-s", "--statistics", action="store_true", dest="statistics", default=False, 
-                      help="Dump timing statistics. [default: %default]")
-    optParser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, 
-                      help="Verbose Output. [default: %default]")
-    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False, 
-                      help="Process input recursively. [default: %default]")
+                         help="Number of times to repeat the read [default: %default]"
+                         )
+    optParser.add_option("-s", "--statistics", action="store_true", dest="statistics", default=False,
+                         help="Dump timing statistics. [default: %default]")
+    optParser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                         help="Verbose Output. [default: %default]")
+    optParser.add_option("-r", "--recursive", action="store_true", dest="recursive", default=False,
+                         help="Process input recursively. [default: %default]")
     # optParser.add_option("-J", "--JSON", action="store_true", dest="json", default=False,
     #                   help="Convert index to JSON, if verbose then dump it out as well. [default: %default]")
     opts, args = optParser.parse_args()
     # Initialise logging etc.
     logging.basicConfig(level=opts.loglevel,
-                    format='%(asctime)s %(filename)24s %(lineno)4d %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(filename)24s %(lineno)4d %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     # Your code here
-    #print('opts', opts)
+    # print('opts', opts)
     clk_start = time.perf_counter()
     if len(args) != 1:
         optParser.print_help()
@@ -317,14 +316,15 @@ Indexes LIS files recursively."""
         return 1
     if os.path.isfile(args[0]):
         # Single file so always single process code
-        results = {args[0]:  index_file(args[0], opts.times, opts.verbose, opts.keepGoing)}
+        results = {args[0]: index_file(args[0], opts.times, opts.verbose, opts.keepGoing)}
     elif os.path.isdir(args[0]):
         if opts.jobs == -1:
             # Single process code
             results = index_dir_single_process(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing)
         else:
             # Multiprocess code 
-            results = index_dir_multi_process(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing, opts.jobs)
+            results = index_dir_multi_process(args[0], opts.recursive, opts.times, opts.verbose, opts.keepGoing,
+                                              opts.jobs)
     else:
         logging.error(f'Path {args[0]} does not exist!')
         return 1

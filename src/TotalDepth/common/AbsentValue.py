@@ -21,7 +21,6 @@ import typing
 
 import numpy as np
 
-
 #: Absent value as a float.
 ABSENT_VALUE_FLOAT: float = -999.25
 #: Absent value as an integer.
@@ -58,7 +57,7 @@ def mask_absent_values(array: np.ndarray, absent_value: typing.Union[None, int, 
 def unmask_absent_values(array: np.ndarray) -> None:
     """Unmask values by setting the mask  to [False, ...] if present."""
     if hasattr(array, 'mask'):
-        array.mask = [False,] * len(array)
+        array.mask = [False, ] * len(array)
 
 
 def count_of_absent_values(array: np.ndarray) -> int:

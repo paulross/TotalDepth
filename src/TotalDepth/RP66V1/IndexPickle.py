@@ -35,12 +35,10 @@ from TotalDepth.util import gnuplot, DirWalk
 from TotalDepth.util.DirWalk import dirWalk
 from TotalDepth.util.bin_file_type import binary_file_type_from_path
 
-
-__author__  = 'Paul Ross'
-__date__    = '2019-06-29'
+__author__ = 'Paul Ross'
+__date__ = '2019-06-29'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
-
+__rights__ = 'Copyright (c) 2019 Paul Ross. All rights reserved.'
 
 logger = logging.getLogger(__file__)
 
@@ -136,7 +134,8 @@ def index_dir_or_file(path_in: str, path_out: str, recurse: bool, read_back: boo
         for file_in_out in dirWalk(path_in, path_out, theFnMatch='', recursive=recurse, bigFirst=False):
             bin_file_type = binary_file_type_from_path(file_in_out.filePathIn)
             if bin_file_type == 'RP66V1':
-                ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut, read_back)
+                ret[file_in_out.filePathIn] = index_a_single_file(file_in_out.filePathIn, file_in_out.filePathOut,
+                                                                  read_back)
     else:
         bin_file_type = binary_file_type_from_path(path_in)
         if bin_file_type == 'RP66V1':
@@ -301,7 +300,7 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
                         f'{idx_result.time_write:.3f}', f'{ms_mb_write:.1f}',
                         f'{idx_result.time_read:.3f}', f'{ms_mb_read:.2f}',
                         f'{str(idx_result.exception):5}',
-                        f'{path[len_path_prefix+1:]}',
+                        f'{path[len_path_prefix + 1:]}',
                     ]
                 )
                 size_input += result[path].size_input
@@ -322,7 +321,7 @@ Scans a RP66V1 file or directory and saves the index as a pickled file."""
         ret_val = 3
     print('Execution time = %8.3f (S)' % clk_exec)
     if size_input > 0:
-        ms_mb = clk_exec * 1000 / (size_input/ 1024**2)
+        ms_mb = clk_exec * 1000 / (size_input / 1024 ** 2)
         ratio = size_index / size_input
     else:  # pragma: no cover
         ms_mb = 0.0

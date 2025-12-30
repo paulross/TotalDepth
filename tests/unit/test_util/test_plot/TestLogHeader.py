@@ -24,29 +24,31 @@ Created on Jan 3, 2012
 @author: paulross
 """
 
-__author__  = 'Paul Ross'
-__date__    = '2011-08-03'
+__author__ = 'Paul Ross'
+__date__ = '2011-08-03'
 __version__ = '0.1.0'
-__rights__  = 'Copyright (c) 2012 Paul Ross.'
+__rights__ = 'Copyright (c) 2012 Paul Ross.'
 
-import sys
-import os
+import io
 import logging
+import os
+import sys
 import time
 import unittest
-import io
 
+from TotalDepth.LAS.core import LASRead
 from TotalDepth.LIS.core import LogiRec
 from TotalDepth.LIS.core import RepCode
-from TotalDepth.LAS.core import LASRead
-from TotalDepth.util.plot import SVGWriter
 from TotalDepth.util.plot import Coord
 from TotalDepth.util.plot import LogHeader
+from TotalDepth.util.plot import SVGWriter
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 import TestPlotShared
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 import BaseTestClasses
+
 
 def _hdrTrippleToLogicalRecord(theData):
     # Record header
@@ -64,8 +66,8 @@ def _hdrTrippleToLogicalRecord(theData):
         if u is None:
             u = b'    '
         myB.append(bytes([0, 65, 4, 0]))
-        myB.append(b'MNEM') # Mnem
-        myB.append(b'    ') # Units
+        myB.append(b'MNEM')  # Mnem
+        myB.append(b'    ')  # Units
         myB.append(m)
         myB.append(bytes([69, 65, 4, 0]))
         myB.append(b'STAT')
@@ -79,7 +81,7 @@ def _hdrTrippleToLogicalRecord(theData):
         myB.append(b'TUNI')
         myB.append(b'    ')
         myB.append(u)
-        assert(type(v) in (bytes, int, float))
+        assert (type(v) in (bytes, int, float))
         if isinstance(v, bytes):
             myB.append(bytes([69, 65, len(v), 0]))
             myB.append(b'VALU')
@@ -100,66 +102,66 @@ def _hdrTrippleToLogicalRecord(theData):
     myF = myBaseFile._retFilePrS(b''.join(myB))
     return LogiRec.LrTableRead(myF)
 
+
 def headerLogicalRecordLIS():
     """Returns a CONS Logical Record that contains header information."""
     # Mnem/value/uom where value is bytes/float/int
     myData = [
         # Basic
-        (b'CN  ', b'Company name',                      None),
-        (b'FN  ', b'Field name',                      None),
-        (b'COUN', b'Rig name',                      None),
-        (b'WN  ', b'Well name',                      None),
-        (b'NATI', b'Nation',                      None),
-#            (b'STAT', b'State',                      None),
+        (b'CN  ', b'Company name', None),
+        (b'FN  ', b'Field name', None),
+        (b'COUN', b'Rig name', None),
+        (b'WN  ', b'Well name', None),
+        (b'NATI', b'Nation', None),
+        #            (b'STAT', b'State',                      None),
         # Three field location records
-        (b'FL  ', b'Field location one',                      None),
-        (b'FL1 ', b'Field location two',                      None),
-        (b'FL2 ', b'Field location three',                      None),
+        (b'FL  ', b'Field location one', None),
+        (b'FL1 ', b'Field location two', None),
+        (b'FL2 ', b'Field location three', None),
         # Dynamic header
-        (b'HIDE', b'Log Title',                      None),
-        (b'HID1', b'Log Title ONE',                      None),
-        (b'HID2', b'Log Title TWO',                      None),
+        (b'HIDE', b'Log Title', None),
+        (b'HID1', b'Log Title ONE', None),
+        (b'HID2', b'Log Title TWO', None),
         # Deviation and Lat/Long
-        (b'MHD ', 12.7,   b'DEG '),
-        (b'LATI', b'52 31\' 47.369"N',   None),
-        (b'LONG', b'2 12\' 12.196"W',   None),
+        (b'MHD ', 12.7, b'DEG '),
+        (b'LATI', b'52 31\' 47.369"N', None),
+        (b'LONG', b'2 12\' 12.196"W', None),
         # Fine column of 24 rows
         (b'DATE', b'2012-01-05', None),
-        (b'RUN ', b'Run number',                      None),
-        (b'TDD ', 3000.0,   b'M   '),
-        (b'TDL ', 2989.5,   b'M   '),
-        (b'BLI ', 2980.0,   b'M   '),
-        (b'TLI ', 1989.5,   b'M   '),
-        (b'CSIZ', 9.625,    b'IN  '),
-        (b'CD  ', 1988.5,   b'M   '),
-        (b'CBLO', 1989.25,  b'M   '),
-        (b'BS  ', 8.0,      b'IN  '),
-        (b'DFT ', b'KCL Polymer Glycol PHPA',      None),
-        
-        
-        (b'MSS ', b'Flowline',      None),
+        (b'RUN ', b'Run number', None),
+        (b'TDD ', 3000.0, b'M   '),
+        (b'TDL ', 2989.5, b'M   '),
+        (b'BLI ', 2980.0, b'M   '),
+        (b'TLI ', 1989.5, b'M   '),
+        (b'CSIZ', 9.625, b'IN  '),
+        (b'CD  ', 1988.5, b'M   '),
+        (b'CBLO', 1989.25, b'M   '),
+        (b'BS  ', 8.0, b'IN  '),
+        (b'DFT ', b'KCL Polymer Glycol PHPA', None),
+
+        (b'MSS ', b'Flowline', None),
         # Mud stuff
-        (b'RMS ', 0.196,    b'OHMM'),
-        (b'RMFS', 0.0797,   b'OHMM'),
-        (b'RMCS', 0.266,    b'OHMM'),
-        (b'MST ', 16.0,     b'DEGC'),
-        (b'MFST', 16.0,     b'DEGC'),
-        (b'MCST', 16.0,     b'DEGC'),
-        (b'RMB ', 0.0368,   b'OHMM'),
-        (b'RMFB', 0.0329,   b'OHMM'),
-        (b'MRT ', 153.6,    b'DEGC'),
-        (b'TCS ', b'22:35 2012-01-04',    None),
-        (b'TLAB', b'09:50 2012-01-05',    None),
-        
+        (b'RMS ', 0.196, b'OHMM'),
+        (b'RMFS', 0.0797, b'OHMM'),
+        (b'RMCS', 0.266, b'OHMM'),
+        (b'MST ', 16.0, b'DEGC'),
+        (b'MFST', 16.0, b'DEGC'),
+        (b'MCST', 16.0, b'DEGC'),
+        (b'RMB ', 0.0368, b'OHMM'),
+        (b'RMFB', 0.0329, b'OHMM'),
+        (b'MRT ', 153.6, b'DEGC'),
+        (b'TCS ', b'22:35 2012-01-04', None),
+        (b'TLAB', b'09:50 2012-01-05', None),
+
         # Datums
         (b'PDAT', b'Permanent datum', None),
-        (b'EKB ', 21.0,   b'FT  '),
-        (b'EDF ', 20.0,   b'FT  '),
-        (b'EGL ', 3.0,   b'FT  '),
+        (b'EKB ', 21.0, b'FT  '),
+        (b'EDF ', 20.0, b'FT  '),
+        (b'EGL ', 3.0, b'FT  '),
         (b'LMF ', b'DF  ', None),
         (b'APD ', 17.0, b'FT  '),
         (b'DMF ', b'DF  ', None),
-        
+
         # Location etc
         (b'ENGI', b'Paul Ross', None),
         (b'WITN', b'Son of Godzilla', None),
@@ -174,40 +176,42 @@ def headerLogicalRecordLIS():
     ]
     return _hdrTrippleToLogicalRecord(myData)
 
+
 TEST_SVG_FILE_MAP_HDR = {
-    40   : TestPlotShared.SVGTestOutput(
-            'APIHeader_40_LIS.svg',
-            "TestLogHeaderLIS.test_05(): Empty API header from LIS data (upright)."
-        ),
-    41   : TestPlotShared.SVGTestOutput(
-            'APIHeader_41_LIS.svg',
-            "TestLogHeaderLIS.test_06(): Empty API header from LIS data (rotated)."
-        ),
-    45   : TestPlotShared.SVGTestOutput(
-            'APIHeader_45_LIS.svg',
-            "TestLogHeaderLIS.test_10(): API header with CONS information from LIS data (upright)."
-        ),
-    46   : TestPlotShared.SVGTestOutput(
-            'APIHeader_46_LIS.svg',
-            "TestLogHeaderLIS.test_11(): API header with CONS information from LIS data (rotated)."
-        ),
-    50   : TestPlotShared.SVGTestOutput(
-            'APIHeader_50_LAS.svg',
-            "TestLogHeaderLAS.test_05(): Empty API header from LAS data (upright)."
-        ),
-    51   : TestPlotShared.SVGTestOutput(
-            'APIHeader_51_LAS.svg',
-            "TestLogHeaderLAS.test_06(): Empty API header from LAS data (rotated)."
-        ),
-    55   : TestPlotShared.SVGTestOutput(
-            'APIHeader_55_LAS.svg',
-            "TestLogHeaderLAS.test_10(): API header with CONS information from LAS data (upright)."
-        ),
-    56   : TestPlotShared.SVGTestOutput(
-            'APIHeader_56_LAS.svg',
-            "TestLogHeaderLAS.test_11(): API header with CONS information from LAS data (rotated)."
-        ),
+    40: TestPlotShared.SVGTestOutput(
+        'APIHeader_40_LIS.svg',
+        "TestLogHeaderLIS.test_05(): Empty API header from LIS data (upright)."
+    ),
+    41: TestPlotShared.SVGTestOutput(
+        'APIHeader_41_LIS.svg',
+        "TestLogHeaderLIS.test_06(): Empty API header from LIS data (rotated)."
+    ),
+    45: TestPlotShared.SVGTestOutput(
+        'APIHeader_45_LIS.svg',
+        "TestLogHeaderLIS.test_10(): API header with CONS information from LIS data (upright)."
+    ),
+    46: TestPlotShared.SVGTestOutput(
+        'APIHeader_46_LIS.svg',
+        "TestLogHeaderLIS.test_11(): API header with CONS information from LIS data (rotated)."
+    ),
+    50: TestPlotShared.SVGTestOutput(
+        'APIHeader_50_LAS.svg',
+        "TestLogHeaderLAS.test_05(): Empty API header from LAS data (upright)."
+    ),
+    51: TestPlotShared.SVGTestOutput(
+        'APIHeader_51_LAS.svg',
+        "TestLogHeaderLAS.test_06(): Empty API header from LAS data (rotated)."
+    ),
+    55: TestPlotShared.SVGTestOutput(
+        'APIHeader_55_LAS.svg',
+        "TestLogHeaderLAS.test_10(): API header with CONS information from LAS data (upright)."
+    ),
+    56: TestPlotShared.SVGTestOutput(
+        'APIHeader_56_LAS.svg',
+        "TestLogHeaderLAS.test_11(): API header with CONS information from LAS data (rotated)."
+    ),
 }
+
 
 class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
 
@@ -224,21 +228,21 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         """TestLogHeader.test_00(): CONS table."""
         self.assertEqual(LogiRec.LR_TYPE_WELL_DATA, self._lrCONS.type)
         self.assertEqual(b'CONS', self._lrCONS.value)
-        #print()
-#        for r in self._lrCONS.genRows():
-#            for c in r.genCells():
-#                print(c.engVal, '\t', end="")
-#            print('')
-#        self.assertEqual(len(self._lrCONS), 13)
+        # print()
+        #        for r in self._lrCONS.genRows():
+        #            for c in r.genCells():
+        #                print(c.engVal, '\t', end="")
+        #            print('')
+        #        self.assertEqual(len(self._lrCONS), 13)
         self.assertFalse(self._lrCONS.isSingleParam)
-        #print(sorted(list(myT.rowLabels())))
-#        self.assertEqual(
-#            [
-#                 b'SP\x00\x00'
-#             ],                         
-#             sorted(list(self._lrCONS.rowLabels())),
-#        )
-        #print(myT.colLabels())
+        # print(sorted(list(myT.rowLabels())))
+        #        self.assertEqual(
+        #            [
+        #                 b'SP\x00\x00'
+        #             ],
+        #             sorted(list(self._lrCONS.rowLabels())),
+        #        )
+        # print(myT.colLabels())
         self.assertEqual(
             {b'MNEM', b'STAT', b'PUNI', b'TUNI', b'VALU'},
             self._lrCONS.colLabels(),
@@ -251,10 +255,10 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         """TestLogHeader.test_02(): MNEM count and LogHeader.lrDataCount()."""
         self.assertEqual(53, len(self._lrCONS))
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=True)
-        self.assertEqual(53, myLh.lrDataCount([self._lrCONS,]))
-#        print()
-#        print(myLh.missingFields([self._lrCONS,]))
-        self.assertEqual((set(), set()), myLh.missingFields([self._lrCONS,]))
+        self.assertEqual(53, myLh.lrDataCount([self._lrCONS, ]))
+        #        print()
+        #        print(myLh.missingFields([self._lrCONS,]))
+        self.assertEqual((set(), set()), myLh.missingFields([self._lrCONS, ]))
 
     def test_04(self):
         """TestLogHeader.test_04(): APIHeaderLIS.viewPort()."""
@@ -294,7 +298,7 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         tl = Coord.Pt(Coord.Dim(0.25, 'in'), Coord.Dim(0.5, 'in'))
         viewPort = myLh.viewPort(tl)
         with SVGWriter.SVGWriter(open(fp, 'w'), viewPort) as xS:
-            myLh.plot(xS, tl, [self._lrCONS,])
+            myLh.plot(xS, tl, [self._lrCONS, ])
 
     def test_11(self):
         """TestLogHeader.test_11(): Plot as top of log with CONS data."""
@@ -303,7 +307,7 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         tl = Coord.Pt(Coord.Dim(0.5, 'in'), Coord.Dim(0.25, 'in'))
         viewPort = myLh.viewPort(tl)
         with SVGWriter.SVGWriter(open(fp, 'w'), viewPort) as xS:
-            myLh.plot(xS, tl, [self._lrCONS,])
+            myLh.plot(xS, tl, [self._lrCONS, ])
 
     def test_20(self):
         """TestLogHeader.test_20(): Fails with wrong Logical Record type 32."""
@@ -326,7 +330,7 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         myLrCONS = LogiRec.LrTableRead(myF)
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
-        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS,])
+        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS, ])
 
     def test_21(self):
         """TestLogHeader.test_21(): Fails with wrong Logical Record value 'PRES'."""
@@ -349,7 +353,7 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         myLrCONS = LogiRec.LrTableRead(myF)
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
-        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS,])
+        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS, ])
 
     def test_22(self):
         """TestLogHeader.test_22(): Fails with Logical Record that is missing 'MNEM' column."""
@@ -372,7 +376,7 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         myLrCONS = LogiRec.LrTableRead(myF)
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
-        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS,])
+        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS, ])
 
     def test_23(self):
         """TestLogHeader.test_23(): Fails with Logical Record that is missing 'VALU' column."""
@@ -395,7 +399,8 @@ class TestLogHeaderLIS(BaseTestClasses.TestBaseFile):
         myLrCONS = LogiRec.LrTableRead(myF)
         myLh = LogHeader.APIHeaderLIS(isTopOfLog=False)
         tl = Coord.Pt(Coord.Dim(0.0, 'in'), Coord.Dim(0.0, 'in'))
-        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS,])
+        self.assertRaises(LogHeader.ExceptionLogHeader, myLh.plot, None, tl, [myLrCONS, ])
+
 
 class TestLogHeaderLAS(BaseTestClasses.TestBaseFile):
 
@@ -453,7 +458,7 @@ LON .                     98.95341: LONGITUDE WEST (KGS, LEO3.6)
     def test_01(self):
         """TestLogHeaderLAS.test_01(): Tables in LAS file."""
         self.assertEqual(3, len(self._lasFile))
-        
+
     def test_05(self):
         """TestLogHeaderLAS.test_05(): Plot as not top of log."""
         myLh = LogHeader.APIHeaderLAS(isTopOfLog=False)
@@ -489,6 +494,8 @@ LON .                     98.95341: LONGITUDE WEST (KGS, LEO3.6)
         viewPort = myLh.viewPort(tl)
         with SVGWriter.SVGWriter(open(fp, 'w'), viewPort) as xS:
             myLh.plot(xS, tl, self._lasFile)
+
+
 #        a, b = myLh.missingFields(self._lasFile)
 #        print('Missing fields:')
 #        print('Not in LAS file:\n', sorted(a))
@@ -498,12 +505,15 @@ class Special(unittest.TestCase):
     """Special tests."""
     pass
 
+
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLogHeaderLIS))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLogHeaderLAS))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -528,6 +538,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print(('Test....py script version "%s", dated %s' % (__version__, __date__)))
@@ -536,7 +547,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -554,14 +565,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print(('CPU time = %8.3f (S)' % clkExec))
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()

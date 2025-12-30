@@ -20,24 +20,26 @@
 """Tests NamedStruct module.
 """
 
-__author__  = 'Paul Ross'
-__date__    = '4 Jan 2011'
+__author__ = 'Paul Ross'
+__date__ = '4 Jan 2011'
 __version__ = '0.8.0'
-__rights__  = 'Copyright (c) Paul Ross'
+__rights__ = 'Copyright (c) Paul Ross'
 
-#import pprint
+import logging
+# import pprint
 import sys
 import time
-import logging
-from TotalDepth.LIS.core import NamedStruct
-
 ######################
 # Section: Unit tests.
 ######################
 import unittest
 
+from TotalDepth.LIS.core import NamedStruct
+
+
 class TestNamedStruct(unittest.TestCase):
     """Tests ..."""
+
     def setUp(self):
         """Set up."""
         pass
@@ -53,10 +55,10 @@ class TestNamedStruct(unittest.TestCase):
     def test_00(self):
         """TestNamedStruct.test_00(): Basic test."""
         myNs = NamedStruct.NamedStruct(
-                    'Student',
-                    'name serialnum school gradelevel',
-                    '<10sHHb'
-                )
+            'Student',
+            'name serialnum school gradelevel',
+            '<10sHHb'
+        )
         self.assertEqual(myNs.structSize(), 15)
         self.assertEqual(len(myNs), 4)
         myNs.unpack(b'raymond   \x32\x12\x08\x01\x08')
@@ -69,17 +71,20 @@ class TestNamedStruct(unittest.TestCase):
             self.fail('AttributeError not raised.')
         except AttributeError:
             pass
-        
+
 
 class Special(unittest.TestCase):
     """Special tests."""
     pass
+
 
 def unitTest(theVerbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(Special)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNamedStruct))
     myResult = unittest.TextTestRunner(verbosity=theVerbosity).run(suite)
     return (myResult.testsRun, len(myResult.errors), len(myResult.failures))
+
+
 ##################
 # End: Unit tests.
 ##################
@@ -104,6 +109,7 @@ Options (debug):
                 NOTSET      0
 """)
 
+
 def main():
     """Invoke unit test code."""
     print('TestClass.py script version "%s", dated %s' % (__version__, __date__))
@@ -112,7 +118,7 @@ def main():
     print()
     import getopt
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help",])
+        opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help", ])
     except getopt.GetoptError:
         usage()
         print('ERROR: Invalid options!')
@@ -130,14 +136,15 @@ def main():
         sys.exit(1)
     # Initialise logging etc.
     logging.basicConfig(level=logLevel,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    #datefmt='%y-%m-%d % %H:%M:%S',
-                    stream=sys.stdout)
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        # datefmt='%y-%m-%d % %H:%M:%S',
+                        stream=sys.stdout)
     clkStart = time.perf_counter()
     unitTest()
     clkExec = time.perf_counter() - clkStart
     print('CPU time = %8.3f (S)' % clkExec)
     print('Bye, bye!')
+
 
 if __name__ == "__main__":
     main()
