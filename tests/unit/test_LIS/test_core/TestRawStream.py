@@ -25,24 +25,19 @@ __date__ = '8 Nov 2010'
 __version__ = '0.8.0'
 __rights__ = 'Copyright (c) 2010 Paul Ross.'
 
+import io
 import logging
 import random
 import struct
-# import pprint
 import sys
 import time
-######################
-# Section: Unit tests.
-######################
 import unittest
 
 from TotalDepth.LIS.core import RawStream
 
-try:
-    import io as StringIO
-except ImportError:
-    import io
-
+######################
+# Section: Unit tests.
+######################
 
 class TestRawStream(unittest.TestCase):
     """Tests ..."""

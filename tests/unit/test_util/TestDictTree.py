@@ -232,9 +232,9 @@ def test_dict_tree_items(key_values, expected):
                         ([0, 1, 2], 'two'),
                     ],
                     """0
-          1
-            2
-              two""",
+  1
+    2
+      two""",
             ),
             (
                     [
@@ -242,11 +242,11 @@ def test_dict_tree_items(key_values, expected):
                         ([0, 1, 2, 3], 'three'),
                     ],
                     """0
-          1
-            2
-              two
-              3
-                three""",
+  1
+    2
+      two
+      3
+        three""",
             ),
             # Reverse insert order check.
             (
@@ -255,11 +255,11 @@ def test_dict_tree_items(key_values, expected):
                         ([0, 1, 2], 'two'),
                     ],
                     """0
-          1
-            2
-              two
-              3
-                three""",
+  1
+    2
+      two
+      3
+        three""",
             ),
             (
                     [
@@ -268,14 +268,14 @@ def test_dict_tree_items(key_values, expected):
                         ([0, 1, 2, 3, 4, 5], 'five'),
                     ],
                     """0
-      1
-        one
-        2
-          3
-            three
-            4
-              5
-                five""",
+  1
+    one
+    2
+      3
+        three
+        4
+          5
+            five""",
             ),
     )
 )
@@ -283,6 +283,8 @@ def test_dict_tree_add_indented_string(key_values, expected):
     dt = DictTree.DictTree()
     for key, value in key_values:
         dt.add(key, value)
+    print()
+    print(dt.indented_string())
     assert dt.indented_string() == expected
 
 
