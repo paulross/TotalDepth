@@ -1,12 +1,13 @@
 Cython
-Pillow
 Sphinx
 beautifulsoup4
 colorama
 lxml
 numpy
+pillow
+psutil
 pytest
 pytest-cov
-psutil
 requests
+setuptools
 wheel
