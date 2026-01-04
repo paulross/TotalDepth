@@ -134,9 +134,12 @@ show_results_of_dist() {
   echo "---> twine upload dist/*"
 }
 
-echo "===> Removing build/ and dist/"
+echo "===> Starting"
+echo "---> Removing build/ and dist/"
 #rm --recursive --force -- "build" "dist"
 rm -rf -- "build" "dist"
+echo "---> Removing .so files"
+find . -type f -name "*.so" -exec rm {} \;
 remove_virtual_environments
 create_virtual_environments
 create_bdist_wheel
