@@ -411,6 +411,8 @@ BACKUP_TWICE = (-2, 2)
 BACKUP_LEFT = (0, -1)
 #: Single backup to right only
 BACKUP_RIGHT = (1, 0)
+# Seems to occur with LgFormats
+BACKUP_TEN = (-10, 10)
 
 # LIS Statistics
 # ======================== Count of all table entries =======================

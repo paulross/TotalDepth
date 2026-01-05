@@ -27,6 +27,7 @@ __date__ = '2012-01-24'
 __version__ = '0.1.0'
 __rights__ = 'Copyright (c) Paul Ross'
 
+import dataclasses
 import time
 import sys
 import os
@@ -34,7 +35,7 @@ import logging
 import multiprocessing
 import collections
 import traceback
-# from optparse import OptionParser
+import typing
 
 # LIS support
 from TotalDepth.LIS import ExceptionTotalDepthLIS
@@ -100,6 +101,16 @@ th, td {
 # The field names are not (yet) used.
 IndexTableValue = collections.namedtuple('IndexTableValue', 'scale evFirst evLast evInterval curves numPoints outPath')
 
+PlotResult = typing.NamedTuple(
+    'PlotResult',
+    [
+        ('in_path', str),
+        ('log_pass_index', int),
+        ('film_id', str),
+        ('index_table_value', IndexTableValue),
+    ]
+)
+
 
 class PlotLogInfo(object):
     """Class that collates information about the results of plotting log passes.
@@ -109,9 +120,9 @@ class PlotLogInfo(object):
     def __init__(self):
         # So here the essential data that we have to put in the index.html is:
         # A list of tuples of:
-        # (theInPath, theLpIdx, theFilmID, IndexTableValue(theScale, theEvFirst, theEvLast, evInterval, theCurveS, theOutPath))
+        # PlotResult(theInPath, theLpIdx, theFilmID, IndexTableValue(theScale, theEvFirst, theEvLast, evInterval, theCurveS, theOutPath))
         # as: (str,     int,       str,    IndexTableValue(number,    EngVal,     EngVal,  [str, ...], str))
-        self._plotS = []
+        self._plotS: typing.List[PlotResult] = []
         self._lisBytes = 0
         self.lisFileCntr = 0
         self.lasFileCntr = 0
@@ -126,7 +137,7 @@ class PlotLogInfo(object):
         return self._intervalCntrS
 
     def __str__(self):
-        retL = ['PlotLogInfo {:s} Files={:d} Bytes={:d} LogPasses={:d} Plots={:d} Curve points={:d}'.format(
+        return 'PlotLogInfo {:s} Files={:d} Bytes={:d} LogPasses={:d} Plots={:d} Curve points={:d}'.format(
             repr(self),
             self.lisFileCntr + self.lasFileCntr,
             self._lisBytes,
@@ -134,12 +145,10 @@ class PlotLogInfo(object):
             self.plotCntr,
             self.curvePoints
         )
-        ]
-        for l in sorted(self._plotS):
-            retL.append('{:s}'.format(str(l)))
-        for anEv in self._intervalCntrS:
-            retL.append('Interval*curves: {:s}'.format(anEv.newEngValInOpticalUnits().strFormat('{:.3f}')))
-        return '\n'.join(retL)
+
+    @property
+    def plots(self) -> typing.List[PlotResult]:
+        return self._plotS
 
     def __iadd__(self, other):
         self._plotS += other._plotS
@@ -168,7 +177,7 @@ class PlotLogInfo(object):
         """
         myInterval = theEvLast - theEvFirst
         self._plotS.append(
-            (
+            PlotResult(
                 theInPath,
                 theLpIdx,
                 theFilmID,
@@ -213,14 +222,17 @@ class PlotLogInfo(object):
                 # No break; Add a new interval
                 self._intervalCntrS.append(theInterval)
 
-    def writeHTML(self, theFilePath, theDesc):
+    def len_common_imput_prefix(self) -> int:
+        return os.path.commonprefix([t[0] for t in self._plotS]).rfind(os.sep) + 1
+
+    def writeHTML(self, theFilePath, theDesc, command: str):
         """Write the index.html table."""
-        lenCmnPref = os.path.commonprefix([t[0] for t in self._plotS]).rfind(os.sep) + 1
-        # Put the plot summary data into a DictTree
-        myTree = DictTree.DictTreeHtmlTable()
-        for aPlt in self._plotS:
-            key = (aPlt[0][lenCmnPref:],) + aPlt[1:3]
-            myTree.add([str(s) for s in key], aPlt[3])
+        # lenCmnPref = self.len_common_imput_prefix()
+        # # Put the plot summary data into a DictTree
+        # myTree = DictTree.DictTreeHtmlTable()
+        # for aPlt in self._plotS:
+        #     key = (aPlt[0][lenCmnPref:],) + aPlt[1:3]
+        #     myTree.add([str(s) for s in key], aPlt[3])
         # Write CSS
         with open(os.path.join(os.path.dirname(theFilePath), self.CSS_FILE_PATH), 'w') as f:
             f.write(CSS_CONTENT_INDEX)
@@ -238,13 +250,31 @@ class PlotLogInfo(object):
                 ):
                     pass
                 with XmlWrite.Element(myS, 'title'):
-                    myS.characters('LIS plots in SVG')
+                    myS.characters('Log plots in SVG')
             with XmlWrite.Element(myS, 'h1'):
                 myS.characters('PlotLogPasses: {:s}'.format(theDesc))
-            with XmlWrite.Element(myS, 'table', {'border': '1'}):
-                self._writeHTMLTh(myS)
-                self._writeIndexTableRows(myS, myTree, theFilePath)
-            # Write: </table>
+            with XmlWrite.Element(myS, 'pre'):
+                myS.characters('Command: {:s}'.format(command))
+            with XmlWrite.Element(myS, 'pre'):
+                myS.characters('CWD: {:s}'.format(os.getcwd()))
+            self.write_to_index_stream(theFilePath, myS)
+
+    def write_to_index_stream(
+            self,
+            theFilePath: str,
+            myS: XmlWrite.XhtmlStream,
+    ) -> None:
+        """Write the table of links to the index.html file."""
+        lenCmnPref = self.len_common_imput_prefix()
+        # Put the plot summary data into a DictTree
+        myTree = DictTree.DictTreeHtmlTable()
+        for aPlt in self._plotS:
+            key = (aPlt[0][lenCmnPref:],) + aPlt[1:3]
+            myTree.add([str(s) for s in key], aPlt[3])
+        with XmlWrite.Element(myS, 'table', {'border': '1'}):
+            self._writeHTMLTh(myS)
+            self._writeIndexTableRows(myS, myTree, theFilePath)
+        # Write: </table>
 
     def _writeIndexTableRows(self, theS, theTrie, theFilePath):
         # Write the rowspan/colspan data
@@ -305,11 +335,21 @@ class PlotLogInfo(object):
         return os.path.join(*r)
 
 
+@dataclasses.dataclass
+class PlotLogPassesOptions:
+    recurse: bool
+    keepGoing: bool
+    LgFormat: typing.Optional[typing.List[str]]
+    LgFormat_min: int
+    apiHeader: bool
+    scale: int
+
+
 class PlotLogPasses(object):
     """Takes an input path, output path and generates SVG file(s) from LIS."""
     EXCLUDE_FILE_NAMES = ('.DS_Store',)
 
-    def __init__(self, fpIn, fpOut, opts):
+    def __init__(self, fpIn, fpOut, opts: PlotLogPassesOptions):
         """Constructor.
 
         fpIn and fpOut are file or directory paths. fpOut will be created if necessary.
@@ -318,7 +358,7 @@ class PlotLogPasses(object):
 
         keepGoing is a flag passed to the LIS File.FileRead object.
 
-        lgFormatS is a list of strings the correspond to the LgFormat UniqueId XML attribute.
+        lgFormatS is a list of strings that correspond to the LgFormat UniqueId XML attribute.
             If absent the LIS file FILM/PRES etc. tables are used.
 
         apiHeader is a flag to control whether a API header is extracted from CONS tables
@@ -398,10 +438,10 @@ class PlotLogPasses(object):
             for lpIdx, aPrs in enumerate(myIdx.genPlotRecords(fromInternalRecords=self.usesInternalRecords)):
                 #                print('lpIdx:', lpIdx)
                 #                print(' aPrs:', aPrs)
-                if self.usesInternalRecords:
-                    # Use internal FILM/PRES plotting specification
+                # Always use internal FILM/PRES plotting specification if available.
+                if self._hasInternalPlotRecords(aPrs):
                     self._plotUsingLISLogicalRecords(myFi, lpIdx, aPrs, fpOut)
-                else:
+                if not self.usesInternalRecords:
                     # Plot using external plot specification
                     self._plotLISUsingLgFormats(myFi, lpIdx, aPrs, fpOut)
         except ExceptionTotalDepthLIS as err:
@@ -449,11 +489,16 @@ class PlotLogPasses(object):
     # ===================================================================
     # Sect.: Plotting LIS using LIS Logical Records to specify the plot.
     # ===================================================================
+
+    def _hasInternalPlotRecords(self, thePrs) -> bool:
+        """Returns True if there is a FILM and PRES record"""
+        return thePrs.tellFilm is not None and thePrs.tellPres is not None
+
     def _retPlotFromIntPlotRecordSet(self, theFi, thePrs):
         """Returns a Plot.PlotReadLIS, a LogPass and a list of CONS records from the PlotRecordSet.
         This creates the plot using internal records such as FILM and PRES records."""
         assert (thePrs)
-        assert (self.usesInternalRecords)
+        assert (self._hasInternalPlotRecords(thePrs))
         theFi.seekLr(thePrs.tellFilm)
         myLrFilm = TotalDepth.LIS.core.LogiRec.LrTableRead(theFi)
         theFi.seekLr(thePrs.tellPres)
@@ -490,6 +535,7 @@ class PlotLogPasses(object):
             LIS Logical Records.
         theFpOut - Output file path for the SVG file(s), one per FILM ID.
         """
+        assert self._hasInternalPlotRecords(thePrs)
         myPlot, myLogPass, myCONSRecS = self._retPlotFromIntPlotRecordSet(theFi, thePrs)
         for aFilmId in myPlot.filmIdS():
             logging.info('PlotLogPasses._plotUsingLISLogicalRecords(): FILM ID={:s}.'.format(aFilmId.pStr(strip=True)))
@@ -677,7 +723,7 @@ class PlotLogPasses(object):
 ################################
 # Section: Multiprocessing code.
 ################################
-def processFile(fpIn, fpOut, opts):
+def processFile(fpIn, fpOut, opts: PlotLogPassesOptions):
     if not os.path.exists(os.path.dirname(fpOut)):
         try:
             os.makedirs(os.path.dirname(fpOut))
@@ -687,12 +733,10 @@ def processFile(fpIn, fpOut, opts):
     return myPlp.plotLogInfo
 
 
-def plotLogPassesMP(dIn, dOut, opts):
+def plotLogPassesMP(dIn, dOut, jobs: int, opts: PlotLogPassesOptions):
     """Multiprocessing code to plot log passes. Returns a PlotLogInfo object."""
-    if opts.jobs < 1:
+    if jobs < 1:
         jobs = multiprocessing.cpu_count()
-    else:
-        jobs = opts.jobs
     logging.info('plotLogPassesMP(): Setting multi-processing jobs to %d' % jobs)
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [
@@ -714,6 +758,13 @@ def plotLogPassesMP(dIn, dOut, opts):
 ################################
 # End: Multiprocessing code.
 ################################
+
+def limit_str(s: str, limit: int = 16) -> str:
+    if len(s) < limit:
+        return s
+    suffix = '...'
+    return s[:(limit - len(suffix))] + suffix
+
 
 def main():
     print('Cmd: %s' % ' '.join(sys.argv))
@@ -756,22 +807,58 @@ def main():
         print('XML LgFormats available: [{:d}]'.format(len(myFg.keys())))
         print(myFg.longStr(''.join(args.LgFormat).count('?')))
         return 0
+    #     keepGoing: bool
+    #     LgFormat: typing.Optional[typing.List[str]]
+    #     LgFormat_min: int
+    #     apiHeader: bool
+    #     scale: int
+    plot_log_passes_options = PlotLogPassesOptions(
+        args.recurse,
+        args.keepGoing,
+        args.LgFormat,
+        args.LgFormat_min,
+        args.apiHeader,
+        args.scale,
+    )
     if cmn_cmd_opts.multiprocessing_requested(args):
         myResult = plotLogPassesMP(
             args.path_in,
             args.path_out,
-            args,
+            args.jobs,
+            plot_log_passes_options,
         )
     else:
         myPlp = PlotLogPasses(
             args.path_in,
             args.path_out,
-            args,
+            plot_log_passes_options,
         )
         myResult = myPlp.plotLogInfo
     if os.path.isdir(args.path_out):
-        myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in)
-    print('plotLogInfo', str(myResult))
+        myResult.writeHTML(os.path.join(args.path_out, 'index.html'), args.path_in, ' '.join(sys.argv))
+    print(' Results '.center(75, '='))
+    print(f'Plot summary {myResult}')
+    len_common_prefix = myResult.len_common_imput_prefix()
+    for plot in  myResult.plots:
+        print(f' {plot.in_path[len_common_prefix:]} '.center(75, '-'))
+        # Has fields: scale evFirst evLast evInterval curves numPoints outPath
+        itv = plot.index_table_value
+        print(
+            f'{plot.log_pass_index:2d}'
+            f' {limit_str(plot.film_id, 24):24s}'
+            f' 1:{itv.scale}'
+            f' {itv.evFirst}'
+            f' to {itv.evLast}'
+            # f' [{itv.evInterval}]'
+            f' Curves: {len(itv.curves):3d}'
+            f' Out: {itv.outPath}'
+        )
+        print(
+            f'{" " * 64}'
+            f' Curves: {itv.curves}'
+        )
+        print(f' {plot.in_path[len_common_prefix:]} DONE '.center(75, '-'))
+    print(' Results DONE '.center(75, '='))
     print('  CPU time = %8.3f (S)' % (time.perf_counter() - start_clock))
     print('Exec. time = %8.3f (S)' % (time.time() - start_time))
     print('Bye, bye!')

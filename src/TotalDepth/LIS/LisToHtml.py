@@ -31,6 +31,7 @@ import traceback
 import typing as typing
 
 import TotalDepth
+from TotalDepth import PlotLogs
 from TotalDepth.LIS import ExceptionTotalDepthLIS
 from TotalDepth.LIS import ProcLISPath
 from TotalDepth.LIS.core import FileIndexer
@@ -487,6 +488,14 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
 
         }
         self._accCh = accCh
+        self.plot_log_passes_options = PlotLogs.PlotLogPassesOptions(
+            recursive,
+            keepGoing,
+            [],  # LgFormat,
+            4,  # LgFormat_min,
+            True,  # apiHeader,
+            0,  # scale,
+        )
         super().__init__(fpIn, fpOut, recursive, keepGoing)
 
     def _retIndentDepth(self, theIe):
@@ -926,8 +935,27 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                  ],
                 myTable,
             )
-        # TODO: Add plotting here.
+
+        self._writePlots(theS)
+
         self._HTMLLinkToTop(theS)
+
+    def _writePlots(self, theS) -> None:
+        """Write the plots."""
+        # TODO: Make plotting optional as it is quite expensive.
+        # TODO: Fix issue with multiple log passes, we should only add the relevant one to the html page.
+        with XmlWrite.Element(theS, 'h5', {}):
+            theS.characters('Plots')
+        myPlp = PlotLogs.PlotLogPasses(
+            self._fpIn,
+            self._fpOut,
+            self.plot_log_passes_options,
+        )
+        plot_result = myPlp.plotLogInfo
+        # print(f'TRACE: XXX {theIe}')
+        # print(f'TRACE: YYY {plot_result}')
+        plot_result.write_to_index_stream(self._fpOut, theS)
+
 
     def _writeCss(self, fpOut):
         """Writes the CSS file if it is not already there."""
@@ -1133,6 +1161,7 @@ Generates HTML from input LIS file or directory to an output destination."""
     TotalDepth.common.cmn_cmd_opts.add_multiprocessing(parser)
     # TotalDepth.common.Slice.add_frame_slice_to_argument_parser(parser, use_what=True)
     TotalDepth.common.process.add_process_logger_to_argument_parser(parser)
+    # TODO: Why does this fail in PyCharm?
     gnuplot.add_gnuplot_to_argument_parser(parser)
     parser.add_argument("-g", "--glob", type=str, dest="glob", default="",
                         help="Space separated list of file match patterns. default: %(default)s")

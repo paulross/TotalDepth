@@ -508,10 +508,9 @@ class PlotLogPasses(object):
             return
         # Iterate through the PlotRecordSet objects
         for lpIdx, aPrs in enumerate(myIdx.genPlotRecords()):
-            if len(self._lgFormatS) == 0:
-                # Use internal FILM/PRES plotting specification
-                self._plotUsingLISLogicalRecords(myFi, lpIdx, aPrs, fpOut)
-            else:
+            # Always use internal FILM/PRES plotting specification
+            self._plotUsingLISLogicalRecords(myFi, lpIdx, aPrs, fpOut)
+            if len(self._lgFormatS) > 0:
                 self._plotUsingLgFormats(myFi, lpIdx, aPrs, fpOut)
 
         #            myPlot, myLogPass, myCONSRecS = self._retPlotFromPlotRecordSet(myFi, aPrs)
