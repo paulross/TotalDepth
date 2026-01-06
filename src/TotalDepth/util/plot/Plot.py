@@ -705,12 +705,12 @@ class Plot(object):
         myPhsFiCf = self._filmCfg[theFilmId]
         myLisSize = self._loadFrameSet(theLisFile, theLogPass, theXStart,
                                        theXStop, theFilmId, frameStep)
-        logging.info(
+        logging.debug(
             'Plot.plotLogPassLIS(): LogPass now:\n{:s}'.format(
                 theLogPass.longStr()
             )
         )
-        logging.info(
+        logging.debug(
             'Plot.plotLogPassLIS(): FrameSet now:\n{:s}'.format(
                 theLogPass.frameSetLongStr()
             )

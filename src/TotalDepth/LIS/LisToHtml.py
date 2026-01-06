@@ -534,6 +534,9 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                         # theS.literal('&nbsp;' * 2 * self._retIndentDepth(anIdx))
                         with XmlWrite.Element(theS, 'a', {'href': '#{:d}'.format(anIdx.tell)}):
                             theS.characters(anIdx.tocStr())
+            with XmlWrite.Element(theS, 'p', {}):
+                with XmlWrite.Element(theS, 'a', {'href': '#Plots'}):
+                    theS.characters('Plots')
 
     def _HTMLEntryBasic(self, theIe, theS):
         """Writes the basic entry for the index entry (we treat it as an
@@ -936,16 +939,18 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                 myTable,
             )
 
-        self._writePlots(theS)
+        # self._writePlots(theS)
 
         self._HTMLLinkToTop(theS)
 
-    def _writePlots(self, theS) -> None:
+    def _writePlots(self, theS) -> PlotLogs.PlotLogInfo:
         """Write the plots."""
         # TODO: Make plotting optional as it is quite expensive.
         # TODO: Fix issue with multiple log passes, we should only add the relevant one to the html page.
         with XmlWrite.Element(theS, 'h5', {}):
-            theS.characters('Plots')
+            with XmlWrite.Element(theS, 'a', {'name': 'Plots'}):
+                theS.characters('Plots')
+
         myPlp = PlotLogs.PlotLogPasses(
             self._fpIn,
             self._fpOut,
@@ -953,8 +958,9 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         )
         plot_result = myPlp.plotLogInfo
         # print(f'TRACE: XXX {theIe}')
-        # print(f'TRACE: YYY {plot_result}')
-        plot_result.write_to_index_stream(self._fpOut, theS)
+        print(f'TRACE: YYY {plot_result}')
+        plot_result.write_to_html_stream(self._fpOut, theS)
+        return plot_result
 
 
     def _writeCss(self, fpOut):
@@ -1020,6 +1026,11 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                                 myS.literal('&nbsp;' * 8 * self._retIndentDepth(anIdx))
                                 with XmlWrite.Element(myS, 'a', {'href': '#{:d}'.format(anIdx.tell)}):
                                     myS.characters(anIdx.tocStr())
+                    # Plots at bottom
+                    with XmlWrite.Element(myS, 'p', {}):
+                        myS.literal('&nbsp;' * 8)
+                        with XmlWrite.Element(myS, 'a', {'href': '#Plots'}):
+                            myS.characters('Plots')
 
                     # Iterate through the records.
                     for anIe in myIndex.genAll():
@@ -1035,6 +1046,8 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                                 logging.error(err_str)
                                 with XmlWrite.Element(myS, 'p', {'class': 'error'}):
                                     myS.characters(f'ERROR: {err_str}')
+
+                    self._writePlots(myS)
 
                     with XmlWrite.Element(myS, 'hr'):
                         pass

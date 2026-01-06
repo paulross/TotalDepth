@@ -257,14 +257,14 @@ class PlotLogInfo(object):
                 myS.characters('Command: {:s}'.format(command))
             with XmlWrite.Element(myS, 'pre'):
                 myS.characters('CWD: {:s}'.format(os.getcwd()))
-            self.write_to_index_stream(theFilePath, myS)
+            self.write_to_html_stream(theFilePath, myS)
 
-    def write_to_index_stream(
+    def write_to_html_stream(
             self,
             theFilePath: str,
             myS: XmlWrite.XhtmlStream,
     ) -> None:
-        """Write the table of links to the index.html file."""
+        """Write the table of links to the index.html or other file."""
         lenCmnPref = self.len_common_imput_prefix()
         # Put the plot summary data into a DictTree
         myTree = DictTree.DictTreeHtmlTable()
@@ -733,15 +733,15 @@ def processFile(fpIn, fpOut, opts: PlotLogPassesOptions):
     return myPlp.plotLogInfo
 
 
-def plotLogPassesMP(dIn, dOut, jobs: int, opts: PlotLogPassesOptions):
+def plotLogPassesMP(dIn, dOut, jobs: int, glob: str, opts: PlotLogPassesOptions):
     """Multiprocessing code to plot log passes. Returns a PlotLogInfo object."""
     if jobs < 1:
         jobs = multiprocessing.cpu_count()
     logging.info('plotLogPassesMP(): Setting multi-processing jobs to %d' % jobs)
     myPool = multiprocessing.Pool(processes=jobs)
     myTaskS = [
-        (t.filePathIn, t.filePathOut, opts) \
-        for t in DirWalk.dirWalk(dIn, dOut, opts.glob.split(), opts.recurse, bigFirst=True)
+        (t.filePathIn, t.filePathOut, opts)
+        for t in DirWalk.dirWalk(dIn, dOut, glob.split(), opts.recurse, bigFirst=True)
     ]
     retResult = PlotLogInfo()
     myResults = [
@@ -825,6 +825,7 @@ def main():
             args.path_in,
             args.path_out,
             args.jobs,
+            args.glob,
             plot_log_passes_options,
         )
     else:
