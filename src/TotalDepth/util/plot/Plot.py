@@ -617,31 +617,31 @@ class Plot(object):
         plot data being produced."""
         if theLogPass.totalFrames == 0:
             # No frames no data...
-            logging.info('Plot.hasDataToPlotLIS(): No frames no data...')
+            logging.debug('Plot.hasDataToPlotLIS(): No frames no data...')
             return False
         if not self._presCfg.hasCurvesForDest(theFilmId):
             # No curves for this ID
-            logging.info(
+            logging.debug(
                 'Plot.hasDataToPlotLIS():'
                 ' No curves for destination "{:s}"'.format(str(theFilmId))
             )
             return False
         # Now get the list of OUTP and check that at least one is in LogPass
         myOutS = self._retOutputChIDs(theFilmId)
-        logging.info(
+        logging.debug(
             'Plot.hasDataToPlotLIS():'
             '   Available outputs: {:s}'.format(str(myOutS))
         )
-        logging.info(
+        logging.debug(
             'Plot.hasDataToPlotLIS():'
             ' LogPass._chMap keys: {:s}'.format(str(theLogPass._chMap.keys()))
         )
         for anO in myOutS:
-            #            logging.info('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
+            #            logging.debug('Plot.hasDataToPlotLIS(): Testing output "{:s}"'.format(str(anO)))
             # If an output is in the LogPass we are good to go
             if theLogPass.hasOutpMnem(anO):
                 return True
-        logging.info(
+        logging.debug(
             'Plot.hasDataToPlotLIS():'
             ' No outputs for destination "{:s}"'.format(str(theFilmId)))
         return False
@@ -694,7 +694,7 @@ class Plot(object):
         """
         retVal = (None, None)
         if not self.hasDataToPlotLIS(theLogPass, theFilmId):
-            logging.info(
+            logging.debug(
                 'Plot.plotLogPassLIS():'
                 ' Has no data to plot for destination {:s}'.format(theFilmId)
             )
@@ -740,7 +740,7 @@ class Plot(object):
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch,
         )
-        logging.info(
+        logging.debug(
             'Plot.plotLogPassLIS():'
             ' Plotting SVG width={!r:s} depth={!r:s} ...'.format(myPlRo.widthDim,
                                                                  myPlRo.depthDim)
@@ -760,12 +760,12 @@ class Plot(object):
                 assert (lrCONS is not None)
                 self._insertCommentInSVG(xS, ' API Header START ', 0)
                 self._incTimers(timerS, 0, 'Plotting API Header')
-                logging.info('Plot.plotLogPassLIS(): Plotting Tracks...')
+                logging.debug('Plot.plotLogPassLIS(): Plotting Tracks...')
                 myLogHeader.plot(xS, myPlRo.retHeadPane()[0], lrCONS)
                 self._insertCommentInSVG(xS, ' API Header END ', 0)
             # Plot tracks
             self._incTimers(timerS, 0, 'Plotting Tracks')
-            logging.info('Plot.plotLogPassLIS(): Plotting Tracks...')
+            logging.debug('Plot.plotLogPassLIS(): Plotting Tracks...')
             self._insertCommentInSVG(xS, ' Plot Tracks START ', 0)
             for tIdx in range(len(myPhsFiCf)):
                 self._insertCommentInSVG(xS, ' Track {:d} START '.format(tIdx), 1)
@@ -774,19 +774,19 @@ class Plot(object):
             self._insertCommentInSVG(xS, ' Plot Tracks END ', 0)
             # Plot XGrid
             self._incTimers(timerS, 0, 'Plotting XGrid')
-            logging.info('Plot.plotLogPassLIS(): Plotting XGrid...')
+            logging.debug('Plot.plotLogPassLIS(): Plotting XGrid...')
             self._insertCommentInSVG(xS, ' Plot X Grid START ', 0)
             self._plotXGrid(myPhsFiCf, theXStart, theXStop, xS, myPlRo.retMainPaneStart())
             self._insertCommentInSVG(xS, ' Plot X Grid END ', 0)
             # Plot scales at header and footer
             self._incTimers(timerS, 0, 'Plotting scales (legends)')
-            logging.info('Plot.plotLogPassLIS(): Plotting Scales (legends)...')
+            logging.debug('Plot.plotLogPassLIS(): Plotting Scales (legends)...')
             self._insertCommentInSVG(xS, ' Plot Legends START ', 0)
             self._plotScales(theFilmId, theLogPass, myPlRo, xS, mySscS, title)
             self._insertCommentInSVG(xS, ' Plot Legends END ', 0)
             # Plot Curves
             self._incTimers(timerS, 0, 'Plotting curves')
-            logging.info('Plot.plotLogPassLIS(): Plotting Curves...')
+            logging.debug('Plot.plotLogPassLIS(): Plotting Curves...')
             self._insertCommentInSVG(xS, ' Plot Curves START ', 0)
             retVal = self._plotCurves(theFilmId, theLogPass, myPlRo, xS)
             self._insertCommentInSVG(xS, ' Plot Curves END ', 0)
@@ -806,11 +806,11 @@ class Plot(object):
         plot data being produced."""
         if theLasFile.number_of_frames() == 0:
             # No frames no data...
-            logging.info('Plot.hasDataToPlotLAS(): No frames no data...')
+            logging.debug('Plot.hasDataToPlotLAS(): No frames no data...')
             return False
         if not self._presCfg.hasCurvesForDest(theFilmId):
             # No curves for this ID
-            logging.info(
+            logging.debug(
                 'Plot.hasDataToPlotLAS():'
                 ' No curves for destination "{:s}"'.format(str(theFilmId))
             )
@@ -830,7 +830,7 @@ class Plot(object):
             # If an output is in the LogPass we are good to go
             if theLasFile.has_output_mnemonic(anO):
                 return True
-        logging.info(
+        logging.debug(
             'Plot.hasDataToPlotLAS():'
             ' No outputs for destination "{:s}"'.format(str(theFilmId))
         )
@@ -873,7 +873,7 @@ class Plot(object):
         """
         retVal = (None, None)
         if not self.hasDataToPlotLAS(theLasFile, theFilmId):
-            logging.info('Plot.plotLogPassLIS(): Has no data to plot for destination {:s}'.format(theFilmId))
+            logging.debug('Plot.plotLogPassLIS(): Has no data to plot for destination {:s}'.format(theFilmId))
             return retVal
         # We use 6 to measure effective ammount of work as a compromise between
         # LIS floats (4 bytes) and IEEE floats (8 bytes) 
@@ -904,7 +904,7 @@ class Plot(object):
             plotUp=not theLasFile.is_log_down(),
             theWidth=PlotConstants.STANDARD_PAPER_WIDTH,
             theMargin=PlotConstants.MarginQtrInch)
-        logging.info(
+        logging.debug(
             'Plot.plotLogPassLAS(): Plotting SVG width={!r:s} depth={!r:s} ...'.format(myPlRo.widthDim, myPlRo.depthDim)
         )
         # Set up viewBox and viewPort
@@ -921,12 +921,12 @@ class Plot(object):
             if myLogHeader is not None:
                 self._insertCommentInSVG(xS, ' API Header START ', 0)
                 self._incTimers(timerS, 0, 'Plotting API Header')
-                logging.info('Plot.plotLogPassLAS(): Plotting Tracks...')
+                logging.debug('Plot.plotLogPassLAS(): Plotting Tracks...')
                 myLogHeader.plot(xS, myPlRo.retHeadPane()[0], theLasFile)
                 self._insertCommentInSVG(xS, ' API Header END ', 0)
             # Plot tracks
             self._incTimers(timerS, 0, 'Plotting Tracks')
-            logging.info('Plot.plotLogPassLAS(): Plotting Tracks...')
+            logging.debug('Plot.plotLogPassLAS(): Plotting Tracks...')
             self._insertCommentInSVG(xS, ' Plot Tracks START ', 0)
             for tIdx in range(len(myPhsFiCf)):
                 self._insertCommentInSVG(xS, ' Track {:d} START '.format(tIdx), 1)
@@ -935,19 +935,19 @@ class Plot(object):
             self._insertCommentInSVG(xS, ' Plot Tracks END ', 0)
             # Plot XGrid
             self._incTimers(timerS, 0, 'Plotting XGrid')
-            logging.info('Plot.plotLogPassLAS(): Plotting XGrid...')
+            logging.debug('Plot.plotLogPassLAS(): Plotting XGrid...')
             self._insertCommentInSVG(xS, ' Plot X Grid START ', 0)
             self._plotXGrid(myPhsFiCf, theXStart, theXStop, xS, myPlRo.retMainPaneStart())
             self._insertCommentInSVG(xS, ' Plot X Grid END ', 0)
             # Plot scales at header and footer
             self._incTimers(timerS, 0, 'Plotting scales (legends)')
-            logging.info('Plot.plotLogPassLAS(): Plotting Scales (legends)...')
+            logging.debug('Plot.plotLogPassLAS(): Plotting Scales (legends)...')
             self._insertCommentInSVG(xS, ' Plot Legends START ', 0)
             self._plotScales(theFilmId, theLasFile, myPlRo, xS, mySscS, title)
             self._insertCommentInSVG(xS, ' Plot Legends END ', 0)
             # Plot Curves
             self._incTimers(timerS, 0, 'Plotting curves')
-            logging.info('Plot.plotLogPassLAS(): Plotting Curves...')
+            logging.debug('Plot.plotLogPassLAS(): Plotting Curves...')
             self._insertCommentInSVG(xS, ' Plot Curves START ', 0)
             retVal = self._plotCurves(theFilmId, theLasFile, myPlRo, xS)
             self._insertCommentInSVG(xS, ' Plot Curves END ', 0)
@@ -987,9 +987,9 @@ class Plot(object):
         EngVal objects, theFilmId is a Mnem.
         Returns number of LIS bytes read."""
         # Load the FrameSet
-        logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet...')
+        logging.debug('Plot._loadFrameSet(): Loading LogPass FrameSet...')
         myChIdS = [m for m in self._retOutputChIDs(theFilmId) if theLogPass.hasOutpMnem(m)]
-        logging.info(
+        logging.debug(
             'Plot._loadFrameSet(): X axis from="{:s}" to="{:s}" frame step={:d}. Channel IDs[{:d}]:\n{:s}'.format(
                 str(theXStart),
                 str(theXStop),
@@ -999,7 +999,7 @@ class Plot(object):
             )
         )
         theLogPass.setFrameSetChX(theLisFile, myChIdS, theXStart, theXStop, frStep=frameStep)
-        logging.info('Plot._loadFrameSet(): Loading LogPass FrameSet DONE...')
+        logging.debug('Plot._loadFrameSet(): Loading LogPass FrameSet DONE...')
         return theLogPass.numBytes
 
     # ============================================
@@ -1279,7 +1279,7 @@ class Plot(object):
                     logging.debug(
                         'Plot._retCurvePlotScales() OUTP not available in'
                         ' LogPass: {!r:s}'.format(anO))
-        logging.info(
+        logging.debug(
             'Plot._retCurvePlotScales() OUTP\'s available in'
             ' LogPass: {!r:s}'.format(curvIdSet))
         # cpsSet is a set of curve IDs
@@ -1335,7 +1335,7 @@ class Plot(object):
         thePlRo - The PlotRoll output configuration.
         xS - The SVG stream to write to. 
         """
-        logging.info('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
+        logging.debug('Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
         assert (self._presCfg.usesOutpChannel(theFilmID, theOutpID))
         assert (theFrameHolder.hasOutpMnem(theOutpID))
         # Given an output ID select all curve IDs and iterate through their
@@ -1391,7 +1391,7 @@ class Plot(object):
                     myCuPlot.prevWrap = wr
                     ptPrevS[cuIdx] = pt
             xPrev = x
-        logging.info('DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
+        logging.debug('DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s}'.format(theFilmID, theOutpID))
         if COMMENTS_IN_SVG_TRACE: xS.comment(
             ' DONE: Plot._plotSingleOutput(theFilmId={!r:s} theOutpId={!r:s} '.format(theFilmID, theOutpID))
         for cuPlot in myCurvPlotS:

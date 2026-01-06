@@ -41,6 +41,7 @@ from TotalDepth.LIS.core import Mnem
 from TotalDepth.common import XAxis
 from TotalDepth.common import xxd
 from TotalDepth.util import DictTree
+from TotalDepth.util import HtmlUtils
 from TotalDepth.util import XmlWrite
 from TotalDepth.util import bin_file_type
 from TotalDepth.util import gnuplot
@@ -270,12 +271,13 @@ class FileInfo(typing.NamedTuple):
     lisSize: int
     numLr: int
     num_log_passes: int
+    num_plots: int
     cpuTime: float
     exception: bool
 
     def __str__(self):
-        return 'FileInfo: "%s" -> "%s" %d (kb) LR count=%d Log Passes= %d t=%.3f' \
-            % (self.pathIn, self.pathOut, self.lisSize / 1024, self.numLr, self.num_log_passes, self.cpuTime)
+        return 'FileInfo: "%s" -> "%s" %d (kb) LR count=%d Log Passes= %d Plots= %d t=%.3f' \
+            % (self.pathIn, self.pathOut, self.lisSize / 1024, self.numLr, self.num_log_passes, self.num_plots, self.cpuTime)
 
 
 class IndexSummary(object):
@@ -295,9 +297,10 @@ class IndexSummary(object):
     def __len__(self):
         return len(self.file_results)
 
-    def add(self, fpIn, fpOut, numLr, num_log_passes, cpuTime, exception):
+    def add(self, fpIn, fpOut, numLr: int, num_log_passes: int, num_plots: int, cpuTime: float, exception: bool):
         self.file_results.append(
-            FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, num_log_passes, cpuTime, exception))
+            FileInfo(fpIn, fpOut, os.path.getsize(fpIn), numLr, num_log_passes, num_plots, cpuTime, exception)
+        )
 
     @property
     def lisSize(self):
@@ -312,10 +315,14 @@ class IndexSummary(object):
         return sum([fi.num_log_passes for fi in self.file_results])
 
     @property
+    def num_plots(self):
+        return sum([fi.num_plots for fi in self.file_results])
+
+    @property
     def cpuTime(self):
         return sum([fi.cpuTime for fi in self.file_results])
 
-    def writeIndexHTML(self, theOutDir):
+    def writeIndexHTML(self, command: str, theOutDir):
         if len(self.file_results) == 0:
             return
         os.makedirs(theOutDir, exist_ok=True)
@@ -350,39 +357,17 @@ class IndexSummary(object):
                         file_result.lisSize,
                         file_result.numLr,
                         file_result.num_log_passes,
+                        file_result.num_plots,
                         file_result.cpuTime,
                         file_result.exception,
                     )
                 )
 
             with XmlWrite.Element(myS, 'body'):
+                with XmlWrite.Element(myS, 'pre'):
+                    myS.characters('Command: {:s}'.format(command))
                 with XmlWrite.Element(myS, 'table'):
-                    # with XmlWrite.Element(myS, 'tr', {}):
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('LIS File')
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('Size (MB)')
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('Record Entries')
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('Log Passes')
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('CPU Time (s)')
-                    #     with XmlWrite.Element(myS, 'th'):
-                    #         myS.characters('Rate (MB/s)')
-                    # Body of table
-                    # for aF in sorted(set(self.file_results)):
-                    #     if not aF.exception:
-                    #         with XmlWrite.Element(myS, 'tr'):
-                    #             with XmlWrite.Element(myS, 'td'):
-                    #                 with XmlWrite.Element(myS, 'a', {'href': os.path.abspath(aF.pathOut)}):
-                    #                     myS.characters(aF.pathIn[lenCmnPrefixFpIn:])
-                    #             self._writeCols(myS, aF)
-                    # with XmlWrite.Element(myS, 'tr'):
-                    #     with XmlWrite.Element(myS, 'td'):
-                    #         myS.characters('Totals')
-                    #     self._writeCols(myS, self)
-                    # Header row
+                   # Header row
                     with XmlWrite.Element(myS, 'tr', {}):
                         if dict_tree.depth() > 1:
                             for i in range(dict_tree.depth() - 1):
@@ -396,6 +381,8 @@ class IndexSummary(object):
                             myS.characters('Record Entries')
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('Log Passes')
+                        with XmlWrite.Element(myS, 'th'):
+                            myS.characters('Plots')
                         with XmlWrite.Element(myS, 'th'):
                             myS.characters('CPU Time (s)')
                         with XmlWrite.Element(myS, 'th'):
@@ -424,7 +411,7 @@ class IndexSummary(object):
                                     with XmlWrite.Element(myS, 'a', {'href': event.node[0]}):
                                         myS.characters(event.branch[-1])
                                     tmp_file_info = FileInfo('', '', event.node[1], event.node[2], event.node[3],
-                                                             event.node[4], False)
+                                                             event.node[4], event.node[5], False)
                                     self._writeCols(myS, tmp_file_info)
                     with XmlWrite.Element(myS, 'tr'):
                         if dict_tree.depth() > 1:
@@ -435,6 +422,10 @@ class IndexSummary(object):
                             myS.characters('Totals')
                         self._writeCols(myS, self)
 
+                with XmlWrite.Element(myS, 'p'):
+                    myS.characters('Environment:')
+                HtmlUtils.writeTableOfEnvironment(myS, '')
+
     def _writeCols(self, theS, theObj):
         """Write the columns after the first one. theObj is expected to have certain attributes..."""
         with XmlWrite.Element(theS, 'td', {'align': 'right'}):
@@ -443,6 +434,8 @@ class IndexSummary(object):
             theS.characters('{:d}'.format(theObj.numLr))
         with XmlWrite.Element(theS, 'td', {'align': 'right'}):
             theS.characters('{:d}'.format(theObj.num_log_passes))
+        with XmlWrite.Element(theS, 'td', {'align': 'right'}):
+            theS.characters('{:d}'.format(theObj.num_plots))
         with XmlWrite.Element(theS, 'td', {'align': 'right'}):
             theS.characters('{:.3f}'.format(theObj.cpuTime))
         if theObj.cpuTime != 0:
@@ -986,6 +979,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
         # Write the CSS is not already there
         self._writeCss(fpOut)
         numEntries = 0
+        numPlots = 0
         # Now Generate the HTML
         with XmlWrite.XhtmlStream(open(fpOut, 'w')) as myS:
             with XmlWrite.Element(myS, 'head'):
@@ -1047,7 +1041,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                                 with XmlWrite.Element(myS, 'p', {'class': 'error'}):
                                     myS.characters(f'ERROR: {err_str}')
 
-                    self._writePlots(myS)
+                    numPlots = len(self._writePlots(myS).plots)
 
                     with XmlWrite.Element(myS, 'hr'):
                         pass
@@ -1061,7 +1055,7 @@ class LisToHtml(ProcLISPath.ProcLISPathBase):
                             )
                         )
         # Update the counter
-        self.summary.add(fpIn, fpOut, numEntries, myIndex.numLogPasses(), time.perf_counter() - clkStart, False)
+        self.summary.add(fpIn, fpOut, numEntries, myIndex.numLogPasses(), numPlots, time.perf_counter() - clkStart, False)
 
 
 def processFile(fpIn, fpOut, keepGoing) -> IndexSummary:
@@ -1206,7 +1200,7 @@ Generates HTML from input LIS file or directory to an output destination."""
             resultObj=IndexSummary(),
         )
         # Write index.html
-        myResult.writeIndexHTML(args.path_out)
+        myResult.writeIndexHTML(' '.join(sys.argv), args.path_out)
     else:
         if os.path.isdir(args.path_in):
             myResult = ProcLISPath.procLISPathSP(
@@ -1219,7 +1213,7 @@ Generates HTML from input LIS file or directory to an output destination."""
                 resultObj=IndexSummary(),
             )
             # Write index.html
-            myResult.writeIndexHTML(args.path_out)
+            myResult.writeIndexHTML(' '.join(sys.argv), args.path_out)
         else:
             myLth = LisToHtml(args.path_in, args.path_out, args.recurse, args.keepGoing)
             myResult = myLth.summary

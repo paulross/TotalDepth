@@ -24,9 +24,17 @@ __date__ = '2009-09-15'
 __version__ = '0.8.0'
 __rights__ = 'Copyright (c) Paul Ross'
 
+import datetime
 import os
 import hashlib
-# import types
+import platform
+import pprint
+import subprocess
+import sys
+import typing
+
+
+import TotalDepth
 
 from TotalDepth.util import XmlWrite
 from TotalDepth.util import DictTree
@@ -233,3 +241,84 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
 #                            theS.characters(str(v))
 # ===============================================================================
 # Write: </table>
+
+def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
+    """Writes the environment as a table showing all version information.
+
+    """
+    attrs = {}
+    if tableStyle:
+        attrs['class'] = tableStyle
+
+    SYS_ATTRIBUTES = (
+        ('Python Version', 'version'),
+        ('Python Version', 'version_info'),
+        ('Python Executable', 'executable'),
+    )
+    PLATFORM_ATTRIBUTES = (
+        ('Platform Architecture', 'architecture'),
+        ('Platform Machine', 'machine'),
+        ('Platform Platform', 'platform'),
+        ('Platform Python Compiler', 'python_compiler'),
+        ('Platform System', 'system'),
+        # Needs arguments
+        # ('Platform System Alias', 'system_alias'),
+    )
+    with XmlWrite.Element(theS, 'table', attrs):
+        with XmlWrite.Element(theS, 'tbody'):
+            with XmlWrite.Element(theS, 'tr'):
+                with XmlWrite.Element(theS, 'th'):
+                    theS.characters('Key')
+                with XmlWrite.Element(theS, 'th'):
+                    theS.characters('Value')
+
+            for title, attr_name in SYS_ATTRIBUTES:
+                with XmlWrite.Element(theS, 'tr'):
+                    with XmlWrite.Element(theS, 'td'):
+                        theS.characters(title)
+                    with XmlWrite.Element(theS, 'td'):
+                        with XmlWrite.Element(theS, 'tt'):
+                            theS.characters(str(getattr(sys, attr_name)))
+
+            for title, attr_name in PLATFORM_ATTRIBUTES:
+                with XmlWrite.Element(theS, 'tr'):
+                    with XmlWrite.Element(theS, 'td'):
+                        theS.characters(title)
+                    with XmlWrite.Element(theS, 'td'):
+                        with XmlWrite.Element(theS, 'tt'):
+                            # Note: platform attributes are callable
+                            theS.characters(str(getattr(platform, attr_name)()))
+
+            with XmlWrite.Element(theS, 'tr'):
+                with XmlWrite.Element(theS, 'td'):
+                    theS.characters('TotalDepth Version')
+                with XmlWrite.Element(theS, 'td'):
+                    with XmlWrite.Element(theS, 'tt'):
+                        theS.characters(TotalDepth.__version__)
+
+            pip_list = subprocess.run(["pip", "list", ], capture_output=True)
+            pip_list_as_list_str = pip_list.stdout.decode('ascii').split('\n')
+            with XmlWrite.Element(theS, 'tr'):
+                with XmlWrite.Element(theS, 'td'):
+                    theS.characters('pip list')
+                with XmlWrite.Element(theS, 'td'):
+                    # for line in pip_list_as_list_str:
+                    #     with XmlWrite.Element(theS, 'pre'):
+                    #         theS.characters(line)
+                    with XmlWrite.Element(theS, 'pre'):
+                        theS.characters(pip_list.stdout.decode('ascii'))
+
+            environment = pprint.pformat(dict(os.environ))
+            with XmlWrite.Element(theS, 'tr'):
+                with XmlWrite.Element(theS, 'td'):
+                    theS.characters('Environment')
+                with XmlWrite.Element(theS, 'td'):
+                    with XmlWrite.Element(theS, 'pre'):
+                        theS.characters(environment)
+
+            with XmlWrite.Element(theS, 'tr'):
+                with XmlWrite.Element(theS, 'td'):
+                    theS.characters('Now')
+                with XmlWrite.Element(theS, 'td'):
+                    with XmlWrite.Element(theS, 'tt'):
+                        theS.characters(datetime.datetime.now().isoformat())
