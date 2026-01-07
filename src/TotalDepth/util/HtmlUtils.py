@@ -242,9 +242,9 @@ def writeFilePathsAsTable(valueType, theS, theKvS, tableStyle, fnTd):
 # ===============================================================================
 # Write: </table>
 
-def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
+def writeTableOfEnvironment(theS, tableStyle: str, include_machine_env: bool, **kwargs):
     """Writes the environment as a table showing all version information.
-
+    If include_machine_env is true then the env will be included.
     """
     attrs = {}
     if tableStyle:
@@ -264,6 +264,7 @@ def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
         # Needs arguments
         # ('Platform System Alias', 'system_alias'),
     )
+    subst_user = f'/Users/{os.environ["USER"]}'
     with XmlWrite.Element(theS, 'table', attrs):
         with XmlWrite.Element(theS, 'tbody'):
             with XmlWrite.Element(theS, 'tr'):
@@ -278,7 +279,7 @@ def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
                         theS.characters(title)
                     with XmlWrite.Element(theS, 'td'):
                         with XmlWrite.Element(theS, 'tt'):
-                            theS.characters(str(getattr(sys, attr_name)))
+                            theS.characters(str(getattr(sys, attr_name)).replace(subst_user, '~'))
 
             for title, attr_name in PLATFORM_ATTRIBUTES:
                 with XmlWrite.Element(theS, 'tr'):
@@ -287,7 +288,7 @@ def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
                     with XmlWrite.Element(theS, 'td'):
                         with XmlWrite.Element(theS, 'tt'):
                             # Note: platform attributes are callable
-                            theS.characters(str(getattr(platform, attr_name)()))
+                            theS.characters(str(getattr(platform, attr_name)()).replace(subst_user, '~'))
 
             with XmlWrite.Element(theS, 'tr'):
                 with XmlWrite.Element(theS, 'td'):
@@ -297,7 +298,6 @@ def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
                         theS.characters(TotalDepth.__version__)
 
             pip_list = subprocess.run(["pip", "list", ], capture_output=True)
-            pip_list_as_list_str = pip_list.stdout.decode('ascii').split('\n')
             with XmlWrite.Element(theS, 'tr'):
                 with XmlWrite.Element(theS, 'td'):
                     theS.characters('pip list')
@@ -306,15 +306,17 @@ def writeTableOfEnvironment(theS, tableStyle: str, **kwargs):
                     #     with XmlWrite.Element(theS, 'pre'):
                     #         theS.characters(line)
                     with XmlWrite.Element(theS, 'pre'):
-                        theS.characters(pip_list.stdout.decode('ascii'))
+                        text = pip_list.stdout.decode('ascii')
+                        theS.characters(text.replace(subst_user, '~'))
 
-            environment = pprint.pformat(dict(os.environ))
-            with XmlWrite.Element(theS, 'tr'):
-                with XmlWrite.Element(theS, 'td'):
-                    theS.characters('Environment')
-                with XmlWrite.Element(theS, 'td'):
-                    with XmlWrite.Element(theS, 'pre'):
-                        theS.characters(environment)
+            if include_machine_env:
+                environment = pprint.pformat(dict(os.environ))
+                with XmlWrite.Element(theS, 'tr'):
+                    with XmlWrite.Element(theS, 'td'):
+                        theS.characters('Environment')
+                    with XmlWrite.Element(theS, 'td'):
+                        with XmlWrite.Element(theS, 'pre'):
+                            theS.characters(environment.replace(subst_user, '~'))
 
             with XmlWrite.Element(theS, 'tr'):
                 with XmlWrite.Element(theS, 'td'):

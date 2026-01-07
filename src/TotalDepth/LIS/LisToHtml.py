@@ -332,6 +332,7 @@ class IndexSummary(object):
         # Now Generate the HTML
         index_html_path = os.path.join(theOutDir, 'index.html')
         logger.info(f'Writing index to {index_html_path}')
+        subst_user = f'/Users/{os.environ["USER"]}'
         with XmlWrite.XhtmlStream(open(index_html_path, 'w')) as myS:
             with XmlWrite.Element(myS, 'head'):
                 with XmlWrite.Element(
@@ -365,7 +366,7 @@ class IndexSummary(object):
 
             with XmlWrite.Element(myS, 'body'):
                 with XmlWrite.Element(myS, 'pre'):
-                    myS.characters('Command: {:s}'.format(command))
+                    myS.characters('Command: {:s}'.format(command.replace(subst_user, '~')))
                 with XmlWrite.Element(myS, 'table'):
                    # Header row
                     with XmlWrite.Element(myS, 'tr', {}):
@@ -424,7 +425,7 @@ class IndexSummary(object):
 
                 with XmlWrite.Element(myS, 'p'):
                     myS.characters('Environment:')
-                HtmlUtils.writeTableOfEnvironment(myS, '')
+                HtmlUtils.writeTableOfEnvironment(myS, '', include_machine_env=False)
 
     def _writeCols(self, theS, theObj):
         """Write the columns after the first one. theObj is expected to have certain attributes..."""
