@@ -285,13 +285,29 @@ def test_dim_div(dim, factor, expected):
     assert result == expected
 
 
+@pytest.mark.skipif(sys.version_info >= (3, 14), reason='requires Python 3.13 or lower')
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
             (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+            (Coord.Dim(72, 'px'), 0.0, 'float division by zero'),
     )
 )
-def test_dim_div_raises(dim, factor, expected):
+def test_dim_div_raises_pre_314(dim, factor, expected):
+    with pytest.raises(ZeroDivisionError) as err:
+        dim / factor
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.skipif(sys.version_info < (3, 14), reason='requires Python 3.14 or higher')
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+            (Coord.Dim(72, 'px'), 0, 'division by zero'),
+            (Coord.Dim(72, 'px'), 0.0, 'division by zero'),
+    )
+)
+def test_dim_div_raises_314_onwards(dim, factor, expected):
     with pytest.raises(ZeroDivisionError) as err:
         dim / factor
     assert err.value.args[0] == expected
@@ -310,13 +326,29 @@ def test_dim_idiv(dim, factor, expected):
     assert dim == expected
 
 
+@pytest.mark.skipif(sys.version_info >= (3, 14), reason='requires Python 3.13 or lower')
 @pytest.mark.parametrize(
     'dim, factor, expected',
     (
             (Coord.Dim(72, 'px'), 0, 'float division by zero'),
+            (Coord.Dim(72, 'px'), 0.0, 'float division by zero'),
     )
 )
-def test_dim_idiv_raises(dim, factor, expected):
+def test_dim_idiv_raises_pre_314(dim, factor, expected):
+    with pytest.raises(ZeroDivisionError) as err:
+        dim /= factor
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.skipif(sys.version_info < (3, 14), reason='requires Python 3.14 or higher')
+@pytest.mark.parametrize(
+    'dim, factor, expected',
+    (
+            (Coord.Dim(72, 'px'), 0, 'division by zero'),
+            (Coord.Dim(72, 'px'), 0.0, 'division by zero'),
+    )
+)
+def test_dim_idiv_raises_314_onwards(dim, factor, expected):
     with pytest.raises(ZeroDivisionError) as err:
         dim /= factor
     assert err.value.args[0] == expected

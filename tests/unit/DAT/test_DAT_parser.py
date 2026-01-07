@@ -1,5 +1,6 @@
 import datetime
 import io
+import sys
 
 import pytest
 
@@ -133,7 +134,6 @@ def test__unit_ddmmyy_to_datetime_date(value, expected):
 @pytest.mark.parametrize(
     'value, expected',
     (
-            ('32Dec06', '_unit_ddmmyy_to_datetime_date(): day is out of range for month on value "32Dec06"'),
             ('09XXX06', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09XXX06"'),
             ('', '_unit_ddmmyy_to_datetime_date(): Can not grep value ""'),
             ('09', '_unit_ddmmyy_to_datetime_date(): Can not grep value "09"'),
@@ -141,6 +141,38 @@ def test__unit_ddmmyy_to_datetime_date(value, expected):
     )
 )
 def test__unit_ddmmyy_to_datetime_date_raises(value, expected):
+    with pytest.raises(DAT_parser.ExceptionDATRead) as err:
+        DAT_parser._unit_ddmmyy_to_datetime_date(value)
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.skipif(sys.version_info >= (3, 14), reason='requires Python 3.13 or lower')
+@pytest.mark.parametrize(
+    'value, expected',
+    (
+            ('32Dec06', '_unit_ddmmyy_to_datetime_date(): day is out of range for month on value "32Dec06"'),
+    )
+)
+def test__unit_ddmmyy_to_datetime_date_raises_pre_314(value, expected):
+    with pytest.raises(DAT_parser.ExceptionDATRead) as err:
+        DAT_parser._unit_ddmmyy_to_datetime_date(value)
+    assert err.value.args[0] == expected
+
+
+@pytest.mark.skipif(sys.version_info < (3, 14), reason='requires Python 3.14 or higher')
+@pytest.mark.parametrize(
+    'value, expected',
+    (
+            (
+                    '32Dec06',
+                    (
+                            '_unit_ddmmyy_to_datetime_date():'
+                            ' day 32 must be in range 1..31 for month 12 in year 2006 on value "32Dec06"'
+                    ),
+            ),
+    )
+)
+def test__unit_ddmmyy_to_datetime_date_raises_314_onwards(value, expected):
     with pytest.raises(DAT_parser.ExceptionDATRead) as err:
         DAT_parser._unit_ddmmyy_to_datetime_date(value)
     assert err.value.args[0] == expected
