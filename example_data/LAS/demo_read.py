@@ -28,8 +28,8 @@ from TotalDepth.LAS.core import LASRead
 TOTAL_DEPTH_SOURCE_ROOT = os.path.dirname(TotalDepth.__file__)
 EXAMPLE_DATA_DIRECTORY = os.path.join(TOTAL_DEPTH_SOURCE_ROOT, os.path.pardir, os.path.pardir, 'example_data')
 
-las_file_path = os.path.join('example_data', 'LAS', 'data', 'BASIC_FILE_0_50.las')
-las_file_path = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data', 'BASIC_FILE_0_50.las')
+# las_file_path = os.path.join('example_data', 'LAS', 'data', 'DILLSON-1_WELL_LOGS_FILE-013.LIS_0.las')
+las_file_path = os.path.join(EXAMPLE_DATA_DIRECTORY, 'LAS', 'data', 'DILLSON-1_WELL_LOGS_FILE-013.LIS_0.las')
 las_file = LASRead.LASRead(las_file_path, las_file_path, raise_on_error=False)
 
 print(type(las_file.frame_array))
