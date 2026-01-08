@@ -893,7 +893,10 @@ class LASRead(LASBase):
         return mnem.m.replace(b'\x00', b'').decode('ascii')
 
     def hasOutpMnem(self, mnem: Mnem) -> bool:
-        return self._stringify_mnem(mnem) in self.frame_array.channel_ident_map
+        if self.frame_array is not None:
+            return self._stringify_mnem(mnem) in self.frame_array.channel_ident_map
+        # Missing a frame array in LAS.
+        return False
 
     def curveUnitsAsStr(self, mnem: Mnem) -> str:
         """Given a curve as a Mnem.Mnem() this returns the units as a string."""
