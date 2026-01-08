@@ -910,3 +910,7 @@ class LASRead(LASBase):
 
     def nullValue(self) -> float:
         return self.null_value
+
+    @property
+    def xAxisUnits(self) -> bytes:
+        return bytes(self.frame_array.channels[0].units, 'ascii')
