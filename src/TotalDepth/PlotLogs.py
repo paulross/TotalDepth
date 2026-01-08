@@ -466,9 +466,9 @@ class PlotLogPasses(object):
         assert (os.path.exists(os.path.dirname(fpOut)))
         if not TotalDepth.LAS.core.LASRead.has_las_extension(fpIn):
             return False
-        if self.usesInternalRecords:
-            # LAS logs do not have internal records that can describe plots
-            return False
+        # if self.usesInternalRecords:
+        #     # LAS logs do not have internal records that can describe plots
+        #     return False
         try:
             myLasFile = TotalDepth.LAS.core.LASRead.LASRead(fpIn)
             self._plotLASUsingLgFormats(myLasFile, fpOut)
@@ -479,7 +479,7 @@ class PlotLogPasses(object):
             )
             return False
         except Exception as err:
-            logging.critical('PlotLogPasses._processFileLAS(): In "{:s}", error: {:s}'.format(fpIn, err))
+            logging.critical('PlotLogPasses._processFileLAS(): In "{:s}", error: {:s}'.format(fpIn, str(err)))
             logging.critical(traceback.format_exc())
             return False
         self.plotLogInfo.lasFileCntr += 1
@@ -604,13 +604,13 @@ class PlotLogPasses(object):
 
     def _retUniqueIdS(self, theLpOrLasFile):
         """Returns a list of UniqueID strings depending on my constructor."""
-        assert (not self.usesInternalRecords)
+        # assert (not self.usesInternalRecords)
         if self._lgFormatMinCurves > 0:
             # Filter out those that have fewer curves than self._lgFormatMinCurves
             myMap = XMLMatches.fileCurveMap(theLpOrLasFile)
             myLgUidS = []
             for u, i in myMap.items():
-                if len(i) > self._lgFormatMinCurves \
+                if len(i) >= self._lgFormatMinCurves \
                         and (len(self._lgFormatS) == 0 or u in self._lgFormatS):
                     myLgUidS.append(u)
             return myLgUidS
@@ -683,7 +683,7 @@ class PlotLogPasses(object):
         theFi - the LASFile object.
         theFpOut - Output file path for the SVG file(s), one per XML UniqueId.
         """
-        assert (not self.usesInternalRecords)
+        # assert (not self.usesInternalRecords)
         for aUniqueId in self._retUniqueIdS(theLasFile):
             logging.info('PlotLogPasses._plotLASUsingLgFormats(): UniqueId={:s}.'.format(aUniqueId))
             # Note: Only one log pass per LAS file so index 0

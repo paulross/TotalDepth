@@ -50,6 +50,7 @@ import numpy as np
 from TotalDepth.LAS import ExceptionTotalDepthLAS
 from TotalDepth.LAS.core import LASConstants
 from TotalDepth.LIS.core import EngVal
+from TotalDepth.LIS.core import Mnem
 from TotalDepth.common import LogPass
 
 __author__ = 'Paul Ross'
@@ -887,3 +888,25 @@ class LASRead(LASBase):
     def frame_array(self) -> typing.Union[LogPass.FrameArray, None]:
         if 'A' in self._section_map:
             return self._sections[self._section_map['A']].frame_array
+
+    def _stringify_mnem(self, mnem: Mnem) -> str:
+        return mnem.m.replace(b'\x00', b'').decode('ascii')
+
+    def hasOutpMnem(self, mnem: Mnem) -> bool:
+        return self._stringify_mnem(mnem) in self.frame_array.channel_ident_map
+
+    def curveUnitsAsStr(self, mnem: Mnem) -> str:
+        """Given a curve as a Mnem.Mnem() this returns the units as a string."""
+        ch_idx = self.frame_array.channel_ident_map[self._stringify_mnem(mnem)]
+        ch = self.frame_array.channels[ch_idx]
+        return ch.units
+
+    def genOutpPoints(self, mnem: Mnem):
+        ch_idx = self.frame_array.channel_ident_map[self._stringify_mnem(mnem)]
+        ch = self.frame_array.channels[ch_idx]
+        ch_x = self.frame_array.channels[0]
+        for i, v_arr in enumerate(ch.array):
+            yield ch_x.array[i][0], v_arr[0]
+
+    def nullValue(self) -> float:
+        return self.null_value

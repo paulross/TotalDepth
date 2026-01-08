@@ -12,9 +12,9 @@ FRAME-ARRAY.   50                              : Identity of the Frame Array in 
 ~Well Information Section
 #MNEM.UNIT  DATA                         DESCRIPTION
 #----.----  ----                         -----------
-STRT.m      2889.4                       : Start X
-STOP.m      2954.199999999941            : Stop X, frames 649 out of 649 available.
-STEP.m      0.09999999999990905          : Step (average)
+STRT.M      2889.4                       : Start X
+STOP.M      2954.199999999941            : Stop X, frames 649 out of 649 available.
+STEP.M      0.09999999999990905          : Step (average)
 NULL.                                    :
 COMP.       BURU ENERGY LIMITED          :
 WELL.       VALHALLA NORTH 1             :
@@ -96,11 +96,11 @@ D4TG_Accum_Length.m      27.639999389648438              : D4TG Accum Length
 ~Curve Information Section
 #MNEM.UNIT  Curve Description                  
 #---------  -----------------                  
-DEPT.m      : DEPT/Depth Dimensions (1,)       
-TENS.lbs    : TENS/Tension Dimensions (1,)     
-ETIM.min    : ETIM/Elapsed Time Dimensions (1,)
+DEPT.M      : DEPT/Depth Dimensions (1,)
+TENS.LBS    : TENS/Tension Dimensions (1,)
+ETIM.MIN    : ETIM/Elapsed Time Dimensions (1,)
 DHTN.lbs    : DHTN/CH Tension Dimensions (1,)  
-GR  .api    : GR/Gamma API Dimensions (1,)     
+GR  .API    : GR/Gamma API Dimensions (1,)
 # Array processing information:
 # Frame Array: ID: OBNAME: O: 2 C: 0 I: b'50' description: b''
 # All [5] original channels reproduced here.
