@@ -29,6 +29,8 @@ from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, np_summary
 from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
 # import cPyMemTrace
+from pymemtrace import process
+from pymemtrace import cpymemtrace_decs
 
 
 __author__ = 'Paul Ross'
@@ -589,6 +591,8 @@ def plot_gnuplot(data: typing.Dict[str, LASFileResult], gnuplot_dir: str) -> Non
         raise IOError(f'Can not plot gnuplot with return code {return_code}')
 
 
+
+@cpymemtrace_decs.profile(d_rss_trigger=-1, message="LASToHTML")
 def process_arguments(args, log_level):
     if cmn_cmd_opts.number_multiprocessing_jobs(args) != 1:
         # Multiprocessing.
@@ -667,7 +671,9 @@ Generates HTML from input LAS file or directory to an output destination."""
     else:
         # with cPyMemTrace.Profile():
         #     result = process_arguments(args, log_level)
-        result = process_arguments(args, log_level)
+        # result = process_arguments(args, log_level)
+        with process.log_process(interval=0.25, log_level=logger.getEffectiveLevel()):
+            result = process_arguments(args, log_level)
 
     if args.log_process > 0.0:
         process.add_message_to_queue('Processing HTML Complete.')

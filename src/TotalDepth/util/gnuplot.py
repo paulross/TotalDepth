@@ -44,9 +44,12 @@ def version() -> bytes:
     """
     For example: b'gnuplot 5.2 patchlevel 6'
     """
-    with subprocess.Popen(['gnuplot', '--version'], stdout=subprocess.PIPE) as proc:
-        return proc.stdout.read().strip()
-
+    # with subprocess.Popen(['gnuplot', '--version'], stdout=subprocess.PIPE) as proc:
+    #     return proc.stdout.read().strip()
+    # proc = subprocess.run(['gnuplot', '--version'], shell=True, capture_output=True)
+    proc = subprocess.run(['gnuplot', '--version'], capture_output=True)
+    return proc.stdout.strip()
+    # return b'1.2.3'
 
 # TODO: Use TotalDepth.common.data_table
 
