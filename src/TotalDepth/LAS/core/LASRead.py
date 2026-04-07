@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Paul Ross: apaulross@gmail.com
-"""Reads LAS files.
+r"""Reads LAS files.
 
 Created on Jan 11, 2012
 
