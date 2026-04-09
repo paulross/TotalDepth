@@ -29,7 +29,7 @@ from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, np_summary
 from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
 # import cPyMemTrace
-from pymemtrace import process
+# from pymemtrace import process
 from pymemtrace import cpymemtrace_decs
 
 
@@ -267,6 +267,8 @@ def write_file_array(las_file: LASRead.LASRead, xhtml_stream: XmlWrite.XhtmlStre
                         f'{channel.array.dtype}',
                     ]
                 )
+            else:
+                logger.warning(f'No summary of array for "{channel.ident}"')
         ToHTML.html_write_table(frame_table, xhtml_stream, class_style='monospace')
         _write_link_to_top(xhtml_stream)
 
@@ -592,7 +594,7 @@ def plot_gnuplot(data: typing.Dict[str, LASFileResult], gnuplot_dir: str) -> Non
 
 
 
-@cpymemtrace_decs.profile(d_rss_trigger=-1, message="LASToHTML")
+@cpymemtrace_decs.reference_tracing(message="LASToHTML include_builtins=True", include_builtins=True)
 def process_arguments(args, log_level):
     if cmn_cmd_opts.number_multiprocessing_jobs(args) != 1:
         # Multiprocessing.
