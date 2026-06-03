@@ -28,7 +28,7 @@ from TotalDepth.LAS.core import LASRead
 from TotalDepth.common import cmn_cmd_opts, process, ToHTML, Slice, np_summary
 from TotalDepth.util import gnuplot, XmlWrite, bin_file_type, DirWalk
 
-# import cPyMemTrace
+from pymemtrace import cPyMemTrace
 # from pymemtrace import process
 from pymemtrace import cpymemtrace_decs
 
@@ -324,8 +324,10 @@ def las_file_to_html(las_file_path: str, html_file_path: str, binary_file_type: 
                      label_process: bool, frame_slice: typing.Union[Slice.Slice, Slice.Sample]) -> LASFileResult:
     """Read a LAS file and write an HTML summary to the given path."""
     # TODO: use label_process, frame_slice
+    cPyMemTrace.reference_tracing_write_message_to_log(f'Read LAS File "{os.path.basename(las_file_path)}')
     time_start = time.perf_counter()
     las_file = LASRead.LASRead(las_file_path, las_file_path, raise_on_error=not keep_going)
+    cPyMemTrace.reference_tracing_write_message_to_log(f'Write HTML "{os.path.basename(html_file_path)}')
     with open(html_file_path, 'w') as html_file:
         with XmlWrite.XhtmlStream(html_file) as xhtml_stream:
             with XmlWrite.Element(xhtml_stream, 'head'):
@@ -594,7 +596,7 @@ def plot_gnuplot(data: typing.Dict[str, LASFileResult], gnuplot_dir: str) -> Non
 
 
 
-@cpymemtrace_decs.reference_tracing(message="LASToHTML include_builtins=True", include_builtins=True)
+@cpymemtrace_decs.reference_tracing(message="LASToHTML include_builtins=False", include_builtins=False)
 def process_arguments(args, log_level):
     if cmn_cmd_opts.number_multiprocessing_jobs(args) != 1:
         # Multiprocessing.
